@@ -1,0 +1,11 @@
+.git
+.gitignore
+__pycache__
+*.pyc
+uploads/session_*
+uploads/*.csv
+*.egg-info
+.env
+README.md
+guide_real_data.py
+bridge.py

@@ -58,15 +58,23 @@ class MT5CSVImporter:
 
     # Common date/time format patterns from MT5
     DATETIME_FORMATS = [
-        "%Y.%m.%d %H:%M:%S",       # MT5 default
-        "%Y.%m.%d\t%H:%M:%S",      # Tab-separated
-        "%Y-%m-%d %H:%M:%S",       # ISO-ish
-        "%Y-%m-%d,%H:%M:%S",       # Comma-separated
+        "%Y.%m.%d %H:%M:%S",       # MT5 default with seconds
+        "%Y.%m.%d %H:%M",          # MT5 without seconds (common in M5/H1 exports)
+        "%Y.%m.%d\t%H:%M:%S",      # Tab-separated with seconds
+        "%Y.%m.%d\t%H:%M",         # Tab-separated without seconds
+        "%Y-%m-%d %H:%M:%S",       # ISO-ish with seconds
+        "%Y-%m-%d %H:%M",          # ISO-ish without seconds
+        "%Y-%m-%d,%H:%M:%S",       # Comma-separated with seconds
+        "%Y-%m-%d,%H:%M",          # Comma-separated without seconds
         "%Y.%m.%d %H:%M:%S.%f",   # With milliseconds (tick data)
         "%Y-%m-%dT%H:%M:%S",       # ISO
-        "%d/%m/%Y %H:%M:%S",       # European
-        "%m/%d/%Y %H:%M:%S",       # US
+        "%Y-%m-%dT%H:%M",          # ISO without seconds
+        "%d/%m/%Y %H:%M:%S",       # European with seconds
+        "%d/%m/%Y %H:%M",          # European without seconds
+        "%m/%d/%Y %H:%M:%S",       # US with seconds
+        "%m/%d/%Y %H:%M",          # US without seconds
         "%Y%m%d %H:%M:%S",         # Compact date + time (20210412 02:00:00)
+        "%Y%m%d %H:%M",            # Compact date + time without seconds
         "%Y%m%d %H%M%S",           # Compact date + compact time
         "%Y%m%d",                  # Compact date only
     ]

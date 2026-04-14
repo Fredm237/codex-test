@@ -702,8 +702,19 @@ async def list_datasets():
     result = []
     for ds in datasets.values():
         # Vérifier que le fichier existe encore
-        if Path(ds["filepath"]).exists():
+        if not Path(ds.get("filepath", "")).exists():
+            continue
+        # Protection: si format est un dict (bug ancien), extraire la string
+        fmt = ds.get("format", "generic_csv")
+        if isinstance(fmt, dict):
+            ds["format"] = fmt.get("format", "generic_csv")
+            ds["rows"] = fmt.get("rows", ds.get("rows", 0))
+            ds["date_start"] = fmt.get("date_start", ds.get("date_start"))
+            ds["date_end"] = fmt.get("date_end", ds.get("date_end"))
+        try:
             result.append(DatasetInfo(**ds))
+        except Exception as e:
+            logger.warning(f"Skipping corrupted dataset {ds.get('id')}: {e}")
     return sorted(result, key=lambda x: x.uploaded_at, reverse=True)
 
 
@@ -1063,6 +1074,181 @@ async def get_backtest(job_id: str):
         result=j.get("result"),
         created_at=j["created_at"],
         completed_at=j.get("completed_at"),
+    )
+
+
+# ══════════════════════════════════════════════════════════════
+# ENDPOINT — CUSTOM STRATEGY BACKTEST (imported MQL4/Python/etc.)
+# ══════════════════════════════════════════════════════════════
+
+class CustomBacktestRequest(BaseModel):
+    strategy_id: str = Field(..., description="ID de la stratégie en DB MySQL")
+    strategy_name: str = Field(..., description="Nom de la stratégie")
+    source_code: str = Field(..., description="Code source de la stratégie")
+    source_language: str = Field("mql4", description="mql4 | mql5 | python | pine | json")
+    parameters: dict[str, Any] = Field(default_factory=dict, description="Paramètres optimisables")
+    symbol: str = "XAUUSD"
+    timeframe: TimeframeEnum = TimeframeEnum.M5
+    start_date: str = "2024-01-01"
+    end_date: str = "2025-12-31"
+    initial_capital: float = Field(100_000, ge=100)
+    leverage: int = Field(100, ge=1, le=500)
+    execution: ExecutionModelSchema = Field(default_factory=ExecutionModelSchema)
+    risk: RiskParamsSchema = Field(default_factory=RiskParamsSchema)
+    dataset_id: Optional[str] = None
+
+
+async def run_custom_backtest_job(job_id: str, req: CustomBacktestRequest):
+    """Background task: translate + execute a custom imported strategy."""
+    from core.models import BacktestConfig, Timeframe
+    from core.engine import BacktestEngine
+    from data.datastore import SyntheticTickGenerator
+    from strategies.dynamic_strategy import create_dynamic_strategy, EMAFallbackStrategy
+
+    jobs[job_id]["status"] = "running"
+    jobs[job_id]["progress"] = 5.0
+    jobs[job_id]["message"] = f"Traduction {req.source_language.upper()} → Python..."
+    logger.info(f"[Job {job_id}] Custom backtest: {req.strategy_name} ({req.source_language})")
+
+    try:
+        # Step 1: Translate / compile strategy
+        jobs[job_id]["progress"] = 15.0
+        try:
+            StrategyClass = create_dynamic_strategy(
+                source_code=req.source_code,
+                source_lang=req.source_language,
+                parameters=req.parameters,
+                strategy_name=req.strategy_name,
+            )
+            jobs[job_id]["message"] = "Stratégie compilée, exécution du backtest..."
+        except Exception as e:
+            logger.warning(f"[Job {job_id}] Translation failed: {e} — using EMA fallback")
+            StrategyClass = EMAFallbackStrategy
+            jobs[job_id]["message"] = f"Traduction échouée (fallback EMA): {str(e)[:100]}"
+
+        jobs[job_id]["progress"] = 30.0
+
+        # Step 2: Load data
+        tf_map = {
+            "M1": Timeframe.M1, "M5": Timeframe.M5, "M15": Timeframe.M15,
+            "M30": Timeframe.M30, "H1": Timeframe.H1, "H4": Timeframe.H4, "D1": Timeframe.D1,
+        }
+        timeframe = tf_map.get(req.timeframe.value, Timeframe.M5)
+
+        if req.dataset_id and req.dataset_id in datasets:
+            ticks = _get_ticks_from_dataset(req.dataset_id, req.start_date, req.end_date)
+            data_source = f"MT5 dataset: {datasets[req.dataset_id]['filename']}"
+        else:
+            gen = SyntheticTickGenerator(
+                symbol=req.symbol,
+                base_price=2700.0 if req.symbol == "XAUUSD" else 40000.0,
+                ticks_per_day=2000,
+            )
+            ticks = gen.generate(start_date=req.start_date, end_date=req.end_date)
+            data_source = "synthetic"
+
+        jobs[job_id]["progress"] = 50.0
+        jobs[job_id]["message"] = f"Backtest en cours ({len(ticks)} ticks, source: {data_source})..."
+        logger.info(f"[Job {job_id}] Running with {len(ticks)} ticks (source: {data_source})")
+
+        # Step 3: Run backtest
+        config = BacktestConfig(
+            strategy_name=req.strategy_name,
+            symbol=req.symbol,
+            timeframe=timeframe,
+            start_date=req.start_date,
+            end_date=req.end_date,
+            initial_capital=req.initial_capital,
+            leverage=req.leverage,
+            spread_model=req.execution.spread_model,
+            avg_spread_points=req.execution.avg_spread_points,
+            slippage_model=req.execution.slippage_model,
+            max_slippage_points=req.execution.max_slippage_points,
+            latency_ms=req.execution.latency_ms,
+            commission_per_lot=req.execution.commission_per_lot,
+            max_risk_per_trade_pct=req.risk.max_risk_per_trade_pct,
+            max_daily_dd_pct=req.risk.max_daily_dd_pct,
+            max_total_dd_pct=req.risk.max_total_dd_pct,
+            max_concurrent_trades=req.risk.max_concurrent_trades,
+            strategy_params=req.parameters,
+        )
+
+        strategy = StrategyClass(params=req.parameters)
+        engine = BacktestEngine(config=config, strategy=strategy)
+        result = await asyncio.to_thread(engine.run, ticks)
+
+        jobs[job_id]["progress"] = 95.0
+
+        pf = result.profit_factor
+        if pf == float('inf') or (isinstance(pf, float) and math.isinf(pf)):
+            pf = 999.0
+
+        jobs[job_id]["status"] = "completed"
+        jobs[job_id]["progress"] = 100.0
+        jobs[job_id]["completed_at"] = datetime.utcnow().isoformat()
+        jobs[job_id]["result"] = {
+            "strategy_id": req.strategy_id,
+            "strategy_name": req.strategy_name,
+            "source_language": req.source_language,
+            "data_source": data_source,
+            "ticks_processed": len(ticks),
+            "total_trades": result.total_trades,
+            "winning_trades": result.winning_trades,
+            "losing_trades": result.losing_trades,
+            "win_rate": _safe_float(result.win_rate),
+            "total_pnl": _safe_float(result.total_pnl),
+            "total_return_pct": _safe_float(result.total_return_pct),
+            "profit_factor": _safe_float(pf),
+            "expectancy": _safe_float(result.expectancy),
+            "sharpe_ratio": _safe_float(result.sharpe_ratio),
+            "sortino_ratio": _safe_float(result.sortino_ratio),
+            "calmar_ratio": _safe_float(result.calmar_ratio),
+            "max_drawdown_pct": _safe_float(result.max_drawdown_pct),
+            "max_drawdown_abs": _safe_float(result.max_drawdown_abs),
+            "recovery_factor": _safe_float(result.recovery_factor),
+            "avg_win": _safe_float(result.avg_win),
+            "avg_loss": _safe_float(result.avg_loss),
+            "largest_win": _safe_float(result.largest_win),
+            "largest_loss": _safe_float(result.largest_loss),
+            "max_consecutive_wins": result.max_consecutive_wins,
+            "max_consecutive_losses": result.max_consecutive_losses,
+            "avg_trade_duration_hours": _safe_float(result.avg_trade_duration_hours),
+            "total_commission": _safe_float(result.total_commission),
+            "equity_curve": result.equity_curve or [],
+            "trade_log": result.trade_log[:500] if result.trade_log else [],
+            "daily_returns": [round(float(r), 6) for r in (result.daily_returns or [])],
+        }
+        logger.info(f"[Job {job_id}] Done: {result.total_trades} trades, PnL={result.total_pnl:.2f}")
+
+    except Exception as e:
+        logger.error(f"[Job {job_id}] Failed: {e}", exc_info=True)
+        jobs[job_id]["status"] = "failed"
+        jobs[job_id]["message"] = str(e)
+        jobs[job_id]["completed_at"] = datetime.utcnow().isoformat()
+
+
+@app.post("/api/v1/backtest/custom", response_model=JobResponse)
+async def submit_custom_backtest(req: CustomBacktestRequest, background_tasks: BackgroundTasks):
+    """Lance un backtest pour une stratégie importée (MQL4/MQL5/Python/Pine)."""
+    job_id = str(uuid.uuid4())[:8]
+
+    if req.dataset_id and req.dataset_id not in datasets:
+        raise HTTPException(400, f"Dataset '{req.dataset_id}' introuvable.")
+
+    jobs[job_id] = {
+        "status": "queued",
+        "progress": 0.0,
+        "result": None,
+        "created_at": datetime.utcnow().isoformat(),
+        "completed_at": None,
+        "message": f"En attente: {req.strategy_name} ({req.source_language})",
+    }
+    background_tasks.add_task(run_custom_backtest_job, job_id, req)
+    return JobResponse(
+        job_id=job_id,
+        status=JobStatus.QUEUED,
+        message=f"Backtest custom lancé : {req.strategy_name} ({req.source_language.upper()})",
+        created_at=jobs[job_id]["created_at"],
     )
 
 
