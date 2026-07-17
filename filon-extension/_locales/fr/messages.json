@@ -1,0 +1,10 @@
+{
+  "extName": {
+    "message": "FILON — Le réflexe malin avant chaque achat",
+    "description": "Nom de l'extension"
+  },
+  "extDescription": {
+    "message": "Compare automatiquement cashback, reconditionné et codes promo sur les fiches produit, et révèle votre prix réel le plus bas.",
+    "description": "Description de l'extension"
+  }
+}

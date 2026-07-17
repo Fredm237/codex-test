@@ -1,0 +1,86 @@
+/* FILON overlay — injected on product pages. Scoped with the filon-x prefix
+   and high specificity so host-page CSS does not leak in. */
+
+.filon-x-overlay {
+  --fx-blue: #3c7bff;
+  --fx-aqua: #24e3c6;
+  --fx-violet: #8b6cff;
+  --fx-pos: #22e0a6;
+  --fx-vein: linear-gradient(100deg, #3c7bff 0%, #8b6cff 42%, #24e3c6 100%);
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  z-index: 2147483000;
+  width: 360px;
+  max-width: calc(100vw - 48px);
+  border-radius: 30px;
+  background: rgba(9, 11, 18, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.05) inset, 0 40px 90px -40px rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(22px) saturate(1.3);
+  -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  color: #f4f6fb;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Inter, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  opacity: 0;
+  transform: translateY(20px) scale(0.98);
+  transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+.filon-x-overlay.filon-x-show { opacity: 1; transform: none; }
+.filon-x-overlay * { box-sizing: border-box; }
+.filon-x-overlay::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: var(--fx-vein);
+  opacity: 0.4;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+.filon-x-head { display: flex; align-items: center; gap: 10px; padding: 15px 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
+.filon-x-title { font-weight: 600; font-size: 14px; letter-spacing: -0.02em; }
+.filon-x-title small { display: block; font-weight: 500; font-size: 11px; color: #626b80; letter-spacing: 0; }
+.filon-x-close { margin-left: auto; width: 26px; height: 26px; border-radius: 8px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.09); color: #9ba3b6; cursor: pointer; font-size: 13px; line-height: 1; padding: 0; }
+
+.filon-x-body { padding: 14px 16px; }
+.filon-x-scan { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #9ba3b6; margin-bottom: 12px; }
+.filon-x-spin { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.14); border-top-color: #5a93ff; animation: filon-x-sp 0.7s linear infinite; }
+@keyframes filon-x-sp { to { transform: rotate(360deg); } }
+.filon-x-detected { font-size: 12px; color: #626b80; margin-bottom: 12px; }
+.filon-x-detected b { color: #9ba3b6; font-weight: 600; }
+
+.filon-x-src { display: flex; align-items: center; gap: 11px; padding: 10px 12px; border-radius: 16px; background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.09); margin-bottom: 7px; opacity: 0.4; transform: translateY(4px); transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s; }
+.filon-x-src.filon-x-on { opacity: 1; transform: none; border-color: rgba(255, 255, 255, 0.14); }
+.filon-x-ic { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex: none; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.09); color: #55f0d6; font-family: "SF Mono", ui-monospace, monospace; font-size: 12px; font-weight: 700; }
+.filon-x-m { flex: 1; min-width: 0; }
+.filon-x-a { font-size: 13px; font-weight: 600; }
+.filon-x-b { font-size: 11px; color: #626b80; }
+.filon-x-v { font-family: "SF Mono", ui-monospace, monospace; font-size: 13.5px; font-weight: 600; color: #626b80; }
+.filon-x-src.filon-x-on .filon-x-v { color: var(--fx-pos); }
+
+.filon-x-result { margin-top: 6px; padding: 14px 15px; border-radius: 22px; background: rgba(34, 224, 166, 0.14); border: 1px solid rgba(34, 224, 166, 0.4); display: none; }
+.filon-x-result.filon-x-show { display: block; animation: filon-x-pop 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes filon-x-pop { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.filon-x-rr { display: flex; justify-content: space-between; align-items: baseline; }
+.filon-x-lab { font-size: 11px; text-transform: uppercase; letter-spacing: 0.09em; color: #9ba3b6; font-weight: 600; }
+.filon-x-amt { font-family: "SF Mono", ui-monospace, monospace; font-size: 26px; font-weight: 700; color: var(--fx-pos); letter-spacing: -0.03em; }
+.filon-x-dt { font-size: 12px; color: #9ba3b6; margin-top: 5px; }
+.filon-x-dt b { color: #f4f6fb; }
+.filon-x-dt b.filon-x-pos { color: var(--fx-pos); }
+.filon-x-cta { width: 100%; margin-top: 12px; padding: 12px; border-radius: 999px; border: 0; color: #05121f; background: var(--fx-vein); box-shadow: 0 0 0 1px rgba(60, 123, 255, 0.25), 0 20px 50px -30px rgba(60, 123, 255, 0.6); font-family: inherit; font-weight: 600; font-size: 14px; cursor: pointer; transition: transform 0.18s cubic-bezier(0.16, 1, 0.3, 1); }
+.filon-x-cta:hover { transform: translateY(-2px); }
+
+.filon-x-foot { font-size: 10.5px; color: #626b80; text-align: center; padding: 0 16px 14px; line-height: 1.5; }
+
+@media (prefers-reduced-motion: reduce) {
+  .filon-x-overlay, .filon-x-src, .filon-x-cta { transition: none; }
+  .filon-x-spin { animation: none; }
+}
