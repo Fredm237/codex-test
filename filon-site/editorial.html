@@ -1,0 +1,357 @@
+<title>FILON — Est-ce vraiment le bon prix ?</title>
+<meta name="description" content="FILON, l'assistant d'achat malin. Avant chaque achat, il compare cashback, reconditionné et codes promo — et vous dit s'il existe mieux. Ne payez plus jamais trop cher." />
+<style>
+  /* ============================================================
+     FILON — Édition « Luxe éditorial » (inspiré du registre Phia)
+     Monde clair assumé : papier froid, encre profonde, un accent.
+     ============================================================ */
+  :root{
+    --sans:"Helvetica Neue",Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    --mono:"SF Mono",ui-monospace,"Geist Mono",Menlo,monospace;
+
+    --paper:#F3F2ED;        /* papier froid, pas crème chaude */
+    --paper-2:#EAE9E2;      /* section alternée */
+    --card:#FCFBF8;         /* carte plus claire que le papier */
+    --ink:#16171B;          /* LBD — encre profonde légèrement froide */
+    --ink-2:#4B4D55;        /* texte secondaire */
+    --ink-3:#8A8C92;        /* tertiaire / captions */
+    --line:rgba(22,23,27,.14);
+    --line-2:rgba(22,23,27,.24);
+    --accent:#2233E4;       /* bleu FILON, profond et confiant */
+    --accent-ink:#1A28B8;
+    --save:#0E7A55;         /* économie — vert sobre, jamais criard */
+
+    --maxw:1160px;
+    --ease:cubic-bezier(.22,.9,.3,1);
+    color-scheme:light;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+  body{background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.55;
+    letter-spacing:-.006em;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden}
+  ::selection{background:var(--ink);color:var(--paper)}
+  a{color:inherit;text-decoration:none}
+  h1,h2,h3{font-weight:600;letter-spacing:-.035em;line-height:1;text-wrap:balance}
+  em{font-family:var(--serif);font-style:italic;font-weight:400;letter-spacing:0}
+  .mono{font-family:var(--mono);font-feature-settings:"tnum"}
+  :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(22px,5vw,40px)}
+  .rule{height:1px;background:var(--line);border:0}
+  .eyebrow{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
+
+  /* Nav */
+  header{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--paper) 86%,transparent);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav{display:flex;align-items:center;justify-content:space-between;height:66px}
+  .brand{font-size:20px;font-weight:600;letter-spacing:.16em}
+  .nav-mid{display:flex;gap:30px}
+  .nav-mid a{font-size:13.5px;color:var(--ink-2);letter-spacing:.01em;transition:color .2s}
+  .nav-mid a:hover{color:var(--ink)}
+  @media (max-width:760px){.nav-mid{display:none}}
+  .nav-cta{font-size:13.5px;font-weight:600;padding:10px 20px;border-radius:100px;background:var(--ink);color:var(--paper);
+    transition:transform .2s var(--ease),background .2s}
+  .nav-cta:hover{transform:translateY(-1px)}
+
+  /* Hero */
+  .hero{padding:clamp(56px,10vw,120px) 0 clamp(40px,6vw,72px)}
+  .hero .eyebrow{display:block;margin-bottom:clamp(26px,4vw,42px)}
+  h1{font-size:clamp(52px,11vw,148px);font-weight:600;letter-spacing:-.05em;line-height:.9}
+  h1 .l{display:block;overflow:hidden}
+  h1 .l > span{display:block;transform:translateY(102%);transition:transform 1s var(--ease)}
+  .hero.in h1 .l > span{transform:none}
+  .hero.in h1 .l:nth-child(2) > span{transition-delay:.08s}
+  .hero.in h1 .l:nth-child(3) > span{transition-delay:.16s}
+  .hero-foot{margin-top:clamp(34px,5vw,54px);display:grid;grid-template-columns:1.1fr .9fr;gap:40px;align-items:end}
+  @media (max-width:820px){.hero-foot{grid-template-columns:1fr;gap:30px}}
+  .hero-sub{font-size:clamp(17px,1.8vw,20px);color:var(--ink-2);max-width:46ch;line-height:1.5}
+  .hero-sub b{color:var(--ink);font-weight:600}
+  .hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .btn{font-family:inherit;font-size:15px;font-weight:600;padding:15px 28px;border-radius:100px;cursor:pointer;
+    transition:transform .2s var(--ease),background .2s,color .2s;border:1px solid var(--ink);white-space:nowrap;display:inline-flex;align-items:center;gap:9px}
+  .btn.dark{background:var(--ink);color:var(--paper)}
+  .btn.dark:hover{transform:translateY(-2px)}
+  .btn.outline{background:transparent;color:var(--ink)}
+  .btn.outline:hover{background:var(--ink);color:var(--paper)}
+  .hero-actions .cap{font-size:13px;color:var(--ink-3)}
+
+  /* "Faut-il l'acheter ?" card — signature module */
+  .verdict{background:var(--card);border:1px solid var(--line-2);border-radius:6px;overflow:hidden;
+    box-shadow:0 30px 60px -40px rgba(22,23,27,.5)}
+  .verdict-top{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line);font-size:12px;color:var(--ink-3);letter-spacing:.04em}
+  .verdict-top .q{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink)}
+  .verdict-body{padding:20px}
+  .vrow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 0;border-bottom:1px solid var(--line)}
+  .vrow:last-of-type{border-bottom:0}
+  .vrow .who{font-size:14px;color:var(--ink-2)}
+  .vrow .who b{color:var(--ink);font-weight:600;display:block;font-size:14.5px}
+  .vrow .amt{font-family:var(--mono);font-size:16px;font-weight:600;letter-spacing:-.02em}
+  .vrow .amt.old{color:var(--ink-3);text-decoration:line-through;text-decoration-thickness:1px}
+  .vrow .amt.new{color:var(--save)}
+  .verdict-answer{margin-top:8px;padding:16px 18px;border-radius:4px;background:var(--ink);color:var(--paper);display:flex;align-items:center;justify-content:space-between;gap:14px}
+  .verdict-answer .label{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,242,237,.6)}
+  .verdict-answer .val{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:-.03em}
+  .verdict-answer .val small{display:block;font-family:var(--sans);font-size:11px;letter-spacing:.06em;color:#7BE0B4;text-align:right;margin-top:2px}
+  .verdict-note{font-size:11.5px;color:var(--ink-3);padding:12px 4px 0;line-height:1.5}
+
+  /* Stats strip */
+  .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .strip-in{display:grid;grid-template-columns:repeat(4,1fr);gap:0}
+  @media (max-width:760px){.strip-in{grid-template-columns:repeat(2,1fr)}}
+  .stat{padding:34px clamp(14px,2.5vw,28px);border-right:1px solid var(--line)}
+  .stat:last-child{border-right:0}
+  @media (max-width:760px){.stat:nth-child(2){border-right:0}.stat:nth-child(1),.stat:nth-child(2){border-bottom:1px solid var(--line)}}
+  .stat .n{font-size:clamp(30px,3.6vw,42px);font-weight:600;letter-spacing:-.04em}
+  .stat .k{font-size:13px;color:var(--ink-2);margin-top:10px;line-height:1.4;max-width:22ch}
+
+  /* Section scaffold */
+  section{position:relative}
+  .band{padding:clamp(70px,10vw,130px) 0}
+  .band.alt{background:var(--paper-2)}
+  .lead-head{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,6vw,80px);align-items:baseline;margin-bottom:clamp(40px,6vw,70px)}
+  @media (max-width:760px){.lead-head{grid-template-columns:1fr;gap:18px}}
+  .lead-head .idx{font-family:var(--mono);font-size:13px;color:var(--ink-3)}
+  .lead-head h2{font-size:clamp(32px,5vw,60px);font-weight:600;letter-spacing:-.04em;max-width:16ch}
+  .lead-head h2 em{font-size:1.02em}
+
+  /* Steps — editorial */
+  .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--line)}
+  @media (max-width:820px){.steps{grid-template-columns:1fr}}
+  .step{padding:34px 30px 30px;border-right:1px solid var(--line)}
+  .step:last-child{border-right:0}
+  @media (max-width:820px){.step{border-right:0;border-bottom:1px solid var(--line)}}
+  .step .no{font-family:var(--serif);font-style:italic;font-size:34px;color:var(--accent);line-height:1;margin-bottom:22px}
+  .step h3{font-size:21px;font-weight:600;margin-bottom:10px;letter-spacing:-.02em}
+  .step p{font-size:14.5px;color:var(--ink-2);line-height:1.5}
+
+  /* Manifesto / transparency */
+  .manifesto{max-width:20ch}
+  .manifesto h2{font-size:clamp(34px,6vw,80px);font-weight:600;letter-spacing:-.045em;line-height:.98}
+  .manifesto-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,70px);align-items:start;margin-top:10px}
+  @media (max-width:820px){.manifesto-grid{grid-template-columns:1fr;gap:30px}}
+  .manifesto-body p{font-size:clamp(16px,1.7vw,19px);color:var(--ink-2);line-height:1.6;margin-bottom:18px}
+  .manifesto-body p b{color:var(--ink);font-weight:600}
+  .pledge{margin-top:22px;border-top:1px solid var(--line)}
+  .pledge div{display:flex;gap:14px;padding:15px 0;border-bottom:1px solid var(--line);font-size:15px;color:var(--ink-2)}
+  .pledge div span{font-family:var(--mono);color:var(--accent);font-size:13px;flex:none;width:26px}
+  .pledge div b{color:var(--ink);font-weight:600}
+
+  /* Partners */
+  .partners{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .partners span{flex:1 1 auto;text-align:center;padding:26px 14px;font-size:17px;font-weight:600;color:var(--ink-2);
+    border-right:1px solid var(--line);letter-spacing:-.01em;white-space:nowrap}
+  .partners span:last-child{border-right:0}
+  @media (max-width:760px){.partners span{flex:1 1 40%;border-bottom:1px solid var(--line)}}
+
+  /* Closing */
+  .closing{text-align:center;padding:clamp(80px,12vw,150px) 0}
+  .closing .eyebrow{margin-bottom:26px;display:block}
+  .closing h2{font-size:clamp(40px,8vw,110px);font-weight:600;letter-spacing:-.05em;line-height:.92}
+  .closing h2 em{display:block}
+  .closing .btn{margin-top:clamp(34px,5vw,50px)}
+
+  footer{border-top:1px solid var(--line);padding:46px 0}
+  .foot{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;align-items:center}
+  .foot .brand{font-size:16px}
+  .foot .col{font-size:13px;color:var(--ink-3)}
+  .foot-links{display:flex;gap:22px}
+  .foot-links a{font-size:13px;color:var(--ink-2)}
+  .disc{font-size:11.5px;color:var(--ink-3);max-width:70ch;margin-top:28px;line-height:1.6}
+
+  .rv{opacity:0;transform:translateY(26px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+  .rv.in{opacity:1;transform:none}
+  @media (prefers-reduced-motion:reduce){.rv{opacity:1;transform:none}.hero h1 .l>span{transform:none}}
+</style>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top">FILON</a>
+    <nav class="nav-mid">
+      <a href="#comment">La méthode</a>
+      <a href="#transparence">Transparence</a>
+      <a href="#partenaires">Sources</a>
+    </nav>
+    <a class="nav-cta" href="#installer">Ajouter FILON</a>
+  </div>
+</header>
+
+<main id="top">
+  <!-- HERO -->
+  <section class="hero wrap" id="hero">
+    <span class="eyebrow">L'assistant d'achat malin</span>
+    <h1>
+      <span class="l"><span>Est-ce</span></span>
+      <span class="l"><span><em>vraiment</em></span></span>
+      <span class="l"><span>le bon prix&nbsp;?</span></span>
+    </h1>
+    <div class="hero-foot">
+      <div>
+        <p class="hero-sub">
+          Avant chaque achat, FILON compare le meilleur cashback, le reconditionné équivalent et les codes promo —
+          puis vous dit, en une seconde, <b>s'il existe mieux</b>. Ne payez plus jamais trop cher.
+        </p>
+        <div class="hero-actions" style="margin-top:28px">
+          <a class="btn dark" href="#installer">Ajouter FILON — gratuit</a>
+          <span class="cap">Extension &amp; app · sans revendre vos données</span>
+        </div>
+      </div>
+
+      <!-- Signature verdict card -->
+      <div class="verdict rv" id="verdict" aria-label="Exemple : faut-il l'acheter ?">
+        <div class="verdict-top">
+          <span class="q">« Faut-il l'acheter&nbsp;? »</span>
+          <span>Casque Aura X1</span>
+        </div>
+        <div class="verdict-body">
+          <div class="vrow">
+            <span class="who"><b>Prix neuf affiché</b>vendu par la boutique</span>
+            <span class="amt old">499 €</span>
+          </div>
+          <div class="vrow">
+            <span class="who"><b>Reconditionné A+</b>garanti 24 mois · Back Market</span>
+            <span class="amt new" data-to="405" data-suffix=" €">—</span>
+          </div>
+          <div class="vrow">
+            <span class="who"><b>Cashback + code</b>iGraal · code vérifié en direct</span>
+            <span class="amt new">−40 €</span>
+          </div>
+          <div class="verdict-answer">
+            <span class="label">Votre prix réel</span>
+            <span class="val"><span class="mono" data-to="365">—</span> €<small>−134 € · le filon</small></span>
+          </div>
+          <p class="verdict-note">Lien affilié · FILON perçoit une part de la commission d'apport de la plateforme. Jamais un centime de votre poche.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="strip">
+    <div class="wrap strip-in">
+      <div class="stat"><div class="n mono" data-to="12" data-suffix=" M+">—</div><div class="k">utilisateurs cashback en francophonie</div></div>
+      <div class="stat"><div class="n mono">200–450 €</div><div class="k">économisés par foyer, chaque année</div></div>
+      <div class="stat"><div class="n mono" data-to="50" data-suffix=" %">—</div><div class="k">d'économie en cumulant reconditionné &amp; cashback</div></div>
+      <div class="stat"><div class="n mono">0 €</div><div class="k">pour vous — FILON est, et restera, gratuit</div></div>
+    </div>
+  </div>
+
+  <!-- MÉTHODE -->
+  <section class="band" id="comment">
+    <div class="wrap">
+      <div class="lead-head rv">
+        <span class="idx">01 — 03</span>
+        <h2>Trois secondes entre vous et <em>le meilleur prix</em>.</h2>
+      </div>
+      <div class="steps rv">
+        <div class="step">
+          <div class="no">i.</div>
+          <h3>FILON reconnaît le produit</h3>
+          <p>Sur n'importe quelle fiche, l'assistant identifie l'article et lance une analyse silencieuse. Vous ne changez rien à vos habitudes.</p>
+        </div>
+        <div class="step">
+          <div class="no">ii.</div>
+          <h3>Il compare toutes les sources</h3>
+          <p>Cashback le plus rémunérateur, reconditionné équivalent garanti, codes promo testés en direct, prix chez 37+ marchands. En temps réel.</p>
+        </div>
+        <div class="step">
+          <div class="no">iii.</div>
+          <h3>Il rend le verdict</h3>
+          <p>Un seul chiffre : votre prix réel le plus bas. Faut-il l'acheter, ici, maintenant&nbsp;? FILON vous le dit — et applique l'économie.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MANIFESTE TRANSPARENCE -->
+  <section class="band alt" id="transparence">
+    <div class="wrap">
+      <div class="manifesto-grid">
+        <div class="manifesto rv">
+          <span class="eyebrow" style="display:block;margin-bottom:24px">Notre serment</span>
+          <h2>La transparence n'est pas une promesse. C'est le <em>modèle</em>.</h2>
+        </div>
+        <div class="manifesto-body rv">
+          <p>
+            D'autres ont promis de « ne jamais payer trop cher » — puis se sont fait prendre à détourner discrètement
+            les commissions. La confiance ne se déclare pas&nbsp;: elle se prouve, ligne après ligne.
+          </p>
+          <p>Chez FILON, la manière dont nous gagnons de l'argent est <b>écrite, visible, et alignée avec la vôtre</b>. Rien à cacher, par construction.</p>
+          <div class="pledge">
+            <div><span>01</span><p><b>Rémunération affichée.</b> Vous savez exactement ce que FILON perçoit sur chaque recommandation.</p></div>
+            <div><span>02</span><p><b>Liens affiliés signalés.</b> Toujours. C'est une exigence légale que nous traitons comme une promesse.</p></div>
+            <div><span>03</span><p><b>Zéro captation déloyale.</b> Nous n'écrasons jamais l'attribution d'un créateur ou d'un site.</p></div>
+            <div><span>04</span><p><b>Vos données restent les vôtres.</b> Pas de profil publicitaire, pas de revente. Conforme RGPD, par défaut.</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PARTENAIRES -->
+  <section class="band" id="partenaires">
+    <div class="wrap">
+      <div class="lead-head rv">
+        <span class="idx">Sources</span>
+        <h2>Toutes vos économies, <em>comparées</em> au même endroit.</h2>
+      </div>
+    </div>
+    <div class="partners rv">
+      <span>iGraal</span><span>Poulpeo</span><span>Widilo</span><span>Joko</span><span>eBuyClub</span><span>Back Market</span><span>Rakuten</span>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="closing" id="installer">
+    <div class="wrap rv">
+      <span class="eyebrow">Ne payez plus jamais trop cher</span>
+      <h2>Demandez à FILON <em>avant d'acheter.</em></h2>
+      <a class="btn dark" href="#top">Ajouter FILON — gratuit</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <span class="brand">FILON</span>
+      <div class="foot-links">
+        <a href="#comment">La méthode</a>
+        <a href="#transparence">Transparence</a>
+        <a href="#partenaires">Sources</a>
+        <a href="#installer">Installer</a>
+      </div>
+      <span class="col">© 2026 · Conçu à Bruxelles</span>
+    </div>
+    <p class="disc">
+      FILON est gratuit. Certains liens sont affiliés — lorsque vous activez une offre via FILON, la plateforme partenaire
+      nous reverse une part de sa commission d'apport. Cela n'augmente jamais votre prix. Nous ne revendons aucune donnée de navigation.
+    </p>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var RM=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // hero lines in
+  requestAnimationFrame(function(){document.getElementById("hero").classList.add("in");});
+
+  // reveal
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});},{threshold:.16,rootMargin:"0px 0px -8% 0px"});
+  document.querySelectorAll(".rv").forEach(function(el){io.observe(el);});
+
+  // count-ups — one clean function for every [data-to] (optional data-suffix)
+  function animateNumber(el){
+    var to=parseFloat(el.getAttribute("data-to")),suf=el.getAttribute("data-suffix")||"";
+    if(RM){el.textContent=to+suf;return;}
+    var s=performance.now(),d=1100;
+    (function t(n){var p=Math.min((n-s)/d,1),e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(to*e)+suf;if(p<1)requestAnimationFrame(t);})(s);
+  }
+  var cio=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){animateNumber(e.target);cio.unobserve(e.target);}});},{threshold:.5});
+  document.querySelectorAll("[data-to]").forEach(function(el){cio.observe(el);});
+})();
+</script>
