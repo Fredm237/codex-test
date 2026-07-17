@@ -1,0 +1,468 @@
+<title>FILON — L'expérience</title>
+<meta name="description" content="FILON — le réflexe malin avant chaque achat. Une expérience immersive." />
+<style>
+  :root{
+    --font-sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Inter,system-ui,sans-serif;
+    --font-mono:"SF Mono",ui-monospace,"Geist Mono","JetBrains Mono",Menlo,monospace;
+    --bg:#04050A; --text:#F3F6FF; --dim:#8A93AB; --mute:#4E566B;
+    --blue:#3C7BFF; --aqua:#24E3C6; --violet:#8B6CFF; --gold:#FFC873; --pos:#2FE6AE;
+    --glass:rgba(255,255,255,.045); --glass-2:rgba(255,255,255,.08); --line:rgba(255,255,255,.09);
+    --vein:linear-gradient(100deg,var(--blue),var(--violet) 45%,var(--aqua));
+    --ease:cubic-bezier(.16,1,.3,1);
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{background:var(--bg);color:var(--text);font-family:var(--font-sans);font-size:17px;line-height:1.6;letter-spacing:-.012em;-webkit-font-smoothing:antialiased;overflow-x:hidden;cursor:none}
+  @media (pointer:coarse){body{cursor:auto}}
+  a{color:inherit;text-decoration:none}
+  ::selection{background:rgba(60,123,255,.35)}
+  h1,h2,h3{font-weight:600;letter-spacing:-.035em;line-height:1.02;text-wrap:balance}
+  .mono{font-family:var(--font-mono);font-feature-settings:"tnum"}
+  .grad{background:var(--vein);-webkit-background-clip:text;background-clip:text;color:transparent}
+  :focus-visible{outline:2px solid var(--aqua);outline-offset:4px;border-radius:6px}
+
+  /* WebGL / fallback background */
+  #gl{position:fixed;inset:0;width:100%;height:100%;z-index:-2;display:block}
+  .bg-fallback{position:fixed;inset:0;z-index:-3;background:
+     radial-gradient(60% 50% at 70% 12%, rgba(60,123,255,.35), transparent 60%),
+     radial-gradient(55% 45% at 25% 78%, rgba(36,227,198,.24), transparent 60%),
+     radial-gradient(70% 60% at 50% 40%, rgba(139,108,255,.20), transparent 65%), var(--bg)}
+  .grain{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+  .vignette{position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(120% 100% at 50% 30%,transparent 55%,rgba(0,0,0,.55))}
+
+  /* Custom cursor */
+  .cursor,.cursor-ring{position:fixed;top:0;left:0;z-index:9999;pointer-events:none;border-radius:50%;mix-blend-mode:screen;will-change:transform}
+  .cursor{width:7px;height:7px;background:#fff;transform:translate(-50%,-50%)}
+  .cursor-ring{width:38px;height:38px;border:1px solid rgba(255,255,255,.35);transform:translate(-50%,-50%);transition:width .3s var(--ease),height .3s var(--ease),background .3s,border-color .3s}
+  .cursor-ring.hot{width:64px;height:64px;background:rgba(60,123,255,.14);border-color:transparent}
+  @media (pointer:coarse){.cursor,.cursor-ring{display:none}}
+
+  /* Intro */
+  #intro{position:fixed;inset:0;z-index:9000;background:var(--bg);display:grid;place-items:center;transition:opacity .9s var(--ease),visibility .9s}
+  #intro.done{opacity:0;visibility:hidden}
+  .intro-logo{width:96px;height:96px}
+  .intro-logo path,.intro-logo rect{stroke-dasharray:200;stroke-dashoffset:200;animation:draw 1.5s var(--ease) forwards}
+  .intro-logo rect{stroke-dasharray:130;stroke-dashoffset:130}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .intro-word{position:absolute;bottom:34%;font-size:13px;letter-spacing:.42em;text-transform:uppercase;color:var(--dim);opacity:0;animation:fadein .8s .7s forwards}
+  @keyframes fadein{to{opacity:1}}
+
+  /* Scroll progress */
+  .progress{position:fixed;top:0;left:0;height:2px;width:0;z-index:8000;background:var(--vein);box-shadow:0 0 16px rgba(60,123,255,.6)}
+
+  /* Nav */
+  nav{position:fixed;top:0;left:0;right:0;z-index:200;display:flex;align-items:center;justify-content:space-between;
+    padding:22px clamp(20px,4vw,52px);transition:transform .5s var(--ease),background .4s,backdrop-filter .4s;mix-blend-mode:normal}
+  nav.hide{transform:translateY(-110%)}
+  nav.solid{background:rgba(6,8,15,.6);backdrop-filter:blur(18px) saturate(1.3);border-bottom:1px solid var(--line)}
+  .brand{display:flex;align-items:center;gap:11px;font-weight:600;font-size:19px;letter-spacing:-.04em}
+  .brand svg{width:28px;height:28px}
+  .nav-cta{display:flex;align-items:center;gap:18px}
+  .nav-cta a.link{font-size:14px;color:var(--dim);transition:color .25s}
+  .nav-cta a.link:hover{color:var(--text)}
+  .btn{position:relative;display:inline-flex;align-items:center;gap:9px;font-family:inherit;font-size:14.5px;font-weight:600;
+    padding:12px 22px;border-radius:100px;border:1px solid transparent;cursor:none;overflow:hidden;isolation:isolate;white-space:nowrap}
+  @media (pointer:coarse){.btn{cursor:pointer}}
+  .btn.solid{color:#04101f;background:var(--vein);box-shadow:0 0 0 1px rgba(60,123,255,.3),0 20px 60px -20px rgba(60,123,255,.6)}
+  .btn.solid::after{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,var(--aqua),var(--blue) 55%,var(--violet));opacity:0;transition:opacity .4s}
+  .btn.solid:hover::after{opacity:1}
+  .btn.line{color:var(--text);border-color:var(--glass-2);background:var(--glass)}
+  .btn.big{padding:17px 32px;font-size:16px}
+
+  /* Layout */
+  .wrap{width:100%;max-width:1180px;margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  section{position:relative}
+
+  /* Hero */
+  .hero{min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding-top:120px;padding-bottom:60px}
+  .tagpill{display:inline-flex;align-items:center;gap:9px;align-self:flex-start;padding:8px 8px 8px 15px;border-radius:100px;background:var(--glass);border:1px solid var(--line);font-size:13px;color:var(--dim);margin-bottom:34px;backdrop-filter:blur(8px)}
+  .tagpill .b{font-size:10.5px;font-weight:800;letter-spacing:.06em;padding:4px 9px;border-radius:100px;color:#04101f;background:var(--vein)}
+  h1.hero{font-size:clamp(46px,9vw,128px);font-weight:600;letter-spacing:-.05em;line-height:.94}
+  .hero .reveal-line{display:block;overflow:hidden}
+  .hero .reveal-line > span{display:inline-block;transform:translateY(105%);will-change:transform}
+  .hero-sub{margin-top:30px;max-width:540px;font-size:clamp(17px,2vw,20px);color:var(--dim);line-height:1.5;opacity:0;transform:translateY(20px)}
+  .hero-cta{margin-top:38px;display:flex;gap:14px;flex-wrap:wrap;align-items:center;opacity:0;transform:translateY(20px)}
+  .hero-note{font-size:13px;color:var(--mute);display:flex;align-items:center;gap:8px}
+  .hero-stats{margin-top:70px;display:flex;gap:clamp(24px,6vw,72px);flex-wrap:wrap;opacity:0;transform:translateY(20px)}
+  .hstat .n{font-size:clamp(26px,3.4vw,40px);font-weight:700;letter-spacing:-.03em;line-height:1}
+  .hstat .l{font-size:13px;color:var(--dim);margin-top:8px;max-width:180px}
+  .scroll-hint{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--mute);opacity:0;animation:fadein 1s 2.6s forwards}
+  .scroll-hint .m{width:22px;height:34px;border:1px solid var(--line);border-radius:14px;position:relative}
+  .scroll-hint .m::after{content:"";position:absolute;top:6px;left:50%;width:3px;height:7px;background:var(--dim);border-radius:2px;transform:translateX(-50%);animation:wheel 1.7s infinite}
+  @keyframes wheel{0%{opacity:0;transform:translate(-50%,0)}30%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(-50%,10px)}}
+
+  /* Reveal util */
+  .rv{opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease),transform .9s var(--ease)}
+  .rv.in{opacity:1;transform:none}
+
+  /* Storytelling — the vein */
+  .story{padding:clamp(90px,16vh,190px) 0}
+  .story .ey{font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:9px}
+  .story .ey .d{width:7px;height:7px;border-radius:50%;background:var(--aqua);box-shadow:0 0 14px var(--aqua)}
+  .story h2{font-size:clamp(32px,5.2vw,68px);margin:22px 0;max-width:14ch}
+  .story p.lead{font-size:clamp(17px,2vw,21px);color:var(--dim);max-width:560px;line-height:1.5}
+  .vein-wrap{position:relative;margin:70px 0;height:200px}
+  .vein-svg{width:100%;height:100%;overflow:visible}
+  .vein-path{fill:none;stroke:url(#vg);stroke-width:2.5;stroke-linecap:round;filter:drop-shadow(0 0 10px rgba(60,123,255,.5))}
+  .vein-node{opacity:0}
+
+  /* Feature panels — cinematic bento */
+  .panels{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}
+  .panel{position:relative;border-radius:26px;background:linear-gradient(180deg,var(--glass-2),var(--glass));border:1px solid var(--line);
+    padding:30px;overflow:hidden;min-height:230px;display:flex;flex-direction:column;justify-content:space-between}
+  .panel::before{content:"";position:absolute;inset:0;background:radial-gradient(80% 60% at var(--mx,70%) 0%,rgba(60,123,255,.16),transparent 60%);opacity:0;transition:opacity .5s}
+  .panel:hover::before{opacity:1}
+  .panel h3{font-size:22px;letter-spacing:-.03em}
+  .panel p{color:var(--dim);font-size:15px;margin-top:10px;max-width:34ch}
+  .panel .ico{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:var(--glass-2);border:1px solid var(--line);margin-bottom:20px}
+  .panel .ico svg{width:22px;height:22px;color:var(--aqua)}
+  .p7{grid-column:span 7} .p5{grid-column:span 5} .p4{grid-column:span 4} .p6{grid-column:span 6}
+  .panel .big-n{font-size:clamp(40px,6vw,76px);font-weight:700;letter-spacing:-.04em;line-height:1}
+  @media (max-width:860px){.p7,.p5,.p4,.p6{grid-column:span 12}}
+
+  /* Marquee */
+  .mq{margin:0;padding:34px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);overflow:hidden;
+    -webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
+  .mq-row{display:flex;gap:54px;width:max-content;animation:mq 32s linear infinite}
+  @keyframes mq{to{transform:translateX(-50%)}}
+  .mq-row span{font-size:19px;font-weight:600;color:var(--mute);white-space:nowrap;letter-spacing:-.02em}
+
+  /* Final */
+  .final{padding:clamp(100px,18vh,220px) 0;text-align:center}
+  .final h2{font-size:clamp(38px,7vw,96px);letter-spacing:-.05em;line-height:.98}
+  .final p{color:var(--dim);font-size:19px;margin:24px auto 40px;max-width:520px}
+  footer{padding:50px 0;border-top:1px solid var(--line);color:var(--mute);font-size:13px}
+  .foot-in{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+  .foot-discl{font-size:11.5px;color:var(--mute);max-width:640px;margin-top:22px;line-height:1.6}
+
+  @media (prefers-reduced-motion:reduce){
+    *{animation:none!important;transition:none!important}
+    .hero .reveal-line>span{transform:none}
+    .hero-sub,.hero-cta,.hero-stats{opacity:1;transform:none}
+    .rv{opacity:1;transform:none}
+    #intro{display:none}
+    body{cursor:auto}.cursor,.cursor-ring{display:none}
+  }
+</style>
+
+<div class="bg-fallback"></div>
+<canvas id="gl"></canvas>
+<div class="grain"></div>
+<div class="vignette"></div>
+<div class="cursor" id="cur"></div>
+<div class="cursor-ring" id="curRing"></div>
+<div class="progress" id="prog"></div>
+
+<div id="intro">
+  <svg class="intro-logo" viewBox="0 0 32 32" fill="none">
+    <defs><linearGradient id="ig" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#3C7BFF"/><stop offset=".5" stop-color="#8B6CFF"/><stop offset="1" stop-color="#24E3C6"/></linearGradient></defs>
+    <rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#ig)" stroke-width="2"/>
+    <path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#ig)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>
+  <div class="intro-word">F I L O N</div>
+</div>
+
+<nav id="nav">
+  <a class="brand" href="#top">
+    <svg viewBox="0 0 32 32" fill="none"><rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#ig)" stroke-width="2"/><path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#ig)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    FILON
+  </a>
+  <div class="nav-cta">
+    <a class="link" data-hover href="#story">Le principe</a>
+    <a class="link" data-hover href="#features">Ce que ça change</a>
+    <a class="btn solid" data-hover href="#final">Installer</a>
+  </div>
+</nav>
+
+<main id="top">
+  <section class="hero wrap">
+    <span class="tagpill" id="tagpill"><span class="b">2026</span> L'assistant qui trouve le filon avant chaque achat</span>
+    <h1 class="hero" id="heroTitle" aria-label="Ne payez plus jamais le prix fort.">
+      <span class="reveal-line"><span>Ne payez plus</span></span>
+      <span class="reveal-line"><span>jamais le</span></span>
+      <span class="reveal-line"><span class="grad">prix fort.</span></span>
+    </h1>
+    <p class="hero-sub" id="heroSub">FILON compare en une seconde le meilleur cashback, le reconditionné équivalent et les codes promo qui marchent — puis vous révèle votre prix réel. Silencieux. Transparent. Redoutable.</p>
+    <div class="hero-cta" id="heroCta">
+      <a class="btn solid big" data-hover data-magnetic href="#final">Ajouter à mon navigateur</a>
+      <a class="btn line big" data-hover href="#story">Voir le principe</a>
+      <span class="hero-note"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--pos)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg> Gratuit · données non revendues</span>
+    </div>
+    <div class="hero-stats" id="heroStats">
+      <div class="hstat"><div class="n mono"><span data-count="12" data-suffix=" M+">0</span></div><div class="l">utilisateurs cashback en francophonie</div></div>
+      <div class="hstat"><div class="n mono">200–450 €</div><div class="l">économisés par foyer, chaque année</div></div>
+      <div class="hstat"><div class="n mono"><span data-count="50" data-suffix=" %">0</span></div><div class="l">d'économie en cumulant reconditionné + cashback</div></div>
+    </div>
+    <div class="scroll-hint"><span class="m"></span>Défiler</div>
+  </section>
+
+  <section class="story wrap" id="story">
+    <div class="rv">
+      <span class="ey"><span class="d"></span> Le principe</span>
+      <h2>Une veine d'économies invisible. FILON la fait remonter.</h2>
+      <p class="lead">Un <em style="color:var(--text);font-style:normal">filon</em>, c'est le bon plan que personne ne voit. Aujourd'hui il est éclaté entre dix services. FILON le réunit en un seul geste — et le rend limpide.</p>
+    </div>
+    <div class="vein-wrap rv">
+      <svg class="vein-svg" viewBox="0 0 1000 200" preserveAspectRatio="none" aria-hidden="true">
+        <defs><linearGradient id="vg" x1="0" y1="0" x2="1000" y2="0"><stop stop-color="#3C7BFF"/><stop offset=".5" stop-color="#8B6CFF"/><stop offset="1" stop-color="#24E3C6"/></linearGradient></defs>
+        <path class="vein-path" id="veinPath" d="M0,140 C160,140 180,60 320,60 C460,60 470,150 620,150 C760,150 780,40 1000,40"/>
+        <g id="veinNodes">
+          <g class="vein-node"><circle cx="320" cy="60" r="6" fill="#0b0e18" stroke="url(#vg)" stroke-width="2"/><text x="320" y="38" fill="#8A93AB" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace">Cashback</text></g>
+          <g class="vein-node"><circle cx="620" cy="150" r="6" fill="#0b0e18" stroke="url(#vg)" stroke-width="2"/><text x="620" y="182" fill="#8A93AB" font-size="13" text-anchor="middle" font-family="ui-monospace,monospace">Reconditionné</text></g>
+          <g class="vein-node"><circle cx="1000" cy="40" r="6" fill="#0b0e18" stroke="url(#vg)" stroke-width="2"/></g>
+        </g>
+      </svg>
+    </div>
+  </section>
+
+  <section class="wrap" id="features" style="padding-bottom:40px">
+    <div class="rv" style="max-width:640px;margin-bottom:52px">
+      <span class="ey" style="font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);display:flex;align-items:center;gap:9px"><span style="width:7px;height:7px;border-radius:50%;background:var(--aqua);box-shadow:0 0 14px var(--aqua)"></span> Ce que ça change</span>
+      <h2 style="font-size:clamp(30px,4.6vw,56px);margin-top:18px">Dix onglets, remplacés par un réflexe.</h2>
+    </div>
+    <div class="panels">
+      <div class="panel p7 rv" data-tilt>
+        <div>
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2ZM9 21h6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Une IA qui cherche à votre place</h3>
+          <p>Cashback, reconditionné, promos et prix marchands croisés en temps réel — puis le meilleur cumul, calculé pour vous.</p>
+        </div>
+        <div class="big-n grad" data-count="4" data-suffix=" sources">0</div>
+      </div>
+      <div class="panel p5 rv" data-tilt>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg></div>
+        <h3>Toujours le meilleur taux</h3>
+        <p>iGraal, Poulpeo, Widilo, Joko, eBuyClub — comparés, et le plus rémunérateur appliqué automatiquement.</p>
+      </div>
+      <div class="panel p5 rv" data-tilt>
+        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3>Le même produit, moins cher</h3>
+        <p>Le reconditionné équivalent, vérifié et garanti — souvent 40 % sous le neuf, cashback en plus.</p>
+      </div>
+      <div class="panel p7 rv" data-tilt>
+        <div>
+          <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 9h.01M15 15h.01M16 8l-8 8M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7" stroke-linecap="round"/></svg></div>
+          <h3>La transparence, par construction</h3>
+          <p>Chaque lien affilié est signalé, notre rémunération affichée, vos données jamais revendues. Après Honey et Phia, c'est le seul modèle qui tient.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mq" aria-hidden="true">
+    <div class="mq-row"><span>iGraal</span><span>·</span><span>Poulpeo</span><span>·</span><span>Widilo</span><span>·</span><span>Joko</span><span>·</span><span>eBuyClub</span><span>·</span><span>Back Market</span><span>·</span><span>Rakuten</span><span>·</span><span>iGraal</span><span>·</span><span>Poulpeo</span><span>·</span><span>Widilo</span><span>·</span><span>Joko</span><span>·</span><span>eBuyClub</span><span>·</span><span>Back Market</span><span>·</span><span>Rakuten</span><span>·</span></div>
+  </div>
+
+  <section class="final wrap" id="final">
+    <h2 class="rv">Trouvez le filon.<br><span class="grad">Avant tout le monde.</span></h2>
+    <p class="rv">Soyez parmi les premiers à ne plus jamais payer le prix fort.</p>
+    <div class="rv" style="display:flex;gap:14px;justify-content:center;flex-wrap:wrap">
+      <a class="btn solid big" data-hover data-magnetic href="#top">Ajouter à mon navigateur</a>
+      <a class="btn line big" data-hover href="#story">Comment ça marche</a>
+    </div>
+  </section>
+
+  <footer class="wrap">
+    <div class="foot-in">
+      <span class="brand" style="font-size:17px"><svg viewBox="0 0 32 32" fill="none" style="width:24px;height:24px"><rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#ig)" stroke-width="2"/><path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#ig)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg> FILON</span>
+      <span>© 2026 · Conçu à Bruxelles, pour la francophonie.</span>
+    </div>
+    <p class="foot-discl">FILON est gratuit. Certains liens sont affiliés — lorsque vous activez une offre via FILON, la plateforme partenaire nous reverse une part de sa commission d'apport. Cela n'augmente jamais votre prix. Nous ne revendons aucune donnée de navigation.</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  "use strict";
+  var RM = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var fine = window.matchMedia("(pointer:fine)").matches;
+
+  /* ---------- WebGL living background ---------- */
+  (function webgl(){
+    if(RM) return;
+    var canvas=document.getElementById("gl");
+    var gl=canvas.getContext("webgl",{antialias:false,alpha:true,premultipliedAlpha:false});
+    if(!gl){canvas.style.display="none";return;}
+    var vsrc="attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
+    var fsrc=[
+"precision highp float;",
+"uniform vec2 u_res;uniform float u_time;uniform vec2 u_mouse;",
+"float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}",
+"float noise(vec2 p){vec2 i=floor(p),f=fract(p);vec2 u=f*f*(3.-2.*f);",
+" return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}",
+"float fbm(vec2 p){float v=0.,a=.5;mat2 m=mat2(1.6,1.2,-1.2,1.6);",
+" for(int i=0;i<6;i++){v+=a*noise(p);p=m*p;a*=.5;}return v;}",
+"void main(){",
+" vec2 uv=gl_FragCoord.xy/u_res.xy;",
+" vec2 p=(gl_FragCoord.xy-.5*u_res.xy)/u_res.y;",
+" float t=u_time*.045;",
+" vec2 mo=(u_mouse-.5)*.35;",
+" vec2 q=vec2(fbm(p*1.5+t+mo),fbm(p*1.5-t+vec2(5.2,1.3)));",
+" float f=fbm(p*1.9+q*1.7+t);",
+" vec3 c1=vec3(0.016,0.020,0.039);",   // deep bg
+" vec3 c2=vec3(0.235,0.482,1.0);",     // blue
+" vec3 c3=vec3(0.545,0.423,1.0);",     // violet
+" vec3 c4=vec3(0.141,0.890,0.776);",   // aqua
+" vec3 col=mix(c1,c2,smoothstep(.25,.85,f));",
+" col=mix(col,c3,smoothstep(.45,.95,q.x));",
+" col=mix(col,c4,smoothstep(.55,1.05,q.y));",
+" float vein=smoothstep(.015,.0,abs(f-.62));",
+" col+=vein*vec3(.5,.7,1.)*.5;",
+" float glow=smoothstep(1.1,.1,length(p-vec2(mo.x,-mo.y)*1.5));",
+" col+=glow*vec3(.05,.09,.16);",
+" col*=1.0-.35*length(p*vec2(.55,.9));",  // vignette
+" col=pow(col,vec3(.86));",
+" gl_FragColor=vec4(col,1.);",
+"}"].join("\n");
+    function sh(type,src){var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+      if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){console.warn(gl.getShaderInfoLog(s));return null;}return s;}
+    var vs=sh(gl.VERTEX_SHADER,vsrc),fs=sh(gl.FRAGMENT_SHADER,fsrc);
+    if(!vs||!fs){canvas.style.display="none";return;}
+    var pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);gl.useProgram(pr);
+    var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+    gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+    var loc=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+    var uRes=gl.getUniformLocation(pr,"u_res"),uTime=gl.getUniformLocation(pr,"u_time"),uMouse=gl.getUniformLocation(pr,"u_mouse");
+    var mouse=[.5,.5],mt=[.5,.5];
+    window.addEventListener("mousemove",function(e){mt=[e.clientX/innerWidth,1-e.clientY/innerHeight];},{passive:true});
+    var dpr=Math.min(window.devicePixelRatio||1,1.6);
+    function resize(){canvas.width=innerWidth*dpr;canvas.height=innerHeight*dpr;gl.viewport(0,0,canvas.width,canvas.height);}
+    resize();window.addEventListener("resize",resize);
+    var start=performance.now(),vis=true;
+    document.addEventListener("visibilitychange",function(){vis=!document.hidden;});
+    function frame(now){
+      if(vis){
+        mouse[0]+=(mt[0]-mouse[0])*.05;mouse[1]+=(mt[1]-mouse[1])*.05;
+        gl.uniform2f(uRes,canvas.width,canvas.height);
+        gl.uniform1f(uTime,(now-start)/1000);
+        gl.uniform2f(uMouse,mouse[0],mouse[1]);
+        gl.drawArrays(gl.TRIANGLES,0,3);
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  })();
+
+  /* ---------- Intro sequence ---------- */
+  function startHero(){
+    document.querySelectorAll("#heroTitle .reveal-line > span").forEach(function(s,i){
+      s.style.transition="transform 1s cubic-bezier(.16,1,.3,1)";
+      s.style.transitionDelay=(0.08*i)+"s";
+      requestAnimationFrame(function(){s.style.transform="translateY(0)";});
+    });
+    [["heroSub",.35],["heroCta",.5],["heroStats",.65]].forEach(function(a){
+      var el=document.getElementById(a[0]);if(!el)return;
+      el.style.transition="opacity .9s var(--ease),transform .9s var(--ease)";
+      el.style.transitionDelay=a[1]+"s";
+      requestAnimationFrame(function(){el.style.opacity="1";el.style.transform="none";});
+    });
+  }
+  var intro=document.getElementById("intro");
+  if(RM){ intro.style.display="none"; startHero(); }
+  else{
+    setTimeout(function(){ intro.classList.add("done"); startHero(); }, 1900);
+  }
+
+  /* ---------- Smooth scroll (lerp) ---------- */
+  if(!RM && fine){
+    var target=window.scrollY,current=window.scrollY,rafScroll;
+    var docH=function(){return document.body.scrollHeight-innerHeight;};
+    window.addEventListener("wheel",function(e){
+      e.preventDefault();
+      target=Math.max(0,Math.min(docH(),target+e.deltaY));
+      if(!rafScroll)loop();
+    },{passive:false});
+    window.addEventListener("resize",function(){target=Math.min(target,docH());});
+    // keep target synced for anchor clicks / keyboard
+    window.addEventListener("scroll",function(){ if(Math.abs(window.scrollY-current)>2 && !rafScroll){target=window.scrollY;current=window.scrollY;} },{passive:true});
+    function loop(){
+      current+=(target-current)*.09;
+      if(Math.abs(target-current)<.4){current=target;window.scrollTo(0,current);rafScroll=null;return;}
+      window.scrollTo(0,current);
+      rafScroll=requestAnimationFrame(loop);
+    }
+    document.querySelectorAll('a[href^="#"]').forEach(function(a){
+      a.addEventListener("click",function(e){
+        var el=document.querySelector(a.getAttribute("href"));if(!el)return;
+        e.preventDefault();
+        target=Math.max(0,Math.min(docH(),el.getBoundingClientRect().top+window.scrollY-10));
+        if(!rafScroll)loop();
+      });
+    });
+  }
+
+  /* ---------- Scroll progress + nav ---------- */
+  var prog=document.getElementById("prog"),nav=document.getElementById("nav"),lastY=0;
+  function onScroll(){
+    var y=window.scrollY,h=document.body.scrollHeight-innerHeight;
+    prog.style.width=(h>0?(y/h*100):0)+"%";
+    if(y>40)nav.classList.add("solid");else nav.classList.remove("solid");
+    if(y>lastY&&y>400)nav.classList.add("hide");else nav.classList.remove("hide");
+    lastY=y;
+  }
+  window.addEventListener("scroll",onScroll,{passive:true});onScroll();
+
+  /* ---------- Reveal on scroll ---------- */
+  var io=new IntersectionObserver(function(en){
+    en.forEach(function(e){if(e.isIntersecting){e.target.classList.add("in");io.unobserve(e.target);}});
+  },{threshold:.16,rootMargin:"0px 0px -8% 0px"});
+  document.querySelectorAll(".rv").forEach(function(el){io.observe(el);});
+
+  /* ---------- Counters ---------- */
+  function count(el){
+    var to=parseFloat(el.getAttribute("data-count")),suf=el.getAttribute("data-suffix")||"";
+    if(RM){el.textContent=to+suf;return;}
+    var s=performance.now(),d=1300;
+    (function tick(n){var p=Math.min((n-s)/d,1),e=1-Math.pow(1-p,3);
+      el.textContent=Math.round(to*e)+suf;if(p<1)requestAnimationFrame(tick);})(s);
+  }
+  var cio=new IntersectionObserver(function(en){en.forEach(function(e){if(e.isIntersecting){count(e.target);cio.unobserve(e.target);}});},{threshold:.6});
+  document.querySelectorAll("[data-count]").forEach(function(el){cio.observe(el);});
+
+  /* ---------- Vein path draw on scroll ---------- */
+  var veinPath=document.getElementById("veinPath");
+  if(veinPath){
+    var len=veinPath.getTotalLength();
+    veinPath.style.strokeDasharray=len;veinPath.style.strokeDashoffset=len;
+    var nodes=document.querySelectorAll("#veinNodes .vein-node");
+    var vio=new IntersectionObserver(function(en){
+      en.forEach(function(e){
+        if(e.isIntersecting){
+          veinPath.style.transition="stroke-dashoffset 1.8s var(--ease)";
+          veinPath.style.strokeDashoffset="0";
+          nodes.forEach(function(n,i){n.style.transition="opacity .6s var(--ease)";n.style.transitionDelay=(0.6+i*0.35)+"s";n.style.opacity="1";});
+          vio.disconnect();
+        }
+      });
+    },{threshold:.4});
+    vio.observe(document.querySelector(".vein-wrap"));
+  }
+
+  /* ---------- Custom cursor + magnetic + tilt ---------- */
+  if(fine && !RM){
+    var cur=document.getElementById("cur"),ring=document.getElementById("curRing");
+    var cx=innerWidth/2,cy=innerHeight/2,rx=cx,ry=cy;
+    window.addEventListener("mousemove",function(e){cx=e.clientX;cy=e.clientY;cur.style.transform="translate("+cx+"px,"+cy+"px) translate(-50%,-50%)";});
+    (function ringLoop(){rx+=(cx-rx)*.18;ry+=(cy-ry)*.18;ring.style.transform="translate("+rx+"px,"+ry+"px) translate(-50%,-50%)";requestAnimationFrame(ringLoop);})();
+    document.querySelectorAll("[data-hover],a,button").forEach(function(el){
+      el.addEventListener("mouseenter",function(){ring.classList.add("hot");});
+      el.addEventListener("mouseleave",function(){ring.classList.remove("hot");});
+    });
+    document.querySelectorAll("[data-magnetic]").forEach(function(el){
+      el.addEventListener("mousemove",function(e){var r=el.getBoundingClientRect();
+        el.style.transform="translate("+(e.clientX-r.left-r.width/2)*.35+"px,"+(e.clientY-r.top-r.height/2)*.5+"px)";});
+      el.addEventListener("mouseleave",function(){el.style.transform="";});
+    });
+    document.querySelectorAll("[data-tilt]").forEach(function(el){
+      el.addEventListener("mousemove",function(e){var r=el.getBoundingClientRect();
+        var mx=(e.clientX-r.left)/r.width,my=(e.clientY-r.top)/r.height;
+        el.style.setProperty("--mx",(mx*100)+"%");
+        el.style.transform="perspective(900px) rotateX("+((.5-my)*5)+"deg) rotateY("+((mx-.5)*6)+"deg) translateY(-3px)";});
+      el.addEventListener("mouseleave",function(){el.style.transform="";});
+      el.style.transition="transform .4s var(--ease)";
+    });
+  }
+})();
+</script>
