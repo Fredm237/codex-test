@@ -10,16 +10,16 @@
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
     --mono:"SF Mono",ui-monospace,"Geist Mono",Menlo,monospace;
 
-    --paper:#F3F2ED;        /* papier froid, pas crème chaude */
-    --paper-2:#EAE9E2;      /* section alternée */
-    --card:#FCFBF8;         /* carte plus claire que le papier */
-    --ink:#16171B;          /* LBD — encre profonde légèrement froide */
+    --paper:#FBFBF9;        /* blanc quasi pur, propre (registre Phia) */
+    --paper-2:#F2F2EF;      /* section alternée, à peine grise */
+    --card:#FFFFFF;         /* carte blanche */
+    --ink:#111214;          /* encre profonde, quasi noire */
     --ink-2:#4B4D55;        /* texte secondaire */
     --ink-3:#8A8C92;        /* tertiaire / captions */
-    --line:rgba(22,23,27,.14);
-    --line-2:rgba(22,23,27,.24);
-    --accent:#2233E4;       /* bleu FILON, profond et confiant */
-    --accent-ink:#1A28B8;
+    --line:rgba(17,18,20,.12);
+    --line-2:rgba(17,18,20,.22);
+    --accent:#2B50E6;       /* bleu cobalt, un seul accent (comme "Add to Chrome") */
+    --accent-ink:#1E3ECB;
     --save:#0E7A55;         /* économie — vert sobre, jamais criard */
 
     --maxw:1160px;
@@ -51,14 +51,14 @@
   .nav-mid a{font-size:13.5px;color:var(--ink-2);letter-spacing:.01em;transition:color .2s}
   .nav-mid a:hover{color:var(--ink)}
   @media (max-width:760px){.nav-mid{display:none}}
-  .nav-cta{font-size:13.5px;font-weight:600;padding:10px 20px;border-radius:100px;background:var(--ink);color:var(--paper);
-    transition:transform .2s var(--ease),background .2s}
-  .nav-cta:hover{transform:translateY(-1px)}
+  .nav-cta{font-size:13.5px;font-weight:600;padding:10px 20px;border-radius:100px;background:var(--accent);color:#fff;
+    transition:transform .2s var(--ease),background .2s;box-shadow:0 8px 20px -10px var(--accent)}
+  .nav-cta:hover{transform:translateY(-1px);background:var(--accent-ink)}
 
   /* Hero */
   .hero{padding:clamp(56px,10vw,120px) 0 clamp(40px,6vw,72px)}
   .hero .eyebrow{display:block;margin-bottom:clamp(26px,4vw,42px)}
-  h1{font-size:clamp(52px,11vw,148px);font-weight:600;letter-spacing:-.05em;line-height:.9}
+  h1{font-family:var(--serif);font-size:clamp(50px,10.5vw,140px);font-weight:500;letter-spacing:-.02em;line-height:.94}
   h1 .l{display:block;overflow:hidden}
   h1 .l > span{display:block;transform:translateY(102%);transition:transform 1s var(--ease)}
   .hero.in h1 .l > span{transform:none}
@@ -113,7 +113,7 @@
   .lead-head{display:grid;grid-template-columns:auto 1fr;gap:clamp(20px,6vw,80px);align-items:baseline;margin-bottom:clamp(40px,6vw,70px)}
   @media (max-width:760px){.lead-head{grid-template-columns:1fr;gap:18px}}
   .lead-head .idx{font-family:var(--mono);font-size:13px;color:var(--ink-3)}
-  .lead-head h2{font-size:clamp(32px,5vw,60px);font-weight:600;letter-spacing:-.04em;max-width:16ch}
+  .lead-head h2{font-family:var(--serif);font-size:clamp(32px,5vw,60px);font-weight:500;letter-spacing:-.015em;max-width:16ch;line-height:1.02}
   .lead-head h2 em{font-size:1.02em}
 
   /* Steps — editorial */
@@ -128,7 +128,7 @@
 
   /* Manifesto / transparency */
   .manifesto{max-width:20ch}
-  .manifesto h2{font-size:clamp(34px,6vw,80px);font-weight:600;letter-spacing:-.045em;line-height:.98}
+  .manifesto h2{font-family:var(--serif);font-size:clamp(34px,6vw,78px);font-weight:500;letter-spacing:-.018em;line-height:1}
   .manifesto-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(30px,5vw,70px);align-items:start;margin-top:10px}
   @media (max-width:820px){.manifesto-grid{grid-template-columns:1fr;gap:30px}}
   .manifesto-body p{font-size:clamp(16px,1.7vw,19px);color:var(--ink-2);line-height:1.6;margin-bottom:18px}
@@ -148,7 +148,7 @@
   /* Closing */
   .closing{text-align:center;padding:clamp(80px,12vw,150px) 0}
   .closing .eyebrow{margin-bottom:26px;display:block}
-  .closing h2{font-size:clamp(40px,8vw,110px);font-weight:600;letter-spacing:-.05em;line-height:.92}
+  .closing h2{font-family:var(--serif);font-size:clamp(42px,8vw,104px);font-weight:500;letter-spacing:-.02em;line-height:.96}
   .closing h2 em{display:block}
   .closing .btn{margin-top:clamp(34px,5vw,50px)}
 
