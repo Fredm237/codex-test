@@ -1,0 +1,168 @@
+/* Immersive experience — scoped styles (fx-*). Loaded only on /experience.
+   Deliberately dark, cinematic single-world design. */
+
+.fx-root {
+  --fx-blue: #3c7bff;
+  --fx-aqua: #24e3c6;
+  --fx-violet: #8b6cff;
+  --fx-pos: #2fe6ae;
+  --fx-dim: #8a93ab;
+  --fx-mute: #4e566b;
+  --fx-line: rgba(255, 255, 255, 0.09);
+  --fx-glass: rgba(255, 255, 255, 0.045);
+  --fx-glass-2: rgba(255, 255, 255, 0.08);
+  --fx-vein: linear-gradient(100deg, var(--fx-blue), var(--fx-violet) 45%, var(--fx-aqua));
+  --fx-ease: cubic-bezier(0.16, 1, 0.3, 1);
+  background: #04050a;
+  color: #f3f6ff;
+  min-height: 100vh;
+}
+.fx-root .wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 clamp(20px, 4vw, 40px); }
+
+/* Background layers */
+.fx-bg-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: -3;
+  background:
+    radial-gradient(60% 50% at 70% 12%, rgba(60, 123, 255, 0.35), transparent 60%),
+    radial-gradient(55% 45% at 25% 78%, rgba(36, 227, 198, 0.24), transparent 60%),
+    radial-gradient(70% 60% at 50% 40%, rgba(139, 108, 255, 0.2), transparent 65%),
+    #04050a;
+}
+.fx-root .fx-vignette {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(120% 100% at 50% 30%, transparent 55%, rgba(0, 0, 0, 0.55));
+}
+
+/* Cursor */
+.fx-cursor,
+.fx-cursor-ring {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 9999;
+  pointer-events: none;
+  border-radius: 50%;
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+.fx-cursor { width: 7px; height: 7px; background: #fff; transform: translate(-50%, -50%); }
+.fx-cursor-ring {
+  width: 38px;
+  height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  transition: width 0.3s var(--fx-ease), height 0.3s var(--fx-ease), background 0.3s, border-color 0.3s;
+}
+.fx-cursor-ring.fx-hot { width: 64px; height: 64px; background: rgba(60, 123, 255, 0.14); border-color: transparent; }
+body.fx-cursor-on { cursor: none; }
+@media (pointer: coarse) { .fx-cursor, .fx-cursor-ring { display: none; } body.fx-cursor-on { cursor: auto; } }
+
+/* Progress */
+.fx-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  z-index: 8000;
+  background: var(--fx-vein);
+  box-shadow: 0 0 16px rgba(60, 123, 255, 0.6);
+}
+
+/* Nav */
+.fx-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px clamp(20px, 4vw, 52px);
+}
+.fx-brand { display: flex; align-items: center; gap: 11px; font-weight: 600; font-size: 19px; letter-spacing: -0.04em; }
+.fx-brand svg { width: 28px; height: 28px; }
+.fx-nav-cta { display: flex; align-items: center; gap: 18px; }
+.fx-nav-cta .fx-navlink { font-size: 14px; color: var(--fx-dim); transition: color 0.25s; }
+.fx-nav-cta .fx-navlink:hover { color: #f3f6ff; }
+@media (max-width: 720px) { .fx-navlink { display: none; } }
+
+/* Buttons */
+.fx-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: inherit;
+  font-size: 14.5px;
+  font-weight: 600;
+  padding: 12px 22px;
+  border-radius: 100px;
+  border: 1px solid transparent;
+  overflow: hidden;
+  isolation: isolate;
+  white-space: nowrap;
+}
+.fx-btn.fx-big { padding: 17px 32px; font-size: 16px; }
+.fx-solid { color: #04101f; background: var(--fx-vein); box-shadow: 0 0 0 1px rgba(60, 123, 255, 0.3), 0 20px 60px -20px rgba(60, 123, 255, 0.6); }
+.fx-solid::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(100deg, var(--fx-aqua), var(--fx-blue) 55%, var(--fx-violet)); opacity: 0; transition: opacity 0.4s; }
+.fx-solid:hover::after { opacity: 1; }
+.fx-line-btn { color: #f3f6ff; border-color: var(--fx-glass-2); background: var(--fx-glass); }
+
+/* Hero */
+.fx-hero { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; padding-top: 120px; padding-bottom: 60px; }
+.fx-tagpill { display: inline-flex; align-items: center; gap: 9px; align-self: flex-start; padding: 8px 8px 8px 15px; border-radius: 100px; background: var(--fx-glass); border: 1px solid var(--fx-line); font-size: 13px; color: var(--fx-dim); margin-bottom: 34px; backdrop-filter: blur(8px); }
+.fx-tagpill .fx-b { font-size: 10.5px; font-weight: 800; letter-spacing: 0.06em; padding: 4px 9px; border-radius: 100px; color: #04101f; background: var(--fx-vein); }
+.fx-h1 { font-size: clamp(46px, 9vw, 124px); font-weight: 600; letter-spacing: -0.05em; line-height: 0.94; }
+.fx-line { display: block; overflow: hidden; }
+.fx-line > span { display: inline-block; transform: translateY(105%); will-change: transform; }
+.fx-hero-sub { margin-top: 30px; max-width: 540px; font-size: clamp(17px, 2vw, 20px); color: var(--fx-dim); line-height: 1.5; }
+.fx-hero-cta { margin-top: 38px; display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
+.fx-hero-stats { margin-top: 70px; display: flex; gap: clamp(24px, 6vw, 72px); flex-wrap: wrap; }
+.fx-hstat .fx-n { font-size: clamp(26px, 3.4vw, 40px); font-weight: 700; letter-spacing: -0.03em; line-height: 1; }
+.fx-hstat .fx-l { font-size: 13px; color: var(--fx-dim); margin-top: 8px; max-width: 180px; }
+
+/* Story */
+.fx-story { padding: clamp(90px, 16vh, 190px) 0; }
+.fx-ey { font-size: 12px; font-weight: 600; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fx-dim); display: flex; align-items: center; gap: 9px; }
+.fx-ey .fx-d { width: 7px; height: 7px; border-radius: 50%; background: var(--fx-aqua); box-shadow: 0 0 14px var(--fx-aqua); }
+.fx-story h2 { font-size: clamp(32px, 5.2vw, 64px); margin: 22px 0; max-width: 15ch; letter-spacing: -0.035em; }
+.fx-story .fx-lead { font-size: clamp(17px, 2vw, 21px); color: var(--fx-dim); max-width: 560px; line-height: 1.5; }
+
+/* Panels */
+.fx-panels { display: grid; grid-template-columns: repeat(12, 1fr); gap: 18px; }
+.fx-panel { position: relative; border-radius: 26px; background: linear-gradient(180deg, var(--fx-glass-2), var(--fx-glass)); border: 1px solid var(--fx-line); padding: 30px; overflow: hidden; min-height: 220px; display: flex; flex-direction: column; justify-content: space-between; transition: transform 0.4s var(--fx-ease); }
+.fx-panel h3 { font-size: 22px; letter-spacing: -0.03em; }
+.fx-panel p { color: var(--fx-dim); font-size: 15px; margin-top: 10px; max-width: 34ch; }
+.fx-panel .fx-ico { width: 44px; height: 44px; border-radius: 13px; display: grid; place-items: center; background: var(--fx-glass-2); border: 1px solid var(--fx-line); margin-bottom: 20px; }
+.fx-panel .fx-ico svg { width: 22px; height: 22px; color: var(--fx-aqua); }
+.fx-panel .fx-big-n { font-size: clamp(40px, 6vw, 72px); font-weight: 700; letter-spacing: -0.04em; line-height: 1; }
+.fx-p7 { grid-column: span 7; } .fx-p5 { grid-column: span 5; }
+@media (max-width: 860px) { .fx-p7, .fx-p5 { grid-column: span 12; } }
+
+/* Marquee */
+.fx-mq { margin: 40px 0 0; padding: 34px 0; border-top: 1px solid var(--fx-line); border-bottom: 1px solid var(--fx-line); overflow: hidden; -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.fx-mq-row { display: flex; gap: 54px; width: max-content; animation: fx-mq 32s linear infinite; }
+@keyframes fx-mq { to { transform: translateX(-50%); } }
+.fx-mq-row span { font-size: 19px; font-weight: 600; color: var(--fx-mute); white-space: nowrap; letter-spacing: -0.02em; }
+@media (prefers-reduced-motion: reduce) { .fx-mq-row { animation: none; } }
+
+/* Final */
+.fx-final { padding: clamp(100px, 18vh, 200px) 0; text-align: center; }
+.fx-final h2 { font-size: clamp(38px, 7vw, 88px); letter-spacing: -0.05em; line-height: 0.98; }
+.fx-final p { color: var(--fx-dim); font-size: 19px; margin: 24px auto 40px; max-width: 520px; }
+.fx-footer { padding: 50px 0; border-top: 1px solid var(--fx-line); color: var(--fx-mute); font-size: 13px; }
+.fx-foot-in { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; align-items: center; }
+.fx-foot-discl { font-size: 11.5px; color: var(--fx-mute); max-width: 640px; margin-top: 22px; line-height: 1.6; }
+
+/* Reduced motion: reveal everything the JS would otherwise animate in. */
+@media (prefers-reduced-motion: reduce) {
+  .fx-root .fx-line > span { transform: none !important; }
+  .fx-root .fx-cursor, .fx-root .fx-cursor-ring { display: none; }
+  body.fx-cursor-on { cursor: auto; }
+}

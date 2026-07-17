@@ -75,6 +75,27 @@ référence du design system. Thème clair/sombre géré au niveau des tokens :
 vercel
 ```
 
+## Expérience immersive — `/experience`
+
+Route « takeover » plein écran, niveau Awwwards, avec le vrai stack immersif :
+
+- **three + @react-three/fiber** — fond WebGL vivant (shader GLSL maison : bruit
+  fbm + rampe de couleurs de marque + veine électrique, réactif à la souris),
+  code-splitté sur cette route uniquement (chargé via `next/dynamic`, `ssr:false`).
+- **GSAP + ScrollTrigger** — révélation du titre ligne par ligne, reveals au scroll.
+- **Lenis** — smooth-scroll (autoRaf), synchronisé avec ScrollTrigger.
+- Curseur premium, boutons magnétiques, compteurs animés.
+- Fallback `prefers-reduced-motion` complet (désactive shader, curseur, motion) ;
+  fallback CSS si WebGL indisponible.
+
+Composants réutilisables dans `components/immersive/` : `ShaderBackground`,
+`SmoothScroll`, `Cursor`, `Reveal`, `MagneticButton`, `Counter`, `ScrollProgress`,
+`ImmersiveHero`. La chrome marketing (nav/footer/aurora) vit dans le groupe de
+routes `app/(site)/` et ne s'applique donc pas à `/experience`.
+
+> three.js n'est chargé que sur `/experience` (First Load ~156 kB) ; le reste du
+> site reste à ~103 kB.
+
 ## Prochaines étapes
 
 - Porter les sections restantes de la maquette de référence (bento features,

@@ -3,9 +3,6 @@ import "./globals.css";
 import { buildMetadata, organizationSchema, websiteSchema, JsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 import { ThemeScript } from "@/components/site/ThemeScript";
-import { Nav } from "@/components/site/Nav";
-import { Footer } from "@/components/site/Footer";
-import { Atmosphere } from "@/components/site/Atmosphere";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -28,12 +25,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <JsonLd data={organizationSchema()} />
         <JsonLd data={websiteSchema()} />
       </head>
-      <body>
-        <Atmosphere />
-        <Nav />
-        <main>{children}</main>
-        <Footer />
-      </body>
+      <body>{children}</body>
     </html>
   );
 }
