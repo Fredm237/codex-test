@@ -1,0 +1,1040 @@
+<title>FILON — Le réflexe malin avant chaque achat</title>
+<meta name="description" content="FILON compare automatiquement cashback, reconditionné et codes promo avant chaque achat. Une seule expérience, zéro effort, un maximum d'économies." />
+<style>
+  /* ============================================================
+     FILON — Design System (tokens → components)
+     Signature: "Le Filon" — une veine lumineuse bleu→turquoise.
+     ============================================================ */
+  :root {
+    /* Type */
+    --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI Variable", "Segoe UI", Inter, Roboto, system-ui, sans-serif;
+    --font-mono: "SF Mono", ui-monospace, "Geist Mono", "JetBrains Mono", "Cascadia Code", Menlo, monospace;
+
+    /* Neutrals — cool blue-biased, chosen not defaulted */
+    --bg:        #06070C;
+    --bg-2:      #090B12;
+    --ground:    radial-gradient(120% 120% at 50% -10%, #0d1120 0%, #06070c 55%);
+    --text:      #F4F6FB;
+    --text-dim:  #9BA3B6;
+    --text-mute: #626B80;
+    --surface:   rgba(255,255,255,0.028);
+    --surface-2: rgba(255,255,255,0.05);
+    --border:    rgba(255,255,255,0.09);
+    --border-2:  rgba(255,255,255,0.14);
+
+    /* Brand — la veine */
+    --blue:      #3C7BFF;
+    --blue-2:    #5A93FF;
+    --aqua:      #24E3C6;
+    --aqua-2:    #55F0D6;
+    --violet:    #8B6CFF;   /* accent rare */
+    --gold:      #FFC46B;   /* le "filon" — soupçon d'or */
+    --vein: linear-gradient(100deg, var(--blue) 0%, var(--violet) 42%, var(--aqua) 100%);
+    --vein-soft: linear-gradient(100deg, rgba(60,123,255,.18), rgba(36,227,198,.18));
+
+    /* Semantic */
+    --pos:       #22E0A6;
+    --pos-dim:   rgba(34,224,166,.14);
+
+    /* Radius / shadow / motion */
+    --r-sm: 10px; --r-md: 16px; --r-lg: 24px; --r-xl: 34px; --r-full: 999px;
+    --shadow-soft: 0 1px 0 rgba(255,255,255,.05) inset, 0 24px 60px -30px rgba(0,0,0,.7);
+    --shadow-glow: 0 0 0 1px rgba(60,123,255,.25), 0 30px 90px -40px rgba(60,123,255,.5);
+    --ease: cubic-bezier(.22,.61,.36,1);
+    --ease-out: cubic-bezier(.16,1,.3,1);
+    --dur: .5s;
+
+    --maxw: 1200px;
+    color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root {
+      --bg:        #FBFCFE;
+      --bg-2:      #F2F5FB;
+      --ground:    radial-gradient(120% 120% at 50% -10%, #ffffff 0%, #eef2fb 60%);
+      --text:      #0A0E1A;
+      --text-dim:  #4C566E;
+      --text-mute: #8791A6;
+      --surface:   rgba(255,255,255,0.72);
+      --surface-2: rgba(255,255,255,0.9);
+      --border:    rgba(12,20,40,0.09);
+      --border-2:  rgba(12,20,40,0.14);
+      --blue:      #1E5BFF;
+      --blue-2:    #2E6BFF;
+      --aqua:      #06B6A4;
+      --aqua-2:    #12CBB6;
+      --violet:    #6D4CFF;
+      --gold:      #C98A1E;
+      --pos:       #06A97C;
+      --pos-dim:   rgba(6,169,124,.12);
+      --shadow-soft: 0 1px 0 rgba(255,255,255,.7) inset, 0 22px 50px -28px rgba(20,40,90,.28);
+      --shadow-glow: 0 0 0 1px rgba(30,91,255,.18), 0 30px 80px -44px rgba(30,91,255,.4);
+      color-scheme: light;
+    }
+  }
+  /* Explicit toggle wins over OS in both directions */
+  :root[data-theme="dark"] {
+    --bg:#06070C; --bg-2:#090B12; --ground:radial-gradient(120% 120% at 50% -10%, #0d1120 0%, #06070c 55%);
+    --text:#F4F6FB; --text-dim:#9BA3B6; --text-mute:#626B80;
+    --surface:rgba(255,255,255,.028); --surface-2:rgba(255,255,255,.05);
+    --border:rgba(255,255,255,.09); --border-2:rgba(255,255,255,.14);
+    --blue:#3C7BFF; --blue-2:#5A93FF; --aqua:#24E3C6; --aqua-2:#55F0D6; --violet:#8B6CFF; --gold:#FFC46B; --pos:#22E0A6; --pos-dim:rgba(34,224,166,.14);
+    --shadow-soft:0 1px 0 rgba(255,255,255,.05) inset,0 24px 60px -30px rgba(0,0,0,.7);
+    --shadow-glow:0 0 0 1px rgba(60,123,255,.25),0 30px 90px -40px rgba(60,123,255,.5);
+    color-scheme: dark;
+  }
+  :root[data-theme="light"] {
+    --bg:#FBFCFE; --bg-2:#F2F5FB; --ground:radial-gradient(120% 120% at 50% -10%, #ffffff 0%, #eef2fb 60%);
+    --text:#0A0E1A; --text-dim:#4C566E; --text-mute:#8791A6;
+    --surface:rgba(255,255,255,.72); --surface-2:rgba(255,255,255,.9);
+    --border:rgba(12,20,40,.09); --border-2:rgba(12,20,40,.14);
+    --blue:#1E5BFF; --blue-2:#2E6BFF; --aqua:#06B6A4; --aqua-2:#12CBB6; --violet:#6D4CFF; --gold:#C98A1E; --pos:#06A97C; --pos-dim:rgba(6,169,124,.12);
+    --shadow-soft:0 1px 0 rgba(255,255,255,.7) inset,0 22px 50px -28px rgba(20,40,90,.28);
+    --shadow-glow:0 0 0 1px rgba(30,91,255,.18),0 30px 80px -44px rgba(30,91,255,.4);
+    color-scheme: light;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font-family: var(--font-sans);
+    font-size: 17px; line-height: 1.6; letter-spacing: -0.011em;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  ::selection { background: rgba(60,123,255,.32); }
+  a { color: inherit; text-decoration: none; }
+  h1,h2,h3 { text-wrap: balance; margin: 0; letter-spacing: -0.03em; line-height: 1.04; font-weight: 600; }
+  p { margin: 0; }
+  .mono { font-family: var(--font-mono); font-feature-settings: "tnum"; letter-spacing: -0.02em; }
+  :focus-visible { outline: 2px solid var(--blue-2); outline-offset: 3px; border-radius: 6px; }
+
+  .wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--aqua); box-shadow: 0 0 12px var(--aqua); }
+  .gradient-text {
+    background: var(--vein); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* ---------- Ambient background: aurora + mesh + la veine ---------- */
+  .atmos { position: fixed; inset: 0; z-index: -2; background: var(--ground); }
+  .blob { position: fixed; z-index: -1; filter: blur(90px); opacity: .5; border-radius: 50%; pointer-events: none; will-change: transform; }
+  .blob.b1 { width: 620px; height: 620px; top: -180px; left: -120px; background: radial-gradient(circle, var(--blue), transparent 70%); opacity:.45; }
+  .blob.b2 { width: 540px; height: 540px; top: 4%; right: -160px; background: radial-gradient(circle, var(--aqua), transparent 70%); opacity:.32; }
+  .blob.b3 { width: 700px; height: 700px; top: 42%; left: 30%; background: radial-gradient(circle, var(--violet), transparent 70%); opacity:.22; }
+  @media (prefers-color-scheme: light){ .blob{ opacity:.4 } .blob.b3{opacity:.16} }
+  .grain { position: fixed; inset: 0; z-index: -1; pointer-events: none; opacity: .04; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+  /* ---------- Nav ---------- */
+  header.nav { position: sticky; top: 0; z-index: 50; }
+  .nav-inner {
+    margin: 14px auto 0; max-width: var(--maxw); width: calc(100% - 32px);
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+    padding: 11px 12px 11px 20px; border-radius: var(--r-full);
+    background: color-mix(in srgb, var(--bg-2) 62%, transparent);
+    border: 1px solid var(--border); backdrop-filter: blur(20px) saturate(1.4);
+    box-shadow: var(--shadow-soft);
+  }
+  .brand { display: flex; align-items: center; gap: 11px; font-weight: 600; letter-spacing: -.04em; font-size: 19px; }
+  .logo-mark { width: 30px; height: 30px; flex: none; }
+  .nav-links { display: flex; align-items: center; gap: 4px; }
+  .nav-links a { padding: 8px 13px; border-radius: var(--r-full); color: var(--text-dim); font-size: 14.5px; font-weight: 500; transition: color .2s, background .2s; }
+  .nav-links a:hover { color: var(--text); background: var(--surface-2); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .icon-btn { width: 40px; height: 40px; display: grid; place-items: center; border-radius: var(--r-full);
+    background: var(--surface); border: 1px solid var(--border); color: var(--text-dim); cursor: pointer; transition: .2s; }
+  .icon-btn:hover { color: var(--text); border-color: var(--border-2); }
+  .icon-btn svg { width: 18px; height: 18px; }
+  [data-theme="light"] .sun, :root:not([data-theme="dark"]) .sun { display: none; }
+  [data-theme="dark"] .sun { display: block; } [data-theme="dark"] .moon { display: none; }
+  @media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) .moon { display:none } :root:not([data-theme="dark"]) .sun { display:block } }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    font-family: inherit; font-size: 14.5px; font-weight: 600; letter-spacing: -.01em;
+    padding: 11px 20px; border-radius: var(--r-full); border: 1px solid transparent; cursor: pointer;
+    transition: transform .18s var(--ease-out), box-shadow .25s, background .2s, border-color .2s; white-space: nowrap; }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { color: #05121f; background: var(--vein); box-shadow: var(--shadow-glow); position: relative; }
+  [data-theme="light"] .btn-primary, :root:not([data-theme="dark"]) .btn-primary { color: #061225; }
+  @media (prefers-color-scheme: light){ :root:not([data-theme="dark"]) .btn-primary{ color:#fff } }
+  :root[data-theme="light"] .btn-primary { color:#fff; }
+  .btn-primary:hover { transform: translateY(-2px); }
+  .btn-ghost { color: var(--text); background: var(--surface); border-color: var(--border-2); }
+  .btn-ghost:hover { background: var(--surface-2); transform: translateY(-2px); }
+  .btn-lg { padding: 15px 28px; font-size: 16px; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding: 78px 0 40px; position: relative; }
+  .hero-badge { margin-bottom: 26px; display:inline-flex; align-items:center; gap:10px; padding:7px 8px 7px 14px;
+    border-radius: var(--r-full); background: var(--surface); border: 1px solid var(--border); font-size: 13px; color: var(--text-dim); }
+  .hero-badge b { color: var(--text); font-weight: 600; }
+  .hero-badge .pill { font-size: 11px; font-weight: 700; letter-spacing:.04em; padding: 3px 9px; border-radius: var(--r-full); color:#05121f; background: var(--vein); }
+  :root[data-theme="light"] .hero-badge .pill { color:#fff }
+  h1.hero-title { font-size: clamp(44px, 7.2vw, 92px); font-weight: 620; margin-bottom: 22px; }
+  .hero-sub { font-size: clamp(17px, 2.1vw, 21px); color: var(--text-dim); max-width: 620px; margin-bottom: 34px; line-height: 1.5; }
+  .hero-cta { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+  .hero-cta .note { font-size: 13px; color: var(--text-mute); display:flex; align-items:center; gap:7px; }
+
+  .grid-hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 48px; align-items: center; }
+  @media (max-width: 940px){ .grid-hero { grid-template-columns: 1fr; gap: 40px; } }
+
+  /* Interactive search demo */
+  .demo {
+    position: relative; border-radius: var(--r-xl); padding: 20px;
+    background: linear-gradient(180deg, var(--surface-2), var(--surface));
+    border: 1px solid var(--border-2); box-shadow: var(--shadow-soft); backdrop-filter: blur(18px);
+  }
+  .demo::before { content:""; position:absolute; inset:-1px; border-radius: inherit; padding:1px;
+    background: var(--vein); opacity:.35; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; }
+  .demo-head { display:flex; align-items:center; gap:8px; margin-bottom: 14px; }
+  .demo-head .traffic { display:flex; gap:6px; }
+  .demo-head .traffic i { width:10px; height:10px; border-radius:50%; background: var(--border-2); }
+  .demo-head .url { margin-left:6px; font-size:12px; color: var(--text-mute); font-family: var(--font-mono); }
+  .search-row { display:flex; gap:8px; align-items:center; padding:6px 6px 6px 16px; border-radius: var(--r-full);
+    background: var(--bg-2); border:1px solid var(--border-2); }
+  .search-row svg { width:18px; height:18px; color: var(--text-mute); flex:none; }
+  .search-row input { flex:1; background:transparent; border:0; color:var(--text); font-family:inherit; font-size:15px; outline:none; padding:9px 0; }
+  .search-row input::placeholder { color: var(--text-mute); }
+  .search-go { padding:9px 16px; font-size:13.5px; }
+  .chips { display:flex; gap:7px; flex-wrap:wrap; margin-top:12px; }
+  .chip { font-size:12.5px; padding:6px 12px; border-radius:var(--r-full); background:var(--surface); border:1px solid var(--border); color:var(--text-dim); cursor:pointer; transition:.18s; }
+  .chip:hover { color:var(--text); border-color:var(--border-2); transform: translateY(-1px); }
+
+  .scan { margin-top:14px; display:grid; gap:8px; }
+  .source { display:flex; align-items:center; gap:12px; padding:12px 14px; border-radius: var(--r-md);
+    background: var(--surface); border:1px solid var(--border); opacity:.4; transform: translateY(4px);
+    transition: opacity .4s var(--ease), transform .4s var(--ease), border-color .4s; }
+  .source.active { opacity:1; transform:none; border-color: var(--border-2); }
+  .source.done { opacity:1; transform:none; }
+  .source .ico { width:34px; height:34px; border-radius:10px; display:grid; place-items:center; flex:none; background:var(--surface-2); border:1px solid var(--border); }
+  .source .ico svg { width:17px; height:17px; }
+  .source .meta { flex:1; min-width:0; }
+  .source .meta .t { font-size:13.5px; font-weight:600; }
+  .source .meta .s { font-size:12px; color: var(--text-mute); }
+  .source .val { font-family: var(--font-mono); font-size:14px; font-weight:600; color: var(--text-mute); }
+  .source.done .val { color: var(--pos); }
+  .spinner { width:16px; height:16px; border-radius:50%; border:2px solid var(--border-2); border-top-color: var(--blue-2); animation: spin .7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce){ .spinner{ animation:none } }
+
+  .result { margin-top:12px; padding:16px 18px; border-radius: var(--r-lg); background: var(--pos-dim);
+    border:1px solid color-mix(in srgb, var(--pos) 40%, transparent); display:none; }
+  .result.show { display:block; animation: pop .5s var(--ease-out); }
+  @keyframes pop { from { opacity:0; transform: translateY(10px) scale(.98) } to { opacity:1; transform:none } }
+  .result .r-top { display:flex; justify-content:space-between; align-items:baseline; gap:12px; }
+  .result .r-label { font-size:12.5px; color: var(--text-dim); text-transform:uppercase; letter-spacing:.1em; font-weight:600; }
+  .result .r-amount { font-family: var(--font-mono); font-size:30px; font-weight:700; color: var(--pos); letter-spacing:-.03em; }
+  .result .r-detail { font-size:13px; color: var(--text-dim); margin-top:4px; }
+
+  /* ---------- Sections ---------- */
+  section { position: relative; }
+  .band { padding: 90px 0; }
+  .head { max-width: 680px; margin-bottom: 52px; }
+  .head h2 { font-size: clamp(30px, 4.4vw, 50px); margin: 16px 0 16px; font-weight: 600; }
+  .head p { color: var(--text-dim); font-size: 18px; }
+  .head.center { margin-left:auto; margin-right:auto; text-align:center; }
+
+  /* Marquee of sources */
+  .marquee-wrap { border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding: 26px 0; overflow:hidden;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .marquee { display:flex; gap:52px; width:max-content; animation: slide 34s linear infinite; }
+  @keyframes slide { to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce){ .marquee { animation:none } }
+  .marquee span { font-size:18px; font-weight:600; color: var(--text-mute); letter-spacing:-.02em; white-space:nowrap; }
+  .marquee-wrap:hover .marquee { animation-play-state: paused; }
+
+  /* Stats row */
+  .stats-row { display:grid; grid-template-columns: repeat(4,1fr); gap: 24px; }
+  @media (max-width:820px){ .stats-row { grid-template-columns: repeat(2,1fr); gap:28px 20px; } }
+  .stat { padding-left:18px; border-left:2px solid; border-image: var(--vein) 1; }
+  .stat-n { font-size: clamp(30px,4vw,42px); font-weight:700; letter-spacing:-.03em; line-height:1; margin-bottom:10px; }
+  .stat-l { font-size:14px; color: var(--text-dim); line-height:1.4; }
+
+  /* Steps */
+  .steps { display:grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  @media (max-width: 880px){ .steps { grid-template-columns:1fr; } }
+  .step { padding: 26px; border-radius: var(--r-lg); background: var(--surface); border:1px solid var(--border); position:relative; overflow:hidden; }
+  .step .num { font-family: var(--font-mono); font-size:13px; color: var(--text-mute); font-weight:600; }
+  .step h3 { font-size:20px; margin:14px 0 9px; font-weight:600; }
+  .step p { color: var(--text-dim); font-size:15px; }
+  .step .line { position:absolute; left:0; top:0; height:100%; width:3px; background: var(--vein); opacity:.7; }
+
+  /* Bento */
+  .bento { display:grid; grid-template-columns: repeat(6, 1fr); grid-auto-rows: minmax(150px, auto); gap: 16px; }
+  .cell { border-radius: var(--r-lg); background: var(--surface); border:1px solid var(--border); padding: 24px; position:relative; overflow:hidden;
+    transition: transform .3s var(--ease-out), border-color .3s, box-shadow .3s; }
+  .cell:hover { transform: translateY(-3px); border-color: var(--border-2); box-shadow: var(--shadow-soft); }
+  .cell h3 { font-size:19px; font-weight:600; margin-bottom:8px; }
+  .cell p { color: var(--text-dim); font-size:14.5px; }
+  .cell .ic { width:40px; height:40px; border-radius:12px; display:grid; place-items:center; margin-bottom:16px;
+    background: var(--vein-soft); border:1px solid var(--border); }
+  .cell .ic svg { width:20px; height:20px; color: var(--aqua-2); }
+  .c-wide { grid-column: span 4; } .c-mid { grid-column: span 3; } .c-third { grid-column: span 2; } .c-half { grid-column: span 3; }
+  @media (max-width: 900px){ .c-wide,.c-mid,.c-third,.c-half { grid-column: span 6; } }
+  .cell.feature-hero { grid-column: span 4; grid-row: span 2; display:flex; flex-direction:column; justify-content:space-between; }
+  @media (max-width:900px){ .cell.feature-hero { grid-column: span 6; grid-row:auto; } }
+  .stat-big { font-family: var(--font-mono); font-size: clamp(38px,6vw,58px); font-weight:700; letter-spacing:-.04em; line-height:1; }
+
+  /* Comparison table */
+  .cmp { border-radius: var(--r-lg); border:1px solid var(--border); overflow:hidden; background: var(--surface); }
+  .cmp table { width:100%; border-collapse: collapse; }
+  .cmp th, .cmp td { padding: 16px 20px; text-align:left; font-size:15px; border-bottom:1px solid var(--border); }
+  .cmp thead th { font-size:13px; text-transform:uppercase; letter-spacing:.08em; color: var(--text-mute); font-weight:600; }
+  .cmp thead th.filon { color: var(--text); }
+  .cmp td.feat { color: var(--text-dim); font-weight:500; }
+  .cmp col.filon-col { }
+  .cmp td.filon, .cmp th.filon { background: var(--vein-soft); position:relative; }
+  .cmp th.filon { border-top-left-radius:0; }
+  .cmp tr:last-child td { border-bottom:0; }
+  .yes { color: var(--pos); font-weight:600; display:inline-flex; align-items:center; gap:7px; }
+  .no { color: var(--text-mute); display:inline-flex; align-items:center; gap:7px; }
+  .yes svg,.no svg { width:16px; height:16px; }
+  .cmp-scroll { overflow-x:auto; }
+
+  /* Transparency block */
+  .trust-block { display:grid; grid-template-columns: 1.1fr .9fr; gap:48px; align-items:center; }
+  @media (max-width:900px){ .trust-block { grid-template-columns:1fr; gap:36px; } }
+  .trust-copy h2 { font-size: clamp(28px,4.2vw,46px); margin-top:16px; font-weight:600; }
+  .trust-list { list-style:none; padding:0; margin:26px 0 0; display:grid; gap:16px; }
+  .trust-list li { display:flex; gap:14px; align-items:flex-start; font-size:15px; color:var(--text-dim); }
+  .trust-list li b { color:var(--text); font-weight:600; }
+  .trust-list .tk { flex:none; width:22px; height:22px; border-radius:50%; margin-top:2px; background:var(--pos-dim);
+    border:1px solid color-mix(in srgb, var(--pos) 45%, transparent); position:relative; }
+  .trust-list .tk::after { content:""; position:absolute; left:7px; top:5px; width:5px; height:9px; border:solid var(--pos); border-width:0 2px 2px 0; transform:rotate(45deg); }
+  .trust-card { border-radius: var(--r-xl); padding:26px; background: linear-gradient(180deg,var(--surface-2),var(--surface));
+    border:1px solid var(--border-2); box-shadow: var(--shadow-soft); position:relative; overflow:hidden; }
+  .trust-card::before { content:""; position:absolute; inset:0; background: radial-gradient(90% 60% at 90% 0%, rgba(36,227,198,.12), transparent 60%); pointer-events:none; }
+  .tc-head { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-dim); font-weight:600; margin-bottom:18px; }
+  .tc-badge { font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:#04121f; background:var(--vein); padding:4px 9px; border-radius:var(--r-full); }
+  :root[data-theme="light"] .tc-badge{ color:#fff }
+  .tc-dot { width:6px; height:6px; border-radius:50%; background:var(--pos); box-shadow:0 0 10px var(--pos); margin-left:auto; }
+  .tc-line { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:12px 0; border-bottom:1px solid var(--border); font-size:14px; color:var(--text-dim); }
+  .tc-line em { font-style:normal; font-size:11px; color:var(--text-mute); background:var(--surface); padding:2px 7px; border-radius:var(--r-full); border:1px solid var(--border); margin-left:4px; }
+  .tc-total { display:flex; justify-content:space-between; align-items:center; padding:16px 0 6px; font-weight:600; font-size:16px; }
+  .tc-total b { font-size:26px; letter-spacing:-.03em; }
+  .tc-note { font-size:12.5px; color:var(--text-mute); margin-top:14px; line-height:1.5; }
+
+  /* Calculator */
+  .calc { display:grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items:center;
+    border-radius: var(--r-xl); border:1px solid var(--border-2); padding: 40px;
+    background: linear-gradient(180deg,var(--surface-2),var(--surface)); box-shadow: var(--shadow-soft); }
+  @media (max-width:820px){ .calc { grid-template-columns:1fr; gap:28px; padding:28px; } }
+  .calc label { font-size:14px; color: var(--text-dim); font-weight:500; }
+  .calc .amount { font-family: var(--font-mono); font-size: 26px; font-weight:700; margin: 6px 0 20px; }
+  input[type=range]{ -webkit-appearance:none; appearance:none; width:100%; height:6px; border-radius:999px; background: var(--surface-2); outline:none; border:1px solid var(--border); }
+  input[type=range]::-webkit-slider-thumb{ -webkit-appearance:none; width:24px; height:24px; border-radius:50%; background: var(--vein); cursor:pointer; box-shadow:var(--shadow-glow); border:2px solid var(--bg); }
+  input[type=range]::-moz-range-thumb{ width:22px; height:22px; border:2px solid var(--bg); border-radius:50%; background: var(--blue); cursor:pointer; }
+  .calc-out { text-align:center; padding: 28px; border-radius: var(--r-lg); background: var(--bg-2); border:1px solid var(--border); }
+  .calc-out .save { font-family: var(--font-mono); font-size: clamp(46px,8vw,68px); font-weight:700; color: var(--pos); letter-spacing:-.04em; line-height:1; }
+  .calc-out .sub { color: var(--text-dim); font-size:14px; margin-top:8px; }
+
+  /* Testimonials */
+  .quotes { display:grid; grid-template-columns: repeat(3,1fr); gap:16px; }
+  @media (max-width:880px){ .quotes { grid-template-columns:1fr; } }
+  .quote { padding:24px; border-radius: var(--r-lg); background: var(--surface); border:1px solid var(--border); }
+  .quote p { font-size:15.5px; line-height:1.55; }
+  .quote .by { margin-top:18px; display:flex; align-items:center; gap:11px; }
+  .avatar { width:38px; height:38px; border-radius:50%; background: var(--vein); display:grid; place-items:center; color:#04121f; font-weight:700; font-size:14px; flex:none; }
+  :root[data-theme="light"] .avatar { color:#fff }
+  .quote .by .n { font-size:14px; font-weight:600; } .quote .by .r { font-size:12.5px; color: var(--text-mute); }
+  .stars { color: var(--gold); font-size:13px; letter-spacing:2px; margin-bottom:12px; }
+
+  /* FAQ */
+  .faq { max-width: 780px; margin:0 auto; }
+  .qa { border-bottom:1px solid var(--border); }
+  .qa button { width:100%; text-align:left; background:none; border:0; color:var(--text); font-family:inherit;
+    font-size:17px; font-weight:560; padding:22px 0; cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:16px; }
+  .qa .plus { flex:none; width:24px; height:24px; position:relative; transition:transform .3s var(--ease); }
+  .qa .plus::before,.qa .plus::after { content:""; position:absolute; background: var(--text-dim); border-radius:2px; }
+  .qa .plus::before { width:14px; height:2px; top:11px; left:5px; }
+  .qa .plus::after { width:2px; height:14px; top:5px; left:11px; transition: transform .3s var(--ease); }
+  .qa[open] .plus { transform: rotate(90deg); }
+  .qa[open] .plus::after { transform: scaleY(0); }
+  .qa .ans { color: var(--text-dim); font-size:15.5px; padding: 0 0 22px; max-width: 90%; }
+  .qa summary { list-style:none; } .qa summary::-webkit-details-marker { display:none; }
+
+  /* CTA final */
+  .cta-final { border-radius: var(--r-xl); padding: 64px 40px; text-align:center; position:relative; overflow:hidden;
+    border:1px solid var(--border-2); background: linear-gradient(180deg, var(--surface-2), var(--surface)); box-shadow: var(--shadow-soft); }
+  .cta-final::before{ content:""; position:absolute; inset:0; background: radial-gradient(80% 120% at 50% -20%, rgba(60,123,255,.22), transparent 60%); }
+  .cta-final > * { position:relative; }
+  .cta-final h2 { font-size: clamp(30px,5vw,52px); font-weight:620; margin-bottom:16px; }
+  .cta-final p { color:var(--text-dim); font-size:18px; max-width:520px; margin:0 auto 30px; }
+  .news { display:flex; gap:8px; max-width:440px; margin:0 auto; padding:6px 6px 6px 18px; border-radius:var(--r-full);
+    background: var(--bg-2); border:1px solid var(--border-2); }
+  .news input { flex:1; background:none; border:0; outline:none; color:var(--text); font-family:inherit; font-size:15px; }
+  .news input::placeholder{ color: var(--text-mute); }
+  .news-ok { font-size:13.5px; color: var(--pos); margin-top:14px; min-height:18px; font-weight:500; }
+
+  /* Footer */
+  footer { border-top:1px solid var(--border); padding: 60px 0 40px; margin-top: 40px; }
+  .foot-grid { display:grid; grid-template-columns: 1.6fr 1fr 1fr 1fr; gap:32px; }
+  @media (max-width:820px){ .foot-grid { grid-template-columns:1fr 1fr; gap:32px 20px; } }
+  .foot-grid h4 { font-size:12.5px; text-transform:uppercase; letter-spacing:.1em; color: var(--text-mute); margin:0 0 16px; font-weight:600; }
+  .foot-grid a { display:block; color: var(--text-dim); font-size:14.5px; padding:5px 0; transition:color .2s; }
+  .foot-grid a:hover { color: var(--text); }
+  .foot-brand p { color: var(--text-dim); font-size:14.5px; max-width:280px; margin-top:14px; }
+  .foot-bottom { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-top:48px; padding-top:26px; border-top:1px solid var(--border); flex-wrap:wrap; }
+  .foot-bottom span { font-size:13px; color: var(--text-mute); }
+  .badge-line { display:flex; gap:10px; flex-wrap:wrap; }
+  .badge { font-size:12px; padding:6px 12px; border-radius:var(--r-full); background:var(--surface); border:1px solid var(--border); color:var(--text-dim); display:inline-flex; gap:7px; align-items:center; }
+
+  /* Scroll reveal */
+  .reveal { opacity:0; transform: translateY(22px); transition: opacity .7s var(--ease-out), transform .7s var(--ease-out); }
+  .reveal.in { opacity:1; transform:none; }
+  @media (prefers-reduced-motion: reduce){ .reveal { opacity:1; transform:none; transition:none } .marquee,.blob{ animation:none } }
+
+  .mobile-hide { }
+  @media (max-width: 780px){ .nav-links { display:none; } .hero { padding-top: 48px; } .band { padding: 66px 0; } }
+</style>
+
+<div class="atmos"></div>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<div class="grain"></div>
+
+<!-- ============ NAV ============ -->
+<header class="nav">
+  <nav class="nav-inner">
+    <a class="brand" href="#top" aria-label="FILON accueil">
+      <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+        <defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32">
+          <stop stop-color="#3C7BFF"/><stop offset=".5" stop-color="#8B6CFF"/><stop offset="1" stop-color="#24E3C6"/>
+        </linearGradient></defs>
+        <rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#lg)" stroke-width="2"/>
+        <path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#lg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+      FILON
+    </a>
+    <div class="nav-links">
+      <a href="#comment">Comment ça marche</a>
+      <a href="#avantages">Avantages</a>
+      <a href="#comparaison">Comparaison</a>
+      <a href="#transparence">Transparence</a>
+      <a href="#calcul">Économies</a>
+    </div>
+    <div class="nav-right">
+      <button class="icon-btn" id="theme" aria-label="Changer de thème" title="Thème clair / sombre">
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a class="btn btn-primary" href="#calcul">Installer FILON</a>
+    </div>
+  </nav>
+</header>
+
+<main id="top">
+  <!-- ============ HERO ============ -->
+  <section class="hero">
+    <div class="wrap grid-hero">
+      <div>
+        <div class="hero-badge reveal">
+          <span class="pill">Nouveau</span>
+          <span>L'assistant qui trouve <b>le filon</b> avant chaque achat</span>
+        </div>
+        <h1 class="hero-title reveal">
+          Le réflexe malin<br><span class="gradient-text">avant chaque achat.</span>
+        </h1>
+        <p class="hero-sub reveal">
+          FILON compare automatiquement le meilleur cashback, le meilleur prix en reconditionné
+          et les codes promo qui marchent vraiment — en une seconde, sans quitter votre panier.
+          Vous n'achetez plus jamais au prix fort.
+        </p>
+        <div class="hero-cta reveal">
+          <a class="btn btn-primary btn-lg" href="#calcul">Ajouter à mon navigateur</a>
+          <a class="btn btn-ghost btn-lg" href="#comment">Voir comment ça marche</a>
+        </div>
+        <div class="hero-cta reveal" style="margin-top:18px">
+          <span class="note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pos)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Gratuit, pour toujours
+          </span>
+          <span class="note">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--pos)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
+            Sans revendre vos données
+          </span>
+        </div>
+      </div>
+
+      <!-- Interactive demo -->
+      <div class="demo reveal" role="region" aria-label="Démonstration : FILON compare les sources d'économies">
+        <div class="demo-head">
+          <span class="traffic"><i></i><i></i><i></i></span>
+          <span class="url">filon.app/scan</span>
+        </div>
+        <form class="search-row" id="demoForm">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3" stroke-linecap="round"/></svg>
+          <input id="demoInput" type="text" value="Sony WH-1000XM5" aria-label="Produit à comparer" autocomplete="off"/>
+          <button class="btn btn-primary search-go" type="submit">Trouver le filon</button>
+        </form>
+        <div class="chips" aria-hidden="false">
+          <button class="chip" type="button">iPhone 15 Pro</button>
+          <button class="chip" type="button">Dyson V15</button>
+          <button class="chip" type="button">Nike Air Max</button>
+          <button class="chip" type="button">MacBook Air M3</button>
+        </div>
+
+        <div class="scan" id="scan">
+          <div class="source" data-src="cashback">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="var(--aqua-2)" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg></span>
+            <div class="meta"><div class="t">Cashback</div><div class="s">42 programmes analysés</div></div>
+            <div class="val" data-val="+6,5 %"></div>
+          </div>
+          <div class="source" data-src="recond">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="var(--aqua-2)" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M21 12a9 9 0 0 1-15 6.7L3 16M3 21v-5h5" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="meta"><div class="t">Reconditionné</div><div class="s">Grade A+ · garanti 24 mois</div></div>
+            <div class="val" data-val="−94 €"></div>
+          </div>
+          <div class="source" data-src="promo">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="var(--aqua-2)" stroke-width="2"><path d="M9 9h.01M15 15h.01M16 8l-8 8M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7" stroke-linecap="round"/></svg></span>
+            <div class="meta"><div class="t">Codes promo</div><div class="s">Testés en direct, 3 valides</div></div>
+            <div class="val" data-val="−15 €"></div>
+          </div>
+          <div class="source" data-src="price">
+            <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="var(--aqua-2)" stroke-width="2"><path d="M3 3v18h18M7 14l4-4 3 3 5-6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div class="meta"><div class="t">Comparateur prix</div><div class="s">37 marchands en temps réel</div></div>
+            <div class="val" data-val="379 €"></div>
+          </div>
+        </div>
+
+        <div class="result" id="result" aria-live="polite">
+          <div class="r-top">
+            <span class="r-label">Économie totale trouvée</span>
+            <span class="r-amount" id="rAmount">134 €</span>
+          </div>
+          <div class="r-detail">Prix affiché <b style="color:var(--text)">499 €</b> → votre prix réel avec FILON <b style="color:var(--pos)">365 €</b>. Le filon est trouvé en 0,8 s.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ MARQUEE ============ -->
+  <div class="marquee-wrap reveal">
+    <p style="text-align:center; font-size:13px; color:var(--text-mute); margin-bottom:18px; letter-spacing:.02em">Toutes vos sources d'économies, comparées au même endroit</p>
+    <div class="marquee" aria-hidden="true">
+      <span>iGraal</span><span>Poulpeo</span><span>Widilo</span><span>Joko</span><span>eBuyClub</span><span>Back Market</span><span>Rakuten</span><span>Naomi</span>
+      <span>iGraal</span><span>Poulpeo</span><span>Widilo</span><span>Joko</span><span>eBuyClub</span><span>Back Market</span><span>Rakuten</span><span>Naomi</span>
+    </div>
+  </div>
+
+  <!-- ============ STATS MARCHÉ ============ -->
+  <section class="band" style="padding-top:80px; padding-bottom:20px">
+    <div class="wrap">
+      <div class="stats-row">
+        <div class="stat reveal">
+          <div class="stat-n mono"><span data-count="12" data-suffix=" M+">0</span></div>
+          <div class="stat-l">consommateurs utilisent déjà le cashback en francophonie</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-n mono">200–450 €</div>
+          <div class="stat-l">économisés par foyer actif, chaque année</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-n mono"><span data-count="50" data-suffix=" %">0</span></div>
+          <div class="stat-l">d'économie possible en cumulant reconditionné + cashback</div>
+        </div>
+        <div class="stat reveal">
+          <div class="stat-n mono">0 €</div>
+          <div class="stat-l">pour vous — FILON est gratuit, aujourd'hui et demain</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMMENT ÇA MARCHE ============ -->
+  <section class="band" id="comment">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow"><span class="dot"></span> Comment ça marche</span>
+        <h2>Trois secondes. Zéro effort. Le meilleur prix, toujours.</h2>
+        <p>FILON travaille en arrière-plan pendant que vous faites vos courses en ligne. Vous ne changez rien à vos habitudes — vous payez simplement moins cher.</p>
+      </div>
+      <div class="steps">
+        <div class="step reveal"><span class="line"></span>
+          <span class="num">01 — Détection</span>
+          <h3>Vous arrivez sur un produit</h3>
+          <p>Dès que vous ouvrez une fiche produit, FILON reconnaît l'article et lance une analyse silencieuse de toutes les sources d'économies.</p>
+        </div>
+        <div class="step reveal"><span class="line"></span>
+          <span class="num">02 — Comparaison</span>
+          <h3>FILON scanne tout, en direct</h3>
+          <p>Cashback, reconditionné équivalent, codes promo testés un par un, et prix chez 37+ marchands. Tout est croisé en temps réel.</p>
+        </div>
+        <div class="step reveal"><span class="line"></span>
+          <span class="num">03 — Le filon</span>
+          <h3>Vous voyez le vrai prix</h3>
+          <p>Un seul chiffre : votre prix réel le plus bas, cumul d'économies inclus. Un clic pour l'appliquer. Aucune recherche manuelle.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ POURQUOI / BENTO ============ -->
+  <section class="band" id="avantages">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow"><span class="dot"></span> Pourquoi FILON</span>
+        <h2>Tout ce que vous cherchiez sur dix sites, réuni en un réflexe.</h2>
+        <p>Le premier assistant qui regroupe chaque levier d'économie dans une expérience unique, rapide et totalement transparente.</p>
+      </div>
+      <div class="bento">
+        <div class="cell feature-hero reveal">
+          <div>
+            <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2ZM9 21h6M10 17v4M14 17v4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <h3>Une IA qui cherche à votre place</h3>
+            <p>Notre moteur croise cashback, reconditionné, promos et prix marchands en temps réel — puis calcule le meilleur cumul possible. Vous n'ouvrez plus jamais dix onglets.</p>
+          </div>
+          <div style="margin-top:24px">
+            <div class="stat-big gradient-text" data-count="4" data-suffix=" sources">0</div>
+            <p style="margin-top:6px">croisées à chaque achat, en moins d'une seconde.</p>
+          </div>
+        </div>
+
+        <div class="cell c-third reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" stroke-linecap="round"/></svg></div>
+          <h3>Cashback maximisé</h3>
+          <p>Toujours le taux le plus élevé, appliqué automatiquement.</p>
+        </div>
+        <div class="cell c-third reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Reconditionné malin</h3>
+          <p>Le même produit, vérifié et garanti, souvent 30 % moins cher.</p>
+        </div>
+
+        <div class="cell c-half reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 9h.01M15 15h.01M16 8l-8 8M4 7v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7" stroke-linecap="round"/></svg></div>
+          <h3>Codes promo qui fonctionnent</h3>
+          <p>FILON teste chaque code en direct et applique celui qui offre la plus grosse réduction. Fini les « code expiré ».</p>
+        </div>
+        <div class="cell c-half reveal">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Alertes prix &amp; cashback</h3>
+          <p>Le prix baisse ou un meilleur taux apparaît ? FILON vous prévient au bon moment, jamais trop tard.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ COMPARAISON ============ -->
+  <section class="band" id="comparaison">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow"><span class="dot"></span> La différence</span>
+        <h2>Les autres font une chose. FILON les fait toutes.</h2>
+        <p>Les comparateurs classiques vous laissent le travail. FILON réunit chaque source d'économie et calcule le cumul optimal, automatiquement.</p>
+      </div>
+      <div class="cmp reveal">
+        <div class="cmp-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Ce que vous cherchez</th>
+              <th>Site de cashback</th>
+              <th>Comparateur de prix</th>
+              <th>Extension de codes</th>
+              <th class="filon">FILON</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="feat">Meilleur taux de cashback</td>
+              <td><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td class="filon"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5" stroke-linecap="round"/></svg></span></td>
+            </tr>
+            <tr>
+              <td class="feat">Alternative reconditionnée</td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td class="filon"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5" stroke-linecap="round"/></svg></span></td>
+            </tr>
+            <tr>
+              <td class="feat">Codes promo testés en direct</td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5" stroke-linecap="round"/></svg></span></td>
+              <td class="filon"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5" stroke-linecap="round"/></svg></span></td>
+            </tr>
+            <tr>
+              <td class="feat">Cumul automatique optimal</td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td class="filon"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5" stroke-linecap="round"/></svg></span></td>
+            </tr>
+            <tr>
+              <td class="feat">Sans revendre vos données</td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td><span class="no"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18 6 6 18M6 6l12 12" stroke-linecap="round"/></svg></span></td>
+              <td class="filon"><span class="yes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5" stroke-linecap="round"/></svg></span></td>
+            </tr>
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TRANSPARENCE (le moat) ============ -->
+  <section class="band" id="transparence">
+    <div class="wrap">
+      <div class="trust-block reveal">
+        <div class="trust-copy">
+          <span class="eyebrow"><span class="dot"></span> Notre engagement</span>
+          <h2>La transparence n'est pas un argument.<br>C'est notre modèle.</h2>
+          <p style="color:var(--text-dim); font-size:17px; margin-top:16px">
+            Les affaires Honey et Phia ont montré comment certaines extensions détournaient discrètement
+            les commissions au détriment des créateurs — et des utilisateurs. FILON prend le contre-pied,
+            par principe et par construction.
+          </p>
+          <ul class="trust-list">
+            <li><span class="tk"></span><div><b>Rémunération affichée.</b> Nous vous disons exactement comment FILON gagne de l'argent sur chaque recommandation. Aucune zone d'ombre.</div></li>
+            <li><span class="tk"></span><div><b>Liens affiliés signalés.</b> Chaque lien rémunéré est identifié comme tel — c'est une exigence légale que nous traitons comme une promesse.</div></li>
+            <li><span class="tk"></span><div><b>Zéro captation déloyale.</b> FILON n'écrase jamais l'attribution d'un créateur ou d'un site. Nous n'ajoutons de la valeur que lorsqu'il y en a réellement.</div></li>
+            <li><span class="tk"></span><div><b>Vos données restent les vôtres.</b> Pas de profil publicitaire, pas de revente. Conforme RGPD, par défaut.</div></li>
+          </ul>
+        </div>
+        <div class="trust-card reveal">
+          <div class="tc-head">
+            <span class="tc-badge">Exemple réel</span>
+            <span class="tc-dot"></span> Affichage FILON
+          </div>
+          <div class="tc-line"><span>Prix marchand</span><b class="mono">499 €</b></div>
+          <div class="tc-line"><span>Reconditionné grade A+ · garanti 24 mois</span><b class="mono" style="color:var(--pos)">405 €</b></div>
+          <div class="tc-line"><span>Cashback iGraal <em>(lien affilié)</em></span><b class="mono" style="color:var(--pos)">−6,5 %</b></div>
+          <div class="tc-line"><span>Code promo vérifié en direct</span><b class="mono" style="color:var(--pos)">−15 €</b></div>
+          <div class="tc-total"><span>Votre prix réel</span><b class="mono">365 €</b></div>
+          <p class="tc-note">FILON perçoit une part de la commission d'apport versée par la plateforme — jamais un centime de votre poche. C'est écrit, ici et partout.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CALCULATEUR ============ -->
+  <section class="band" id="calcul">
+    <div class="wrap">
+      <div class="head center reveal">
+        <span class="eyebrow" style="justify-content:center"><span class="dot"></span> Votre potentiel</span>
+        <h2>Combien FILON vous ferait économiser ?</h2>
+        <p style="margin:0 auto">Déplacez le curseur selon vos achats en ligne mensuels. Estimation basée sur un cumul moyen observé de 9 % (cashback + reconditionné + promos).</p>
+      </div>
+      <div class="calc reveal">
+        <div>
+          <label for="spend">Vos achats en ligne par mois</label>
+          <div class="amount mono" id="spendOut">250 €</div>
+          <input type="range" id="spend" min="50" max="2000" step="10" value="250" aria-label="Achats mensuels en euros"/>
+          <p style="color:var(--text-mute); font-size:13px; margin-top:14px">
+            Électronique, mode, maison, beauté… FILON s'applique partout où vous achetez déjà.
+          </p>
+        </div>
+        <div class="calc-out">
+          <div class="save mono" id="saveOut">270 €</div>
+          <div class="sub">économisés par an, sans changer vos habitudes</div>
+          <a class="btn btn-primary btn-lg" href="#top" style="margin-top:20px; width:100%">Commencer à économiser</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TÉMOIGNAGES ============ -->
+  <section class="band">
+    <div class="wrap">
+      <div class="head reveal">
+        <span class="eyebrow"><span class="dot"></span> Ils ont trouvé le filon</span>
+        <h2>Le réflexe de celles et ceux qui n'achètent plus au prix fort.</h2>
+      </div>
+      <div class="quotes">
+        <div class="quote reveal">
+          <div class="stars">★★★★★</div>
+          <p>« J'allais commander des écouteurs à 499 €. FILON m'a trouvé le même modèle reconditionné garanti + un cashback. J'ai payé 365 €. Je ne commande plus rien sans. »</p>
+          <div class="by"><span class="avatar">CL</span><div><div class="n">Camille L.</div><div class="r">Lyon · utilisatrice depuis 4 mois</div></div></div>
+        </div>
+        <div class="quote reveal">
+          <div class="stars">★★★★★</div>
+          <p>« Enfin une extension qui ne me spamme pas. Elle se manifeste seulement quand il y a vraiment de l'argent à gagner. Simple, discret, efficace. »</p>
+          <div class="by"><span class="avatar">TN</span><div><div class="n">Thomas N.</div><div class="r">Nantes · 312 € économisés</div></div></div>
+        </div>
+        <div class="quote reveal">
+          <div class="stars">★★★★★</div>
+          <p>« Le fait qu'ils ne revendent pas mes données de navigation, ça change tout. On sent que la transparence n'est pas un argument marketing chez FILON. »</p>
+          <div class="by"><span class="avatar">SB</span><div><div class="n">Sarah B.</div><div class="r">Bordeaux · early adopter</div></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ FAQ ============ -->
+  <section class="band" id="faq">
+    <div class="wrap">
+      <div class="head center reveal">
+        <span class="eyebrow" style="justify-content:center"><span class="dot"></span> Questions fréquentes</span>
+        <h2>Tout ce qu'il faut savoir</h2>
+      </div>
+      <div class="faq reveal">
+        <details class="qa"><summary><button type="button">FILON est-il vraiment gratuit ?<span class="plus"></span></button></summary>
+          <div class="ans">Oui, totalement et pour toujours. FILON se rémunère uniquement via une petite commission versée par les marchands lorsqu'un cashback est validé — jamais en vous facturant, ni en revendant vos données.</div>
+        </details>
+        <details class="qa"><summary><button type="button">Comment FILON gagne-t-il de l'argent alors ?<span class="plus"></span></button></summary>
+          <div class="ans">Quand vous activez un cashback via FILON, le marchand nous reverse une part de sa commission d'apport. Nous vous rendons le meilleur taux et gardons une marge minime. Vos intérêts et les nôtres sont donc parfaitement alignés : plus vous économisez, mieux nous nous portons.</div>
+        </details>
+        <details class="qa"><summary><button type="button">Est-ce que mes données de navigation sont revendues ?<span class="plus"></span></button></summary>
+          <div class="ans">Jamais. FILON n'analyse que la page produit nécessaire à la comparaison, en local autant que possible. Nous ne construisons pas de profil publicitaire et ne vendons aucune donnée à des tiers. C'est un engagement inscrit dans notre modèle, pas une option.</div>
+        </details>
+        <details class="qa"><summary><button type="button">Sur quels sites FILON fonctionne-t-il ?<span class="plus"></span></button></summary>
+          <div class="ans">Sur les principales boutiques en ligne francophones — électronique, mode, maison, beauté, sport — et nous ajoutons de nouveaux marchands chaque semaine. L'extension reconnaît automatiquement les produits éligibles.</div>
+        </details>
+        <details class="qa"><summary><button type="button">Le reconditionné proposé est-il fiable ?<span class="plus"></span></button></summary>
+          <div class="ans">FILON ne propose que des reconditionnés de grade vérifié, issus de vendeurs certifiés et couverts par une garantie d'au moins 12 à 24 mois. Vous voyez le grade, la garantie et l'économie avant de décider.</div>
+        </details>
+        <details class="qa"><summary><button type="button">Quand l'extension et l'application seront-elles disponibles ?<span class="plus"></span></button></summary>
+          <div class="ans">L'extension Chrome arrive en premier, suivie d'Edge, Firefox et Safari, puis de l'application mobile et de l'assistant IA conversationnel. Inscrivez-vous à la newsletter pour être prévenu·e du lancement et rejoindre les premiers accès.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CTA FINAL ============ -->
+  <section class="band">
+    <div class="wrap">
+      <div class="cta-final reveal">
+        <span class="eyebrow" style="justify-content:center; margin-bottom:18px"><span class="dot"></span> Rejoignez le mouvement</span>
+        <h2>N'achetez plus jamais<br>sans avoir trouvé <span class="gradient-text">le filon.</span></h2>
+        <p>Soyez prévenu·e du lancement de l'extension et rejoignez les premiers à économiser sur chaque achat.</p>
+        <form class="news" id="newsForm">
+          <input type="email" id="newsEmail" placeholder="votre@email.com" aria-label="Votre adresse email" required/>
+          <button class="btn btn-primary" type="submit">Rejoindre</button>
+        </form>
+        <div class="news-ok" id="newsOk" role="status"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <a class="brand" href="#top">
+          <svg class="logo-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+            <rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#lg)" stroke-width="2"/>
+            <path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#lg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+          FILON
+        </a>
+        <p>Le réflexe malin avant chaque achat. L'assistant qui trouve le meilleur prix réel — cashback, reconditionné et promos réunis.</p>
+        <div class="badge-line" style="margin-top:18px">
+          <span class="badge"><span class="dot" style="width:6px;height:6px;border-radius:50%;background:var(--pos)"></span> RGPD · données non revendues</span>
+        </div>
+      </div>
+      <div>
+        <h4>Produit</h4>
+        <a href="#comment">Comment ça marche</a>
+        <a href="#avantages">Fonctionnalités</a>
+        <a href="#calcul">Simulateur d'économies</a>
+        <a href="#comparaison">Comparaison</a>
+      </div>
+      <div>
+        <h4>Économies</h4>
+        <a href="#">Cashback</a>
+        <a href="#">Reconditionné</a>
+        <a href="#">Codes promo</a>
+        <a href="#">Blog &amp; guides</a>
+      </div>
+      <div>
+        <h4>Entreprise</h4>
+        <a href="#">À propos</a>
+        <a href="#">Notre vision</a>
+        <a href="#">Contact</a>
+        <a href="#">Confidentialité</a>
+      </div>
+    </div>
+    <p style="font-size:12.5px; color:var(--text-mute); max-width:760px; margin-top:36px; line-height:1.6">
+      <b style="color:var(--text-dim)">Transparence :</b> FILON est gratuit. Certains liens sont affiliés — lorsque vous activez un cashback ou une offre via FILON, la plateforme partenaire nous reverse une part de sa commission d'apport. Cela n'augmente jamais votre prix. Nous ne revendons aucune donnée de navigation.
+    </p>
+    <div class="foot-bottom">
+      <span>© 2026 FILON. Conçu à Bruxelles, pour la francophonie. Tous droits réservés.</span>
+      <div class="badge-line">
+        <span class="badge">Transparence</span>
+        <span class="badge">Intelligence</span>
+        <span class="badge">Simplicité</span>
+        <span class="badge">Confiance</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---- Theme toggle ---- */
+  var root = document.documentElement;
+  var themeBtn = document.getElementById("theme");
+  function currentDark(){
+    var t = root.getAttribute("data-theme");
+    if (t) return t === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  themeBtn.addEventListener("click", function(){
+    root.setAttribute("data-theme", currentDark() ? "light" : "dark");
+  });
+
+  /* ---- Scroll reveal ---- */
+  var revs = document.querySelectorAll(".reveal");
+  if (reduce || !("IntersectionObserver" in window)) {
+    revs.forEach(function(el){ el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add("in"); io.unobserve(e.target); } });
+    }, { threshold: 0.14, rootMargin: "0px 0px -8% 0px" });
+    revs.forEach(function(el){ io.observe(el); });
+  }
+
+  /* ---- Parallax blobs (light) ---- */
+  if (!reduce) {
+    var blobs = document.querySelectorAll(".blob");
+    var ty = 0, raf = false;
+    window.addEventListener("scroll", function(){
+      ty = window.scrollY;
+      if (!raf){ raf = true; requestAnimationFrame(function(){
+        blobs.forEach(function(b,i){ b.style.transform = "translateY(" + (ty * (0.02 + i*0.015)) + "px)"; });
+        raf = false;
+      }); }
+    }, { passive: true });
+  }
+
+  /* ---- Count-up stats ---- */
+  function animateCount(el){
+    var target = parseFloat(el.getAttribute("data-count"));
+    var suffix = el.getAttribute("data-suffix") || "";
+    if (reduce){ el.textContent = target + suffix; return; }
+    var start = performance.now(), dur = 1100;
+    function tick(now){
+      var p = Math.min((now-start)/dur, 1);
+      var eased = 1 - Math.pow(1-p, 3);
+      el.textContent = Math.round(target*eased) + suffix;
+      if (p < 1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
+  var counters = document.querySelectorAll("[data-count]");
+  if ("IntersectionObserver" in window){
+    var cio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ animateCount(e.target); cio.unobserve(e.target); } });
+    }, { threshold: 0.6 });
+    counters.forEach(function(el){ cio.observe(el); });
+  } else { counters.forEach(animateCount); }
+
+  /* ---- Magnetic buttons ---- */
+  if (!reduce && window.matchMedia("(pointer:fine)").matches){
+    document.querySelectorAll(".btn-primary, .btn-lg").forEach(function(btn){
+      btn.addEventListener("mousemove", function(e){
+        var r = btn.getBoundingClientRect();
+        var x = e.clientX - r.left - r.width/2, y = e.clientY - r.top - r.height/2;
+        btn.style.transform = "translate(" + x*0.15 + "px," + y*0.22 + "px)";
+      });
+      btn.addEventListener("mouseleave", function(){ btn.style.transform = ""; });
+    });
+  }
+
+  /* ---- Interactive search demo ---- */
+  var form = document.getElementById("demoForm");
+  var input = document.getElementById("demoInput");
+  var sources = document.querySelectorAll("#scan .source");
+  var result = document.getElementById("result");
+  var rAmount = document.getElementById("rAmount");
+  var running = false;
+  // deterministic pseudo amounts derived from query length for realism
+  function runScan(){
+    if (running) return; running = true;
+    result.classList.remove("show");
+    var seed = (input.value.length || 8);
+    var total = 90 + (seed*7) % 120;
+    sources.forEach(function(s){
+      s.classList.remove("active","done");
+      var v = s.querySelector(".val"); v.textContent = "";
+      var sp = s.querySelector(".spinner"); if(sp) sp.remove();
+    });
+    if (reduce){
+      sources.forEach(function(s){ s.classList.add("done"); s.querySelector(".val").textContent = s.querySelector(".val").getAttribute("data-val"); });
+      rAmount.textContent = total + " €"; result.classList.add("show"); running=false; return;
+    }
+    var i = 0;
+    function step(){
+      if (i > 0){ var prev = sources[i-1]; prev.classList.add("done"); var sp=prev.querySelector(".spinner"); if(sp)sp.remove(); prev.querySelector(".val").textContent = prev.querySelector(".val").getAttribute("data-val"); }
+      if (i < sources.length){
+        var s = sources[i]; s.classList.add("active");
+        var val = s.querySelector(".val");
+        var spin = document.createElement("span"); spin.className="spinner"; val.parentNode.insertBefore(spin, val);
+        i++; setTimeout(step, 420);
+      } else {
+        rAmount.textContent = total + " €";
+        result.classList.add("show");
+        running = false;
+      }
+    }
+    step();
+  }
+  form.addEventListener("submit", function(e){ e.preventDefault(); runScan(); });
+  document.querySelectorAll(".chip").forEach(function(c){
+    c.addEventListener("click", function(){ input.value = c.textContent; runScan(); });
+  });
+  // auto-run once when demo enters view
+  if ("IntersectionObserver" in window){
+    var dio = new IntersectionObserver(function(entries){
+      entries.forEach(function(e){ if(e.isIntersecting){ setTimeout(runScan, 500); dio.disconnect(); } });
+    }, { threshold: 0.5 });
+    dio.observe(document.getElementById("scan"));
+  }
+
+  /* ---- Savings calculator ---- */
+  var spend = document.getElementById("spend");
+  var spendOut = document.getElementById("spendOut");
+  var saveOut = document.getElementById("saveOut");
+  function fmt(n){ return n.toLocaleString("fr-FR"); }
+  function updateCalc(){
+    var monthly = parseInt(spend.value,10);
+    spendOut.textContent = fmt(monthly) + " €";
+    var annual = Math.round(monthly * 12 * 0.09);
+    saveOut.textContent = fmt(annual) + " €";
+  }
+  spend.addEventListener("input", updateCalc);
+  updateCalc();
+
+  /* ---- Newsletter ---- */
+  var news = document.getElementById("newsForm");
+  var newsOk = document.getElementById("newsOk");
+  news.addEventListener("submit", function(e){
+    e.preventDefault();
+    var email = document.getElementById("newsEmail").value;
+    if (email && email.indexOf("@") > 0){
+      newsOk.textContent = "✓ C'est noté ! Vous serez parmi les premiers à trouver le filon.";
+      document.getElementById("newsEmail").value = "";
+    } else {
+      newsOk.style.color = "var(--text-mute)";
+      newsOk.textContent = "Entrez une adresse email valide.";
+    }
+  });
+
+  /* ---- FAQ: close others on open (accordion) ---- */
+  var qas = document.querySelectorAll(".qa");
+  qas.forEach(function(d){
+    d.addEventListener("toggle", function(){
+      if (d.open){ qas.forEach(function(o){ if(o!==d) o.open=false; }); }
+    });
+  });
+})();
+</script>
