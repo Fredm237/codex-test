@@ -7,13 +7,13 @@ export const metadata: Metadata = buildMetadata({
   path: "/faq",
   title: "FAQ — toutes vos questions sur FILON",
   description:
-    "Comment fonctionne le copilote d'achat FILON, comment il gagne de l'argent, ce qu'il fait de vos données, le cashback, le reconditionné, l'extension et Filon Pro. Toutes les réponses, sans jargon.",
+    "Comment fonctionne le copilote d'achat FILON, comment il gagne de l'argent (sans vous facturer), ce qu'il fait de vos données, le cashback, le reconditionné et l'extension. Toutes les réponses, sans jargon.",
 });
 
 const GENERAL = [
   { q: "C'est quoi FILON, en une phrase ?", a: "Un copilote d'achat : vous lui dites ce que vous cherchez, il analyse le marché (prix, cashback, reconditionné, codes promo, fiabilité, historique) et vous dit quoi acheter, où, et si c'est le bon moment." },
   { q: "En quoi c'est différent d'un comparateur ?", a: "Un comparateur affiche une liste de prix et vous laisse trancher. FILON va plus loin : il calcule le coût réel total, croise les sources d'économie et vous donne une recommandation claire — « voici ce que vous devriez acheter », pas seulement « voici les prix »." },
-  { q: "FILON est-il vraiment gratuit ?", a: "Oui, le cœur du service est gratuit et le restera. Une offre Filon Pro (7,99€/mois, sans engagement) ajoute les alertes de prix, l'historique illimité et la protection anti-mauvais-achat pour celles et ceux qui achètent souvent." },
+  { q: "FILON est-il vraiment gratuit ?", a: "Oui, totalement — pour tout le monde, pour toujours, sans abonnement ni carte bancaire. Il n'y a pas de version payante. FILON se rémunère uniquement via une part de la commission d'apport des plateformes partenaires quand vous activez une offre, jamais en vous facturant." },
   { q: "Comment FILON gagne-t-il de l'argent, alors ?", a: "Via une part de la commission d'apport que les plateformes partenaires nous reversent quand vous activez une offre. Cela n'augmente jamais votre prix. Et la recommandation reste celle qui vous fait économiser le plus, pas celle qui nous rapporte le plus." },
 ];
 

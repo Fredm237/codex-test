@@ -28,7 +28,7 @@ export default function AidePage() {
               { n: "02", h: "Cashback", p: "Plateformes comparées, cumul avec un code promo, délais de validation et de retrait." },
               { n: "03", h: "Reconditionné", p: "Grades, garanties, vendeurs certifiés et calcul de l'économie réelle." },
               { n: "04", h: "Extension", p: "Installation, navigateurs pris en charge, ce qui s'affiche sur une fiche produit." },
-              { n: "05", h: "Compte & Filon Pro", p: "Alertes de prix, gestion de l'abonnement, résiliation sans frais." },
+              { n: "05", h: "Compte & alertes", p: "Créer un compte, gérer les alertes de baisse de prix et vos préférences." },
               { n: "06", h: "Données & confidentialité", p: "Ce que FILON lit, ce qu'il ne fait pas, et comment exercer vos droits RGPD." },
             ]}
           />

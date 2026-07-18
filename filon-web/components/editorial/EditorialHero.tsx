@@ -77,7 +77,7 @@ export function EditorialHero() {
       <LiquidMetal className="ed-coin" />
       <div className="ed-wrap inner">
         <span className="eyebrow" style={{ display: "block", marginBottom: "clamp(24px,4vw,40px)" }}>
-          L&apos;assistant d&apos;achat malin
+          Votre copilote d&apos;achat, propulsé par l&apos;IA
         </span>
         <h1 className="ed-h1" aria-label="Est-ce vraiment le bon prix ?">
           <span className="l"><span>Est-ce</span></span>
@@ -87,8 +87,9 @@ export function EditorialHero() {
         <div className="ed-hero-foot">
           <div>
             <p className="ed-hero-sub">
-              Avant chaque achat, FILON compare le meilleur cashback, le reconditionné équivalent et les codes promo —
-              puis vous dit, en une seconde, <b>s&apos;il existe mieux</b>. Ne payez plus jamais trop cher.
+              Dites à FILON ce que vous cherchez. Il analyse le marché, compare tout — prix, cashback, reconditionné,
+              historique — et vous dit <b>quoi acheter, où, et si c&apos;est le bon moment</b>. Un comparateur montre les prix.
+              FILON décide avec vous.
             </p>
             <div className="ed-hero-actions">
               <a className="ed-btn dark" href="/#installer">Ajouter FILON — gratuit</a>

@@ -43,7 +43,7 @@ export default function PressePage() {
               { n: "◆", h: "Catégorie", p: "AdTech / IA d'aide à la décision d'achat — un copilote, pas un comparateur." },
               { n: "◆", h: "Différence", p: "Transparence totale : la rémunération est affichée, l'attribution est honnête." },
               { n: "◆", h: "Marché", p: "Belgique francophone d'abord, puis France et francophonie européenne." },
-              { n: "◆", h: "Modèle", p: "Gratuit pour l'utilisateur ; commission d'apport des partenaires + offre Filon Pro." },
+              { n: "◆", h: "Modèle", p: "100 % gratuit pour l'utilisateur ; rémunéré par la commission d'apport des partenaires." },
               { n: "◆", h: "Fondateur", p: `${site.founder}, ${site.city} — également fondateur de SmartWave FX.` },
               { n: "◆", h: "Statut", p: "En phase de lancement — extension navigateur puis application et assistant." },
             ]}

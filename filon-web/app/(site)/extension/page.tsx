@@ -15,7 +15,7 @@ const FAQ = [
   { q: "Sur quels navigateurs l'extension fonctionne-t-elle ?", a: "Chrome en premier, puis Edge, Firefox et Safari. L'application mobile et l'assistant conversationnel suivront. Rejoignez la liste pour être prévenu·e du lancement de chaque version." },
   { q: "L'extension ralentit-elle ma navigation ?", a: "Non. Elle ne s'active que sur les pages produit des marchands reconnus, reste invisible le reste du temps, et n'exécute aucune analyse tant que vous ne consultez pas un article." },
   { q: "Quelles données l'extension lit-elle ?", a: "Uniquement ce qui est nécessaire à la comparaison : le produit et le marchand de la page consultée. Pas de profil publicitaire, pas de revente. Le détail figure dans notre politique de confidentialité." },
-  { q: "Dois-je créer un compte ?", a: "Non pour l'essentiel. Un compte devient utile pour les alertes de prix et les fonctions Filon Pro, mais la comparaison de base fonctionne sans inscription." },
+  { q: "Dois-je créer un compte ?", a: "Non pour l'essentiel. Un compte devient utile pour les alertes de baisse de prix, mais la comparaison et le verdict fonctionnent sans inscription — et c'est gratuit." },
 ];
 
 export default function ExtensionPage() {

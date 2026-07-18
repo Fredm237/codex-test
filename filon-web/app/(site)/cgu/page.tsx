@@ -40,10 +40,10 @@ export default function CguPage() {
 
           <h2>3. Accès et gratuité</h2>
           <p>
-            L&apos;accès aux fonctions essentielles de FILON est <b>gratuit</b>. Une offre payante optionnelle (« Filon Pro »)
-            peut donner accès à des fonctionnalités supplémentaires, dans les conditions et au tarif indiqués sur la page{" "}
-            <a href="/tarifs">Tarifs</a>. L&apos;éditeur s&apos;efforce d&apos;assurer la disponibilité du service sans pouvoir
-            la garantir de manière ininterrompue.
+            L&apos;accès à FILON est <b>entièrement gratuit</b> pour l&apos;utilisateur, sans abonnement ni frais&nbsp;: voir la
+            page <a href="/tarifs">Tarifs</a>. Le service se rémunère via la commission d&apos;apport des plateformes partenaires
+            (voir article 6), jamais en facturant l&apos;utilisateur. L&apos;éditeur s&apos;efforce d&apos;assurer la
+            disponibilité du service sans pouvoir la garantir de manière ininterrompue.
           </p>
 
           <h2>4. Utilisation conforme</h2>
