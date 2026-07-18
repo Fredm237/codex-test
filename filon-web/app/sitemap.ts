@@ -10,13 +10,23 @@ const routes = [
   "/cashback",
   "/reconditionne",
   "/codes-promo",
+  "/tarifs",
+  "/extension",
   "/blog",
   "/blog/quelle-app-cashback-paie-le-plus",
   "/blog/neuf-vs-reconditionne-economie-reelle",
+  "/faq",
+  "/aide",
   "/a-propos",
+  "/partenaires",
+  "/presse",
+  "/carrieres",
   "/contact",
+  "/securite",
   "/mentions-legales",
   "/confidentialite",
+  "/cookies",
+  "/cgu",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

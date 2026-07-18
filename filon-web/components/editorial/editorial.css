@@ -305,3 +305,31 @@
 .ed-legal ul { padding-left: 22px; margin-bottom: 14px; }
 .ed-legal a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
 .ed-legal .upd { font-size: 13px; color: var(--ink-3); font-family: var(--mono); }
+.ed-legal h3 { font-family: var(--serif); font-variation-settings: "opsz" 30; font-size: 19px; margin: 22px 0 8px; letter-spacing: -0.01em; }
+
+/* ---------- Pricing (Tarifs) ---------- */
+.ed-pricing { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 760px) { .ed-pricing { grid-template-columns: 1fr; } }
+.ed-plan { border: 1px solid var(--line); border-radius: 20px; background: var(--card); padding: 32px; display: flex; flex-direction: column; }
+.ed-plan.featured { border: 1px solid transparent; background:
+  linear-gradient(var(--card), var(--card)) padding-box,
+  var(--wave) border-box; box-shadow: 0 18px 50px -28px rgba(20,120,180,0.45); }
+.ed-plan .tag { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); }
+.ed-plan.featured .tag { color: var(--teal-ink); }
+.ed-plan .name { font-family: var(--serif); font-variation-settings: "opsz" 40; font-size: 28px; letter-spacing: -0.01em; margin: 6px 0 4px; }
+.ed-plan .price { font-family: var(--serif); font-variation-settings: "opsz" 72; font-size: 46px; letter-spacing: -0.02em; line-height: 1; margin: 14px 0 2px; }
+.ed-plan .price small { font-family: var(--mono); font-size: 14px; color: var(--ink-3); letter-spacing: 0; }
+.ed-plan .lede { font-size: 15px; color: var(--ink-2); line-height: 1.55; margin: 10px 0 20px; }
+.ed-plan ul { list-style: none; margin: 0 0 24px; padding: 0; display: grid; gap: 11px; }
+.ed-plan li { font-size: 15px; color: var(--ink-2); line-height: 1.45; padding-left: 26px; position: relative; }
+.ed-plan li::before { content: "✓"; position: absolute; left: 0; top: 0; color: var(--teal-ink); font-weight: 700; }
+.ed-plan li.off { color: var(--ink-3); }
+.ed-plan li.off::before { content: "–"; color: var(--ink-3); }
+.ed-plan .cta-wrap { margin-top: auto; }
+
+/* ---------- Extension browsers ---------- */
+.ed-browsers { display: flex; flex-wrap: wrap; gap: 12px; margin: 26px 0 6px; }
+.ed-browsers .bw { display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 999px; padding: 11px 20px; background: var(--card); font-size: 14.5px; font-weight: 600; color: var(--ink-2); }
+.ed-browsers .bw .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+.ed-browsers .bw.live .dot { background: var(--save); box-shadow: 0 0 0 3px rgba(10,125,116,0.16); }
+.ed-browsers .bw.live { color: var(--ink); border-color: var(--line-2); }

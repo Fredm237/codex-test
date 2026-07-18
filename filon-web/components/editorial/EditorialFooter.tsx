@@ -3,8 +3,15 @@ import { Newsletter } from "./Forms";
 
 const LINKS = [
   { label: "Assistant IA", href: "/recherche" },
+  { label: "Tarifs", href: "/tarifs" },
+  { label: "Extension", href: "/extension" },
   { label: "La méthode", href: "/comment-ca-marche" },
   { label: "Blog", href: "/blog" },
+  { label: "FAQ", href: "/faq" },
+  { label: "Aide", href: "/aide" },
+  { label: "Partenaires", href: "/partenaires" },
+  { label: "Presse", href: "/presse" },
+  { label: "Carrières", href: "/carrieres" },
   { label: "À propos", href: "/a-propos" },
   { label: "Contact", href: "/contact" },
 ];
@@ -12,6 +19,9 @@ const LINKS = [
 const LEGAL = [
   { label: "Mentions légales", href: "/mentions-legales" },
   { label: "Confidentialité", href: "/confidentialite" },
+  { label: "Politique cookies", href: "/cookies" },
+  { label: "CGU", href: "/cgu" },
+  { label: "Sécurité", href: "/securite" },
 ];
 
 export function EditorialFooter() {

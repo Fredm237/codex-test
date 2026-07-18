@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { primaryNav, site } from "@/lib/site";
 
-const DESKTOP = primaryNav.slice(0, 4);
+const DESKTOP = primaryNav.slice(0, 5);
 
 export function EditorialNav() {
   const ref = useRef<HTMLElement>(null);

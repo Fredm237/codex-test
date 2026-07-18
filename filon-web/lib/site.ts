@@ -21,6 +21,7 @@ export type NavItem = { label: string; href: string };
 export const primaryNav: NavItem[] = [
   { label: "Assistant IA", href: "/recherche" },
   { label: "Comment ça marche", href: "/comment-ca-marche" },
+  { label: "Tarifs", href: "/tarifs" },
   { label: "Cashback", href: "/cashback" },
   { label: "Reconditionné", href: "/reconditionne" },
   { label: "Codes promo", href: "/codes-promo" },
