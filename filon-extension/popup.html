@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>FILON</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        width: 300px;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
+        background: #06070c;
+        color: #f4f6fb;
+        font-size: 14px;
+        line-height: 1.5;
+        letter-spacing: -0.01em;
+      }
+      .head { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
+      .head b { font-size: 16px; letter-spacing: -0.03em; }
+      .head small { display: block; color: #626b80; font-size: 11px; font-weight: 400; }
+      .body { padding: 16px; }
+      .stat { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
+      .stat span { color: #9ba3b6; font-size: 13px; }
+      .stat b { font-family: "SF Mono", ui-monospace, monospace; font-size: 15px; color: #22e0a6; }
+      .toggle { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+      .switch { width: 42px; height: 24px; border-radius: 999px; background: linear-gradient(100deg, #3c7bff, #24e3c6); position: relative; cursor: pointer; border: 0; }
+      .switch::after { content: ""; position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.2s; }
+      .switch[aria-pressed="false"] { background: rgba(255, 255, 255, 0.12); }
+      .switch[aria-pressed="false"]::after { left: 3px; }
+      .cta { display: block; text-align: center; margin-top: 16px; padding: 12px; border-radius: 999px; color: #05121f; background: linear-gradient(100deg, #3c7bff, #8b6cff, #24e3c6); font-weight: 600; text-decoration: none; font-size: 14px; }
+      .foot { padding: 0 16px 16px; font-size: 10.5px; color: #626b80; line-height: 1.5; }
+    </style>
+  </head>
+  <body>
+    <div class="head">
+      <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
+        <defs><linearGradient id="plg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#3C7BFF" /><stop offset=".5" stop-color="#8B6CFF" /><stop offset="1" stop-color="#24E3C6" /></linearGradient></defs>
+        <rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#plg)" stroke-width="2" />
+        <path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#plg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <div><b>FILON</b><small>Le réflexe malin avant chaque achat.</small></div>
+    </div>
+    <div class="body">
+      <div class="stat"><span>Économisé ce mois-ci</span><b id="month">0 €</b></div>
+      <div class="stat"><span>Économisé au total</span><b id="total">0 €</b></div>
+      <div class="stat"><span>Filons trouvés</span><b id="count">0</b></div>
+      <div class="toggle">
+        <span>FILON actif</span>
+        <button class="switch" id="switch" aria-pressed="true" aria-label="Activer ou désactiver FILON"></button>
+      </div>
+      <a class="cta" href="https://filon.app" target="_blank" rel="noopener">Ouvrir mon tableau de bord</a>
+    </div>
+    <div class="foot">FILON est gratuit. Certains liens sont affiliés — cela n'augmente jamais votre prix. Données non revendues.</div>
+    <script src="popup.js"></script>
+  </body>
+</html>

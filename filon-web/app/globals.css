@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* ============================================================
+   FILON — Éditorial luxe · palette SmartWave FX
+   Light editorial world (deliberate single theme).
+   ============================================================ */
+:root {
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  --serif: var(--font-serif), "Iowan Old Style", Palatino, Georgia, serif;
+  --mono: "SF Mono", ui-monospace, "Geist Mono", Menlo, monospace;
+
+  --paper: #f4f7fa;   /* blanc froid, métallique */
+  --paper-2: #e9eef4;
+  --card: #ffffff;
+  --ink: #0e1826;     /* encre bleu-nuit */
+  --ink-2: #47566b;
+  --ink-3: #8794a6;
+  --line: rgba(14, 24, 38, 0.12);
+  --line-2: rgba(14, 24, 38, 0.22);
+
+  /* SmartWave FX — SMART bleu royal · WAVE turquoise cyan · chrome argent */
+  --accent: #1e75c9;
+  --accent-ink: #155ba3;
+  --accent-soft: #e7f1fb;
+  --teal: #14c6c0;
+  --teal-ink: #0a8078; /* darker turquoise — AA-legible on light */
+  --chrome: linear-gradient(180deg, #edf1f5, #aeb9c6);
+  --wave: linear-gradient(100deg, #1e75c9, #14c6c0);           /* fills / on-dark */
+  --wave-text: linear-gradient(100deg, #1c6fc4, #0c8f86);      /* legible on light */
+  --wave3: linear-gradient(100deg, #1e75c9, #c3ccd6 50%, #14c6c0);
+  --save: #0a7d74;      /* AA 4.5:1 on white — used for text amounts */
+  --save-soft: #e1f5f4;
+
+  --maxw: 1160px;
+  --ease: cubic-bezier(0.22, 0.9, 0.3, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* radii + shadows */
+  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 26px; --r-full: 100px;
+  --shadow-soft: 0 1px 2px rgba(17,18,20,.05), 0 22px 50px -30px rgba(17,18,20,.28);
+  --shadow-glow: 0 10px 24px -10px var(--accent);
+
+  /* Back-compat aliases so pre-existing components adopt the editorial palette */
+  --bg: var(--paper); --bg-2: var(--paper-2);
+  --text: var(--ink); --text-dim: var(--ink-2); --text-mute: var(--ink-3);
+  --surface: var(--card); --surface-2: #ffffff;
+  --border: var(--line); --border-2: var(--line-2);
+  --blue: var(--accent); --blue-2: var(--accent-ink);
+  --aqua: var(--teal); --aqua-2: var(--teal);
+  --violet: var(--accent);
+  --pos: var(--save); --pos-dim: var(--save-soft); --gold: var(--teal);
+  --vein: var(--wave);
+  --vein-soft: linear-gradient(100deg, rgba(30,116,224,.12), rgba(18,199,180,.12));
+
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-dim: var(--ink-2);
+  --color-accent: var(--accent);
+  --color-teal: var(--teal);
+  --color-save: var(--save);
+  --font-sans: var(--sans);
+  --font-serif: var(--serif);
+  --font-mono: var(--mono);
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 17px;
+  line-height: 1.55;
+  letter-spacing: -0.006em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+::selection { background: var(--ink); color: var(--paper); }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3 { margin: 0; font-weight: 400; line-height: 1; text-wrap: balance; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
+
+.serif { font-family: var(--serif); }
+.it { font-family: var(--serif); font-style: italic; font-weight: 400; }
+.mono { font-family: var(--mono); font-feature-settings: "tnum"; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
+.wave-text {
+  background: var(--wave-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Reveal utility */
+.rv { opacity: 0; transform: translateY(28px); transition: opacity 0.9s var(--ease-out), transform 0.9s var(--ease-out); }
+.rv.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; } }
