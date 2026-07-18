@@ -1,8 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { fraunces } from "./fonts";
 import { buildMetadata, organizationSchema, websiteSchema, JsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
-import { ThemeScript } from "@/components/site/ThemeScript";
 
 export const metadata: Metadata = {
   metadataBase: new URL(site.url),
@@ -11,17 +11,13 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: dark)", color: "#06070c" },
-    { media: "(prefers-color-scheme: light)", color: "#fbfcfe" },
-  ],
+  themeColor: "#FBFBF9",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" suppressHydrationWarning>
+    <html lang="fr" className={fraunces.variable}>
       <head>
-        <ThemeScript />
         <JsonLd data={organizationSchema()} />
         <JsonLd data={websiteSchema()} />
       </head>

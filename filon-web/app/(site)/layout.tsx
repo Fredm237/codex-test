@@ -1,16 +1,14 @@
-import { Nav } from "@/components/site/Nav";
-import { Footer } from "@/components/site/Footer";
-import { Atmosphere } from "@/components/site/Atmosphere";
+import "@/components/editorial/editorial.css";
+import { EditorialNav } from "@/components/editorial/EditorialNav";
+import { EditorialFooter } from "@/components/editorial/EditorialFooter";
 
-// Marketing chrome (aurora background, nav, footer) — applies to every page in
-// the (site) group but NOT to the full-bleed /experience route.
+// Editorial (SmartWave) chrome for the whole marketing site.
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Atmosphere />
-      <Nav />
-      <main>{children}</main>
-      <Footer />
+      <EditorialNav />
+      <main id="top">{children}</main>
+      <EditorialFooter />
     </>
   );
 }

@@ -1,22 +1,25 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
-import { Hero } from "@/components/site/Hero";
-import { Stats, Steps, Transparency, FinalCta } from "@/components/site/Sections";
+import { EditorialHero } from "@/components/editorial/EditorialHero";
+import { Transformation } from "@/components/editorial/Transformation";
+import { Method, Transparency, Partners, Closing } from "@/components/editorial/EditorialSections";
 
 export const metadata: Metadata = buildMetadata({
   path: "/",
+  title: "Est-ce vraiment le bon prix ?",
   description:
-    "FILON compare automatiquement cashback, reconditionné et codes promo avant chaque achat. Une seule expérience, zéro effort, un maximum d'économies — en toute transparence.",
+    "FILON, l'assistant d'achat malin. Avant chaque achat, il compare cashback, reconditionné et codes promo — et vous dit s'il existe mieux. Ne payez plus jamais trop cher.",
 });
 
 export default function HomePage() {
   return (
     <>
-      <Hero />
-      <Stats />
-      <Steps />
+      <EditorialHero />
+      <Transformation />
+      <Method />
       <Transparency />
-      <FinalCta />
+      <Partners />
+      <Closing />
     </>
   );
 }
