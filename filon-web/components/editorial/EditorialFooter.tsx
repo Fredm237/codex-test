@@ -5,6 +5,7 @@ const LINKS = [
   { label: "Assistant IA", href: "/recherche" },
   { label: "Tarifs", href: "/tarifs" },
   { label: "Extension", href: "/extension" },
+  { label: "Intelligence", href: "/intelligence" },
   { label: "La méthode", href: "/comment-ca-marche" },
   { label: "Blog", href: "/blog" },
   { label: "FAQ", href: "/faq" },
@@ -31,10 +32,11 @@ export function EditorialFooter() {
         <div className="ed-newsblock">
           <div>
             <h3 style={{ fontFamily: "var(--serif)", fontVariationSettings: '"opsz" 40', fontSize: 24, letterSpacing: "-0.01em" }}>
-              Soyez prévenu·e du lancement.
+              <span className="it">Le Filon</span> — la newsletter.
             </h3>
             <p style={{ color: "var(--ink-2)", fontSize: 14.5, marginTop: 6 }}>
-              L&apos;extension arrive. Rejoignez la liste — pas de spam, juste le signal du départ.
+              Chaque semaine : les vraies bonnes affaires, les erreurs d&apos;achat à éviter et les produits qui valent le coup.
+              Zéro spam — et le signal du lancement en avant-première.
             </p>
           </div>
           <Newsletter />

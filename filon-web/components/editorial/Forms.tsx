@@ -87,7 +87,7 @@ export function Newsletter() {
     const fd = new FormData(e.currentTarget);
     if (fd.get("_gotcha")) return;
     setState("sending");
-    const ok = await postForm({ email: String(fd.get("email") || ""), _subject: "Newsletter FILON", liste: "newsletter" });
+    const ok = await postForm({ email: String(fd.get("email") || ""), _subject: "Le Filon — inscription newsletter", liste: "le-filon" });
     setState(ok ? "ok" : "error");
     if (ok) e.currentTarget.reset();
   };

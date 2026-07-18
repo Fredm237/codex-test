@@ -12,6 +12,7 @@ const routes = [
   "/codes-promo",
   "/tarifs",
   "/extension",
+  "/intelligence",
   "/blog",
   "/blog/quelle-app-cashback-paie-le-plus",
   "/blog/neuf-vs-reconditionne-economie-reelle",
