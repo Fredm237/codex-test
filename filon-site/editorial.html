@@ -11,13 +11,15 @@
     --serif:"Fraunces","Iowan Old Style",Palatino,Georgia,serif;
     --mono:"SF Mono",ui-monospace,"Geist Mono",Menlo,monospace;
 
-    --paper:#FBFBF9; --paper-2:#F2F2EF; --card:#FFFFFF;
-    --ink:#111214; --ink-2:#4B4D55; --ink-3:#8A8C92;
-    --line:rgba(17,18,20,.12); --line-2:rgba(17,18,20,.22);
-    --accent:#1E74E0; --accent-ink:#155BC0; --accent-soft:#E8F1FD;  /* SmartWave bleu électrique */
-    --teal:#12C7B4;  /* SmartWave turquoise */
-    --wave:linear-gradient(100deg,#1E74E0,#4FA8D8 46%,#12C7B4);     /* bleu → argent → turquoise */
-    --save:#0BA592; --save-soft:#E4F6F3;  /* économie = turquoise SmartWave */
+    --paper:#F4F7FA; --paper-2:#E9EEF4; --card:#FFFFFF;   /* blanc froid, métallique */
+    --ink:#0E1826; --ink-2:#47566B; --ink-3:#8794A6;      /* encre bleu-nuit */
+    --line:rgba(14,24,38,.12); --line-2:rgba(14,24,38,.22);
+    --accent:#1E75C9; --accent-ink:#155BA3; --accent-soft:#E7F1FB;  /* SMART — bleu royal */
+    --teal:#14C6C0; --teal-ink:#0FA6A0;                              /* WAVE — turquoise cyan */
+    --chrome:linear-gradient(180deg,#EDF1F5,#AEB9C6);               /* argent chromé */
+    --wave:linear-gradient(100deg,#1E75C9,#14C6C0);                 /* bleu → turquoise (logo) */
+    --wave3:linear-gradient(100deg,#1E75C9,#C3CCD6 50%,#14C6C0);    /* bleu → chrome → turquoise */
+    --save:#0FA6A0; --save-soft:#E1F5F4;                            /* économie = turquoise WAVE */
     --maxw:1160px;
     --ease:cubic-bezier(.22,.9,.3,1); --ease-out:cubic-bezier(.16,1,.3,1);
     color-scheme:light;
@@ -34,6 +36,7 @@
   .serif{font-family:var(--serif)}
   em,.it{font-family:var(--serif);font-style:italic;font-weight:400}
   .mono{font-family:var(--mono);font-feature-settings:"tnum"}
+  .wave-text{background:var(--wave);-webkit-background-clip:text;background-clip:text;color:transparent}
   :focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(22px,5vw,40px)}
   .eyebrow{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3)}
@@ -220,7 +223,7 @@
       <h1>
         <span class="l"><span>Est-ce</span></span>
         <span class="l"><span><em>vraiment</em></span></span>
-        <span class="l"><span>le bon prix&nbsp;?</span></span>
+        <span class="l"><span class="wave-text">le bon prix&nbsp;?</span></span>
       </h1>
       <div class="hero-foot">
         <div>
@@ -416,9 +419,9 @@
 "vec3 nrm(vec3 p){vec2 e=vec2(0.0015,0.);return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}",
 // SmartWave studio reflected by the chrome: turquoise(bas) → argent(milieu) → bleu(haut)
 "vec3 env(vec3 r){float y=r.y*0.5+0.5;",
-" vec3 teal=vec3(0.05,0.72,0.68),silver=vec3(0.95,0.97,1.0),blue=vec3(0.10,0.44,0.90);",
-" vec3 c=mix(teal,silver,smoothstep(0.0,0.5,y));c=mix(c,blue,smoothstep(0.55,1.0,y));",
-" c+=vec3(1.0)*pow(max(dot(r,normalize(vec3(0.4,0.85,0.5))),0.),60.);return c;}",
+" vec3 teal=vec3(0.078,0.776,0.752),silver=vec3(0.97,0.98,1.0),blue=vec3(0.118,0.459,0.788);",  // WAVE / chrome / SMART
+" vec3 c=mix(teal,silver,smoothstep(0.0,0.48,y));c=mix(c,blue,smoothstep(0.52,1.0,y));",
+" c+=vec3(1.0)*pow(max(dot(r,normalize(vec3(0.4,0.85,0.5))),0.),90.);return c;}",  // sharper chrome highlight
 "void main(){vec2 uv=(gl_FragCoord.xy-0.5*R)/R.y;",
 " vec3 ro=vec3(0.,0.,2.6);vec3 rd=normalize(vec3(uv,-1.7));",
 " float ry=T*0.12+M.x*0.5, rx=-0.08+M.y*0.32;",

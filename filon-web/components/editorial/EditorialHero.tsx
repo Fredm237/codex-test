@@ -82,7 +82,7 @@ export function EditorialHero() {
         <h1 className="ed-h1" aria-label="Est-ce vraiment le bon prix ?">
           <span className="l"><span>Est-ce</span></span>
           <span className="l"><span className="it">vraiment</span></span>
-          <span className="l"><span>le bon prix&nbsp;?</span></span>
+          <span className="l"><span className="wave-text">le bon prix&nbsp;?</span></span>
         </h1>
         <div className="ed-hero-foot">
           <div>

@@ -9,23 +9,26 @@
   --serif: var(--font-serif), "Iowan Old Style", Palatino, Georgia, serif;
   --mono: "SF Mono", ui-monospace, "Geist Mono", Menlo, monospace;
 
-  --paper: #fbfbf9;
-  --paper-2: #f2f2ef;
+  --paper: #f4f7fa;   /* blanc froid, métallique */
+  --paper-2: #e9eef4;
   --card: #ffffff;
-  --ink: #111214;
-  --ink-2: #4b4d55;
-  --ink-3: #8a8c92;
-  --line: rgba(17, 18, 20, 0.12);
-  --line-2: rgba(17, 18, 20, 0.22);
+  --ink: #0e1826;     /* encre bleu-nuit */
+  --ink-2: #47566b;
+  --ink-3: #8794a6;
+  --line: rgba(14, 24, 38, 0.12);
+  --line-2: rgba(14, 24, 38, 0.22);
 
-  /* SmartWave FX */
-  --accent: #1e74e0;
-  --accent-ink: #155bc0;
-  --accent-soft: #e8f1fd;
-  --teal: #12c7b4;
-  --wave: linear-gradient(100deg, #1e74e0, #4fa8d8 46%, #12c7b4);
-  --save: #0ba592;
-  --save-soft: #e4f6f3;
+  /* SmartWave FX — SMART bleu royal · WAVE turquoise cyan · chrome argent */
+  --accent: #1e75c9;
+  --accent-ink: #155ba3;
+  --accent-soft: #e7f1fb;
+  --teal: #14c6c0;
+  --teal-ink: #0fa6a0;
+  --chrome: linear-gradient(180deg, #edf1f5, #aeb9c6);
+  --wave: linear-gradient(100deg, #1e75c9, #14c6c0);
+  --wave3: linear-gradient(100deg, #1e75c9, #c3ccd6 50%, #14c6c0);
+  --save: #0fa6a0;
+  --save-soft: #e1f5f4;
 
   --maxw: 1160px;
   --ease: cubic-bezier(0.22, 0.9, 0.3, 1);
