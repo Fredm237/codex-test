@@ -1,24 +1,41 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * Liquid-metal 3D object — merged metaballs with a chrome material reflecting a
- * SmartWave studio (blue → silver → turquoise). Hand-written WebGL, no libs.
- * Represents the "filon" streaming; mouse-reactive; reduced-motion safe.
+ * Liquid-metal 3D object (SmartWave chrome). WebGL runs only on capable
+ * desktops, pauses when off-screen, and falls back to a CSS gradient orb on
+ * mobile / low-power / reduced-motion — keeping the page fast everywhere.
  */
-export function LiquidMetal({ className, style }: { className?: string; style?: React.CSSProperties }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+export function LiquidMetal({ className }: { className?: string }) {
+  const [useGL, setUseGL] = useState(false);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  // Decide whether to run WebGL at all
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const nav = navigator as Navigator & { connection?: { saveData?: boolean }; deviceMemory?: number };
+    const weak =
+      window.innerWidth < 768 ||
+      (typeof nav.hardwareConcurrency === "number" && nav.hardwareConcurrency <= 4) ||
+      (typeof nav.deviceMemory === "number" && nav.deviceMemory <= 4) ||
+      nav.connection?.saveData === true;
+    let webglOk = false;
+    try {
+      const c = document.createElement("canvas");
+      webglOk = !!(c.getContext("webgl") || c.getContext("experimental-webgl"));
+    } catch {
+      webglOk = false;
+    }
+    setUseGL(!reduce && !weak && webglOk);
+  }, []);
 
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const cv = ref.current;
+    if (!useGL) return;
+    const cv = canvasRef.current;
     if (!cv) return;
     const gl = cv.getContext("webgl", { alpha: true, antialias: true, premultipliedAlpha: false });
-    if (!gl) {
-      cv.style.display = "none";
-      return;
-    }
+    if (!gl) return;
 
     const vs = "attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}";
     const fs = [
@@ -55,22 +72,16 @@ export function LiquidMetal({ className, style }: { className?: string; style?: 
       " gl_FragColor=vec4(col,0.97);}",
     ].join("\n");
 
-    function sh(type: number, src: string) {
-      const o = gl!.createShader(type)!;
-      gl!.shaderSource(o, src);
-      gl!.compileShader(o);
-      if (!gl!.getShaderParameter(o, gl!.COMPILE_STATUS)) {
-        console.warn(gl!.getShaderInfoLog(o));
-        return null;
-      }
+    const sh = (type: number, src: string) => {
+      const o = gl.createShader(type)!;
+      gl.shaderSource(o, src);
+      gl.compileShader(o);
+      if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) return null;
       return o;
-    }
+    };
     const v = sh(gl.VERTEX_SHADER, vs);
     const f = sh(gl.FRAGMENT_SHADER, fs);
-    if (!v || !f) {
-      cv.style.display = "none";
-      return;
-    }
+    if (!v || !f) return;
     const pr = gl.createProgram()!;
     gl.attachShader(pr, v);
     gl.attachShader(pr, f);
@@ -103,13 +114,18 @@ export function LiquidMetal({ className, style }: { className?: string; style?: 
     size();
     window.addEventListener("resize", size);
 
-    const t0 = performance.now();
-    let vis = true;
-    let raf = 0;
-    const onVis = () => (vis = !document.hidden);
+    // Pause when off-screen or tab hidden (perf/battery)
+    let onScreen = true;
+    const io = new IntersectionObserver((es) => es.forEach((e) => (onScreen = e.isIntersecting)), { threshold: 0.01 });
+    io.observe(cv);
+    let tabVisible = true;
+    const onVis = () => (tabVisible = !document.hidden);
     document.addEventListener("visibilitychange", onVis);
+
+    const t0 = performance.now();
+    let raf = 0;
     const frame = (now: number) => {
-      if (vis) {
+      if (onScreen && tabVisible) {
         m[0] += (mt[0] - m[0]) * 0.05;
         m[1] += (mt[1] - m[1]) * 0.05;
         gl.uniform2f(uR, cv.width, cv.height);
@@ -126,8 +142,13 @@ export function LiquidMetal({ className, style }: { className?: string; style?: 
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("resize", size);
       document.removeEventListener("visibilitychange", onVis);
+      io.disconnect();
     };
-  }, []);
+  }, [useGL]);
 
-  return <canvas ref={ref} className={className} style={style} aria-hidden="true" />;
+  return (
+    <div className={className} aria-hidden="true">
+      {useGL ? <canvas ref={canvasRef} /> : <div className="ed-coin-fallback" />}
+    </div>
+  );
 }

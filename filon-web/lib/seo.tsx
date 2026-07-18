@@ -11,6 +11,8 @@ export function buildMetadata(input: {
   const description = input.description ?? site.description;
   const url = `${site.url}${input.path ?? "/"}`;
 
+  const ogImage = { url: "/og.png", width: 1200, height: 630, alt: `${site.name} — ${site.tagline}` };
+
   return {
     title,
     description,
@@ -22,12 +24,14 @@ export function buildMetadata(input: {
       siteName: site.name,
       title,
       description,
+      images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
       site: site.twitter,
+      images: ["/og.png"],
     },
   };
 }

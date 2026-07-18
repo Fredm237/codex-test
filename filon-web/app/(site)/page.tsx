@@ -3,6 +3,7 @@ import { buildMetadata } from "@/lib/seo";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { Transformation } from "@/components/editorial/Transformation";
 import { Method, Transparency, Partners, Closing } from "@/components/editorial/EditorialSections";
+import { Faq } from "@/components/editorial/Faq";
 
 export const metadata: Metadata = buildMetadata({
   path: "/",
@@ -19,6 +20,7 @@ export default function HomePage() {
       <Method />
       <Transparency />
       <Partners />
+      <Faq />
       <Closing />
     </>
   );

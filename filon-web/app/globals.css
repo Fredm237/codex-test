@@ -23,11 +23,12 @@
   --accent-ink: #155ba3;
   --accent-soft: #e7f1fb;
   --teal: #14c6c0;
-  --teal-ink: #0fa6a0;
+  --teal-ink: #0a8078; /* darker turquoise — AA-legible on light */
   --chrome: linear-gradient(180deg, #edf1f5, #aeb9c6);
-  --wave: linear-gradient(100deg, #1e75c9, #14c6c0);
+  --wave: linear-gradient(100deg, #1e75c9, #14c6c0);           /* fills / on-dark */
+  --wave-text: linear-gradient(100deg, #1c6fc4, #0c8f86);      /* legible on light */
   --wave3: linear-gradient(100deg, #1e75c9, #c3ccd6 50%, #14c6c0);
-  --save: #0fa6a0;
+  --save: #0a7d74;      /* AA 4.5:1 on white — used for text amounts */
   --save-soft: #e1f5f4;
 
   --maxw: 1160px;
@@ -92,7 +93,7 @@ h1, h2, h3 { margin: 0; font-weight: 400; line-height: 1; text-wrap: balance; }
 .mono { font-family: var(--mono); font-feature-settings: "tnum"; }
 .eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
 .wave-text {
-  background: var(--wave);
+  background: var(--wave-text);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
