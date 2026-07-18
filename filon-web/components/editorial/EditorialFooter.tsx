@@ -2,10 +2,16 @@ import { site } from "@/lib/site";
 import { Newsletter } from "./Forms";
 
 const LINKS = [
-  { label: "La transformation", href: "/#transform" },
-  { label: "La méthode", href: "/#comment" },
-  { label: "Transparence", href: "/#transparence" },
-  { label: "Installer", href: "/#installer" },
+  { label: "Assistant IA", href: "/recherche" },
+  { label: "La méthode", href: "/comment-ca-marche" },
+  { label: "Blog", href: "/blog" },
+  { label: "À propos", href: "/a-propos" },
+  { label: "Contact", href: "/contact" },
+];
+
+const LEGAL = [
+  { label: "Mentions légales", href: "/mentions-legales" },
+  { label: "Confidentialité", href: "/confidentialite" },
 ];
 
 export function EditorialFooter() {
@@ -31,6 +37,13 @@ export function EditorialFooter() {
             ))}
           </div>
           <span className="cr">© {new Date().getFullYear()} · Conçu à {site.city}</span>
+        </div>
+        <div className="ed-foot-links" style={{ marginTop: 18 }}>
+          {LEGAL.map((l) => (
+            <a key={l.href} href={l.href} style={{ fontSize: 12.5, color: "var(--ink-3)" }}>
+              {l.label}
+            </a>
+          ))}
         </div>
         <p className="ed-disc">
           FILON est gratuit. Certains liens sont affiliés — lorsque vous activez une offre via FILON, la plateforme

@@ -11,8 +11,11 @@ const routes = [
   "/reconditionne",
   "/codes-promo",
   "/blog",
+  "/blog/quelle-app-cashback-paie-le-plus",
   "/a-propos",
   "/contact",
+  "/mentions-legales",
+  "/confidentialite",
 ];
 
 export default function sitemap(): MetadataRoute.Sitemap {

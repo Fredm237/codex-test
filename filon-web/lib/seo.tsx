@@ -79,6 +79,27 @@ export function faqSchema(items: { q: string; a: string }[]) {
   };
 }
 
+/** JSON-LD: Article (blog posts). */
+export function articleSchema(a: { title: string; description: string; path: string; datePublished: string }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: a.title,
+    description: a.description,
+    author: { "@type": "Organization", name: site.name },
+    publisher: {
+      "@type": "Organization",
+      name: site.name,
+      logo: { "@type": "ImageObject", url: `${site.url}/icon.png` },
+    },
+    datePublished: a.datePublished,
+    dateModified: a.datePublished,
+    mainEntityOfPage: `${site.url}${a.path}`,
+    image: `${site.url}/og.png`,
+    inLanguage: "fr",
+  };
+}
+
 /** JSON-LD: BreadcrumbList. */
 export function breadcrumbSchema(items: { name: string; path: string }[]) {
   return {

@@ -45,4 +45,11 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
       { label: "Contact", href: "/contact" },
     ],
   },
+  {
+    title: "Légal",
+    items: [
+      { label: "Mentions légales", href: "/mentions-legales" },
+      { label: "Confidentialité", href: "/confidentialite" },
+    ],
+  },
 ];
