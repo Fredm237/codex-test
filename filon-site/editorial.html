@@ -14,8 +14,10 @@
     --paper:#FBFBF9; --paper-2:#F2F2EF; --card:#FFFFFF;
     --ink:#111214; --ink-2:#4B4D55; --ink-3:#8A8C92;
     --line:rgba(17,18,20,.12); --line-2:rgba(17,18,20,.22);
-    --accent:#2B50E6; --accent-ink:#1E3ECB; --accent-soft:#EEF1FE;
-    --save:#0E7A55; --save-soft:#E8F6EF;
+    --accent:#1E74E0; --accent-ink:#155BC0; --accent-soft:#E8F1FD;  /* SmartWave bleu électrique */
+    --teal:#12C7B4;  /* SmartWave turquoise */
+    --wave:linear-gradient(100deg,#1E74E0,#4FA8D8 46%,#12C7B4);     /* bleu → argent → turquoise */
+    --save:#0BA592; --save-soft:#E4F6F3;  /* économie = turquoise SmartWave */
     --maxw:1160px;
     --ease:cubic-bezier(.22,.9,.3,1); --ease-out:cubic-bezier(.16,1,.3,1);
     color-scheme:light;
@@ -55,9 +57,9 @@
   .nav-mid a{font-size:13.5px;color:var(--ink-2);letter-spacing:.01em;transition:color .2s}
   .nav-mid a:hover{color:var(--ink)}
   @media (max-width:760px){.nav-mid{display:none}}
-  .nav-cta{font-size:13.5px;font-weight:600;padding:11px 22px;border-radius:100px;background:var(--accent);color:#fff;
-    transition:transform .2s var(--ease),background .2s;box-shadow:0 10px 24px -10px var(--accent)}
-  .nav-cta:hover{transform:translateY(-1px);background:var(--accent-ink)}
+  .nav-cta{font-size:13.5px;font-weight:600;padding:11px 22px;border-radius:100px;background:var(--wave);color:#fff;
+    transition:transform .2s var(--ease),filter .2s;box-shadow:0 10px 24px -10px var(--accent)}
+  .nav-cta:hover{transform:translateY(-1px);filter:brightness(1.06)}
 
   .btn{font-family:inherit;font-size:15px;font-weight:600;padding:15px 28px;border-radius:100px;cursor:none;
     transition:transform .2s var(--ease-out),background .2s,color .2s;border:1px solid var(--ink);display:inline-flex;align-items:center;gap:9px;white-space:nowrap}
@@ -403,29 +405,37 @@
     var fs=[
 "precision highp float;uniform vec2 R;uniform float T;uniform vec2 M;",
 "mat2 rot(float a){float c=cos(a),s=sin(a);return mat2(c,-s,s,c);}",
-// rounded disc SDF (coin)
-"float sdCoin(vec3 p){vec2 d=vec2(length(p.xz)-0.72,abs(p.y)-0.12);return min(max(d.x,d.y),0.0)+length(max(d,0.0))-0.06;}",
-"vec3 nrm(vec3 p){vec2 e=vec2(0.001,0.);return normalize(vec3(sdCoin(p+e.xyy)-sdCoin(p-e.xyy),sdCoin(p+e.yxy)-sdCoin(p-e.yxy),sdCoin(p+e.yyx)-sdCoin(p-e.yyx)));}",
+"float smin(float a,float b,float k){float h=clamp(0.5+0.5*(b-a)/k,0.,1.);return mix(b,a,h)-k*h*(1.-h);}",
+// flowing liquid-metal (the filon that streams) — merged metaballs
+"float map(vec3 p){",
+" vec3 a=vec3(sin(T*0.7)*0.34,cos(T*0.5)*0.30,sin(T*0.3)*0.15);",
+" vec3 b=vec3(cos(T*0.6)*0.40,sin(T*0.8)*0.24,cos(T*0.45)*0.18);",
+" vec3 c=vec3(sin(T*0.9+1.0)*0.30,cos(T*0.7+2.0)*0.34,cos(T*0.5)*0.16);",
+" float d=smin(length(p-a)-0.50,length(p-b)-0.46,0.36);",
+" return smin(d,length(p-c)-0.42,0.36);}",
+"vec3 nrm(vec3 p){vec2 e=vec2(0.0015,0.);return normalize(vec3(map(p+e.xyy)-map(p-e.xyy),map(p+e.yxy)-map(p-e.yxy),map(p+e.yyx)-map(p-e.yyx)));}",
+// SmartWave studio reflected by the chrome: turquoise(bas) → argent(milieu) → bleu(haut)
+"vec3 env(vec3 r){float y=r.y*0.5+0.5;",
+" vec3 teal=vec3(0.05,0.72,0.68),silver=vec3(0.95,0.97,1.0),blue=vec3(0.10,0.44,0.90);",
+" vec3 c=mix(teal,silver,smoothstep(0.0,0.5,y));c=mix(c,blue,smoothstep(0.55,1.0,y));",
+" c+=vec3(1.0)*pow(max(dot(r,normalize(vec3(0.4,0.85,0.5))),0.),60.);return c;}",
 "void main(){vec2 uv=(gl_FragCoord.xy-0.5*R)/R.y;",
-" vec3 ro=vec3(0.,0.,2.6);vec3 rd=normalize(vec3(uv,-1.6));",
-" float ang=T*0.35+M.x*0.6;float tilt=-0.5+M.y*0.4;",
-" float t=0.;vec3 pos;bool hit=false;",
-" for(int i=0;i<70;i++){pos=ro+rd*t;vec3 q=pos;q.yz=rot(tilt)*q.yz;q.xz=rot(ang)*q.xz;float d=sdCoin(q);if(d<0.001){hit=true;break;}t+=d;if(t>6.)break;}",
+" vec3 ro=vec3(0.,0.,2.6);vec3 rd=normalize(vec3(uv,-1.7));",
+" float ry=T*0.12+M.x*0.5, rx=-0.08+M.y*0.32;",
+" mat2 RY=rot(ry),RX=rot(rx);",
+" ro.xz=RY*ro.xz;rd.xz=RY*rd.xz;ro.yz=RX*ro.yz;rd.yz=RX*rd.yz;",
+" float t=0.;float d;vec3 pos;bool hit=false;",
+" for(int i=0;i<90;i++){pos=ro+rd*t;d=map(pos);if(d<0.001){hit=true;break;}t+=d;if(t>7.)break;}",
 " if(!hit){gl_FragColor=vec4(0.);return;}",
-" vec3 q=pos;q.yz=rot(tilt)*q.yz;q.xz=rot(ang)*q.xz;vec3 n=nrm(q);",
-" vec3 L=normalize(vec3(0.6,0.9,0.7));vec3 V=normalize(-rd);vec3 H=normalize(L+V);",
-" float diff=clamp(dot(n,L),0.,1.);float spec=pow(clamp(dot(n,H),0.,1.),60.);",
-" float fres=pow(1.-clamp(dot(n,V),0.,1.),2.5);",
-// metallic base tinted between ink, cobalt and gold rim
-" vec3 hi=vec3(0.97,0.90,0.72);vec3 lo=vec3(0.44,0.33,0.16);",  // champagne → bronze
-" vec3 base=mix(lo,hi,clamp(n.y*0.5+0.55,0.,1.));",
-" vec3 col=base*(0.46+0.54*diff);",
-" col+=vec3(1.0,0.93,0.72)*fres*0.38;",          // warm rim (le filon)
-" col+=vec3(1.0,0.97,0.86)*spec*1.2;",           // bright warm specular
-" col=pow(col,vec3(0.95));",
-" float aa=smoothstep(0.001,0.0,sdCoin(q));",
-" float shade=clamp(diff+0.25,0.,1.);",
-" gl_FragColor=vec4(col, 0.96);}"
+" vec3 n=nrm(pos);vec3 V=-rd;",
+" float fres=pow(1.-clamp(dot(n,V),0.,1.),3.0);",
+" vec3 refl=reflect(rd,n);",
+" vec3 col=env(refl);",                              // chrome reflection
+" col=mix(col,vec3(1.0),fres*0.5);",                 // fresnel white rim
+" col*=vec3(0.90,0.97,1.0);",                        // faint cool tint
+" col+=vec3(1.0)*pow(max(dot(refl,normalize(vec3(0.4,0.85,0.5))),0.),130.)*0.55;",
+" col=col/(1.0+col*0.14);col=pow(col,vec3(0.92));",
+" gl_FragColor=vec4(col,0.97);}"
 ].join("\n");
     function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){return null;}return o;}
     var v=sh(gl.VERTEX_SHADER,vs),f=sh(gl.FRAGMENT_SHADER,fs);if(!v||!f){cv.style.display="none";return;}
