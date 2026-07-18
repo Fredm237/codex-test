@@ -1,7 +1,9 @@
 import { faqSchema, JsonLd } from "@/lib/seo";
 import { Reveal } from "./Reveal";
 
-export const FAQ_ITEMS = [
+export type QA = { q: string; a: string };
+
+export const HOME_FAQ: QA[] = [
   {
     q: "FILON est-il vraiment gratuit ?",
     a: "Oui, totalement et pour toujours. FILON se rémunère via une part de la commission d'apport versée par les plateformes partenaires quand vous activez une offre — jamais en vous facturant, ni en revendant vos données.",
@@ -24,19 +26,29 @@ export const FAQ_ITEMS = [
   },
 ];
 
-export function Faq() {
+export function FaqBlock({
+  items,
+  id = "faq",
+  eyebrow = "FAQ",
+  title = "Les questions que vous vous posez.",
+}: {
+  items: QA[];
+  id?: string;
+  eyebrow?: string;
+  title?: string;
+}) {
   return (
-    <section className="ed-band" id="faq">
-      <JsonLd data={faqSchema(FAQ_ITEMS.map((i) => ({ q: i.q, a: i.a })))} />
+    <section className="ed-band" id={id}>
+      <JsonLd data={faqSchema(items)} />
       <div className="ed-wrap">
         <Reveal>
           <div className="ed-lead">
-            <span className="idx">FAQ</span>
-            <h2>Les questions que vous vous posez.</h2>
+            <span className="idx">{eyebrow}</span>
+            <h2>{title}</h2>
           </div>
         </Reveal>
         <div className="ed-faq">
-          {FAQ_ITEMS.map((it) => (
+          {items.map((it) => (
             <details className="ed-qa" key={it.q}>
               <summary>
                 {it.q}
@@ -49,4 +61,8 @@ export function Faq() {
       </div>
     </section>
   );
+}
+
+export function Faq() {
+  return <FaqBlock items={HOME_FAQ} />;
 }

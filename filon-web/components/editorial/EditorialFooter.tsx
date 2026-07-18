@@ -1,4 +1,5 @@
 import { site } from "@/lib/site";
+import { Newsletter } from "./Forms";
 
 const LINKS = [
   { label: "La transformation", href: "/#transform" },
@@ -11,6 +12,17 @@ export function EditorialFooter() {
   return (
     <footer className="ed-footer">
       <div className="ed-wrap">
+        <div className="ed-newsblock">
+          <div>
+            <h3 style={{ fontFamily: "var(--serif)", fontVariationSettings: '"opsz" 40', fontSize: 24, letterSpacing: "-0.01em" }}>
+              Soyez prévenu·e du lancement.
+            </h3>
+            <p style={{ color: "var(--ink-2)", fontSize: 14.5, marginTop: 6 }}>
+              L&apos;extension arrive. Rejoignez la liste — pas de spam, juste le signal du départ.
+            </p>
+          </div>
+          <Newsletter />
+        </div>
         <div className="ed-foot">
           <span className="ed-brand" style={{ fontSize: 16 }}>{site.name}</span>
           <div className="ed-foot-links">

@@ -23,6 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <JsonLd data={organizationSchema()} />
         <JsonLd data={websiteSchema()} />
+        {site.plausibleDomain ? (
+          // Privacy-first, cookieless analytics — no consent banner needed.
+          <script defer data-domain={site.plausibleDomain} src="https://plausible.io/js/script.js" />
+        ) : null}
       </head>
       <body>{children}</body>
     </html>

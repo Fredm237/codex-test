@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { primaryNav, site } from "@/lib/site";
 
-const NAV = primaryNav.slice(0, 4);
+const DESKTOP = primaryNav.slice(0, 4);
 
 export function EditorialNav() {
   const ref = useRef<HTMLElement>(null);
@@ -39,7 +39,7 @@ export function EditorialNav() {
             {site.name}
           </a>
           <div className="ed-nav-mid">
-            {NAV.map((n) => (
+            {DESKTOP.map((n) => (
               <a key={n.href} href={n.href}>
                 {n.label}
               </a>
@@ -65,7 +65,7 @@ export function EditorialNav() {
           not trapped by the header's backdrop-filter containing block. */}
       <div className={`ed-mobile ${open ? "show" : ""}`} aria-hidden={!open}>
         <nav className="ed-mobile-nav">
-          {NAV.map((n) => (
+          {primaryNav.map((n) => (
             <a key={n.href} href={n.href} onClick={() => setOpen(false)}>
               {n.label}
             </a>
