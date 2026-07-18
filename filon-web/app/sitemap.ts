@@ -12,6 +12,7 @@ const routes = [
   "/codes-promo",
   "/blog",
   "/blog/quelle-app-cashback-paie-le-plus",
+  "/blog/neuf-vs-reconditionne-economie-reelle",
   "/a-propos",
   "/contact",
   "/mentions-legales",

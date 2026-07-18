@@ -18,6 +18,13 @@ const POSTS = [
     href: "/blog/quelle-app-cashback-paie-le-plus",
     read: "6 min de lecture",
   },
+  {
+    cat: "Guide",
+    title: "Neuf vs reconditionné : l'économie réelle, produit par produit",
+    excerpt: "Combien économise-t-on vraiment ? Écarts par catégorie, grades, garanties et le cumul avec le cashback — pour décider sans hésiter.",
+    href: "/blog/neuf-vs-reconditionne-economie-reelle",
+    read: "5 min de lecture",
+  },
 ];
 
 export default function BlogPage() {
@@ -41,12 +48,6 @@ export default function BlogPage() {
                   <div className="rd">{p.read} →</div>
                 </a>
               ))}
-              <div className="ed-post" style={{ opacity: 0.6 }}>
-                <span className="cat">Bientôt</span>
-                <h3>Neuf vs reconditionné : l&apos;économie réelle, produit par produit</h3>
-                <p>Combien vous gagnez vraiment en choisissant le reconditionné garanti — chiffres à l&apos;appui.</p>
-                <div className="rd">En préparation</div>
-              </div>
             </div>
           </Reveal>
         </div>
