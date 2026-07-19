@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { Transformation } from "@/components/editorial/Transformation";
-import { Method, Transparency, Partners, Closing } from "@/components/editorial/EditorialSections";
+import { Method, Transparency, Partners } from "@/components/editorial/EditorialSections";
+import { NetworkScene, GraphScene, ClosingScene } from "@/components/editorial/Scenes";
 import { Faq } from "@/components/editorial/Faq";
 
 export const metadata: Metadata = buildMetadata({
@@ -18,10 +19,12 @@ export default function HomePage() {
       <EditorialHero />
       <Transformation />
       <Method />
+      <NetworkScene />
       <Transparency />
+      <GraphScene />
       <Partners />
       <Faq />
-      <Closing />
+      <ClosingScene />
     </>
   );
 }
