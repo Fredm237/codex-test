@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { LiquidMetal } from "./LiquidMetal";
+import dynamic from "next/dynamic";
+
+const IntelligenceCore = dynamic(
+  () => import("./IntelligenceCore").then((m) => m.IntelligenceCore),
+  { ssr: false, loading: () => <div className="ed-core core-fallback" aria-hidden="true" /> }
+);
 
 function animateNumber(el: HTMLElement) {
   const to = parseFloat(el.getAttribute("data-to") || "0");
@@ -28,10 +33,8 @@ export function EditorialHero() {
     const hero = heroRef.current;
     if (!hero) return;
     requestAnimationFrame(() => hero.classList.add("in"));
-
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    // count-ups
     const cio = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -45,7 +48,20 @@ export function EditorialHero() {
     );
     hero.querySelectorAll<HTMLElement>("[data-to]").forEach((el) => cio.observe(el));
 
-    // verdict choreography
+    // pointer parallax on the floating verdict card
+    const card = hero.querySelector<HTMLElement>(".ed-verdict");
+    let rafP = 0;
+    const onMove = (e: PointerEvent) => {
+      if (reduce || window.innerWidth < 860) return;
+      cancelAnimationFrame(rafP);
+      rafP = requestAnimationFrame(() => {
+        const cx = (e.clientX / window.innerWidth - 0.5) * 2;
+        const cy = (e.clientY / window.innerHeight - 0.5) * 2;
+        if (card) card.style.transform = `perspective(1000px) rotateY(${cx * 4}deg) rotateX(${-cy * 4}deg) translateY(var(--float,0px))`;
+      });
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+
     const vc = hero.querySelector(".ed-verdict");
     if (vc) {
       const vio = new IntersectionObserver(
@@ -69,35 +85,42 @@ export function EditorialHero() {
       vio.observe(vc);
     }
 
-    return () => cio.disconnect();
+    return () => {
+      cio.disconnect();
+      window.removeEventListener("pointermove", onMove);
+      cancelAnimationFrame(rafP);
+    };
   }, []);
 
   return (
     <section className="ed-hero" ref={heroRef}>
-      <LiquidMetal className="ed-coin" />
+      <div className="ed-core-wrap" aria-hidden="true">
+        <div className="ed-core-glow" />
+        <IntelligenceCore className="ed-core" />
+      </div>
+
       <div className="ed-wrap inner">
-        <span className="eyebrow" style={{ display: "block", marginBottom: "clamp(24px,4vw,40px)" }}>
-          Votre copilote d&apos;achat, propulsé par l&apos;IA
+        <span className="eyebrow ed-hero-eyebrow">
+          <span className="dot" /> Copilote d&apos;achat · propulsé par l&apos;IA
         </span>
         <h1 className="ed-h1" aria-label="Est-ce vraiment le bon prix ?">
           <span className="l"><span>Est-ce</span></span>
           <span className="l"><span className="it">vraiment</span></span>
           <span className="l"><span className="wave-text">le bon prix&nbsp;?</span></span>
         </h1>
+
         <div className="ed-hero-foot">
           <div>
             <p className="ed-hero-sub">
-              Dites à FILON ce que vous cherchez. Il analyse le marché, compare tout — prix, cashback, reconditionné,
-              historique — et vous dit <b>quoi acheter, où, et si c&apos;est le bon moment</b>. Un comparateur montre les prix.
-              FILON décide avec vous.
+              Décrivez un besoin. FILON compare tout — et vous dit <b>quoi acheter, et quand</b>.
             </p>
             <div className="ed-hero-actions">
-              <a className="ed-btn dark" href="/#installer">Ajouter FILON — gratuit</a>
-              <span className="ed-cap">Extension &amp; app · données non revendues</span>
+              <a className="ed-btn dark" href="/recherche">Essayer le copilote</a>
+              <a className="ed-btn ghost" href="/#installer">Ajouter — gratuit</a>
             </div>
           </div>
 
-          <div className="ed-verdict">
+          <div className="ed-verdict glass">
             <div className="ed-verdict-top">
               <span className="q">« Faut-il l&apos;acheter&nbsp;? »</span>
               <span>Casque Aura X1</span>
@@ -121,13 +144,15 @@ export function EditorialHero() {
                   <span className="mono" data-to="365">—</span> €<small>−134 € · le filon</small>
                 </span>
               </div>
-              <p className="ed-verdict-note">
-                Lien affilié · FILON perçoit une part de la commission d&apos;apport de la plateforme. Jamais un centime de votre poche.
-              </p>
             </div>
           </div>
         </div>
       </div>
+
+      <a href="#transform" className="ed-scrollcue" aria-label="Défiler">
+        <span className="ln" />
+        <span className="tx">Découvrir</span>
+      </a>
     </section>
   );
 }

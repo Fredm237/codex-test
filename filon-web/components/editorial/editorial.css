@@ -61,14 +61,23 @@
 .ed-wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 clamp(22px, 5vw, 40px); }
 
 /* Hero */
-.ed-hero { padding: clamp(48px, 8vw, 96px) 0 clamp(40px, 6vw, 72px); position: relative; }
-.ed-coin { position: absolute; top: clamp(40px, 6vw, 72px); right: clamp(-40px, 2vw, 40px); width: min(430px, 42vw); height: min(430px, 42vw); z-index: 0; pointer-events: none; }
-.ed-coin canvas { width: 100%; height: 100%; display: block; }
+.ed-hero { padding: clamp(72px, 12vh, 150px) 0 clamp(48px, 7vw, 96px); position: relative; min-height: min(94vh, 900px); display: flex; flex-direction: column; justify-content: center; overflow: clip; }
+/* Immersive particle Intelligence Core */
+.ed-core-wrap { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
+.ed-core { position: absolute; top: 50%; right: clamp(-14%, -4vw, 0%); transform: translateY(-50%); width: min(760px, 66vw); height: min(760px, 66vw); }
+.ed-core canvas { width: 100%; height: 100%; display: block; }
+.ed-core-glow { position: absolute; top: 50%; right: 2%; width: min(620px, 56vw); height: min(620px, 56vw); transform: translateY(-50%);
+  background: radial-gradient(circle at 50% 50%, rgba(20,198,192,0.20), rgba(30,117,201,0.14) 42%, transparent 70%);
+  filter: blur(20px); opacity: 0.9; animation: ed-corepulse 9s ease-in-out infinite; }
+@keyframes ed-corepulse { 0%,100% { transform: translateY(-50%) scale(1); opacity: 0.85; } 50% { transform: translateY(-50%) scale(1.06); opacity: 1; } }
+@media (max-width: 900px) { .ed-core { right: -18%; width: 96vw; height: 96vw; opacity: 0.85; } .ed-core-glow { right: -10%; } }
+@media (max-width: 640px) { .ed-core { top: 30%; opacity: 0.7; } }
+@media (prefers-reduced-motion: reduce) { .ed-core-glow { animation: none; } }
+.core-fallback { border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #dfeaf3, #14c6c0 40%, #1e75c9 78%, #0c4f8f); box-shadow: 0 40px 120px -40px rgba(20,120,180,0.5); }
 .ed-coin-fallback { width: 100%; height: 100%; border-radius: 50%;
   background: radial-gradient(120% 120% at 34% 24%, rgba(255,255,255,.9), transparent 52%), var(--wave3);
   box-shadow: 0 40px 80px -40px rgba(30,117,201,.4); }
-@media (max-width: 900px) { .ed-coin { opacity: 0.6; right: -18%; top: 0; } }
-@media (max-width: 640px) { .ed-coin { display: none; } }
 .ed-hero .inner { position: relative; z-index: 1; }
 .ed-h1 { font-family: var(--serif); font-variation-settings: "opsz" 144; font-size: clamp(52px, 11vw, 150px); letter-spacing: -0.018em; line-height: 0.92; }
 .ed-h1 .l { display: block; overflow: hidden; padding-bottom: 0.02em; }
@@ -84,6 +93,34 @@
 .ed-hero-actions { margin-top: 28px; display: flex; gap: 14px; align-items: center; flex-wrap: wrap; opacity: 0; transform: translateY(16px); transition: opacity 0.8s var(--ease-out) 0.64s, transform 0.8s var(--ease-out) 0.64s; }
 .ed-hero.in .ed-hero-actions { opacity: 1; transform: none; }
 .ed-cap { font-size: 13px; color: var(--ink-3); }
+
+/* Hero eyebrow with live dot */
+.ed-hero-eyebrow { display: inline-flex; align-items: center; gap: 9px; margin-bottom: clamp(20px, 3vw, 34px); }
+.ed-hero-eyebrow .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal-ink); box-shadow: 0 0 0 0 rgba(10,128,120,0.5); animation: ed-live 2.4s ease-out infinite; }
+@keyframes ed-live { 0% { box-shadow: 0 0 0 0 rgba(10,128,120,0.45); } 70%,100% { box-shadow: 0 0 0 7px rgba(10,128,120,0); } }
+@media (prefers-reduced-motion: reduce) { .ed-hero-eyebrow .dot { animation: none; } }
+
+/* Ghost button */
+.ed-btn.ghost { background: transparent; border-color: var(--line-2); color: var(--ink); }
+.ed-btn.ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
+
+/* Glass floating verdict */
+.ed-verdict.glass { background: color-mix(in srgb, var(--card) 62%, transparent); backdrop-filter: blur(22px) saturate(1.3); -webkit-backdrop-filter: blur(22px) saturate(1.3);
+  border: 1px solid rgba(255,255,255,0.6); border-radius: 20px; box-shadow: 0 40px 90px -50px rgba(17,30,50,0.55), inset 0 1px 0 rgba(255,255,255,0.7);
+  animation: ed-levitate 7s ease-in-out infinite; transform-style: preserve-3d; transition: transform 0.25s var(--ease-out); }
+@keyframes ed-levitate { 0%,100% { --float: 0px; } 50% { --float: -12px; } }
+.ed-verdict.glass { transform: perspective(1000px) translateY(var(--float,0px)); }
+@media (prefers-reduced-motion: reduce) { .ed-verdict.glass { animation: none; } }
+
+/* Scroll cue */
+.ed-scrollcue { position: absolute; left: 50%; bottom: clamp(18px, 3vh, 34px); transform: translateX(-50%); display: inline-flex; flex-direction: column; align-items: center; gap: 10px; text-decoration: none; z-index: 2; opacity: 0; animation: ed-cuein 1s var(--ease-out) 1.1s forwards; }
+.ed-scrollcue .ln { width: 1px; height: 46px; background: linear-gradient(var(--ink-3), transparent); position: relative; overflow: hidden; }
+.ed-scrollcue .ln::after { content: ""; position: absolute; top: -50%; left: 0; width: 1px; height: 50%; background: var(--accent); animation: ed-cuedrop 1.8s ease-in-out infinite; }
+.ed-scrollcue .tx { font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); }
+@keyframes ed-cuedrop { 0% { top: -50%; } 100% { top: 100%; } }
+@keyframes ed-cuein { to { opacity: 1; } }
+@media (max-width: 640px) { .ed-scrollcue { display: none; } }
+@media (prefers-reduced-motion: reduce) { .ed-scrollcue .ln::after { animation: none; } .ed-scrollcue { animation: none; opacity: 1; } }
 
 /* Verdict card */
 .ed-verdict { background: var(--card); border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; box-shadow: 0 30px 70px -44px rgba(17,18,20,.5);
@@ -187,9 +224,8 @@
 .ed-disc { font-size: 11.5px; color: var(--ink-3); max-width: 74ch; margin-top: 28px; line-height: 1.6; }
 
 @media (prefers-reduced-motion: reduce) {
-  .ed-hero-sub, .ed-hero-actions, .ed-verdict { opacity: 1 !important; transform: none !important; }
+  .ed-hero-sub, .ed-hero-actions, .ed-verdict { opacity: 1 !important; }
   .ed-h1 .l > span { transform: none; }
-  .ed-coin { display: none; }
 }
 
 /* ---------- Forms ---------- */
