@@ -457,3 +457,19 @@
 .ed-browsers .bw .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
 .ed-browsers .bw.live .dot { background: var(--save); box-shadow: 0 0 0 3px rgba(10,125,116,0.16); }
 .ed-browsers .bw.live { color: var(--ink); border-color: var(--line-2); }
+
+/* ---------- Micro-interactions polish ("tout doit répondre") ---------- */
+.ed-btn { position: relative; overflow: hidden; }
+.ed-btn.wave::after, .ed-btn.dark::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(110deg, transparent 32%, rgba(255,255,255,0.28) 50%, transparent 68%);
+  transform: translateX(-130%); transition: transform 0.7s var(--ease-out); }
+.ed-btn.wave:hover::after, .ed-btn.dark:hover::after { transform: translateX(130%); }
+.ed-step { transition: background 0.3s var(--ease), transform 0.3s var(--ease); }
+.ed-step:hover { background: var(--card); transform: translateY(-2px); }
+.ed-step .no { transition: transform 0.3s var(--ease); }
+.ed-step:hover .no { transform: translateY(-2px) scale(1.05); }
+.ed-info { transition: transform 0.3s var(--ease), border-color 0.3s, box-shadow 0.3s; }
+.ed-info:hover { transform: translateY(-3px); border-color: var(--line-2); box-shadow: 0 18px 40px -30px rgba(17,30,50,0.4); }
+.ed-pledge div { transition: color 0.25s, padding-left 0.25s var(--ease); }
+.ed-pledge div:hover { color: var(--ink); padding-left: 6px; }
+@media (prefers-reduced-motion: reduce) { .ed-btn.wave::after, .ed-btn.dark::after { display: none; } .ed-step:hover, .ed-info:hover { transform: none; } }
