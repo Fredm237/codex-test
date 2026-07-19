@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "installCommand": "cd filon-web && npm install",
+  "buildCommand": "cd filon-web && npm run build",
+  "outputDirectory": "filon-web/out",
+  "trailingSlash": true
+}
