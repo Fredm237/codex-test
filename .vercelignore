@@ -1,0 +1,16 @@
+# Vercel deploys the FILON web app (filon-web) as a static site.
+# Everything below is the Python backend / other assets — excluded so Vercel
+# never turns the root api/ folder into a crashing Serverless Function.
+api/
+core/
+data/
+optimization/
+robustness/
+strategies/
+filon-extension/
+filon-site/
+*.py
+Dockerfile
+Procfile
+railway.json
+requirements.txt
