@@ -27,7 +27,7 @@ const input: React.CSSProperties = {
   width: "100%",
   background: "var(--card)",
   border: "1px solid var(--line-2)",
-  borderRadius: 12,
+  borderRadius: "var(--r-md)",
   padding: "14px 16px",
   color: "var(--ink)",
   fontFamily: "var(--sans)",
