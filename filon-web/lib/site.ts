@@ -2,7 +2,7 @@ export const site = {
   name: "FILON",
   tagline: "Le réflexe malin avant chaque achat.",
   description:
-    "FILON compare automatiquement le meilleur cashback, le meilleur prix en reconditionné et les codes promo qui marchent vraiment — avant chaque achat, en toute transparence.",
+    "Avant chaque achat, FILON compare le meilleur cashback, le meilleur prix en reconditionné et les codes promo qui marchent vraiment. En toute transparence.",
   url: "https://filon.be",
   domain: "filon.be",
   locale: "fr_BE",

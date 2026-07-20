@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/cookies",
   title: "Politique cookies",
   description:
-    "La politique cookies de FILON : nous n'utilisons aucun cookie de suivi publicitaire. Mesure d'audience sans cookie, cookies strictement nécessaires et cookies d'affiliation déposés par les partenaires — expliqués simplement.",
+    "La politique cookies de FILON : nous n'utilisons aucun cookie de suivi publicitaire. Mesure d'audience sans cookie, cookies strictement nécessaires et cookies d'affiliation déposés par les partenaires, expliqués simplement.",
 });
 
 export default function CookiesPage() {
@@ -50,7 +50,7 @@ export default function CookiesPage() {
             Lorsque vous <b>activez une offre</b> via FILON (cashback, reconditionné, code promo), la plateforme ou le marchand
             partenaire peut déposer un <b>cookie d&apos;affiliation</b> sur votre appareil. Ce cookie permet d&apos;attribuer
             correctement l&apos;apport et, le cas échéant, de vous verser votre cashback. Il est déposé par le partenaire, sous
-            sa propre responsabilité, au moment où vous choisissez d&apos;activer l&apos;offre — jamais à votre insu.
+            sa propre responsabilité, au moment où vous choisissez d&apos;activer l&apos;offre, jamais à votre insu.
           </p>
 
           <h2>Gérer les cookies</h2>

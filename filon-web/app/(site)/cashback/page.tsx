@@ -24,14 +24,14 @@ export default function CashbackPage() {
       <ContentHero
         eyebrow="Cashback"
         title={<>Le meilleur taux de cashback, sans le chercher.</>}
-        intro="Un même marchand peut offrir 5 % sur une plateforme, 7 % sur une autre et 4 % sur une troisième — le même jour. FILON compare iGraal, Poulpeo, Widilo, Joko et eBuyClub en temps réel et vous oriente vers le taux le plus rémunérateur, automatiquement."
+        intro="Un même marchand peut offrir 5 % sur une plateforme, 7 % sur une autre et 4 % sur une troisième, le même jour. FILON compare iGraal, Poulpeo, Widilo, Joko et eBuyClub en temps réel et vous oriente vers le taux le plus rémunérateur, automatiquement."
         breadcrumb={[{ name: "Cashback", path: "/cashback" }]}
       />
 
       <ProseBlock heading={<>Le cashback, c'est de l'argent que vous <span className="it">oubliez</span> de récupérer.</>}>
         <p>
           Des millions de francophones utilisent déjà le cashback. Mais la plupart s'inscrivent à <b>une seule</b> plateforme
-          et s'y tiennent — alors que les taux changent en permanence d'une plateforme à l'autre.
+          et s'y tiennent, alors que les taux changent en permanence d'une plateforme à l'autre.
         </p>
         <p>
           FILON supprime ce travail : à l'instant où vous vous apprêtez à acheter, il interroge les plateformes partenaires,

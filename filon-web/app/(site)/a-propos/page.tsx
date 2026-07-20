@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/a-propos",
   title: "À propos",
   description:
-    "FILON veut devenir la référence francophone de l'optimisation d'achat en ligne — le premier réflexe du consommateur malin, avec la transparence pour boussole. Notre vision, notre mission, notre fondateur.",
+    "FILON veut devenir la référence francophone de l'optimisation d'achat en ligne, le premier réflexe du consommateur malin, avec la transparence pour boussole. Notre vision, notre mission, notre fondateur.",
 });
 
 const VALUES = [
@@ -36,7 +36,7 @@ export default function AProposPage() {
         </p>
         <p>
           FILON automatise ce parcours. En une seconde, il croise <b>cashback, reconditionné et codes promo</b> et vous donne
-          un seul chiffre : votre prix réel le plus bas. Vous ne changez rien à vos habitudes — vous payez simplement moins.
+          un seul chiffre : votre prix réel le plus bas. Vous ne changez rien à vos habitudes, vous payez simplement moins.
         </p>
       </ProseBlock>
 
@@ -79,7 +79,7 @@ export default function AProposPage() {
         </p>
         <p>
           À l&apos;heure où les dérives d&apos;attribution du secteur (affaires Honey, Phia) ont ébranlé la confiance, nous
-          faisons de la <b>transparence totale</b> notre différence — pas un slogan, un modèle.
+          faisons de la <b>transparence totale</b> notre différence, pas un slogan, un modèle.
         </p>
       </ProseBlock>
 

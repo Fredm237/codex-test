@@ -32,11 +32,10 @@ export function EditorialFooter() {
         <div className="ed-newsblock">
           <div>
             <h3 style={{ fontFamily: "var(--serif)", fontVariationSettings: '"opsz" 40', fontSize: 24, letterSpacing: "-0.01em" }}>
-              <span className="it">Le Filon</span> — la newsletter.
+              La newsletter <span className="it">Le Filon</span>.
             </h3>
             <p style={{ color: "var(--ink-2)", fontSize: 14.5, marginTop: 6 }}>
-              Chaque semaine : les vraies bonnes affaires, les erreurs d&apos;achat à éviter et les produits qui valent le coup.
-              Zéro spam — et le signal du lancement en avant-première.
+              Chaque semaine, les bonnes affaires du moment et les pièges à éviter. Rien de plus. Vous serez aussi prévenu du lancement avant tout le monde.
             </p>
           </div>
           <Newsletter />
@@ -58,9 +57,8 @@ export function EditorialFooter() {
           ))}
         </div>
         <p className="ed-disc">
-          FILON est gratuit. Certains liens sont affiliés — lorsque vous activez une offre via FILON, la plateforme
-          partenaire nous reverse une part de sa commission d&apos;apport. Cela n&apos;augmente jamais votre prix. Nous ne
-          revendons aucune donnée de navigation.
+          FILON est gratuit. Certains liens sont affiliés. Quand vous activez une offre, la plateforme partenaire nous
+          reverse une part de sa commission. Votre prix ne change pas, et nous ne revendons aucune donnée de navigation.
         </p>
       </div>
     </footer>

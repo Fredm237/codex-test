@@ -17,7 +17,7 @@ export function StickyCta() {
   }, []);
   return (
     <a className="ed-sticky-cta" href="/#installer" ref={ref}>
-      Ajouter FILON — gratuit
+      Ajouter gratuitement
     </a>
   );
 }

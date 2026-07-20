@@ -16,7 +16,7 @@ export default function AidePage() {
       <ContentHero
         eyebrow="Aide"
         title={<>On est là quand vous en avez <span className="it">besoin</span>.</>}
-        intro="Choisissez un thème pour trouver rapidement votre réponse. Et si vous ne trouvez pas, un humain vous répond — pas un robot qui tourne en rond."
+        intro="Choisissez un thème pour trouver rapidement votre réponse. Et si vous ne trouvez pas, un humain vous répond, pas un robot qui tourne en rond."
         breadcrumb={[{ name: "Centre d'aide", path: "/aide" }]}
       />
 

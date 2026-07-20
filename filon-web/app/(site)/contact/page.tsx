@@ -15,7 +15,7 @@ export default function ContactPage() {
       <ContentHero
         eyebrow="Contact"
         title={<>Parlons-en.</>}
-        intro="Une question, une idée, un partenariat cashback ou reconditionné ? Laissez-nous un message — nous répondons vite."
+        intro="Une question, une idée, un partenariat cashback ou reconditionné ? Laissez-nous un message, nous répondons vite."
         breadcrumb={[{ name: "Contact", path: "/contact" }]}
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>

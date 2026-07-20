@@ -77,14 +77,14 @@ export default function ArticlePage() {
             <li>et seulement ensuite, cliquer et payer.</li>
           </ul>
           <p>
-            Fait à la main, c&apos;est fastidieux — et la plupart des gens abandonnent. C&apos;est exactement le travail que{" "}
+            Fait à la main, c&apos;est fastidieux, et la plupart des gens abandonnent. C&apos;est exactement le travail que{" "}
             <b>FILON automatise</b>.
           </p>
 
           <div className="callout">
             💡 <b>Le raccourci :</b> au lieu de comparer les apps une par une, FILON interroge les plateformes partenaires au
-            moment de votre achat, repère le <span className="g">taux le plus élevé</span> pour ce marchand, et vous y envoie —
-            en cumulant si possible un code promo et une alternative reconditionnée.
+            moment de votre achat, repère le <span className="g">taux le plus élevé</span> pour ce marchand et vous y envoie.
+            Quand c&apos;est possible, il ajoute un code promo et compare avec une alternative reconditionnée.
           </div>
 
           <h2>Ne comparez plus le cashback seul</h2>
@@ -95,13 +95,13 @@ export default function ArticlePage() {
           </p>
           <p>
             C&apos;est la philosophie de FILON : réunir cashback, reconditionné et codes promo en une seule vue, et vous donner
-            un seul chiffre — votre prix réel le plus bas.
+            un seul chiffre, votre prix réel le plus bas.
           </p>
 
           <h2>En résumé</h2>
           <ul>
             <li>Il n&apos;existe pas d&apos;app de cashback « meilleure » partout&nbsp;: le taux gagnant change selon le marchand.</li>
-            <li>Comparer avant chaque achat peut doubler votre cashback — mais c&apos;est chronophage à la main.</li>
+            <li>Comparer avant chaque achat peut doubler votre cashback, mais c&apos;est chronophage à la main.</li>
             <li>Raisonnez <b>prix réel final</b> (cashback + reconditionné + code promo), pas cashback seul.</li>
             <li>FILON fait cette comparaison pour vous, gratuitement, à chaque achat.</li>
           </ul>

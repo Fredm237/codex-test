@@ -1,9 +1,9 @@
 import { Reveal } from "./Reveal";
 
 const STEPS = [
-  ["i.", "FILON reconnaît le produit", "Sur n'importe quelle fiche, l'assistant identifie l'article et lance une analyse silencieuse. Vous ne changez rien à vos habitudes."],
-  ["ii.", "Il compare toutes les sources", "Cashback le plus rémunérateur, reconditionné équivalent garanti, codes promo testés en direct, prix chez 37+ marchands. En temps réel."],
-  ["iii.", "Il rend le verdict", "Un seul chiffre : votre prix réel le plus bas. Faut-il l'acheter, ici, maintenant ? FILON vous le dit — et applique l'économie."],
+  ["i.", "Il reconnaît le produit", "Sur n'importe quelle page, il comprend ce que vous regardez. Vous ne changez rien à vos habitudes."],
+  ["ii.", "Il regarde partout", "En une seconde, il a fait le tour du marché. Là où vous auriez passé une heure."],
+  ["iii.", "Il tranche", "Un seul chiffre : votre vrai prix. Et une réponse : acheter, ou attendre."],
 ];
 
 const PLEDGE = [
@@ -21,7 +21,7 @@ export function Method() {
       <div className="ed-wrap">
         <Reveal>
           <div className="ed-lead">
-            <span className="idx">01 — 03</span>
+            <span className="idx">3 étapes</span>
             <h2>
               Trois secondes entre vous et <span className="it">le meilleur prix</span>.
             </h2>
@@ -54,12 +54,12 @@ export function Transparency() {
           </Reveal>
           <Reveal className="ed-mbody">
             <p>
-              D&apos;autres ont promis de « ne jamais payer trop cher » — puis se sont fait prendre à détourner discrètement
-              les commissions. La confiance ne se déclare pas : elle se prouve, ligne après ligne.
+              D&apos;autres ont promis de ne jamais faire payer trop cher, puis se sont fait prendre à détourner les
+              commissions en douce. La confiance ne se déclare pas. Elle se prouve.
             </p>
             <p>
-              Chez FILON, la manière dont nous gagnons de l&apos;argent est <b>écrite, visible, et alignée avec la vôtre</b>.
-              Rien à cacher, par construction.
+              Chez FILON, la façon dont nous gagnons de l&apos;argent est <b>écrite noir sur blanc</b>, et alignée sur la vôtre.
+              Nous n&apos;avons rien à cacher.
             </p>
             <div className="ed-pledge">
               {PLEDGE.map(([n, b, t]) => (
@@ -96,7 +96,7 @@ export function Closing() {
             Demandez à FILON <span className="it">avant d&apos;acheter.</span>
           </h2>
           <a className="ed-btn dark" href="/#top" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
-            Ajouter FILON — gratuit
+            Ajouter gratuitement
           </a>
         </Reveal>
       </div>

@@ -4,7 +4,7 @@ import { buildMetadata, articleSchema, breadcrumbSchema, JsonLd } from "@/lib/se
 const PATH = "/blog/neuf-vs-reconditionne-economie-reelle";
 const TITLE = "Neuf vs reconditionné : l'économie réelle, produit par produit";
 const DESC =
-  "Combien économise-t-on vraiment en choisissant le reconditionné ? Écarts de prix, grades, garanties, et le cumul avec le cashback — le guide clair pour décider.";
+  "Combien économise-t-on vraiment en choisissant le reconditionné ? Écarts de prix, grades, garanties, et le cumul avec le cashback, le guide clair pour décider.";
 
 export const metadata: Metadata = buildMetadata({ path: PATH, title: TITLE, description: DESC });
 
@@ -62,12 +62,12 @@ export default function ArticlePage() {
 
           <h2>Comprendre les grades</h2>
           <ul>
-            <li><b>Grade A+ / « comme neuf »</b> — aucune ou quasi aucune trace d&apos;usage. Le meilleur compromis prix/état.</li>
-            <li><b>Grade A / « très bon état »</b> — micro-rayures invisibles à distance d&apos;usage.</li>
-            <li><b>Grade B / « bon état »</b> — marques visibles mais sans impact sur le fonctionnement. Le plus économique.</li>
+            <li><b>Grade A+ / « comme neuf »</b>, aucune ou quasi aucune trace d&apos;usage. Le meilleur compromis prix/état.</li>
+            <li><b>Grade A / « très bon état »</b>, micro-rayures invisibles à distance d&apos;usage.</li>
+            <li><b>Grade B / « bon état »</b>, marques visibles mais sans impact sur le fonctionnement. Le plus économique.</li>
           </ul>
           <p>
-            Le grade ne change rien au fonctionnement ni à la garantie — seulement l&apos;esthétique. Si l&apos;apparence
+            Le grade ne change rien au fonctionnement ni à la garantie, seulement l&apos;esthétique. Si l&apos;apparence
             n&apos;est pas votre priorité, un grade B maximise l&apos;économie.
           </p>
 
@@ -86,7 +86,7 @@ export default function ArticlePage() {
 
           <h2>Et l&apos;écologie ?</h2>
           <p>
-            Prolonger la vie d&apos;un appareil évite la fabrication d&apos;un neuf — l&apos;étape de loin la plus polluante du
+            Prolonger la vie d&apos;un appareil évite la fabrication d&apos;un neuf, l&apos;étape de loin la plus polluante du
             cycle de vie d&apos;un produit électronique. Choisir le reconditionné, c&apos;est donc l&apos;un des gestes les plus
             efficaces pour réduire l&apos;empreinte de vos achats, sans sacrifier la qualité.
           </p>

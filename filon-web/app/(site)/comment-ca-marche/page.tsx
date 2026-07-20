@@ -33,7 +33,7 @@ export default function CommentCaMarchePage() {
               { n: "€", h: "Prix & marchands", p: "Le meilleur prix parmi des dizaines de marchands, en temps réel." },
               { n: "%", h: "Cashback", p: "Le taux le plus élevé du moment (iGraal, Poulpeo, Widilo, Joko, eBuyClub…)." },
               { n: "↻", h: "Reconditionné", p: "L'équivalent reconditionné garanti, souvent bien moins cher." },
-              { n: "✓", h: "Codes promo", p: "Testés en direct sur votre panier — seul celui qui marche est appliqué." },
+              { n: "✓", h: "Codes promo", p: "Testés en direct sur votre panier, seul celui qui marche est appliqué." },
               { n: "★", h: "Fiabilité vendeur", p: "Réputation et garanties prises en compte dans le verdict." },
               { n: "↧", h: "Historique de prix", p: "Pour savoir s'il vaut mieux acheter maintenant ou attendre." },
             ]}

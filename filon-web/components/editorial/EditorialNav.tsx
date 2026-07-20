@@ -71,7 +71,7 @@ export function EditorialNav() {
             </a>
           ))}
           <a className="ed-btn wave" href="/#installer" onClick={() => setOpen(false)} style={{ marginTop: 12 }}>
-            Ajouter FILON — gratuit
+            Ajouter gratuitement
           </a>
         </nav>
       </div>
