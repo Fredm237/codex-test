@@ -5,11 +5,12 @@ import { useEffect, useRef } from "react";
 const FROM = 499;
 const TO = 365;
 
-// Discount sources that orbit the core and get absorbed as you scroll.
+// Discount sources orbit the LOWER half of the orb (never near the title) and
+// get absorbed as you scroll, morphing the price to the real one.
 const CHIPS = [
-  { label: "Cashback", v: "−6,5 %", ang: -60, r: 1.0, tIn: 0.18, tSpan: 0.16 },
-  { label: "Reconditionné", v: "−94 €", ang: 70, r: 1.12, tIn: 0.4, tSpan: 0.16 },
-  { label: "Code promo", v: "−15 €", ang: 190, r: 0.9, tIn: 0.62, tSpan: 0.16 },
+  { label: "Cashback", v: "−6,5 %", ang: 22, r: 1.0, tIn: 0.18, tSpan: 0.16 },
+  { label: "Code promo", v: "−15 €", ang: 90, r: 1.12, tIn: 0.4, tSpan: 0.16 },
+  { label: "Reconditionné", v: "−94 €", ang: 158, r: 1.0, tIn: 0.62, tSpan: 0.16 },
 ];
 
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
@@ -19,7 +20,7 @@ export function Transformation() {
   const secRef = useRef<HTMLElement>(null);
   const priceRef = useRef<HTMLSpanElement>(null);
   const coreRef = useRef<HTMLDivElement>(null);
-  const finalRef = useRef<HTMLDivElement>(null);
+  const capRef = useRef<HTMLSpanElement>(null);
   const chipRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   useEffect(() => {
@@ -27,7 +28,8 @@ export function Transformation() {
     if (!sec) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const R = () => Math.min(window.innerWidth, window.innerHeight) * 0.2;
+    // orbit radius keyed to the orb's on-screen size, so chips sit just outside it
+    const orbRadius = () => Math.min(600, Math.min(window.innerWidth, window.innerHeight) * 0.7) * 0.5;
 
     const apply = (prog: number) => {
       const p = clamp01(prog);
@@ -35,26 +37,22 @@ export function Transformation() {
       if (priceRef.current) priceRef.current.textContent = `${val} €`;
       if (coreRef.current) {
         coreRef.current.style.setProperty("--glow", `${0.4 + p * 0.6}`);
-        coreRef.current.style.setProperty("--coreScale", `${1 + p * 0.22}`);
+        coreRef.current.style.setProperty("--coreScale", `${1 + p * 0.14}`);
       }
-      const radius = R();
+      const R = orbRadius() * 1.18;
       CHIPS.forEach((c, i) => {
         const el = chipRefs.current[i];
         if (!el) return;
         const t = easeInOut(clamp01((p - c.tIn) / c.tSpan));
-        const ang = ((c.ang + p * 42) * Math.PI) / 180;
-        const rad = radius * c.r * (1 - t);
+        const ang = ((c.ang + p * 30) * Math.PI) / 180;
+        const rad = R * c.r * (1 - t);
         const x = Math.cos(ang) * rad;
         const y = Math.sin(ang) * rad;
         el.style.transform = `translate(-50%,-50%) translate(${x}px,${y}px) scale(${1 - 0.55 * t})`;
         el.style.opacity = `${1 - 0.9 * t}`;
         el.classList.toggle("absorbed", t > 0.02 && t < 0.98);
       });
-      if (finalRef.current) {
-        const fp = clamp01((p - 0.82) / 0.14);
-        finalRef.current.style.opacity = `${fp}`;
-        finalRef.current.style.setProperty("--fy", `${(1 - fp) * 16}px`);
-      }
+      if (capRef.current) capRef.current.style.opacity = `${clamp01((p - 0.86) / 0.12)}`;
     };
 
     if (reduce) {
@@ -93,6 +91,7 @@ export function Transformation() {
         <div className="ed-grav-stage" aria-hidden="true">
           <div className="core" ref={coreRef}>
             <span className="price mono" ref={priceRef}>499 €</span>
+            <span className="cap" ref={capRef}>votre prix réel · −134 € · le filon</span>
           </div>
           {CHIPS.map((c, i) => (
             <div
@@ -106,12 +105,6 @@ export function Transformation() {
               <b>{c.v}</b>
             </div>
           ))}
-        </div>
-
-        <div className="ed-grav-final" ref={finalRef}>
-          <span className="tag">Votre prix réel</span>
-          <span className="save mono">365 €</span>
-          <span className="delta">−134 € · le filon</span>
         </div>
       </div>
     </section>
