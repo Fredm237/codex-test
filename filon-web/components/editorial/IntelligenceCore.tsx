@@ -65,7 +65,7 @@ const FRAG = /* glsl */ `
     col = mix(col, uColorC, smoothstep(0.72, 1.0, vGrad) * 0.6);
     // depth fade — far points recede
     float depthFade = clamp(1.0 - (vDepth - 4.0) / 7.0, 0.22, 1.0);
-    gl_FragColor = vec4(col, alpha * depthFade * vTwinkle * 0.95);
+    gl_FragColor = vec4(col, alpha * depthFade * vTwinkle * 1.15);
   }
 `;
 
@@ -121,7 +121,7 @@ export function IntelligenceCore({ className }: { className?: string }) {
 
     const uniforms = {
       uTime: { value: 0 },
-      uSize: { value: small ? 26 : 34 },
+      uSize: { value: small ? 30 : 44 },
       uPixelRatio: { value: dpr },
       uMouse: { value: new THREE.Vector2(0, 0) },
       uBurst: { value: 0 },

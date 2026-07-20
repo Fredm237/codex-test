@@ -27,7 +27,7 @@ export function Transformation() {
     if (!sec) return;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const R = () => Math.min(window.innerWidth, window.innerHeight) * 0.28;
+    const R = () => Math.min(window.innerWidth, window.innerHeight) * 0.2;
 
     const apply = (prog: number) => {
       const p = clamp01(prog);
