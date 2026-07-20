@@ -66,16 +66,18 @@
 .ed-hero-grid { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr); gap: clamp(24px, 4vw, 72px); align-items: center; width: 100%; }
 @media (max-width: 900px) { .ed-hero-grid { grid-template-columns: 1fr; gap: clamp(30px, 7vw, 52px); } }
 .ed-hero-text { position: relative; z-index: 2; min-width: 0; }
-.ed-hero-visual { position: relative; z-index: 1; min-height: clamp(420px, 60vh, 660px); }
-/* Immersive particle Intelligence Core — large & visible; card floats over its lower half */
-.ed-core-wrap { position: absolute; top: 44%; left: 50%; transform: translate(-50%, -50%); width: min(116%, 600px); aspect-ratio: 1 / 1; z-index: 0; pointer-events: none; }
+.ed-hero-visual { position: relative; z-index: 1; min-height: clamp(460px, 70vh, 760px); }
+/* Immersive particle Intelligence Core — the sole hero visual. Anchored to the
+   visual column's left edge and bleeding right (off-screen), so it can be large
+   while staying structurally clear of the headline in the other column. */
+.ed-core-wrap { position: absolute; top: 50%; left: 0; transform: translateY(-50%); width: min(150%, 840px); aspect-ratio: 1 / 1; z-index: 0; pointer-events: none; }
 .ed-core { position: absolute; inset: 0; }
 .ed-core canvas { width: 100%; height: 100%; display: block; }
-.ed-core-glow { position: absolute; inset: 12%; border-radius: 50%;
-  background: radial-gradient(circle at 50% 46%, rgba(20,198,192,0.30), rgba(30,117,201,0.20) 44%, transparent 72%);
-  filter: blur(22px); opacity: 1; animation: ed-corepulse 9s ease-in-out infinite; }
+.ed-core-glow { position: absolute; inset: 14%; border-radius: 50%;
+  background: radial-gradient(circle at 50% 48%, rgba(20,198,192,0.30), rgba(30,117,201,0.20) 44%, transparent 72%);
+  filter: blur(24px); opacity: 1; animation: ed-corepulse 9s ease-in-out infinite; }
 @keyframes ed-corepulse { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.07); opacity: 1; } }
-@media (max-width: 900px) { .ed-hero-visual { min-height: clamp(360px, 78vw, 500px); } .ed-core-wrap { top: 42%; width: min(104%, 440px); } }
+@media (max-width: 900px) { .ed-hero-visual { min-height: clamp(380px, 86vw, 560px); } .ed-core-wrap { left: 50%; transform: translate(-50%, -50%); width: min(116%, 520px); } }
 @media (prefers-reduced-motion: reduce) { .ed-core-glow { animation: none; } }
 .core-fallback { border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, #dfeaf3, #14c6c0 40%, #1e75c9 78%, #0c4f8f); box-shadow: 0 40px 120px -40px rgba(20,120,180,0.5); }
@@ -211,7 +213,8 @@
 .ed-final { position: relative; background: #0a1524; color: #eaf2fb; overflow: hidden; text-align: center; padding: clamp(120px, 20vh, 220px) 0; }
 .ed-final::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 20vh; z-index: 2; pointer-events: none; background: linear-gradient(var(--paper), transparent); }
 .ed-final-glow { position: absolute; left: 50%; top: 54%; transform: translate(-50%, -50%); width: min(760px, 90vw); height: min(760px, 90vw); z-index: 0; pointer-events: none;
-  background: radial-gradient(circle at 50% 50%, rgba(20,198,192,0.22), rgba(30,117,201,0.14) 40%, transparent 68%); filter: blur(10px); animation: ed-corepulse 9s ease-in-out infinite; }
+  background: radial-gradient(circle at 50% 50%, rgba(20,198,192,0.22), rgba(30,117,201,0.14) 40%, transparent 68%); filter: blur(10px); animation: ed-glowpulse 9s ease-in-out infinite; }
+@keyframes ed-glowpulse { 0%,100% { transform: translate(-50%, -50%) scale(1); opacity: 0.9; } 50% { transform: translate(-50%, -50%) scale(1.06); opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .ed-final-glow { animation: none; } }
 .ed-final-inner { position: relative; z-index: 1; }
 .ed-final .eyebrow { color: rgba(234,242,251,0.5); display: block; margin-bottom: 26px; }
