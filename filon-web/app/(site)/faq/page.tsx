@@ -35,7 +35,7 @@ export default function FaqPage() {
       <ContentHero
         eyebrow="FAQ"
         title={<>Vos questions, nos réponses <span className="it">claires</span>.</>}
-        intro="Le fonctionnement du copilote, notre modèle économique, vos données, le cashback, le reconditionné et l'extension — tout ce qu'il faut savoir avant de faire de FILON votre réflexe d'achat."
+        intro="Comment ça marche, comment on se rémunère, ce qu'on fait de vos données. Les vraies questions — et des réponses franches."
         breadcrumb={[{ name: "FAQ", path: "/faq" }]}
       />
       <FaqBlock items={GENERAL} id="general" eyebrow="Général" title="L'essentiel." />

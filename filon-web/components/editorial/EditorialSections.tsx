@@ -1,9 +1,9 @@
 import { Reveal } from "./Reveal";
 
 const STEPS = [
-  ["i.", "FILON reconnaît le produit", "Sur n'importe quelle fiche, l'assistant identifie l'article et lance une analyse silencieuse. Vous ne changez rien à vos habitudes."],
-  ["ii.", "Il compare toutes les sources", "Cashback le plus rémunérateur, reconditionné équivalent garanti, codes promo testés en direct, prix chez 37+ marchands. En temps réel."],
-  ["iii.", "Il rend le verdict", "Un seul chiffre : votre prix réel le plus bas. Faut-il l'acheter, ici, maintenant ? FILON vous le dit — et applique l'économie."],
+  ["i.", "Il reconnaît le produit", "Sur n'importe quelle page, il comprend ce que vous regardez. Vous ne changez rien à vos habitudes."],
+  ["ii.", "Il regarde partout", "En une seconde, il a fait le tour du marché. Là où vous auriez passé une heure."],
+  ["iii.", "Il tranche", "Un seul chiffre : votre vrai prix. Et une réponse : acheter, ou attendre."],
 ];
 
 const PLEDGE = [

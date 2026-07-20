@@ -33,7 +33,7 @@ export default function BlogPage() {
       <ContentHero
         eyebrow="Blog"
         title={<>Acheter malin, ça s&apos;apprend.</>}
-        intro="Comparatifs chiffrés, guides neuf vs reconditionné, décryptages conso et bons plans. Le contenu qui vous fait économiser — clair, honnête, sans jargon."
+        intro="Des guides qui vous font vraiment économiser. Clairs, chiffrés, sans jargon."
         breadcrumb={[{ name: "Blog", path: "/blog" }]}
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
