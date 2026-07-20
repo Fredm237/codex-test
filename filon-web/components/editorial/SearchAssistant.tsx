@@ -356,7 +356,7 @@ export function SearchAssistant() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Décrivez un besoin (« PC pour montage vidéo, 1200€ ») ou un produit…"
+              placeholder="Décrivez un besoin, ou un produit…"
               aria-label="Décrivez un besoin ou un produit"
               autoComplete="off"
             />
@@ -373,8 +373,12 @@ export function SearchAssistant() {
 
         <div className={`sa-answer ${searched ? "on" : ""}`} ref={answerRef} aria-live="polite">
           {thinking && (
-            <div className="sa-think">
-              <span className="sa-orb" /> FILON analyse le marché…
+            <div className="sa-think" role="status" aria-label="FILON analyse le marché">
+              <div className="sa-steps">
+                <div className="sa-step"><span className="tk" />Je lis votre demande</div>
+                <div className="sa-step"><span className="tk" />Je compare le marché</div>
+                <div className="sa-step"><span className="tk" />Je calcule votre vrai prix</div>
+              </div>
             </div>
           )}
           {!thinking && searched && (
