@@ -70,14 +70,14 @@
 /* Immersive particle Intelligence Core — the sole hero visual. Anchored to the
    visual column's left edge and bleeding right (off-screen), so it can be large
    while staying structurally clear of the headline in the other column. */
-.ed-core-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(114%, 660px); aspect-ratio: 1 / 1; z-index: 0; pointer-events: none; }
+.ed-core-wrap { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(150%, 880px); aspect-ratio: 1 / 1; z-index: 0; pointer-events: none; }
 .ed-core { position: absolute; inset: 0; }
 .ed-core canvas { width: 100%; height: 100%; display: block; }
 .ed-core-glow { position: absolute; inset: 14%; border-radius: 50%;
   background: radial-gradient(circle at 50% 48%, rgba(20,198,192,0.30), rgba(30,117,201,0.20) 44%, transparent 72%);
   filter: blur(24px); opacity: 1; animation: ed-corepulse 9s ease-in-out infinite; }
 @keyframes ed-corepulse { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.07); opacity: 1; } }
-@media (max-width: 900px) { .ed-hero-visual { min-height: clamp(380px, 86vw, 560px); } .ed-core-wrap { left: 50%; transform: translate(-50%, -50%); width: min(116%, 520px); } }
+@media (max-width: 900px) { .ed-hero-visual { min-height: clamp(400px, 92vw, 600px); } .ed-core-wrap { left: 50%; transform: translate(-50%, -50%); width: min(150%, 640px); } }
 @media (prefers-reduced-motion: reduce) { .ed-core-glow { animation: none; } }
 .core-fallback { border-radius: 50%;
   background: radial-gradient(circle at 38% 32%, #dfeaf3, #14c6c0 40%, #1e75c9 78%, #0c4f8f); box-shadow: 0 40px 120px -40px rgba(20,120,180,0.5); }

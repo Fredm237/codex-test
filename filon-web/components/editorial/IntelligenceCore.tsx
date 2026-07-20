@@ -94,7 +94,9 @@ export function IntelligenceCore({ className }: { className?: string }) {
 
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 100);
-    camera.position.set(0, 0, 7.2);
+    // pulled back so the sphere sits in the centre of the canvas with generous
+    // margin — it can move/parallax freely without ever hitting the canvas edge.
+    camera.position.set(0, 0, 9.6);
 
     // ── particle geometry: two fibonacci shells for volume ──
     const COUNT = small ? 3600 : lowPower ? 6000 : 11000;
@@ -121,7 +123,7 @@ export function IntelligenceCore({ className }: { className?: string }) {
 
     const uniforms = {
       uTime: { value: 0 },
-      uSize: { value: small ? 30 : 44 },
+      uSize: { value: small ? 36 : 56 },
       uPixelRatio: { value: dpr },
       uMouse: { value: new THREE.Vector2(0, 0) },
       uBurst: { value: 0 },
