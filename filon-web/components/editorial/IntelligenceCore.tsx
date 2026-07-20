@@ -145,12 +145,29 @@ export function IntelligenceCore({ className }: { className?: string }) {
     host.appendChild(renderer.domElement);
     Object.assign(renderer.domElement.style, { width: "100%", height: "100%", display: "block" });
 
+    // The sphere always fits inside the canvas with margin on every side, so it
+    // can rotate / parallax / breathe without ever touching an edge (no hard cut),
+    // at any window size. On desktop it sits to the right; on mobile, lower.
+    const RAD = 2.12; // outer particle radius in object space
+    const PAR = 0.62; // max pointer-parallax displacement
+    const fov = (38 * Math.PI) / 180;
     const resize = () => {
       const w = host.clientWidth || 1;
       const h = host.clientHeight || 1;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
+
+      const halfH = Math.tan(fov / 2) * camera.position.z;
+      const halfW = halfH * (w / h);
+      const minHalf = Math.min(halfW, halfH);
+      const outer = RAD * 1.1 + PAR; // extent that must fit (breathing + parallax)
+      const s = (minHalf * 0.92) / outer;
+      points.scale.setScalar(s);
+      const scaledOuter = outer * s;
+      const desktop = w >= 900;
+      points.position.x = desktop ? Math.max(0, halfW - scaledOuter - 0.05) * 0.92 : 0;
+      points.position.y = desktop ? 0 : -Math.max(0, halfH - scaledOuter - 0.05) * 0.7;
     };
     resize();
     const ro = new ResizeObserver(resize);

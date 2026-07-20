@@ -19,6 +19,10 @@ export function EditorialHero() {
 
   return (
     <section className="ed-hero" ref={heroRef}>
+      <div className="ed-core-wrap" aria-hidden="true">
+        <IntelligenceCore className="ed-core" />
+      </div>
+
       <div className="ed-wrap ed-hero-grid">
         <div className="ed-hero-text">
           <span className="eyebrow ed-hero-eyebrow">
@@ -38,12 +42,7 @@ export function EditorialHero() {
           </div>
         </div>
 
-        <div className="ed-hero-visual">
-          <div className="ed-core-wrap" aria-hidden="true">
-            <div className="ed-core-glow" />
-            <IntelligenceCore className="ed-core" />
-          </div>
-        </div>
+        <div className="ed-hero-visual" aria-hidden="true" />
       </div>
 
       <a href="#transform" className="ed-scrollcue" aria-label="Défiler">
