@@ -39,7 +39,7 @@ export default function SecuritePage() {
         <p>
           FILON ne revend pas votre navigation, ne construit pas de profil publicitaire, et ne modifie jamais le prix que vous
           payez chez le marchand. Il ne stocke pas non plus vos moyens de paiement : l&apos;achat se fait chez le marchand,
-          comme d&apos;habitude — FILON vous a seulement mené·e à la meilleure décision.
+          comme d&apos;habitude, FILON vous a seulement mené·e à la meilleure décision.
         </p>
         <p>
           Le détail complet des traitements figure dans notre <a href="/confidentialite">politique de confidentialité</a> et

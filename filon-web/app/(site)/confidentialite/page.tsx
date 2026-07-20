@@ -16,7 +16,7 @@ export default function ConfidentialitePage() {
       <ContentHero
         eyebrow="Confidentialité"
         title={<>Vos données restent les vôtres.</>}
-        intro="La transparence est le cœur de FILON — cela vaut aussi pour vos données. Voici, en clair, ce que nous collectons, pourquoi, et vos droits."
+        intro="La transparence est le cœur de FILON, cela vaut aussi pour vos données. Voici, en clair, ce que nous collectons, pourquoi, et vos droits."
         breadcrumb={[{ name: "Confidentialité", path: "/confidentialite" }]}
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
@@ -62,15 +62,15 @@ export default function ConfidentialitePage() {
           <h2>Liens affiliés</h2>
           <p>
             Lorsque vous activez une offre via FILON, un cookie d&apos;affiliation peut être déposé par la plateforme
-            partenaire (iGraal, Poulpeo, Back Market, etc.) afin de rattacher votre achat — c&apos;est ce qui permet le
+            partenaire (iGraal, Poulpeo, Back Market, etc.) afin de rattacher votre achat, c&apos;est ce qui permet le
             cashback et notre rémunération. Ce traitement relève de la politique de confidentialité de chaque partenaire.
           </p>
 
           <h2>Sous-traitants</h2>
           <ul>
-            <li><b>Hostinger</b> — hébergement du site.</li>
-            <li><b>Plausible Analytics</b> — mesure d&apos;audience sans cookie.</li>
-            <li><b>Formspree</b> (ou équivalent) — acheminement des messages de contact et inscriptions.</li>
+            <li><b>Hostinger</b>, hébergement du site.</li>
+            <li><b>Plausible Analytics</b>, mesure d&apos;audience sans cookie.</li>
+            <li><b>Formspree</b> (ou équivalent), acheminement des messages de contact et inscriptions.</li>
           </ul>
 
           <h2>Durée de conservation</h2>

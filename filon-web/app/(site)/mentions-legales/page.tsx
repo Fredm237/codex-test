@@ -6,7 +6,7 @@ import { site } from "@/lib/site";
 export const metadata: Metadata = buildMetadata({
   path: "/mentions-legales",
   title: "Mentions légales",
-  description: "Mentions légales du site FILON — éditeur, hébergeur et informations légales.",
+  description: "Mentions légales du site FILON, éditeur, hébergeur et informations légales.",
 });
 
 export default function MentionsLegalesPage() {
@@ -27,13 +27,13 @@ export default function MentionsLegalesPage() {
             Le site <b>{site.domain}</b> est édité par <b>{site.founder}</b>.
             <br />
             {/* À COMPLÉTER : forme juridique, adresse et numéros officiels. */}
-            Forme juridique : <b>[entreprise / société — à compléter]</b>
+            Forme juridique : <b>[entreprise / société, à compléter]</b>
             <br />
-            Siège : <b>[adresse complète, {site.city}, Belgique — à compléter]</b>
+            Siège : <b>[adresse complète, {site.city}, Belgique, à compléter]</b>
             <br />
-            Numéro d&apos;entreprise (BCE) : <b>[BE 0XXX.XXX.XXX — à compléter]</b>
+            Numéro d&apos;entreprise (BCE) : <b>[BE 0XXX.XXX.XXX, à compléter]</b>
             <br />
-            Numéro de TVA : <b>[BE 0XXX.XXX.XXX — à compléter]</b>
+            Numéro de TVA : <b>[BE 0XXX.XXX.XXX, à compléter]</b>
             <br />
             Contact : <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>
           </p>
@@ -43,8 +43,8 @@ export default function MentionsLegalesPage() {
 
           <h2>Hébergement</h2>
           <p>
-            Le site est hébergé par <b>Hostinger International Ltd</b> — 61 Lordou Vironos Street, 6023 Larnaca, Chypre —
-            <a href="https://www.hostinger.fr"> hostinger.fr</a>.
+            Le site est hébergé par <b>Hostinger International Ltd</b>, 61 Lordou Vironos Street, 6023 Larnaca, Chypre.
+            Plus d&apos;informations sur <a href="https://www.hostinger.fr">hostinger.fr</a>.
             {" "}
             {/* Adaptez si vous changez d'hébergeur. */}
           </p>

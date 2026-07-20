@@ -24,7 +24,7 @@ export default function CodesPromoPage() {
       <ContentHero
         eyebrow="Codes promo"
         title={<>Des codes promo qui fonctionnent <span className="it">vraiment</span>.</>}
-        intro="« Code expiré », « non applicable à cet article »… tout le monde connaît la frustration. FILON teste chaque code en direct au moment du paiement et applique automatiquement celui qui offre la plus grosse réduction — sans que vous essayiez dix combinaisons."
+        intro="« Code expiré », « non applicable à cet article »… tout le monde connaît la frustration. FILON teste chaque code en direct au moment du paiement et applique automatiquement celui qui offre la plus grosse réduction, sans que vous essayiez dix combinaisons."
         breadcrumb={[{ name: "Codes promo", path: "/codes-promo" }]}
       />
 
@@ -48,7 +48,7 @@ export default function CodesPromoPage() {
             items={[
               { n: "01", h: "Collecte", p: "FILON réunit les codes disponibles pour le marchand où vous êtes." },
               { n: "02", h: "Test en direct", p: "Chaque code est essayé sur votre panier réel, au moment du paiement." },
-              { n: "03", h: "Meilleure réduction", p: "Le code le plus avantageux est appliqué — et cumulé au cashback si possible." },
+              { n: "03", h: "Meilleure réduction", p: "Le code le plus avantageux est appliqué, et cumulé au cashback si possible." },
             ]}
           />
         </div>

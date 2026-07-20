@@ -7,11 +7,11 @@ export function buildMetadata(input: {
   description?: string;
   path?: string;
 }): Metadata {
-  const title = input.title ? `${input.title} — ${site.name}` : `${site.name} — ${site.tagline}`;
+  const title = input.title ? `${input.title} · ${site.name}` : `${site.name} · ${site.tagline}`;
   const description = input.description ?? site.description;
   const url = `${site.url}${input.path ?? "/"}`;
 
-  const ogImage = { url: "/og.png", width: 1200, height: 630, alt: `${site.name} — ${site.tagline}` };
+  const ogImage = { url: "/og.png", width: 1200, height: 630, alt: `${site.name}, ${site.tagline}` };
 
   return {
     title,

@@ -38,7 +38,7 @@ export function EditorialHero() {
           </p>
           <div className="ed-hero-actions">
             <a className="ed-btn dark" href="/recherche">Essayer le copilote</a>
-            <a className="ed-btn ghost" href="/#installer">Ajouter — gratuit</a>
+            <a className="ed-btn ghost" href="/#installer">Ajouter gratuitement</a>
           </div>
         </div>
 

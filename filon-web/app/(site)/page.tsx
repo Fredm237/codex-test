@@ -10,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/",
   title: "Est-ce vraiment le bon prix ?",
   description:
-    "FILON, l'assistant d'achat malin. Avant chaque achat, il compare cashback, reconditionné et codes promo — et vous dit s'il existe mieux. Ne payez plus jamais trop cher.",
+    "FILON, l'assistant d'achat malin. Avant chaque achat, il compare cashback, reconditionné et codes promo, et vous dit s'il existe mieux. Ne payez plus jamais trop cher.",
 });
 
 export default function HomePage() {

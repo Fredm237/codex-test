@@ -22,7 +22,7 @@ export default function PartenairesPage() {
       <ContentHero
         eyebrow="Partenaires"
         title={<>Touchez l&apos;acheteur au <span className="it">moment</span> décisif.</>}
-        intro="FILON accompagne le consommateur juste avant l'achat — l'instant où l'intention est la plus forte. Pour les plateformes, marchands et acteurs du reconditionné, c'est un canal d'acquisition qualifié, transparent et mesurable."
+        intro="FILON accompagne le consommateur juste avant l'achat, l'instant où l'intention est la plus forte. Pour les plateformes, marchands et acteurs du reconditionné, c'est un canal d'acquisition qualifié, transparent et mesurable."
         breadcrumb={[{ name: "Partenaires", path: "/partenaires" }]}
       />
 
@@ -81,7 +81,7 @@ export default function PartenairesPage() {
       <ProseBlock heading={<>Travaillons <span className="it">ensemble</span>.</>} alt>
         <p>
           Plateforme de cashback, marchand, spécialiste du reconditionné ou marque&nbsp;? Écrivez-nous à{" "}
-          <a href={`mailto:partenaires@${site.domain}`}>partenaires@{site.domain}</a> — nous vous présentons les formats de
+          <a href={`mailto:partenaires@${site.domain}`}>partenaires@{site.domain}</a>, nous vous présentons les formats de
           collaboration et les modalités d&apos;intégration.
         </p>
       </ProseBlock>

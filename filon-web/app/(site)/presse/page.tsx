@@ -16,7 +16,7 @@ export default function PressePage() {
       <ContentHero
         eyebrow="Presse"
         title={<>FILON, en <span className="it">clair</span>.</>}
-        intro="Tout ce qu'il faut pour parler de FILON : notre mission, notre positionnement et un contact média direct. Journalistes, créateurs, podcasteurs — écrivez-nous, on répond vite."
+        intro="Tout ce qu'il faut pour parler de FILON : notre mission, notre positionnement et un contact média direct. Journalistes, créateurs, podcasteurs, écrivez-nous, on répond vite."
         breadcrumb={[{ name: "Presse", path: "/presse" }]}
       />
 
@@ -24,7 +24,7 @@ export default function PressePage() {
         <p>
           <b>FILON est un copilote d&apos;achat propulsé par l&apos;IA</b> : il analyse le marché, compare les options
           (prix, cashback, reconditionné, codes promo, fiabilité, historique de prix) et recommande la meilleure décision
-          avant chaque achat — pas seulement le meilleur prix, mais le bon choix, au bon moment.
+          avant chaque achat, pas seulement le meilleur prix, mais le bon choix, au bon moment.
         </p>
         <p>
           Basé à {site.city}, FILON vise à devenir la référence francophone de l&apos;optimisation d&apos;achat, avec la{" "}
@@ -40,12 +40,12 @@ export default function PressePage() {
           </div>
           <InfoGrid
             items={[
-              { n: "◆", h: "Catégorie", p: "AdTech / IA d'aide à la décision d'achat — un copilote, pas un comparateur." },
+              { n: "◆", h: "Catégorie", p: "AdTech / IA d'aide à la décision d'achat, un copilote, pas un comparateur." },
               { n: "◆", h: "Différence", p: "Transparence totale : la rémunération est affichée, l'attribution est honnête." },
               { n: "◆", h: "Marché", p: "Belgique francophone d'abord, puis France et francophonie européenne." },
               { n: "◆", h: "Modèle", p: "100 % gratuit pour l'utilisateur ; rémunéré par la commission d'apport des partenaires." },
-              { n: "◆", h: "Fondateur", p: `${site.founder}, ${site.city} — également fondateur de SmartWave FX.` },
-              { n: "◆", h: "Statut", p: "En phase de lancement — extension navigateur puis application et assistant." },
+              { n: "◆", h: "Fondateur", p: `${site.founder}, ${site.city}, également fondateur de SmartWave FX.` },
+              { n: "◆", h: "Statut", p: "En phase de lancement, extension navigateur puis application et assistant." },
             ]}
           />
         </div>
@@ -54,7 +54,7 @@ export default function PressePage() {
       <ProseBlock heading={<>Ce qui rend le sujet <span className="it">intéressant</span>.</>}>
         <p>
           La bascule d&apos;un modèle de <b>comparateur</b> (« voici les prix ») vers un modèle de <b>copilote d&apos;achat</b>
-          (« voici ce que vous devriez acheter ») — porté par l&apos;IA et une base produit propriétaire.
+          (« voici ce que vous devriez acheter »), porté par l&apos;IA et une base produit propriétaire.
         </p>
         <p>
           La <b>transparence comme réponse</b> à la crise de confiance de l&apos;affiliation, et un pari d&apos;ancrage
@@ -70,7 +70,7 @@ export default function PressePage() {
         </p>
       </ProseBlock>
 
-      <ClosingCta title={<>Parlons de ce qui <span className="it">change</span>.</>} sub="Une question, un angle, une interview — le contact presse répond vite." />
+      <ClosingCta title={<>Parlons de ce qui <span className="it">change</span>.</>} sub="Un angle, une interview, un chiffre à vérifier. Écrivez-nous, on répond vite." />
     </>
   );
 }

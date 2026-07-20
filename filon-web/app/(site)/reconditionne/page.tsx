@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/reconditionne",
   title: "Reconditionné : le même produit, jusqu'à 50 % moins cher",
   description:
-    "Neuf ou reconditionné ? FILON compare le prix neuf au reconditionné équivalent (grade vérifié, garanti) et calcule l'économie réelle — meilleur pour votre budget et pour la planète.",
+    "Neuf ou reconditionné ? FILON compare le prix neuf au reconditionné équivalent (grade vérifié, garanti) et calcule l'économie réelle, meilleur pour votre budget et pour la planète.",
 });
 
 const FAQ = [
@@ -24,7 +24,7 @@ export default function ReconditionnePage() {
       <ContentHero
         eyebrow="Reconditionné"
         title={<>Le même produit. Jusqu&apos;à <span className="it">50 %</span> moins cher.</>}
-        intro="Pourquoi payer le neuf plein tarif quand l'équivalent reconditionné, vérifié et garanti, coûte souvent 40 % de moins ? FILON compare les deux et ajoute le cashback pour révéler votre prix réel — meilleur pour votre budget, et pour la planète."
+        intro="Pourquoi payer le neuf plein tarif quand l'équivalent reconditionné, vérifié et garanti, coûte souvent 40 % de moins ? FILON compare les deux et ajoute le cashback pour révéler votre prix réel, meilleur pour votre budget, et pour la planète."
         breadcrumb={[{ name: "Reconditionné", path: "/reconditionne" }]}
       />
 
@@ -47,7 +47,7 @@ export default function ReconditionnePage() {
           <InfoGrid
             items={[
               { n: "✓", h: "Grade vérifié", p: "L'état esthétique et fonctionnel est affiché clairement (A+, A, B…)." },
-              { n: "✓", h: "Garantie réelle", p: "12 à 24 mois selon le vendeur — jamais un reconditionné sans filet." },
+              { n: "✓", h: "Garantie réelle", p: "12 à 24 mois selon le vendeur, jamais un reconditionné sans filet." },
               { n: "✓", h: "Économie chiffrée", p: "Le gain vs neuf, cashback compris, calculé et affiché avant l'achat." },
             ]}
           />

@@ -47,7 +47,7 @@ export function ContactForm() {
       nom: String(fd.get("nom") || ""),
       email: String(fd.get("email") || ""),
       message: String(fd.get("message") || ""),
-      _subject: "Nouveau message — FILON",
+      _subject: "Nouveau message FILON",
     });
     setState(ok ? "ok" : "error");
     if (ok) e.currentTarget.reset();
@@ -87,7 +87,7 @@ export function Newsletter() {
     const fd = new FormData(e.currentTarget);
     if (fd.get("_gotcha")) return;
     setState("sending");
-    const ok = await postForm({ email: String(fd.get("email") || ""), _subject: "Le Filon — inscription newsletter", liste: "le-filon" });
+    const ok = await postForm({ email: String(fd.get("email") || ""), _subject: "Inscription à la newsletter Le Filon", liste: "le-filon" });
     setState(ok ? "ok" : "error");
     if (ok) e.currentTarget.reset();
   };

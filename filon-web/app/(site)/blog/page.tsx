@@ -5,7 +5,7 @@ import { Reveal } from "@/components/editorial/Reveal";
 
 export const metadata: Metadata = buildMetadata({
   path: "/blog",
-  title: "Blog — guides d'achat malin",
+  title: "Le blog",
   description:
     "Comparatifs cashback, guides neuf vs reconditionné, décryptages conso et bons plans. Le contenu qui vous fait économiser, sans jargon.",
 });
@@ -21,7 +21,7 @@ const POSTS = [
   {
     cat: "Guide",
     title: "Neuf vs reconditionné : l'économie réelle, produit par produit",
-    excerpt: "Combien économise-t-on vraiment ? Écarts par catégorie, grades, garanties et le cumul avec le cashback — pour décider sans hésiter.",
+    excerpt: "Combien économise-t-on vraiment ? Écarts par catégorie, grades, garanties et le cumul avec le cashback, pour décider sans hésiter.",
     href: "/blog/neuf-vs-reconditionne-economie-reelle",
     read: "5 min de lecture",
   },

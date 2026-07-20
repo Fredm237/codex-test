@@ -5,7 +5,7 @@ import { site } from "@/lib/site";
 
 export const metadata: Metadata = buildMetadata({
   path: "/carrieres",
-  title: "Carrières — construire FILON",
+  title: "Carrières",
   description:
     "FILON construit le copilote d'achat IA de référence en francophonie. Nous cherchons des personnes exigeantes et curieuses pour bâtir le produit, la donnée et la marque. Candidatures spontanées bienvenues.",
 });
@@ -16,7 +16,7 @@ export default function CarrieresPage() {
       <ContentHero
         eyebrow="Carrières"
         title={<>Construisez le <span className="it">réflexe</span> de millions d&apos;acheteurs.</>}
-        intro="FILON en est à ses débuts — le meilleur moment pour rejoindre. Nous bâtissons un copilote d'achat qui fait gagner du temps et de l'argent à tout le monde, avec la transparence pour boussole."
+        intro="FILON en est à ses débuts, le meilleur moment pour rejoindre. Nous bâtissons un copilote d'achat qui fait gagner du temps et de l'argent à tout le monde, avec la transparence pour boussole."
         breadcrumb={[{ name: "Carrières", path: "/carrieres" }]}
       />
 
@@ -27,8 +27,8 @@ export default function CarrieresPage() {
           C&apos;est un projet technique et éditorial ambitieux, avec un vrai impact concret sur le portefeuille des gens.
         </p>
         <p>
-          Nous croyons à une petite équipe exigeante, à l&apos;autonomie, et à un produit soigné jusqu&apos;au dernier détail —
-          l&apos;inverse du « vite fait, mal fait ».
+          Nous croyons à une petite équipe exigeante, à l&apos;autonomie et à un produit soigné jusqu&apos;au dernier détail.
+          Tout l&apos;inverse du « vite fait, mal fait ».
         </p>
       </ProseBlock>
 

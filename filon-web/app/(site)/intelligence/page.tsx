@@ -16,7 +16,7 @@ const PHASES = [
     status: "En cours",
     live: true,
     h: "Le copilote conversationnel",
-    p: "Vous décrivez un besoin, FILON analyse le marché et recommande la meilleure décision — quoi acheter, où, et quand.",
+    p: "Vous décrivez un besoin, FILON analyse le marché et recommande la meilleure décision, quoi acheter, où, et quand.",
     items: ["Analyse besoin + budget", "Cashback, reconditionné, codes promo", "Verdict acheter / attendre"],
   },
   {
@@ -24,7 +24,7 @@ const PHASES = [
     status: "À venir",
     live: false,
     h: "L'extension, partout",
-    p: "Le copilote présent sur chaque site marchand — le vrai avantage durable. Sur chaque fiche produit, la meilleure alternative en un coup d'œil.",
+    p: "Le copilote présent sur chaque site marchand, le vrai avantage durable. Sur chaque fiche produit, la meilleure alternative en un coup d'œil.",
     items: ["Prix ailleurs en direct", "Alternative reconditionnée", "Historique de prix contextuel"],
   },
   {
@@ -32,7 +32,7 @@ const PHASES = [
     status: "En construction",
     live: false,
     h: "L'Intelligence Graph",
-    p: "La base de connaissance produit propriétaire qui alimente tout le reste — et qui, à terme, vaut bien plus que l'affiliation.",
+    p: "La base de connaissance produit propriétaire qui alimente tout le reste, et qui, à terme, vaut bien plus que l'affiliation.",
     items: ["Durée de vie & réparabilité", "Fiabilité des marques", "Coût total de possession"],
   },
 ];
@@ -43,7 +43,7 @@ export default function IntelligencePage() {
       <ContentHero
         eyebrow="Technologie"
         title={<>Sous le copilote, une <span className="it">intelligence</span> propriétaire.</>}
-        intro="Un comparateur affiche des prix. FILON recommande une décision. La différence tient en une chose : le Filon Intelligence Graph — une base de connaissance produit que nous construisons, et qui apprend à chaque analyse."
+        intro="Un comparateur affiche des prix. FILON recommande une décision. La différence tient en une chose : le Filon Intelligence Graph, une base de connaissance produit que nous construisons, et qui apprend à chaque analyse."
         breadcrumb={[{ name: "Intelligence", path: "/intelligence" }]}
       />
 
@@ -116,7 +116,7 @@ export default function IntelligencePage() {
           <b>données comportementales propriétaires</b> qui améliorent la recommandation à chaque usage.
         </p>
         <p>
-          Le tout avec la <b>transparence</b> comme socle — l&apos;exact opposé des modèles qui ont trahi la confiance du secteur.
+          Le tout avec la <b>transparence</b> comme socle, l&apos;exact opposé des modèles qui ont trahi la confiance du secteur.
           C&apos;est ce cercle vertueux, pas un simple flux de prix, qui construit l&apos;avance de FILON.
         </p>
       </ProseBlock>

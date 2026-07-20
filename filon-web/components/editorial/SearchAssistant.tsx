@@ -8,11 +8,11 @@ import { useRef, useState } from "react";
 type Deal = { offers: number; newP: number; merchant: string; recP: number; recPct: number; cb: number; cbP: string; advise: string; real: number };
 
 const DB: Record<string, Deal> = {
-  "iphone 18 pro": { offers: 42, newP: 1199, merchant: "Amazon", recP: 985, recPct: 18, cb: 5.5, cbP: "Widilo", advise: "attendez 6 jours — le prix baisse généralement avant le week-end", real: 930 },
-  ps6: { offers: 37, newP: 599, merchant: "Fnac", recP: 519, recPct: 13, cb: 4, cbP: "iGraal", advise: "achetez maintenant — le stock est tendu et aucune baisse n'est prévue avant les fêtes", real: 498 },
+  "iphone 18 pro": { offers: 42, newP: 1199, merchant: "Amazon", recP: 985, recPct: 18, cb: 5.5, cbP: "Widilo", advise: "attendez six jours, le prix baisse souvent avant le week-end", real: 930 },
+  ps6: { offers: 37, newP: 599, merchant: "Fnac", recP: 519, recPct: 13, cb: 4, cbP: "iGraal", advise: "achetez maintenant, le stock est tendu et aucune baisse ne se profile avant les fêtes", real: 498 },
   "dyson v15": { offers: 34, newP: 549, merchant: "Boulanger", recP: 379, recPct: 31, cb: 6.5, cbP: "Poulpeo", advise: "le reconditionné grade A+ est la meilleure affaire ce mois-ci", real: 354 },
   "airpods pro": { offers: 29, newP: 279, merchant: "Amazon", recP: 229, recPct: 18, cb: 5, cbP: "Widilo", advise: "un code promo valide fait tomber le neuf sous le reconditionné aujourd'hui", real: 214 },
-  "macbook air": { offers: 31, newP: 1299, merchant: "Amazon", recP: 1049, recPct: 19, cb: 4.5, cbP: "eBuyClub", advise: "attendez la rentrée — une remise étudiante est probable sous 10 jours", real: 1002 },
+  "macbook air": { offers: 31, newP: 1299, merchant: "Amazon", recP: 1049, recPct: 19, cb: 4.5, cbP: "eBuyClub", advise: "attendez la rentrée, une remise étudiante est probable sous dix jours", real: 1002 },
 };
 
 function synthDeal(q: string): Deal {
@@ -26,8 +26,8 @@ function synthDeal(q: string): Deal {
   const merchants = ["Amazon", "Fnac", "Cdiscount", "Boulanger", "Darty"];
   const cbs = ["iGraal", "Poulpeo", "Widilo", "Joko", "eBuyClub"];
   const advs = [
-    "attendez quelques jours — une baisse est probable avant le week-end",
-    "achetez maintenant — c'est le meilleur prix observé sur 90 jours",
+    "attendez quelques jours, une baisse est probable avant le week-end",
+    "achetez maintenant, c'est le meilleur prix vu en 90 jours",
     "le reconditionné équivalent est la meilleure affaire ce mois-ci",
   ];
   return { offers: 20 + (seed % 30), newP, merchant: merchants[seed % 5], recP, recPct, cb, cbP: cbs[(seed >> 3) % 5], advise: advs[seed % 3], real };
@@ -46,7 +46,7 @@ const NEEDS: { keys: RegExp; budget: number; build: (b: number) => Need }[] = [
     build: (b) => ({
       usage: "Montage vidéo",
       priorities: "CPU/GPU, écran calibré, RAM 32 Go",
-      verdict: "Acheter maintenant — prix proche du plancher, aucune baisse attendue avant 30 jours.",
+      verdict: "Acheter maintenant. Le prix est proche du plancher, aucune baisse attendue avant 30 jours.",
       picks: [
         { name: "ASUS ProArt Studiobook", rank: "Le plus taillé pour la vidéo", fit: "Écran 4K OLED calibré usine, GPU RTX pour l'export, 32 Go RAM. La machine de monteur.", price: 1189, merchant: "LDLC", now: 1189, avg6: 1349, low: 1149, buy: true, best: true },
         { name: "MacBook Air (puce M)", rank: "Meilleure autonomie / silence", fit: "Silencieux, ~18 h d'autonomie, export 1080p fluide. Parfait en mobilité.", price: 1049, merchant: "Amazon", now: 1049, avg6: 1129, low: 999, buy: true },
@@ -60,7 +60,7 @@ const NEEDS: { keys: RegExp; budget: number; build: (b: number) => Need }[] = [
     build: (b) => ({
       usage: "Gaming",
       priorities: "GPU, taux de rafraîchissement, refroidissement",
-      verdict: "Acheter maintenant — le modèle vedette est à son meilleur prix sur 90 jours.",
+      verdict: "Acheter maintenant. Le modèle vedette est à son meilleur prix depuis 90 jours.",
       picks: [
         { name: "MSI Katana · RTX", rank: "Le meilleur rapport perf/prix", fit: "GPU RTX, écran 144 Hz, refroidissement sérieux. Tourne tout en 1080p élevé.", price: 999, merchant: "Cdiscount", now: 999, avg6: 1149, low: 979, buy: true, best: true },
         { name: "Lenovo LOQ", rank: "L'entrée de gamme maligne", fit: "Bon GPU, châssis solide, silencieux. Idéal pour débuter sans exploser le budget.", price: 849, merchant: "Fnac", now: 849, avg6: 899, low: 829, buy: true },
@@ -74,7 +74,7 @@ const NEEDS: { keys: RegExp; budget: number; build: (b: number) => Need }[] = [
     build: (b) => ({
       usage: "Smartphone",
       priorities: "Photo, autonomie, longévité des mises à jour",
-      verdict: "Attendre 1 semaine — une promotion récurrente ramène le modèle vedette ~40 € plus bas.",
+      verdict: "Attendre une semaine. Une promotion récurrente fait souvent baisser ce modèle d'environ 40 €.",
       picks: [
         { name: "Google Pixel (série a)", rank: "La meilleure photo à ce prix", fit: "Photo de référence, Android pur, 7 ans de mises à jour. Le plus pérenne.", price: 499, merchant: "Amazon", now: 499, avg6: 549, low: 459, buy: false, best: true },
         { name: "Samsung Galaxy A · 5G", rank: "Le meilleur écran / autonomie", fit: "Grand écran AMOLED, grosse batterie, très bonne autonomie. Polyvalent.", price: 379, merchant: "Boulanger", now: 379, avg6: 429, low: 369, buy: true },
@@ -88,7 +88,7 @@ const NEEDS: { keys: RegExp; budget: number; build: (b: number) => Need }[] = [
     build: (b) => ({
       usage: "Audio / casque",
       priorities: "Réduction de bruit, autonomie, confort",
-      verdict: "Acheter maintenant — le reconditionné grade A+ bat le neuf sur ce modèle aujourd'hui.",
+      verdict: "Acheter maintenant. Le reconditionné grade A+ passe sous le neuf sur ce modèle aujourd'hui.",
       picks: [
         { name: "Sony WH · réduction de bruit", rank: "La meilleure réduction de bruit", fit: "Référence anti-bruit, 30 h d'autonomie, très confortable. Le haut du panier.", price: 279, merchant: "Fnac", now: 279, avg6: 329, low: 259, buy: false, best: true },
         { name: "Écouteurs sport étanches", rank: "Le meilleur pour le sport", fit: "Maintien parfait, étanches, autonomie généreuse. Pensés pour bouger.", price: 129, merchant: "Amazon", now: 129, avg6: 149, low: 119, buy: true },
@@ -110,11 +110,11 @@ function synthNeed(q: string, budget: number | null): Need {
   return {
     usage: q.trim().replace(/^\w/, (c) => c.toUpperCase()),
     priorities: "rapport qualité/prix, fiabilité, garantie",
-    verdict: "Acheter maintenant — la sélection est au meilleur prix observé récemment.",
+    verdict: "Acheter maintenant. La sélection est au meilleur prix vu récemment.",
     picks: [
       mk(0.98, 0, "Le meilleur choix global", "Le meilleur équilibre performances, fiabilité et prix pour votre besoin.", true, true),
       mk(0.82, 1, "Le plus économique", "Presque aussi bon, sensiblement moins cher. Le choix malin.", true),
-      mk(0.7, 2, "Reconditionné A+", "L'équivalent reconditionné garanti 24 mois — le maximum d'économie.", false),
+      mk(0.7, 2, "Reconditionné A+", "L'équivalent reconditionné, garanti 24 mois. Le maximum d'économie.", false),
     ],
   };
 }
@@ -166,7 +166,7 @@ export function SearchAssistant() {
     const segs: { t: string; c?: string }[] = [
       { t: "J'ai analysé " }, { t: `${d.offers} offres`, c: "ent" }, { t: " pour " }, { t: name, c: "ent" },
       { t: ". Le meilleur prix neuf est chez " }, { t: d.merchant, c: "ent" }, { t: " à " }, { t: euro(d.newP), c: "ent" },
-      { t: ". En reconditionné grade A+, on descend à " }, { t: euro(d.recP), c: "save" }, { t: " — soit " },
+      { t: ". En reconditionné grade A+, on descend à " }, { t: euro(d.recP), c: "save" }, { t: ", soit " },
       { t: `−${d.recPct} %`, c: "save" }, { t: ", garanti 24 mois. Le cashback le plus élevé est chez " }, { t: d.cbP, c: "ent" },
       { t: " (" }, { t: `${d.cb.toString().replace(".", ",")} %`, c: "save" }, { t: ")." },
     ];
@@ -300,7 +300,7 @@ export function SearchAssistant() {
         window.setTimeout(() => {
           verdict.classList.add("in");
           vp.textContent = euro(best.price);
-          vs.innerHTML = `<b>${best.name}</b> — ${need.verdict}`;
+          vs.innerHTML = `<b>${best.name}</b>. ${need.verdict}`;
         }, reduce ? 0 : pEls.length * 120 + 250)
       );
     };
@@ -339,7 +339,7 @@ export function SearchAssistant() {
     <section className={`sa ${searched ? "searched" : ""}`}>
       <div className="ed-wrap">
         {!searched && <span className="eyebrow">Copilote d&apos;achat · IA</span>}
-        <h1>{searched ? "Un autre achat à décider ?" : "Que voulez-vous acheter — ou décider ?"}</h1>
+        <h1>{searched ? "Un autre achat à décider ?" : "Que voulez-vous acheter, ou décider ?"}</h1>
 
         <form
           className="sa-search"
@@ -392,7 +392,7 @@ export function SearchAssistant() {
               <div className="sa-verdict">
                 <div>
                   <div className="lab">{mode === "need" ? "Ma recommandation" : "Votre prix réel le plus bas"}</div>
-                  <div className="price mono sa-vp">—</div>
+                  <div className="price mono sa-vp">…</div>
                 </div>
                 <div className="sv sa-vs" />
                 <a className="ed-btn wave" href="/#installer">{mode === "need" ? "Voir cette offre" : "Voir l'offre"}</a>
