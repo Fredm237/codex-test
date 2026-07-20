@@ -163,11 +163,11 @@
 .ed-grav-head .it { color: #7fe9dc; }
 
 .ed-grav-stage { position: absolute; inset: 0; z-index: 2; }
-.ed-grav-stage .core { position: absolute; left: 50%; top: 53%; transform: translate(-50%, -50%) scale(var(--coreScale, 1)); width: min(600px, 70vmin); height: min(600px, 70vmin); border-radius: 50%;
-  background: radial-gradient(circle at 50% 44%, rgba(255,255,255,0.92), rgba(127,233,220,0.5) 28%, rgba(30,117,201,0.24) 58%, transparent 72%);
-  box-shadow: 0 0 calc(90px * var(--glow, 0.5)) rgba(20,198,192,0.5), 0 0 calc(200px * var(--glow, 0.5)) rgba(30,117,201,0.38);
+.ed-grav-stage .core { position: absolute; left: 50%; top: 53%; transform: translate(-50%, -50%) scale(var(--coreScale, 1)); width: min(460px, 50vmin); height: min(460px, 50vmin); border-radius: 50%;
+  background: radial-gradient(circle at 50% 47%, rgba(10,32,52,0) 30%, rgba(127,233,220,0.34) 52%, rgba(30,117,201,0.2) 66%, transparent 74%);
+  box-shadow: 0 0 calc(70px * var(--glow, 0.5)) rgba(20,198,192,0.4), 0 0 calc(170px * var(--glow, 0.5)) rgba(30,117,201,0.3);
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
-.ed-grav-stage .core .price { font-family: var(--mono); font-weight: 600; font-size: clamp(42px, 7vw, 84px); letter-spacing: -0.03em; color: #fff; text-shadow: 0 2px 40px rgba(0,0,0,0.4); }
+.ed-grav-stage .core .price { font-family: var(--mono); font-weight: 600; font-size: clamp(36px, 5vw, 64px); letter-spacing: -0.03em; color: #fff; text-shadow: 0 2px 30px rgba(0,0,0,0.5); }
 .ed-grav-stage .core .cap { font-size: clamp(12px, 1.3vw, 14px); letter-spacing: 0.02em; color: #7fe9dc; opacity: 0; transition: opacity 0.4s var(--ease-out); }
 .ed-grav-chip { position: absolute; left: 50%; top: 53%; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 11px 17px; border-radius: 14px; white-space: nowrap;
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.14); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: box-shadow 0.3s, border-color 0.3s; }

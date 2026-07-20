@@ -29,7 +29,7 @@ export function Transformation() {
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // orbit radius keyed to the orb's on-screen size, so chips sit just outside it
-    const orbRadius = () => Math.min(600, Math.min(window.innerWidth, window.innerHeight) * 0.7) * 0.5;
+    const orbRadius = () => Math.min(460, Math.min(window.innerWidth, window.innerHeight) * 0.5) * 0.5;
 
     const apply = (prog: number) => {
       const p = clamp01(prog);
