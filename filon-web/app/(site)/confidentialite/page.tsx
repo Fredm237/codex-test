@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/confidentialite",
   title: "Politique de confidentialité",
   description:
-    "Comment FILON protège vos données : aucune revente, analytics sans cookie, formulaires, liens affiliés et vos droits RGPD.",
+    "Comment FILON protège vos données : aucune revente, analytics sans cookie, formulaires, liens partenaires et vos droits RGPD.",
 });
 
 export default function ConfidentialitePage() {
@@ -28,7 +28,7 @@ export default function ConfidentialitePage() {
             <li>Nous ne construisons <b>aucun profil publicitaire</b> et ne <b>revendons aucune donnée</b>.</li>
             <li>Notre mesure d&apos;audience est <b>sans cookie</b> et anonyme (Plausible).</li>
             <li>Nous ne collectons des données personnelles que si <b>vous nous les fournissez</b> (contact, newsletter).</li>
-            <li>Les liens affiliés n&apos;augmentent <b>jamais</b> votre prix.</li>
+            <li>Les liens partenaires n&apos;augmentent <b>jamais</b> votre prix.</li>
           </ul>
 
           <h2>Responsable du traitement</h2>
@@ -59,11 +59,11 @@ export default function ConfidentialitePage() {
             navigateur.
           </p>
 
-          <h2>Liens affiliés</h2>
+          <h2>Liens partenaires</h2>
           <p>
-            Lorsque vous activez une offre via FILON, un cookie d&apos;affiliation peut être déposé par la plateforme
-            partenaire (iGraal, Poulpeo, Back Market, etc.) afin de rattacher votre achat, c&apos;est ce qui permet le
-            cashback et notre rémunération. Ce traitement relève de la politique de confidentialité de chaque partenaire.
+            Lorsque vous activez une offre via FILON, un service partenaire peut déposer un cookie technique afin de
+            rattacher votre commande. Ce traitement relève de la politique de confidentialité de ce partenaire. Cela ne
+            modifie jamais le prix que vous payez.
           </p>
 
           <h2>Sous-traitants</h2>

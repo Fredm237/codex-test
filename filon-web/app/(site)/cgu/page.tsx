@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/cgu",
   title: "Conditions générales d'utilisation",
   description:
-    "Les conditions générales d'utilisation du service FILON : objet, accès, nature de l'aide à la décision, liens affiliés, responsabilités et droit applicable.",
+    "Les conditions générales d'utilisation du service FILON : objet, accès, nature de l'aide à la décision, liens partenaires, responsabilités et droit applicable.",
 });
 
 export default function CguPage() {
@@ -41,9 +41,8 @@ export default function CguPage() {
           <h2>3. Accès et gratuité</h2>
           <p>
             L&apos;accès à FILON est <b>entièrement gratuit</b> pour l&apos;utilisateur, sans abonnement ni frais&nbsp;: voir la
-            page <a href="/tarifs">Tarifs</a>. Le service se rémunère via la commission d&apos;apport des plateformes partenaires
-            (voir article 6), jamais en facturant l&apos;utilisateur. L&apos;éditeur s&apos;efforce d&apos;assurer la
-            disponibilité du service sans pouvoir la garantir de manière ininterrompue.
+            page <a href="/tarifs">Tarifs</a>. Il n&apos;est jamais facturé à l&apos;utilisateur. L&apos;éditeur s&apos;efforce
+            d&apos;assurer la disponibilité du service sans pouvoir la garantir de manière ininterrompue.
           </p>
 
           <h2>4. Utilisation conforme</h2>
@@ -61,12 +60,11 @@ export default function CguPage() {
             décision d&apos;achat relève de la seule responsabilité de l&apos;utilisateur.
           </p>
 
-          <h2>6. Liens affiliés</h2>
+          <h2>6. Liens partenaires</h2>
           <p>
-            FILON contient des <b>liens affiliés</b>&nbsp;: lorsqu&apos;un utilisateur active une offre via FILON, la plateforme
-            partenaire peut reverser à l&apos;éditeur une part de sa commission d&apos;apport. <b>Cela n&apos;augmente jamais le
-            prix payé par l&apos;utilisateur</b> et n&apos;influence pas l&apos;objectivité de la recommandation, qui vise le
-            meilleur coût réel pour l&apos;utilisateur.
+            FILON peut contenir des <b>liens partenaires</b>. Les activer <b>n&apos;augmente jamais le prix payé par
+            l&apos;utilisateur</b> et n&apos;influence pas la recommandation, qui vise le meilleur coût réel pour
+            l&apos;utilisateur.
           </p>
 
           <h2>7. Propriété intellectuelle</h2>

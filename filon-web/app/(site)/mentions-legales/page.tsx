@@ -56,12 +56,10 @@ export default function MentionsLegalesPage() {
             reproduction sans autorisation est interdite.
           </p>
 
-          <h2>Nature du service et liens affiliés</h2>
+          <h2>Nature du service et liens partenaires</h2>
           <p>
-            FILON est un service gratuit d&apos;aide à la décision d&apos;achat. Le site contient des <b>liens affiliés</b> :
-            lorsqu&apos;un utilisateur active une offre (cashback, reconditionné, code promo) via FILON, la plateforme
-            partenaire peut reverser à l&apos;éditeur une part de sa commission d&apos;apport. <b>Cela n&apos;augmente jamais le
-            prix payé par l&apos;utilisateur.</b> Cette rémunération est signalée de manière transparente.
+            FILON est un service gratuit d&apos;aide à la décision d&apos;achat. Le site peut contenir des <b>liens
+            partenaires</b>. Les activer <b>ne modifie jamais le prix payé par l&apos;utilisateur.</b>
           </p>
 
           <h2>Données personnelles</h2>

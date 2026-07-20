@@ -11,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const FAQ = [
-  { q: "Un produit reconditionné, est-ce fiable ?", a: "Oui, quand il est bien sourcé. FILON ne compare que du reconditionné de grade vérifié, issu de vendeurs certifiés (type Back Market) et garanti 12 à 24 mois. Vous voyez le grade, la garantie et l'économie avant de décider." },
+  { q: "Un produit reconditionné, est-ce fiable ?", a: "Oui, quand il est bien choisi. FILON ne retient que du reconditionné vérifié, chez des vendeurs certifiés et sous garantie. Vous voyez la garantie et l'économie avant de décider." },
   { q: "Quelle économie peut-on vraiment espérer ?", a: "Un smartphone haut de gamme reconditionné se négocie souvent 40 % sous le neuf. En ajoutant un cashback partenaire (3 à 8 %), l'économie totale atteint 45 à 50 %. FILON calcule ce cumul pour vous." },
   { q: "Que veulent dire les grades A, A+, etc. ?", a: "Le grade décrit l'état esthétique : un grade A+ est quasi neuf, un grade B présente de légères marques d'usage sans impact sur le fonctionnement. FILON affiche le grade pour chaque offre afin que vous choisissiez en connaissance de cause." },
   { q: "Le reconditionné, est-ce vraiment plus écologique ?", a: "Oui : prolonger la vie d'un appareil évite la fabrication d'un neuf, gros consommateur de ressources et d'énergie. C'est l'un des gestes les plus efficaces pour réduire l'empreinte de vos achats tech." },
@@ -30,12 +30,12 @@ export default function ReconditionnePage() {
 
       <ProseBlock heading={<>Neuf ou reconditionné ? FILON <span className="it">tranche</span> pour vous.</>}>
         <p>
-          Comparer soi-même le neuf et le reconditionné, c'est fastidieux : trouver l'équivalent exact, vérifier le grade,
-          la garantie, le vendeur, puis calculer l'économie réelle une fois le cashback ajouté.
+          Comparer soi-même le neuf et le reconditionné, c&apos;est fastidieux : trouver l&apos;équivalent exact, vérifier
+          la garantie, le vendeur, puis calculer l&apos;économie réelle.
         </p>
         <p>
-          FILON fait ce croisement en une seconde. Il vous montre le <b>prix neuf</b>, le <b>reconditionné équivalent garanti</b>,
-          et le <b>prix réel final</b> cashback inclus. Vous décidez en un coup d'œil, sans y passer votre soirée.
+          FILON le fait pour vous, en une seconde. Il vous montre le <b>neuf</b>, le <b>reconditionné équivalent
+          garanti</b>, et <b>votre vrai prix</b>. Vous décidez en un coup d&apos;œil, sans y passer votre soirée.
         </p>
       </ProseBlock>
 

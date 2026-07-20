@@ -14,7 +14,7 @@ const POSTS = [
   {
     cat: "Comparatif",
     title: "Quelle app de cashback paie le plus ?",
-    excerpt: "iGraal, Poulpeo, Widilo, Joko, eBuyClub : comment les taux varient, et comment être sûr de prendre le meilleur à chaque achat.",
+    excerpt: "Les taux varient énormément d'une app à l'autre. Comment être sûr de prendre le meilleur à chaque achat.",
     href: "/blog/quelle-app-cashback-paie-le-plus",
     read: "6 min de lecture",
   },

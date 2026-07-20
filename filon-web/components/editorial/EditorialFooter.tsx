@@ -57,8 +57,7 @@ export function EditorialFooter() {
           ))}
         </div>
         <p className="ed-disc">
-          FILON est gratuit. Certains liens sont affiliés. Quand vous activez une offre, la plateforme partenaire nous
-          reverse une part de sa commission. Votre prix ne change pas, et nous ne revendons aucune donnée de navigation.
+          FILON est gratuit et le restera. Aucune publicité, aucune revente de vos données. Vous ne payez jamais.
         </p>
       </div>
     </footer>

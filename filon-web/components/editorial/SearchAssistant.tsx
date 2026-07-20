@@ -167,8 +167,8 @@ export function SearchAssistant() {
       { t: "J'ai analysé " }, { t: `${d.offers} offres`, c: "ent" }, { t: " pour " }, { t: name, c: "ent" },
       { t: ". Le meilleur prix neuf est chez " }, { t: d.merchant, c: "ent" }, { t: " à " }, { t: euro(d.newP), c: "ent" },
       { t: ". En reconditionné grade A+, on descend à " }, { t: euro(d.recP), c: "save" }, { t: ", soit " },
-      { t: `−${d.recPct} %`, c: "save" }, { t: ", garanti 24 mois. Le cashback le plus élevé est chez " }, { t: d.cbP, c: "ent" },
-      { t: " (" }, { t: `${d.cb.toString().replace(".", ",")} %`, c: "save" }, { t: ")." },
+      { t: `−${d.recPct} %`, c: "save" }, { t: ", garanti 24 mois. Et le cashback fait encore tomber le prix de " },
+      { t: `${d.cb.toString().replace(".", ",")} %`, c: "save" }, { t: "." },
     ];
     text.innerHTML = "";
     const words: HTMLElement[] = [];
@@ -192,8 +192,8 @@ export function SearchAssistant() {
 
     const cards = [
       { lab: "Meilleur prix neuf", val: euro(d.newP), g: false, sub: `${d.merchant} · livraison incluse`, tag: "" },
-      { lab: "Reconditionné A+", val: euro(d.recP), g: true, sub: "garanti 24 mois · Back Market", tag: `−${d.recPct} %` },
-      { lab: "Meilleur cashback", val: `${d.cb.toString().replace(".", ",")} %`, g: true, sub: `appliqué via ${d.cbP}`, tag: "" },
+      { lab: "Reconditionné A+", val: euro(d.recP), g: true, sub: "garanti 24 mois · vendeur certifié", tag: `−${d.recPct} %` },
+      { lab: "Cashback", val: `${d.cb.toString().replace(".", ",")} %`, g: true, sub: "appliqué automatiquement", tag: "" },
     ];
     results.innerHTML = cards
       .map((c) => `<div class="sa-r"><div class="lab">${c.lab}</div><div class="val${c.g ? " g" : ""}">${c.val}</div><div class="sub">${c.sub}</div>${c.tag ? `<span class="tag">${c.tag}</span>` : ""}</div>`)
@@ -398,7 +398,7 @@ export function SearchAssistant() {
                 <a className="ed-btn wave" href="/#installer">{mode === "need" ? "Voir cette offre" : "Voir l'offre"}</a>
               </div>
               <p className="sa-disc">
-                Lien affilié · FILON perçoit une part de la commission d&apos;apport de la plateforme. Cela n&apos;augmente jamais votre prix. Données non revendues.
+                FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.
               </p>
             </>
           )}

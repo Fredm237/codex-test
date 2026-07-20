@@ -47,7 +47,7 @@ export function GraphScene() {
               <span className="it">Il comprend les produits.</span>
             </h2>
             <p className="ed-scene-sub">Ce qu&apos;un produit vaut vraiment, et combien de temps il durera. Il l&apos;apprend à chaque achat.</p>
-            <a className="ed-btn ghostlight" href="/intelligence">Voir l&apos;Intelligence Graph</a>
+            <a className="ed-btn ghostlight" href="/intelligence">En savoir plus</a>
           </Reveal>
         </div>
       </div>
