@@ -28,13 +28,13 @@ const VERT = /* glsl */ `
     float n = sin(uTime * 0.6 + ph + p.y * 2.6) * 0.5 + 0.5;
     float disp = (0.05 + 0.05 * uBurst) * n;
     vec3 pos = p * (1.0 + disp);
-    // slow swirl around Y
-    float a = uTime * 0.045;
+    // swirl around Y
+    float a = uTime * 0.085;
     float ca = cos(a), sa = sin(a);
     pos.xz = mat2(ca, -sa, sa, ca) * pos.xz;
     // pointer parallax — front particles react more
     float front = pos.z * 0.5 + 0.5;
-    pos.xy += uMouse * 0.28 * front;
+    pos.xy += uMouse * 0.62 * front;
 
     vec4 mv = modelViewMatrix * vec4(pos, 1.0);
     vDepth = -mv.z;
@@ -172,10 +172,13 @@ export function IntelligenceCore({ className }: { className?: string }) {
 
     const renderFrame = () => {
       uniforms.uTime.value = clock.getElapsedTime();
-      uniforms.uMouse.value.lerp(target, 0.05);
+      uniforms.uMouse.value.lerp(target, 0.09);
       burst += (0 - burst) * 0.02;
       uniforms.uBurst.value = burst;
-      points.rotation.y += 0.0006;
+      // continuous spin + pointer-driven tilt for a livelier object
+      points.rotation.y += 0.0016;
+      points.rotation.x += (uniforms.uMouse.value.y * 0.22 - points.rotation.x) * 0.06;
+      points.rotation.z += (uniforms.uMouse.value.x * 0.12 - points.rotation.z) * 0.06;
       renderer.render(scene, camera);
     };
 
