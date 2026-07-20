@@ -94,32 +94,30 @@ export function EditorialHero() {
 
   return (
     <section className="ed-hero" ref={heroRef}>
-      <div className="ed-core-wrap" aria-hidden="true">
-        <div className="ed-core-glow" />
-        <IntelligenceCore className="ed-core" />
-      </div>
-
-      <div className="ed-wrap inner">
-        <span className="eyebrow ed-hero-eyebrow">
-          <span className="dot" /> Copilote d&apos;achat · propulsé par l&apos;IA
-        </span>
-        <h1 className="ed-h1" aria-label="Est-ce vraiment le bon prix ?">
-          <span className="l"><span>Est-ce</span></span>
-          <span className="l"><span className="it">vraiment</span></span>
-          <span className="l"><span className="wave-text">le bon prix&nbsp;?</span></span>
-        </h1>
-
-        <div className="ed-hero-foot">
-          <div>
-            <p className="ed-hero-sub">
-              Décrivez un besoin. FILON compare tout — et vous dit <b>quoi acheter, et quand</b>.
-            </p>
-            <div className="ed-hero-actions">
-              <a className="ed-btn dark" href="/recherche">Essayer le copilote</a>
-              <a className="ed-btn ghost" href="/#installer">Ajouter — gratuit</a>
-            </div>
+      <div className="ed-wrap ed-hero-grid">
+        <div className="ed-hero-text">
+          <span className="eyebrow ed-hero-eyebrow">
+            <span className="dot" /> Copilote d&apos;achat propulsé par l&apos;IA
+          </span>
+          <h1 className="ed-h1" aria-label="Est-ce vraiment le bon prix ?">
+            <span className="l"><span>Est-ce</span></span>
+            <span className="l"><span className="it">vraiment</span></span>
+            <span className="l"><span className="wave-text">le bon prix&nbsp;?</span></span>
+          </h1>
+          <p className="ed-hero-sub">
+            Décrivez ce que vous cherchez. FILON vous dit quoi acheter, et quand.
+          </p>
+          <div className="ed-hero-actions">
+            <a className="ed-btn dark" href="/recherche">Essayer le copilote</a>
+            <a className="ed-btn ghost" href="/#installer">Ajouter — gratuit</a>
           </div>
+        </div>
 
+        <div className="ed-hero-visual">
+          <div className="ed-core-wrap" aria-hidden="true">
+            <div className="ed-core-glow" />
+            <IntelligenceCore className="ed-core" />
+          </div>
           <div className="ed-verdict glass">
             <div className="ed-verdict-top">
               <span className="q">« Faut-il l&apos;acheter&nbsp;? »</span>

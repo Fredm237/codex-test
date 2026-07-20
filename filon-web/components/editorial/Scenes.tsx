@@ -12,20 +12,20 @@ const NeuralNetwork = dynamic(() => import("./NeuralNetwork").then((m) => m.Neur
 export function NetworkScene() {
   return (
     <section className="ed-scene dark" id="reseau">
-      <div className="ed-net-wrap right">
-        <NeuralNetwork variant="merchants" className="ed-net" />
-      </div>
-      <div className="ed-wrap ed-scene-inner">
-        <Reveal>
-          <span className="eyebrow">En temps réel</span>
-          <h2>
-            Pendant que vous hésitez,<br />
-            <span className="it">FILON a déjà tout comparé.</span>
-          </h2>
-          <p className="ed-scene-sub">
-            37+ marchands, toutes les plateformes de cashback, chaque code promo testé en direct — analysés en une seconde.
-          </p>
-        </Reveal>
+      <div className="ed-wrap ed-scene-grid">
+        <div className="ed-scene-inner">
+          <Reveal>
+            <span className="eyebrow">En temps réel</span>
+            <h2>
+              Pendant que vous hésitez,<br />
+              <span className="it">FILON a déjà comparé.</span>
+            </h2>
+            <p className="ed-scene-sub">Il regarde partout, à votre place. Vous n&apos;avez plus qu&apos;à dire oui.</p>
+          </Reveal>
+        </div>
+        <div className="ed-net-cell">
+          <NeuralNetwork variant="merchants" className="ed-net" />
+        </div>
       </div>
     </section>
   );
@@ -35,23 +35,21 @@ export function NetworkScene() {
 export function GraphScene() {
   return (
     <section className="ed-scene dark flip" id="graph-scene">
-      <div className="ed-net-wrap left">
-        <NeuralNetwork variant="graph" className="ed-net" />
-      </div>
-      <div className="ed-wrap ed-scene-inner end">
-        <Reveal>
-          <span className="eyebrow">L&apos;intelligence</span>
-          <h2>
-            Il ne compare pas des prix.<br />
-            <span className="it">Il comprend les produits.</span>
-          </h2>
-          <p className="ed-scene-sub">
-            Historique, fiabilité, réparabilité, durée de vie, coût réel de possession. Une connaissance qui grandit à chaque analyse.
-          </p>
-          <a className="ed-btn ghostlight" href="/intelligence">
-            Voir l&apos;Intelligence Graph
-          </a>
-        </Reveal>
+      <div className="ed-wrap ed-scene-grid">
+        <div className="ed-net-cell">
+          <NeuralNetwork variant="graph" className="ed-net" />
+        </div>
+        <div className="ed-scene-inner">
+          <Reveal>
+            <span className="eyebrow">L&apos;intelligence</span>
+            <h2>
+              Il ne compare pas des prix.<br />
+              <span className="it">Il comprend les produits.</span>
+            </h2>
+            <p className="ed-scene-sub">Ce qu&apos;un produit vaut vraiment, et combien de temps il durera. Il l&apos;apprend à chaque achat.</p>
+            <a className="ed-btn ghostlight" href="/intelligence">Voir l&apos;Intelligence Graph</a>
+          </Reveal>
+        </div>
       </div>
     </section>
   );
@@ -72,7 +70,7 @@ export function ClosingScene() {
             <a className="ed-btn wave" href="/recherche">Essayer le copilote</a>
             <a className="ed-btn ghostlight" href="/#top">Ajouter — gratuit</a>
           </div>
-          <p className="ed-final-note">Gratuit, pour toujours · sans carte bancaire · données non revendues</p>
+          <p className="ed-final-note">Gratuit, pour toujours. Sans carte bancaire. Vos données restent chez vous.</p>
         </Reveal>
       </div>
     </section>
