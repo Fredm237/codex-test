@@ -1,0 +1,46 @@
+services:
+  filon-backend:
+    build: .
+    container_name: filon-backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+      - qdrant
+    restart: unless-stopped
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: filon-postgres
+    environment:
+      POSTGRES_USER: filon
+      POSTGRES_PASSWORD: filon
+      POSTGRES_DB: filon
+    ports:
+      - "5432:5432"
+    volumes:
+      - filon_pg:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    container_name: filon-redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: filon-qdrant
+    ports:
+      - "6333:6333"
+    volumes:
+      - filon_qdrant:/qdrant/storage
+    restart: unless-stopped
+
+volumes:
+  filon_pg:
+  filon_qdrant:
