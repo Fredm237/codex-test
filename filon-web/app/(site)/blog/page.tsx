@@ -12,18 +12,32 @@ export const metadata: Metadata = buildMetadata({
 
 const POSTS = [
   {
-    cat: "Comparatif",
-    title: "Quelle app de cashback paie le plus ?",
-    excerpt: "Les taux varient énormément d'une app à l'autre. Comment être sûr de prendre le meilleur à chaque achat.",
-    href: "/blog/quelle-app-cashback-paie-le-plus",
+    cat: "Guide",
+    title: "Bien choisir son ordinateur portable : le guide simple",
+    excerpt: "Quelle RAM, quel stockage, quel processeur ? L'essentiel expliqué simplement, selon votre usage et votre budget.",
+    href: "/blog/choisir-ordinateur-portable",
+    read: "7 min de lecture",
+  },
+  {
+    cat: "Guide",
+    title: "Quand acheter pour payer moins cher",
+    excerpt: "Soldes belges, Black Friday, rentrée, fin de cycle. Le calendrier des vrais bons moments pour acheter.",
+    href: "/blog/quand-acheter-moins-cher",
     read: "6 min de lecture",
   },
   {
     cat: "Guide",
     title: "Neuf vs reconditionné : l'économie réelle, produit par produit",
-    excerpt: "Combien économise-t-on vraiment ? Écarts par catégorie, grades, garanties et le cumul avec le cashback, pour décider sans hésiter.",
+    excerpt: "Combien économise-t-on vraiment ? Écarts par catégorie, grades et garanties, pour décider sans hésiter.",
     href: "/blog/neuf-vs-reconditionne-economie-reelle",
     read: "5 min de lecture",
+  },
+  {
+    cat: "Comparatif",
+    title: "Quelle app de cashback paie le plus ?",
+    excerpt: "Les taux varient énormément d'une app à l'autre. Comment être sûr de prendre le meilleur à chaque achat.",
+    href: "/blog/quelle-app-cashback-paie-le-plus",
+    read: "6 min de lecture",
   },
 ];
 

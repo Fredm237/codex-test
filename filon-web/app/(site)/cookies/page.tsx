@@ -21,7 +21,7 @@ export default function CookiesPage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 2026</p>
+          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
 
           <h2>Notre principe</h2>
           <p>

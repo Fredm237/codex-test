@@ -14,6 +14,8 @@ const routes = [
   "/extension",
   "/intelligence",
   "/blog",
+  "/blog/choisir-ordinateur-portable",
+  "/blog/quand-acheter-moins-cher",
   "/blog/quelle-app-cashback-paie-le-plus",
   "/blog/neuf-vs-reconditionne-economie-reelle",
   "/faq",

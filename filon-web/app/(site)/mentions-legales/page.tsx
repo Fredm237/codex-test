@@ -20,7 +20,7 @@ export default function MentionsLegalesPage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 2026</p>
+          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
 
           <h2>Éditeur du site</h2>
           <p>
@@ -42,10 +42,8 @@ export default function MentionsLegalesPage() {
 
           <h2>Hébergement</h2>
           <p>
-            Le site est hébergé par <b>Hostinger International Ltd</b>, 61 Lordou Vironos Street, 6023 Larnaca, Chypre.
-            Plus d&apos;informations sur <a href="https://www.hostinger.fr">hostinger.fr</a>.
-            {" "}
-            {/* Adaptez si vous changez d'hébergeur. */}
+            Le site est hébergé par <b>Vercel Inc.</b>, San Francisco, Californie, États-Unis.
+            Plus d&apos;informations sur <a href="https://vercel.com">vercel.com</a>.
           </p>
 
           <h2>Propriété intellectuelle</h2>
@@ -69,8 +67,8 @@ export default function MentionsLegalesPage() {
 
           <h2>Responsabilité</h2>
           <p>
-            Les informations de prix, cashback, disponibilité et offres sont fournies à titre indicatif et peuvent évoluer
-            en temps réel chez les marchands et plateformes partenaires. L&apos;éditeur s&apos;efforce d&apos;assurer leur
+            Les informations de prix, de disponibilité et d&apos;offres sont fournies à titre indicatif et peuvent évoluer
+            en temps réel chez les marchands. L&apos;éditeur s&apos;efforce d&apos;assurer leur
             exactitude mais ne saurait être tenu responsable d&apos;éventuelles erreurs ou d&apos;un préjudice lié à leur
             utilisation.
           </p>

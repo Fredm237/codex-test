@@ -21,7 +21,7 @@ export default function ConfidentialitePage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 2026</p>
+          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
 
           <h2>En résumé</h2>
           <ul>
@@ -33,7 +33,8 @@ export default function ConfidentialitePage() {
 
           <h2>Responsable du traitement</h2>
           <p>
-            {site.founder}, éditeur du site {site.domain} ({site.city}, Belgique). Pour toute question :{" "}
+            {site.founder}, entreprise individuelle (BCE BE 1016.978.286), Chaussée de Stockel 406, 1150
+            Woluwe-Saint-Pierre, Belgique. Pour toute question :{" "}
             <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
           </p>
 
@@ -68,7 +69,7 @@ export default function ConfidentialitePage() {
 
           <h2>Sous-traitants</h2>
           <ul>
-            <li><b>Hostinger</b>, hébergement du site.</li>
+            <li><b>Vercel</b>, hébergement du site.</li>
             <li><b>Plausible Analytics</b>, mesure d&apos;audience sans cookie.</li>
             <li><b>Formspree</b> (ou équivalent), acheminement des messages de contact et inscriptions.</li>
           </ul>

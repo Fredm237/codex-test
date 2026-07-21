@@ -21,21 +21,21 @@ export default function CguPage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 2026</p>
+          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
 
           <h2>1. Objet</h2>
           <p>
             Les présentes conditions générales d&apos;utilisation (« CGU ») régissent l&apos;accès et l&apos;utilisation du
             service <b>{site.name}</b>, accessible via le site <b>{site.domain}</b> et, à terme, via une extension de navigateur
-            et une application. Le service est édité par {site.founder}.
+            et une application. Le service est édité par {site.founder}, entreprise individuelle (BCE BE 1016.978.286),
+            Chaussée de Stockel 406, 1150 Woluwe-Saint-Pierre, Belgique.
           </p>
 
           <h2>2. Description du service</h2>
           <p>
-            FILON est un service d&apos;<b>aide à la décision d&apos;achat</b>. Il analyse et compare des offres (prix,
-            cashback, reconditionné, codes promo), estime un coût réel et propose une recommandation. FILON ne vend aucun
-            produit&nbsp;: l&apos;achat s&apos;effectue toujours directement auprès du marchand ou de la plateforme partenaire
-            choisie par l&apos;utilisateur.
+            FILON est un service d&apos;<b>aide à la décision d&apos;achat</b>. Il analyse le marché, compare des offres et
+            estime un coût réel, puis propose une recommandation. FILON ne vend aucun produit&nbsp;: l&apos;achat
+            s&apos;effectue toujours directement auprès du marchand ou de la plateforme choisie par l&apos;utilisateur.
           </p>
 
           <h2>3. Accès et gratuité</h2>
@@ -54,8 +54,8 @@ export default function CguPage() {
 
           <h2>5. Nature indicative des informations</h2>
           <p>
-            Les informations de prix, taux de cashback, disponibilité, grades et offres sont fournies à titre <b>indicatif</b>
-            {" "}et peuvent évoluer en temps réel chez les marchands et plateformes partenaires. L&apos;éditeur s&apos;efforce
+            Les informations de prix, de disponibilité et d&apos;offres sont fournies à titre <b>indicatif</b>
+            {" "}et peuvent évoluer en temps réel chez les marchands. L&apos;éditeur s&apos;efforce
             d&apos;en assurer l&apos;exactitude mais ne garantit pas leur caractère complet ou à jour à chaque instant. La
             décision d&apos;achat relève de la seule responsabilité de l&apos;utilisateur.
           </p>
