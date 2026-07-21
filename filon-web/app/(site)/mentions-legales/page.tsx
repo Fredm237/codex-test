@@ -26,14 +26,13 @@ export default function MentionsLegalesPage() {
           <p>
             Le site <b>{site.domain}</b> est édité par <b>{site.founder}</b>.
             <br />
-            {/* À COMPLÉTER : forme juridique, adresse et numéros officiels. */}
-            Forme juridique : <b>[entreprise / société, à compléter]</b>
+            Forme juridique : <b>Entreprise individuelle</b>
             <br />
-            Siège : <b>[adresse complète, {site.city}, Belgique, à compléter]</b>
+            Siège : <b>Chaussée de Stockel 406, 1150 Woluwe-Saint-Pierre, Belgique</b>
             <br />
-            Numéro d&apos;entreprise (BCE) : <b>[BE 0XXX.XXX.XXX, à compléter]</b>
+            Numéro d&apos;entreprise (BCE) : <b>BE 1016.978.286</b>
             <br />
-            Numéro de TVA : <b>[BE 0XXX.XXX.XXX, à compléter]</b>
+            Numéro de TVA : <b>BE 1016.978.286</b>
             <br />
             Contact : <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>
           </p>
