@@ -48,7 +48,7 @@ export default function PressePage() {
       <ProseBlock heading={<>Contact <span className="it">média</span>.</>} alt>
         <p>
           Pour une interview ou des visuels, écrivez à{" "}
-          <a href={`mailto:presse@${site.domain}`}>presse@{site.domain}</a>. Nous fournissons logo et éléments sur demande.
+          <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. Nous fournissons logo et éléments sur demande.
         </p>
       </ProseBlock>
 

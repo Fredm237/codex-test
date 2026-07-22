@@ -50,7 +50,7 @@ export default function SecuritePage() {
       <ProseBlock heading={<>Signaler une <span className="it">vulnérabilité</span>.</>}>
         <p>
           La sécurité est un travail continu. Si vous pensez avoir identifié une faille ou un comportement anormal, écrivez-nous
-          à <a href={`mailto:securite@${site.domain}`}>securite@{site.domain}</a>. Nous étudions chaque signalement sérieux avec
+          à <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. Nous étudions chaque signalement sérieux avec
           attention et reconnaissance.
         </p>
       </ProseBlock>

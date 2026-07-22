@@ -56,7 +56,7 @@ export default function CarrieresPage() {
           et que vous êtes excellent·e dans ce que vous faites, présentez-vous.
         </p>
         <p>
-          Écrivez à <a href={`mailto:jobs@${site.domain}`}>jobs@{site.domain}</a> : dites-nous ce que vous voulez construire,
+          Écrivez à <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a> : dites-nous ce que vous voulez construire,
           montrez ce que vous avez déjà fait. Basé·e en Belgique ou en télétravail francophone.
         </p>
       </ProseBlock>

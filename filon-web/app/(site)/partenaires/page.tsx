@@ -27,7 +27,7 @@ export default function PartenairesPage() {
         </p>
         <p>
           Si vous pensez avoir votre place, écrivez-nous à{" "}
-          <a href={`mailto:partenaires@${site.domain}`}>partenaires@{site.domain}</a>. On revient vers vous rapidement.
+          <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. On revient vers vous rapidement.
         </p>
       </ProseBlock>
 

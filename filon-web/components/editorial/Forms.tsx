@@ -6,9 +6,19 @@ import { site } from "@/lib/site";
 type State = "idle" | "sending" | "ok" | "error";
 
 async function postForm(data: Record<string, string>): Promise<boolean> {
-  // Demo mode when no endpoint is configured yet.
+  // No form backend configured: route the request to the real mailbox through
+  // the visitor's mail client, so contact still works without Formspree.
   if (!site.formEndpoint) {
-    await new Promise((r) => setTimeout(r, 600));
+    const subject = data._subject || "Message FILON";
+    const body = Object.entries(data)
+      .filter(([k]) => !k.startsWith("_"))
+      .map(([k, v]) => `${k}: ${v}`)
+      .join("\n");
+    if (typeof window !== "undefined") {
+      window.location.href = `mailto:contact@${site.domain}?subject=${encodeURIComponent(
+        subject
+      )}&body=${encodeURIComponent(body)}`;
+    }
     return true;
   }
   try {
