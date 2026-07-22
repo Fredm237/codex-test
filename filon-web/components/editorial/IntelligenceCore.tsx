@@ -85,8 +85,7 @@ export function IntelligenceCore({ className }: { className?: string }) {
     try {
       renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: "high-performance" });
     } catch {
-      host.classList.add("core-fallback");
-      return;
+      return; // WebGL unavailable — the CSS fallback orb stays visible.
     }
     const dpr = Math.min(window.devicePixelRatio || 1, small ? 1.5 : 2);
     renderer.setPixelRatio(dpr);
@@ -145,6 +144,13 @@ export function IntelligenceCore({ className }: { className?: string }) {
     host.appendChild(renderer.domElement);
     Object.assign(renderer.domElement.style, { width: "100%", height: "100%", display: "block" });
 
+    // If the GPU context is lost (driver reset, tab throttling), fall back to
+    // the CSS orb rather than showing a blank canvas.
+    renderer.domElement.addEventListener("webglcontextlost", (e) => {
+      e.preventDefault();
+      host.classList.remove("core-live");
+    });
+
     // The sphere always fits inside the canvas with margin on every side, so it
     // can rotate / parallax / breathe without ever touching an edge (no hard cut),
     // at any window size. On desktop it sits to the right; on mobile, lower.
@@ -201,13 +207,27 @@ export function IntelligenceCore({ className }: { className?: string }) {
       renderer.render(scene, camera);
     };
 
+    // Only hide the CSS fallback orb once WebGL has actually drawn a clean
+    // frame. If the context or shader failed silently, gl.getError() is set and
+    // the orb stays visible instead of leaving a blank hero.
+    const markLive = () => {
+      const gl = renderer.getContext();
+      if (gl.getError() === gl.NO_ERROR) host.classList.add("core-live");
+    };
+
     if (reduce) {
       renderFrame();
+      markLive();
     } else {
+      let first = true;
       const loop = () => {
         raf = requestAnimationFrame(loop);
         if (!visible || document.hidden) return;
         renderFrame();
+        if (first) {
+          first = false;
+          markLive();
+        }
       };
       loop();
     }
@@ -224,5 +244,9 @@ export function IntelligenceCore({ className }: { className?: string }) {
     };
   }, []);
 
-  return <div ref={hostRef} className={className} aria-hidden="true" />;
+  return (
+    <div ref={hostRef} className={className} aria-hidden="true">
+      <span className="core-fallback-orb" />
+    </div>
+  );
 }

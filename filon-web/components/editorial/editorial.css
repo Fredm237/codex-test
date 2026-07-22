@@ -76,8 +76,17 @@
 .ed-core canvas { width: 100%; height: 100%; display: block; }
 @media (max-width: 900px) { .ed-hero-visual { min-height: clamp(360px, 84vw, 560px); } }
 @media (prefers-reduced-motion: reduce) { .ed-core-glow { animation: none; } }
-.core-fallback { border-radius: 50%;
-  background: radial-gradient(circle at 38% 32%, #dfeaf3, #14c6c0 40%, #1e75c9 78%, #0c4f8f); box-shadow: 0 40px 120px -40px rgba(20,120,180,0.5); }
+/* Graceful fallback when WebGL is unavailable or fails silently (e.g. hardware
+   acceleration off): a soft glowing orb in the SmartWave gradient, positioned
+   like the particle core. Hidden only once WebGL has drawn a clean frame. */
+.core-fallback-orb { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(78vmin, 560px); aspect-ratio: 1; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 42% 38%, #eaf3fb 0%, #7fe0dc 26%, #14c6c0 46%, #1e75c9 72%, rgba(12,79,143,0) 82%);
+  filter: blur(1px); opacity: 0.9; transition: opacity 0.7s var(--ease-out); }
+@media (min-width: 900px) { .core-fallback-orb { left: auto; right: 3%; transform: translateY(-50%); } }
+@media (max-width: 899px) { .core-fallback-orb { top: 64%; width: min(70vmin, 420px); opacity: 0.82; } }
+.ed-core.core-live .core-fallback-orb { opacity: 0; }
+@media (prefers-reduced-motion: reduce) { .core-fallback-orb { transition: none; } }
 .ed-coin-fallback { width: 100%; height: 100%; border-radius: 50%;
   background: radial-gradient(120% 120% at 34% 24%, rgba(255,255,255,.9), transparent 52%), var(--wave3);
   box-shadow: 0 40px 80px -40px rgba(30,117,201,.4); }
