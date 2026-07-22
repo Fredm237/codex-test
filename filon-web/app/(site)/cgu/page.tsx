@@ -27,8 +27,8 @@ export default function CguPage() {
           <p>
             Les présentes conditions générales d&apos;utilisation (« CGU ») régissent l&apos;accès et l&apos;utilisation du
             service <b>{site.name}</b>, accessible via le site <b>{site.domain}</b> et, à terme, via une extension de navigateur
-            et une application. Le service est édité par {site.founder}, entreprise individuelle (BCE BE 1016.978.286),
-            Chaussée de Stockel 406, 1150 Woluwe-Saint-Pierre, Belgique.
+            et une application. Le service est édité par {site.legalName}, {site.legalForm.toLowerCase()} (BCE{" "}
+            {site.bce}), {site.legalAddress}.
           </p>
 
           <h2>2. Description du service</h2>

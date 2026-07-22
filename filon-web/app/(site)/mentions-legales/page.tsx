@@ -24,21 +24,21 @@ export default function MentionsLegalesPage() {
 
           <h2>Éditeur du site</h2>
           <p>
-            Le site <b>{site.domain}</b> est édité par <b>{site.founder}</b>.
+            Le site <b>{site.domain}</b> est édité par <b>{site.legalName}</b>.
             <br />
-            Forme juridique : <b>Entreprise individuelle</b>
+            Forme juridique : <b>{site.legalForm}</b>
             <br />
-            Siège : <b>Chaussée de Stockel 406, 1150 Woluwe-Saint-Pierre, Belgique</b>
+            Siège : <b>{site.legalAddress}</b>
             <br />
-            Numéro d&apos;entreprise (BCE) : <b>BE 1016.978.286</b>
+            Numéro d&apos;entreprise (BCE) : <b>{site.bce}</b>
             <br />
-            Numéro de TVA : <b>BE 1016.978.286</b>
+            Numéro de TVA : <b>{site.vat}</b>
             <br />
             Contact : <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>
           </p>
 
           <h2>Directeur de la publication</h2>
-          <p>{site.founder}.</p>
+          <p>{site.legalName}.</p>
 
           <h2>Hébergement</h2>
           <p>

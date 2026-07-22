@@ -33,8 +33,8 @@ export default function ConfidentialitePage() {
 
           <h2>Responsable du traitement</h2>
           <p>
-            {site.founder}, entreprise individuelle (BCE BE 1016.978.286), Chaussée de Stockel 406, 1150
-            Woluwe-Saint-Pierre, Belgique. Pour toute question :{" "}
+            {site.legalName}, {site.legalForm.toLowerCase()} (BCE {site.bce}), {site.legalAddress}. Pour toute
+            question :{" "}
             <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
           </p>
 
