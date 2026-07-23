@@ -58,17 +58,15 @@ const FRAG = /* glsl */ `
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
-    // bright pin-point with a soft glow falloff — reads as luminous light
+    // crisp point with a soft edge — solid enough to read on a light background
     float core = smoothstep(0.5, 0.0, d);
     float alpha = core * core;
+    // blue → turquoise across the sphere, deep-navy accent toward the top
     vec3 col = mix(uColorA, uColorB, smoothstep(0.1, 0.9, vGrad));
-    col = mix(col, uColorC, smoothstep(0.55, 1.0, vGrad) * 0.85);
-    // hot white sparkle on the brightest points — pushes the object to glow
-    col += vTwinkle * vTwinkle * 0.5 * uColorC;
-    // near particles blaze, far ones recede — real depth
-    float depthFade = clamp(1.0 - (vDepth - 3.5) / 8.5, 0.3, 1.0);
-    // additive blending: alpha modulates how much light each point adds
-    gl_FragColor = vec4(col, alpha * depthFade * (0.5 + 0.7 * vTwinkle) * 1.35);
+    col = mix(col, uColorC, smoothstep(0.6, 1.0, vGrad) * 0.55);
+    // near particles saturated, far ones fade into the light background
+    float depthFade = clamp(1.0 - (vDepth - 3.5) / 8.5, 0.22, 1.0);
+    gl_FragColor = vec4(col, alpha * depthFade * (0.62 + 0.34 * vTwinkle));
   }
 `;
 
@@ -129,9 +127,9 @@ export function IntelligenceCore({ className }: { className?: string }) {
       uPixelRatio: { value: dpr },
       uMouse: { value: new THREE.Vector2(0, 0) },
       uBurst: { value: 0 },
-      uColorA: { value: new THREE.Color(0x2f8fff) }, // luminous blue
-      uColorB: { value: new THREE.Color(0x3af0e2) }, // bright turquoise
-      uColorC: { value: new THREE.Color(0xffffff) }, // white-hot highlight
+      uColorA: { value: new THREE.Color(0x1e75c9) }, // SmartWave blue
+      uColorB: { value: new THREE.Color(0x12b6b0) }, // deep turquoise (reads on light)
+      uColorC: { value: new THREE.Color(0x0c3f70) }, // deep navy accent
     };
     const material = new THREE.ShaderMaterial({
       uniforms,
@@ -139,9 +137,9 @@ export function IntelligenceCore({ className }: { className?: string }) {
       fragmentShader: FRAG,
       transparent: true,
       depthWrite: false,
-      // Additive so overlapping points sum into a bright, glowing nucleus that
-      // pops off the dark hero instead of a flat, washed-out cloud.
-      blending: THREE.AdditiveBlending,
+      // Normal blending so the sphere stays a crisp, saturated blue object on the
+      // light hero — additive would wash out to nothing against white.
+      blending: THREE.NormalBlending,
     });
     const points = new THREE.Points(geo, material);
     scene.add(points);
