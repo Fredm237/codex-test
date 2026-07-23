@@ -139,6 +139,23 @@
 .ed-hero .ed-scrollcue .ln { background: linear-gradient(rgba(255,255,255,0.42), transparent); }
 .ed-hero .ed-scrollcue .tx { color: rgba(255,255,255,0.55); }
 
+/* Bloom halo behind the particle Core — makes it read as a real light source */
+.ed-core-glow { position: absolute; z-index: 0; pointer-events: none;
+  top: 50%; right: 8%; transform: translateY(-50%);
+  width: min(50vw, 620px); aspect-ratio: 1; border-radius: 50%;
+  background: radial-gradient(circle,
+    rgba(90,220,235,0.20) 0%,
+    rgba(47,143,255,0.16) 32%,
+    rgba(30,117,201,0.06) 56%,
+    transparent 72%);
+  filter: blur(26px); opacity: 0.85;
+  animation: ed-coreglow 7.5s ease-in-out infinite; }
+@keyframes ed-coreglow { 0%,100% { opacity: 0.72; } 50% { opacity: 1; } }
+@media (max-width: 900px) {
+  .ed-core-glow { top: auto; bottom: 6%; right: 50%; transform: translateX(50%); width: min(88vw, 480px); }
+}
+@media (prefers-reduced-motion: reduce) { .ed-core-glow { animation: none; } }
+
 /* Nav sitting over the dark hero (top of homepage, before it sticks).
    Opaque dark matching the hero's top colour so the header + hero read as one
    seamless dark block — the sticky header is above the hero in flow, so a

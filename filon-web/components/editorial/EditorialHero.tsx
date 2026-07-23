@@ -20,6 +20,7 @@ export function EditorialHero() {
   return (
     <section className="ed-hero" ref={heroRef}>
       <div className="ed-core-wrap" aria-hidden="true">
+        <div className="ed-core-glow" />
         <IntelligenceCore className="ed-core" />
       </div>
 
