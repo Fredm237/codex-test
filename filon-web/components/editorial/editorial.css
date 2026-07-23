@@ -113,6 +113,45 @@
 .ed-btn.ghost { background: transparent; border-color: var(--line-2); color: var(--ink); }
 .ed-btn.ghost:hover { border-color: var(--ink); transform: translateY(-2px); }
 
+/* ══════════ Premium dark hero — the particle Core pops, flows into the dark scene below ══════════ */
+.ed-hero {
+  background:
+    radial-gradient(62% 80% at 74% 46%, rgba(38,190,196,0.15), transparent 60%),
+    radial-gradient(98% 122% at 80% 42%, rgba(30,117,201,0.24), transparent 64%),
+    linear-gradient(180deg, #0c1826 0%, #0a1421 56%, #0a1524 100%);
+}
+@media (max-width: 900px) {
+  .ed-hero {
+    background:
+      radial-gradient(82% 48% at 50% 72%, rgba(34,170,190,0.17), transparent 62%),
+      radial-gradient(100% 60% at 50% 74%, rgba(30,117,201,0.2), transparent 66%),
+      linear-gradient(180deg, #0c1826 0%, #0a1524 100%);
+  }
+}
+.ed-hero .ed-hero-eyebrow { color: #94a8c0; }
+.ed-hero .ed-hero-eyebrow .dot { background: #3fe0d4; }
+.ed-hero .ed-h1 { color: #eef4fb; }
+.ed-hero .wave-text { background-image: linear-gradient(100deg, #5aa8f5, #48e4d7); }
+.ed-hero .ed-hero-sub { color: #afbed2; }
+.ed-hero .ed-hero-sub b { color: #eef4fb; }
+.ed-hero .ed-btn.ghost { border-color: rgba(255,255,255,0.24); color: #eef4fb; }
+.ed-hero .ed-btn.ghost:hover { border-color: #ffffff; }
+.ed-hero .ed-scrollcue .ln { background: linear-gradient(rgba(255,255,255,0.42), transparent); }
+.ed-hero .ed-scrollcue .tx { color: rgba(255,255,255,0.55); }
+
+/* Nav sitting over the dark hero (top of homepage, before it sticks).
+   Opaque dark matching the hero's top colour so the header + hero read as one
+   seamless dark block — the sticky header is above the hero in flow, so a
+   transparent bar would reveal the light page background behind it. */
+.ed-header.on-dark { background: #0c1826; backdrop-filter: none; -webkit-backdrop-filter: none; border-color: transparent; }
+.ed-header.on-dark .ed-brand { color: #eef4fb; }
+.ed-header.on-dark .ed-nav-mid a { color: rgba(255,255,255,0.74); }
+.ed-header.on-dark .ed-nav-mid a:hover { color: #ffffff; }
+.ed-header.on-dark .ed-burger { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.22); }
+.ed-header.on-dark .ed-burger span,
+.ed-header.on-dark .ed-burger span::before,
+.ed-header.on-dark .ed-burger span::after { background: #eef4fb; }
+
 /* Glass floating verdict */
 .ed-verdict.glass { position: absolute; left: 0; right: 0; bottom: 0; margin-inline: auto; z-index: 2; width: min(100%, 372px); background: color-mix(in srgb, var(--card) 72%, transparent); backdrop-filter: blur(22px) saturate(1.3); -webkit-backdrop-filter: blur(22px) saturate(1.3);
   border: 1px solid rgba(255,255,255,0.6); border-radius: var(--r-lg); box-shadow: 0 40px 90px -50px rgba(17,30,50,0.55), inset 0 1px 0 rgba(255,255,255,0.7);
