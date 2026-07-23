@@ -13,14 +13,9 @@ export function EditorialNav() {
     const el = ref.current;
     if (!el) return;
     let last = 0;
-    // The homepage opens on a dark hero; the nav sits light-on-transparent over
-    // it, then flips to its frosted light bar (dark text) once scrolled.
-    const darkHero = !!document.querySelector(".ed-hero");
     const onScroll = () => {
       const y = window.scrollY;
-      const stuck = y > 8;
-      el.classList.toggle("stuck", stuck);
-      el.classList.toggle("on-dark", darkHero && !stuck);
+      el.classList.toggle("stuck", y > 8);
       el.classList.toggle("hide", y > last && y > 420 && !open);
       last = y;
     };
