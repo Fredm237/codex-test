@@ -497,6 +497,7 @@
 
 .fa-summary { font-size: 15.5px; color: var(--ink-2); margin: 4px 0 18px; }
 .fa-summary b { color: var(--ink); font-weight: 600; }
+.fa-est { color: var(--ink-3); font-size: 13.5px; }
 
 /* ── ranked recommendation cards ── */
 .fa-cards { display: flex; flex-direction: column; gap: 14px; }

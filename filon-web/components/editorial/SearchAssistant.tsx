@@ -109,10 +109,13 @@ function detectBudget(q: string): number | null {
   return m ? parseInt(m[1], 10) : null;
 }
 
-/* Stream of analysis events — swap this generator for an SSE reader later. */
-async function* mockAnalyze(q: string, reduce: boolean): AsyncGenerator<
-  { type: "step"; i: number } | { type: "step-done"; i: number } | { type: "results"; data: Result }
-> {
+type Ev =
+  | { type: "step"; i: number }
+  | { type: "step-done"; i: number }
+  | { type: "results"; data: Result };
+
+/* Local mock — used until the real backend is configured, and as a fallback. */
+async function* mockAnalyze(q: string, reduce: boolean): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
   for (let i = 0; i < STEPS.length; i++) {
     yield { type: "step", i };
@@ -120,6 +123,33 @@ async function* mockAnalyze(q: string, reduce: boolean): AsyncGenerator<
     yield { type: "step-done", i };
   }
   yield { type: "results", data: recommend(q, budget) };
+}
+
+/* Real backend: reads the same events over SSE from FILON's /advise/stream.
+   Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
+   The UI is identical — only the source of the events changes. */
+const API = (process.env.NEXT_PUBLIC_FILON_API || "").replace(/\/$/, "");
+
+async function* streamAnalyze(q: string): AsyncGenerator<Ev> {
+  const budget = detectBudget(q);
+  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}`;
+  const res = await fetch(url, { headers: { Accept: "text/event-stream" } });
+  if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const chunks = buf.split("\n\n");
+    buf = chunks.pop() ?? "";
+    for (const chunk of chunks) {
+      const line = chunk.split("\n").find((l) => l.startsWith("data:"));
+      if (!line) continue;
+      yield JSON.parse(line.slice(5).trim()) as Ev;
+    }
+  }
 }
 
 const CHIPS = ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"];
@@ -181,8 +211,9 @@ export function SearchAssistant() {
     setResult(null);
     setDone([]);
     setActive(0);
-    for await (const ev of mockAnalyze(q, reduce)) {
-      if (runId.current !== id) return; // superseded by a newer query
+
+    const apply = (ev: Ev): boolean => {
+      if (runId.current !== id) return false; // superseded by a newer query
       if (ev.type === "step") setActive(ev.i);
       else if (ev.type === "step-done") setDone((d) => [...d, ev.i]);
       else if (ev.type === "results") {
@@ -190,7 +221,22 @@ export function SearchAssistant() {
         setResult(ev.data);
         setPhase("results");
       }
+      return true;
+    };
+
+    // Prefer the real backend when configured; fall back to the local mock on
+    // any error so the assistant always answers.
+    if (API) {
+      try {
+        for await (const ev of streamAnalyze(q)) if (!apply(ev)) return;
+        return;
+      } catch {
+        if (runId.current !== id) return;
+        setDone([]);
+        setActive(0);
+      }
     }
+    for await (const ev of mockAnalyze(q, reduce)) if (!apply(ev)) return;
   };
 
   return (
@@ -240,6 +286,7 @@ export function SearchAssistant() {
               <div className="fa-results">
                 <p className="fa-summary">
                   <b>{result.offers} offres analysées</b> pour {result.usage}. Voici mes 5 recommandations, classées.
+                  <span className="fa-est"> Prix estimés, à titre indicatif.</span>
                 </p>
                 <div className="fa-cards">
                   {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} />)}
