@@ -68,7 +68,7 @@ export function ClosingScene() {
           </h2>
           <div className="ed-final-actions">
             <a className="ed-btn wave" href="/recherche">Essayer le copilote</a>
-            <a className="ed-btn ghostlight" href="/#top">Ajouter gratuitement</a>
+            <a className="ed-btn ghostlight" href="/#installer">Ajouter gratuitement</a>
           </div>
           <p className="ed-final-note">Gratuit, pour toujours. Sans carte bancaire. Vos données restent chez vous.</p>
         </Reveal>

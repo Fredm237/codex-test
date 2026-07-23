@@ -401,6 +401,76 @@
 .sa-pick .buy.now { color: var(--save); background: rgba(10,125,116,0.12); }
 .sa-pick .buy.wait { color: var(--accent); background: var(--accent-soft); }
 
+/* ══════════ Assistant, redesigned: streamed reasoning + 5 ranked cards ══════════ */
+.fa-out { max-width: 880px; margin: 32px auto 0; text-align: left; }
+
+/* ── live reasoning stream ── */
+.fa-steps { display: flex; flex-direction: column; gap: 2px; max-width: 460px; padding: 4px 0; }
+.fa-step { display: flex; align-items: center; gap: 13px; font-size: 15.5px; padding: 8px 0; color: var(--ink-3); opacity: 0.42; transition: color 0.3s, opacity 0.3s; }
+.fa-step .tk { width: 21px; height: 21px; border-radius: 50%; flex: none; border: 2px solid var(--line-2); display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; position: relative; transition: background 0.3s, border-color 0.3s; }
+.fa-step.active { color: var(--ink); opacity: 1; }
+.fa-step.active .tk { border-color: var(--accent); }
+.fa-step.active .tk::after { content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 2px solid transparent; border-top-color: var(--accent); animation: fa-spin 0.7s linear infinite; }
+.fa-step.done { color: var(--ink-2); opacity: 1; }
+.fa-step.done .tk { background: var(--wave); border-color: transparent; }
+@keyframes fa-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .fa-step.active .tk::after { animation: none; } }
+/* once results arrive, collapse the 8 steps into a compact "checked" recap */
+.fa-steps.collapsed { flex-direction: row; flex-wrap: wrap; gap: 7px 10px; max-width: none; padding: 2px 0 16px; }
+.fa-steps.collapsed .fa-step { font-size: 12px; padding: 0; opacity: 1; color: var(--ink-3); gap: 6px; }
+.fa-steps.collapsed .fa-step .tk { width: 15px; height: 15px; font-size: 9px; }
+
+.fa-summary { font-size: 15.5px; color: var(--ink-2); margin: 4px 0 18px; }
+.fa-summary b { color: var(--ink); font-weight: 600; }
+
+/* ── ranked recommendation cards ── */
+.fa-cards { display: flex; flex-direction: column; gap: 14px; }
+.fa-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-soft);
+  opacity: 0; transform: translateY(16px); animation: fa-in 0.55s var(--ease-out) forwards; animation-delay: var(--d, 0ms); }
+@keyframes fa-in { to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .fa-card { opacity: 1; transform: none; animation: none; } }
+.fa-card.win { border-color: transparent;
+  background: linear-gradient(var(--card), var(--card)) padding-box, var(--wave) border-box;
+  box-shadow: 0 18px 46px -28px rgba(20,120,180,0.5); }
+.fa-rank { font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
+  color: var(--teal-ink); padding: 13px 20px 0; display: flex; align-items: center; gap: 8px; }
+.fa-rank .medal { font-size: 15px; }
+.fa-body { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 18px; padding: 12px 20px 20px; align-items: start; }
+.fa-thumb { width: 66px; height: 66px; border-radius: var(--r-md); display: grid; place-items: center; font-size: 30px; flex: none;
+  background: radial-gradient(120% 120% at 30% 22%, rgba(255,255,255,0.75), transparent 55%), var(--wave3); }
+.fa-main h3 { font-family: var(--serif); font-variation-settings: "opsz" 32; font-size: 20px; letter-spacing: -0.01em; margin: 0 0 7px; line-height: 1.2; color: var(--ink); }
+.fa-price { display: flex; align-items: baseline; gap: 10px; margin-bottom: 11px; }
+.fa-price b { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); }
+.fa-price .mc { font-size: 13px; color: var(--ink-3); }
+.fa-specs { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink-2); }
+.fa-specs .g { color: var(--save); font-weight: 600; }
+.fa-specs .hist.baisse { color: var(--save); font-weight: 600; }
+.fa-why { font-size: 13.5px; color: var(--ink-2); margin: 13px 0 0; line-height: 1.5; }
+.fa-why b { color: var(--ink); font-weight: 600; }
+.fa-alt { font-size: 12.5px; color: var(--ink-3); margin: 5px 0 0; }
+.fa-aside { display: flex; flex-direction: column; align-items: center; gap: 11px; min-width: 122px; }
+
+/* Score FILON — the signature number */
+.fa-score { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.fa-score .ring { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; position: relative;
+  background: conic-gradient(var(--teal-ink) calc(var(--v, 0) * 1%), var(--line) 0); }
+.fa-score .ring::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--card); }
+.fa-score .ring span { position: relative; font-family: var(--mono); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; color: var(--ink); }
+.fa-score .lab { font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-3); font-weight: 700; }
+.fa-verdict { font-size: 12.5px; font-weight: 600; padding: 6px 13px; border-radius: var(--r-full); white-space: nowrap; }
+.fa-verdict.buy { color: var(--save); background: var(--save-soft); }
+.fa-verdict.wait { color: var(--accent); background: var(--accent-soft); }
+.fa-aside .ed-btn { font-size: 13px; padding: 9px 18px; width: 100%; text-align: center; text-decoration: none; }
+
+@media (max-width: 720px) {
+  .fa-body { grid-template-columns: 52px minmax(0,1fr); gap: 14px; }
+  .fa-thumb { width: 52px; height: 52px; font-size: 24px; }
+  .fa-aside { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 12px; min-width: 0; margin-top: 4px; }
+  .fa-score { flex-direction: row; gap: 8px; }
+  .fa-score .lab { display: none; }
+  .fa-aside .ed-btn { width: auto; margin-left: auto; }
+}
+
 /* ---------- Roadmap (Filon 2.0 vision) ---------- */
 .ed-roadmap { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 @media (max-width: 820px) { .ed-roadmap { grid-template-columns: 1fr; } }

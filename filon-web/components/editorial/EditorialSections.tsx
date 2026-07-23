@@ -82,8 +82,8 @@ export function Closing() {
           <h2>
             Demandez à FILON <span className="it">avant d&apos;acheter.</span>
           </h2>
-          <a className="ed-btn dark" href="/#top" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
-            Ajouter gratuitement
+          <a className="ed-btn dark" href="/recherche" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
+            Essayer le copilote
           </a>
         </Reveal>
       </div>
