@@ -15,9 +15,7 @@ export const site = {
   legalForm: "Entreprise individuelle (personne physique)",
   bce: "BE 0797.756.902",
   vat: "BE 0797.756.902",
-  // TODO confirm: registered seat address of Ricardo Aimon (from the KBO/BCE
-  // extract). Update here in one place if different.
-  legalAddress: "Chaussée de Stockel 406, 1150 Woluwe-Saint-Pierre, Belgique",
+  legalAddress: "Avenue Dailly 89, 1030 Schaerbeek, Belgique",
   // Formspree endpoint for contact + newsletter (create at formspree.io, then
   // paste the form URL here or set NEXT_PUBLIC_FORM_ENDPOINT). Empty = demo mode.
   formEndpoint: process.env.NEXT_PUBLIC_FORM_ENDPOINT || "",

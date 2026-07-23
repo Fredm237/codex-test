@@ -58,8 +58,17 @@ export default function AProposPage() {
 
       <ProseBlock heading={<>Le <span className="it">fondateur</span>.</>}>
         <p>
-          FILON est porté par <b>{site.founder}</b>, à {site.city}. Entrepreneur, à la croisée du produit, de la
-          technologie et de la marque.
+          FILON est porté par <b>{site.founder}</b>, entrepreneur bruxellois à la croisée du produit, de la technologie
+          et de la marque. Il conçoit des produits de bout en bout : l&apos;ingénierie, l&apos;expérience, le récit.
+        </p>
+        <p>
+          Avant FILON, il a fondé et développé <b>SmartWave FX</b>, une plateforme SaaS qu&apos;il a menée de
+          l&apos;infrastructure technique jusqu&apos;à la marque et la communauté. Bilingue français-néerlandais, il
+          transforme une idée en produit vivant, et une intuition en exécution soignée.
+        </p>
+        <p>
+          Avec FILON, il applique cette exigence à un problème que tout le monde connaît : payer trop cher, faute de
+          temps. Sa conviction tient en une phrase. Bien acheter ne devrait demander ni effort, ni compromis.
         </p>
       </ProseBlock>
 
