@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import __version__
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
-from app.api.routes import advise, chat, health
+from app.api.routes import advise, chat, health, stream
 
 log = get_logger("main")
 
@@ -54,6 +54,7 @@ def create_app() -> FastAPI:
     app.include_router(health.router)
     app.include_router(chat.router, prefix="/api")
     app.include_router(advise.router, prefix="/api")
+    app.include_router(stream.router, prefix="/api")
 
     @app.get("/")
     async def root() -> dict:
