@@ -1,20 +1,20 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
-import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
+import { ContentHero, ProseBlock, ClosingCta } from "@/components/editorial/ContentPage";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = buildMetadata({
   path: "/a-propos",
   title: "À propos",
   description:
-    "FILON veut devenir la référence francophone de l'optimisation d'achat en ligne, le premier réflexe du consommateur malin, avec la transparence pour boussole. Notre vision, notre mission, notre fondateur.",
+    "FILON veut devenir le premier réflexe avant chaque achat, en commençant par la Belgique. Notre vision, notre mission.",
 });
 
 const VALUES = [
-  { n: "01", h: "Transparence", p: "Nous affichons notre rémunération. Toujours. C'est notre modèle, pas un argument." },
+  { n: "01", h: "De votre côté", p: "Pas de publicité, pas d'intérêt caché. Ce qu'on vous montre sert votre intérêt." },
   { n: "02", h: "Intelligence", p: "La bonne information, au bon moment, sans effort pour vous." },
   { n: "03", h: "Simplicité", p: "Une seule expérience à la place de dix onglets." },
-  { n: "04", h: "Innovation", p: "Un assistant qui anticipe, pas un énième comparateur." },
+  { n: "04", h: "Exigence", p: "Un produit soigné, jusqu'au dernier détail." },
   { n: "05", h: "Confiance", p: "Vos données restent les vôtres. Sans exception." },
 ];
 
@@ -24,19 +24,18 @@ export default function AProposPage() {
       <ContentHero
         eyebrow="À propos"
         title={<>Ne jamais payer le <span className="it">prix fort</span>.</>}
-        intro="FILON réunit en une interface unique ce qui est aujourd'hui éclaté entre des dizaines de services concurrents. Notre ambition : devenir la référence francophone de l'optimisation d'achat en ligne, en commençant par la Belgique, avec la transparence pour boussole."
+        intro="FILON réunit en une expérience simple ce qui prenait dix onglets. Notre ambition : devenir le premier réflexe avant chaque achat, en commençant par la Belgique."
         breadcrumb={[{ name: "À propos", path: "/a-propos" }]}
       />
 
       <ProseBlock heading={<>Le problème que nous <span className="it">réglons</span>.</>}>
         <p>
-          Pour vraiment optimiser un achat, il faut aujourd&apos;hui vérifier plusieurs plateformes de cashback, chercher un
-          équivalent reconditionné, tester des codes promo, comparer les marchands… C&apos;est long, et la plupart des gens
-          abandonnent en payant plein tarif.
+          Bien acheter prend du temps : vérifier, comparer, douter, recommencer. La plupart des gens abandonnent et
+          paient plein tarif.
         </p>
         <p>
-          FILON automatise ce parcours. En une seconde, il croise <b>cashback, reconditionné et codes promo</b> et vous donne
-          un seul chiffre : votre prix réel le plus bas. Vous ne changez rien à vos habitudes, vous payez simplement moins.
+          FILON fait ce travail à votre place. En une seconde, il vous donne une réponse claire et votre vrai prix. Vous
+          ne changez rien à vos habitudes, vous payez simplement moins.
         </p>
       </ProseBlock>
 
@@ -59,27 +58,27 @@ export default function AProposPage() {
 
       <ProseBlock heading={<>Le <span className="it">fondateur</span>.</>}>
         <p>
-          FILON est porté par <b>{site.founder}</b>, à {site.city}. Un profil à la croisée du digital, de la gestion de projet
-          et de l&apos;entrepreneuriat technologique.
+          FILON est porté par <b>{site.founder}</b>, entrepreneur bruxellois à la croisée du produit, de la technologie
+          et de la marque. Il conçoit des produits de bout en bout : l&apos;ingénierie, l&apos;expérience, le récit.
         </p>
         <p>
-          Coordinateur social au CPAS de Woluwe-Saint-Pierre, il pilote des projets et une communication bilingue FR/NL. Il est
-          aussi le fondateur de <b>SmartWave FX</b> (plateforme SaaS de trading algorithmique et d&apos;éducation), où il a
-          construit l&apos;infrastructure technique, le marketing de contenu et le playbook commercial. Création de communautés,
-          production de contenu multi-format, storytelling de marque : c&apos;est précisément ce qui fait la force d&apos;un
-          projet comme FILON, où la marque et l&apos;audience sont le vrai actif.
+          Avant FILON, il a fondé et développé <b>SmartWave FX</b>, une plateforme SaaS qu&apos;il a menée de
+          l&apos;infrastructure technique jusqu&apos;à la marque et la communauté. Bilingue français-néerlandais, il
+          transforme une idée en produit vivant, et une intuition en exécution soignée.
+        </p>
+        <p>
+          Avec FILON, il applique cette exigence à un problème que tout le monde connaît : payer trop cher, faute de
+          temps. Sa conviction tient en une phrase. Bien acheter ne devrait demander ni effort, ni compromis.
         </p>
       </ProseBlock>
 
       <ProseBlock heading={<>Pourquoi la <span className="it">Belgique</span> d&apos;abord.</>} alt>
         <p>
-          Le marché belge francophone est nettement moins servi que la France par les acteurs historiques du cashback.
-          C&apos;est une opportunité : y établir une position de référent, avec une exécution soignée et une marque de
-          confiance, avant d&apos;élargir à la France et au reste de la francophonie européenne.
+          Nous commençons par la Belgique francophone. Un marché que l&apos;on connaît, où l&apos;on peut faire les choses
+          bien avant de grandir.
         </p>
         <p>
-          À l&apos;heure où les dérives d&apos;attribution du secteur (affaires Honey, Phia) ont ébranlé la confiance, nous
-          faisons de la <b>transparence totale</b> notre différence, pas un slogan, un modèle.
+          La confiance se construit près de chez soi. Ensuite viendront la France et le reste de la francophonie.
         </p>
       </ProseBlock>
 

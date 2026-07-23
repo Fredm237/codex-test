@@ -16,8 +16,8 @@ export function StickyCta() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
   return (
-    <a className="ed-sticky-cta" href="/#installer" ref={ref}>
-      Ajouter gratuitement
+    <a className="ed-sticky-cta" href="/recherche" ref={ref}>
+      Essayer le copilote
     </a>
   );
 }

@@ -71,8 +71,8 @@ export function ClosingCta({ title, sub }: { title: ReactNode; sub?: string }) {
           </span>
           <h2>{title}</h2>
           {sub ? <p style={{ color: "var(--ink-2)", fontSize: 18, margin: "18px auto 0", maxWidth: "42ch" }}>{sub}</p> : null}
-          <a className="ed-btn dark" href="/#installer" style={{ marginTop: "clamp(30px,5vw,44px)" }}>
-            Ajouter gratuitement
+          <a className="ed-btn dark" href="/recherche" style={{ marginTop: "clamp(30px,5vw,44px)" }}>
+            Essayer le copilote
           </a>
         </Reveal>
       </div>

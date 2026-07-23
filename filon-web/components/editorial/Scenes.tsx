@@ -47,7 +47,7 @@ export function GraphScene() {
               <span className="it">Il comprend les produits.</span>
             </h2>
             <p className="ed-scene-sub">Ce qu&apos;un produit vaut vraiment, et combien de temps il durera. Il l&apos;apprend à chaque achat.</p>
-            <a className="ed-btn ghostlight" href="/intelligence">Voir l&apos;Intelligence Graph</a>
+            <a className="ed-btn ghostlight" href="/intelligence">En savoir plus</a>
           </Reveal>
         </div>
       </div>
@@ -68,7 +68,7 @@ export function ClosingScene() {
           </h2>
           <div className="ed-final-actions">
             <a className="ed-btn wave" href="/recherche">Essayer le copilote</a>
-            <a className="ed-btn ghostlight" href="/#top">Ajouter gratuitement</a>
+            <a className="ed-btn ghostlight" href="/#installer">Ajouter gratuitement</a>
           </div>
           <p className="ed-final-note">Gratuit, pour toujours. Sans carte bancaire. Vos données restent chez vous.</p>
         </Reveal>

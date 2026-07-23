@@ -22,9 +22,9 @@ export default function CarrieresPage() {
 
       <ProseBlock heading={<>Ce que nous <span className="it">construisons</span>.</>}>
         <p>
-          Pas un énième comparateur, mais une <b>intelligence d&apos;achat</b> : une IA qui recommande la bonne décision, une
-          extension présente partout, et une base produit propriétaire qui, à terme, vaut bien plus que l&apos;affiliation.
-          C&apos;est un projet technique et éditorial ambitieux, avec un vrai impact concret sur le portefeuille des gens.
+          Pas un énième comparateur, mais une <b>intelligence d&apos;achat</b> : une IA qui recommande la bonne décision,
+          présente au bon moment. C&apos;est un projet technique et éditorial ambitieux, avec un impact concret sur le
+          portefeuille des gens.
         </p>
         <p>
           Nous croyons à une petite équipe exigeante, à l&apos;autonomie et à un produit soigné jusqu&apos;au dernier détail.
@@ -39,7 +39,7 @@ export default function CarrieresPage() {
           </div>
           <InfoGrid
             items={[
-              { n: "01", h: "Produit & IA", p: "Ingénierie, data et modèles : bâtir l'analyse d'achat et le Filon Intelligence Graph." },
+              { n: "01", h: "Produit & IA", p: "Ingénierie, data et modèles : bâtir l'intelligence qui recommande le bon achat." },
               { n: "02", h: "Extension & front", p: "Une extension navigateur ultra-fluide, présente sans jamais gêner." },
               { n: "03", h: "Contenu & marque média", p: "Vidéo, newsletter « Le Filon », réseaux : faire de FILON une marque qu'on suit." },
               { n: "04", h: "Growth & partenariats", p: "Nouer les intégrations marchands et plateformes, faire grandir l'audience." },
@@ -56,7 +56,7 @@ export default function CarrieresPage() {
           et que vous êtes excellent·e dans ce que vous faites, présentez-vous.
         </p>
         <p>
-          Écrivez à <a href={`mailto:jobs@${site.domain}`}>jobs@{site.domain}</a> : dites-nous ce que vous voulez construire,
+          Écrivez à <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a> : dites-nous ce que vous voulez construire,
           montrez ce que vous avez déjà fait. Basé·e en Belgique ou en télétravail francophone.
         </p>
       </ProseBlock>

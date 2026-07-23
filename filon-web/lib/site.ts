@@ -9,6 +9,13 @@ export const site = {
   twitter: "@filon",
   founder: "Freddy Mvogo Eloundou",
   city: "Bruxelles",
+  // Legal / registered editor entity (shown on legal pages, distinct from the
+  // marketing founder above). Belgian sole proprietorship.
+  legalName: "Ricardo Aimon",
+  legalForm: "Entreprise individuelle (personne physique)",
+  bce: "BE 0797.756.902",
+  vat: "BE 0797.756.902",
+  legalAddress: "Avenue Dailly 89, 1030 Schaerbeek, Belgique",
   // Formspree endpoint for contact + newsletter (create at formspree.io, then
   // paste the form URL here or set NEXT_PUBLIC_FORM_ENDPOINT). Empty = demo mode.
   formEndpoint: process.env.NEXT_PUBLIC_FORM_ENDPOINT || "",

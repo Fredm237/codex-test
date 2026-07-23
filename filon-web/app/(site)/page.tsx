@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { Transformation } from "@/components/editorial/Transformation";
-import { Method, Transparency, Partners } from "@/components/editorial/EditorialSections";
+import { Method, Transparency } from "@/components/editorial/EditorialSections";
 import { NetworkScene, GraphScene, ClosingScene } from "@/components/editorial/Scenes";
 import { Faq } from "@/components/editorial/Faq";
 
@@ -22,7 +22,6 @@ export default function HomePage() {
       <NetworkScene />
       <Transparency />
       <GraphScene />
-      <Partners />
       <Faq />
       <ClosingScene />
     </>

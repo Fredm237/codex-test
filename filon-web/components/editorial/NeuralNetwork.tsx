@@ -12,7 +12,7 @@ import { useEffect, useRef } from "react";
 type Variant = "merchants" | "graph";
 
 const LABELS: Record<Variant, string[]> = {
-  merchants: ["Amazon", "Fnac", "Cdiscount", "Back Market", "iGraal", "Poulpeo", "Boulanger", "Darty", "Rakuten", "Widilo", "Joko", "eBuyClub"],
+  merchants: ["Amazon", "Fnac", "Cdiscount", "Back Market", "Boulanger", "Darty", "Rakuten", "Decathlon", "Zalando", "Leroy Merlin", "Micromania", "Nike"],
   graph: ["Prix historique", "Fiabilité marque", "Réparabilité", "Durée de vie", "Coût total", "Avis analysés", "Garantie", "Disponibilité"],
 };
 

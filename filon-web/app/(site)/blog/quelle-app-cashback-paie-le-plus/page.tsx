@@ -4,7 +4,7 @@ import { buildMetadata, articleSchema, breadcrumbSchema, JsonLd } from "@/lib/se
 const PATH = "/blog/quelle-app-cashback-paie-le-plus";
 const TITLE = "Quelle app de cashback paie le plus ? (guide 2026)";
 const DESC =
-  "iGraal, Poulpeo, Widilo, Joko, eBuyClub : les taux de cashback varient énormément d'une app à l'autre. Voici comment comparer, et comment prendre le meilleur à chaque achat.";
+  "Les taux de cashback varient énormément d'une app à l'autre. Voici comment comparer, et comment prendre le meilleur à chaque achat.";
 
 export const metadata: Metadata = buildMetadata({ path: PATH, title: TITLE, description: DESC });
 
@@ -82,9 +82,8 @@ export default function ArticlePage() {
           </p>
 
           <div className="callout">
-            💡 <b>Le raccourci :</b> au lieu de comparer les apps une par une, FILON interroge les plateformes partenaires au
-            moment de votre achat, repère le <span className="g">taux le plus élevé</span> pour ce marchand et vous y envoie.
-            Quand c&apos;est possible, il ajoute un code promo et compare avec une alternative reconditionnée.
+            💡 <b>Le raccourci :</b> au lieu de comparer les apps une par une, laissez FILON le faire. Il trouve la{" "}
+            <span className="g">meilleure offre du moment</span> et vous y emmène. Vous n&apos;avez rien à chercher.
           </div>
 
           <h2>Ne comparez plus le cashback seul</h2>
@@ -94,8 +93,8 @@ export default function ArticlePage() {
             un <b>code promo</b> cumulable. Le bon réflexe, c&apos;est de comparer le <b>coût total</b>, pas une seule ligne.
           </p>
           <p>
-            C&apos;est la philosophie de FILON : réunir cashback, reconditionné et codes promo en une seule vue, et vous donner
-            un seul chiffre, votre prix réel le plus bas.
+            C&apos;est la philosophie de FILON : vous donner un seul chiffre, votre vrai prix, et vous dire s&apos;il faut
+            acheter ou attendre.
           </p>
 
           <h2>En résumé</h2>

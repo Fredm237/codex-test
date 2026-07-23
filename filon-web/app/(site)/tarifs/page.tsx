@@ -8,26 +8,24 @@ export const metadata: Metadata = buildMetadata({
   path: "/tarifs",
   title: "Tarifs",
   description:
-    "FILON est gratuit, pour tout le monde, pour toujours. Le copilote d'achat qui trouve le meilleur prix réel avant chaque commande, sans abonnement, sans carte bancaire, sans revente de vos données. Voici pourquoi c'est possible.",
+    "FILON est gratuit, pour tout le monde, pour toujours. Sans abonnement, sans carte bancaire, sans revente de vos données.",
 });
 
 const INCLUS = [
-  "Analyse d'achat par l'IA, décrivez un besoin, obtenez la meilleure décision",
-  "Comparaison cashback, reconditionné et codes promo en temps réel",
-  "Verdict clair : « acheter maintenant » ou « attendre »",
-  "Meilleur vendeur et prix réel le plus bas",
-  "Historique de prix pour savoir si c'est le bon moment",
-  "Extension navigateur, présente sur chaque site marchand",
-  "Alertes de baisse de prix",
-  "Aucune revente de données · conforme RGPD",
+  "Le meilleur prix réel, trouvé pour vous",
+  "Un verdict clair : acheter maintenant, ou attendre",
+  "Le bon moment pour passer commande",
+  "Des alternatives fiables, quand elles existent",
+  "L'extension, présente au bon moment",
+  "Des alertes quand le prix baisse",
+  "Vos données restent chez vous · RGPD",
 ];
 
 const FAQ = [
-  { q: "FILON est-il vraiment 100 % gratuit ?", a: "Oui. Toutes les fonctions de FILON sont gratuites, pour tout le monde, sans abonnement ni carte bancaire. Il n'y a pas de version « premium » payante : ce que vous voyez est ce que vous obtenez, gratuitement." },
-  { q: "Comment FILON gagne-t-il de l'argent, alors ?", a: "Via une part de la commission d'apport que les plateformes partenaires nous reversent quand vous activez une offre (cashback, reconditionné, code promo). C'est le marchand qui paie cette commission, jamais vous. Le prix que vous payez est identique, que vous passiez par FILON ou non." },
-  { q: "Est-ce que la recommandation est biaisée par ce que FILON gagne ?", a: "Non. Le verdict est calculé sur votre seul intérêt : le coût réel le plus bas et la fiabilité du vendeur. Notre rémunération est affichée en toute transparence, c'est notre modèle, pas un argument." },
-  { q: "Vais-je devoir payer un jour ?", a: "Non. Le modèle de FILON repose sur la commission d'apport des partenaires, pas sur votre portefeuille. Le copilote d'achat restera gratuit." },
-  { q: "Mes données sont-elles revendues pour compenser ?", a: "Jamais. Pas de profil publicitaire, pas de revente à des tiers. FILON n'analyse que ce qui est nécessaire à la comparaison, conforme RGPD par défaut." },
+  { q: "FILON est-il vraiment 100 % gratuit ?", a: "Oui. Tout est gratuit, pour tout le monde, sans abonnement ni carte bancaire. Il n'y a pas de version payante." },
+  { q: "La recommandation est-elle neutre ?", a: "Oui. Elle est calculée sur votre seul intérêt. Aucune marque ne peut acheter sa place dans un conseil FILON." },
+  { q: "Vais-je devoir payer un jour ?", a: "Non. FILON est gratuit, et le restera." },
+  { q: "Mes données sont-elles revendues ?", a: "Jamais. Pas de profil publicitaire, pas de revente à des tiers. Conforme RGPD par défaut." },
 ];
 
 export default function TarifsPage() {
@@ -36,7 +34,7 @@ export default function TarifsPage() {
       <ContentHero
         eyebrow="Tarifs"
         title={<>Gratuit. Pour tout le monde. <span className="it">Pour toujours.</span></>}
-        intro="Pas d'abonnement, pas de version premium, pas de carte bancaire. FILON est un copilote d'achat entièrement gratuit, et le modèle est pensé pour qu'il le reste."
+        intro="Pas d'abonnement, pas de version premium, pas de carte bancaire. FILON est entièrement gratuit, et le restera."
         breadcrumb={[{ name: "Tarifs", path: "/tarifs" }]}
       />
 
@@ -47,7 +45,7 @@ export default function TarifsPage() {
               <span className="tag">Le seul plan qui existe</span>
               <div className="name">Filon</div>
               <div className="price">0€ <small>/ pour toujours · sans carte bancaire</small></div>
-              <p className="lede">Le copilote d&apos;achat complet. Décrivez un besoin, obtenez le meilleur coût réel et le verdict « acheter ou attendre », gratuitement, à chaque achat.</p>
+              <p className="lede">Tout FILON. Décrivez un besoin, obtenez le meilleur prix réel et le verdict « acheter ou attendre », à chaque achat.</p>
               <ul>
                 {INCLUS.map((f) => (
                   <li key={f}>{f}</li>
@@ -59,26 +57,23 @@ export default function TarifsPage() {
             </div>
           </Reveal>
           <p style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13.5, marginTop: 22 }}>
-            Le prix chez le marchand est le même avec ou sans FILON. Nous ne facturons jamais l&apos;utilisateur.
+            Le prix chez le marchand est le même avec ou sans FILON. Vous ne payez jamais.
           </p>
         </div>
       </section>
 
-      <ProseBlock heading={<>Pourquoi c&apos;est <span className="it">gratuit</span>, et honnête.</>} alt>
+      <ProseBlock heading={<>Gratuit, sans <span className="it">arrière-pensée</span>.</>} alt>
         <p>
-          Quand vous activez une offre via FILON, la plateforme partenaire nous reverse une part de sa{" "}
-          <b>commission d&apos;apport</b>. C&apos;est cette commission, payée par le marchand, jamais par vous, qui finance FILON.
-          Votre prix ne change pas d&apos;un centime.
+          Gratuit ne veut pas dire au rabais. FILON est complet, sans version payante cachée, sans publicité. Vous ne
+          payez jamais.
         </p>
         <p>
-          Nous refusons le modèle inverse, celui qui a miné la confiance du secteur (affaires Honey, Phia) : détourner
-          l&apos;attribution ou revendre vos données. Chez FILON, la rémunération est <b>affichée</b> et la recommandation sert
-          <b> votre</b> intérêt. La transparence, c&apos;est le produit, pas une option payante.
+          Et vos données ne sont pas à vendre. Le conseil que vous recevez ne sert qu&apos;une chose : votre intérêt.
         </p>
       </ProseBlock>
 
       <FaqBlock items={FAQ} eyebrow="Tarifs · FAQ" title="Ce que « gratuit » veut vraiment dire." />
-      <ClosingCta title={<>Commencez, c&apos;est <span className="it">gratuit</span>.</>} sub="Le copilote d'achat, sans abonnement ni carte bancaire. Vraiment." />
+      <ClosingCta title={<>Commencez, c&apos;est <span className="it">gratuit</span>.</>} sub="Sans abonnement ni carte bancaire. Vraiment." />
     </>
   );
 }

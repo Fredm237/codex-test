@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/cgu",
   title: "Conditions générales d'utilisation",
   description:
-    "Les conditions générales d'utilisation du service FILON : objet, accès, nature de l'aide à la décision, liens affiliés, responsabilités et droit applicable.",
+    "Les conditions générales d'utilisation du service FILON : objet, accès, nature de l'aide à la décision, liens partenaires, responsabilités et droit applicable.",
 });
 
 export default function CguPage() {
@@ -21,29 +21,28 @@ export default function CguPage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 2026</p>
+          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
 
           <h2>1. Objet</h2>
           <p>
             Les présentes conditions générales d&apos;utilisation (« CGU ») régissent l&apos;accès et l&apos;utilisation du
             service <b>{site.name}</b>, accessible via le site <b>{site.domain}</b> et, à terme, via une extension de navigateur
-            et une application. Le service est édité par {site.founder}.
+            et une application. Le service est édité par {site.legalName}, {site.legalForm.toLowerCase()} (BCE{" "}
+            {site.bce}), {site.legalAddress}.
           </p>
 
           <h2>2. Description du service</h2>
           <p>
-            FILON est un service d&apos;<b>aide à la décision d&apos;achat</b>. Il analyse et compare des offres (prix,
-            cashback, reconditionné, codes promo), estime un coût réel et propose une recommandation. FILON ne vend aucun
-            produit&nbsp;: l&apos;achat s&apos;effectue toujours directement auprès du marchand ou de la plateforme partenaire
-            choisie par l&apos;utilisateur.
+            FILON est un service d&apos;<b>aide à la décision d&apos;achat</b>. Il analyse le marché, compare des offres et
+            estime un coût réel, puis propose une recommandation. FILON ne vend aucun produit&nbsp;: l&apos;achat
+            s&apos;effectue toujours directement auprès du marchand ou de la plateforme choisie par l&apos;utilisateur.
           </p>
 
           <h2>3. Accès et gratuité</h2>
           <p>
             L&apos;accès à FILON est <b>entièrement gratuit</b> pour l&apos;utilisateur, sans abonnement ni frais&nbsp;: voir la
-            page <a href="/tarifs">Tarifs</a>. Le service se rémunère via la commission d&apos;apport des plateformes partenaires
-            (voir article 6), jamais en facturant l&apos;utilisateur. L&apos;éditeur s&apos;efforce d&apos;assurer la
-            disponibilité du service sans pouvoir la garantir de manière ininterrompue.
+            page <a href="/tarifs">Tarifs</a>. Il n&apos;est jamais facturé à l&apos;utilisateur. L&apos;éditeur s&apos;efforce
+            d&apos;assurer la disponibilité du service sans pouvoir la garantir de manière ininterrompue.
           </p>
 
           <h2>4. Utilisation conforme</h2>
@@ -55,18 +54,17 @@ export default function CguPage() {
 
           <h2>5. Nature indicative des informations</h2>
           <p>
-            Les informations de prix, taux de cashback, disponibilité, grades et offres sont fournies à titre <b>indicatif</b>
-            {" "}et peuvent évoluer en temps réel chez les marchands et plateformes partenaires. L&apos;éditeur s&apos;efforce
+            Les informations de prix, de disponibilité et d&apos;offres sont fournies à titre <b>indicatif</b>
+            {" "}et peuvent évoluer en temps réel chez les marchands. L&apos;éditeur s&apos;efforce
             d&apos;en assurer l&apos;exactitude mais ne garantit pas leur caractère complet ou à jour à chaque instant. La
             décision d&apos;achat relève de la seule responsabilité de l&apos;utilisateur.
           </p>
 
-          <h2>6. Liens affiliés</h2>
+          <h2>6. Liens partenaires</h2>
           <p>
-            FILON contient des <b>liens affiliés</b>&nbsp;: lorsqu&apos;un utilisateur active une offre via FILON, la plateforme
-            partenaire peut reverser à l&apos;éditeur une part de sa commission d&apos;apport. <b>Cela n&apos;augmente jamais le
-            prix payé par l&apos;utilisateur</b> et n&apos;influence pas l&apos;objectivité de la recommandation, qui vise le
-            meilleur coût réel pour l&apos;utilisateur.
+            FILON peut contenir des <b>liens partenaires</b>. Les activer <b>n&apos;augmente jamais le prix payé par
+            l&apos;utilisateur</b> et n&apos;influence pas la recommandation, qui vise le meilleur coût réel pour
+            l&apos;utilisateur.
           </p>
 
           <h2>7. Propriété intellectuelle</h2>

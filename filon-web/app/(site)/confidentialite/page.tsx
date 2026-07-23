@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/confidentialite",
   title: "Politique de confidentialité",
   description:
-    "Comment FILON protège vos données : aucune revente, analytics sans cookie, formulaires, liens affiliés et vos droits RGPD.",
+    "Comment FILON protège vos données : aucune revente, analytics sans cookie, formulaires, liens partenaires et vos droits RGPD.",
 });
 
 export default function ConfidentialitePage() {
@@ -21,19 +21,20 @@ export default function ConfidentialitePage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 2026</p>
+          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
 
           <h2>En résumé</h2>
           <ul>
             <li>Nous ne construisons <b>aucun profil publicitaire</b> et ne <b>revendons aucune donnée</b>.</li>
             <li>Notre mesure d&apos;audience est <b>sans cookie</b> et anonyme (Plausible).</li>
             <li>Nous ne collectons des données personnelles que si <b>vous nous les fournissez</b> (contact, newsletter).</li>
-            <li>Les liens affiliés n&apos;augmentent <b>jamais</b> votre prix.</li>
+            <li>Les liens partenaires n&apos;augmentent <b>jamais</b> votre prix.</li>
           </ul>
 
           <h2>Responsable du traitement</h2>
           <p>
-            {site.founder}, éditeur du site {site.domain} ({site.city}, Belgique). Pour toute question :{" "}
+            {site.legalName}, {site.legalForm.toLowerCase()} (BCE {site.bce}), {site.legalAddress}. Pour toute
+            question :{" "}
             <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
           </p>
 
@@ -59,16 +60,16 @@ export default function ConfidentialitePage() {
             navigateur.
           </p>
 
-          <h2>Liens affiliés</h2>
+          <h2>Liens partenaires</h2>
           <p>
-            Lorsque vous activez une offre via FILON, un cookie d&apos;affiliation peut être déposé par la plateforme
-            partenaire (iGraal, Poulpeo, Back Market, etc.) afin de rattacher votre achat, c&apos;est ce qui permet le
-            cashback et notre rémunération. Ce traitement relève de la politique de confidentialité de chaque partenaire.
+            Lorsque vous activez une offre via FILON, un service partenaire peut déposer un cookie technique afin de
+            rattacher votre commande. Ce traitement relève de la politique de confidentialité de ce partenaire. Cela ne
+            modifie jamais le prix que vous payez.
           </p>
 
           <h2>Sous-traitants</h2>
           <ul>
-            <li><b>Hostinger</b>, hébergement du site.</li>
+            <li><b>Vercel</b>, hébergement du site.</li>
             <li><b>Plausible Analytics</b>, mesure d&apos;audience sans cookie.</li>
             <li><b>Formspree</b> (ou équivalent), acheminement des messages de contact et inscriptions.</li>
           </ul>

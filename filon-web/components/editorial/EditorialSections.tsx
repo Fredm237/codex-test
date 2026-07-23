@@ -7,13 +7,11 @@ const STEPS = [
 ];
 
 const PLEDGE = [
-  ["01", "Rémunération affichée.", "Vous savez exactement ce que FILON perçoit sur chaque recommandation."],
-  ["02", "Liens affiliés signalés.", "Toujours. Une exigence légale que nous traitons comme une promesse."],
-  ["03", "Zéro captation déloyale.", "Nous n'écrasons jamais l'attribution d'un créateur ou d'un site."],
-  ["04", "Vos données restent les vôtres.", "Pas de profil publicitaire, pas de revente. RGPD par défaut."],
+  ["01", "De votre côté.", "Aucune marque ne peut acheter sa place dans un conseil FILON."],
+  ["02", "Sans publicité.", "Rien ne vient troubler la réponse que vous recevez."],
+  ["03", "Vos données restent les vôtres.", "Pas de profil publicitaire, pas de revente. RGPD par défaut."],
+  ["04", "Gratuit, pour de vrai.", "Aucune carte, aucun abonnement. Vous ne payez jamais."],
 ];
-
-const PARTNERS = ["iGraal", "Poulpeo", "Widilo", "Joko", "eBuyClub", "Back Market", "Rakuten"];
 
 export function Method() {
   return (
@@ -47,19 +45,18 @@ export function Transparency() {
       <div className="ed-wrap">
         <div className="ed-mgrid">
           <Reveal className="ed-manifesto">
-            <span className="eyebrow" style={{ display: "block", marginBottom: 24 }}>Notre serment</span>
+            <span className="eyebrow" style={{ display: "block", marginBottom: 24 }}>Notre principe</span>
             <h2>
-              La transparence n&apos;est pas une promesse. C&apos;est le <span className="it">modèle</span>.
+              De votre côté. <span className="it">Uniquement.</span>
             </h2>
           </Reveal>
           <Reveal className="ed-mbody">
             <p>
-              D&apos;autres ont promis de ne jamais faire payer trop cher, puis se sont fait prendre à détourner les
-              commissions en douce. La confiance ne se déclare pas. Elle se prouve.
+              FILON travaille pour vous, pas pour une marque. Ce qu&apos;il vous montre, c&apos;est ce qui est vraiment le
+              mieux pour vous. Rien d&apos;autre n&apos;entre en jeu.
             </p>
             <p>
-              Chez FILON, la façon dont nous gagnons de l&apos;argent est <b>écrite noir sur blanc</b>, et alignée sur la vôtre.
-              Nous n&apos;avons rien à cacher.
+              La confiance ne se déclare pas. Elle se prouve, à chaque conseil.
             </p>
             <div className="ed-pledge">
               {PLEDGE.map(([n, b, t]) => (
@@ -76,16 +73,6 @@ export function Transparency() {
   );
 }
 
-export function Partners() {
-  return (
-    <div className="ed-partners" aria-hidden="true">
-      <div className="track">
-        {[0, 1].flatMap((k) => PARTNERS.map((p) => <span key={`${k}-${p}`}>{p}</span>))}
-      </div>
-    </div>
-  );
-}
-
 export function Closing() {
   return (
     <section className="ed-closing" id="installer">
@@ -95,8 +82,8 @@ export function Closing() {
           <h2>
             Demandez à FILON <span className="it">avant d&apos;acheter.</span>
           </h2>
-          <a className="ed-btn dark" href="/#top" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
-            Ajouter gratuitement
+          <a className="ed-btn dark" href="/recherche" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
+            Essayer le copilote
           </a>
         </Reveal>
       </div>

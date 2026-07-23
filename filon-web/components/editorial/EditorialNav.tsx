@@ -46,8 +46,8 @@ export function EditorialNav() {
             ))}
           </div>
           <div className="ed-nav-right">
-            <a className="ed-nav-cta" href="/#installer">
-              Ajouter FILON
+            <a className="ed-nav-cta" href="/recherche">
+              Essayer le copilote
             </a>
             <button
               className="ed-burger"
@@ -70,8 +70,8 @@ export function EditorialNav() {
               {n.label}
             </a>
           ))}
-          <a className="ed-btn wave" href="/#installer" onClick={() => setOpen(false)} style={{ marginTop: 12 }}>
-            Ajouter gratuitement
+          <a className="ed-btn wave" href="/recherche" onClick={() => setOpen(false)} style={{ marginTop: 12 }}>
+            Essayer le copilote
           </a>
         </nav>
       </div>

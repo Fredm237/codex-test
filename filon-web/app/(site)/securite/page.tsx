@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/securite",
   title: "Sécurité & confiance",
   description:
-    "Comment FILON protège vos données et votre navigation : minimisation des données, aucune revente, chiffrement, conformité RGPD et transparence sur notre modèle. La confiance n'est pas une option, c'est le produit.",
+    "Comment FILON protège vos données et votre navigation : minimisation des données, aucune revente, chiffrement, conformité RGPD. La confiance n'est pas une option.",
 });
 
 export default function SecuritePage() {
@@ -29,7 +29,7 @@ export default function SecuritePage() {
               { n: "🔐", h: "Connexions chiffrées", p: "Les échanges avec nos services sont chiffrés (HTTPS/TLS) de bout en bout." },
               { n: "🇪🇺", h: "Conforme RGPD", p: "Traitement conforme au RGPD par défaut, avec des droits que vous pouvez exercer à tout moment." },
               { n: "📊", h: "Mesure sans cookie", p: "Notre audience est mesurée sans cookie et de façon anonyme (Plausible)." },
-              { n: "👁", h: "Transparence du modèle", p: "Nous affichons notre rémunération. La recommandation sert votre intérêt, pas le nôtre." },
+              { n: "👁", h: "Sans arrière-pensée", p: "Pas de publicité. La recommandation sert votre intérêt, pas le nôtre." },
             ]}
           />
         </div>
@@ -50,12 +50,12 @@ export default function SecuritePage() {
       <ProseBlock heading={<>Signaler une <span className="it">vulnérabilité</span>.</>}>
         <p>
           La sécurité est un travail continu. Si vous pensez avoir identifié une faille ou un comportement anormal, écrivez-nous
-          à <a href={`mailto:securite@${site.domain}`}>securite@{site.domain}</a>. Nous étudions chaque signalement sérieux avec
+          à <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. Nous étudions chaque signalement sérieux avec
           attention et reconnaissance.
         </p>
       </ProseBlock>
 
-      <ClosingCta title={<>Un copilote en qui vous pouvez avoir <span className="it">confiance</span>.</>} sub="Transparence, minimisation des données, zéro revente. C'est notre modèle, pas un argument." />
+      <ClosingCta title={<>Un copilote en qui vous pouvez avoir <span className="it">confiance</span>.</>} sub="Minimisation des données, zéro revente, aucune publicité." />
     </>
   );
 }

@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/cookies",
   title: "Politique cookies",
   description:
-    "La politique cookies de FILON : nous n'utilisons aucun cookie de suivi publicitaire. Mesure d'audience sans cookie, cookies strictement nécessaires et cookies d'affiliation déposés par les partenaires, expliqués simplement.",
+    "La politique cookies de FILON : nous n'utilisons aucun cookie de suivi publicitaire. Mesure d'audience sans cookie, cookies strictement nécessaires et cookies partenaires, expliqués simplement.",
 });
 
 export default function CookiesPage() {
@@ -21,7 +21,7 @@ export default function CookiesPage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 2026</p>
+          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
 
           <h2>Notre principe</h2>
           <p>
@@ -45,19 +45,18 @@ export default function CookiesPage() {
             par la réglementation.
           </p>
 
-          <h2>Cookies d&apos;affiliation des partenaires</h2>
+          <h2>Cookies partenaires</h2>
           <p>
-            Lorsque vous <b>activez une offre</b> via FILON (cashback, reconditionné, code promo), la plateforme ou le marchand
-            partenaire peut déposer un <b>cookie d&apos;affiliation</b> sur votre appareil. Ce cookie permet d&apos;attribuer
-            correctement l&apos;apport et, le cas échéant, de vous verser votre cashback. Il est déposé par le partenaire, sous
-            sa propre responsabilité, au moment où vous choisissez d&apos;activer l&apos;offre, jamais à votre insu.
+            Lorsque vous <b>activez une offre</b> via FILON, un service partenaire peut déposer un <b>cookie technique</b> sur
+            votre appareil pour rattacher votre commande. Il est déposé par le partenaire, sous sa propre responsabilité, au
+            moment où vous choisissez d&apos;activer l&apos;offre, jamais à votre insu.
           </p>
 
           <h2>Gérer les cookies</h2>
           <p>
             Vous pouvez à tout moment consulter, bloquer ou supprimer les cookies depuis les réglages de votre navigateur
-            (Chrome, Firefox, Edge, Safari…). Bloquer les cookies d&apos;affiliation peut toutefois empêcher l&apos;attribution
-            de votre cashback chez le partenaire concerné.
+            (Chrome, Firefox, Edge, Safari…). Bloquer ces cookies peut toutefois empêcher la bonne prise en compte de votre
+            commande chez le partenaire concerné.
           </p>
 
           <h2>En savoir plus</h2>
