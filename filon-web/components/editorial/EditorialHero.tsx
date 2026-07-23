@@ -37,7 +37,7 @@ export function EditorialHero() {
             Décrivez ce que vous cherchez. FILON vous dit quoi acheter, et quand.
           </p>
           <div className="ed-hero-actions">
-            <a className="ed-btn dark" href="/recherche">Essayer le copilote</a>
+            <a className="ed-btn wave" href="/recherche">Essayer le copilote</a>
             <a className="ed-btn ghost" href="/#installer">Ajouter gratuitement</a>
           </div>
         </div>

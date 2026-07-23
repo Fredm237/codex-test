@@ -122,7 +122,7 @@ export function IntelligenceCore({ className }: { className?: string }) {
 
     const uniforms = {
       uTime: { value: 0 },
-      uSize: { value: small ? 36 : 56 },
+      uSize: { value: small ? 42 : 64 },
       uPixelRatio: { value: dpr },
       uMouse: { value: new THREE.Vector2(0, 0) },
       uBurst: { value: 0 },
