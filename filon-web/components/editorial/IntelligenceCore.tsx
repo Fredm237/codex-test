@@ -58,14 +58,17 @@ const FRAG = /* glsl */ `
     vec2 uv = gl_PointCoord - 0.5;
     float d = length(uv);
     if (d > 0.5) discard;
-    float alpha = smoothstep(0.5, 0.0, d);
-    // soft luminous core
-    alpha *= alpha;
-    vec3 col = mix(uColorA, uColorB, smoothstep(0.15, 0.85, vGrad));
-    col = mix(col, uColorC, smoothstep(0.72, 1.0, vGrad) * 0.6);
-    // depth fade — far points recede
-    float depthFade = clamp(1.0 - (vDepth - 4.0) / 7.0, 0.22, 1.0);
-    gl_FragColor = vec4(col, alpha * depthFade * vTwinkle * 1.15);
+    // bright pin-point with a soft glow falloff — reads as luminous light
+    float core = smoothstep(0.5, 0.0, d);
+    float alpha = core * core;
+    vec3 col = mix(uColorA, uColorB, smoothstep(0.1, 0.9, vGrad));
+    col = mix(col, uColorC, smoothstep(0.55, 1.0, vGrad) * 0.85);
+    // hot white sparkle on the brightest points — pushes the object to glow
+    col += vTwinkle * vTwinkle * 0.5 * uColorC;
+    // near particles blaze, far ones recede — real depth
+    float depthFade = clamp(1.0 - (vDepth - 3.5) / 8.5, 0.3, 1.0);
+    // additive blending: alpha modulates how much light each point adds
+    gl_FragColor = vec4(col, alpha * depthFade * (0.5 + 0.7 * vTwinkle) * 1.35);
   }
 `;
 
@@ -98,7 +101,7 @@ export function IntelligenceCore({ className }: { className?: string }) {
     camera.position.set(0, 0, 9.6);
 
     // ── particle geometry: two fibonacci shells for volume ──
-    const COUNT = small ? 3600 : lowPower ? 6000 : 11000;
+    const COUNT = small ? 5000 : lowPower ? 8000 : 15000;
     const positions = new Float32Array(COUNT * 3);
     const scales = new Float32Array(COUNT);
     const phases = new Float32Array(COUNT);
@@ -122,13 +125,13 @@ export function IntelligenceCore({ className }: { className?: string }) {
 
     const uniforms = {
       uTime: { value: 0 },
-      uSize: { value: small ? 42 : 64 },
+      uSize: { value: small ? 52 : 76 },
       uPixelRatio: { value: dpr },
       uMouse: { value: new THREE.Vector2(0, 0) },
       uBurst: { value: 0 },
-      uColorA: { value: new THREE.Color(0x1e75c9) }, // SmartWave blue
-      uColorB: { value: new THREE.Color(0x14c6c0) }, // turquoise
-      uColorC: { value: new THREE.Color(0xdfe9f2) }, // chrome light
+      uColorA: { value: new THREE.Color(0x2f8fff) }, // luminous blue
+      uColorB: { value: new THREE.Color(0x3af0e2) }, // bright turquoise
+      uColorC: { value: new THREE.Color(0xffffff) }, // white-hot highlight
     };
     const material = new THREE.ShaderMaterial({
       uniforms,
@@ -136,7 +139,9 @@ export function IntelligenceCore({ className }: { className?: string }) {
       fragmentShader: FRAG,
       transparent: true,
       depthWrite: false,
-      blending: THREE.NormalBlending,
+      // Additive so overlapping points sum into a bright, glowing nucleus that
+      // pops off the dark hero instead of a flat, washed-out cloud.
+      blending: THREE.AdditiveBlending,
     });
     const points = new THREE.Points(geo, material);
     scene.add(points);
@@ -172,7 +177,7 @@ export function IntelligenceCore({ className }: { className?: string }) {
       points.scale.setScalar(s);
       const scaledOuter = outer * s;
       const desktop = w >= 900;
-      points.position.x = desktop ? Math.max(0, halfW - scaledOuter - 0.05) * 0.92 : 0;
+      points.position.x = desktop ? Math.max(0, halfW - scaledOuter - 0.05) * 0.72 : 0;
       points.position.y = desktop ? 0 : -Math.max(0, halfH - scaledOuter - 0.05) * 0.7;
     };
     resize();
