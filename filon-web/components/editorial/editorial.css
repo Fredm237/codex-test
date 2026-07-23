@@ -273,8 +273,19 @@
 .ed-final-note { margin-top: 26px; font-size: 13px; color: rgba(234,242,251,0.45); letter-spacing: 0.02em; }
 
 /* Sections */
-.ed-band { padding: var(--sp-section) 0; border-top: 1px solid var(--line); }
-.ed-band.alt { background: var(--paper-2); }
+.ed-band { padding: var(--sp-section) 0; border-top: 1px solid var(--line);
+  /* Fresh vert-menthe / bleu-clair bloom on a --paper base — the base matches the
+     dark-section fade target, so transitions stay seamless while the section
+     itself carries premium colour instead of flat white. */
+  background:
+    radial-gradient(58% 54% at 10% 20%, rgba(24,204,196,0.17), transparent 62%),
+    radial-gradient(54% 58% at 92% 80%, rgba(30,117,201,0.14), transparent 64%),
+    var(--paper); }
+.ed-band.alt {
+  background:
+    radial-gradient(56% 56% at 90% 18%, rgba(30,117,201,0.18), transparent 62%),
+    radial-gradient(58% 58% at 8% 82%, rgba(24,204,196,0.15), transparent 64%),
+    var(--paper); }
 .ed-lead { display: grid; grid-template-columns: auto 1fr; gap: clamp(20px, 6vw, 80px); align-items: baseline; margin-bottom: clamp(40px, 6vw, 66px); }
 @media (max-width: 760px) { .ed-lead { grid-template-columns: 1fr; gap: 16px; } }
 .ed-lead .idx { font-family: var(--mono); font-size: 13px; color: var(--ink-3); }
