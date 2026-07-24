@@ -128,7 +128,7 @@ async function* mockAnalyze(q: string, reduce: boolean): AsyncGenerator<Ev> {
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
-const API = (process.env.NEXT_PUBLIC_FILON_API || "").replace(/\/$/, "");
+const API = (process.env.NEXT_PUBLIC_FILON_API || "https://web-production-c6842.up.railway.app").replace(/\/$/, "");
 
 async function* streamAnalyze(q: string): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
