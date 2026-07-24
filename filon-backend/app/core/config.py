@@ -61,6 +61,12 @@ class Settings(BaseSettings):
 
     llm_timeout_seconds: float = Field(default=30.0)
 
+    # Données produits réelles (Google Shopping via SerpApi)
+    serpapi_api_key: str | None = Field(default=None)
+    serpapi_base_url: str = Field(default="https://serpapi.com/search.json")
+    serpapi_gl: str = Field(default="be")   # pays : Belgique
+    serpapi_hl: str = Field(default="fr")   # langue : français
+
 
 @lru_cache
 def get_settings() -> Settings:

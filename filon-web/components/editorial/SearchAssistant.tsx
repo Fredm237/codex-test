@@ -31,11 +31,12 @@ const STEPS = [
 type Hist = "baisse" | "hausse" | "stable";
 type Card = {
   rank: string; medal: string; name: string; emoji: string;
+  image?: string | null; link?: string | null;
   price: number; merchant: string; delivery: string; warranty: string;
-  cashback: number; coupon: string | null; hist: Hist; histNote: string;
+  cashback: number; coupon: string | null; hist: Hist | null; histNote: string;
   score: number; why: string; alt: string | null; buy: boolean;
 };
-type Result = { usage: string; offers: number; cards: Card[] };
+type Result = { usage: string; offers: number; cards: Card[]; real?: boolean };
 
 const CATALOGS: Record<string, { usage: string; emoji: string; cards: Card[] }> = {
   laptop: {
@@ -166,24 +167,29 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 function RecCard({ c, i }: { c: Card; i: number }) {
-  // No affiliate deep-links yet (prices are LLM estimates), so "Voir l'offre"
-  // sends the user to real Google Shopping listings for this exact product —
-  // real photos, real merchants, real current prices.
-  const offerUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(c.name)}`;
+  const [imgOk, setImgOk] = useState(true);
+  // Real product URL when we have it (SerpApi mode); otherwise a Google Shopping
+  // search for this exact product — either way it lands on real listings.
+  const offerUrl = c.link || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(c.name)}`;
+  const showImg = c.image && imgOk;
   return (
     <article className={`fa-card${i === 0 ? " win" : ""}`} style={{ ["--d" as string]: `${i * 90}ms` }}>
       <div className="fa-rank"><span className="medal">{c.medal}</span> {c.rank}</div>
       <div className="fa-body">
-        <div className="fa-thumb" aria-hidden="true">{c.emoji}</div>
+        <div className={`fa-thumb${showImg ? " has-img" : ""}`} aria-hidden="true">
+          {showImg
+            ? <img src={c.image as string} alt="" loading="lazy" onError={() => setImgOk(false)} />
+            : c.emoji}
+        </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
           <div className="fa-price"><b>{euro(c.price)}</b><span className="mc">chez {c.merchant}</span></div>
           <div className="fa-specs">
             <span>🚚 {c.delivery}</span>
             <span>🛡️ {c.warranty}</span>
-            <span className="g">💸 cashback {c.cashback} %</span>
+            {c.cashback ? <span className="g">💸 cashback {c.cashback} %</span> : null}
             {c.coupon && <span className="g">🎟️ coupon {c.coupon}</span>}
-            <span className={`hist ${c.hist}`}>📈 {HIST_LABEL[c.hist]} · {c.histNote}</span>
+            {c.hist && c.histNote ? <span className={`hist ${c.hist}`}>📈 {HIST_LABEL[c.hist]} · {c.histNote}</span> : null}
           </div>
           <p className="fa-why"><b>Pourquoi&nbsp;:</b> {c.why}</p>
           {c.alt && <p className="fa-alt">Alternative&nbsp;: {c.alt}</p>}
@@ -290,7 +296,7 @@ export function SearchAssistant() {
               <div className="fa-results">
                 <p className="fa-summary">
                   <b>{result.offers} offres analysées</b> pour {result.usage}. Voici mes 5 recommandations, classées.
-                  <span className="fa-est"> Prix estimés, à titre indicatif.</span>
+                  <span className="fa-est"> {result.real ? "Prix réels · Google Shopping." : "Prix estimés, à titre indicatif."}</span>
                 </p>
                 <div className="fa-cards">
                   {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} />)}
