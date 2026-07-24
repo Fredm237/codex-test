@@ -295,7 +295,7 @@ export function SearchAssistant() {
             {phase === "results" && result && (
               <div className="fa-results">
                 <p className="fa-summary">
-                  <b>{result.offers} offres analysées</b> pour {result.usage}. Voici mes 5 recommandations, classées.
+                  <b>{result.offers} offres analysées</b> pour {result.usage}. Voici mes {result.cards.length} recommandation{result.cards.length > 1 ? "s" : ""}, classée{result.cards.length > 1 ? "s" : ""}.
                   <span className="fa-est"> {result.real ? "Prix réels · Google Shopping." : "Prix estimés, à titre indicatif."}</span>
                 </p>
                 <div className="fa-cards">
