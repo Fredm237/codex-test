@@ -13,5 +13,6 @@ COPY app ./app
 
 EXPOSE 8000
 
-# Railway (et la plupart des PaaS) injectent $PORT ; on s'y adapte, 8000 en local.
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
+# Le port est lu depuis PORT en Python (voir app/__main__.py) — pas d'expansion
+# shell, donc robuste quel que soit la façon dont la plateforme lance le conteneur.
+CMD ["python", "-m", "app"]
