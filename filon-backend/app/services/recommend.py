@@ -126,29 +126,42 @@ def _coerce_card(raw: Any, slot: int) -> dict[str, Any]:
 _SYSTEM_RANK = (
     "Tu es FILON, copilote d'achat expert (Belgique/Europe). On te donne une liste "
     "de PRODUITS RÉELS (index, nom, prix, marchand) issus de Google Shopping. "
-    "Choisis les 5 meilleurs pour le besoin et classe-les. Réponds UNIQUEMENT en JSON.\n\n"
+    "Sélectionne les MEILLEURS (jusqu'à 5), du meilleur au moins bon. "
+    "Réponds UNIQUEMENT en JSON.\n\n"
+    "Règles STRICTES :\n"
+    "- Ne garde que des produits VRAIMENT pertinents pour le besoin et cohérents "
+    "entre eux (même type de produit). Écarte tout le reste.\n"
+    "- EXCLIS le matériel obsolète ou sous-dimensionné, les pièces détachées, "
+    "accessoires, lots, et les 'pièges' (très bas prix parce que dépassé).\n"
+    "- 'Le moins cher' n'est PAS 'le meilleur budget' : privilégie le vrai rapport "
+    "qualité/prix.\n"
+    "- Donne à CHAQUE reco une étiquette courte ADAPTÉE au produit et au besoin "
+    "(ex : 'Meilleur rapport qualité/prix', 'Le plus polyvalent', 'Idéal gaming', "
+    "'Le plus léger', 'Meilleur reconditionné'). N'utilise JAMAIS une étiquette "
+    "absurde pour le produit (jamais 'autonomie' pour un PC de bureau).\n"
+    "- Si moins de 5 produits sont vraiment bons, renvoie-en moins. Pas de doublon.\n\n"
     "Format :\n"
     "{\n"
     '  "usage": "catégorie du besoin en français",\n'
     '  "emoji": "un emoji de la catégorie",\n'
-    '  "picks": [ 5 objets, un par emplacement, DANS CET ORDRE :\n'
-    "     1) meilleur rapport qualité/prix, 2) meilleur budget, 3) meilleure autonomie,\n"
-    "     4) meilleure performance, 5) meilleur reconditionné/alternative ]\n"
+    '  "picks": [ jusqu’à 5 objets, du meilleur au moins bon ]\n'
     "}\n"
     "Chaque pick : {\n"
-    '  "index": entier = l’index du produit choisi dans la liste,\n'
+    '  "index": entier = index du produit dans la liste,\n'
+    '  "label": "étiquette courte adaptée, max 4 mots",\n'
     '  "score": entier 80-96 (Score FILON),\n'
-    '  "why": "une phrase en français : pourquoi ce produit pour ce besoin",\n'
+    '  "why": "une phrase : pourquoi ce produit pour ce besoin",\n'
     '  "verdict": "acheter" ou "attendre",\n'
     '  "alt": "nom d’une alternative" ou null\n'
     "}\n"
-    "Utilise des index DIFFÉRENTS pour chaque emplacement. Ne renvoie que du JSON."
+    "Ne renvoie que du JSON."
 )
 
 
 def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji: str) -> dict[str, Any]:
     """Carte à partir d'un produit RÉEL (SerpApi) + annotation du LLM."""
-    rank, medal = SLOTS[slot]
+    default_rank, medal = SLOTS[slot]
+    rank = str(ann.get("label") or default_rank)
     try:
         score = max(0, min(100, int(ann.get("score", 88))))
     except (TypeError, ValueError):
@@ -209,13 +222,20 @@ async def _rank_real_products(
 
     cards: list[dict[str, Any]] = []
     used: set[int] = set()
-    for slot in range(5):
-        ann = picks[slot] if slot < len(picks) else {}
+    # On ne garde QUE les produits réellement choisis/étiquetés par le LLM (pas de
+    # remplissage avec des produits au hasard, qui réintroduirait des pièges).
+    for ann in picks[:5]:
         idx = ann.get("index")
         if not (isinstance(idx, int) and 0 <= idx < len(products)) or idx in used:
-            idx = next((j for j in range(len(products)) if j not in used), slot % len(products))
+            continue
         used.add(idx)
-        cards.append(_build_real_card(slot, products[idx], ann, emoji))
+        cards.append(_build_real_card(len(cards), products[idx], ann, emoji))
+
+    # Repli si le LLM n'a rien produit d'exploitable : top produits SerpApi.
+    if not cards:
+        for slot in range(min(5, len(products))):
+            cards.append(_build_real_card(slot, products[slot], {}, emoji))
+
     return {"usage": usage, "emoji": emoji, "offers": len(products), "cards": cards, "real": True}
 
 
