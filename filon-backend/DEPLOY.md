@@ -53,8 +53,26 @@ backend n'est pas configurée, le site utilise automatiquement le mock local
   5 cartes classées) ; `app/api/routes/stream.py` l'émet en SSE.
 - Sans clé LLM, le backend renvoie une synthèse de repli (toujours fonctionnel).
 
-## Prochaine étape (prix live)
+## Données produits réelles (SerpApi — actif si la clé est présente)
 
-Les prix sont ici des **estimations** du modèle. Pour des prix **réels en
-direct**, brancher une source dans `recommend.py` (API shopping type SerpApi,
-ou feeds d'affiliation Awin/Impact) — le contrat de carte reste identique.
+Avec une clé **SerpApi**, l'assistant renvoie de **vrais produits** (nom, photo,
+prix du jour, marchand, lien cliquable) via Google Shopping, que le LLM classe et
+argumente. Sans clé, il reste en mode « LLM estimé ».
+
+Ajouter sur **Railway** (service `web` → Variables) :
+
+```
+SERPAPI_API_KEY=votre_clé_serpapi
+SERPAPI_GL=be
+SERPAPI_HL=fr
+```
+
+Obtenir la clé : https://serpapi.com → compte → **Your Account / API Key**
+(essai gratuit ~100 recherches/mois). Après ajout, Railway redéploie ; l'assistant
+passe automatiquement en données réelles (le bandeau affiche « Prix réels ·
+Google Shopping »).
+
+### Étape suivante (monétisation)
+
+Remplacer les liens Google Shopping par des **liens d'affiliation** (Awin/Impact…)
+une fois les programmes approuvés — le contrat de carte reste identique.

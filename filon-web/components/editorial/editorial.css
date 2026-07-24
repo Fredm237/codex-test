@@ -512,10 +512,12 @@
   color: var(--teal-ink); padding: 13px 20px 0; display: flex; align-items: center; gap: 8px; }
 .fa-rank .medal { font-size: 15px; }
 .fa-body { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 18px; padding: 12px 20px 20px; align-items: start; }
-/* Clean, honest category tile — a flat marker, not a glossy pseudo-photo.
-   Real product photos arrive with the shopping-data source (next phase). */
-.fa-thumb { width: 66px; height: 66px; border-radius: var(--r-md); display: grid; place-items: center; font-size: 28px; flex: none;
+/* Real product photo when available (SerpApi), else a clean, honest category
+   tile — never a glossy pseudo-photo. */
+.fa-thumb { width: 66px; height: 66px; border-radius: var(--r-md); display: grid; place-items: center; font-size: 28px; flex: none; overflow: hidden;
   background: linear-gradient(180deg, #f4f8fc, #eaf1f8); border: 1px solid var(--line); }
+.fa-thumb.has-img { background: #fff; }
+.fa-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
 .fa-main h3 { font-family: var(--serif); font-variation-settings: "opsz" 32; font-size: 20px; letter-spacing: -0.01em; margin: 0 0 7px; line-height: 1.2; color: var(--ink); }
 .fa-price { display: flex; align-items: baseline; gap: 10px; margin-bottom: 11px; }
 .fa-price b { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); }

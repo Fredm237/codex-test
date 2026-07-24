@@ -105,6 +105,8 @@ def _coerce_card(raw: Any, slot: int) -> dict[str, Any]:
         "medal": medal,
         "name": str(r.get("name") or f"Option {slot + 1}"),
         "emoji": "🛍️",  # remplacé par l'emoji de catégorie plus bas
+        "image": None,
+        "link": None,
         "price": price,
         "merchant": str(r.get("merchant") or "Amazon"),
         "delivery": str(r.get("delivery") or "48 h"),
@@ -118,6 +120,103 @@ def _coerce_card(raw: Any, slot: int) -> dict[str, Any]:
         "alt": alt,
         "buy": bool(r.get("buy", True)),
     }
+
+
+# Emplacements pour le classement des produits RÉELS (SerpApi).
+_SYSTEM_RANK = (
+    "Tu es FILON, copilote d'achat expert (Belgique/Europe). On te donne une liste "
+    "de PRODUITS RÉELS (index, nom, prix, marchand) issus de Google Shopping. "
+    "Choisis les 5 meilleurs pour le besoin et classe-les. Réponds UNIQUEMENT en JSON.\n\n"
+    "Format :\n"
+    "{\n"
+    '  "usage": "catégorie du besoin en français",\n'
+    '  "emoji": "un emoji de la catégorie",\n'
+    '  "picks": [ 5 objets, un par emplacement, DANS CET ORDRE :\n'
+    "     1) meilleur rapport qualité/prix, 2) meilleur budget, 3) meilleure autonomie,\n"
+    "     4) meilleure performance, 5) meilleur reconditionné/alternative ]\n"
+    "}\n"
+    "Chaque pick : {\n"
+    '  "index": entier = l’index du produit choisi dans la liste,\n'
+    '  "score": entier 80-96 (Score FILON),\n'
+    '  "why": "une phrase en français : pourquoi ce produit pour ce besoin",\n'
+    '  "verdict": "acheter" ou "attendre",\n'
+    '  "alt": "nom d’une alternative" ou null\n'
+    "}\n"
+    "Utilise des index DIFFÉRENTS pour chaque emplacement. Ne renvoie que du JSON."
+)
+
+
+def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji: str) -> dict[str, Any]:
+    """Carte à partir d'un produit RÉEL (SerpApi) + annotation du LLM."""
+    rank, medal = SLOTS[slot]
+    try:
+        score = max(0, min(100, int(ann.get("score", 88))))
+    except (TypeError, ValueError):
+        score = 88
+    alt = ann.get("alt")
+    alt = str(alt) if alt not in (None, "", "null") else None
+    verdict = str(ann.get("verdict", "acheter")).lower()
+    return {
+        "rank": rank,
+        "medal": medal,
+        "name": prod["name"],
+        "emoji": emoji,
+        "image": prod.get("image"),
+        "link": prod.get("link"),
+        "price": int(prod["price"]),
+        "merchant": prod["merchant"],
+        "delivery": prod.get("delivery") or "voir marchand",
+        "warranty": "24 mois",           # garantie légale UE (2 ans)
+        "cashback": 0,                    # pas de donnée réelle → masqué côté UI
+        "coupon": None,
+        "hist": None,                     # pas d'historique réel → masqué côté UI
+        "histNote": "",
+        "score": score,
+        "why": str(ann.get("why") or "Un bon choix pour votre besoin."),
+        "alt": alt,
+        "buy": verdict != "attendre",
+    }
+
+
+async def _rank_real_products(
+    query: str, budget: float | None, products: list[dict[str, Any]]
+) -> dict[str, Any]:
+    """Fait classer/annoter par le LLM une liste de produits réels."""
+    provider = get_router().for_task("reasoning")
+    listing = [
+        {"index": i, "name": p["name"], "price": p["price"], "merchant": p["merchant"]}
+        for i, p in enumerate(products)
+    ]
+    budget_txt = f" Budget max : {int(budget)} €." if budget else ""
+    messages = [
+        Message(role="system", content=_SYSTEM_RANK),
+        Message(
+            role="user",
+            content=f"Besoin : {query}.{budget_txt}\nProduits réels :\n{json.dumps(listing, ensure_ascii=False)}",
+        ),
+    ]
+    emoji = "🛍️"
+    usage = query.strip().lower() or "votre besoin"
+    picks: list[dict[str, Any]] = []
+    if provider.name != "mock":
+        try:
+            data = json.loads(await provider.complete_json(messages, temperature=0.3))
+            picks = data.get("picks") or []
+            emoji = str(data.get("emoji") or emoji)[:4]
+            usage = str(data.get("usage") or usage)
+        except Exception as exc:  # pragma: no cover
+            log.warning("Classement LLM indisponible (%s) → ordre SerpApi", exc)
+
+    cards: list[dict[str, Any]] = []
+    used: set[int] = set()
+    for slot in range(5):
+        ann = picks[slot] if slot < len(picks) else {}
+        idx = ann.get("index")
+        if not (isinstance(idx, int) and 0 <= idx < len(products)) or idx in used:
+            idx = next((j for j in range(len(products)) if j not in used), slot % len(products))
+        used.add(idx)
+        cards.append(_build_real_card(slot, products[idx], ann, emoji))
+    return {"usage": usage, "emoji": emoji, "offers": len(products), "cards": cards, "real": True}
 
 
 def _synth(query: str, budget: float | None) -> dict[str, Any]:
@@ -138,6 +237,7 @@ def _synth(query: str, budget: float | None) -> dict[str, Any]:
         rank, medal = SLOTS[i]
         cards.append({
             "rank": rank, "medal": medal, "name": f"Option {i + 1}", "emoji": "🛍️",
+            "image": None, "link": None,
             "price": int(base * mult),
             "merchant": "Back Market" if i == 4 else merchants[(seed >> i) % 5],
             "delivery": delivery[i % 4], "warranty": "24 mois",
@@ -145,11 +245,25 @@ def _synth(query: str, budget: float | None) -> dict[str, Any]:
             "histNote": note, "score": score, "why": why, "alt": None, "buy": buy,
         })
     usage = query.strip().lower() or "votre besoin"
-    return {"usage": usage, "emoji": "🛍️", "offers": 24 + seed % 26, "cards": cards}
+    return {"usage": usage, "emoji": "🛍️", "offers": 24 + seed % 26, "cards": cards, "real": False}
 
 
 async def generate_result(query: str, budget: float | None) -> dict[str, Any]:
-    """Retourne le ``Result`` attendu par le frontend, via LLM si disponible."""
+    """Retourne le ``Result`` attendu par le frontend.
+
+    Ordre de préférence :
+      1. Produits RÉELS (SerpApi) classés/argumentés par le LLM — photos, prix,
+         marchands et liens réels.
+      2. LLM seul : produits plausibles, prix estimés.
+      3. Synthèse déterministe (aucune clé).
+    """
+    from app.services.serpapi_shopping import search_products
+
+    products = await search_products(query, budget)
+    if products:
+        log.info("Mode données réelles : %d produits SerpApi", len(products))
+        return await _rank_real_products(query, budget, products)
+
     provider = get_router().for_task("reasoning")
     if provider.name == "mock":
         log.info("Pas de LLM configuré → synthèse de repli")
@@ -173,6 +287,7 @@ async def generate_result(query: str, budget: float | None) -> dict[str, Any]:
             "emoji": emoji,
             "offers": 24 + abs(hash(query)) % 26,
             "cards": cards,
+            "real": False,
         }
     except Exception as exc:  # pragma: no cover - dépend du réseau/modèle
         log.warning("LLM indisponible ou réponse invalide (%s) → repli", exc)
