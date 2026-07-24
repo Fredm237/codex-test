@@ -46,7 +46,10 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
-        allow_credentials=True,
+        # Le frontend n'envoie aucun cookie/credential : on garde credentials=False,
+        # ce qui rend "*" pleinement valide et évite tout blocage CORS navigateur,
+        # quelle que soit la valeur de CORS_ORIGINS.
+        allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
     )
