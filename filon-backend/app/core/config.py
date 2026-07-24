@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from functools import lru_cache
 
 from pydantic import Field
@@ -17,7 +18,23 @@ class Settings(BaseSettings):
     app_name: str = "FILON AI"
     env: str = Field(default="dev")
     debug: bool = Field(default=True)
-    cors_origins: list[str] = Field(default=["*"])
+    # Gardé en chaîne pour ne jamais planter au démarrage : accepte "*", une
+    # liste JSON, ou une liste séparée par des virgules (voir cors_origins_list).
+    cors_origins: str = Field(default="*")
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        raw = (self.cors_origins or "").strip()
+        if raw in ("", "*"):
+            return ["*"]
+        if raw.startswith("["):
+            try:
+                parsed = json.loads(raw)
+                if isinstance(parsed, list) and parsed:
+                    return [str(o).strip() for o in parsed]
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return [o.strip() for o in raw.split(",") if o.strip()] or ["*"]
 
     # Infrastructure (optionnelle au runtime : dégradation propre si absente)
     database_url: str | None = Field(default=None)
