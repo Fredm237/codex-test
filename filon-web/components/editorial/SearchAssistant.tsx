@@ -166,6 +166,10 @@ function ScoreRing({ score }: { score: number }) {
 }
 
 function RecCard({ c, i }: { c: Card; i: number }) {
+  // No affiliate deep-links yet (prices are LLM estimates), so "Voir l'offre"
+  // sends the user to real Google Shopping listings for this exact product —
+  // real photos, real merchants, real current prices.
+  const offerUrl = `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(c.name)}`;
   return (
     <article className={`fa-card${i === 0 ? " win" : ""}`} style={{ ["--d" as string]: `${i * 90}ms` }}>
       <div className="fa-rank"><span className="medal">{c.medal}</span> {c.rank}</div>
@@ -187,7 +191,7 @@ function RecCard({ c, i }: { c: Card; i: number }) {
         <div className="fa-aside">
           <ScoreRing score={c.score} />
           <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? "✓ Bon moment" : "◷ Attendre"}</span>
-          <a className="ed-btn wave" href="/#installer">Voir l&apos;offre</a>
+          <a className="ed-btn wave" href={offerUrl} target="_blank" rel="noopener noreferrer">Voir l&apos;offre</a>
         </div>
       </div>
     </article>
