@@ -4,6 +4,7 @@ import { EditorialHero } from "@/components/editorial/EditorialHero";
 import { Transformation } from "@/components/editorial/Transformation";
 import { Method, Transparency } from "@/components/editorial/EditorialSections";
 import { NetworkScene, GraphScene, ClosingScene } from "@/components/editorial/Scenes";
+import { ProofSection } from "@/components/editorial/ProofSection";
 import { Faq } from "@/components/editorial/Faq";
 
 export const metadata: Metadata = buildMetadata({
@@ -20,6 +21,7 @@ export default function HomePage() {
       <Transformation />
       <Method />
       <NetworkScene />
+      <ProofSection />
       <Transparency />
       <GraphScene />
       <Faq />
