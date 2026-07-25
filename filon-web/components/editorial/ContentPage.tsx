@@ -7,11 +7,13 @@ export function ContentHero({
   title,
   intro,
   breadcrumb,
+  photo,
 }: {
   eyebrow: string;
   title: ReactNode;
   intro: ReactNode;
   breadcrumb: { name: string; path: string }[];
+  photo?: string;
 }) {
   return (
     <section className="ed-content-hero">
@@ -22,6 +24,11 @@ export function ContentHero({
           <h1 style={{ marginTop: 18 }}>{title}</h1>
           <p className="intro">{intro}</p>
         </Reveal>
+        {photo ? (
+          <Reveal className="ed-content-photo">
+            <img src={photo} alt="" loading="lazy" />
+          </Reveal>
+        ) : null}
       </div>
     </section>
   );

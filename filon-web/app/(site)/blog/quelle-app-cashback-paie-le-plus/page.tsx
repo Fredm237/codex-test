@@ -33,6 +33,7 @@ export default function ArticlePage() {
         </div>
 
         <div className="ed-article" style={{ paddingBottom: 60 }}>
+          <img className="ed-article-cover" src="/img/blog-app-cashback.webp" alt="" />
           <p>
             Le cashback est devenu un réflexe pour des millions de consommateurs francophones. Le principe est simple : en
             passant par une plateforme partenaire avant de payer, vous récupérez un pourcentage de votre achat. Mais une

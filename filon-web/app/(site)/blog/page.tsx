@@ -16,6 +16,7 @@ const POSTS = [
     title: "Le cashback expliqué simplement : comment ça marche",
     excerpt: "D'où vient l'argent, combien récupère-t-on vraiment, et quels pièges éviter ? Le cashback sans jargon.",
     href: "/blog/cashback-comment-ca-marche",
+    img: "/img/blog-cashback-explique.webp",
     read: "6 min de lecture",
   },
   {
@@ -23,6 +24,7 @@ const POSTS = [
     title: "Black Friday : le guide pour ne pas se faire avoir",
     excerpt: "De vraies affaires, et beaucoup de fausses promos. Comment repérer les vrais rabais et éviter les prix gonflés.",
     href: "/blog/black-friday-sans-se-faire-avoir",
+    img: "/img/blog-black-friday.webp",
     read: "7 min de lecture",
   },
   {
@@ -30,6 +32,7 @@ const POSTS = [
     title: "Bien choisir son ordinateur portable : le guide simple",
     excerpt: "Quelle RAM, quel stockage, quel processeur ? L'essentiel expliqué simplement, selon votre usage et votre budget.",
     href: "/blog/choisir-ordinateur-portable",
+    img: "/img/blog-choisir-portable.webp",
     read: "7 min de lecture",
   },
   {
@@ -37,6 +40,7 @@ const POSTS = [
     title: "Quand acheter pour payer moins cher",
     excerpt: "Soldes belges, Black Friday, rentrée, fin de cycle. Le calendrier des vrais bons moments pour acheter.",
     href: "/blog/quand-acheter-moins-cher",
+    img: "/img/blog-quand-acheter.webp",
     read: "6 min de lecture",
   },
   {
@@ -44,6 +48,7 @@ const POSTS = [
     title: "Neuf vs reconditionné : l'économie réelle, produit par produit",
     excerpt: "Combien économise-t-on vraiment ? Écarts par catégorie, grades et garanties, pour décider sans hésiter.",
     href: "/blog/neuf-vs-reconditionne-economie-reelle",
+    img: "/img/blog-neuf-vs-reconditionne.webp",
     read: "5 min de lecture",
   },
   {
@@ -51,6 +56,7 @@ const POSTS = [
     title: "Quelle app de cashback paie le plus ?",
     excerpt: "Les taux varient énormément d'une app à l'autre. Comment être sûr de prendre le meilleur à chaque achat.",
     href: "/blog/quelle-app-cashback-paie-le-plus",
+    img: "/img/blog-app-cashback.webp",
     read: "6 min de lecture",
   },
 ];
@@ -70,10 +76,15 @@ export default function BlogPage() {
             <div className="ed-blog">
               {POSTS.map((p) => (
                 <a className="ed-post" href={p.href} key={p.href}>
-                  <span className="cat">{p.cat}</span>
-                  <h3>{p.title}</h3>
-                  <p>{p.excerpt}</p>
-                  <div className="rd">{p.read} →</div>
+                  <span className="ed-post-cover">
+                    <img src={p.img} alt="" loading="lazy" />
+                  </span>
+                  <span className="ed-post-body">
+                    <span className="cat">{p.cat}</span>
+                    <h3>{p.title}</h3>
+                    <p>{p.excerpt}</p>
+                    <span className="rd">{p.read} →</span>
+                  </span>
                 </a>
               ))}
             </div>

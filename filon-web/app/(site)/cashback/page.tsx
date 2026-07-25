@@ -25,6 +25,7 @@ export default function CashbackPage() {
         title={<>De l&apos;argent qui revient. À chaque <span className="it">achat</span>.</>}
         intro="Sur beaucoup d'achats, une partie de la somme peut vous revenir. FILON récupère le maximum pour vous, automatiquement. Vous n'avez rien à chercher."
         breadcrumb={[{ name: "Cashback", path: "/cashback" }]}
+        photo="/img/page-cashback.webp"
       />
 
       <ProseBlock heading={<>L&apos;argent que vous oubliez de <span className="it">récupérer</span>.</>}>

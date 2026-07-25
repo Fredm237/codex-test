@@ -33,6 +33,7 @@ export default function ArticlePage() {
         </div>
 
         <div className="ed-article" style={{ paddingBottom: 60 }}>
+          <img className="ed-article-cover" src="/img/blog-cashback-explique.webp" alt="" />
           <p>
             Le cashback, c&apos;est un remboursement d&apos;une partie de votre achat, versé après coup. Vous payez le
             prix normal chez le marchand, et quelques jours ou semaines plus tard, un pourcentage revient sur votre

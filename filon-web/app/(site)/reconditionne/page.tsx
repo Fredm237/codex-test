@@ -26,6 +26,7 @@ export default function ReconditionnePage() {
         title={<>Le même produit. Jusqu&apos;à <span className="it">50 %</span> moins cher.</>}
         intro="Pourquoi payer le neuf plein tarif quand l'équivalent reconditionné, vérifié et garanti, coûte souvent 40 % de moins ? FILON compare les deux et ajoute le cashback pour révéler votre prix réel, meilleur pour votre budget, et pour la planète."
         breadcrumb={[{ name: "Reconditionné", path: "/reconditionne" }]}
+        photo="/img/page-reconditionne.webp"
       />
 
       <ProseBlock heading={<>Neuf ou reconditionné ? FILON <span className="it">tranche</span> pour vous.</>}>

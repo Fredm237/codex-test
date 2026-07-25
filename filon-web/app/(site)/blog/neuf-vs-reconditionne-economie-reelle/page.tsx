@@ -33,6 +33,7 @@ export default function ArticlePage() {
         </div>
 
         <div className="ed-article" style={{ paddingBottom: 60 }}>
+          <img className="ed-article-cover" src="/img/blog-neuf-vs-reconditionne.webp" alt="" />
           <p>
             Un produit reconditionné est un appareil d&apos;occasion testé, remis en état et garanti par un professionnel. Sur
             le papier, l&apos;économie est évidente. Dans la réalité, elle dépend de trois choses : le <b>type de produit</b>,

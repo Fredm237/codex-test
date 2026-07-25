@@ -33,6 +33,7 @@ export default function ArticlePage() {
         </div>
 
         <div className="ed-article" style={{ paddingBottom: 60 }}>
+          <img className="ed-article-cover" src="/img/blog-black-friday.webp" alt="" />
           <p>
             Fin novembre, tout devient «&nbsp;-50&nbsp;%&nbsp;». Le problème, c&apos;est qu&apos;un prix barré ne prouve
             rien&nbsp;: certains marchands montent le prix quelques semaines avant pour mieux le «&nbsp;baisser&nbsp;» le
