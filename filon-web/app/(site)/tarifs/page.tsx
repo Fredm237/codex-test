@@ -53,7 +53,7 @@ export default function TarifsPage() {
                 ))}
               </ul>
               <div className="cta-wrap">
-                <ChromeCta variant="wave" href="/recherche" style={{ textDecoration: "none" }} />
+                <ChromeCta variant="wave" style={{ textDecoration: "none" }} />
               </div>
             </div>
           </Reveal>

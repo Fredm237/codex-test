@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { chromeInstallHref } from "@/lib/config";
 
 /** Logo Google Chrome, reconstruit en SVG (net à toute taille, aucun fichier à héberger). */
 export function ChromeMark({ size = 20 }: { size?: number }) {
@@ -26,7 +27,7 @@ export function ChromeMark({ size = 20 }: { size?: number }) {
  */
 export function ChromeCta({
   variant = "ghost",
-  href = "/#installer",
+  href = chromeInstallHref,
   label = "Ajouter à Chrome",
   size = 20,
   style,
@@ -37,8 +38,14 @@ export function ChromeCta({
   size?: number;
   style?: React.CSSProperties;
 }) {
+  const external = href.startsWith("http");
   return (
-    <a className={`ed-btn ${variant} ed-chrome-cta`} href={href} style={style}>
+    <a
+      className={`ed-btn ${variant} ed-chrome-cta`}
+      href={href}
+      style={style}
+      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+    >
       <ChromeMark size={size} />
       <span>{label}</span>
     </a>

@@ -3,6 +3,8 @@ import { buildMetadata } from "@/lib/seo";
 import { ContentHero, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
 import { FaqBlock } from "@/components/editorial/Faq";
 import { Reveal } from "@/components/editorial/Reveal";
+import { ChromeCta } from "@/components/editorial/ChromeCta";
+import { CHROME_STORE_URL } from "@/lib/config";
 
 export const metadata: Metadata = buildMetadata({
   path: "/extension",
@@ -31,15 +33,28 @@ export default function ExtensionPage() {
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-wrap">
           <Reveal>
-            <div className="ed-browsers">
-              <span className="bw live"><span className="dot" /> Chrome · bientôt</span>
-              <span className="bw"><span className="dot" /> Edge</span>
-              <span className="bw"><span className="dot" /> Firefox</span>
-              <span className="bw"><span className="dot" /> Safari</span>
-            </div>
-            <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
-              L&apos;extension Chrome arrive en premier. Ajoutez FILON pour être prévenu·e dès sa mise en ligne.
-            </p>
+            {CHROME_STORE_URL ? (
+              <>
+                <ChromeCta variant="wave" label="Ajouter à Chrome — gratuit" />
+                <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 14 }}>
+                  Installation en un clic depuis le Chrome Web Store. Aussi sur Edge. Firefox et Safari à suivre.
+                </p>
+              </>
+            ) : (
+              <>
+                <div className="ed-browsers">
+                  <span className="bw live"><span className="dot" /> Chrome · en cours de publication</span>
+                  <span className="bw"><span className="dot" /> Edge</span>
+                  <span className="bw"><span className="dot" /> Firefox</span>
+                  <span className="bw"><span className="dot" /> Safari</span>
+                </div>
+                <p style={{ color: "var(--ink-3)", fontSize: 13.5, marginTop: 4 }}>
+                  L&apos;extension est prête et en cours de validation sur le Chrome Web Store. Dès qu&apos;elle
+                  est en ligne, le bouton « Ajouter à Chrome » l&apos;installe en un clic. Laissez votre e-mail
+                  pour être prévenu·e.
+                </p>
+              </>
+            )}
           </Reveal>
         </div>
       </section>
