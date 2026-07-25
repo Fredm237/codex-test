@@ -721,9 +721,9 @@
 @media (prefers-reduced-motion: reduce) { .ed-proof-marquee .track { animation: none; } }
 .ed-proof-logo { flex: none; width: 158px; height: 70px; border: 1px solid var(--line); border-radius: var(--r-md);
   background: var(--card); display: grid; place-items: center; }
-.ed-proof-logo img { max-width: 118px; max-height: 40px; width: auto; height: auto;
-  object-fit: contain; filter: grayscale(1); opacity: 0.7; transition: filter 0.25s, opacity 0.25s; }
-.ed-proof-logo:hover img { filter: none; opacity: 1; }
+.ed-proof-logo img { max-width: 116px; max-height: 42px; width: auto; height: auto;
+  object-fit: contain; opacity: 0.95; transition: opacity 0.25s, transform 0.25s; }
+.ed-proof-logo:hover img { opacity: 1; transform: scale(1.04); }
 .ed-proof-note { text-align: center; font-size: 12.5px; color: var(--ink-3); margin-top: 20px; }
 
 /* Tuiles de chiffres */
