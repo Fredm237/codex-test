@@ -300,12 +300,16 @@
 
 .ed-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 1px solid var(--line); }
 @media (max-width: 820px) { .ed-steps { grid-template-columns: 1fr; } }
-.ed-step { padding: 34px 30px 30px; border-right: 1px solid var(--line); }
+.ed-step { padding: 40px 30px 34px; border-right: 1px solid var(--line); }
 .ed-step:last-child { border-right: 0; }
 @media (max-width: 820px) { .ed-step { border-right: 0; border-bottom: 1px solid var(--line); } }
-.ed-step .no { font-family: var(--serif); font-style: italic; font-variation-settings: "opsz" 40; font-size: 36px; color: var(--accent); line-height: 1; margin-bottom: 22px; }
-.ed-step h3 { font-size: 20px; font-weight: 600; margin-bottom: 10px; letter-spacing: -0.02em; }
-.ed-step p { font-size: 14.5px; color: var(--ink-2); line-height: 1.5; }
+/* Icône visuelle par étape — pastille dégradée menthe/bleu, moins de texte */
+.ed-step-ico { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 16px;
+  background: linear-gradient(180deg, rgba(24,204,196,0.16), rgba(30,117,201,0.13));
+  color: var(--accent-ink); margin-bottom: 22px; }
+.ed-step-ico svg { width: 27px; height: 27px; }
+.ed-step h3 { font-size: 20px; font-weight: 600; margin-bottom: 9px; letter-spacing: -0.02em; }
+.ed-step p { font-size: 15px; color: var(--ink-2); line-height: 1.5; max-width: 30ch; }
 
 .ed-mgrid { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(30px, 5vw, 70px); align-items: start; }
 @media (max-width: 820px) { .ed-mgrid { grid-template-columns: 1fr; gap: 30px; } }

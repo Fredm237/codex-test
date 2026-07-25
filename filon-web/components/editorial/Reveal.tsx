@@ -1,9 +1,17 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type CSSProperties, type ReactNode } from "react";
 
 /** Lightweight scroll reveal (IntersectionObserver adds `.in`). */
-export function Reveal({ children, className = "" }: { children: ReactNode; className?: string }) {
+export function Reveal({
+  children,
+  className = "",
+  style,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const el = ref.current;
@@ -27,7 +35,7 @@ export function Reveal({ children, className = "" }: { children: ReactNode; clas
     return () => io.disconnect();
   }, []);
   return (
-    <div ref={ref} className={`rv ${className}`}>
+    <div ref={ref} className={`rv ${className}`} style={style}>
       {children}
     </div>
   );
