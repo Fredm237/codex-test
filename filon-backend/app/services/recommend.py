@@ -23,6 +23,25 @@ from app.llm.router import get_router
 
 log = get_logger("recommend")
 
+
+def _parse_json(raw: str) -> dict[str, Any]:
+    """Parse robuste : retire d'éventuelles clôtures markdown et texte autour.
+
+    Certains modèles enveloppent le JSON dans ```json ... ``` ou ajoutent une
+    phrase avant/après, ce qui faisait échouer json.loads et provoquait un repli.
+    """
+    s = (raw or "").strip()
+    if s.startswith("```"):
+        parts = s.split("```")
+        s = parts[1] if len(parts) > 1 else s
+        if s.lstrip().lower().startswith("json"):
+            s = s.lstrip()[4:]
+    a, b = s.find("{"), s.rfind("}")
+    if a != -1 and b != -1 and b > a:
+        s = s[a : b + 1]
+    return json.loads(s)
+
+
 # Les 8 étapes de raisonnement affichées par le frontend (mêmes libellés/ordre).
 STEPS = [
     "Compréhension du besoin",
@@ -213,7 +232,7 @@ async def _rank_real_products(
     picks: list[dict[str, Any]] = []
     if provider.name != "mock":
         try:
-            data = json.loads(await provider.complete_json(messages, temperature=0.3))
+            data = _parse_json(await provider.complete_json(messages, temperature=0.3))
             picks = data.get("picks") or []
             emoji = str(data.get("emoji") or emoji)[:4]
             usage = str(data.get("usage") or usage)
@@ -243,6 +262,10 @@ def _synth(query: str, budget: float | None) -> dict[str, Any]:
     """Repli déterministe quand le LLM n'est pas disponible."""
     seed = abs(hash(query)) % (10**8)
     base = int(budget) if budget else 200 + seed % 700
+    # Nom basé sur la requête (jamais "Option N") pour rester pertinent + un lien
+    # « Voir l'offre » qui retombe sur une vraie recherche.
+    name = " ".join(query.split())[:60] or "Votre besoin"
+    name = name[:1].upper() + name[1:]
     merchants = ["Amazon", "Fnac", "Coolblue", "Boulanger", "MediaMarkt"]
     defs = [
         (0.98, 93, True, "Le meilleur équilibre global pour votre besoin.", "−20 €", "baisse", "sous la moyenne"),
@@ -256,7 +279,7 @@ def _synth(query: str, budget: float | None) -> dict[str, Any]:
     for i, (mult, score, buy, why, coupon, hist, note) in enumerate(defs):
         rank, medal = SLOTS[i]
         cards.append({
-            "rank": rank, "medal": medal, "name": f"Option {i + 1}", "emoji": "🛍️",
+            "rank": rank, "medal": medal, "name": name, "emoji": "🛍️",
             "image": None, "link": None,
             "price": int(base * mult),
             "merchant": "Back Market" if i == 4 else merchants[(seed >> i) % 5],
@@ -296,7 +319,7 @@ async def generate_result(query: str, budget: float | None) -> dict[str, Any]:
     ]
     try:
         raw = await provider.complete_json(messages, temperature=0.4)
-        data = json.loads(raw)
+        data = _parse_json(raw)
         cards_raw = data.get("cards") or []
         emoji = str(data.get("emoji") or "🛍️")[:4]
         cards = [_coerce_card(cards_raw[i] if i < len(cards_raw) else {}, i) for i in range(5)]

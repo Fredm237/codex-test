@@ -166,11 +166,12 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
-function RecCard({ c, i }: { c: Card; i: number }) {
+function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
   const [imgOk, setImgOk] = useState(true);
-  // Real product URL when we have it (SerpApi mode); otherwise a Google Shopping
-  // search for this exact product — either way it lands on real listings.
-  const offerUrl = c.link || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(c.name)}`;
+  // Real product URL when we have it (SerpApi mode). Otherwise search Google
+  // Shopping for the user's actual query — never the card name, which can be a
+  // generic placeholder in the estimated fallback ("Option 1" → junk results).
+  const offerUrl = c.link || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q || c.name)}`;
   const showImg = c.image && imgOk;
   return (
     <article className={`fa-card${i === 0 ? " win" : ""}`} style={{ ["--d" as string]: `${i * 90}ms` }}>
@@ -212,11 +213,13 @@ export function SearchAssistant() {
   const [active, setActive] = useState(-1);
   const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
+  const [asked, setAsked] = useState("");
   const runId = useRef(0);
 
   const ask = async (raw: string) => {
     const q = raw.trim();
     if (!q) return;
+    setAsked(q);
     const id = ++runId.current;
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setPhase("thinking");
@@ -301,7 +304,7 @@ export function SearchAssistant() {
                   <span className="fa-est"> {result.real ? "Prix réels · Google Shopping." : "Prix estimés, à titre indicatif."}</span>
                 </p>
                 <div className="fa-cards">
-                  {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} />)}
+                  {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} />)}
                 </div>
                 <p className="sa-disc">FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.</p>
               </div>
