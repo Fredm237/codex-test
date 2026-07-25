@@ -1,9 +1,31 @@
 import { Reveal } from "./Reveal";
 
+const STEP_ICONS = [
+  // Reconnaît le produit — cadre de scan
+  <svg key="i" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8" />
+    <path d="M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8" />
+    <path d="M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16" />
+    <path d="M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" />
+    <rect x="9" y="9" width="6" height="6" rx="1.4" />
+  </svg>,
+  // Regarde partout — globe
+  <svg key="ii" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.2" />
+    <path d="M12 3.8v16.4M3.8 12h16.4" />
+    <ellipse cx="12" cy="12" rx="4" ry="8.2" />
+  </svg>,
+  // Tranche — verdict validé
+  <svg key="iii" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <circle cx="12" cy="12" r="8.2" />
+    <path d="M8.5 12.2 11 14.7 15.7 9.6" />
+  </svg>,
+];
+
 const STEPS = [
-  ["i.", "Il reconnaît le produit", "Sur n'importe quelle page, il comprend ce que vous regardez. Vous ne changez rien à vos habitudes."],
-  ["ii.", "Il regarde partout", "En une seconde, il a fait le tour du marché. Là où vous auriez passé une heure."],
-  ["iii.", "Il tranche", "Un seul chiffre : votre vrai prix. Et une réponse : acheter, ou attendre."],
+  ["Il reconnaît le produit", "Sur n'importe quelle page, il comprend ce que vous regardez."],
+  ["Il regarde partout", "En une seconde, tout le marché passé au crible."],
+  ["Il tranche", "Un chiffre : votre vrai prix. Une réponse : acheter, ou attendre."],
 ];
 
 const PLEDGE = [
@@ -26,12 +48,12 @@ export function Method() {
           </div>
         </Reveal>
         <div className="ed-steps">
-          {STEPS.map(([no, h, p]) => (
-            <div className="ed-step" key={h}>
-              <div className="no">{no}</div>
+          {STEPS.map(([h, p], i) => (
+            <Reveal className="ed-step" key={h} style={{ transitionDelay: `${i * 90}ms` }}>
+              <span className="ed-step-ico">{STEP_ICONS[i]}</span>
               <h3>{h}</h3>
               <p>{p}</p>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
