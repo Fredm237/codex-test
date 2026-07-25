@@ -663,3 +663,116 @@
 .ed-pledge div { transition: color 0.25s, padding-left 0.25s var(--ease); }
 .ed-pledge div:hover { color: var(--ink); padding-left: 6px; }
 @media (prefers-reduced-motion: reduce) { .ed-btn.wave::after, .ed-btn.dark::after { display: none; } .ed-step:hover, .ed-info:hover { transform: none; } }
+
+
+/* ════════════════════════════════════════════════════════════════════════
+   PR-A · Assistant, cibles tactiles mobile (≥44px) + confort de saisie
+   À APPENDRE à la fin de filon-web/components/editorial/editorial.css.
+
+   Pourquoi : l'audit a relevé des cibles tactiles denses (<44px) sur mobile
+   (chips, pilules verdict, bouton « Voir l'offre », champ de recherche).
+   On corrige UNIQUEMENT sur petits écrans et sur pointeurs grossiers (tactile),
+   donc aucun impact sur le desktop souris. Additif, réversible.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Petits écrans : on aère et on garantit la hauteur de frappe. */
+@media (max-width: 720px) {
+  .sa-chip { padding: 11px 16px; }
+  .sa-need { padding: 10px 14px; }
+  .fa-verdict { padding: 9px 15px; }
+  .fa-specs { gap: 8px 12px; font-size: 13px; }
+  .fa-aside .ed-btn { padding: 12px 18px; }
+  .fa-rank { padding-top: 15px; }
+}
+
+/* Pointeurs tactiles (téléphone, tablette) : plancher de 44px sur tout ce qui
+   se tape, quelle que soit la largeur. Sans effet sur les pointeurs fins. */
+@media (pointer: coarse) {
+  .sa-chip,
+  .sa-need,
+  .fa-verdict { min-height: 44px; display: inline-flex; align-items: center; }
+
+  .sa-chip,
+  .fa-verdict { justify-content: center; }
+
+  .fa-aside .ed-btn,
+  .sa-pick .buy { min-height: 44px; }
+
+  /* Champ de recherche : zone de frappe plus confortable au doigt. */
+  .sa-box { padding: 10px 10px 10px 22px; }
+  .sa-box input { padding: 16px 0; }
+
+  /* La pastille de score reste tapable si on la rend interactive plus tard. */
+  .fa-score .ring { width: 60px; height: 60px; }
+}
+/* ════════════════════════════════════════════════════════════════════════
+   PR-D · CSS de la bande de preuves
+   À APPENDRE à filon-web/components/editorial/editorial.css.
+   Scopé .ed-proof-* → aucun impact ailleurs.
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* Marquee des logos réels (pause au survol) */
+.ed-proof-marquee { position: relative; margin-top: 26px; overflow: hidden;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.ed-proof-marquee .track { display: flex; gap: 20px; width: max-content; animation: ed-proof-slide 34s linear infinite; }
+.ed-proof-marquee:hover .track { animation-play-state: paused; }
+@keyframes ed-proof-slide { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { .ed-proof-marquee .track { animation: none; } }
+.ed-proof-logo { flex: none; width: 158px; height: 70px; border: 1px solid var(--line); border-radius: var(--r-md);
+  background: var(--card); display: grid; place-items: center; }
+.ed-proof-logo img { max-width: 118px; max-height: 40px; width: auto; height: auto;
+  object-fit: contain; filter: grayscale(1); opacity: 0.7; transition: filter 0.25s, opacity 0.25s; }
+.ed-proof-logo:hover img { filter: none; opacity: 1; }
+.ed-proof-note { text-align: center; font-size: 12.5px; color: var(--ink-3); margin-top: 20px; }
+
+/* Tuiles de chiffres */
+.ed-proof-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line);
+  border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; margin-top: clamp(44px, 6vw, 72px); }
+@media (max-width: 760px) { .ed-proof-stats { grid-template-columns: 1fr 1fr; } }
+.ed-proof-stats > div { background: var(--card); padding: clamp(24px, 3vw, 32px) 24px; text-align: center; }
+.ed-proof-stat-v { font-family: var(--serif); font-variation-settings: "opsz" 48; font-size: clamp(34px, 5vw, 48px);
+  line-height: 1; letter-spacing: -0.02em; color: var(--ink); }
+.ed-proof-stat-v.g { color: var(--save); }
+.ed-proof-stat-v.dot { color: var(--accent); }
+.ed-proof-stat-l { font-size: 13px; color: var(--ink-2); margin-top: 10px; line-height: 1.4; }
+.ed-proof-legend { text-align: center; font-size: 11.5px; color: var(--ink-3); margin-top: 12px; }
+.ed-proof-legend .dot { color: var(--accent); font-weight: 600; }
+
+/* Vrai prix décomposé */
+.ed-proof-price { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(28px, 5vw, 56px);
+  align-items: center; margin-top: clamp(56px, 8vw, 96px); }
+@media (max-width: 820px) { .ed-proof-price { grid-template-columns: 1fr; gap: 28px; } }
+.ed-proof-price-copy h2 { font-family: var(--serif); font-variation-settings: "opsz" 60; font-weight: 400;
+  font-size: clamp(26px, 4vw, 40px); line-height: 1.08; letter-spacing: -0.02em; margin: 10px 0 16px; }
+.ed-proof-price-copy p { font-size: 15.5px; color: var(--ink-2); line-height: 1.55; max-width: 42ch; }
+.ed-proof-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  padding: clamp(22px, 3vw, 30px); box-shadow: var(--shadow-soft); }
+.ed-proof-card .ex { font-size: 12px; color: var(--ink-3); margin-bottom: 14px; }
+.ed-proof-card .row { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.ed-proof-card .row span:first-child { font-size: 14px; color: var(--ink-2); }
+.ed-proof-card .row .v { font-family: var(--mono); font-size: 14.5px; font-weight: 600; color: var(--ink-2); }
+.ed-proof-card .row .v.good { color: var(--save); }
+.ed-proof-card .total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; }
+.ed-proof-card .total > span:first-child { font-size: 14px; font-weight: 600; }
+.ed-proof-total-val { font-family: var(--mono); font-size: 26px; font-weight: 700; color: var(--save); letter-spacing: -0.02em; }
+
+/* Faits de transparence */
+.ed-proof-trust { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: clamp(56px, 8vw, 96px); }
+@media (max-width: 760px) { .ed-proof-trust { grid-template-columns: 1fr; } }
+.ed-proof-tcard { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); padding: 24px;
+  transition: transform 0.3s var(--ease-out), border-color 0.3s; }
+.ed-proof-tcard:hover { transform: translateY(-3px); border-color: var(--line-2); }
+.ed-proof-tcard h3 { font-size: 15.5px; font-weight: 600; margin-bottom: 7px; }
+.ed-proof-tcard p { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; }
+
+/* Emplacement d'avis */
+.ed-proof-slot { margin-top: clamp(48px, 7vw, 80px); border: 1.5px dashed var(--line-2); border-radius: var(--r-lg);
+  padding: clamp(28px, 4vw, 44px); text-align: center; background: var(--paper-2); }
+.ed-proof-slot .q { font-family: var(--serif); font-style: italic; font-size: clamp(20px, 3vw, 28px);
+  line-height: 1.35; color: var(--ink-2); margin: 16px auto 0; max-width: 36ch; }
+.ed-proof-slot .warn { font-size: 12.5px; color: var(--ink-3); margin-top: 16px; }
+
+/* Logos marchands rendus en noms stylés (pas de fichiers logos requis) */
+.ed-proof-logo span { font-family: var(--sans); font-weight: 700; font-size: 17px; letter-spacing: -0.01em; color: var(--ink-2); opacity: 0.68; transition: opacity 0.25s; }
+.ed-proof-logo:hover span { opacity: 1; }

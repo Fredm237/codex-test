@@ -31,6 +31,7 @@ export const primaryNav: NavItem[] = [
   { label: "Tarifs", href: "/tarifs" },
   { label: "Cashback", href: "/cashback" },
   { label: "Reconditionné", href: "/reconditionne" },
+  { label: "Le Score", href: "/score" },
   { label: "Codes promo", href: "/codes-promo" },
 ];
 
