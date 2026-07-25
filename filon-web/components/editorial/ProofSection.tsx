@@ -155,15 +155,6 @@ export function ProofSection() {
             </Reveal>
           ))}
         </div>
-
-        <Reveal className="ed-proof-slot">
-          <span className="eyebrow">Emplacement · avis vérifiés</span>
-          <p className="q">
-            « Les vrais témoignages utilisateurs et la note moyenne viendront ici, après les
-            premiers milliers d'achats. »
-          </p>
-          <p className="warn">À ne jamais remplir avec de faux avis. La neutralité est notre seul actif.</p>
-        </Reveal>
       </div>
     </section>
   );

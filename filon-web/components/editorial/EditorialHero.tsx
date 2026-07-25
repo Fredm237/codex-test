@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
+import { ChromeCta } from "./ChromeCta";
 
 const IntelligenceCore = dynamic(
   () => import("./IntelligenceCore").then((m) => m.IntelligenceCore),
@@ -27,7 +28,7 @@ export function EditorialHero() {
       <div className="ed-wrap ed-hero-grid">
         <div className="ed-hero-text">
           <span className="eyebrow ed-hero-eyebrow">
-            <span className="dot" /> Copilote d&apos;achat propulsé par l&apos;IA
+            <span className="dot" /> Indépendant · Belgique
           </span>
           <h1 className="ed-h1" aria-label="Est-ce vraiment le bon prix ?">
             <span className="l"><span>Est-ce</span></span>
@@ -39,7 +40,7 @@ export function EditorialHero() {
           </p>
           <div className="ed-hero-actions">
             <a className="ed-btn wave" href="/recherche">Essayer le copilote</a>
-            <a className="ed-btn ghost" href="/#installer">Ajouter gratuitement</a>
+            <ChromeCta variant="ghost" />
           </div>
         </div>
 

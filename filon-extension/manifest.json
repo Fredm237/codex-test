@@ -1,22 +1,24 @@
 {
   "manifest_version": 3,
-  "name": "FILON — Le réflexe malin avant chaque achat",
+  "name": "FILON — le vrai prix, avant d'acheter",
   "short_name": "FILON",
-  "description": "Compare automatiquement cashback, reconditionné et codes promo sur les fiches produit, et révèle votre prix réel le plus bas.",
-  "version": "0.1.0",
+  "description": "Sur une fiche produit, FILON repère l'article et vous emmène au vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis.",
+  "version": "1.0.0",
   "default_locale": "fr",
   "icons": {
-    "16": "icons/icon-16.png",
-    "48": "icons/icon-48.png",
-    "128": "icons/icon-128.png"
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "FILON",
+    "default_title": "FILON — voir le vrai prix",
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "icons/icon-16.png",
-      "48": "icons/icon-48.png",
-      "128": "icons/icon-128.png"
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
     }
   },
   "background": {
@@ -24,11 +26,43 @@
   },
   "permissions": ["storage", "activeTab"],
   "host_permissions": [
-    "https://*.boutique-demo.fr/*"
+    "https://*.amazon.com.be/*",
+    "https://*.amazon.fr/*",
+    "https://*.amazon.nl/*",
+    "https://*.bol.com/*",
+    "https://*.coolblue.be/*",
+    "https://*.coolblue.nl/*",
+    "https://*.mediamarkt.be/*",
+    "https://*.krefel.be/*",
+    "https://*.vandenborre.be/*",
+    "https://*.fnac.com/*",
+    "https://*.fnac.be/*",
+    "https://*.cdiscount.com/*",
+    "https://*.darty.com/*",
+    "https://*.boulanger.com/*",
+    "https://*.backmarket.fr/*",
+    "https://*.backmarket.be/*"
   ],
   "content_scripts": [
     {
-      "matches": ["https://*.boutique-demo.fr/*"],
+      "matches": [
+        "https://*.amazon.com.be/*",
+        "https://*.amazon.fr/*",
+        "https://*.amazon.nl/*",
+        "https://*.bol.com/*",
+        "https://*.coolblue.be/*",
+        "https://*.coolblue.nl/*",
+        "https://*.mediamarkt.be/*",
+        "https://*.krefel.be/*",
+        "https://*.vandenborre.be/*",
+        "https://*.fnac.com/*",
+        "https://*.fnac.be/*",
+        "https://*.cdiscount.com/*",
+        "https://*.darty.com/*",
+        "https://*.boulanger.com/*",
+        "https://*.backmarket.fr/*",
+        "https://*.backmarket.be/*"
+      ],
       "js": ["content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
@@ -36,7 +70,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["icons/icon-128.png"],
+      "resources": ["icons/icon128.png"],
       "matches": ["<all_urls>"]
     }
   ]

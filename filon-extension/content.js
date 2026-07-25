@@ -1,157 +1,169 @@
 /**
- * FILON — content script (prototype)
+ * FILON — content script
  *
- * Runs on a product page, detects the product, then injects the FILON overlay
- * that compares cashback / reconditionné / codes promo and reveals the real price.
+ * Sur une fiche produit d'un marchand supporté, FILON :
+ *   1. détecte le produit (JSON-LD Product → OpenGraph → sélecteurs marchand → <h1>) ;
+ *   2. affiche une pastille discrète, non intrusive, en bas à droite ;
+ *   3. déroule un panneau qui rappelle les 4 leviers d'économie que FILON vérifie,
+ *      puis emmène l'utilisateur vers l'analyse RÉELLE sur filon.be.
  *
- * In production, `compareOffers()` would call the FILON API with the detected
- * product; here it returns an illustrative, clearly-simulated result so the
- * prototype is fully self-contained.
+ * Principe : aucune économie chiffrée n'est inventée ici. Le vrai prix est calculé
+ * côté FILON, sur des données réelles. L'extension ne fait que détecter et relier.
  */
 (() => {
   "use strict";
   if (window.__FILON_INJECTED__) return;
   window.__FILON_INJECTED__ = true;
 
+  const SITE = "https://filon.be";
   const PREFIX = "filon-x";
-  const euro = (n) => `${n.toLocaleString("fr-FR")} €`;
 
-  /** Best-effort product detection: JSON-LD Product → OpenGraph → <h1> + price. */
-  function detectProduct() {
-    // 1. Schema.org Product via JSON-LD
+  /* ---- détection produit ------------------------------------------------ */
+
+  function fromJsonLd() {
     for (const s of document.querySelectorAll('script[type="application/ld+json"]')) {
       try {
         const data = JSON.parse(s.textContent);
         const items = Array.isArray(data) ? data : [data];
         for (const it of items) {
-          if (it && (it["@type"] === "Product" || (Array.isArray(it["@type"]) && it["@type"].includes("Product")))) {
-            const offer = Array.isArray(it.offers) ? it.offers[0] : it.offers;
-            const price = offer && (offer.price || offer.lowPrice);
-            if (it.name && price) return { name: String(it.name), price: parseFloat(price) };
-          }
+          const type = it && it["@type"];
+          const isProduct = type === "Product" || (Array.isArray(type) && type.includes("Product"));
+          if (isProduct && it.name) return String(it.name).trim();
         }
       } catch {
-        /* ignore malformed JSON-LD */
+        /* JSON-LD malformé — on ignore */
       }
-    }
-    // 2. OpenGraph title + a price-looking number on the page
-    const ogTitle = document.querySelector('meta[property="og:title"]')?.content;
-    const priceEl = document.querySelector("[data-price], .price, [itemprop='price']");
-    const priceText = priceEl?.getAttribute("content") || priceEl?.textContent || "";
-    const priceMatch = priceText.match(/(\d[\d\s.,]*)/);
-    const title = ogTitle || document.querySelector("h1")?.textContent?.trim();
-    if (title && priceMatch) {
-      const price = parseFloat(priceMatch[1].replace(/\s/g, "").replace(",", "."));
-      if (price) return { name: title, price };
     }
     return null;
   }
 
-  /**
-   * Compute the best cumulative saving. Simulated for the prototype.
-   * Returns the sources and the resulting real price.
-   */
-  function compareOffers(product) {
-    const p = product.price;
-    const cashbackRate = 6.5; // best of compared cashback platforms
-    const recondPrice = Math.round(p * 0.81); // reconditioned equivalent ≈ -19%
-    const promo = 15;
-    const base = Math.min(p, recondPrice) - promo;
-    const cashback = Math.round(base * (cashbackRate / 100));
-    const realPrice = Math.max(0, base - cashback);
-    return {
-      sources: [
-        { ic: "i", a: "Cashback — iGraal", b: "le mieux-disant des 42 comparés", v: `+${cashbackRate}`.replace(".", ",") + " %" },
-        { ic: "R", a: "Reconditionné A+", b: "garanti 24 mois · Back Market", v: `−${euro(p - recondPrice)}` },
-        { ic: "%", a: "Code promo vérifié", b: "testé en direct · valide", v: `−${euro(promo)}` },
-        { ic: "€", a: "Prix marchand le plus bas", b: "37 marchands en temps réel", v: euro(recondPrice) },
-      ],
-      realPrice,
-      saving: p - realPrice,
-    };
-  }
-
-  function el(tag, cls, html) {
-    const node = document.createElement(tag);
-    if (cls) node.className = cls;
-    if (html != null) node.innerHTML = html;
-    return node;
-  }
-
-  const LOGO = `<svg viewBox="0 0 32 32" fill="none" width="26" height="26"><defs><linearGradient id="${PREFIX}-lg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#3C7BFF"/><stop offset=".5" stop-color="#8B6CFF"/><stop offset="1" stop-color="#24E3C6"/></linearGradient></defs><rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#${PREFIX}-lg)" stroke-width="2"/><path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#${PREFIX}-lg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-
-  function render(product, result) {
-    const prefersReduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    const root = el("aside", `${PREFIX}-overlay`);
-    root.setAttribute("role", "complementary");
-    root.setAttribute("aria-label", "FILON — comparateur d'économies");
-    root.innerHTML = `
-      <div class="${PREFIX}-head">
-        ${LOGO}
-        <div class="${PREFIX}-title">FILON<small>Le filon est là.</small></div>
-        <button class="${PREFIX}-close" aria-label="Fermer FILON">✕</button>
-      </div>
-      <div class="${PREFIX}-body">
-        <div class="${PREFIX}-scan"><span class="${PREFIX}-spin"></span> Analyse des sources d'économies…</div>
-        <div class="${PREFIX}-detected">Produit détecté : <b>${escapeHtml(product.name)}</b></div>
-        <div class="${PREFIX}-sources">
-          ${result.sources
-            .map(
-              (s, i) => `
-            <div class="${PREFIX}-src" data-i="${i}">
-              <span class="${PREFIX}-ic">${s.ic}</span>
-              <div class="${PREFIX}-m"><div class="${PREFIX}-a">${escapeHtml(s.a)}</div><div class="${PREFIX}-b">${escapeHtml(s.b)}</div></div>
-              <div class="${PREFIX}-v" data-v="${escapeHtml(s.v)}">…</div>
-            </div>`
-            )
-            .join("")}
-        </div>
-        <div class="${PREFIX}-result">
-          <div class="${PREFIX}-rr"><span class="${PREFIX}-lab">Votre prix réel</span><span class="${PREFIX}-amt">${euro(result.realPrice)}</span></div>
-          <div class="${PREFIX}-dt">Affiché <b>${euro(product.price)}</b> → économie totale <b class="${PREFIX}-pos">${euro(result.saving)}</b>.</div>
-          <button class="${PREFIX}-cta">Appliquer le filon →</button>
-        </div>
-      </div>
-      <div class="${PREFIX}-foot">Lien affilié · FILON perçoit une part de la commission d'apport de la plateforme. Cela n'augmente jamais votre prix. Données non revendues.</div>
-    `;
-    document.body.appendChild(root);
-    requestAnimationFrame(() => root.classList.add(`${PREFIX}-show`));
-
-    const srcs = root.querySelectorAll(`.${PREFIX}-src`);
-    const scan = root.querySelector(`.${PREFIX}-scan`);
-    const res = root.querySelector(`.${PREFIX}-result`);
-
-    const reveal = (node) => {
-      node.classList.add(`${PREFIX}-on`);
-      node.querySelector(`.${PREFIX}-v`).textContent = node.querySelector(`.${PREFIX}-v`).getAttribute("data-v");
-    };
-
-    if (prefersReduced) {
-      srcs.forEach(reveal);
-      scan.style.display = "none";
-      res.classList.add(`${PREFIX}-show`);
-    } else {
-      srcs.forEach((s, i) => setTimeout(() => reveal(s), 450 + i * 420));
-      setTimeout(() => {
-        scan.style.display = "none";
-        res.classList.add(`${PREFIX}-show`);
-      }, 450 + srcs.length * 420 + 200);
+  function fromMerchant() {
+    // Sélecteurs de titre spécifiques aux marchands supportés.
+    const sels = [
+      "#productTitle", // Amazon
+      "[data-test='title']", // bol.com / coolblue
+      ".js-product-name",
+      ".product-title",
+      "h1[itemprop='name']",
+      ".f-productHeader__title", // Fnac
+    ];
+    for (const sel of sels) {
+      const t = document.querySelector(sel)?.textContent?.trim();
+      if (t) return t;
     }
-
-    root.querySelector(`.${PREFIX}-close`).addEventListener("click", () => root.remove());
-    root.querySelector(`.${PREFIX}-cta`).addEventListener("click", () => {
-      // In production: open the affiliate deep-link for the winning offer.
-      window.open("https://filon.app/redirect?demo=1", "_blank", "noopener");
-    });
+    return null;
   }
 
-  function escapeHtml(str) {
+  function detectProduct() {
+    const og = document.querySelector('meta[property="og:type"]')?.content || "";
+    const looksLikeProduct =
+      og.includes("product") ||
+      document.querySelector('[itemtype*="schema.org/Product"], #productTitle, .f-productHeader__title');
+    const name =
+      fromJsonLd() ||
+      fromMerchant() ||
+      (looksLikeProduct ? document.querySelector('meta[property="og:title"]')?.content : null) ||
+      (looksLikeProduct ? document.querySelector("h1")?.textContent?.trim() : null);
+    if (!name) return null;
+    // Nettoyage léger : couper les suffixes marchands après un séparateur.
+    const clean = name.split(/[|·–—:]\s/)[0].trim().slice(0, 140);
+    return clean.length >= 3 ? { name: clean } : null;
+  }
+
+  /* ---- rendu ------------------------------------------------------------ */
+
+  function esc(str) {
     return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
-  const product = detectProduct();
-  if (product) {
-    render(product, compareOffers(product));
+  const LOGO = `<svg viewBox="0 0 40 40" width="26" height="26" aria-hidden="true">
+    <defs><linearGradient id="${PREFIX}-g" x1="0" y1="0" x2="40" y2="40">
+      <stop stop-color="#18beb0"/><stop offset="1" stop-color="#1e75c9"/></linearGradient></defs>
+    <rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="url(#${PREFIX}-g)"/>
+    <path d="M14 11h13v3.4H17.4v6.1h8v3.4h-8V29H14z" fill="#fff"/></svg>`;
+
+  const CHECKS = [
+    ["Meilleur marchand", "des dizaines de vendeurs comparés en direct"],
+    ["Reconditionné certifié", "l'équivalent garanti, quand il existe"],
+    ["Code promo vérifié", "testé au paiement, pas de code mort"],
+    ["Cashback maximal", "la meilleure plateforme, réunie au prix"],
+  ];
+
+  function openFilon(name) {
+    const url = `${SITE}/recherche?q=${encodeURIComponent(name)}&utm_source=extension&utm_medium=fiche`;
+    window.open(url, "_blank", "noopener");
   }
+
+  function render(product) {
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const pill = document.createElement("button");
+    pill.className = `${PREFIX}-pill`;
+    pill.setAttribute("aria-label", "Ouvrir FILON — voir le vrai prix");
+    pill.innerHTML = `${LOGO}<span>Voir le vrai prix</span>`;
+
+    const panel = document.createElement("aside");
+    panel.className = `${PREFIX}-panel`;
+    panel.setAttribute("role", "complementary");
+    panel.setAttribute("aria-label", "FILON — le vrai prix");
+    panel.innerHTML = `
+      <div class="${PREFIX}-head">
+        ${LOGO}
+        <div class="${PREFIX}-brand">FILON<small>Le vrai prix, avant d'acheter</small></div>
+        <button class="${PREFIX}-close" aria-label="Fermer">✕</button>
+      </div>
+      <div class="${PREFIX}-detected">
+        <span class="${PREFIX}-dl">Produit repéré</span>
+        <b>${esc(product.name)}</b>
+      </div>
+      <div class="${PREFIX}-checks">
+        ${CHECKS.map(
+          ([a, b], i) => `
+          <div class="${PREFIX}-check" data-i="${i}">
+            <span class="${PREFIX}-tick"><svg viewBox="0 0 24 24" width="14" height="14"><path d="M5 12.5l4.2 4.2L19 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <div><div class="${PREFIX}-ca">${esc(a)}</div><div class="${PREFIX}-cb">${esc(b)}</div></div>
+          </div>`
+        ).join("")}
+      </div>
+      <button class="${PREFIX}-cta">Voir le vrai prix sur FILON →</button>
+      <div class="${PREFIX}-foot">Gratuit · indépendant · vos données ne sont jamais revendues.</div>
+    `;
+
+    document.body.appendChild(pill);
+    document.body.appendChild(panel);
+
+    const checks = panel.querySelectorAll(`.${PREFIX}-check`);
+    const revealAll = () => checks.forEach((c) => c.classList.add(`${PREFIX}-on`));
+
+    let open = false;
+    const setOpen = (v) => {
+      open = v;
+      panel.classList.toggle(`${PREFIX}-show`, v);
+      pill.classList.toggle(`${PREFIX}-hide`, v);
+      if (v) {
+        if (reduced) revealAll();
+        else checks.forEach((c, i) => setTimeout(() => c.classList.add(`${PREFIX}-on`), 220 + i * 180));
+      }
+    };
+
+    pill.addEventListener("click", () => setOpen(true));
+    panel.querySelector(`.${PREFIX}-close`).addEventListener("click", () => setOpen(false));
+    panel.querySelector(`.${PREFIX}-cta`).addEventListener("click", () => openFilon(product.name));
+
+    // Auto-ouverture douce, une seule fois par onglet, si non refusé récemment.
+    try {
+      const key = `${PREFIX}-dismissed:${location.host}`;
+      chrome.storage?.session?.get(key, (r) => {
+        if (!r || !r[key]) setTimeout(() => setOpen(true), 900);
+      });
+      panel.querySelector(`.${PREFIX}-close`).addEventListener("click", () => {
+        chrome.storage?.session?.set({ [key]: Date.now() });
+      });
+    } catch {
+      setTimeout(() => setOpen(true), 900);
+    }
+  }
+
+  const product = detectProduct();
+  if (product) render(product);
 })();

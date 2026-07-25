@@ -5,54 +5,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>FILON</title>
     <style>
-      :root { color-scheme: dark; }
+      :root { color-scheme: light; }
       * { box-sizing: border-box; }
       body {
         margin: 0;
-        width: 300px;
+        width: 328px;
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui, sans-serif;
-        background: #06070c;
-        color: #f4f6fb;
+        background: #f4f7fa;
+        color: #0f1b2d;
         font-size: 14px;
         line-height: 1.5;
         letter-spacing: -0.01em;
+        -webkit-font-smoothing: antialiased;
       }
-      .head { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1px solid rgba(255, 255, 255, 0.09); }
-      .head b { font-size: 16px; letter-spacing: -0.03em; }
-      .head small { display: block; color: #626b80; font-size: 11px; font-weight: 400; }
-      .body { padding: 16px; }
-      .stat { display: flex; justify-content: space-between; align-items: baseline; padding: 9px 0; border-bottom: 1px solid rgba(255, 255, 255, 0.07); }
-      .stat span { color: #9ba3b6; font-size: 13px; }
-      .stat b { font-family: "SF Mono", ui-monospace, monospace; font-size: 15px; color: #22e0a6; }
-      .toggle { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
-      .switch { width: 42px; height: 24px; border-radius: 999px; background: linear-gradient(100deg, #3c7bff, #24e3c6); position: relative; cursor: pointer; border: 0; }
-      .switch::after { content: ""; position: absolute; top: 3px; left: 21px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.2s; }
-      .switch[aria-pressed="false"] { background: rgba(255, 255, 255, 0.12); }
-      .switch[aria-pressed="false"]::after { left: 3px; }
-      .cta { display: block; text-align: center; margin-top: 16px; padding: 12px; border-radius: 999px; color: #05121f; background: linear-gradient(100deg, #3c7bff, #8b6cff, #24e3c6); font-weight: 600; text-decoration: none; font-size: 14px; }
-      .foot { padding: 0 16px 16px; font-size: 10.5px; color: #626b80; line-height: 1.5; }
+      .head {
+        display: flex; align-items: center; gap: 11px;
+        padding: 18px 18px 16px;
+        background:
+          radial-gradient(120% 140% at 0% 0%, rgba(24,190,176,0.16), transparent 60%),
+          radial-gradient(120% 140% at 100% 0%, rgba(30,117,201,0.16), transparent 60%),
+          #ffffff;
+        border-bottom: 1px solid rgba(16,40,70,0.07);
+      }
+      .brand { line-height: 1.1; }
+      .brand b { font-family: Georgia, "Times New Roman", serif; font-size: 20px; letter-spacing: 0.06em; }
+      .brand small { display: block; color: #5b6b80; font-size: 11px; font-weight: 500; margin-top: 1px; }
+      .body { padding: 16px 18px 6px; }
+      .lbl { font-size: 11px; text-transform: uppercase; letter-spacing: 0.12em; color: #4a90b5; margin-bottom: 8px; }
+      form { display: flex; flex-direction: column; gap: 9px; }
+      input {
+        width: 100%; padding: 12px 14px; border-radius: 12px; font-size: 14px;
+        border: 1px solid rgba(16,40,70,0.14); background: #fff; color: #0f1b2d; outline: none;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      }
+      input:focus { border-color: #1e75c9; box-shadow: 0 0 0 3px rgba(30,117,201,0.14); }
+      .cta {
+        border: 0; cursor: pointer; padding: 13px 16px; border-radius: 12px; font-size: 14.5px;
+        font-weight: 650; color: #fff; letter-spacing: -0.01em;
+        background: linear-gradient(120deg, #18beb0, #1e75c9);
+        box-shadow: 0 12px 26px -12px rgba(30,117,201,0.7);
+        transition: transform 0.18s ease, filter 0.18s ease;
+      }
+      .cta:hover { transform: translateY(-1px); filter: brightness(1.04); }
+      .ghost {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        margin-top: 9px; padding: 11px 14px; border-radius: 12px; cursor: pointer; width: 100%;
+        border: 1px solid rgba(16,40,70,0.14); background: #fff; color: #0f1b2d; font-size: 13.5px; font-weight: 600;
+        transition: border-color 0.15s ease, background 0.15s ease;
+      }
+      .ghost:hover { border-color: #1e75c9; background: #f3f8fd; }
+      .links { display: flex; gap: 8px; margin: 14px 0 4px; }
+      .links a {
+        flex: 1; text-align: center; text-decoration: none; color: #0f1b2d; font-size: 12.5px; font-weight: 600;
+        padding: 10px 6px; border-radius: 11px; background: rgba(16,40,70,0.045);
+        transition: background 0.15s ease;
+      }
+      .links a:hover { background: rgba(30,117,201,0.1); }
+      .foot { padding: 12px 18px 16px; font-size: 10.5px; color: #8494a6; line-height: 1.55; text-align: center; }
     </style>
   </head>
   <body>
     <div class="head">
-      <svg viewBox="0 0 32 32" fill="none" width="28" height="28">
-        <defs><linearGradient id="plg" x1="0" y1="0" x2="32" y2="32"><stop stop-color="#3C7BFF" /><stop offset=".5" stop-color="#8B6CFF" /><stop offset="1" stop-color="#24E3C6" /></linearGradient></defs>
-        <rect x="1.5" y="1.5" width="29" height="29" rx="9" stroke="url(#plg)" stroke-width="2" />
-        <path d="M9 22 L15 9 L18 16 L23 10" stroke="url(#plg)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" />
+      <svg viewBox="0 0 40 40" width="30" height="30" aria-hidden="true">
+        <defs><linearGradient id="plg" x1="0" y1="0" x2="40" y2="40"><stop stop-color="#18beb0" /><stop offset="1" stop-color="#1e75c9" /></linearGradient></defs>
+        <rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="url(#plg)" />
+        <path d="M14 11h13v3.4H17.4v6.1h8v3.4h-8V29H14z" fill="#fff" />
       </svg>
-      <div><b>FILON</b><small>Le réflexe malin avant chaque achat.</small></div>
+      <div class="brand"><b>FILON</b><small>Le vrai prix, avant d'acheter.</small></div>
     </div>
+
     <div class="body">
-      <div class="stat"><span>Économisé ce mois-ci</span><b id="month">0 €</b></div>
-      <div class="stat"><span>Économisé au total</span><b id="total">0 €</b></div>
-      <div class="stat"><span>Filons trouvés</span><b id="count">0</b></div>
-      <div class="toggle">
-        <span>FILON actif</span>
-        <button class="switch" id="switch" aria-pressed="true" aria-label="Activer ou désactiver FILON"></button>
+      <div class="lbl">Que voulez-vous acheter&nbsp;?</div>
+      <form id="ask">
+        <input id="q" type="text" placeholder="Ex. : iPhone 16, aspirateur Dyson…" autofocus />
+        <button class="cta" type="submit">Demander à FILON&nbsp;→</button>
+      </form>
+      <button class="ghost" id="analyze">Analyser la page ouverte</button>
+
+      <div class="links">
+        <a href="https://filon.be/cashback" target="_blank" rel="noopener">Cashback</a>
+        <a href="https://filon.be/reconditionne" target="_blank" rel="noopener">Reconditionné</a>
+        <a href="https://filon.be/comment-ca-marche" target="_blank" rel="noopener">Le concept</a>
       </div>
-      <a class="cta" href="https://filon.app" target="_blank" rel="noopener">Ouvrir mon tableau de bord</a>
     </div>
-    <div class="foot">FILON est gratuit. Certains liens sont affiliés — cela n'augmente jamais votre prix. Données non revendues.</div>
+
+    <div class="foot">
+      Gratuit · indépendant · Belgique. Certains liens sont affiliés — cela n'augmente jamais votre prix, et vos données ne sont jamais revendues.
+    </div>
     <script src="popup.js"></script>
   </body>
 </html>

@@ -1,15 +1,13 @@
-/* FILON — background service worker (MV3).
-   Seeds default stats on install. In production this is where API tokens,
-   affiliate-link resolution and saved-savings accounting would live. */
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.storage.local.get({ active: null }, (cur) => {
-    if (cur.active === null) {
-      chrome.storage.local.set({
-        active: true,
-        monthSaved: 0,
-        totalSaved: 0,
-        filonCount: 0,
-      });
-    }
-  });
+/* FILON — service worker (MV3).
+ *
+ * Minimal et honnête : à l'installation, on ouvre la page d'accueil FILON pour
+ * expliquer l'extension. Aucun suivi, aucune donnée collectée en arrière-plan.
+ * La résolution des liens affiliés se fera côté FILON, sur des données réelles.
+ */
+const SITE = "https://filon.be";
+
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "install") {
+    chrome.tabs.create({ url: `${SITE}/?utm_source=extension&utm_medium=install` });
+  }
 });

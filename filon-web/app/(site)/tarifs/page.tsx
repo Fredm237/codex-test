@@ -3,6 +3,7 @@ import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, ClosingCta } from "@/components/editorial/ContentPage";
 import { FaqBlock } from "@/components/editorial/Faq";
 import { Reveal } from "@/components/editorial/Reveal";
+import { ChromeCta } from "@/components/editorial/ChromeCta";
 
 export const metadata: Metadata = buildMetadata({
   path: "/tarifs",
@@ -52,7 +53,7 @@ export default function TarifsPage() {
                 ))}
               </ul>
               <div className="cta-wrap">
-                <a className="ed-btn wave" href="/#installer" style={{ textDecoration: "none" }}>Ajouter gratuitement</a>
+                <ChromeCta variant="wave" href="/recherche" style={{ textDecoration: "none" }} />
               </div>
             </div>
           </Reveal>
