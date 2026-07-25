@@ -9,7 +9,14 @@
 import { useEffect, useRef, useState } from "react";
 import { Reveal } from "./Reveal";
 
-const MERCHANTS = ["Amazon", "Fnac", "Cdiscount", "Boulanger", "Darty", "Rakuten", "Coolblue", "MediaMarkt"];
+const MERCHANTS = [
+  { name: "Amazon", src: "/logos/amazon.webp" },
+  { name: "Fnac", src: "/logos/fnac.webp" },
+  { name: "Cdiscount", src: "/logos/cdiscount.webp" },
+  { name: "Boulanger", src: "/logos/boulanger.webp" },
+  { name: "Darty", src: "/logos/darty.svg" },
+  { name: "Rakuten", src: "/logos/rakuten.webp" },
+];
 
 const STATS: Array<[string, string, string?]> = [
   ["5+", "grands marchands comparés à chaque recherche"],
@@ -79,9 +86,9 @@ export function ProofSection() {
 
         <Reveal className="ed-proof-marquee">
           <div className="track">
-            {[...MERCHANTS, ...MERCHANTS].map((name, i) => (
-              <div className="ed-proof-logo" key={`${name}-${i}`}>
-                <span>{name}</span>
+            {[...MERCHANTS, ...MERCHANTS].map((m, i) => (
+              <div className="ed-proof-logo" key={`${m.name}-${i}`}>
+                <img src={m.src} alt={m.name} loading="lazy" />
               </div>
             ))}
           </div>
