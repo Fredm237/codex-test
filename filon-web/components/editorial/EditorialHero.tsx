@@ -28,7 +28,7 @@ export function EditorialHero() {
       <div className="ed-wrap ed-hero-grid">
         <div className="ed-hero-text">
           <span className="eyebrow ed-hero-eyebrow">
-            <span className="dot" /> Indépendant · Belgique
+            <span className="dot" /> Copilote d&apos;achat
           </span>
           <h1 className="ed-h1" aria-label="Est-ce vraiment le bon prix ?">
             <span className="l"><span>Est-ce</span></span>

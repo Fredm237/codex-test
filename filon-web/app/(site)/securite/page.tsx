@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
+import { IcLock, IcNoResale, IcEncrypted, IcShieldCheck, IcChartNoCookie, IcEye } from "@/components/editorial/icons";
 import { site } from "@/lib/site";
 
 export const metadata: Metadata = buildMetadata({
@@ -24,12 +25,12 @@ export default function SecuritePage() {
         <div className="ed-wrap">
           <InfoGrid
             items={[
-              { n: "🔒", h: "Minimisation des données", p: "FILON n'analyse que ce qui est strictement nécessaire à la comparaison. Rien de plus." },
-              { n: "🚫", h: "Aucune revente", p: "Pas de profil publicitaire, pas de revente à des tiers. Vos données restent les vôtres." },
-              { n: "🔐", h: "Connexions chiffrées", p: "Les échanges avec nos services sont chiffrés (HTTPS/TLS) de bout en bout." },
-              { n: "🇪🇺", h: "Conforme RGPD", p: "Traitement conforme au RGPD par défaut, avec des droits que vous pouvez exercer à tout moment." },
-              { n: "📊", h: "Mesure sans cookie", p: "Notre audience est mesurée sans cookie et de façon anonyme (Plausible)." },
-              { n: "👁", h: "Sans arrière-pensée", p: "Pas de publicité. La recommandation sert votre intérêt, pas le nôtre." },
+              { n: <IcLock />, h: "Minimisation des données", p: "FILON n'analyse que ce qui est strictement nécessaire à la comparaison. Rien de plus." },
+              { n: <IcNoResale />, h: "Aucune revente", p: "Pas de profil publicitaire, pas de revente à des tiers. Vos données restent les vôtres." },
+              { n: <IcEncrypted />, h: "Connexions chiffrées", p: "Les échanges avec nos services sont chiffrés (HTTPS/TLS) de bout en bout." },
+              { n: <IcShieldCheck />, h: "Conforme RGPD", p: "Traitement conforme au RGPD par défaut, avec des droits que vous pouvez exercer à tout moment." },
+              { n: <IcChartNoCookie />, h: "Mesure sans cookie", p: "Notre audience est mesurée sans cookie et de façon anonyme (Plausible)." },
+              { n: <IcEye />, h: "Sans arrière-pensée", p: "Pas de publicité. La recommandation sert votre intérêt, pas le nôtre." },
             ]}
           />
         </div>

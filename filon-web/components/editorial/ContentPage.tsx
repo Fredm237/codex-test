@@ -54,7 +54,7 @@ export function ProseBlock({ heading, children, alt = false }: { heading: ReactN
   );
 }
 
-export function InfoGrid({ items }: { items: { n: string; h: string; p: string }[] }) {
+export function InfoGrid({ items }: { items: { n: ReactNode; h: string; p: string }[] }) {
   return (
     <div className="ed-infogrid">
       {items.map((it) => (

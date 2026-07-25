@@ -80,7 +80,7 @@ export default function ArticlePage() {
           </p>
 
           <div className="callout">
-            💡 <b>Le vrai calcul :</b> l&apos;économie ne s&apos;arrête pas au prix reconditionné. En ajoutant un{" "}
+            <b>Le vrai calcul :</b> l&apos;économie ne s&apos;arrête pas au prix reconditionné. En ajoutant un{" "}
             <span className="g">cashback</span> (3 à 8 %) et parfois un code promo, l&apos;économie totale vs neuf atteint
             souvent <span className="g">45 à 50 %</span>. C&apos;est exactement ce que FILON calcule pour vous.
           </div>

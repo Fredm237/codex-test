@@ -91,7 +91,7 @@ export default function ArticlePage() {
           </p>
 
           <div className="callout">
-            💡 <b>Le bon réflexe :</b> avant d&apos;acheter, demandez-vous si le prix est bas <span className="g">dans son
+            <b>Le bon réflexe :</b> avant d&apos;acheter, demandez-vous si le prix est bas <span className="g">dans son
             cycle</span>. FILON vous le dit d&apos;un coup d&apos;œil : acheter maintenant, ou attendre.
           </div>
 

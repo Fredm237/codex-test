@@ -101,7 +101,7 @@ export default function ArticlePage() {
           </p>
 
           <div className="callout">
-            💡 <b>Le raccourci :</b> décrivez simplement votre besoin («&nbsp;un portable pour la fac à 800&nbsp;€&nbsp;»)
+            <b>Le raccourci :</b> décrivez simplement votre besoin («&nbsp;un portable pour la fac à 800&nbsp;€&nbsp;»)
             et FILON vous propose les meilleurs choix, avec votre <span className="g">vrai prix</span> et le bon moment
             pour acheter.
           </div>

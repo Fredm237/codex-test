@@ -150,17 +150,22 @@
     panel.querySelector(`.${PREFIX}-close`).addEventListener("click", () => setOpen(false));
     panel.querySelector(`.${PREFIX}-cta`).addEventListener("click", () => openFilon(product.name));
 
-    // Auto-ouverture douce, une seule fois par onglet, si non refusé récemment.
+    // Auto-ouverture douce, sauf si l'utilisateur l'a fermé sur ce marchand
+    // dans les 12 dernières heures. storage.local est accessible depuis un
+    // content script (contrairement à storage.session, réservé au worker).
+    const key = `${PREFIX}-dismissed:${location.host}`;
+    const autoOpen = () => setTimeout(() => setOpen(true), 900);
     try {
-      const key = `${PREFIX}-dismissed:${location.host}`;
-      chrome.storage?.session?.get(key, (r) => {
-        if (!r || !r[key]) setTimeout(() => setOpen(true), 900);
+      chrome.storage.local.get(key, (r) => {
+        if (chrome.runtime.lastError) return autoOpen();
+        const ts = r && r[key];
+        if (!ts || Date.now() - ts > 12 * 3600 * 1000) autoOpen();
       });
       panel.querySelector(`.${PREFIX}-close`).addEventListener("click", () => {
-        chrome.storage?.session?.set({ [key]: Date.now() });
+        try { chrome.storage.local.set({ [key]: Date.now() }); } catch {}
       });
     } catch {
-      setTimeout(() => setOpen(true), 900);
+      autoOpen();
     }
   }
 
