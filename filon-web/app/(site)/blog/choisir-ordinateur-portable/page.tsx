@@ -33,6 +33,7 @@ export default function ArticlePage() {
         </div>
 
         <div className="ed-article" style={{ paddingBottom: 60 }}>
+          <img className="ed-article-cover" src="/img/blog-choisir-portable.webp" alt="" />
           <p>
             Un bon ordinateur portable n&apos;est pas le plus cher, ni celui avec les plus gros chiffres. C&apos;est celui
             qui correspond à ce que vous en ferez. Commencez toujours par là.

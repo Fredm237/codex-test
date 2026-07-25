@@ -26,6 +26,7 @@ export default function AProposPage() {
         title={<>Ne jamais payer le <span className="it">prix fort</span>.</>}
         intro="FILON réunit en une expérience simple ce qui prenait dix onglets. Notre ambition : devenir le premier réflexe avant chaque achat, en commençant par la Belgique."
         breadcrumb={[{ name: "À propos", path: "/a-propos" }]}
+        photo="/img/page-apropos.webp"
       />
 
       <ProseBlock heading={<>Le problème que nous <span className="it">réglons</span>.</>}>

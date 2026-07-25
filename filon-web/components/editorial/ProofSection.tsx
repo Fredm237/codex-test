@@ -114,6 +114,10 @@ export function ProofSection() {
           </p>
         </Reveal>
 
+        <Reveal className="ed-proof-life">
+          <img src="/img/proof-unboxing.webp" alt="" loading="lazy" />
+        </Reveal>
+
         <div className="ed-proof-price">
           <Reveal className="ed-proof-price-copy">
             <span className="eyebrow" style={{ display: "block", marginBottom: 12 }}>

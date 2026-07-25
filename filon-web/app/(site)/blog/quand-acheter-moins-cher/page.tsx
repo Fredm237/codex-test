@@ -33,6 +33,7 @@ export default function ArticlePage() {
         </div>
 
         <div className="ed-article" style={{ paddingBottom: 60 }}>
+          <img className="ed-article-cover" src="/img/blog-quand-acheter.webp" alt="" />
           <p>
             Bien acheter, ce n&apos;est pas seulement trouver le bon produit. C&apos;est aussi l&apos;acheter au bon
             moment. Les prix suivent des cycles assez réguliers : les connaître, c&apos;est payer moins sans rien
