@@ -13,6 +13,20 @@ export const metadata: Metadata = buildMetadata({
 const POSTS = [
   {
     cat: "Guide",
+    title: "Le cashback expliqué simplement : comment ça marche",
+    excerpt: "D'où vient l'argent, combien récupère-t-on vraiment, et quels pièges éviter ? Le cashback sans jargon.",
+    href: "/blog/cashback-comment-ca-marche",
+    read: "6 min de lecture",
+  },
+  {
+    cat: "Guide",
+    title: "Black Friday : le guide pour ne pas se faire avoir",
+    excerpt: "De vraies affaires, et beaucoup de fausses promos. Comment repérer les vrais rabais et éviter les prix gonflés.",
+    href: "/blog/black-friday-sans-se-faire-avoir",
+    read: "7 min de lecture",
+  },
+  {
+    cat: "Guide",
     title: "Bien choisir son ordinateur portable : le guide simple",
     excerpt: "Quelle RAM, quel stockage, quel processeur ? L'essentiel expliqué simplement, selon votre usage et votre budget.",
     href: "/blog/choisir-ordinateur-portable",

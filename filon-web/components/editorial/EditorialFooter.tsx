@@ -18,6 +18,7 @@ const LINKS = [
 ];
 
 const LEGAL = [
+  { label: "Transparence & affiliation", href: "/transparence" },
   { label: "Mentions légales", href: "/mentions-legales" },
   { label: "Confidentialité", href: "/confidentialite" },
   { label: "Politique cookies", href: "/cookies" },
@@ -57,7 +58,9 @@ export function EditorialFooter() {
           ))}
         </div>
         <p className="ed-disc">
-          FILON est gratuit et le restera. Aucune publicité, aucune revente de vos données. Vous ne payez jamais.
+          FILON est gratuit et le restera. Aucune publicité, aucune revente de vos données. Vous ne payez jamais.{" "}
+          Certains liens sont affiliés&nbsp;: acheter via FILON peut nous rémunérer, sans surcoût pour vous et sans
+          jamais fausser un conseil (<a href="/transparence" style={{ color: "inherit", textDecoration: "underline" }}>en savoir plus</a>).
         </p>
       </div>
     </footer>

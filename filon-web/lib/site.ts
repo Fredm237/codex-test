@@ -57,8 +57,11 @@ export const footerNav: { title: string; items: NavItem[] }[] = [
   {
     title: "Légal",
     items: [
+      { label: "Transparence & affiliation", href: "/transparence" },
       { label: "Mentions légales", href: "/mentions-legales" },
       { label: "Confidentialité", href: "/confidentialite" },
+      { label: "CGU", href: "/cgu" },
+      { label: "Cookies", href: "/cookies" },
     ],
   },
 ];
