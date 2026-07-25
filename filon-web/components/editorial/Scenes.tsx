@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { Reveal } from "./Reveal";
+import { ChromeCta } from "./ChromeCta";
 
 const NeuralNetwork = dynamic(() => import("./NeuralNetwork").then((m) => m.NeuralNetwork), {
   ssr: false,
@@ -68,7 +69,7 @@ export function ClosingScene() {
           </h2>
           <div className="ed-final-actions">
             <a className="ed-btn wave" href="/recherche">Essayer le copilote</a>
-            <a className="ed-btn ghostlight" href="/#installer">Ajouter gratuitement</a>
+            <ChromeCta variant="ghostlight" href="/recherche" />
           </div>
           <p className="ed-final-note">Gratuit, pour toujours. Sans carte bancaire. Vos données restent chez vous.</p>
         </Reveal>

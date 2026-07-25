@@ -1,61 +1,48 @@
-# FILON — Extension navigateur (prototype)
+# Extension FILON (Chrome / Edge / navigateurs Chromium)
 
-> Le réflexe malin avant chaque achat.
+Le réflexe FILON, directement sur les fiches produit. Sur un marchand supporté,
+l'extension **repère le produit** et vous emmène en un clic vers l'analyse réelle
+de FILON : meilleur marchand, reconditionné certifié, code promo vérifié et
+cashback maximal, réunis en un seul **vrai prix**.
 
-Prototype **Manifest V3** de l'extension FILON : sur une fiche produit, elle
-détecte l'article, compare cashback / reconditionné / codes promo, et affiche
-en overlay votre **prix réel le plus bas** — sans quitter la page.
+> Principe : l'extension **ne fabrique aucune économie chiffrée**. Elle détecte
+> le produit et relie à FILON, où le vrai prix est calculé sur des données
+> réelles. Rien n'est collecté en arrière-plan, rien n'est revendu.
 
-Ce prototype est **autonome et vérifié** : le content script détecte le produit
-(JSON-LD `Product`, puis OpenGraph + prix) et injecte l'overlay. La comparaison
-est **simulée** dans `content.js` (`compareOffers`) ; en production, cette
-fonction appellerait l'API FILON.
+## Contenu
 
-## Charger dans Chrome / Edge
+| Fichier | Rôle |
+| --- | --- |
+| `manifest.json` | Manifest V3, marchands supportés, popup, service worker |
+| `background.js` | Service worker minimal (ouvre l'accueil à l'installation) |
+| `content.js` | Détection produit + overlay (pastille → panneau) |
+| `content.css` | Style de l'overlay, namespacé `filon-x` |
+| `popup.html` / `popup.js` | Popup de la barre d'outils : recherche + analyse de la page |
+| `icons/` | Icônes 16 / 32 / 48 / 128 (+ 256 pour le store) |
+| `_locales/fr/` | Libellés du store |
 
-1. Ouvrir `chrome://extensions` (ou `edge://extensions`).
-2. Activer le **Mode développeur**.
-3. **Charger l'extension non empaquetée** → sélectionner ce dossier `filon-extension/`.
-4. L'icône FILON apparaît dans la barre d'outils.
+## Marchands supportés (v1)
 
-> Le content script se déclenche par défaut sur `*.boutique-demo.fr` (le domaine
-> de démonstration). Pour l'essayer sur un vrai marchand, ajoutez le domaine dans
-> `manifest.json` → `content_scripts.matches` **et** `host_permissions`, puis
-> rechargez l'extension. N'élargissez les permissions qu'aux domaines réellement
-> pris en charge — c'est une bonne pratique de sécurité et d'audit du store.
+Amazon (.com.be / .fr / .nl), bol.com, Coolblue (.be / .nl), MediaMarkt,
+Krëfel, Vanden Borre, Fnac (.com / .be), Cdiscount, Darty, Boulanger,
+Back Market (.fr / .be). D'autres suivront.
 
-## Firefox
+## Installer en local (mode développeur)
 
-Firefox supporte MV3. Charger via `about:debugging` → « Ce Firefox » →
-« Charger un module temporaire » → sélectionner `manifest.json`.
+1. Ouvrir `chrome://extensions`.
+2. Activer **Mode développeur** (en haut à droite).
+3. **Charger l'extension non empaquetée** → sélectionner le dossier `filon-extension/`.
+4. Épingler FILON, puis ouvrir une fiche produit sur un marchand supporté.
 
-## Structure
+## Publication (Chrome Web Store)
 
-```
-filon-extension/
-├── manifest.json        # MV3 : action, background, content_scripts, permissions
-├── background.js        # service worker — seed des stats à l'installation
-├── content.js           # détection produit + injection de l'overlay + scan
-├── content.css          # styles de l'overlay (scopés .filon-x-*, anti-collision)
-├── popup.html / .js     # popup barre d'outils : stats + interrupteur actif/inactif
-├── _locales/fr/         # chaînes localisées (nom, description)
-└── icons/               # 16 / 48 / 128 px
-```
+- Icône 128×128 fournie (`icons/icon128.png`), visuel 256 pour la fiche.
+- Description, capture d'écran et politique de confidentialité à joindre au dépôt.
+- Permissions minimales : `activeTab`, `storage` + `host_permissions` limités aux
+  marchands supportés (aucun accès « tous les sites »).
 
-## Sécurité & confidentialité
+## Confidentialité
 
-- Permissions minimales : `storage`, `activeTab`, et un `host_permissions`
-  restreint (pas de `<all_urls>` sur le content script).
-- Aucune donnée de navigation revendue ; l'overlay affiche systématiquement la
-  nature affiliée des liens (exigence légale + pilier de marque).
-- Le style de l'overlay est préfixé `filon-x-` et posé en `z-index` très haut
-  pour éviter toute collision avec la page hôte.
-
-## Prochaines étapes (production)
-
-- Brancher `compareOffers()` sur l'API FILON (taux cashback temps réel,
-  matching reconditionné, test de codes promo).
-- Résolution des liens affiliés + comptabilisation des économies (popup stats).
-- Adaptateurs par marchand pour une détection produit fiable à grande échelle.
-- Publication : Chrome Web Store, Edge Add-ons, Firefox AMO (respect des règles
-  d'affiliation des extensions, durcies depuis mars 2025).
+`activeTab` n'est lu que sur action de l'utilisateur (bouton « Analyser la page »).
+Aucun tracking, aucune télémétrie, aucune revente. Le seul appel réseau est
+l'ouverture de `filon.be` quand vous cliquez.

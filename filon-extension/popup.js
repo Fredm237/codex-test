@@ -1,36 +1,28 @@
-/* FILON popup — reads saved stats and the on/off toggle from chrome.storage. */
-(() => {
-  "use strict";
-  const euro = (n) => `${Number(n).toLocaleString("fr-FR")} €`;
-  const api = typeof chrome !== "undefined" ? chrome : undefined;
+"use strict";
 
-  const monthEl = document.getElementById("month");
-  const totalEl = document.getElementById("total");
-  const countEl = document.getElementById("count");
-  const sw = document.getElementById("switch");
+const SITE = "https://filon.be";
 
-  const defaults = { monthSaved: 0, totalSaved: 0, filonCount: 0, active: true };
+function openSearch(query) {
+  const q = (query || "").trim();
+  const url = q
+    ? `${SITE}/recherche?q=${encodeURIComponent(q)}&utm_source=extension&utm_medium=popup`
+    : `${SITE}/recherche?utm_source=extension&utm_medium=popup`;
+  chrome.tabs.create({ url });
+  window.close();
+}
 
-  function paint(state) {
-    monthEl.textContent = euro(state.monthSaved);
-    totalEl.textContent = euro(state.totalSaved);
-    countEl.textContent = String(state.filonCount);
-    sw.setAttribute("aria-pressed", state.active ? "true" : "false");
-  }
+document.getElementById("ask").addEventListener("submit", (e) => {
+  e.preventDefault();
+  openSearch(document.getElementById("q").value);
+});
 
-  if (api?.storage?.local) {
-    api.storage.local.get(defaults, paint);
-    sw.addEventListener("click", () => {
-      const next = sw.getAttribute("aria-pressed") !== "true";
-      sw.setAttribute("aria-pressed", next ? "true" : "false");
-      api.storage.local.set({ active: next });
-    });
-  } else {
-    // Fallback when opened outside the extension context.
-    paint(defaults);
-    sw.addEventListener("click", () => {
-      const next = sw.getAttribute("aria-pressed") !== "true";
-      sw.setAttribute("aria-pressed", next ? "true" : "false");
-    });
-  }
-})();
+// « Analyser la page ouverte » : on repart du titre de l'onglet actif comme requête.
+document.getElementById("analyze").addEventListener("click", () => {
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    const tab = tabs && tabs[0];
+    let seed = tab && tab.title ? tab.title : "";
+    // On nettoie les suffixes marchands courants pour ne garder que le produit.
+    seed = seed.split(/[|·–—:]\s/)[0].trim().slice(0, 140);
+    openSearch(seed);
+  });
+});
