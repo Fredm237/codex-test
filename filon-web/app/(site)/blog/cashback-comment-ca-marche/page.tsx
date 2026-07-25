@@ -91,7 +91,7 @@ export default function ArticlePage() {
           </p>
 
           <div className="callout">
-            💡 <b>Le vrai calcul&nbsp;:</b> une bonne affaire, ce n&apos;est pas le plus gros cashback, c&apos;est le
+            <b>Le vrai calcul&nbsp;:</b> une bonne affaire, ce n&apos;est pas le plus gros cashback, c&apos;est le
             <span className="g"> prix final le plus bas</span> une fois tout combiné&nbsp;: prix marchand, coupon et
             cashback réunis. C&apos;est exactement ce que FILON calcule pour vous.
           </div>

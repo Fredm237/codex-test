@@ -3,6 +3,7 @@ import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ClosingCta } from "@/components/editorial/ContentPage";
 import { Method } from "@/components/editorial/EditorialSections";
 import { InfoGrid } from "@/components/editorial/ContentPage";
+import { IcHeart } from "@/components/editorial/icons";
 
 export const metadata: Metadata = buildMetadata({
   path: "/comment-ca-marche",
@@ -35,7 +36,7 @@ export default function CommentCaMarchePage() {
               { n: "✓", h: "La meilleure option", p: "Neuf, reconditionné, ailleurs : le meilleur choix, quand il existe." },
               { n: "★", h: "Un vendeur fiable", p: "La fiabilité et les garanties sont prises en compte, pas seulement le prix." },
               { n: "↧", h: "Sans rien changer", p: "Vous gardez vos habitudes. FILON travaille en arrière-plan." },
-              { n: "♥", h: "Zéro effort", p: "Vous décrivez, FILON tranche. C'est tout." },
+              { n: <IcHeart />, h: "Zéro effort", p: "Vous décrivez, FILON tranche. C'est tout." },
             ]}
           />
         </div>

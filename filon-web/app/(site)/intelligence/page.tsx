@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
+import { IcChat } from "@/components/editorial/icons";
 
 export const metadata: Metadata = buildMetadata({
   path: "/intelligence",
@@ -41,7 +42,7 @@ export default function IntelligencePage() {
               { n: "★", h: "La fiabilité", p: "Un produit qui tient dans le temps, avec un vrai service derrière." },
               { n: "⌛", h: "La durée de vie", p: "Combien de temps il va vraiment durer, à l'usage." },
               { n: "€", h: "Le coût réel", p: "Pas seulement le prix affiché, mais ce qu'il coûte sur la durée." },
-              { n: "💬", h: "Les avis, en clair", p: "Des milliers d'avis résumés en une réponse. Le signal, pas le bruit." },
+              { n: <IcChat />, h: "Les avis, en clair", p: "Des milliers d'avis résumés en une réponse. Le signal, pas le bruit." },
               { n: "✓", h: "La meilleure alternative", p: "Neuf, reconditionné, ailleurs : la meilleure option, quand elle existe." },
             ]}
           />

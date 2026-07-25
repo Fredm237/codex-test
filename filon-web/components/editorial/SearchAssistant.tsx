@@ -11,6 +11,27 @@ import { useRef, useState } from "react";
 
 const euro = (n: number) => `${n.toLocaleString("fr-FR")} €`;
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/* Icônes ligne, nettes et sobres (currentColor) — remplacent les émojis. */
+const IconBase = ({ children }: { children: React.ReactNode }) => (
+  <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{children}</svg>
+);
+const IcTruck = () => <IconBase><path d="M3 6h11v9H3zM14 9h4l3 3v3h-7" /><circle cx="7" cy="18" r="1.6" /><circle cx="17.5" cy="18" r="1.6" /></IconBase>;
+const IcShield = () => <IconBase><path d="M12 3l7 3v5c0 4.2-2.9 7.6-7 9-4.1-1.4-7-4.8-7-9V6z" /><path d="M9.2 12l2 2 3.6-4" /></IconBase>;
+const IcCashback = () => <IconBase><path d="M15.5 8.5a4 4 0 100 7" /><circle cx="10" cy="12" r="6" /><path d="M18 6l3-3M21 3h-2.5M21 3v2.5" /></IconBase>;
+const IcCoupon = () => <IconBase><path d="M3 8a2 2 0 012-2h14a2 2 0 012 2v2a2 2 0 000 4v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-2a2 2 0 000-4z" /><path d="M13 7v10" strokeDasharray="2 2" /></IconBase>;
+const IcTrendDown = () => <IconBase><path d="M4 7l7 7 3-3 6 6" /><path d="M20 17v-4h-4" /></IconBase>;
+const IcTrendUp = () => <IconBase><path d="M4 17l7-7 3 3 6-6" /><path d="M20 7v4h-4" /></IconBase>;
+const IcTrendFlat = () => <IconBase><path d="M4 12h16" /><path d="M17 9l3 3-3 3" /></IconBase>;
+const IcCheck = () => <IconBase><path d="M5 12.5l4.2 4.2L19 7" /></IconBase>;
+const IcClock = () => <IconBase><circle cx="12" cy="12" r="8.5" /><path d="M12 7.5V12l3 2" /></IconBase>;
+const IcBox = () => (
+  <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M12 3l8 4.5v9L12 21l-8-4.5v-9z" /><path d="M4 7.5l8 4.5 8-4.5M12 12v9" opacity="0.6" />
+  </svg>
+);
+const HIST_ICON = { baisse: IcTrendDown, hausse: IcTrendUp, stable: IcTrendFlat } as const;
+
 const hash = (s: string) => {
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
@@ -176,30 +197,30 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
   return (
     <article className={`fa-card${i === 0 ? " win" : ""}`} style={{ ["--d" as string]: `${i * 90}ms` }}>
       {i === 0
-        ? <div className="fa-flag">★ {c.rank}</div>
-        : <div className="fa-rank"><span className="medal">{c.medal}</span> {c.rank}</div>}
+        ? <div className="fa-flag"><IcCheck /> {c.rank}</div>
+        : <div className="fa-rank"><span className="num">{i + 1}</span> {c.rank}</div>}
       <div className="fa-body">
         <div className={`fa-thumb${showImg ? " has-img" : ""}`} aria-hidden="true">
           {showImg
             ? <img src={c.image as string} alt="" loading="lazy" onError={() => setImgOk(false)} />
-            : c.emoji}
+            : <IcBox />}
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
           <div className="fa-price"><b>{euro(c.price)}</b><span className="mc">chez {c.merchant}</span></div>
           <div className="fa-specs">
-            <span>🚚 {c.delivery}</span>
-            <span>🛡️ {c.warranty}</span>
-            {c.cashback ? <span className="g">💸 cashback {c.cashback} %</span> : null}
-            {c.coupon && <span className="g">🎟️ coupon {c.coupon}</span>}
-            {c.hist && c.histNote ? <span className={`hist ${c.hist}`}>📈 {HIST_LABEL[c.hist]} · {c.histNote}</span> : null}
+            <span><IcTruck /> {c.delivery}</span>
+            <span><IcShield /> {c.warranty}</span>
+            {c.cashback ? <span className="g"><IcCashback /> cashback {c.cashback} %</span> : null}
+            {c.coupon && <span className="g"><IcCoupon /> coupon {c.coupon}</span>}
+            {c.hist && c.histNote ? (() => { const Ic = HIST_ICON[c.hist as Hist]; return <span className={`hist ${c.hist}`}><Ic /> {HIST_LABEL[c.hist]} · {c.histNote}</span>; })() : null}
           </div>
           <p className="fa-why"><b>Pourquoi&nbsp;:</b> {c.why}</p>
           {c.alt && <p className="fa-alt">Alternative&nbsp;: {c.alt}</p>}
         </div>
         <div className="fa-aside">
           <ScoreRing score={c.score} />
-          <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? "✓ Bon moment" : "◷ Attendre"}</span>
+          <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> Bon moment</> : <><IcClock /> Attendre</>}</span>
           <a className="ed-btn wave" href={offerUrl} target="_blank" rel="noopener noreferrer">Voir l&apos;offre</a>
         </div>
       </div>

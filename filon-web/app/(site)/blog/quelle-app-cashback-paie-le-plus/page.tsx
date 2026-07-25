@@ -83,7 +83,7 @@ export default function ArticlePage() {
           </p>
 
           <div className="callout">
-            💡 <b>Le raccourci :</b> au lieu de comparer les apps une par une, laissez FILON le faire. Il trouve la{" "}
+            <b>Le raccourci :</b> au lieu de comparer les apps une par une, laissez FILON le faire. Il trouve la{" "}
             <span className="g">meilleure offre du moment</span> et vous y emmène. Vous n&apos;avez rien à chercher.
           </div>
 

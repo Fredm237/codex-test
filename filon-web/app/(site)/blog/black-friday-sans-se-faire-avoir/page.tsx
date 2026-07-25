@@ -82,7 +82,7 @@ export default function ArticlePage() {
           </ul>
 
           <div className="callout">
-            💡 <b>Le raccourci&nbsp;:</b> plutôt que de tout surveiller à la main, demandez à FILON. Il compare le prix
+            <b>Le raccourci&nbsp;:</b> plutôt que de tout surveiller à la main, demandez à FILON. Il compare le prix
             à son <span className="g">historique</span>, tous marchands confondus, et vous dit d&apos;un coup d&apos;œil
             si c&apos;est une vraie affaire — ou du décor.
           </div>
