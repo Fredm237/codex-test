@@ -174,7 +174,9 @@ function RecCard({ c, i }: { c: Card; i: number }) {
   const showImg = c.image && imgOk;
   return (
     <article className={`fa-card${i === 0 ? " win" : ""}`} style={{ ["--d" as string]: `${i * 90}ms` }}>
-      <div className="fa-rank"><span className="medal">{c.medal}</span> {c.rank}</div>
+      {i === 0
+        ? <div className="fa-flag">★ {c.rank}</div>
+        : <div className="fa-rank"><span className="medal">{c.medal}</span> {c.rank}</div>}
       <div className="fa-body">
         <div className={`fa-thumb${showImg ? " has-img" : ""}`} aria-hidden="true">
           {showImg

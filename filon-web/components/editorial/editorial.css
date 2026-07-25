@@ -499,52 +499,62 @@
 .fa-summary b { color: var(--ink); font-weight: 600; }
 .fa-est { color: var(--ink-3); font-size: 13.5px; }
 
-/* ── ranked recommendation cards ── */
-.fa-cards { display: flex; flex-direction: column; gap: 14px; }
-.fa-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-soft);
+/* ── ranked recommendation cards — image-forward, desire-driven ── */
+.fa-cards { display: flex; flex-direction: column; gap: 18px; }
+.fa-card { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden;
+  box-shadow: 0 12px 34px -22px rgba(17,30,50,0.28);
   opacity: 0; transform: translateY(16px); animation: fa-in 0.55s var(--ease-out) forwards; animation-delay: var(--d, 0ms); }
 @keyframes fa-in { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { .fa-card { opacity: 1; transform: none; animation: none; } }
 .fa-card.win { border-color: transparent;
   background: linear-gradient(var(--card), var(--card)) padding-box, var(--wave) border-box;
-  box-shadow: 0 18px 46px -28px rgba(20,120,180,0.5); }
+  box-shadow: 0 24px 58px -26px rgba(20,120,180,0.42); }
+
+/* Warm "best choice" ribbon on the top pick — the reward-highlight iGraal nails */
+.fa-flag { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; font-weight: 800; letter-spacing: 0.04em;
+  text-transform: uppercase; color: #fff; padding: 8px 16px; border-radius: 0 0 var(--r-md) 0;
+  background: linear-gradient(100deg, #ff7a3d, #ff5a6a); }
 .fa-rank { font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase;
-  color: var(--teal-ink); padding: 13px 20px 0; display: flex; align-items: center; gap: 8px; }
+  color: var(--teal-ink); padding: 15px 22px 0; display: flex; align-items: center; gap: 8px; }
 .fa-rank .medal { font-size: 15px; }
-.fa-body { display: grid; grid-template-columns: auto minmax(0,1fr) auto; gap: 18px; padding: 12px 20px 20px; align-items: start; }
-/* Real product photo when available (SerpApi), else a clean, honest category
-   tile — never a glossy pseudo-photo. */
-.fa-thumb { width: 66px; height: 66px; border-radius: var(--r-md); display: grid; place-items: center; font-size: 28px; flex: none; overflow: hidden;
+
+.fa-body { display: grid; grid-template-columns: 126px minmax(0,1fr) auto; gap: 22px; padding: 16px 22px 22px; align-items: center; }
+/* Real product photo when available (SerpApi), else a clean, honest category tile. */
+.fa-thumb { width: 126px; height: 126px; border-radius: var(--r-md); display: grid; place-items: center; font-size: 46px; flex: none; overflow: hidden;
   background: linear-gradient(180deg, #f4f8fc, #eaf1f8); border: 1px solid var(--line); }
 .fa-thumb.has-img { background: #fff; }
-.fa-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; }
-.fa-main h3 { font-family: var(--serif); font-variation-settings: "opsz" 32; font-size: 20px; letter-spacing: -0.01em; margin: 0 0 7px; line-height: 1.2; color: var(--ink); }
+.fa-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; padding: 8px; }
+.fa-main { min-width: 0; }
+.fa-main h3 { font-family: var(--serif); font-variation-settings: "opsz" 40; font-size: 21px; letter-spacing: -0.01em; margin: 0 0 8px; line-height: 1.18; color: var(--ink); }
+/* Price that carries — big and bold, the number that makes people click */
 .fa-price { display: flex; align-items: baseline; gap: 10px; margin-bottom: 11px; }
-.fa-price b { font-family: var(--mono); font-size: 22px; font-weight: 600; letter-spacing: -0.03em; color: var(--ink); }
-.fa-price .mc { font-size: 13px; color: var(--ink-3); }
+.fa-price b { font-family: var(--sans); font-size: 30px; font-weight: 800; letter-spacing: -0.03em; color: var(--ink); }
+.fa-price .mc { font-size: 13.5px; color: var(--ink-3); }
 .fa-specs { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 12.5px; color: var(--ink-2); }
 .fa-specs .g { color: var(--save); font-weight: 600; }
 .fa-specs .hist.baisse { color: var(--save); font-weight: 600; }
-.fa-why { font-size: 13.5px; color: var(--ink-2); margin: 13px 0 0; line-height: 1.5; }
+.fa-why { font-size: 14px; color: var(--ink-2); margin: 13px 0 0; line-height: 1.5; }
 .fa-why b { color: var(--ink); font-weight: 600; }
 .fa-alt { font-size: 12.5px; color: var(--ink-3); margin: 5px 0 0; }
-.fa-aside { display: flex; flex-direction: column; align-items: center; gap: 11px; min-width: 122px; }
+.fa-aside { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 128px; }
 
 /* Score FILON — the signature number */
 .fa-score { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.fa-score .ring { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; position: relative;
+.fa-score .ring { width: 64px; height: 64px; border-radius: 50%; display: grid; place-items: center; position: relative;
   background: conic-gradient(var(--teal-ink) calc(var(--v, 0) * 1%), var(--line) 0); }
 .fa-score .ring::before { content: ""; position: absolute; inset: 6px; border-radius: 50%; background: var(--card); }
-.fa-score .ring span { position: relative; font-family: var(--mono); font-weight: 600; font-size: 19px; letter-spacing: -0.02em; color: var(--ink); }
+.fa-score .ring span { position: relative; font-family: var(--mono); font-weight: 600; font-size: 18px; letter-spacing: -0.02em; color: var(--ink); }
 .fa-score .lab { font-size: 9px; text-transform: uppercase; letter-spacing: 0.09em; color: var(--ink-3); font-weight: 700; }
-.fa-verdict { font-size: 12.5px; font-weight: 600; padding: 6px 13px; border-radius: var(--r-full); white-space: nowrap; }
+.fa-verdict { font-size: 12.5px; font-weight: 700; padding: 6px 13px; border-radius: var(--r-full); white-space: nowrap; }
 .fa-verdict.buy { color: var(--save); background: var(--save-soft); }
 .fa-verdict.wait { color: var(--accent); background: var(--accent-soft); }
-.fa-aside .ed-btn { font-size: 13px; padding: 9px 18px; width: 100%; text-align: center; text-decoration: none; }
+.fa-aside .ed-btn { font-size: 13.5px; padding: 11px 20px; width: 100%; text-align: center; text-decoration: none; }
 
 @media (max-width: 720px) {
-  .fa-body { grid-template-columns: 52px minmax(0,1fr); gap: 14px; }
-  .fa-thumb { width: 52px; height: 52px; font-size: 24px; }
+  .fa-body { grid-template-columns: 88px minmax(0,1fr); gap: 15px; padding: 16px; }
+  .fa-thumb { width: 88px; height: 88px; font-size: 34px; }
+  .fa-main h3 { font-size: 19px; }
+  .fa-price b { font-size: 26px; }
   .fa-aside { grid-column: 1 / -1; flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; gap: 12px; min-width: 0; margin-top: 4px; }
   .fa-score { flex-direction: row; gap: 8px; }
   .fa-score .lab { display: none; }
