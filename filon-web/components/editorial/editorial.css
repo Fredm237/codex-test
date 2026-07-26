@@ -40,6 +40,10 @@
 .ed-nav-mid a:hover { color: var(--ink); }
 @media (max-width: 760px) { .ed-nav-mid { display: none; } }
 .ed-nav-right { display: flex; align-items: center; gap: 12px; }
+.ed-lang { display: inline-flex; align-items: center; gap: 5px; color: var(--ink-3); }
+.ed-lang button { background: none; border: 0; cursor: pointer; color: var(--ink-3); font-weight: 700; font-size: 12.5px; letter-spacing: 0.03em; padding: 2px; transition: color 0.15s; }
+.ed-lang button.on { color: var(--ink); }
+.ed-lang button:hover { color: var(--accent); }
 .ed-nav-cta { font-size: 13.5px; font-weight: 600; padding: 11px 22px; border-radius: var(--r-full); background: var(--wave); color: #fff;
   transition: transform 0.2s var(--ease), filter 0.2s; box-shadow: 0 10px 24px -10px var(--accent); }
 .ed-nav-cta:hover { transform: translateY(-1px); filter: brightness(1.06); }
