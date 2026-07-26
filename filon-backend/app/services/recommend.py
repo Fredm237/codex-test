@@ -296,7 +296,13 @@ def _synth(query: str, budget: float | None) -> dict[str, Any]:
     return {"usage": usage, "emoji": "🛍️", "offers": 24 + seed % 26, "cards": cards, "real": False}
 
 
-async def generate_result(query: str, budget: float | None) -> dict[str, Any]:
+def _currency_for(country: str | None) -> str:
+    return "CHF" if (country or "").lower() == "ch" else "€"
+
+
+async def generate_result(
+    query: str, budget: float | None, country: str | None = None
+) -> dict[str, Any]:
     """Retourne le ``Result`` attendu par le frontend.
 
     Ordre de préférence :
@@ -307,47 +313,52 @@ async def generate_result(query: str, budget: float | None) -> dict[str, Any]:
     """
     from app.services.serpapi_shopping import search_products
 
-    products = await search_products(query, budget)
+    result: dict[str, Any]
+    products = await search_products(query, budget, country=country)
     if products:
-        log.info("Mode données réelles : %d produits SerpApi", len(products))
-        return await _rank_real_products(query, budget, products)
+        log.info("Mode données réelles : %d produits SerpApi (%s)", len(products), country or "be")
+        result = await _rank_real_products(query, budget, products)
+    else:
+        provider = get_router().for_task("reasoning")
+        if provider.name == "mock":
+            log.info("Pas de LLM configuré → synthèse de repli")
+            result = _synth(query, budget)
+        else:
+            budget_txt = f" Budget maximum : {int(budget)} €." if budget else ""
+            messages = [
+                Message(role="system", content=_SYSTEM),
+                Message(role="user", content=f"Besoin : {query}.{budget_txt}"),
+            ]
+            try:
+                raw = await provider.complete_json(messages, temperature=0.4)
+                data = _parse_json(raw)
+                cards_raw = data.get("cards") or []
+                emoji = str(data.get("emoji") or "🛍️")[:4]
+                cards = [_coerce_card(cards_raw[i] if i < len(cards_raw) else {}, i) for i in range(5)]
+                for c in cards:
+                    c["emoji"] = emoji
+                result = {
+                    "usage": str(data.get("usage") or query.strip().lower() or "votre besoin"),
+                    "emoji": emoji,
+                    "offers": 24 + abs(hash(query)) % 26,
+                    "cards": cards,
+                    "real": False,
+                }
+            except Exception as exc:  # pragma: no cover - dépend du réseau/modèle
+                log.warning("LLM indisponible ou réponse invalide (%s) → repli", exc)
+                result = _synth(query, budget)
 
-    provider = get_router().for_task("reasoning")
-    if provider.name == "mock":
-        log.info("Pas de LLM configuré → synthèse de repli")
-        return _synth(query, budget)
-
-    budget_txt = f" Budget maximum : {int(budget)} €." if budget else ""
-    messages = [
-        Message(role="system", content=_SYSTEM),
-        Message(role="user", content=f"Besoin : {query}.{budget_txt}"),
-    ]
-    try:
-        raw = await provider.complete_json(messages, temperature=0.4)
-        data = _parse_json(raw)
-        cards_raw = data.get("cards") or []
-        emoji = str(data.get("emoji") or "🛍️")[:4]
-        cards = [_coerce_card(cards_raw[i] if i < len(cards_raw) else {}, i) for i in range(5)]
-        for c in cards:
-            c["emoji"] = emoji
-        return {
-            "usage": str(data.get("usage") or query.strip().lower() or "votre besoin"),
-            "emoji": emoji,
-            "offers": 24 + abs(hash(query)) % 26,
-            "cards": cards,
-            "real": False,
-        }
-    except Exception as exc:  # pragma: no cover - dépend du réseau/modèle
-        log.warning("LLM indisponible ou réponse invalide (%s) → repli", exc)
-        return _synth(query, budget)
+    result["country"] = (country or "be").lower()
+    result["currency"] = _currency_for(country)
+    return result
 
 
 async def stream_events(
-    query: str, budget: float | None
+    query: str, budget: float | None, country: str | None = None
 ) -> AsyncGenerator[dict[str, Any], None]:
     """Suite d'événements SSE identiques à ceux du frontend (step/step-done/results)."""
     # Lance le vrai travail LLM en tâche de fond pendant que défilent les étapes.
-    task = asyncio.create_task(generate_result(query, budget))
+    task = asyncio.create_task(generate_result(query, budget, country))
     for i in range(len(STEPS)):
         yield {"type": "step", "i": i}
         await asyncio.sleep(0.24)

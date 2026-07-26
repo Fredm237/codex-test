@@ -24,20 +24,32 @@ def _num(v: Any) -> float | None:
         return None
 
 
+# Pays supporté -> (gl Google, hl langue). BE par défaut (fr).
+COUNTRY_MAP: dict[str, tuple[str, str]] = {
+    "be": ("be", "fr"),   # Belgique (francophone)
+    "be-nl": ("be", "nl"),  # Belgique (néerlandophone / Flandre)
+    "fr": ("fr", "fr"),   # France
+    "ch": ("ch", "fr"),   # Suisse (romande)
+    "lu": ("lu", "fr"),   # Luxembourg
+    "nl": ("nl", "nl"),   # Pays-Bas
+}
+
+
 async def search_products(
-    query: str, budget: float | None, *, limit: int = 20
+    query: str, budget: float | None, *, limit: int = 20, country: str | None = None
 ) -> list[dict[str, Any]]:
     """Recherche Google Shopping. Retourne une liste de produits normalisés."""
     s = get_settings()
     if not s.serpapi_api_key:
         return []
 
+    gl, hl = COUNTRY_MAP.get((country or "").lower(), (s.serpapi_gl, s.serpapi_hl))
     params = {
         "engine": "google_shopping",
         "q": query,
         "api_key": s.serpapi_api_key,
-        "gl": s.serpapi_gl,
-        "hl": s.serpapi_hl,
+        "gl": gl,
+        "hl": hl,
         "num": str(limit),
     }
     try:

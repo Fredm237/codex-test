@@ -18,8 +18,8 @@ from app.services.recommend import stream_events
 router = APIRouter(tags=["advise"])
 
 
-async def _sse(query: str, budget: float | None) -> AsyncGenerator[str, None]:
-    async for event in stream_events(query, budget):
+async def _sse(query: str, budget: float | None, country: str | None) -> AsyncGenerator[str, None]:
+    async for event in stream_events(query, budget, country):
         yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
 
@@ -27,9 +27,10 @@ async def _sse(query: str, budget: float | None) -> AsyncGenerator[str, None]:
 async def advise_stream(
     q: str = Query(..., min_length=1, description="Besoin en langage naturel."),
     budget: float | None = Query(default=None, description="Budget max en euros."),
+    country: str | None = Query(default=None, description="Pays : be, be-nl, fr, ch, lu, nl."),
 ) -> StreamingResponse:
     return StreamingResponse(
-        _sse(q, budget),
+        _sse(q, budget, country),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
