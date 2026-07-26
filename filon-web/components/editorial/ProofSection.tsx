@@ -74,6 +74,25 @@ function PriceCountUp() {
   return <span ref={ref} className="ed-proof-total-val">{txt}</span>;
 }
 
+/** Bannière vivante : vidéo d'unboxing en boucle, poster + repli sans animation. */
+function LifeBanner() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    setReduced(window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  }, []);
+  return (
+    <Reveal className="ed-proof-life">
+      {reduced ? (
+        <img src="/img/proof-unboxing.webp" alt="" loading="lazy" />
+      ) : (
+        <video autoPlay muted loop playsInline poster="/img/proof-unboxing.webp" aria-hidden="true">
+          <source src="/video/unboxing.mp4" type="video/mp4" />
+        </video>
+      )}
+    </Reveal>
+  );
+}
+
 export function ProofSection() {
   return (
     <section className="ed-band ed-proof" id="preuves">
@@ -114,9 +133,7 @@ export function ProofSection() {
           </p>
         </Reveal>
 
-        <Reveal className="ed-proof-life">
-          <img src="/img/proof-unboxing.webp" alt="" loading="lazy" />
-        </Reveal>
+        <LifeBanner />
 
         <div className="ed-proof-price">
           <Reveal className="ed-proof-price-copy">
