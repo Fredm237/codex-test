@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { primaryNav } from "@/lib/site";
 import { BrandLogo } from "./Brand";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { NAV_KEYS, useLocale } from "@/lib/i18n";
 
-const DESKTOP = primaryNav.slice(0, 5);
+const DESKTOP = NAV_KEYS.slice(0, 5);
 
 export function EditorialNav() {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
+  const { t } = useLocale();
 
   useEffect(() => {
     const el = ref.current;
@@ -41,13 +43,14 @@ export function EditorialNav() {
           <div className="ed-nav-mid">
             {DESKTOP.map((n) => (
               <a key={n.href} href={n.href}>
-                {n.label}
+                {t(n.key)}
               </a>
             ))}
           </div>
           <div className="ed-nav-right">
+            <LanguageSwitcher />
             <a className="ed-nav-cta" href="/recherche">
-              Essayer le copilote
+              {t("cta.try")}
             </a>
             <button
               className="ed-burger"
@@ -65,14 +68,15 @@ export function EditorialNav() {
           not trapped by the header's backdrop-filter containing block. */}
       <div className={`ed-mobile ${open ? "show" : ""}`} aria-hidden={!open}>
         <nav className="ed-mobile-nav">
-          {primaryNav.map((n) => (
+          {NAV_KEYS.map((n) => (
             <a key={n.href} href={n.href} onClick={() => setOpen(false)}>
-              {n.label}
+              {t(n.key)}
             </a>
           ))}
           <a className="ed-btn wave" href="/recherche" onClick={() => setOpen(false)} style={{ marginTop: 12 }}>
-            Essayer le copilote
+            {t("cta.try")}
           </a>
+          <div style={{ marginTop: 16 }}><LanguageSwitcher /></div>
         </nav>
       </div>
     </>
