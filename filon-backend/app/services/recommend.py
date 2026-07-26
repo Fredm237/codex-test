@@ -20,6 +20,7 @@ from typing import Any, AsyncGenerator
 from app.core.logging import get_logger
 from app.llm.base import Message
 from app.llm.router import get_router
+from app.services import awin
 
 log = get_logger("recommend")
 
@@ -194,7 +195,8 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
         "name": prod["name"],
         "emoji": emoji,
         "image": prod.get("image"),
-        "link": prod.get("link"),
+        # Lien affilié Awin si le marchand est un annonceur inscrit, sinon lien direct.
+        "link": awin.affiliate_link(prod.get("link"), prod.get("merchant")),
         "price": int(prod["price"]),
         "merchant": prod["merchant"],
         "delivery": prod.get("delivery") or "voir marchand",
@@ -214,6 +216,9 @@ async def _rank_real_products(
     query: str, budget: float | None, products: list[dict[str, Any]]
 ) -> dict[str, Any]:
     """Fait classer/annoter par le LLM une liste de produits réels."""
+    # Rafraîchit (si besoin) la liste des annonceurs Awin inscrits, pour pouvoir
+    # transformer les liens produits en liens affiliés.
+    await awin.ensure_advertisers()
     provider = get_router().for_task("reasoning")
     listing = [
         {"index": i, "name": p["name"], "price": p["price"], "merchant": p["merchant"]}

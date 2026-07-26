@@ -67,6 +67,14 @@ class Settings(BaseSettings):
     serpapi_gl: str = Field(default="be")   # pays : Belgique
     serpapi_hl: str = Field(default="fr")   # langue : français
 
+    # Affiliation Awin — l'ID éditeur n'est pas secret (il figure dans les liens).
+    # Le token API, lui, est un SECRET : à définir en variable d'environnement,
+    # jamais dans le code (AWIN_API_TOKEN).
+    awin_publisher_id: str = Field(default="3005443")
+    awin_api_token: str | None = Field(default=None)
+    awin_api_base: str = Field(default="https://api.awin.com")
+    awin_clickref: str = Field(default="filon")
+
 
 @lru_cache
 def get_settings() -> Settings:
