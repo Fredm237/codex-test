@@ -76,11 +76,12 @@
     return String(str).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   }
 
-  const LOGO = `<svg viewBox="0 0 40 40" width="26" height="26" aria-hidden="true">
-    <defs><linearGradient id="${PREFIX}-g" x1="0" y1="0" x2="40" y2="40">
-      <stop stop-color="#18beb0"/><stop offset="1" stop-color="#1e75c9"/></linearGradient></defs>
-    <rect x="1.5" y="1.5" width="37" height="37" rx="11" fill="url(#${PREFIX}-g)"/>
-    <path d="M14 11h13v3.4H17.4v6.1h8v3.4h-8V29H14z" fill="#fff"/></svg>`;
+  const LOGO = `<svg viewBox="0 0 240 240" width="26" height="26" aria-hidden="true">
+    <defs><linearGradient id="${PREFIX}-g" gradientUnits="userSpaceOnUse" x1="95" y1="166" x2="156" y2="78">
+      <stop stop-color="#86D1B0"/><stop offset="1" stop-color="#8FB9E6"/></linearGradient></defs>
+    <rect x="8" y="8" width="224" height="224" rx="49.28" fill="#26364B"/>
+    <g fill="none" stroke="url(#${PREFIX}-g)" stroke-width="17" stroke-linecap="round" stroke-linejoin="round"><path d="M95 78 L95 166"/><path d="M95 78 L156 78"/><path d="M95 121 L145 121"/></g>
+    <circle cx="156" cy="78" r="10.5" fill="#EF9F27"/></svg>`;
 
   const CHECKS = [
     ["Meilleur marchand", "des dizaines de vendeurs comparés en direct"],

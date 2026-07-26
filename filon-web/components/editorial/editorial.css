@@ -1,5 +1,14 @@
 /* Editorial component styles — tokens live in globals.css */
 
+/* Wordmark FILON — Poppins SemiBold auto-hébergée (aucune dépendance externe). */
+@font-face {
+  font-family: "Poppins FILON";
+  src: url("/fonts/poppins-600.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 .ed-btn {
   font-family: var(--sans); font-size: 15px; font-weight: 600; padding: 15px 28px;
   border-radius: var(--r-full); cursor: pointer; border: 1px solid var(--ink);
@@ -22,7 +31,10 @@
 .ed-header:not(.stuck) { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .ed-header.hide { transform: translateY(-102%); }
 .ed-nav { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad-x); display: flex; align-items: center; justify-content: space-between; height: 70px; }
-.ed-brand { font-size: 20px; font-weight: 600; letter-spacing: 0.17em; }
+.ed-brand { display: inline-flex; align-items: center; gap: 10px; color: #26364B; }
+.ed-brand-mark { display: block; flex: none; }
+.ed-brand-word { font-family: "Poppins FILON", var(--sans); font-weight: 600; font-size: 20px; letter-spacing: 0.14em; color: #26364B; line-height: 1; }
+.ed-foot .ed-brand-word { font-size: 18px; }
 .ed-nav-mid { display: flex; gap: 30px; }
 .ed-nav-mid a { font-size: 13.5px; color: var(--ink-2); letter-spacing: 0.01em; transition: color 0.2s; }
 .ed-nav-mid a:hover { color: var(--ink); }
