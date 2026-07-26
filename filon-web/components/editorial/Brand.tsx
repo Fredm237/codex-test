@@ -5,19 +5,18 @@ export function BrandMark({ size = 30 }: { size?: number }) {
   return (
     <svg className="ed-brand-mark" width={size} height={size} viewBox="0 0 240 240" aria-hidden="true" focusable="false">
       <defs>
-        <linearGradient id="filon-mb" x1="0" y1="1" x2="1" y2="0">
+        <linearGradient id="filon-mb" gradientUnits="userSpaceOnUse" x1="95" y1="166" x2="156" y2="78">
           <stop offset="0" stopColor="#86D1B0" />
           <stop offset="1" stopColor="#8FB9E6" />
         </linearGradient>
       </defs>
       <rect x="8" y="8" width="224" height="224" rx="49.28" fill="#26364B" />
-      <g transform="translate(62,60) scale(1.16)">
-        <g fill="none" stroke="url(#filon-mb)" strokeWidth="13" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M34 82 L34 20 L72 20" />
-          <path d="M34 50 L60 50" />
-        </g>
-        <circle cx="72" cy="20" r="6.5" fill="#EF9F27" />
+      <g fill="none" stroke="url(#filon-mb)" strokeWidth="17" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M95 78 L95 166" />
+        <path d="M95 78 L156 78" />
+        <path d="M95 121 L145 121" />
       </g>
+      <circle cx="156" cy="78" r="10.5" fill="#EF9F27" />
     </svg>
   );
 }
