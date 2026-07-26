@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "FILON — le vrai prix, avant d'acheter",
   "short_name": "FILON",
-  "description": "Sur une fiche produit, FILON repère l'article et vous emmène au vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis.",
+  "description": "FILON trouve le vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis sur chaque fiche produit.",
   "version": "1.0.0",
   "default_locale": "fr",
   "icons": {

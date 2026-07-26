@@ -18,7 +18,7 @@ dans `filon-web/lib/config.ts` (`CHROME_STORE_URL`) et **tous** les boutons
 **Nom** : FILON — le vrai prix, avant d'acheter
 
 **Description courte** (132 car. max) :
-> FILON repère le produit sur la page et vous emmène au vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis.
+> FILON trouve le vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis sur chaque fiche produit.
 
 **Description longue** :
 > FILON est votre copilote d'achat. Sur une fiche produit (Amazon, bol.com, Coolblue, MediaMarkt, Fnac, Cdiscount, Back Market…), FILON repère l'article et vous emmène en un clic vers l'analyse complète : le meilleur marchand du moment, l'équivalent reconditionné garanti quand il existe, le code promo vérifié et le cashback maximal — réunis en un seul « vrai prix ».

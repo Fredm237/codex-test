@@ -4,7 +4,7 @@
     "description": "Nom de l'extension"
   },
   "extDescription": {
-    "message": "Sur une fiche produit, FILON repère l'article et vous emmène au vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis.",
+    "message": "FILON trouve le vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis sur chaque fiche produit.",
     "description": "Description de l'extension"
   }
 }
