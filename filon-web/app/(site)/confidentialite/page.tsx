@@ -53,6 +53,22 @@ export default function ConfidentialitePage() {
             agrégées). Aucun bandeau de consentement n&apos;est donc requis pour ce traitement.
           </p>
 
+          <h2>L&apos;extension de navigateur FILON</h2>
+          <p>
+            Sur la fiche produit d&apos;un marchand supporté, l&apos;extension lit uniquement le <b>nom du
+            produit affiché</b> (contenu de la page) afin de vous proposer FILON. Ce nom n&apos;est <b>ni
+            stocké, ni revendu, ni transmis en arrière-plan</b> : il n&apos;est envoyé à FILON que
+            <b> lorsque vous cliquez</b> pour lancer la comparaison, exactement comme si vous tapiez ce produit
+            dans une recherche.
+          </p>
+          <p>
+            L&apos;autorisation <b>activeTab</b> n&apos;est utilisée que si vous cliquez sur « Analyser la
+            page » (lecture du titre de l&apos;onglet actif). L&apos;autorisation <b>storage</b> sert
+            uniquement à mémoriser localement que vous avez fermé le panneau, pour ne pas le rouvrir pendant
+            quelques heures. L&apos;extension ne contient <b>aucune télémétrie</b>, ne suit pas votre
+            navigation et n&apos;accède qu&apos;aux marchands supportés.
+          </p>
+
           <h2>Cookies</h2>
           <p>
             Le site ne dépose <b>pas de cookie de suivi publicitaire</b>. Seuls d&apos;éventuels cookies strictement
