@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
 import { IcChat } from "@/components/editorial/icons";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/intelligence",
@@ -10,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
     "Le prix le plus bas n'est pas toujours le meilleur achat. FILON regarde ce qui compte vraiment : le bon produit, au bon moment, qui dure.",
 });
 
-export default function IntelligencePage() {
+function IntelligenceFR() {
   return (
     <>
       <ContentHero
@@ -19,7 +20,6 @@ export default function IntelligencePage() {
         intro="Le prix le plus bas n'est pas toujours le meilleur achat. FILON regarde ce qui compte vraiment, pour vous éviter les mauvaises surprises."
         breadcrumb={[{ name: "Intelligence", path: "/intelligence" }]}
       />
-
       <ProseBlock heading={<>Le bon achat, pas juste le bon <span className="it">prix</span>.</>}>
         <p>
           Un bon achat, c&apos;est le bon produit, au bon moment, qui dure. FILON tient compte de tout ça, à votre place,
@@ -29,7 +29,6 @@ export default function IntelligencePage() {
           Vous recevez une réponse simple. Derrière, beaucoup de choses ont été pesées pour vous.
         </p>
       </ProseBlock>
-
       <section className="ed-band alt">
         <div className="ed-wrap">
           <div className="ed-prose" style={{ marginBottom: 28 }}>
@@ -48,8 +47,52 @@ export default function IntelligencePage() {
           />
         </div>
       </section>
-
       <ClosingCta title={<>L&apos;intelligence au service de <span className="it">votre</span> achat.</>} sub="Une réponse claire, à chaque fois. Et gratuite." />
     </>
   );
+}
+
+function IntelligenceNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="De FILON-intelligentie"
+        title={<>Verder dan de <span className="it">prijs</span>.</>}
+        intro="De laagste prijs is niet altijd de beste aankoop. FILON kijkt naar wat echt telt, om je slechte verrassingen te besparen."
+        breadcrumb={[{ name: "Intelligentie", path: "/intelligence" }]}
+      />
+      <ProseBlock heading={<>De juiste aankoop, niet alleen de juiste <span className="it">prijs</span>.</>}>
+        <p>
+          Een goede aankoop is het juiste product, op het juiste moment, dat meegaat. FILON houdt met dat alles rekening,
+          in jouw plaats, in enkele seconden.
+        </p>
+        <p>
+          Jij krijgt een eenvoudig antwoord. Daarachter is veel voor je afgewogen.
+        </p>
+      </ProseBlock>
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <span className="eyebrow" style={{ display: "block", marginBottom: 12 }}>Waar FILON voor jou naar kijkt</span>
+            <h2 style={{ maxWidth: "20ch" }}>Veel meer dan een prijs.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "◷", h: "Het juiste moment", p: "Een bodemprijs, gemiddeld, of opgeblazen. Je weet of je moet kopen of wachten." },
+              { n: "★", h: "Betrouwbaarheid", p: "Een product dat meegaat, met echte service erachter." },
+              { n: "⌛", h: "De levensduur", p: "Hoelang het echt meegaat, in gebruik." },
+              { n: "€", h: "De echte kost", p: "Niet alleen de getoonde prijs, maar wat het op termijn kost." },
+              { n: <IcChat />, h: "Reviews, helder", p: "Duizenden reviews samengevat in één antwoord. Het signaal, niet de ruis." },
+              { n: "✓", h: "Het beste alternatief", p: "Nieuw, refurbished, elders : de beste optie, wanneer die bestaat." },
+            ]}
+          />
+        </div>
+      </section>
+      <ClosingCta title={<>Intelligentie ten dienste van <span className="it">jouw</span> aankoop.</>} sub="Een duidelijk antwoord, elke keer. En gratis." />
+    </>
+  );
+}
+
+export default function IntelligencePage() {
+  return <Localized fr={<IntelligenceFR />} nl={<IntelligenceNL />} />;
 }
