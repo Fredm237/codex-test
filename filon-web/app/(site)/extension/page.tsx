@@ -28,6 +28,8 @@ export default function ExtensionPage() {
         title={<>Votre copilote d&apos;achat, <span className="it">partout</span>.</>}
         intro="L'extension FILON est présente sur chaque site marchand. Au moment où vous regardez un produit, elle vous dit s'il est moins cher ailleurs, quel cashback l'accompagne, s'il existe une alternative reconditionnée, et si c'est le bon moment pour acheter."
         breadcrumb={[{ name: "Extension", path: "/extension" }]}
+        photo="/img/video-extension-poster.webp"
+        video="/video/phone-scroll.mp4"
       />
 
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>

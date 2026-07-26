@@ -382,7 +382,8 @@
   background-repeat: no-repeat; }
 .ed-content-hero h1 { font-family: var(--serif); font-variation-settings: "opsz" 100; font-size: clamp(40px, 7vw, 84px); letter-spacing: -0.02em; line-height: 0.98; max-width: 15ch; }
 .ed-content-photo { margin-top: clamp(28px, 4vw, 44px); border-radius: var(--r-lg); overflow: hidden; line-height: 0; box-shadow: 0 22px 54px -32px rgba(17,30,50,0.35); }
-.ed-content-photo img { width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; object-position: center; display: block; }
+.ed-content-photo img,
+.ed-content-photo video { width: 100%; aspect-ratio: 16 / 9; height: auto; object-fit: cover; object-position: center; display: block; }
 .ed-content-hero .intro { font-size: clamp(17px, 2vw, 21px); color: var(--ink-2); max-width: 56ch; margin-top: 22px; line-height: 1.5; }
 .ed-prose { max-width: 64ch; }
 .ed-prose h2 { font-family: var(--serif); font-variation-settings: "opsz" 60; font-size: clamp(28px, 4vw, 48px); letter-spacing: -0.012em; margin-bottom: 20px; line-height: 1.05; }
