@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { primaryNav, site } from "@/lib/site";
+import { primaryNav } from "@/lib/site";
+import { BrandLogo } from "./Brand";
 
 const DESKTOP = primaryNav.slice(0, 5);
 
@@ -36,9 +37,7 @@ export function EditorialNav() {
     <>
       <header className="ed-header" ref={ref}>
         <nav className="ed-nav">
-          <a className="ed-brand" href="/" onClick={() => setOpen(false)}>
-            {site.name}
-          </a>
+          <BrandLogo onClick={() => setOpen(false)} />
           <div className="ed-nav-mid">
             {DESKTOP.map((n) => (
               <a key={n.href} href={n.href}>

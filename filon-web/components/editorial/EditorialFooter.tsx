@@ -1,5 +1,6 @@
 import { site } from "@/lib/site";
 import { Newsletter } from "./Forms";
+import { BrandLogo } from "./Brand";
 
 const LINKS = [
   { label: "Assistant IA", href: "/recherche" },
@@ -42,7 +43,7 @@ export function EditorialFooter() {
           <Newsletter />
         </div>
         <div className="ed-foot">
-          <span className="ed-brand" style={{ fontSize: 16 }}>{site.name}</span>
+          <BrandLogo as="span" markSize={26} />
           <div className="ed-foot-links">
             {LINKS.map((l) => (
               <a key={l.href} href={l.href}>{l.label}</a>
