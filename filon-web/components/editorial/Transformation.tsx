@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLocale } from "@/lib/i18n";
 
 const FROM = 499;
 const TO = 365;
@@ -8,15 +9,32 @@ const TO = 365;
 // Discount sources orbit the LOWER half of the orb (never near the title) and
 // get absorbed as you scroll, morphing the price to the real one.
 const CHIPS = [
-  { label: "Cashback", v: "−6,5 %", ang: 22, r: 1.0, tIn: 0.18, tSpan: 0.16 },
-  { label: "Code promo", v: "−15 €", ang: 90, r: 1.12, tIn: 0.4, tSpan: 0.16 },
-  { label: "Reconditionné", v: "−94 €", ang: 158, r: 1.0, tIn: 0.62, tSpan: 0.16 },
+  { id: "cashback", v: "−6,5 %", ang: 22, r: 1.0, tIn: 0.18, tSpan: 0.16 },
+  { id: "promo", v: "−15 €", ang: 90, r: 1.12, tIn: 0.4, tSpan: 0.16 },
+  { id: "refurb", v: "−94 €", ang: 158, r: 1.0, tIn: 0.62, tSpan: 0.16 },
 ];
+
+const L = {
+  fr: {
+    eye: "Le même achat. Deux prix.",
+    h1: "Le prix affiché n'est pas le ", h2: "vrai", h3: " prix.",
+    cap: "votre prix réel · −134 € · le filon",
+    labels: { cashback: "Cashback", promo: "Code promo", refurb: "Reconditionné" } as Record<string, string>,
+  },
+  nl: {
+    eye: "Dezelfde aankoop. Twee prijzen.",
+    h1: "De getoonde prijs is niet de ", h2: "echte", h3: " prijs.",
+    cap: "je echte prijs · −134 € · gevonden",
+    labels: { cashback: "Cashback", promo: "Kortingscode", refurb: "Refurbished" } as Record<string, string>,
+  },
+};
 
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
 
 export function Transformation() {
+  const { locale } = useLocale();
+  const x = L[locale];
   const secRef = useRef<HTMLElement>(null);
   const priceRef = useRef<HTMLSpanElement>(null);
   const coreRef = useRef<HTMLDivElement>(null);
@@ -82,26 +100,26 @@ export function Transformation() {
     <section className="ed-gravity" id="transform" ref={secRef}>
       <div className="pin">
         <div className="ed-grav-head">
-          <span className="eyebrow">Le même achat. Deux prix.</span>
+          <span className="eyebrow">{x.eye}</span>
           <h2>
-            Le prix affiché n&apos;est pas le <span className="it">vrai</span> prix.
+            {x.h1}<span className="it">{x.h2}</span>{x.h3}
           </h2>
         </div>
 
         <div className="ed-grav-stage" aria-hidden="true">
           <div className="core" ref={coreRef}>
             <span className="price mono" ref={priceRef}>499 €</span>
-            <span className="cap" ref={capRef}>votre prix réel · −134 € · le filon</span>
+            <span className="cap" ref={capRef}>{x.cap}</span>
           </div>
           {CHIPS.map((c, i) => (
             <div
               className="ed-grav-chip"
-              key={c.label}
+              key={c.id}
               ref={(el) => {
                 chipRefs.current[i] = el;
               }}
             >
-              <span className="l">{c.label}</span>
+              <span className="l">{x.labels[c.id]}</span>
               <b>{c.v}</b>
             </div>
           ))}

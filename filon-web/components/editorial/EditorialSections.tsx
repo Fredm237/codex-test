@@ -1,4 +1,7 @@
+"use client";
+
 import { Reveal } from "./Reveal";
+import { useLocale } from "@/lib/i18n";
 
 const STEP_ICONS = [
   // Reconnaît le produit — cadre de scan
@@ -22,33 +25,67 @@ const STEP_ICONS = [
   </svg>,
 ];
 
-const STEPS = [
-  ["Il reconnaît le produit", "Sur n'importe quelle page, il comprend ce que vous regardez."],
-  ["Il regarde partout", "En une seconde, tout le marché passé au crible."],
-  ["Il tranche", "Un chiffre : votre vrai prix. Une réponse : acheter, ou attendre."],
-];
-
-const PLEDGE = [
-  ["01", "De votre côté.", "Aucune marque ne peut acheter sa place dans un conseil FILON."],
-  ["02", "Sans publicité.", "Rien ne vient troubler la réponse que vous recevez."],
-  ["03", "Vos données restent les vôtres.", "Pas de profil publicitaire, pas de revente. RGPD par défaut."],
-  ["04", "Gratuit, pour de vrai.", "Aucune carte, aucun abonnement. Vous ne payez jamais."],
-];
+const L = {
+  fr: {
+    mIdx: "3 étapes",
+    mH1: "Trois secondes entre vous et ", mH2: "le meilleur prix",
+    steps: [
+      ["Il reconnaît le produit", "Sur n'importe quelle page, il comprend ce que vous regardez."],
+      ["Il regarde partout", "En une seconde, tout le marché passé au crible."],
+      ["Il tranche", "Un chiffre : votre vrai prix. Une réponse : acheter, ou attendre."],
+    ],
+    tEye: "Notre principe",
+    tH1: "De votre côté. ", tH2: "Uniquement.",
+    tP1: "FILON travaille pour vous, pas pour une marque. Ce qu'il vous montre, c'est ce qui est vraiment le mieux pour vous. Rien d'autre n'entre en jeu.",
+    tP2: "La confiance ne se déclare pas. Elle se prouve, à chaque conseil.",
+    pledge: [
+      ["01", "De votre côté.", "Aucune marque ne peut acheter sa place dans un conseil FILON."],
+      ["02", "Sans publicité.", "Rien ne vient troubler la réponse que vous recevez."],
+      ["03", "Vos données restent les vôtres.", "Pas de profil publicitaire, pas de revente. RGPD par défaut."],
+      ["04", "Gratuit, pour de vrai.", "Aucune carte, aucun abonnement. Vous ne payez jamais."],
+    ],
+    cEye: "Ne payez plus jamais trop cher",
+    cH1: "Demandez à FILON ", cH2: "avant d'acheter.",
+  },
+  nl: {
+    mIdx: "3 stappen",
+    mH1: "Drie seconden tussen jou en ", mH2: "de beste prijs",
+    steps: [
+      ["Hij herkent het product", "Op elke pagina begrijpt hij wat je bekijkt."],
+      ["Hij kijkt overal", "In één seconde de hele markt doorzocht."],
+      ["Hij beslist", "Eén cijfer: je echte prijs. Eén antwoord: kopen of wachten."],
+    ],
+    tEye: "Ons principe",
+    tH1: "Aan jouw kant. ", tH2: "Enkel dat.",
+    tP1: "FILON werkt voor jou, niet voor een merk. Wat hij je toont, is wat echt het beste is voor jou. Niets anders speelt mee.",
+    tP2: "Vertrouwen verklaar je niet. Je bewijst het, bij elk advies.",
+    pledge: [
+      ["01", "Aan jouw kant.", "Geen enkel merk kan zijn plaats kopen in een FILON-advies."],
+      ["02", "Zonder reclame.", "Niets verstoort het antwoord dat je krijgt."],
+      ["03", "Je gegevens blijven van jou.", "Geen advertentieprofiel, geen doorverkoop. AVG standaard."],
+      ["04", "Echt gratis.", "Geen kaart, geen abonnement. Je betaalt nooit."],
+    ],
+    cEye: "Betaal nooit meer te veel",
+    cH1: "Vraag het aan FILON ", cH2: "voordat je koopt.",
+  },
+};
 
 export function Method() {
+  const { locale } = useLocale();
+  const x = L[locale];
   return (
     <section className="ed-band" id="comment">
       <div className="ed-wrap">
         <Reveal>
           <div className="ed-lead">
-            <span className="idx">3 étapes</span>
+            <span className="idx">{x.mIdx}</span>
             <h2>
-              Trois secondes entre vous et <span className="it">le meilleur prix</span>.
+              {x.mH1}<span className="it">{x.mH2}</span>.
             </h2>
           </div>
         </Reveal>
         <div className="ed-steps">
-          {STEPS.map(([h, p], i) => (
+          {x.steps.map(([h, p], i) => (
             <Reveal className="ed-step" key={h} style={{ transitionDelay: `${i * 90}ms` }}>
               <span className="ed-step-ico">{STEP_ICONS[i]}</span>
               <h3>{h}</h3>
@@ -62,26 +99,23 @@ export function Method() {
 }
 
 export function Transparency() {
+  const { locale } = useLocale();
+  const x = L[locale];
   return (
     <section className="ed-band alt" id="transparence">
       <div className="ed-wrap">
         <div className="ed-mgrid">
           <Reveal className="ed-manifesto">
-            <span className="eyebrow" style={{ display: "block", marginBottom: 24 }}>Notre principe</span>
+            <span className="eyebrow" style={{ display: "block", marginBottom: 24 }}>{x.tEye}</span>
             <h2>
-              De votre côté. <span className="it">Uniquement.</span>
+              {x.tH1}<span className="it">{x.tH2}</span>
             </h2>
           </Reveal>
           <Reveal className="ed-mbody">
-            <p>
-              FILON travaille pour vous, pas pour une marque. Ce qu&apos;il vous montre, c&apos;est ce qui est vraiment le
-              mieux pour vous. Rien d&apos;autre n&apos;entre en jeu.
-            </p>
-            <p>
-              La confiance ne se déclare pas. Elle se prouve, à chaque conseil.
-            </p>
+            <p>{x.tP1}</p>
+            <p>{x.tP2}</p>
             <div className="ed-pledge">
-              {PLEDGE.map(([n, b, t]) => (
+              {x.pledge.map(([n, b, t]) => (
                 <div key={n}>
                   <span>{n}</span>
                   <p><b>{b}</b> {t}</p>
@@ -96,16 +130,18 @@ export function Transparency() {
 }
 
 export function Closing() {
+  const { locale, t } = useLocale();
+  const x = L[locale];
   return (
     <section className="ed-closing" id="installer">
       <div className="ed-wrap">
         <Reveal>
-          <span className="eyebrow" style={{ display: "block", marginBottom: 26 }}>Ne payez plus jamais trop cher</span>
+          <span className="eyebrow" style={{ display: "block", marginBottom: 26 }}>{x.cEye}</span>
           <h2>
-            Demandez à FILON <span className="it">avant d&apos;acheter.</span>
+            {x.cH1}<span className="it">{x.cH2}</span>
           </h2>
           <a className="ed-btn dark" href="/recherche" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
-            Essayer le copilote
+            {t("cta.try")}
           </a>
         </Reveal>
       </div>
