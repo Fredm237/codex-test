@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
 import { FaqBlock } from "@/components/editorial/Faq";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/reconditionne",
@@ -10,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
     "Neuf ou reconditionné ? FILON compare le prix neuf au reconditionné équivalent (grade vérifié, garanti) et calcule l'économie réelle, meilleur pour votre budget et pour la planète.",
 });
 
-const FAQ = [
+const FAQ_FR = [
   { q: "Un produit reconditionné, est-ce fiable ?", a: "Oui, quand il est bien choisi. FILON ne retient que du reconditionné vérifié, chez des vendeurs certifiés et sous garantie. Vous voyez la garantie et l'économie avant de décider." },
   { q: "Quelle économie peut-on vraiment espérer ?", a: "Un smartphone haut de gamme reconditionné se négocie souvent 40 % sous le neuf. En ajoutant un cashback partenaire (3 à 8 %), l'économie totale atteint 45 à 50 %. FILON calcule ce cumul pour vous." },
   { q: "Que veulent dire les grades A, A+, etc. ?", a: "Le grade décrit l'état esthétique : un grade A+ est quasi neuf, un grade B présente de légères marques d'usage sans impact sur le fonctionnement. FILON affiche le grade pour chaque offre afin que vous choisissiez en connaissance de cause." },
@@ -18,7 +19,15 @@ const FAQ = [
   { q: "Puis-je cumuler reconditionné et cashback ?", a: "Absolument, et c'est là que FILON brille : il additionne le prix reconditionné le plus bas, le cashback le plus élevé et un éventuel code promo pour afficher votre prix réel final." },
 ];
 
-export default function ReconditionnePage() {
+const FAQ_NL = [
+  { q: "Is een refurbished product betrouwbaar ?", a: "Ja, als het goed gekozen is. FILON weerhoudt alleen geverifieerd refurbished, bij gecertificeerde verkopers en met garantie. Je ziet de garantie en de besparing voordat je beslist." },
+  { q: "Hoeveel kun je echt besparen ?", a: "Een high-end smartphone gaat refurbished vaak 40 % onder nieuw. Met een partner-cashback (3 tot 8 %) loopt de totale besparing op tot 45 à 50 %. FILON telt dat samen voor jou." },
+  { q: "Wat betekenen de grades A, A+, enz. ?", a: "De grade beschrijft de esthetische staat: A+ is zo goed als nieuw, grade B vertoont lichte gebruikssporen zonder invloed op de werking. FILON toont de grade bij elke aanbieding zodat je met kennis van zaken kiest." },
+  { q: "Is refurbished echt milieuvriendelijker ?", a: "Ja: het leven van een toestel verlengen vermijdt de productie van een nieuw toestel, dat veel grondstoffen en energie verbruikt. Het is een van de doeltreffendste gebaren om de voetafdruk van je tech-aankopen te verkleinen." },
+  { q: "Kan ik refurbished en cashback combineren ?", a: "Absoluut, en daar blinkt FILON in uit: het telt de laagste refurbished-prijs, de hoogste cashback en een eventuele kortingscode op om je echte eindprijs te tonen." },
+];
+
+function ReconditionneFR() {
   return (
     <>
       <ContentHero
@@ -28,7 +37,6 @@ export default function ReconditionnePage() {
         breadcrumb={[{ name: "Reconditionné", path: "/reconditionne" }]}
         photo="/img/page-reconditionne.webp"
       />
-
       <ProseBlock heading={<>Neuf ou reconditionné ? FILON <span className="it">tranche</span> pour vous.</>}>
         <p>
           Comparer soi-même le neuf et le reconditionné, c&apos;est fastidieux : trouver l&apos;équivalent exact, vérifier
@@ -39,7 +47,6 @@ export default function ReconditionnePage() {
           garanti</b>, et <b>votre vrai prix</b>. Vous décidez en un coup d&apos;œil, sans y passer votre soirée.
         </p>
       </ProseBlock>
-
       <section className="ed-band alt">
         <div className="ed-wrap">
           <div className="ed-prose" style={{ marginBottom: 28 }}>
@@ -54,9 +61,53 @@ export default function ReconditionnePage() {
           />
         </div>
       </section>
-
-      <FaqBlock items={FAQ} eyebrow="Reconditionné · FAQ" title="Le reconditionné, en toute confiance." />
+      <FaqBlock items={FAQ_FR} eyebrow="Reconditionné · FAQ" title="Le reconditionné, en toute confiance." />
       <ClosingCta title={<>Payez le <span className="it">juste</span> prix. Pas le prix neuf.</>} sub="FILON compare neuf et reconditionné à chaque achat, gratuitement." />
     </>
   );
+}
+
+function ReconditionneNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Refurbished"
+        title={<>Hetzelfde product. Tot <span className="it">50 %</span> goedkoper.</>}
+        intro="Waarom de volle nieuwprijs betalen als het gelijkwaardige refurbished toestel, geverifieerd en met garantie, vaak 40 % minder kost ? FILON vergelijkt beide en telt de cashback erbij om je echte prijs te tonen — beter voor je budget, en voor de planeet."
+        breadcrumb={[{ name: "Refurbished", path: "/reconditionne" }]}
+        photo="/img/page-reconditionne.webp"
+      />
+      <ProseBlock heading={<>Nieuw of refurbished ? FILON <span className="it">beslist</span> voor jou.</>}>
+        <p>
+          Zelf nieuw en refurbished vergelijken is bewerkelijk : het exacte equivalent vinden, de garantie en de
+          verkoper checken, en dan de echte besparing berekenen.
+        </p>
+        <p>
+          FILON doet het voor jou, in één seconde. Het toont je het <b>nieuwe toestel</b>, het <b>gelijkwaardige
+          refurbished met garantie</b>, en <b>je echte prijs</b>. Jij beslist in één oogopslag, zonder er je avond aan
+          te besteden.
+        </p>
+      </ProseBlock>
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "20ch" }}>Wat FILON controleert voordat het je iets aanbeveelt.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "✓", h: "Geverifieerde grade", p: "De esthetische en functionele staat wordt duidelijk getoond (A+, A, B…)." },
+              { n: "✓", h: "Echte garantie", p: "12 tot 24 maanden volgens de verkoper, nooit refurbished zonder vangnet." },
+              { n: "✓", h: "Becijferde besparing", p: "De winst t.o.v. nieuw, cashback inbegrepen, berekend en getoond vóór aankoop." },
+            ]}
+          />
+        </div>
+      </section>
+      <FaqBlock items={FAQ_NL} eyebrow="Refurbished · FAQ" title="Refurbished, met een gerust hart." />
+      <ClosingCta title={<>Betaal de <span className="it">juiste</span> prijs. Niet de nieuwprijs.</>} sub="FILON vergelijkt nieuw en refurbished bij elke aankoop, gratis." />
+    </>
+  );
+}
+
+export default function ReconditionnePage() {
+  return <Localized fr={<ReconditionneFR />} nl={<ReconditionneNL />} />;
 }
