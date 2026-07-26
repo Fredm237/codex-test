@@ -8,6 +8,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Reveal } from "./Reveal";
+import { useLocale } from "@/lib/i18n";
 
 const MERCHANTS = [
   { name: "Amazon", src: "/logos/amazon.webp" },
@@ -37,6 +38,51 @@ const TRUST: Array<[string, string]> = [
   ["Gratuit, et de votre côté", "Notre rémunération vient de l'affiliation, sans jamais augmenter votre prix, ni fausser un conseil."],
   ["Vos données restent à vous", "Analytics sans cookies, aucune revente. Ce que vous cherchez ne quitte jamais FILON."],
 ];
+
+const PL = {
+  fr: {
+    eye: "FILON compare, en temps réel",
+    note: "Et des dizaines d'autres marchands, plus les vendeurs reconditionnés certifiés.",
+    stats: STATS,
+    legend2: "se rempliront avec des chiffres réels dès l'ouverture des partenariats.",
+    legend1: "Les repères marqués",
+    priceEye: "Le vrai prix, décomposé",
+    priceH1: "L'étiquette n'est jamais ", priceH2: "le prix réel.",
+    priceP: "FILON part du prix affiché, puis retire ce que vous pouvez vraiment récupérer, coupon vérifié, cashback, meilleur marchand, pour révéler le montant que vous paierez réellement.",
+    ex: "Exemple illustratif · Lenovo IdeaPad Slim 5",
+    breakdown: BREAKDOWN,
+    total: "Vrai prix FILON",
+    trust: TRUST,
+  },
+  nl: {
+    eye: "FILON vergelijkt, in realtime",
+    note: "En tientallen andere winkels, plus gecertificeerde refurbished-verkopers.",
+    stats: [
+      ["5+", "grote winkels vergeleken bij elke zoekopdracht"],
+      ["3-in-1", "prijs + kortingscodes + cashback, samengevoegd tot één prijs"],
+      ["0 €", "je betaalt FILON nooit, nooit reclame", "g"],
+      ["•", "gebruikers & bespaarde €, echte cijfers volgen", "dot"],
+    ] as Array<[string, string, string?]>,
+    legend1: "De met",
+    legend2: "gemarkeerde punten worden ingevuld met echte cijfers zodra de partnerships starten.",
+    priceEye: "De echte prijs, ontleed",
+    priceH1: "Het prijskaartje is nooit ", priceH2: "de echte prijs.",
+    priceP: "FILON vertrekt van de getoonde prijs en trekt er af wat je echt kunt recupereren — geverifieerde code, cashback, beste winkel — om te tonen wat je werkelijk betaalt.",
+    ex: "Illustratief voorbeeld · Lenovo IdeaPad Slim 5",
+    breakdown: [
+      ["Getoonde prijs op deze pagina", "799 €", false],
+      ["Beste winkel gevonden", "−60 €", true],
+      ["Geverifieerde code bij betaling", "−15 €", true],
+      ["Uitgekeerde cashback", "−25 €", true],
+    ] as Array<[string, string, boolean]>,
+    total: "Echte FILON-prijs",
+    trust: [
+      ["Geen plaats te koop", "Geen enkel merk of winkel kan betalen voor een betere rangschikking of Score. Nooit."],
+      ["Gratis, en aan jouw kant", "Onze vergoeding komt uit affiliatie, zonder ooit je prijs te verhogen of een advies te vervalsen."],
+      ["Je gegevens blijven van jou", "Analytics zonder cookies, geen doorverkoop. Wat je zoekt verlaat FILON nooit."],
+    ] as Array<[string, string]>,
+  },
+};
 
 function PriceCountUp() {
   const ref = useRef<HTMLSpanElement>(null);
@@ -94,12 +140,14 @@ function LifeBanner() {
 }
 
 export function ProofSection() {
+  const { locale } = useLocale();
+  const x = PL[locale];
   return (
     <section className="ed-band ed-proof" id="preuves">
       <div className="ed-wrap">
         <Reveal>
           <span className="eyebrow" style={{ display: "block", textAlign: "center" }}>
-            FILON compare, en temps réel
+            {x.eye}
           </span>
         </Reveal>
 
@@ -114,12 +162,12 @@ export function ProofSection() {
         </Reveal>
         <Reveal>
           <p className="ed-proof-note">
-            Et des dizaines d'autres marchands, plus les vendeurs reconditionnés certifiés.
+            {x.note}
           </p>
         </Reveal>
 
         <Reveal className="ed-proof-stats">
-          {STATS.map(([value, label, mod]) => (
+          {x.stats.map(([value, label, mod]) => (
             <div key={label}>
               <div className={`ed-proof-stat-v ${mod === "g" ? "g" : mod === "dot" ? "dot" : ""}`}>{value}</div>
               <div className="ed-proof-stat-l">{label}</div>
@@ -128,8 +176,7 @@ export function ProofSection() {
         </Reveal>
         <Reveal>
           <p className="ed-proof-legend">
-            Les repères marqués <span className="dot">•</span> se rempliront avec des chiffres réels
-            dès l'ouverture des partenariats.
+            {x.legend1} <span className="dot">•</span> {x.legend2}
           </p>
         </Reveal>
 
@@ -138,34 +185,30 @@ export function ProofSection() {
         <div className="ed-proof-price">
           <Reveal className="ed-proof-price-copy">
             <span className="eyebrow" style={{ display: "block", marginBottom: 12 }}>
-              Le vrai prix, décomposé
+              {x.priceEye}
             </span>
             <h2>
-              L'étiquette n'est jamais <span className="it">le prix réel.</span>
+              {x.priceH1}<span className="it">{x.priceH2}</span>
             </h2>
-            <p>
-              FILON part du prix affiché, puis retire ce que vous pouvez vraiment récupérer,
-              coupon vérifié, cashback, meilleur marchand, pour révéler le montant que vous
-              paierez réellement.
-            </p>
+            <p>{x.priceP}</p>
           </Reveal>
           <Reveal className="ed-proof-card">
-            <div className="ex">Exemple illustratif · Lenovo IdeaPad Slim 5</div>
-            {BREAKDOWN.map(([label, value, good]) => (
+            <div className="ex">{x.ex}</div>
+            {x.breakdown.map(([label, value, good]) => (
               <div className="row" key={label}>
                 <span>{label}</span>
                 <span className={good ? "v good" : "v"}>{value}</span>
               </div>
             ))}
             <div className="total">
-              <span>Vrai prix FILON</span>
+              <span>{x.total}</span>
               <PriceCountUp />
             </div>
           </Reveal>
         </div>
 
         <div className="ed-proof-trust">
-          {TRUST.map(([title, body]) => (
+          {x.trust.map(([title, body]) => (
             <Reveal className="ed-proof-tcard" key={title}>
               <h3>{title}</h3>
               <p>{body}</p>

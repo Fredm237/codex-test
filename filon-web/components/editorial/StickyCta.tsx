@@ -1,10 +1,12 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useLocale } from "@/lib/i18n";
 
 /** Persistent bottom CTA on mobile — appears once past the first viewport. */
 export function StickyCta() {
   const ref = useRef<HTMLAnchorElement>(null);
+  const { t } = useLocale();
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
@@ -17,7 +19,7 @@ export function StickyCta() {
   }, []);
   return (
     <a className="ed-sticky-cta" href="/recherche" ref={ref}>
-      Essayer le copilote
+      {t("cta.try")}
     </a>
   );
 }

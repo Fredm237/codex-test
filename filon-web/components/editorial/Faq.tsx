@@ -1,5 +1,8 @@
+"use client";
+
 import { faqSchema, JsonLd } from "@/lib/seo";
 import { Reveal } from "./Reveal";
+import { useLocale } from "@/lib/i18n";
 
 export type QA = { q: string; a: string };
 
@@ -24,6 +27,14 @@ export const HOME_FAQ: QA[] = [
     q: "Quand arrivent l'extension et l'application ?",
     a: "L'extension d'abord, puis l'application mobile et l'assistant. Ajoutez FILON pour être prévenu.",
   },
+];
+
+const HOME_FAQ_NL: QA[] = [
+  { q: "Is FILON echt gratis?", a: "Ja, volledig. Geen kaart, geen abonnement, geen betaalde opties. En je gegevens worden nooit doorverkocht." },
+  { q: "Kan ik zijn aanbeveling vertrouwen?", a: "Ze dient jouw belang, nooit het onze. Geen enkel merk kan zijn plaats kopen. FILON toont je wat echt het beste is voor jou." },
+  { q: "Is het aangeboden refurbished betrouwbaar?", a: "Alleen geverifieerd refurbished, bij gecertificeerde verkopers, met garantie. Je ziet de garantie en de besparing voordat je beslist." },
+  { q: "Worden mijn gegevens doorverkocht?", a: "Nooit. Geen advertentieprofiel, geen doorverkoop. FILON bewaart zo weinig mogelijk, en niets anders." },
+  { q: "Wanneer komen de extensie en de app?", a: "Eerst de extensie, daarna de mobiele app en de assistent. Voeg FILON toe om verwittigd te worden." },
 ];
 
 export function FaqBlock({
@@ -64,5 +75,11 @@ export function FaqBlock({
 }
 
 export function Faq() {
-  return <FaqBlock items={HOME_FAQ} />;
+  const { locale } = useLocale();
+  return (
+    <FaqBlock
+      items={locale === "nl" ? HOME_FAQ_NL : HOME_FAQ}
+      title={locale === "nl" ? "De vragen die je je stelt." : "Les questions que vous vous posez."}
+    />
+  );
 }
