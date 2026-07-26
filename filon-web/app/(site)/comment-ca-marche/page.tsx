@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
-import { ContentHero, ClosingCta } from "@/components/editorial/ContentPage";
+import { ContentHero, ClosingCta, InfoGrid } from "@/components/editorial/ContentPage";
 import { Method } from "@/components/editorial/EditorialSections";
-import { InfoGrid } from "@/components/editorial/ContentPage";
 import { IcHeart } from "@/components/editorial/icons";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/comment-ca-marche",
@@ -12,7 +12,7 @@ export const metadata: Metadata = buildMetadata({
     "En quelques secondes, FILON vous donne votre vrai prix et vous dit s'il faut acheter ou attendre. Voici l'expérience.",
 });
 
-export default function CommentCaMarchePage() {
+function CommentFR() {
   return (
     <>
       <ContentHero
@@ -21,9 +21,7 @@ export default function CommentCaMarchePage() {
         intro="Vous ne changez rien à vos habitudes. FILON travaille pour vous et vous présente un seul chiffre : votre vrai prix. Et une réponse : acheter, ou attendre."
         breadcrumb={[{ name: "Comment ça marche", path: "/comment-ca-marche" }]}
       />
-
       <Method />
-
       <section className="ed-band alt">
         <div className="ed-wrap">
           <div className="ed-prose" style={{ marginBottom: 28 }}>
@@ -41,8 +39,43 @@ export default function CommentCaMarchePage() {
           />
         </div>
       </section>
-
       <ClosingCta title={<>Essayez, c&apos;est <span className="it">gratuit</span>.</>} sub="Ajoutez FILON et laissez-le trouver le filon avant chaque achat." />
     </>
   );
+}
+
+function CommentNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Hoe het werkt"
+        title={<>Drie seconden tussen jou en de <span className="it">beste prijs</span>.</>}
+        intro="Je verandert niets aan je gewoontes. FILON werkt voor jou en toont je één cijfer : je echte prijs. En één antwoord : kopen, of wachten."
+        breadcrumb={[{ name: "Hoe het werkt", path: "/comment-ca-marche" }]}
+      />
+      <Method />
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "20ch" }}>Wat je krijgt.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "€", h: "Je echte prijs", p: "Eén cijfer, alles inbegrepen. Geen rekenwerk meer." },
+              { n: "◷", h: "Kopen of wachten", p: "Een duidelijk antwoord, om op het juiste moment te kopen." },
+              { n: "✓", h: "De beste optie", p: "Nieuw, refurbished, elders : de beste keuze, wanneer die bestaat." },
+              { n: "★", h: "Een betrouwbare verkoper", p: "Betrouwbaarheid en garanties tellen mee, niet alleen de prijs." },
+              { n: "↧", h: "Zonder iets te veranderen", p: "Je behoudt je gewoontes. FILON werkt op de achtergrond." },
+              { n: <IcHeart />, h: "Nul moeite", p: "Jij beschrijft, FILON beslist. Meer niet." },
+            ]}
+          />
+        </div>
+      </section>
+      <ClosingCta title={<>Probeer het, het is <span className="it">gratis</span>.</>} sub="Voeg FILON toe en laat het de vondst vinden vóór elke aankoop." />
+    </>
+  );
+}
+
+export default function CommentCaMarchePage() {
+  return <Localized fr={<CommentFR />} nl={<CommentNL />} />;
 }
