@@ -10,6 +10,17 @@ import { useRef, useState } from "react";
    ────────────────────────────────────────────────────────────────────────── */
 
 const euro = (n: number) => `${n.toLocaleString("fr-FR")} €`;
+const money = (n: number, cur = "€") => `${n.toLocaleString("fr-FR")} ${cur}`;
+
+/** Pays supportés pour les prix (SerpApi côté backend). */
+const COUNTRIES: Array<{ code: string; label: string }> = [
+  { code: "be", label: "Belgique (FR)" },
+  { code: "be-nl", label: "België (NL)" },
+  { code: "fr", label: "France" },
+  { code: "ch", label: "Suisse" },
+  { code: "lu", label: "Luxembourg" },
+  { code: "nl", label: "Pays-Bas" },
+];
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /* Icônes ligne, nettes et sobres (currentColor) — remplacent les émojis. */
@@ -57,7 +68,7 @@ type Card = {
   cashback: number; coupon: string | null; hist: Hist | null; histNote: string;
   score: number; why: string; alt: string | null; buy: boolean;
 };
-type Result = { usage: string; offers: number; cards: Card[]; real?: boolean };
+type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; currency?: string; country?: string };
 
 const CATALOGS: Record<string, { usage: string; emoji: string; cards: Card[] }> = {
   laptop: {
@@ -152,9 +163,9 @@ async function* mockAnalyze(q: string, reduce: boolean): AsyncGenerator<Ev> {
    The UI is identical — only the source of the events changes. */
 const API = (process.env.NEXT_PUBLIC_FILON_API || "https://web-production-c6842.up.railway.app").replace(/\/$/, "");
 
-async function* streamAnalyze(q: string): AsyncGenerator<Ev> {
+async function* streamAnalyze(q: string, country: string): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
-  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}`;
+  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}`;
   const res = await fetch(url, { headers: { Accept: "text/event-stream" } });
   if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
   const reader = res.body.getReader();
@@ -187,7 +198,7 @@ function ScoreRing({ score }: { score: number }) {
   );
 }
 
-function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
+function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
   const [imgOk, setImgOk] = useState(true);
   // Real product URL when we have it (SerpApi mode). Otherwise search Google
   // Shopping for the user's actual query — never the card name, which can be a
@@ -207,7 +218,7 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
-          <div className="fa-price"><b>{euro(c.price)}</b><span className="mc">chez {c.merchant}</span></div>
+          <div className="fa-price"><b>{money(c.price, cur)}</b><span className="mc">chez {c.merchant}</span></div>
           <div className="fa-specs">
             <span><IcTruck /> {c.delivery}</span>
             <span><IcShield /> {c.warranty}</span>
@@ -235,6 +246,7 @@ export function SearchAssistant() {
   const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
+  const [country, setCountry] = useState("be");
   const runId = useRef(0);
 
   const ask = async (raw: string) => {
@@ -264,7 +276,7 @@ export function SearchAssistant() {
     // any error so the assistant always answers.
     if (API) {
       try {
-        for await (const ev of streamAnalyze(q)) if (!apply(ev)) return;
+        for await (const ev of streamAnalyze(q, country)) if (!apply(ev)) return;
         return;
       } catch {
         if (runId.current !== id) return;
@@ -278,7 +290,7 @@ export function SearchAssistant() {
   return (
     <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>
       <div className="ed-wrap">
-        {phase === "idle" && <span className="eyebrow">Assistant d&apos;achat · IA</span>}
+        {phase === "idle" && <span className="eyebrow">Assistant d&apos;achat</span>}
         <h1>{phase === "idle" ? "Que voulez-vous acheter, ou décider ?" : "Un autre achat à décider ?"}</h1>
 
         <form className="sa-search" onSubmit={(e) => { e.preventDefault(); ask(query || CHIPS[0]); }}>
@@ -295,6 +307,14 @@ export function SearchAssistant() {
               autoComplete="off"
             />
             <button type="submit" className="ed-btn wave">Demander</button>
+          </div>
+          <div className="sa-country">
+            <label htmlFor="sa-cc">Prix pour</label>
+            <select id="sa-cc" value={country} onChange={(e) => setCountry(e.target.value)}>
+              {COUNTRIES.map((c) => (
+                <option key={c.code} value={c.code}>{c.label}</option>
+              ))}
+            </select>
           </div>
           <div className="sa-chips">
             {CHIPS.map((c) => (
@@ -322,10 +342,10 @@ export function SearchAssistant() {
               <div className="fa-results">
                 <p className="fa-summary">
                   <b>{result.offers} offres analysées</b> pour {result.usage}. Voici mes {result.cards.length} recommandation{result.cards.length > 1 ? "s" : ""}, classée{result.cards.length > 1 ? "s" : ""}.
-                  <span className="fa-est"> {result.real ? "Prix réels · Google Shopping." : "Prix estimés, à titre indicatif."}</span>
+                  <span className="fa-est"> {result.real ? "Prix réels · Google Shopping" : "Prix estimés, à titre indicatif"}{" · "}{COUNTRIES.find((x) => x.code === (result.country || country))?.label || "Belgique"}.</span>
                 </p>
                 <div className="fa-cards">
-                  {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} />)}
+                  {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}
                 </div>
                 <p className="sa-disc">FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.</p>
               </div>
