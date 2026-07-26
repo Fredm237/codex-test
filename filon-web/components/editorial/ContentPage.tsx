@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { JsonLd, breadcrumbSchema } from "@/lib/seo";
 import { Reveal } from "./Reveal";
+import { LifeVideo } from "./LifeVideo";
 
 export function ContentHero({
   eyebrow,
@@ -8,12 +9,15 @@ export function ContentHero({
   intro,
   breadcrumb,
   photo,
+  video,
 }: {
   eyebrow: string;
   title: ReactNode;
   intro: ReactNode;
   breadcrumb: { name: string; path: string }[];
   photo?: string;
+  /** Si fourni, une vidéo en boucle remplace la photo (avec `photo` en poster). */
+  video?: string;
 }) {
   return (
     <section className="ed-content-hero">
@@ -24,7 +28,9 @@ export function ContentHero({
           <h1 style={{ marginTop: 18 }}>{title}</h1>
           <p className="intro">{intro}</p>
         </Reveal>
-        {photo ? (
+        {video && photo ? (
+          <LifeVideo src={video} poster={photo} />
+        ) : photo ? (
           <Reveal className="ed-content-photo">
             <img src={photo} alt="" loading="lazy" />
           </Reveal>
