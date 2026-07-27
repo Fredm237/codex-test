@@ -131,6 +131,66 @@ function CookiesNL() {
   );
 }
 
+function CookiesEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Legal"
+        title={<>Cookie policy</>}
+        intro="FILON uses no advertising tracking cookie. Here, in plain terms, are the only cookies that may be set and why."
+        breadcrumb={[{ name: "Cookie policy", path: "/cookies" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-legal">
+          <p className="upd">Last updated: 21 July 2026</p>
+
+          <h2>Our principle</h2>
+          <p>
+            A cookie is a small file placed on your device when visiting a website. At FILON, we&apos;ve made a simple
+            choice&nbsp;: <b>no advertising tracking cookie, no profiling</b>. Our model doesn&apos;t rely on reselling
+            data, so we collect no more than necessary.
+          </p>
+
+          <h2>Cookie-free audience measurement</h2>
+          <p>
+            To understand how the site is used and improve it, we use <b>Plausible Analytics</b>, an audience
+            measurement solution that is <b>cookie-free</b> and holds no identifiable personal data&nbsp;: no
+            persistent identifier, only aggregated and anonymous statistics. No cookie consent is therefore required
+            for this measurement.
+          </p>
+
+          <h2>Strictly necessary cookies</h2>
+          <p>
+            Some purely technical cookies may be necessary for the site to work (for example, remembering a display
+            preference). They serve neither tracking nor advertising, and are exempt from consent under the
+            regulations.
+          </p>
+
+          <h2>Partner cookies</h2>
+          <p>
+            When you <b>activate an offer</b> via FILON, a partner service may place a <b>technical cookie</b> on
+            your device to attribute your order. It is placed by the partner, under its own responsibility, at the
+            moment you choose to activate the offer, never without your knowledge.
+          </p>
+
+          <h2>Managing cookies</h2>
+          <p>
+            You can at any time view, block or delete cookies from your browser settings (Chrome, Firefox, Edge,
+            Safari…). Blocking these cookies may, however, prevent your order from being properly registered with
+            the partner concerned.
+          </p>
+
+          <h2>Learn more</h2>
+          <p>
+            This policy complements our <a href="/confidentialite">privacy policy</a>. For any question about
+            cookies, write to us at <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function CookiesPage() {
-  return <Localized fr={<CookiesFR />} nl={<CookiesNL />} />;
+  return <Localized fr={<CookiesFR />} nl={<CookiesNL />} en={<CookiesEN />} />;
 }

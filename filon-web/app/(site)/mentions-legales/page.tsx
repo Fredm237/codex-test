@@ -147,6 +147,74 @@ function MentionsNL() {
   );
 }
 
+function MentionsEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Legal"
+        title={<>Legal notice</>}
+        intro="The legal information relating to the FILON website and its publisher."
+        breadcrumb={[{ name: "Legal notice", path: "/mentions-legales" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-legal">
+          <p className="upd">Last updated: 21 July 2026</p>
+
+          <h2>Website publisher</h2>
+          <p>
+            The website <b>{site.domain}</b> is published by <b>{site.legalName}</b>.
+            <br />
+            Legal form: <b>{site.legalForm}</b>
+            <br />
+            Registered office: <b>{site.legalAddress}</b>
+            <br />
+            Company number (CBE): <b>{site.bce}</b>
+            <br />
+            VAT number: <b>{site.vat}</b>
+            <br />
+            Contact: <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>
+          </p>
+
+          <h2>Publication director</h2>
+          <p>{site.legalName}.</p>
+
+          <h2>Hosting</h2>
+          <p>
+            The website is hosted by <b>Vercel Inc.</b>, San Francisco, California, United States.
+            More information at <a href="https://vercel.com">vercel.com</a>.
+          </p>
+
+          <h2>Intellectual property</h2>
+          <p>
+            All the website&apos;s content (texts, graphic elements, logo, visual identity, code) is the property of
+            the publisher, unless stated otherwise, and is protected by intellectual property law. Any reproduction
+            without authorisation is prohibited.
+          </p>
+
+          <h2>Nature of the service and partner links</h2>
+          <p>
+            FILON is a free purchase-decision aid service. The website may contain <b>partner links</b>. Activating
+            them <b>never changes the price paid by the user.</b>
+          </p>
+
+          <h2>Personal data</h2>
+          <p>
+            The processing of personal data is described in our{" "}
+            <a href="/confidentialite">privacy policy</a>.
+          </p>
+
+          <h2>Liability</h2>
+          <p>
+            Information on prices, availability and offers is provided for guidance only and may change in real time
+            at the merchants. The publisher strives to ensure its accuracy but cannot be held liable for any errors
+            or for harm linked to its use.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function MentionsLegalesPage() {
-  return <Localized fr={<MentionsFR />} nl={<MentionsNL />} />;
+  return <Localized fr={<MentionsFR />} nl={<MentionsNL />} en={<MentionsEN />} />;
 }

@@ -204,6 +204,101 @@ function CguNL() {
   );
 }
 
+function CguEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Legal"
+        title={<>Terms of use</>}
+        intro="The rules that govern the use of the FILON service. By using FILON, you accept these terms."
+        breadcrumb={[{ name: "Terms of use", path: "/cgu" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-legal">
+          <p className="upd">Last updated: 21 July 2026</p>
+
+          <h2>1. Purpose</h2>
+          <p>
+            These terms of use (« Terms ») govern access to and use of the <b>{site.name}</b> service, accessible via
+            the website <b>{site.domain}</b> and, in time, via a browser extension and an application. The service is
+            published by {site.legalName}, {site.legalForm.toLowerCase()} (CBE {site.bce}), {site.legalAddress}.
+          </p>
+
+          <h2>2. Description of the service</h2>
+          <p>
+            FILON is a <b>purchase-decision aid</b> service. It analyses the market, compares offers and estimates a
+            real cost, then proposes a recommendation. FILON sells no product&nbsp;: the purchase is always made
+            directly with the merchant or platform chosen by the user.
+          </p>
+
+          <h2>3. Access and free of charge</h2>
+          <p>
+            Access to FILON is <b>entirely free</b> for the user, with no subscription or fees&nbsp;: see the{" "}
+            <a href="/tarifs">Pricing</a> page. It is never billed to the user. The publisher strives to ensure the
+            availability of the service without being able to guarantee it uninterrupted.
+          </p>
+
+          <h2>4. Compliant use</h2>
+          <p>
+            The user undertakes to use FILON in accordance with its purpose and the law. In particular, they refrain
+            from disrupting the operation of the service, extracting its data en masse in an automated way, or
+            infringing the rights of the publisher or of third parties.
+          </p>
+
+          <h2>5. Indicative nature of the information</h2>
+          <p>
+            Information on prices, availability and offers is provided <b>for guidance</b>
+            {" "}and may change in real time at the merchants. The publisher strives to ensure its accuracy but does
+            not guarantee it is complete or up to date at every moment. The purchase decision is the user&apos;s sole
+            responsibility.
+          </p>
+
+          <h2>6. Partner links</h2>
+          <p>
+            FILON may contain <b>partner links</b>. Activating them <b>never increases the price paid by the
+            user</b> and does not influence the recommendation, which aims at the best real cost for the user.
+          </p>
+
+          <h2>7. Intellectual property</h2>
+          <p>
+            All the service&apos;s content (texts, graphic elements, logo, visual identity, code) is protected and
+            remains the property of the publisher, unless stated otherwise. Any unauthorised reproduction or reuse is
+            prohibited.
+          </p>
+
+          <h2>8. Personal data</h2>
+          <p>
+            The processing of personal data is described in our{" "}
+            <a href="/confidentialite">privacy policy</a> and our{" "}
+            <a href="/cookies">cookie policy</a>, GDPR-compliant.
+          </p>
+
+          <h2>9. Liability</h2>
+          <p>
+            FILON is provided « as is ». The publisher cannot be held liable for the user&apos;s purchase decisions,
+            for variations in prices or offers, nor for indirect harm linked to the use of the service. The
+            commercial relationship and after-sales service fall under the merchant or platform where the purchase is
+            made.
+          </p>
+
+          <h2>10. Amendment of the Terms</h2>
+          <p>
+            The publisher may amend these Terms to adapt them to the service or the regulations. The applicable
+            version is the one published on this page on the date of use.
+          </p>
+
+          <h2>11. Applicable law</h2>
+          <p>
+            These Terms are governed by <b>Belgian law</b>. Any dispute falls, failing an amicable resolution, under
+            the competent courts of Belgium. For any question&nbsp;:{" "}
+            <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function CguPage() {
-  return <Localized fr={<CguFR />} nl={<CguNL />} />;
+  return <Localized fr={<CguFR />} nl={<CguNL />} en={<CguEN />} />;
 }
