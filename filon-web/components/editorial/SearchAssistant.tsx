@@ -1,6 +1,34 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { useLocale } from "@/lib/i18n";
+
+const SL = {
+  fr: {
+    steps: ["Compréhension du besoin", "Analyse des marchands", "Analyse des prix", "Analyse de l'historique", "Analyse du cashback", "Analyse des avis", "Recherche d'alternatives", "Calcul du Score FILON"],
+    eyebrow: "Assistant d'achat",
+    h1Idle: "Que voulez-vous acheter, ou décider ?", h1Again: "Un autre achat à décider ?",
+    placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
+    priceFor: "Prix pour",
+    chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
+    why: "Pourquoi", alt: "Alternative", see: "Voir l'offre", good: "Bon moment", wait: "Attendre",
+    real: "Prix réels · Google Shopping", est: "Prix estimés, à titre indicatif",
+    analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
+    disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
+  },
+  nl: {
+    steps: ["Begrip van de behoefte", "Analyse van de winkels", "Prijsanalyse", "Analyse van de geschiedenis", "Analyse van de cashback", "Analyse van de reviews", "Alternatieven zoeken", "Berekening van de FILON-Score"],
+    eyebrow: "Koopassistent",
+    h1Idle: "Wat wil je kopen, of beslissen ?", h1Again: "Nog een aankoop om te beslissen ?",
+    placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
+    priceFor: "Prijs voor",
+    chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
+    why: "Waarom", alt: "Alternatief", see: "Bekijk de aanbieding", good: "Goed moment", wait: "Wachten",
+    real: "Echte prijzen · Google Shopping", est: "Geschatte prijzen, ter indicatie",
+    analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
+    disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
+  },
+};
 
 /* ──────────────────────────────────────────────────────────────────────────
    FILON assistant — a decision surface, not a chat.
@@ -185,8 +213,6 @@ async function* streamAnalyze(q: string, country: string): AsyncGenerator<Ev> {
   }
 }
 
-const CHIPS = ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"];
-
 const HIST_LABEL: Record<Hist, string> = { baisse: "En baisse", hausse: "En hausse", stable: "Stable" };
 
 function ScoreRing({ score }: { score: number }) {
@@ -200,6 +226,7 @@ function ScoreRing({ score }: { score: number }) {
 
 function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
   const [imgOk, setImgOk] = useState(true);
+  const S = SL[useLocale().locale];
   // Real product URL when we have it (SerpApi mode). Otherwise search Google
   // Shopping for the user's actual query — never the card name, which can be a
   // generic placeholder in the estimated fallback ("Option 1" → junk results).
@@ -226,13 +253,13 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
             {c.coupon && <span className="g"><IcCoupon /> coupon {c.coupon}</span>}
             {c.hist && c.histNote ? (() => { const Ic = HIST_ICON[c.hist as Hist]; return <span className={`hist ${c.hist}`}><Ic /> {HIST_LABEL[c.hist]} · {c.histNote}</span>; })() : null}
           </div>
-          <p className="fa-why"><b>Pourquoi&nbsp;:</b> {c.why}</p>
-          {c.alt && <p className="fa-alt">Alternative&nbsp;: {c.alt}</p>}
+          <p className="fa-why"><b>{S.why}&nbsp;:</b> {c.why}</p>
+          {c.alt && <p className="fa-alt">{S.alt}&nbsp;: {c.alt}</p>}
         </div>
         <div className="fa-aside">
           <ScoreRing score={c.score} />
-          <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> Bon moment</> : <><IcClock /> Attendre</>}</span>
-          <a className="ed-btn wave" href={offerUrl} target="_blank" rel="noopener noreferrer">Voir l&apos;offre</a>
+          <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> {S.good}</> : <><IcClock /> {S.wait}</>}</span>
+          <a className="ed-btn wave" href={offerUrl} target="_blank" rel="noopener noreferrer">{S.see}</a>
         </div>
       </div>
     </article>
@@ -247,6 +274,8 @@ export function SearchAssistant() {
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
   const [country, setCountry] = useState("be");
+  const { locale } = useLocale();
+  const S = SL[locale];
   const runId = useRef(0);
 
   const ask = async (raw: string) => {
@@ -290,10 +319,10 @@ export function SearchAssistant() {
   return (
     <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>
       <div className="ed-wrap">
-        {phase === "idle" && <span className="eyebrow">Assistant d&apos;achat</span>}
-        <h1>{phase === "idle" ? "Que voulez-vous acheter, ou décider ?" : "Un autre achat à décider ?"}</h1>
+        {phase === "idle" && <span className="eyebrow">{S.eyebrow}</span>}
+        <h1>{phase === "idle" ? S.h1Idle : S.h1Again}</h1>
 
-        <form className="sa-search" onSubmit={(e) => { e.preventDefault(); ask(query || CHIPS[0]); }}>
+        <form className="sa-search" onSubmit={(e) => { e.preventDefault(); ask(query || S.chips[0]); }}>
           <div className="sa-box">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="7" />
@@ -302,14 +331,14 @@ export function SearchAssistant() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Décrivez un besoin, ou un produit…"
-              aria-label="Décrivez un besoin ou un produit"
+              placeholder={S.placeholder}
+              aria-label={S.placeholder}
               autoComplete="off"
             />
-            <button type="submit" className="ed-btn wave">Demander</button>
+            <button type="submit" className="ed-btn wave">{S.ask}</button>
           </div>
           <div className="sa-country">
-            <label htmlFor="sa-cc">Prix pour</label>
+            <label htmlFor="sa-cc">{S.priceFor}</label>
             <select id="sa-cc" value={country} onChange={(e) => setCountry(e.target.value)}>
               {COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>{c.label}</option>
@@ -317,7 +346,7 @@ export function SearchAssistant() {
             </select>
           </div>
           <div className="sa-chips">
-            {CHIPS.map((c) => (
+            {S.chips.map((c) => (
               <button key={c} type="button" className="sa-chip" onClick={() => { setQuery(c); ask(c); }}>{c}</button>
             ))}
           </div>
@@ -327,10 +356,10 @@ export function SearchAssistant() {
           <div className="fa-out" aria-live="polite">
             {/* streamed reasoning */}
             <div className={`fa-steps ${phase === "results" ? "collapsed" : ""}`}>
-              {STEPS.map((s, i) => {
+              {S.steps.map((s, i) => {
                 const st = done.includes(i) ? "done" : i === active ? "active" : "pending";
                 return (
-                  <div className={`fa-step ${st}`} key={s}>
+                  <div className={`fa-step ${st}`} key={i}>
                     <span className="tk">{st === "done" ? "✓" : ""}</span>
                     {s}
                   </div>
@@ -341,13 +370,13 @@ export function SearchAssistant() {
             {phase === "results" && result && (
               <div className="fa-results">
                 <p className="fa-summary">
-                  <b>{result.offers} offres analysées</b> pour {result.usage}. Voici mes {result.cards.length} recommandation{result.cards.length > 1 ? "s" : ""}, classée{result.cards.length > 1 ? "s" : ""}.
-                  <span className="fa-est"> {result.real ? "Prix réels · Google Shopping" : "Prix estimés, à titre indicatif"}{" · "}{COUNTRIES.find((x) => x.code === (result.country || country))?.label || "Belgique"}.</span>
+                  <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.recos} {result.cards.length} {S.recoTail}{result.cards.length > 1 ? S.nounPl : ""}, {S.classed}{result.cards.length > 1 ? S.adjPl : ""}.
+                  <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{COUNTRIES.find((x) => x.code === (result.country || country))?.label || "Belgique"}.</span>
                 </p>
                 <div className="fa-cards">
                   {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}
                 </div>
-                <p className="sa-disc">FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.</p>
+                <p className="sa-disc">{S.disc}</p>
               </div>
             )}
           </div>
