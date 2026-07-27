@@ -27,6 +27,14 @@ const VALUES_NL = [
   { n: "05", h: "Vertrouwen", p: "Je gegevens blijven van jou. Zonder uitzondering." },
 ];
 
+const VALUES_EN = [
+  { n: "01", h: "On your side", p: "No advertising, no hidden interest. What we show you serves your interest." },
+  { n: "02", h: "Intelligence", p: "The right information, at the right moment, effortlessly for you." },
+  { n: "03", h: "Simplicity", p: "One single experience instead of ten tabs." },
+  { n: "04", h: "Exactingness", p: "A polished product, down to the last detail." },
+  { n: "05", h: "Trust", p: "Your data stays yours. Without exception." },
+];
+
 function Values({ heading, items }: { heading: string; items: typeof VALUES_FR }) {
   return (
     <section className="ed-band alt">
@@ -148,6 +156,54 @@ function AProposNL() {
   );
 }
 
+function AProposEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="About"
+        title={<>Never pay the <span className="it">full price</span>.</>}
+        intro="FILON brings together in one simple experience what used to take ten tabs. Our ambition: to become the first reflex before every purchase, starting with Belgium."
+        breadcrumb={[{ name: "About", path: "/a-propos" }]}
+        photo="/img/page-apropos.webp"
+      />
+      <ProseBlock heading={<>The problem we <span className="it">solve</span>.</>}>
+        <p>
+          Buying well takes time: checking, comparing, doubting, starting over. Most people give up and pay full
+          price.
+        </p>
+        <p>
+          FILON does that work for you. In one second, it gives you a clear answer and your real price. You change
+          nothing about your habits, you simply pay less.
+        </p>
+      </ProseBlock>
+      <Values heading="Our five values." items={VALUES_EN} />
+      <ProseBlock heading={<>The <span className="it">founder</span>.</>}>
+        <p>
+          FILON is driven by <b>{site.founder}</b>, a Brussels entrepreneur at the crossroads of product, technology
+          and brand. He designs products end to end: the engineering, the experience, the story.
+        </p>
+        <p>
+          Before FILON, he founded and grew <b>SmartWave FX</b>, a SaaS platform he led from the technical
+          infrastructure all the way to the brand and community. Bilingual French-Dutch, he turns an idea into a
+          living product, and an intuition into polished execution.
+        </p>
+        <p>
+          With FILON, he applies that exactingness to a problem everyone knows: paying too much, for lack of time.
+          His conviction fits in one sentence. Buying well should require neither effort nor compromise.
+        </p>
+      </ProseBlock>
+      <ProseBlock heading={<>Why <span className="it">Belgium</span> first.</>} alt>
+        <p>
+          We&apos;re starting with Belgium. A market we know, where we can do things well before growing, in French
+          as in Dutch.
+        </p>
+        <p>Trust is built close to home. Then come France, the Netherlands and the rest.</p>
+      </ProseBlock>
+      <ClosingCta title={<>Join the smart <span className="it">reflex</span>.</>} sub="Add FILON and never pay the full price again." />
+    </>
+  );
+}
+
 export default function AProposPage() {
-  return <Localized fr={<AProposFR />} nl={<AProposNL />} />;
+  return <Localized fr={<AProposFR />} nl={<AProposNL />} en={<AProposEN />} />;
 }

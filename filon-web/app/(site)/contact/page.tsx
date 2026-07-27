@@ -46,6 +46,24 @@ function ContactNL() {
   );
 }
 
+function ContactEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Contact"
+        title={<>Let&apos;s talk.</>}
+        intro="A question, an idea, a cashback or refurbished partnership ? Leave us a message, we reply fast."
+        breadcrumb={[{ name: "Contact", path: "/contact" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-wrap">
+          <ContactForm />
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function ContactPage() {
-  return <Localized fr={<ContactFR />} nl={<ContactNL />} />;
+  return <Localized fr={<ContactFR />} nl={<ContactNL />} en={<ContactEN />} />;
 }
