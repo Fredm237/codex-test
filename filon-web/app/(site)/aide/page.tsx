@@ -93,6 +93,47 @@ function AideNL() {
   );
 }
 
+function AideEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Help"
+        title={<>We&apos;re here when you <span className="it">need</span> us.</>}
+        intro="Pick a topic to quickly find your answer. And if you can't find it, a human replies, not a robot going in circles."
+        breadcrumb={[{ name: "Help centre", path: "/aide" }]}
+      />
+
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-wrap">
+          <InfoGrid
+            items={[
+              { n: "01", h: "Getting started", p: "How to state a need, read the verdict and activate the best offer. See « How it works »." },
+              { n: "02", h: "Cashback", p: "Platforms compared, combining with a promo code, validation and withdrawal times." },
+              { n: "03", h: "Refurbished", p: "Grades, warranties, certified sellers and calculating the real saving." },
+              { n: "04", h: "Extension", p: "Installation, supported browsers, what shows on a product page." },
+              { n: "05", h: "Account & alerts", p: "Create an account, manage price-drop alerts and your preferences." },
+              { n: "06", h: "Data & privacy", p: "What FILON reads, what it doesn't do, and how to exercise your GDPR rights." },
+            ]}
+          />
+        </div>
+      </section>
+
+      <ProseBlock heading={<>Can&apos;t find it ? <span className="it">Write to us</span>.</>} alt>
+        <p>
+          Most answers are in our <a href="/faq">FAQ</a> and on the{" "}
+          <a href="/comment-ca-marche">How it works</a> page. For everything else, our team replies directly.
+        </p>
+        <p>
+          Contact us at <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a> or via the{" "}
+          <a href="/contact">contact form</a>. We&apos;ll get back to you quickly, in French or Dutch.
+        </p>
+      </ProseBlock>
+
+      <ClosingCta title={<>Ready to stop <span className="it">overpaying</span> ?</>} sub="Add FILON and let the copilot do the work before every purchase." />
+    </>
+  );
+}
+
 export default function AidePage() {
-  return <Localized fr={<AideFR />} nl={<AideNL />} />;
+  return <Localized fr={<AideFR />} nl={<AideNL />} en={<AideEN />} />;
 }

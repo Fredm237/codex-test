@@ -47,6 +47,24 @@ const PRODUIT_NL = [
   { q: "Werkt FILON buiten België ?", a: "We beginnen met Franstalig België, daarna Frankrijk en de rest van de Europese francofonie." },
 ];
 
+const GENERAL_EN = [
+  { q: "What is FILON, in one sentence ?", a: "A shopping assistant. You tell it what you're looking for, it tells you what to buy, where, and whether it's the right time." },
+  { q: "How is it different from a simple comparison ?", a: "A comparison gives you a list and leaves you to decide. FILON decides for you: a clear answer, « here's what you should buy »." },
+  { q: "Is FILON really free ?", a: "Yes, entirely, for everyone, with no subscription or credit card. There is no paid version." },
+];
+
+const CONFIANCE_EN = [
+  { q: "Can I trust the recommendation ?", a: "It's calculated on your interest alone. No brand can buy its place. FILON shows you what's genuinely best for you." },
+  { q: "Is my browsing data resold ?", a: "Never. No advertising profile, no reselling to third parties. FILON keeps as little as possible, GDPR-compliant by default." },
+  { q: "Is the refurbished offered reliable ?", a: "Only verified refurbished, from certified sellers and under warranty. You see the warranty and the saving before you decide." },
+];
+
+const PRODUIT_EN = [
+  { q: "What does cashback change for me ?", a: "FILON finds the best offer of the moment and takes you there. You have nothing to search for, nor to compare." },
+  { q: "When do the extension and the app arrive ?", a: "The extension first, then the mobile app and the assistant. Add FILON to be notified at each launch." },
+  { q: "Does FILON work outside Belgium ?", a: "We start with French-speaking Belgium, then France and the rest of the European francophonie." },
+];
+
 function FaqFR() {
   return (
     <>
@@ -81,6 +99,23 @@ function FaqNL() {
   );
 }
 
+function FaqEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="FAQ"
+        title={<>Your questions, our <span className="it">clear</span> answers.</>}
+        intro="What FILON does, why it's free, what we do with your data. The real questions, and honest answers."
+        breadcrumb={[{ name: "FAQ", path: "/faq" }]}
+      />
+      <FaqBlock items={GENERAL_EN} id="general" eyebrow="General" title="The essentials." />
+      <FaqBlock items={CONFIANCE_EN} id="confiance" eyebrow="Trust & data" title="Trust and privacy." />
+      <FaqBlock items={PRODUIT_EN} id="produit" eyebrow="Product" title="Refurbished, extension, availability." />
+      <ClosingCta title={<>Another <span className="it">question</span> ?</>} sub="Write to us. We reply fast, and by a human." />
+    </>
+  );
+}
+
 export default function FaqPage() {
-  return <Localized fr={<FaqFR />} nl={<FaqNL />} />;
+  return <Localized fr={<FaqFR />} nl={<FaqNL />} en={<FaqEN />} />;
 }

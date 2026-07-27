@@ -123,6 +123,62 @@ function CarrieresNL() {
   );
 }
 
+function CarrieresEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Careers"
+        title={<>Build the <span className="it">reflex</span> of millions of shoppers.</>}
+        intro="FILON is at its beginnings, the best moment to join. We're building a shopping copilot that saves everyone time and money, with transparency as our compass."
+        breadcrumb={[{ name: "Careers", path: "/carrieres" }]}
+      />
+
+      <ProseBlock heading={<>What we&apos;re <span className="it">building</span>.</>}>
+        <p>
+          Not yet another comparison site, but a <b>shopping intelligence</b>: an AI that recommends the right
+          decision, present at the right moment. It&apos;s an ambitious technical and editorial project, with a
+          concrete impact on people&apos;s wallets.
+        </p>
+        <p>
+          We believe in a small, exacting team, in autonomy and in a product polished down to the last detail. The
+          exact opposite of « quick and sloppy ».
+        </p>
+      </ProseBlock>
+
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "22ch" }}>The profiles that make us tick.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "01", h: "Product & AI", p: "Engineering, data and models: building the intelligence that recommends the right purchase." },
+              { n: "02", h: "Extension & front", p: "An ultra-smooth browser extension, present without ever getting in the way." },
+              { n: "03", h: "Content & media brand", p: "Video, the « Le Filon » newsletter, social: making FILON a brand people follow." },
+              { n: "04", h: "Growth & partnerships", p: "Forging merchant and platform integrations, growing the audience." },
+              { n: "05", h: "Design", p: "Top-tier execution, from the micro-detail to the overall experience." },
+              { n: "06", h: "Ops & trust", p: "GDPR compliance, data quality, an impeccable user relationship." },
+            ]}
+          />
+        </div>
+      </section>
+
+      <ProseBlock heading={<>No opening that <span className="it">fits</span> you ?</>}>
+        <p>
+          We don&apos;t always have an open role, but we read every spontaneous application. If the project speaks
+          to you and you&apos;re excellent at what you do, introduce yourself.
+        </p>
+        <p>
+          Write to <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>: tell us what you want to
+          build, show what you&apos;ve already done. Based in Belgium or French-speaking remote.
+        </p>
+      </ProseBlock>
+
+      <ClosingCta title={<>Want to be <span className="it">part of it</span> ?</>} sub="Write to us. The best stories start early." />
+    </>
+  );
+}
+
 export default function CarrieresPage() {
-  return <Localized fr={<CarrieresFR />} nl={<CarrieresNL />} />;
+  return <Localized fr={<CarrieresFR />} nl={<CarrieresNL />} en={<CarrieresEN />} />;
 }

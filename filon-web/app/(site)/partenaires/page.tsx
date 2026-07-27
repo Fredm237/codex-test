@@ -63,6 +63,32 @@ function PartenairesNL() {
   );
 }
 
+function PartenairesEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Partners"
+        title={<>Let&apos;s work <span className="it">together</span>.</>}
+        intro="FILON helps people buy better every day. Are you a brand, a merchant or a media outlet ? Let's talk about what we can do together."
+        breadcrumb={[{ name: "Partners", path: "/partenaires" }]}
+      />
+
+      <ProseBlock heading={<>An audience that <span className="it">decides</span>.</>}>
+        <p>
+          Our users come to FILON at the precise moment they&apos;re about to buy. That&apos;s the best moment to
+          meet a great brand.
+        </p>
+        <p>
+          If you think you have your place here, write to us at{" "}
+          <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. We&apos;ll get back to you quickly.
+        </p>
+      </ProseBlock>
+
+      <ClosingCta title={<>Shall we <span className="it">talk</span> ?</>} sub="Write to us. A good collaboration starts with a conversation." />
+    </>
+  );
+}
+
 export default function PartenairesPage() {
-  return <Localized fr={<PartenairesFR />} nl={<PartenairesNL />} />;
+  return <Localized fr={<PartenairesFR />} nl={<PartenairesNL />} en={<PartenairesEN />} />;
 }

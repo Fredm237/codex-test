@@ -105,6 +105,53 @@ function PresseNL() {
   );
 }
 
+function PresseEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Press"
+        title={<>FILON, <span className="it">in the clear</span>.</>}
+        intro="Everything you need to talk about FILON. Journalists, creators, podcasters, write to us, we reply fast."
+        breadcrumb={[{ name: "Press", path: "/presse" }]}
+      />
+
+      <ProseBlock heading={<>In one <span className="it">sentence</span>.</>}>
+        <p>
+          <b>FILON is a shopping assistant.</b> You tell it what you&apos;re looking for, it tells you what to buy,
+          where, and whether it&apos;s the right time. Before every purchase, in a few seconds.
+        </p>
+      </ProseBlock>
+
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "20ch" }}>The key points.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "◆", h: "What it is", p: "A shopping assistant that recommends the best decision, not just a list of prices." },
+              { n: "◆", h: "For whom", p: "Anyone who wants to buy better, without spending hours on it." },
+              { n: "◆", h: "Price", p: "100% free. No subscription, no credit card." },
+              { n: "◆", h: "Market", p: "French-speaking Belgium first, then France and the European francophonie." },
+              { n: "◆", h: "Based in", p: `${site.city}.` },
+              { n: "◆", h: "Status", p: "In launch phase, extension then app and assistant." },
+            ]}
+          />
+        </div>
+      </section>
+
+      <ProseBlock heading={<>Media <span className="it">contact</span>.</>} alt>
+        <p>
+          For an interview or visuals, write to{" "}
+          <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. We provide logo and assets on request.
+        </p>
+      </ProseBlock>
+
+      <ClosingCta title={<>Let&apos;s talk about what&apos;s <span className="it">changing</span>.</>} sub="An angle, an interview, a figure to check. Write to us, we reply fast." />
+    </>
+  );
+}
+
 export default function PressePage() {
-  return <Localized fr={<PresseFR />} nl={<PresseNL />} />;
+  return <Localized fr={<PresseFR />} nl={<PresseNL />} en={<PresseEN />} />;
 }
