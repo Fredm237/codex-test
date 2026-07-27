@@ -219,6 +219,110 @@ function TransparenceNL() {
   );
 }
 
+function TransparenceEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Transparency"
+        title={
+          <>
+            How FILON makes a living, <span className="it">without ever costing you more</span>.
+          </>
+        }
+        intro={
+          <>
+            A free service owes an explanation. Here, plainly, is our model: where the money comes from, what it
+            changes for you (nothing), and what we forbid ourselves.
+          </>
+        }
+        breadcrumb={[{ name: "Transparency", path: "/transparence" }]}
+      />
+
+      <ProseBlock heading={<>We&apos;re paid through <span className="it">affiliation</span>.</>}>
+        <p>
+          When you click « See the offer » and buy from a merchant, that merchant may pay us an{" "}
+          <b>affiliation commission</b>. That&apos;s our source of income.
+        </p>
+        <p>
+          Key point&nbsp;: this commission is paid by the <b>merchant</b>, taken from its margin. It
+          <b> never increases the price you pay</b>. You pay exactly the same amount as going directly to the
+          merchant&apos;s site.
+        </p>
+        <p style={{ color: "var(--ink-3)", fontSize: 14 }}>
+          In plain terms, as the regulations and our partners require&nbsp;: some links on this site are affiliate
+          links. Clicking them and buying may earn us a commission, at no extra cost to you.
+        </p>
+      </ProseBlock>
+
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-lead">
+            <span className="idx">Our rules</span>
+            <h2>
+              What the income <span className="it">never</span> changes.
+            </h2>
+          </div>
+          <InfoGrid
+            items={[
+              {
+                n: "01",
+                h: "No ranking is bought",
+                p: "A merchant that pays us more doesn't get a better place, nor a better Score. The ranking follows your interest, full stop.",
+              },
+              {
+                n: "02",
+                h: "The best price first",
+                p: "If the cheapest offer earns us nothing, it's still the one we show you. Always.",
+              },
+              {
+                n: "03",
+                h: "No advertising",
+                p: "No banners, no disguised placements. Nothing disturbs the recommendation you receive.",
+              },
+              {
+                n: "04",
+                h: "Free, for real",
+                p: "No subscription, no credit card, no paid option. You never pay FILON.",
+              },
+              {
+                n: "05",
+                h: "Your data stays yours",
+                p: "Cookie-free, anonymous audience measurement (Plausible). No advertising profile, no reselling.",
+              },
+              {
+                n: "06",
+                h: "The reasoning is open",
+                p: "The Score breaks down criterion by criterion. You see why an offer is recommended.",
+              },
+            ]}
+          />
+        </div>
+      </section>
+
+      <ProseBlock heading={<>During launch, we <span className="it">flag everything</span>.</>} alt>
+        <p>
+          FILON is starting up. Until our merchant partnerships and our data access (cashback, long price history)
+          are all signed, some information relies on <b>estimates</b>.
+        </p>
+        <p>
+          We don&apos;t hide them&nbsp;: they are <b>clearly flagged</b> as such (« estimated prices », « example »,
+          « real figures coming »). As the real data arrives, it replaces the estimates, without ever inventing a
+          figure in the meantime.
+        </p>
+        <p>
+          Our only asset is your trust. Betraying it once would be enough to lose everything&nbsp;: we&apos;d rather
+          show « we don&apos;t know yet » than a nice but false figure.
+        </p>
+      </ProseBlock>
+
+      <ClosingCta
+        title={<>Advice on your side, <span className="it">nothing else.</span></>}
+        sub="Ask FILON before you buy. Free, neutral, ad-free."
+      />
+    </>
+  );
+}
+
 export default function TransparencePage() {
-  return <Localized fr={<TransparenceFR />} nl={<TransparenceNL />} />;
+  return <Localized fr={<TransparenceFR />} nl={<TransparenceNL />} en={<TransparenceEN />} />;
 }

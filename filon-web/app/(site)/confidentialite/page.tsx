@@ -208,6 +208,102 @@ function ConfidentialiteNL() {
   );
 }
 
+function ConfidentialiteEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Privacy"
+        title={<>Your data stays yours.</>}
+        intro="Transparency is at the heart of FILON, and that goes for your data too. Here, plainly, is what we collect, why, and your rights."
+        breadcrumb={[{ name: "Privacy", path: "/confidentialite" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-legal">
+          <p className="upd">Last updated: 21 July 2026</p>
+
+          <h2>In short</h2>
+          <ul>
+            <li>We build <b>no advertising profile</b> and <b>resell no data</b>.</li>
+            <li>Our audience measurement is <b>cookie-free</b> and anonymous (Plausible).</li>
+            <li>We only collect personal data if <b>you provide it</b> (contact, newsletter).</li>
+            <li>Partner links <b>never</b> increase your price.</li>
+          </ul>
+
+          <h2>Data controller</h2>
+          <p>
+            {site.legalName}, {site.legalForm.toLowerCase()} (CBE {site.bce}), {site.legalAddress}. For any
+            question:{" "}
+            <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
+          </p>
+
+          <h2>Data we process</h2>
+          <p>
+            <b>Contact form</b>: name, email address and message, to answer your request. Legal basis: your consent
+            / our legitimate interest in replying to you.
+          </p>
+          <p>
+            <b>Newsletter</b>: your email address, to inform you of the launch and news. Legal basis: your consent.
+            You can unsubscribe at any time.
+          </p>
+          <p>
+            <b>Audience measurement</b>: we use Plausible Analytics, a privacy-friendly solution,
+            <b> cookie-free</b> and with no identifiable personal data (no persistent identifier, aggregated
+            statistics). No consent banner is therefore required for this processing.
+          </p>
+
+          <h2>The FILON browser extension</h2>
+          <p>
+            On the product page of a supported merchant, the extension only reads the <b>displayed product
+            name</b> (page content) in order to offer you FILON. This name is <b>neither stored, resold, nor
+            transmitted in the background</b>: it is sent to FILON only <b>when you click</b> to start the
+            comparison, exactly as if you typed that product into a search.
+          </p>
+          <p>
+            The <b>activeTab</b> permission is used only if you click « Analyse the page » (reading the title of the
+            active tab). The <b>storage</b> permission serves only to remember locally that you closed the panel, so
+            as not to reopen it for a few hours. The extension contains <b>no telemetry</b>, does not track your
+            browsing and only accesses supported merchants.
+          </p>
+
+          <h2>Cookies</h2>
+          <p>
+            The site sets <b>no advertising tracking cookie</b>. Only any strictly necessary cookies for proper
+            functioning may be used. You keep control via your browser settings.
+          </p>
+
+          <h2>Partner links</h2>
+          <p>
+            When you activate an offer via FILON, a partner service may place a technical cookie to attribute your
+            order. This processing falls under that partner&apos;s privacy policy. It never changes the price you
+            pay.
+          </p>
+
+          <h2>Processors</h2>
+          <ul>
+            <li><b>Vercel</b>, website hosting.</li>
+            <li><b>Plausible Analytics</b>, cookie-free audience measurement.</li>
+            <li><b>Formspree</b> (or equivalent), routing of contact messages and sign-ups.</li>
+          </ul>
+
+          <h2>Retention period</h2>
+          <p>
+            Contact messages are kept for as long as needed to process your request. Newsletter addresses are kept
+            until you unsubscribe.
+          </p>
+
+          <h2>Your rights (GDPR)</h2>
+          <p>
+            You have a right of access, rectification, erasure, restriction, objection and portability of your data.
+            To exercise them, write to{" "}
+            <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. You may also lodge a complaint with
+            the Data Protection Authority (DPA), in Belgium.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function ConfidentialitePage() {
-  return <Localized fr={<ConfidentialiteFR />} nl={<ConfidentialiteNL />} />;
+  return <Localized fr={<ConfidentialiteFR />} nl={<ConfidentialiteNL />} en={<ConfidentialiteEN />} />;
 }
