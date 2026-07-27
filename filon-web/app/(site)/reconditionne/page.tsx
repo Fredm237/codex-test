@@ -27,6 +27,14 @@ const FAQ_NL = [
   { q: "Kan ik refurbished en cashback combineren ?", a: "Absoluut, en daar blinkt FILON in uit: het telt de laagste refurbished-prijs, de hoogste cashback en een eventuele kortingscode op om je echte eindprijs te tonen." },
 ];
 
+const FAQ_EN = [
+  { q: "Is a refurbished product reliable ?", a: "Yes, when well chosen. FILON only keeps verified refurbished, from certified sellers and under warranty. You see the warranty and the saving before you decide." },
+  { q: "How much can you really save ?", a: "A high-end refurbished smartphone often sells 40% below new. Adding a partner cashback (3 to 8%), the total saving reaches 45 to 50%. FILON adds this up for you." },
+  { q: "What do grades A, A+, etc. mean ?", a: "The grade describes the cosmetic condition: an A+ grade is almost new, a B grade shows slight signs of use with no impact on functioning. FILON displays the grade for each offer so you choose with full knowledge." },
+  { q: "Is refurbished really more eco-friendly ?", a: "Yes: extending a device's life avoids manufacturing a new one, a heavy consumer of resources and energy. It's one of the most effective moves to reduce the footprint of your tech purchases." },
+  { q: "Can I combine refurbished and cashback ?", a: "Absolutely, and that's where FILON shines: it adds up the lowest refurbished price, the highest cashback and any promo code to show your real final price." },
+];
+
 function ReconditionneFR() {
   return (
     <>
@@ -108,6 +116,46 @@ function ReconditionneNL() {
   );
 }
 
+function ReconditionneEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Refurbished"
+        title={<>The same product. Up to <span className="it">50%</span> cheaper.</>}
+        intro="Why pay full price for new when the refurbished equivalent — verified and guaranteed — often costs 40% less ? FILON compares the two and adds the cashback to reveal your real price, better for your budget, and for the planet."
+        breadcrumb={[{ name: "Refurbished", path: "/reconditionne" }]}
+        photo="/img/page-reconditionne.webp"
+      />
+      <ProseBlock heading={<>New or refurbished ? FILON <span className="it">decides</span> for you.</>}>
+        <p>
+          Comparing new and refurbished yourself is tedious: finding the exact equivalent, checking the warranty,
+          the seller, then calculating the real saving.
+        </p>
+        <p>
+          FILON does it for you, in one second. It shows you the <b>new</b>, the <b>guaranteed refurbished
+          equivalent</b>, and <b>your real price</b>. You decide at a glance, without spending your evening on it.
+        </p>
+      </ProseBlock>
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "20ch" }}>What FILON checks before recommending it to you.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "✓", h: "Verified grade", p: "The cosmetic and functional condition is displayed clearly (A+, A, B…)." },
+              { n: "✓", h: "Real warranty", p: "12 to 24 months depending on the seller, never refurbished without a safety net." },
+              { n: "✓", h: "Quantified saving", p: "The gain vs new, cashback included, calculated and shown before purchase." },
+            ]}
+          />
+        </div>
+      </section>
+      <FaqBlock items={FAQ_EN} eyebrow="Refurbished · FAQ" title="Refurbished, with peace of mind." />
+      <ClosingCta title={<>Pay the <span className="it">right</span> price. Not the new price.</>} sub="FILON compares new and refurbished on every purchase, free." />
+    </>
+  );
+}
+
 export default function ReconditionnePage() {
-  return <Localized fr={<ReconditionneFR />} nl={<ReconditionneNL />} />;
+  return <Localized fr={<ReconditionneFR />} nl={<ReconditionneNL />} en={<ReconditionneEN />} />;
 }

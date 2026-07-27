@@ -104,6 +104,52 @@ function SecuriteNL() {
   );
 }
 
+function SecuriteEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Security"
+        title={<>Trust isn&apos;t an option. It&apos;s the <span className="it">product</span>.</>}
+        intro="A shopping copilot is only worth anything if you can trust it. Here, concretely, is how FILON protects your data, your browsing and your money."
+        breadcrumb={[{ name: "Security", path: "/securite" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-wrap">
+          <InfoGrid
+            items={[
+              { n: <IcLock />, h: "Data minimisation", p: "FILON analyses only what's strictly necessary for the comparison. Nothing more." },
+              { n: <IcNoResale />, h: "No reselling", p: "No advertising profile, no reselling to third parties. Your data stays yours." },
+              { n: <IcEncrypted />, h: "Encrypted connections", p: "Exchanges with our services are end-to-end encrypted (HTTPS/TLS)." },
+              { n: <IcShieldCheck />, h: "GDPR-compliant", p: "Processing GDPR-compliant by default, with rights you can exercise at any time." },
+              { n: <IcChartNoCookie />, h: "Cookie-free measurement", p: "Our audience is measured cookie-free and anonymously (Plausible)." },
+              { n: <IcEye />, h: "No ulterior motive", p: "No advertising. The recommendation serves your interest, not ours." },
+            ]}
+          />
+        </div>
+      </section>
+      <ProseBlock heading={<>What FILON <span className="it">never</span> does.</>} alt>
+        <p>
+          FILON doesn&apos;t resell your browsing, doesn&apos;t build an advertising profile, and never changes the
+          price you pay at the merchant. Nor does it store your payment methods: the purchase happens at the
+          merchant, as usual — FILON only led you to the best decision.
+        </p>
+        <p>
+          The full detail of the processing is set out in our <a href="/confidentialite">privacy policy</a> and our{" "}
+          <a href="/cookies">cookie policy</a>.
+        </p>
+      </ProseBlock>
+      <ProseBlock heading={<>Report a <span className="it">vulnerability</span>.</>}>
+        <p>
+          Security is ongoing work. If you think you&apos;ve found a flaw or abnormal behaviour, write to us at{" "}
+          <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. We study every serious report with
+          care and gratitude.
+        </p>
+      </ProseBlock>
+      <ClosingCta title={<>A copilot you can <span className="it">trust</span>.</>} sub="Data minimisation, zero reselling, no advertising." />
+    </>
+  );
+}
+
 export default function SecuritePage() {
-  return <Localized fr={<SecuriteFR />} nl={<SecuriteNL />} />;
+  return <Localized fr={<SecuriteFR />} nl={<SecuriteNL />} en={<SecuriteEN />} />;
 }

@@ -28,6 +28,13 @@ const FAQ_NL = [
   { q: "Moet ik een account aanmaken ?", a: "Voor het essentiële niet. Een account wordt nuttig voor prijsdalings-meldingen, maar de vergelijking en het oordeel werken zonder inschrijving, en het is gratis." },
 ];
 
+const FAQ_EN = [
+  { q: "Which browsers does the extension work on ?", a: "Chrome first, then Edge, Firefox and Safari. The mobile app and the conversational assistant will follow. Join the list to be notified of each version's launch." },
+  { q: "Does the extension slow down my browsing ?", a: "No. It only activates on the product pages of recognised merchants, stays invisible the rest of the time, and runs no analysis as long as you're not viewing an item." },
+  { q: "What data does the extension read ?", a: "Only what's needed for the comparison : the product and the merchant of the page viewed. No advertising profile, no reselling. The details are in our privacy policy." },
+  { q: "Do I need to create an account ?", a: "Not for the essentials. An account becomes useful for price-drop alerts, but the comparison and the verdict work without signing up, and it's free." },
+];
+
 function Browsers({ chromeLabel, storeNote, statusChrome, waitNote }: { chromeLabel: string; storeNote: string; statusChrome: string; waitNote: string }) {
   return (
     <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
@@ -135,6 +142,46 @@ function ExtensionNL() {
   );
 }
 
+function ExtensionEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Extension"
+        title={<>Your shopping copilot, <span className="it">everywhere</span>.</>}
+        intro="The FILON extension is present on every merchant site. The moment you look at a product, it tells you whether it's cheaper elsewhere, what cashback comes with it, whether a refurbished alternative exists, and whether it's the right time to buy."
+        breadcrumb={[{ name: "Extension", path: "/extension" }]}
+        photo="/img/video-extension-poster.webp"
+        video="/video/phone-scroll.mp4"
+      />
+      <Browsers
+        chromeLabel="Add to Chrome — free"
+        storeNote="One-click install from the Chrome Web Store. Also on Edge. Firefox and Safari to follow."
+        statusChrome="Chrome · being published"
+        waitNote="The extension is ready and under review on the Chrome Web Store. As soon as it's live, the « Add to Chrome » button installs it in one click. Leave your email to be notified."
+      />
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "20ch" }}>What appears while you look at a product.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "€", h: "The price elsewhere", p: "« You're looking at this product at €899, it's €799 at another merchant. »" },
+              { n: "%", h: "The available cashback", p: "The highest rate of the moment, activatable in one move before you pay." },
+              { n: "↻", h: "The refurbished alternative", p: "The guaranteed equivalent, often 20 to 45% cheaper, when it exists." },
+              { n: "↧", h: "The price history", p: "High, normal or rock-bottom price, to know whether to buy or wait." },
+              { n: "★", h: "The seller's reliability", p: "Reputation and warranties, to avoid the false bargain." },
+              { n: "✓", h: "The verdict", p: "One clear message : « buy now » or « better to wait »." },
+            ]}
+          />
+        </div>
+      </section>
+      <FaqBlock items={FAQ_EN} eyebrow="Extension · FAQ" title="The extension, with no grey areas." />
+      <ClosingCta title={<>Install the <span className="it">reflex</span>.</>} sub="Add FILON to your browser and let it watch before every purchase." />
+    </>
+  );
+}
+
 export default function ExtensionPage() {
-  return <Localized fr={<ExtensionFR />} nl={<ExtensionNL />} />;
+  return <Localized fr={<ExtensionFR />} nl={<ExtensionNL />} en={<ExtensionEN />} />;
 }
