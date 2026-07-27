@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/transparence",
@@ -9,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
     "Comment FILON gagne de l'argent : liens d'affiliation, sans surcoût pour vous, sans jamais fausser un conseil. Neutralité, gratuité et clarté, expliquées.",
 });
 
-export default function TransparencePage() {
+function TransparenceFR() {
   return (
     <>
       <ContentHero
@@ -112,4 +113,112 @@ export default function TransparencePage() {
       />
     </>
   );
+}
+
+function TransparenceNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Transparantie"
+        title={
+          <>
+            Hoe FILON zijn brood verdient, <span className="it">zonder je ooit meer te kosten</span>.
+          </>
+        }
+        intro={
+          <>
+            Een gratis dienst moet zich verantwoorden. Hier, zonder omwegen, ons model : waar het geld vandaan komt,
+            wat het voor jou verandert (niets), en wat we onszelf verbieden.
+          </>
+        }
+        breadcrumb={[{ name: "Transparantie", path: "/transparence" }]}
+      />
+
+      <ProseBlock heading={<>We worden vergoed via <span className="it">affiliatie</span>.</>}>
+        <p>
+          Wanneer je op «&nbsp;Bekijk het aanbod&nbsp;» klikt en bij een winkel koopt, kan die ons een{" "}
+          <b>affiliatiecommissie</b> betalen. Dat is onze inkomstenbron.
+        </p>
+        <p>
+          Essentieel punt&nbsp;: die commissie wordt betaald door de <b>winkel</b>, afgehouden van zijn marge. Ze
+          <b> verhoogt nooit de prijs die jij betaalt</b>. Je betaalt exact hetzelfde bedrag als wanneer je
+          rechtstreeks naar de website van de winkel gaat.
+        </p>
+        <p style={{ color: "var(--ink-3)", fontSize: 14 }}>
+          In klare taal, zoals de regelgeving en onze partners het eisen&nbsp;: sommige links op deze site zijn
+          affiliatielinks. Erop klikken en kopen kan ons een commissie opleveren, zonder extra kost voor jou.
+        </p>
+      </ProseBlock>
+
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-lead">
+            <span className="idx">Onze regels</span>
+            <h2>
+              Wat de vergoeding <span className="it">nooit</span> verandert.
+            </h2>
+          </div>
+          <InfoGrid
+            items={[
+              {
+                n: "01",
+                h: "Geen gekochte rangschikking",
+                p: "Een winkel die ons beter vergoedt, krijgt geen betere plaats, noch een betere Score. De rangschikking volgt jouw belang, punt.",
+              },
+              {
+                n: "02",
+                h: "De beste prijs eerst",
+                p: "Als het goedkoopste aanbod ons niets opbrengt, is het toch dat wat we je tonen. Altijd.",
+              },
+              {
+                n: "03",
+                h: "Zonder reclame",
+                p: "Geen banners, geen verkapte plaatsingen. Niets komt het advies dat je krijgt verstoren.",
+              },
+              {
+                n: "04",
+                h: "Gratis, echt waar",
+                p: "Geen abonnement, geen bankkaart, geen betalende optie. Je betaalt FILON nooit.",
+              },
+              {
+                n: "05",
+                h: "Je gegevens blijven van jou",
+                p: "Bezoekersmeting zonder cookie en anoniem (Plausible). Geen advertentieprofiel, geen doorverkoop.",
+              },
+              {
+                n: "06",
+                h: "De redenering ligt open",
+                p: "De Score wordt criterium per criterium ontleed. Je ziet waarom een aanbod aanbevolen is.",
+              },
+            ]}
+          />
+        </div>
+      </section>
+
+      <ProseBlock heading={<>Tijdens de lancering <span className="it">signaleren we alles</span>.</>} alt>
+        <p>
+          FILON start op. Zolang onze winkelpartnerschappen en onze toegang tot de gegevens (cashback, lange
+          prijsgeschiedenis) niet allemaal getekend zijn, berusten sommige informatie op <b>schattingen</b>.
+        </p>
+        <p>
+          We verbergen ze niet&nbsp;: ze zijn <b>duidelijk gesignaleerd</b> als dusdanig («&nbsp;geschatte
+          prijzen&nbsp;», «&nbsp;voorbeeld&nbsp;», «&nbsp;echte cijfers volgen&nbsp;»). Naarmate de echte gegevens
+          binnenkomen, vervangen ze de schattingen, zonder ondertussen ooit een cijfer te verzinnen.
+        </p>
+        <p>
+          Onze enige troef is je vertrouwen. Het één keer beschamen zou volstaan om alles te verliezen&nbsp;: we tonen
+          liever «&nbsp;dat weten we nog niet&nbsp;» dan een mooi vals cijfer.
+        </p>
+      </ProseBlock>
+
+      <ClosingCta
+        title={<>Advies aan jouw kant, <span className="it">niets anders.</span></>}
+        sub="Vraag het aan FILON vóór je koopt. Gratis, neutraal, zonder reclame."
+      />
+    </>
+  );
+}
+
+export default function TransparencePage() {
+  return <Localized fr={<TransparenceFR />} nl={<TransparenceNL />} />;
 }

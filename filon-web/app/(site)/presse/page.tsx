@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
 import { site } from "@/lib/site";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/presse",
@@ -10,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
     "L'essentiel sur FILON pour la presse : ce que fait le produit, pour qui, et le contact média.",
 });
 
-export default function PressePage() {
+function PresseFR() {
   return (
     <>
       <ContentHero
@@ -55,4 +56,55 @@ export default function PressePage() {
       <ClosingCta title={<>Parlons de ce qui <span className="it">change</span>.</>} sub="Un angle, une interview, un chiffre à vérifier. Écrivez-nous, on répond vite." />
     </>
   );
+}
+
+function PresseNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Pers"
+        title={<>FILON, <span className="it">helder</span> uitgelegd.</>}
+        intro="Alles wat nodig is om over FILON te praten. Journalisten, creators, podcasters, schrijf ons, we antwoorden snel."
+        breadcrumb={[{ name: "Pers", path: "/presse" }]}
+      />
+
+      <ProseBlock heading={<>In één <span className="it">zin</span>.</>}>
+        <p>
+          <b>FILON is een koopassistent.</b> Je zegt hem wat je zoekt, hij zegt je wat te kopen, waar, en of het het
+          juiste moment is. Vóór elke aankoop, in enkele seconden.
+        </p>
+      </ProseBlock>
+
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "20ch" }}>De kernpunten.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "◆", h: "Wat het is", p: "Een koopassistent die de beste beslissing aanbeveelt, geen simpele prijslijst." },
+              { n: "◆", h: "Voor wie", p: "Iedereen die beter wil kopen, zonder er uren aan te besteden." },
+              { n: "◆", h: "Prijs", p: "100 % gratis. Zonder abonnement, zonder bankkaart." },
+              { n: "◆", h: "Markt", p: "Franstalig België eerst, daarna Frankrijk en de Europese francofonie." },
+              { n: "◆", h: "Gevestigd te", p: `${site.city}.` },
+              { n: "◆", h: "Status", p: "In lanceringsfase, extensie daarna applicatie en assistent." },
+            ]}
+          />
+        </div>
+      </section>
+
+      <ProseBlock heading={<>Contact <span className="it">media</span>.</>} alt>
+        <p>
+          Voor een interview of visuals, schrijf naar{" "}
+          <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. We bezorgen logo en materiaal op aanvraag.
+        </p>
+      </ProseBlock>
+
+      <ClosingCta title={<>Laten we praten over wat <span className="it">verandert</span>.</>} sub="Een invalshoek, een interview, een cijfer om te checken. Schrijf ons, we antwoorden snel." />
+    </>
+  );
+}
+
+export default function PressePage() {
+  return <Localized fr={<PresseFR />} nl={<PresseNL />} />;
 }

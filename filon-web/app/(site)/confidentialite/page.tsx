@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
 import { site } from "@/lib/site";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/confidentialite",
@@ -10,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
     "Comment FILON protège vos données : aucune revente, analytics sans cookie, formulaires, liens partenaires et vos droits RGPD.",
 });
 
-export default function ConfidentialitePage() {
+function ConfidentialiteFR() {
   return (
     <>
       <ContentHero
@@ -107,4 +108,106 @@ export default function ConfidentialitePage() {
       </section>
     </>
   );
+}
+
+function ConfidentialiteNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Privacy"
+        title={<>Je gegevens blijven van jou.</>}
+        intro="Transparantie is het hart van FILON, dat geldt ook voor je gegevens. Hier, in klare taal, wat we verzamelen, waarom, en je rechten."
+        breadcrumb={[{ name: "Privacy", path: "/confidentialite" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-legal">
+          <p className="upd">Laatste update : 21 juli 2026</p>
+
+          <h2>Samengevat</h2>
+          <ul>
+            <li>We bouwen <b>geen enkel advertentieprofiel</b> en <b>verkopen geen enkele gegevens door</b>.</li>
+            <li>Onze bezoekersmeting is <b>zonder cookie</b> en anoniem (Plausible).</li>
+            <li>We verzamelen enkel persoonsgegevens als <b>jij ze ons bezorgt</b> (contact, nieuwsbrief).</li>
+            <li>Partnerlinks verhogen <b>nooit</b> je prijs.</li>
+          </ul>
+
+          <h2>Verwerkingsverantwoordelijke</h2>
+          <p>
+            {site.legalName}, {site.legalForm.toLowerCase()} (KBO {site.bce}), {site.legalAddress}. Voor elke
+            vraag :{" "}
+            <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
+          </p>
+
+          <h2>Gegevens die we verwerken</h2>
+          <p>
+            <b>Contactformulier</b> : naam, e-mailadres en bericht, om je aanvraag te beantwoorden. Rechtsgrond :
+            jouw toestemming / ons gerechtvaardigd belang om je te antwoorden.
+          </p>
+          <p>
+            <b>Nieuwsbrief</b> : je e-mailadres, om je te informeren over de lancering en de nieuwigheden. Rechtsgrond :
+            jouw toestemming. Je kunt je op elk moment uitschrijven.
+          </p>
+          <p>
+            <b>Bezoekersmeting</b> : we gebruiken Plausible Analytics, een privacyvriendelijke oplossing,
+            <b> zonder cookie</b> en zonder identificeerbare persoonsgegevens (geen persistente identificator,
+            geaggregeerde statistieken). Voor deze verwerking is dus geen toestemmingsbanner vereist.
+          </p>
+
+          <h2>De FILON-browserextensie</h2>
+          <p>
+            Op de productpagina van een ondersteunde winkel leest de extensie enkel de <b>getoonde
+            productnaam</b> (inhoud van de pagina) om je FILON voor te stellen. Die naam wordt <b>noch
+            opgeslagen, noch doorverkocht, noch op de achtergrond doorgestuurd</b> : hij wordt pas naar FILON
+            gestuurd <b>wanneer je klikt</b> om de vergelijking te starten, precies alsof je dat product in een
+            zoekopdracht typt.
+          </p>
+          <p>
+            De <b>activeTab</b>-toestemming wordt enkel gebruikt als je op « Pagina analyseren » klikt
+            (lezen van de titel van het actieve tabblad). De <b>storage</b>-toestemming dient enkel om lokaal te
+            onthouden dat je het paneel gesloten hebt, om het gedurende enkele uren niet opnieuw te openen. De
+            extensie bevat <b>geen enkele telemetrie</b>, volgt je surfgedrag niet en heeft enkel toegang tot de
+            ondersteunde winkels.
+          </p>
+
+          <h2>Cookies</h2>
+          <p>
+            De website plaatst <b>geen advertentie-tracking-cookie</b>. Enkel eventuele cookies die strikt nodig zijn
+            voor de goede werking kunnen gebruikt worden. Je behoudt de controle via de instellingen van je browser.
+          </p>
+
+          <h2>Partnerlinks</h2>
+          <p>
+            Wanneer je een aanbod activeert via FILON, kan een partnerdienst een technische cookie plaatsen om je
+            bestelling te koppelen. Deze verwerking valt onder het privacybeleid van die partner. Dit verandert nooit de
+            prijs die jij betaalt.
+          </p>
+
+          <h2>Verwerkers</h2>
+          <ul>
+            <li><b>Vercel</b>, hosting van de website.</li>
+            <li><b>Plausible Analytics</b>, bezoekersmeting zonder cookie.</li>
+            <li><b>Formspree</b> (of gelijkwaardig), verzending van de contactberichten en inschrijvingen.</li>
+          </ul>
+
+          <h2>Bewaartermijn</h2>
+          <p>
+            De contactberichten worden bewaard zolang nodig voor de verwerking van je aanvraag. De
+            nieuwsbrief-adressen tot je uitschrijving.
+          </p>
+
+          <h2>Je rechten (GDPR)</h2>
+          <p>
+            Je beschikt over een recht op inzage, verbetering, wissing, beperking, verzet en overdraagbaarheid van je
+            gegevens. Om ze uit te oefenen, schrijf naar{" "}
+            <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>. Je kunt ook een klacht indienen bij de
+            Gegevensbeschermingsautoriteit (GBA), in België.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export default function ConfidentialitePage() {
+  return <Localized fr={<ConfidentialiteFR />} nl={<ConfidentialiteNL />} />;
 }

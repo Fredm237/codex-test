@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
 import { site } from "@/lib/site";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/mentions-legales",
@@ -9,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
   description: "Mentions légales du site FILON, éditeur, hébergeur et informations légales.",
 });
 
-export default function MentionsLegalesPage() {
+function MentionsFR() {
   return (
     <>
       <ContentHero
@@ -76,4 +77,76 @@ export default function MentionsLegalesPage() {
       </section>
     </>
   );
+}
+
+function MentionsNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Juridisch"
+        title={<>Juridische vermeldingen</>}
+        intro="De juridische informatie met betrekking tot de website FILON en zijn uitgever."
+        breadcrumb={[{ name: "Juridische vermeldingen", path: "/mentions-legales" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-legal">
+          <p className="upd">Laatste update : 21 juli 2026</p>
+
+          <h2>Uitgever van de website</h2>
+          <p>
+            De website <b>{site.domain}</b> wordt uitgegeven door <b>{site.legalName}</b>.
+            <br />
+            Rechtsvorm : <b>{site.legalForm}</b>
+            <br />
+            Zetel : <b>{site.legalAddress}</b>
+            <br />
+            Ondernemingsnummer (KBO) : <b>{site.bce}</b>
+            <br />
+            Btw-nummer : <b>{site.vat}</b>
+            <br />
+            Contact : <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>
+          </p>
+
+          <h2>Verantwoordelijke uitgever</h2>
+          <p>{site.legalName}.</p>
+
+          <h2>Hosting</h2>
+          <p>
+            De website wordt gehost door <b>Vercel Inc.</b>, San Francisco, Californië, Verenigde Staten.
+            Meer informatie op <a href="https://vercel.com">vercel.com</a>.
+          </p>
+
+          <h2>Intellectuele eigendom</h2>
+          <p>
+            Het geheel van de inhoud van de website (teksten, grafische elementen, logo, visuele identiteit, code) is
+            eigendom van de uitgever, behoudens andersluidende vermelding, en wordt beschermd door het recht van de
+            intellectuele eigendom. Elke reproductie zonder toestemming is verboden.
+          </p>
+
+          <h2>Aard van de dienst en partnerlinks</h2>
+          <p>
+            FILON is een gratis dienst voor hulp bij de aankoopbeslissing. De website kan <b>partnerlinks</b> bevatten.
+            Ze activeren <b>verandert nooit de prijs die de gebruiker betaalt.</b>
+          </p>
+
+          <h2>Persoonsgegevens</h2>
+          <p>
+            De verwerking van persoonsgegevens wordt beschreven in ons{" "}
+            <a href="/confidentialite">privacybeleid</a>.
+          </p>
+
+          <h2>Aansprakelijkheid</h2>
+          <p>
+            De informatie over prijzen, beschikbaarheid en aanbiedingen wordt louter ter indicatie verstrekt en kan in
+            real time evolueren bij de winkels. De uitgever streeft ernaar de juistheid ervan te verzekeren maar kan niet
+            aansprakelijk worden gesteld voor eventuele fouten of voor schade verbonden aan het gebruik ervan.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export default function MentionsLegalesPage() {
+  return <Localized fr={<MentionsFR />} nl={<MentionsNL />} />;
 }
