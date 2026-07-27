@@ -82,6 +82,34 @@ const PL = {
       ["Je gegevens blijven van jou", "Analytics zonder cookies, geen doorverkoop. Wat je zoekt verlaat FILON nooit."],
     ] as Array<[string, string]>,
   },
+  en: {
+    eye: "FILON compares, in real time",
+    note: "And dozens of other merchants, plus certified refurbished sellers.",
+    stats: [
+      ["5+", "major merchants compared on every search"],
+      ["3-in-1", "price + coupons + cashback, merged into a single price"],
+      ["€0", "you never pay FILON, never any ads", "g"],
+      ["•", "users & € saved, real figures coming soon", "dot"],
+    ] as Array<[string, string, string?]>,
+    legend1: "The markers labelled",
+    legend2: "will fill with real figures as soon as the partnerships open.",
+    priceEye: "The real price, broken down",
+    priceH1: "The tag is never ", priceH2: "the real price.",
+    priceP: "FILON starts from the listed price, then removes what you can genuinely recover — verified coupon, cashback, best merchant — to reveal the amount you'll actually pay.",
+    ex: "Illustrative example · Lenovo IdeaPad Slim 5",
+    breakdown: [
+      ["Price shown on this page", "€799", false],
+      ["Best merchant found", "−€60", true],
+      ["Coupon verified at checkout", "−€15", true],
+      ["Cashback returned", "−€25", true],
+    ] as Array<[string, string, boolean]>,
+    total: "FILON real price",
+    trust: [
+      ["No place is for sale", "No brand or merchant can pay for a better ranking or a better Score. Ever."],
+      ["Free, and on your side", "Our income comes from affiliation, without ever raising your price or skewing a recommendation."],
+      ["Your data stays yours", "Cookie-free analytics, no reselling. What you search for never leaves FILON."],
+    ] as Array<[string, string]>,
+  },
 };
 
 function PriceCountUp() {

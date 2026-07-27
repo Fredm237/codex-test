@@ -68,6 +68,27 @@ const L = {
     cEye: "Betaal nooit meer te veel",
     cH1: "Vraag het aan FILON ", cH2: "voordat je koopt.",
   },
+  en: {
+    mIdx: "3 steps",
+    mH1: "Three seconds between you and ", mH2: "the best price",
+    steps: [
+      ["It recognises the product", "On any page, it understands what you're looking at."],
+      ["It looks everywhere", "In one second, the whole market scanned."],
+      ["It decides", "One number: your real price. One answer: buy, or wait."],
+    ],
+    tEye: "Our principle",
+    tH1: "On your side. ", tH2: "Only.",
+    tP1: "FILON works for you, not for a brand. What it shows you is what's genuinely best for you. Nothing else comes into play.",
+    tP2: "Trust isn't declared. It's proven, with every recommendation.",
+    pledge: [
+      ["01", "On your side.", "No brand can buy its place in a FILON recommendation."],
+      ["02", "No advertising.", "Nothing interferes with the answer you receive."],
+      ["03", "Your data stays yours.", "No advertising profile, no reselling. GDPR by default."],
+      ["04", "Free, for real.", "No card, no subscription. You never pay."],
+    ],
+    cEye: "Never overpay again",
+    cH1: "Ask FILON ", cH2: "before you buy.",
+  },
 };
 
 export function Method() {

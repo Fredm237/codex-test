@@ -35,6 +35,18 @@ const L = {
     finalH1: "Vraag het aan FILON ", finalH2: "voordat je koopt",
     finalNote: "Gratis, voor altijd. Geen bankkaart. Je gegevens blijven van jou.",
   },
+  en: {
+    netEye: "In real time",
+    netH1: "While you hesitate,", netH2: "FILON has already compared.",
+    netSub: "It looks everywhere, for you. All you have to do is say yes.",
+    graphEye: "The intelligence",
+    graphH1: "It doesn't compare prices.", graphH2: "It understands products.",
+    graphSub: "What a product is really worth, and how long it will last. It learns with every purchase.",
+    graphCta: "Learn more",
+    finalEye: "Never overpay again",
+    finalH1: "Ask FILON ", finalH2: "before you buy",
+    finalNote: "Free, forever. No credit card. Your data stays yours.",
+  },
 };
 
 /** Scene — the AI comparing the whole market in real time. */

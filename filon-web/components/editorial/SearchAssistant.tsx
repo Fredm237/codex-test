@@ -15,6 +15,8 @@ const SL = {
     real: "Prix réels · Google Shopping", est: "Prix estimés, à titre indicatif",
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
+    at: "chez", cashback: "cashback", coupon: "coupon",
+    hist: { baisse: "En baisse", hausse: "En hausse", stable: "Stable" } as Record<Hist, string>,
   },
   nl: {
     steps: ["Begrip van de behoefte", "Analyse van de winkels", "Prijsanalyse", "Analyse van de geschiedenis", "Analyse van de cashback", "Analyse van de reviews", "Alternatieven zoeken", "Berekening van de FILON-Score"],
@@ -27,6 +29,22 @@ const SL = {
     real: "Echte prijzen · Google Shopping", est: "Geschatte prijzen, ter indicatie",
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
+    at: "bij", cashback: "cashback", coupon: "code",
+    hist: { baisse: "Dalend", hausse: "Stijgend", stable: "Stabiel" } as Record<Hist, string>,
+  },
+  en: {
+    steps: ["Understanding the need", "Analysing merchants", "Analysing prices", "Analysing price history", "Analysing cashback", "Analysing reviews", "Searching for alternatives", "Computing the FILON Score"],
+    eyebrow: "Shopping assistant",
+    h1Idle: "What do you want to buy, or decide ?", h1Again: "Another purchase to decide ?",
+    placeholder: "Describe a need, or a product…", ask: "Ask",
+    priceFor: "Price for",
+    chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
+    why: "Why", alt: "Alternative", see: "See the offer", good: "Good time", wait: "Wait",
+    real: "Real prices · Google Shopping", est: "Estimated prices, for guidance",
+    analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
+    disc: "FILON is free. You never pay, and your data is not resold.",
+    at: "at", cashback: "cashback", coupon: "coupon",
+    hist: { baisse: "Falling", hausse: "Rising", stable: "Stable" } as Record<Hist, string>,
   },
 };
 
@@ -213,8 +231,6 @@ async function* streamAnalyze(q: string, country: string): AsyncGenerator<Ev> {
   }
 }
 
-const HIST_LABEL: Record<Hist, string> = { baisse: "En baisse", hausse: "En hausse", stable: "Stable" };
-
 function ScoreRing({ score }: { score: number }) {
   return (
     <div className="fa-score" style={{ ["--v" as string]: score }}>
@@ -245,13 +261,13 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
-          <div className="fa-price"><b>{money(c.price, cur)}</b><span className="mc">chez {c.merchant}</span></div>
+          <div className="fa-price"><b>{money(c.price, cur)}</b><span className="mc">{S.at} {c.merchant}</span></div>
           <div className="fa-specs">
             <span><IcTruck /> {c.delivery}</span>
             <span><IcShield /> {c.warranty}</span>
-            {c.cashback ? <span className="g"><IcCashback /> cashback {c.cashback} %</span> : null}
-            {c.coupon && <span className="g"><IcCoupon /> coupon {c.coupon}</span>}
-            {c.hist && c.histNote ? (() => { const Ic = HIST_ICON[c.hist as Hist]; return <span className={`hist ${c.hist}`}><Ic /> {HIST_LABEL[c.hist]} · {c.histNote}</span>; })() : null}
+            {c.cashback ? <span className="g"><IcCashback /> {S.cashback} {c.cashback} %</span> : null}
+            {c.coupon && <span className="g"><IcCoupon /> {S.coupon} {c.coupon}</span>}
+            {c.hist && c.histNote ? (() => { const Ic = HIST_ICON[c.hist as Hist]; return <span className={`hist ${c.hist}`}><Ic /> {S.hist[c.hist]} · {c.histNote}</span>; })() : null}
           </div>
           <p className="fa-why"><b>{S.why}&nbsp;:</b> {c.why}</p>
           {c.alt && <p className="fa-alt">{S.alt}&nbsp;: {c.alt}</p>}

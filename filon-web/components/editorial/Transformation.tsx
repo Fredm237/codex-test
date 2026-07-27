@@ -27,6 +27,12 @@ const L = {
     cap: "je echte prijs · −134 € · gevonden",
     labels: { cashback: "Cashback", promo: "Kortingscode", refurb: "Refurbished" } as Record<string, string>,
   },
+  en: {
+    eye: "Same purchase. Two prices.",
+    h1: "The listed price isn't the ", h2: "real", h3: " price.",
+    cap: "your real price · −€134 · the find",
+    labels: { cashback: "Cashback", promo: "Promo code", refurb: "Refurbished" } as Record<string, string>,
+  },
 };
 
 const easeInOut = (t: number) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
