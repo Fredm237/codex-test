@@ -93,6 +93,45 @@ function IntelligenceNL() {
   );
 }
 
+function IntelligenceEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="FILON intelligence"
+        title={<>Beyond the <span className="it">price</span>.</>}
+        intro="The lowest price isn't always the best purchase. FILON looks at what really matters, to spare you nasty surprises."
+        breadcrumb={[{ name: "Intelligence", path: "/intelligence" }]}
+      />
+      <ProseBlock heading={<>The right purchase, not just the right <span className="it">price</span>.</>}>
+        <p>
+          A good purchase is the right product, at the right moment, that lasts. FILON takes all of that into
+          account, for you, in a few seconds.
+        </p>
+        <p>You receive a simple answer. Behind it, a lot has been weighed up for you.</p>
+      </ProseBlock>
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <span className="eyebrow" style={{ display: "block", marginBottom: 12 }}>What FILON looks at for you</span>
+            <h2 style={{ maxWidth: "20ch" }}>Much more than a price.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "◷", h: "The right moment", p: "A rock-bottom price, average, or inflated. You know whether to buy or wait." },
+              { n: "★", h: "Reliability", p: "A product that holds up over time, with real service behind it." },
+              { n: "⌛", h: "The lifespan", p: "How long it will really last, in use." },
+              { n: "€", h: "The real cost", p: "Not just the displayed price, but what it costs over time." },
+              { n: <IcChat />, h: "Reviews, made clear", p: "Thousands of reviews summed up in one answer. The signal, not the noise." },
+              { n: "✓", h: "The best alternative", p: "New, refurbished, elsewhere: the best option, when it exists." },
+            ]}
+          />
+        </div>
+      </section>
+      <ClosingCta title={<>Intelligence in service of <span className="it">your</span> purchase.</>} sub="A clear answer, every time. And free." />
+    </>
+  );
+}
+
 export default function IntelligencePage() {
-  return <Localized fr={<IntelligenceFR />} nl={<IntelligenceNL />} />;
+  return <Localized fr={<IntelligenceFR />} nl={<IntelligenceNL />} en={<IntelligenceEN />} />;
 }

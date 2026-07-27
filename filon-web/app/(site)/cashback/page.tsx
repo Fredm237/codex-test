@@ -25,6 +25,13 @@ const FAQ_NL = [
   { q: "Wanneer krijg ik het ?", a: "Afhankelijk van de winkel, van enkele dagen tot enkele weken. FILON toont de voorwaarden voordat je beslist." },
 ];
 
+const FAQ_EN = [
+  { q: "What exactly is cashback ?", a: "A part of your purchase that comes back to you afterwards. With FILON, you get the maximum, without doing anything." },
+  { q: "Do I have to compare myself ?", a: "No. FILON finds the best offer of the moment for you, and takes you there." },
+  { q: "Can it be combined with a promo ?", a: "Often yes. FILON simply shows you the best final price." },
+  { q: "When do I receive it ?", a: "Depending on the shop, from a few days to a few weeks. FILON shows you the conditions before you decide." },
+];
+
 function CashbackFR() {
   return (
     <>
@@ -78,6 +85,33 @@ function CashbackNL() {
   );
 }
 
+function CashbackEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Cashback"
+        title={<>Money that comes back. On every <span className="it">purchase</span>.</>}
+        intro="On many purchases, part of the sum can come back to you. FILON recovers the maximum for you, automatically. You have nothing to search for."
+        breadcrumb={[{ name: "Cashback", path: "/cashback" }]}
+        photo="/img/video-cashback-poster.webp"
+        video="/video/cashback-coin.mp4"
+      />
+      <ProseBlock heading={<>The money you forget to <span className="it">reclaim</span>.</>}>
+        <p>
+          Many people leave that money on the table, simply for lack of time. It&apos;s a shame, and it&apos;s
+          avoidable.
+        </p>
+        <p>
+          FILON takes care of it. At the right moment, it gets you the best offer and you pocket more. You keep your
+          habits, you pay less.
+        </p>
+      </ProseBlock>
+      <FaqBlock items={FAQ_EN} eyebrow="Cashback · FAQ" title="Cashback, with no grey areas." />
+      <ClosingCta title={<>Never click « pay » <span className="it">without</span> FILON again.</>} sub="It takes care of it for you, free, on every purchase." />
+    </>
+  );
+}
+
 export default function CashbackPage() {
-  return <Localized fr={<CashbackFR />} nl={<CashbackNL />} />;
+  return <Localized fr={<CashbackFR />} nl={<CashbackNL />} en={<CashbackEN />} />;
 }

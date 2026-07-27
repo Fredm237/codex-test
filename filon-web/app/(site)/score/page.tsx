@@ -38,6 +38,20 @@ const NEVERS_NL: Array<[string, string]> = [
   ["De redenering verbergen", "Elke score wordt ontleed, regel per regel, in de details van de aanbieding."],
 ];
 
+const CRITERIA_EN: Array<[string, string, string]> = [
+  ["35%", "Price vs its own history", "We compare today's price to its recent average. A price that's low in absolute terms, but has never been this expensive, loses points."],
+  ["25%", "Merchant reliability", "Reputation, after-sales service, deadlines met, returns policy. A low price at a dubious seller isn't a good deal."],
+  ["20%", "Verified product reviews", "Volume and quality of reviews, weighted to filter out fakes. We look at real satisfaction, not the raw rating."],
+  ["12%", "Delivery and warranty", "Delivery time, real shipping costs and warranty length included in the total price, not just the displayed tag."],
+  ["8%", "Combinable coupons and cashback", "Discounts and cashback genuinely applicable to this purchase, once verified at checkout."],
+];
+
+const NEVERS_EN: Array<[string, string]> = [
+  ["Sell a place", "No brand, no merchant can buy a better score."],
+  ["Inflate an affiliate offer", "A link that pays us doesn't get one extra point."],
+  ["Hide the reasoning", "Every score breaks down, line by line, in the offer's details."],
+];
+
 function ScoreBody({ t }: { t: {
   eye: string; h1a: string; h1b: string; h1c: string; introA: string; introB: string; introC: string;
   idx: string; h2a: string; h2b: string; criteria: Array<[string, string, string]>;
@@ -102,6 +116,16 @@ const NL = {
   note: "Zolang onze winkelpartnerships niet getekend zijn, berusten sommige onderdelen (cashback, lange geschiedenis) op schattingen, duidelijk aangegeven. De Score wordt volledig becijferd naarmate de echte data binnenkomt.",
 };
 
+const EN = {
+  eye: "Transparency", h1a: "How the", h1b: "FILON Score", h1c: " is calculated.",
+  introA: "A score out of 100, unique per offer. It answers one question :",
+  introB: "is this a good buy, now ?",
+  introC: "Here's exactly what it measures, and what it doesn't.",
+  idx: "5 criteria", h2a: "The calculation,", h2b: "weight by weight", criteria: CRITERIA_EN,
+  neverA: "What the Score", neverB: "never", nevers: NEVERS_EN,
+  note: "Until our merchant partnerships are signed, some components (cashback, long history) rely on estimates, clearly flagged. The Score will become fully quantified as the real data arrives.",
+};
+
 export default function ScorePage() {
-  return <Localized fr={<ScoreBody t={FR} />} nl={<ScoreBody t={NL} />} />;
+  return <Localized fr={<ScoreBody t={FR} />} nl={<ScoreBody t={NL} />} en={<ScoreBody t={EN} />} />;
 }

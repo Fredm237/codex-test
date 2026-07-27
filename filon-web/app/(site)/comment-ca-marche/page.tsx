@@ -76,6 +76,38 @@ function CommentNL() {
   );
 }
 
+function CommentEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="How it works"
+        title={<>Three seconds between you and the <span className="it">best price</span>.</>}
+        intro="You change nothing about your habits. FILON works for you and shows you a single number: your real price. And one answer: buy, or wait."
+        breadcrumb={[{ name: "How it works", path: "/comment-ca-marche" }]}
+      />
+      <Method />
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "20ch" }}>What you get.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "€", h: "Your real price", p: "A single number, all in. No more back-of-the-envelope maths." },
+              { n: "◷", h: "Buy or wait", p: "A clear answer, to buy at the right moment." },
+              { n: "✓", h: "The best option", p: "New, refurbished, elsewhere: the best choice, when it exists." },
+              { n: "★", h: "A reliable seller", p: "Reliability and warranties are taken into account, not just the price." },
+              { n: "↧", h: "Without changing a thing", p: "You keep your habits. FILON works in the background." },
+              { n: <IcHeart />, h: "Zero effort", p: "You describe, FILON decides. That's all." },
+            ]}
+          />
+        </div>
+      </section>
+      <ClosingCta title={<>Try it, it&apos;s <span className="it">free</span>.</>} sub="Add FILON and let it find the deal before every purchase." />
+    </>
+  );
+}
+
 export default function CommentCaMarchePage() {
-  return <Localized fr={<CommentFR />} nl={<CommentNL />} />;
+  return <Localized fr={<CommentFR />} nl={<CommentNL />} en={<CommentEN />} />;
 }

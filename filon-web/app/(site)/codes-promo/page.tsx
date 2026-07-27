@@ -27,6 +27,14 @@ const FAQ_NL = [
   { q: "Moet ik de codes zelf kopiëren-plakken ?", a: "Nee. Zodra de extensie actief is, doet FILON dat automatisch bij het betalen. Jij ziet gewoon de prijs dalen." },
 ];
 
+const FAQ_EN = [
+  { q: "Why do so many promo codes not work ?", a: "Most codes found online are expired, reserved for certain products, or already used. Testing them one by one is time-consuming and discouraging. FILON tests them for you, live, and keeps only the one that works." },
+  { q: "How does FILON find the right codes ?", a: "It gathers the codes available for the merchant, tries them automatically at checkout, and applies the one that gives the biggest discount on your real basket." },
+  { q: "Can a promo code be combined with cashback ?", a: "Often yes. FILON calculates the most profitable combination of promo code, cashback and refurbished price, then shows your real final price." },
+  { q: "Are the codes reliable and up to date ?", a: "Since they're tested live on your basket, you never apply a dead code: either a code works and the discount appears, or FILON moves to the next one." },
+  { q: "Do I have to copy-paste the codes myself ?", a: "No. Once the extension is active, FILON handles it automatically at the checkout step. You simply watch the price drop." },
+];
+
 function CodesFR() {
   return (
     <>
@@ -105,6 +113,45 @@ function CodesNL() {
   );
 }
 
+function CodesEN() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Promo codes"
+        title={<>Promo codes that <span className="it">actually</span> work.</>}
+        intro="« Code expired », « not valid for this item »… everyone knows the frustration. FILON tests every code live at checkout and automatically applies the one that gives the biggest discount, without you trying ten combinations."
+        breadcrumb={[{ name: "Promo codes", path: "/codes-promo" }]}
+      />
+      <ProseBlock heading={<>The promo code, without the code <span className="it">hunt</span>.</>}>
+        <p>
+          Searching for a code, opening five deal sites, pasting, taking an « invalid », starting over… That little
+          ritual costs time and, often, you give up and pay full price.
+        </p>
+        <p>
+          FILON flips the logic: it <b>tests all available codes live</b> on your real basket and applies the most
+          advantageous one. You see only one thing: the price dropping, all by itself.
+        </p>
+      </ProseBlock>
+      <section className="ed-band alt">
+        <div className="ed-wrap">
+          <div className="ed-prose" style={{ marginBottom: 28 }}>
+            <h2 style={{ maxWidth: "18ch" }}>Three seconds, zero copy-paste.</h2>
+          </div>
+          <InfoGrid
+            items={[
+              { n: "01", h: "Collect", p: "FILON gathers the codes available for the merchant you're on." },
+              { n: "02", h: "Live test", p: "Each code is tried on your real basket, at the checkout moment." },
+              { n: "03", h: "Best discount", p: "The most advantageous code is applied, and combined with cashback where possible." },
+            ]}
+          />
+        </div>
+      </section>
+      <FaqBlock items={FAQ_EN} eyebrow="Promo codes · FAQ" title="Promo codes, finally without frustration." />
+      <ClosingCta title={<>Never pay again <span className="it">before</span> testing the codes.</>} sub="FILON does it automatically, free, at every checkout." />
+    </>
+  );
+}
+
 export default function CodesPromoPage() {
-  return <Localized fr={<CodesFR />} nl={<CodesNL />} />;
+  return <Localized fr={<CodesFR />} nl={<CodesNL />} en={<CodesEN />} />;
 }
