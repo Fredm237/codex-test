@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
 import { site } from "@/lib/site";
+import { Localized } from "@/components/editorial/Localized";
 
 export const metadata: Metadata = buildMetadata({
   path: "/cgu",
@@ -10,7 +11,7 @@ export const metadata: Metadata = buildMetadata({
     "Les conditions générales d'utilisation du service FILON : objet, accès, nature de l'aide à la décision, liens partenaires, responsabilités et droit applicable.",
 });
 
-export default function CguPage() {
+function CguFR() {
   return (
     <>
       <ContentHero
@@ -105,4 +106,104 @@ export default function CguPage() {
       </section>
     </>
   );
+}
+
+function CguNL() {
+  return (
+    <>
+      <ContentHero
+        eyebrow="Juridisch"
+        title={<>Algemene gebruiksvoorwaarden</>}
+        intro="De regels die het gebruik van de dienst FILON omkaderen. Door FILON te gebruiken, aanvaard je deze voorwaarden."
+        breadcrumb={[{ name: "Algemene gebruiksvoorwaarden", path: "/cgu" }]}
+      />
+      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+        <div className="ed-legal">
+          <p className="upd">Laatste update : 21 juli 2026</p>
+
+          <h2>1. Voorwerp</h2>
+          <p>
+            Deze algemene gebruiksvoorwaarden (« AGV ») regelen de toegang tot en het gebruik van de dienst{" "}
+            <b>{site.name}</b>, toegankelijk via de website <b>{site.domain}</b> en, op termijn, via een browserextensie
+            en een applicatie. De dienst wordt uitgegeven door {site.legalName}, {site.legalForm.toLowerCase()} (KBO{" "}
+            {site.bce}), {site.legalAddress}.
+          </p>
+
+          <h2>2. Beschrijving van de dienst</h2>
+          <p>
+            FILON is een dienst voor <b>hulp bij de aankoopbeslissing</b>. Hij analyseert de markt, vergelijkt
+            aanbiedingen en schat een echte kost, en stelt dan een aanbeveling voor. FILON verkoopt geen enkel
+            product&nbsp;: de aankoop gebeurt altijd rechtstreeks bij de winkel of het platform gekozen door de gebruiker.
+          </p>
+
+          <h2>3. Toegang en kosteloosheid</h2>
+          <p>
+            De toegang tot FILON is <b>volledig gratis</b> voor de gebruiker, zonder abonnement of kosten&nbsp;: zie de
+            pagina <a href="/tarifs">Tarieven</a>. Het wordt nooit aan de gebruiker gefactureerd. De uitgever streeft ernaar
+            de beschikbaarheid van de dienst te verzekeren zonder ze ononderbroken te kunnen garanderen.
+          </p>
+
+          <h2>4. Conform gebruik</h2>
+          <p>
+            De gebruiker verbindt zich ertoe FILON te gebruiken conform zijn bestemming en de wet. Hij verbiedt zich
+            met name de werking van de dienst te verstoren, er massaal de gegevens op geautomatiseerde wijze uit te
+            halen, of de rechten van de uitgever of van derden te schenden.
+          </p>
+
+          <h2>5. Indicatieve aard van de informatie</h2>
+          <p>
+            De informatie over prijzen, beschikbaarheid en aanbiedingen wordt <b>ter indicatie</b> verstrekt
+            {" "}en kan in real time evolueren bij de winkels. De uitgever streeft ernaar de juistheid ervan te
+            verzekeren maar garandeert niet dat ze op elk moment volledig of actueel is. De aankoopbeslissing valt onder
+            de uitsluitende verantwoordelijkheid van de gebruiker.
+          </p>
+
+          <h2>6. Partnerlinks</h2>
+          <p>
+            FILON kan <b>partnerlinks</b> bevatten. Ze activeren <b>verhoogt nooit de prijs die de gebruiker
+            betaalt</b> en beïnvloedt de aanbeveling niet, die de beste echte kost voor de gebruiker beoogt.
+          </p>
+
+          <h2>7. Intellectuele eigendom</h2>
+          <p>
+            Het geheel van de inhoud van de dienst (teksten, grafische elementen, logo, visuele identiteit, code) is
+            beschermd en blijft eigendom van de uitgever, behoudens andersluidende vermelding. Elke ongeoorloofde
+            reproductie of hergebruik is verboden.
+          </p>
+
+          <h2>8. Persoonsgegevens</h2>
+          <p>
+            De verwerking van persoonsgegevens wordt beschreven in ons{" "}
+            <a href="/confidentialite">privacybeleid</a> en ons{" "}
+            <a href="/cookies">cookiebeleid</a>, GDPR-conform.
+          </p>
+
+          <h2>9. Aansprakelijkheid</h2>
+          <p>
+            FILON wordt geleverd « in de staat waarin hij zich bevindt ». De uitgever kan niet aansprakelijk worden
+            gesteld voor de aankoopbeslissingen van de gebruiker, de schommelingen van prijzen of aanbiedingen, noch
+            voor onrechtstreekse schade verbonden aan het gebruik van de dienst. De commerciële relatie en de
+            dienst-na-verkoop vallen onder de winkel of het platform waarbij de aankoop wordt verricht.
+          </p>
+
+          <h2>10. Wijziging van de AGV</h2>
+          <p>
+            De uitgever kan deze AGV doen evolueren om ze aan te passen aan de dienst of de regelgeving. De toepasselijke
+            versie is die welke op deze pagina gepubliceerd is op de datum van gebruik.
+          </p>
+
+          <h2>11. Toepasselijk recht</h2>
+          <p>
+            Deze AGV zijn onderworpen aan het <b>Belgisch recht</b>. Elk geschil valt, bij gebrek aan minnelijke
+            oplossing, onder de bevoegde rechtbanken van België. Voor elke vraag&nbsp;:{" "}
+            <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
+          </p>
+        </div>
+      </section>
+    </>
+  );
+}
+
+export default function CguPage() {
+  return <Localized fr={<CguFR />} nl={<CguNL />} />;
 }
