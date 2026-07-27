@@ -37,6 +37,14 @@ const HOME_FAQ_NL: QA[] = [
   { q: "Wanneer komen de extensie en de app?", a: "Eerst de extensie, daarna de mobiele app en de assistent. Voeg FILON toe om verwittigd te worden." },
 ];
 
+const HOME_FAQ_EN: QA[] = [
+  { q: "Is FILON really free?", a: "Yes, entirely. No card, no subscription, no paid options. And your data is never resold." },
+  { q: "Can I trust its recommendation?", a: "It serves your interest, never ours. No brand can buy its place. FILON shows you what's genuinely best for you." },
+  { q: "Is the refurbished offered reliable?", a: "Only verified refurbished, from certified sellers, under warranty. You see the warranty and the saving before you decide." },
+  { q: "Is my data resold?", a: "Never. No advertising profile, no reselling. FILON keeps as little as possible, and nothing else." },
+  { q: "When do the extension and the app arrive?", a: "The extension first, then the mobile app and the assistant. Add FILON to be notified." },
+];
+
 export function FaqBlock({
   items,
   id = "faq",
@@ -76,10 +84,8 @@ export function FaqBlock({
 
 export function Faq() {
   const { locale } = useLocale();
-  return (
-    <FaqBlock
-      items={locale === "nl" ? HOME_FAQ_NL : HOME_FAQ}
-      title={locale === "nl" ? "De vragen die je je stelt." : "Les questions que vous vous posez."}
-    />
-  );
+  const items = locale === "nl" ? HOME_FAQ_NL : locale === "en" ? HOME_FAQ_EN : HOME_FAQ;
+  const title =
+    locale === "nl" ? "De vragen die je je stelt." : locale === "en" ? "The questions you're asking." : "Les questions que vous vous posez.";
+  return <FaqBlock items={items} title={title} />;
 }

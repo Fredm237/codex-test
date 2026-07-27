@@ -23,6 +23,14 @@ const FL = {
     subscribed: "✓ Ingeschreven", subscribe: "Inschrijven",
     retry: "Probeer opnieuw.", newsOk: "Je wordt verwittigd bij de lancering.",
   },
+  en: {
+    ok: "✓ Thank you ! Your message is on its way. We'll get back to you shortly.",
+    name: "Your name", email: "your@email.com", message: "Your message",
+    sending: "Sending…", send: "Send",
+    err: "Something went wrong. Try again, or write to us directly at ",
+    subscribed: "✓ Subscribed", subscribe: "Subscribe",
+    retry: "Try again.", newsOk: "You'll be notified at launch.",
+  },
 };
 
 async function postForm(data: Record<string, string>): Promise<boolean> {

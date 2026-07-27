@@ -31,6 +31,32 @@ const NL_LABELS: Record<string, string> = {
   "/securite": "Veiligheid",
 };
 
+// Libellés EN par href.
+const EN_LABELS: Record<string, string> = {
+  "/recherche": "AI assistant",
+  "/tarifs": "Pricing",
+  "/extension": "Extension",
+  "/intelligence": "Intelligence",
+  "/comment-ca-marche": "The method",
+  "/cashback": "Cashback",
+  "/reconditionne": "Refurbished",
+  "/codes-promo": "Promo codes",
+  "/blog": "Blog",
+  "/faq": "FAQ",
+  "/aide": "Help",
+  "/partenaires": "Partners",
+  "/presse": "Press",
+  "/carrieres": "Careers",
+  "/a-propos": "About",
+  "/contact": "Contact",
+  "/transparence": "Transparency & affiliation",
+  "/mentions-legales": "Legal notice",
+  "/confidentialite": "Privacy",
+  "/cookies": "Cookie policy",
+  "/cgu": "Terms of use",
+  "/securite": "Security",
+};
+
 const FOOT = {
   fr: {
     newsH: <>La newsletter <span className="it">Le Filon</span>.</>,
@@ -47,6 +73,14 @@ const FOOT = {
     disc1: "FILON is gratis en blijft dat. Geen reclame, geen doorverkoop van je gegevens. Je betaalt nooit.",
     disc2: "Sommige links zijn affiliatielinks : kopen via FILON kan ons een vergoeding opleveren, zonder meerkost voor jou en zonder ooit een advies te vervalsen",
     more: "meer weten",
+  },
+  en: {
+    newsH: <>The <span className="it">Le Filon</span> newsletter.</>,
+    newsP: "Every week, the best deals of the moment and the traps to avoid. Nothing more. You'll also hear about the launch before everyone else.",
+    designed: "Designed in",
+    disc1: "FILON is free and will stay that way. No advertising, no reselling of your data. You never pay.",
+    disc2: "Some links are affiliate links: buying through FILON may earn us a commission, at no extra cost to you and without ever skewing a recommendation",
+    more: "learn more",
   },
 };
 
@@ -78,7 +112,8 @@ const LEGAL = [
 export function EditorialFooter() {
   const { locale } = useLocale();
   const x = FOOT[locale];
-  const lbl = (href: string, fr: string) => (locale === "nl" ? NL_LABELS[href] ?? fr : fr);
+  const lbl = (href: string, fr: string) =>
+    locale === "nl" ? NL_LABELS[href] ?? fr : locale === "en" ? EN_LABELS[href] ?? fr : fr;
   return (
     <footer className="ed-footer">
       <div className="ed-wrap">
