@@ -221,6 +221,111 @@ function ArticleNL() {
   );
 }
 
+function ArticleEN() {
+  return (
+    <article>
+      <div className="ed-article-hero">
+        <div className="ed-article">
+          <div className="ed-article-meta">Guide · 7 min · 2026</div>
+          <h1>Choosing your laptop well</h1>
+          <p className="lede">
+            Spec sheets are designed to lose you. Here are the essentials, explained simply, to choose the right
+            machine by your use and your budget.
+          </p>
+        </div>
+      </div>
+
+      <div className="ed-article" style={{ paddingBottom: 60 }}>
+        <img className="ed-article-cover" src="/img/blog-choisir-portable.webp" alt="" />
+        <p>
+          A good laptop isn&apos;t the most expensive, nor the one with the biggest numbers. It&apos;s the one that
+          matches what you&apos;ll do with it. Always start there.
+        </p>
+
+        <h2>1. Start from the use, not the spec sheet</h2>
+        <ul>
+          <li><b>Office work and study</b>&nbsp;: browsing, word processing, video calls. No need for a powerhouse.</li>
+          <li><b>Creation</b> (photo, video, design)&nbsp;: there, the processor, memory and screen really count.</li>
+          <li><b>Gaming</b>&nbsp;: a dedicated graphics card becomes essential.</li>
+          <li><b>Mobility</b>&nbsp;: if you move around a lot, weight and battery life beat raw power.</li>
+        </ul>
+
+        <h2>2. The four things that really count</h2>
+        <div className="ed-tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Element</th>
+                <th>The simple benchmark</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>Memory (RAM)</b></td><td><b>16 GB</b> to last. 8 GB is enough for light use, but ages fast.</td></tr>
+              <tr><td><b>Storage</b></td><td>An <b>SSD</b>, never a mechanical drive. 512 GB is the sweet spot.</td></tr>
+              <tr><td><b>Processor</b></td><td>Mid-range (like Core i5 / Ryzen 5) for the price-performance balance.</td></tr>
+              <tr><td><b>Screen</b></td><td><b>Full HD</b> resolution minimum, and good brightness if you work near a window.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          The rest (brand, design, details) comes after. These four points decide 90&nbsp;% of satisfaction.
+        </p>
+
+        <h2>3. How much to spend, by need</h2>
+        <div className="ed-tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Budget</th>
+                <th>What you get</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>€400 to €600</b></td><td>Office work and study, no frills. Aim for 16 GB and an SSD.</td></tr>
+              <tr><td><b>€700 to €900</b></td><td>The real balance point&nbsp;: versatile, fast, durable.</td></tr>
+              <tr><td><b>€1000 and up</b></td><td>Creation or gaming&nbsp;: polished screen, graphics card, battery life.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>4. The classic traps</h2>
+        <ul>
+          <li><b>Too little RAM</b>&nbsp;: 8 GB today is already tight for the years ahead.</li>
+          <li><b>A mechanical drive</b> hidden behind a big storage number&nbsp;: run away, it&apos;s slow.</li>
+          <li><b>A dull screen</b>&nbsp;: you forget it in the shop, you regret it every day.</li>
+          <li><b>The inflated «&nbsp;promo&nbsp;»</b>&nbsp;: a struck-through price is no proof of a bargain.</li>
+        </ul>
+
+        <h2>New or refurbished ?</h2>
+        <p>
+          On a laptop, guaranteed refurbished often cuts the bill by 25 to 40&nbsp;% for an identical machine. We
+          detail everything in our guide{" "}
+          <a href="/blog/neuf-vs-reconditionne-economie-reelle">New vs refurbished</a>.
+        </p>
+
+        <div className="callout">
+          <b>The shortcut :</b> simply describe your need («&nbsp;a laptop for uni at €800&nbsp;») and FILON suggests
+          the best choices, with your <span className="g">real price</span> and the right moment to buy.
+        </div>
+
+        <h2>In short</h2>
+        <ul>
+          <li>Choose by <b>use</b>, not by the biggest numbers.</li>
+          <li>Aim for <b>16 GB of RAM</b> and an <b>SSD</b> to last.</li>
+          <li>The best balance sits around <b>€700 to €900</b>.</li>
+          <li>Think <b>guaranteed refurbished</b> for the same machine, cheaper.</li>
+        </ul>
+
+        <p style={{ marginTop: 30 }}>
+          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+            Find my laptop with FILON
+          </a>
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export default function ArticlePage() {
   return (
     <>
@@ -232,7 +337,7 @@ export default function ArticlePage() {
           { name: "Choisir son ordinateur portable", path: PATH },
         ])}
       />
-      <Localized fr={<ArticleFR />} nl={<ArticleNL />} />
+      <Localized fr={<ArticleFR />} nl={<ArticleNL />} en={<ArticleEN />} />
     </>
   );
 }

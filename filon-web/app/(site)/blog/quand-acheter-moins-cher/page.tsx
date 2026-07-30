@@ -196,6 +196,98 @@ function ArticleNL() {
   );
 }
 
+function ArticleEN() {
+  return (
+    <article>
+      <div className="ed-article-hero">
+        <div className="ed-article">
+          <div className="ed-article-meta">Guide · 6 min · 2026</div>
+          <h1>When to buy to pay less</h1>
+          <p className="lede">
+            The same product doesn&apos;t cost the same in January and in October. The right timing can be worth tens
+            of euros. Here&apos;s when prices really drop, and when to hold back.
+          </p>
+        </div>
+      </div>
+
+      <div className="ed-article" style={{ paddingBottom: 60 }}>
+        <img className="ed-article-cover" src="/img/blog-quand-acheter.webp" alt="" />
+        <p>
+          Buying well isn&apos;t just finding the right product. It&apos;s also buying it at the right moment. Prices
+          follow fairly regular cycles: knowing them means paying less without sacrificing anything.
+        </p>
+
+        <h2>The sales, but the real dates</h2>
+        <p>
+          In Belgium, the sales are governed by law. Two main periods&nbsp;: the <b>winter sales</b>, from 3 January,
+          and the <b>summer sales</b>, from 1 July. Each lasts about a month.
+        </p>
+        <p>
+          Just before, there&apos;s a <b>blackout period</b> (December and June) during which real discounts are
+          limited. A «&nbsp;promo&nbsp;» shown at that time deserves a wary eye.
+        </p>
+
+        <h2>The drop calendar, period by period</h2>
+        <div className="ed-tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Period</th>
+                <th>What drops</th>
+                <th>Good to know</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>January</b> (winter sales)</td><td className="g">Fashion, appliances, tech</td><td>The best winter discounts</td></tr>
+              <tr><td><b>February-March</b></td><td className="g">Outgoing tech</td><td>Before the spring releases arrive</td></tr>
+              <tr><td><b>July</b> (summer sales)</td><td className="g">Almost everything</td><td>The big mid-year event</td></tr>
+              <tr><td><b>Late August</b> (back to school)</td><td className="g">Laptops, student offers</td><td>Ideal for a study PC</td></tr>
+              <tr><td><b>Late November</b> (Black Friday)</td><td className="g">Tech, large appliances</td><td>The peak of the year on tech</td></tr>
+              <tr><td><b>December</b> (before Christmas)</td><td>Little, even rises</td><td>Careful: some prices go back up</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>The right moment for a specific product</h2>
+        <p>
+          Beyond the calendar, each product has its own cycle. The price is <b>highest at launch</b>, then drops
+          gradually, and often hits its <b>floor just before the next generation arrives</b>.
+        </p>
+        <p>
+          Concretely&nbsp;: smartphones renew mostly in autumn, PC ranges in spring. Buying last year&apos;s model, a
+          few weeks before the new one, is often the best value of the year.
+        </p>
+
+        <h2>The fake-promo trap</h2>
+        <p>
+          A struck-through price is no proof of a bargain. The real benchmark is the <b>history</b>&nbsp;: a
+          «&nbsp;reduced&nbsp;» price that stays above its average of recent months is no windfall. Always compare to
+          the usual level, never to the struck-through price.
+        </p>
+
+        <div className="callout">
+          <b>The right reflex :</b> before buying, ask yourself whether the price is low <span className="g">within
+          its cycle</span>. FILON tells you at a glance: buy now, or wait.
+        </div>
+
+        <h2>In short</h2>
+        <ul>
+          <li>Two big windows in Belgium&nbsp;: <b>January</b> and <b>July</b>.</li>
+          <li>For tech, the peak remains <b>Black Friday</b> in late November.</li>
+          <li>A product&apos;s best price often falls <b>before its new generation</b>.</li>
+          <li>Judge a promo on the <b>history</b>, never on the struck-through price.</li>
+        </ul>
+
+        <p style={{ marginTop: 30 }}>
+          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+            Know if it&apos;s the right moment
+          </a>
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export default function ArticlePage() {
   return (
     <>
@@ -207,7 +299,7 @@ export default function ArticlePage() {
           { name: "Quand acheter moins cher", path: PATH },
         ])}
       />
-      <Localized fr={<ArticleFR />} nl={<ArticleNL />} />
+      <Localized fr={<ArticleFR />} nl={<ArticleNL />} en={<ArticleEN />} />
     </>
   );
 }
