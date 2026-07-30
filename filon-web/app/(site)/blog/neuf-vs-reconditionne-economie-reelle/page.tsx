@@ -193,6 +193,98 @@ function ArticleNL() {
   );
 }
 
+function ArticleEN() {
+  return (
+    <article>
+      <div className="ed-article-hero">
+        <div className="ed-article">
+          <div className="ed-article-meta">Guide · 5 min · 2026</div>
+          <h1>New vs refurbished&nbsp;: the real saving</h1>
+          <p className="lede">
+            « Refurbished » often rhymes with « cheaper », but by how much exactly ? And at what compromise ? Here are
+            the figures, no spin, to decide with full knowledge.
+          </p>
+        </div>
+      </div>
+
+      <div className="ed-article" style={{ paddingBottom: 60 }}>
+        <img className="ed-article-cover" src="/img/blog-neuf-vs-reconditionne.webp" alt="" />
+        <p>
+          A refurbished product is a second-hand device tested, restored and guaranteed by a professional. On paper,
+          the saving is obvious. In reality, it depends on three things: the <b>type of product</b>, the
+          <b> grade</b>, and what you <b>stack</b> on top.
+        </p>
+
+        <h2>How much you save, category by category</h2>
+        <p>Orders of magnitude observed on the market (average gap vs new):</p>
+        <div className="ed-tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Typical saving</th>
+                <th>Good to know</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>High-end smartphones</b></td><td className="g">−30 to −45 %</td><td>The flagship segment of refurbished</td></tr>
+              <tr><td><b>Laptops</b></td><td className="g">−25 to −40 %</td><td>Check battery and screen condition</td></tr>
+              <tr><td><b>Consoles & tablets</b></td><td className="g">−20 to −35 %</td><td>Often near-new in grade A+</td></tr>
+              <tr><td><b>Audio (headphones, earbuds)</b></td><td className="g">−15 to −30 %</td><td>Watch the included accessories</td></tr>
+              <tr><td><b>Home appliances</b></td><td className="g">−20 to −40 %</td><td>Warranty is key on these products</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>Understanding the grades</h2>
+        <ul>
+          <li><b>Grade A+ / « like new »</b>, no or almost no signs of use. The best price/condition compromise.</li>
+          <li><b>Grade A / « very good condition »</b>, micro-scratches invisible at use distance.</li>
+          <li><b>Grade B / « good condition »</b>, visible marks but no impact on functioning. The most economical.</li>
+        </ul>
+        <p>
+          The grade changes nothing about functioning or warranty, only the looks. If appearance isn&apos;t your
+          priority, a grade B maximises the saving.
+        </p>
+
+        <h2>The warranty, the real safety net</h2>
+        <p>
+          A serious refurbished product is <b>guaranteed 12 to 24 months</b>. That&apos;s what distinguishes
+          professional refurbished from plain second-hand between private individuals. Never give up the warranty for
+          a few euros: it&apos;s what makes the purchase risk-free.
+        </p>
+
+        <div className="callout">
+          <b>The real calculation:</b> the saving doesn&apos;t stop at the refurbished price. Adding a{" "}
+          <span className="g">cashback</span> (3 to 8%) and sometimes a promo code, the total saving vs new often
+          reaches <span className="g">45 to 50%</span>. That&apos;s exactly what FILON calculates for you.
+        </div>
+
+        <h2>And the ecology ?</h2>
+        <p>
+          Extending a device&apos;s life avoids manufacturing a new one, by far the most polluting step in an
+          electronic product&apos;s life cycle. Choosing refurbished is therefore one of the most effective moves to
+          reduce your purchases&apos; footprint, without sacrificing quality.
+        </p>
+
+        <h2>In short</h2>
+        <ul>
+          <li>The saving runs from <b>−15%</b> (audio) to <b>−45%</b> (premium smartphones) by category.</li>
+          <li>The <b>grade</b> concerns only looks; a grade B maximises the saving.</li>
+          <li>Always demand a <b>12 to 24-month warranty</b>.</li>
+          <li>With cashback, the total saving often climbs to <b>45–50%</b>.</li>
+        </ul>
+
+        <p style={{ marginTop: 30 }}>
+          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+            Compare new and refurbished with FILON
+          </a>
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export default function ArticlePage() {
   return (
     <>
@@ -204,7 +296,7 @@ export default function ArticlePage() {
           { name: "Neuf vs reconditionné", path: PATH },
         ])}
       />
-      <Localized fr={<ArticleFR />} nl={<ArticleNL />} />
+      <Localized fr={<ArticleFR />} nl={<ArticleNL />} en={<ArticleEN />} />
     </>
   );
 }

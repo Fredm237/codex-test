@@ -184,6 +184,93 @@ function ArticleNL() {
   );
 }
 
+function ArticleEN() {
+  return (
+    <article>
+      <div className="ed-article-hero">
+        <div className="ed-article">
+          <div className="ed-article-meta">Guide · 7 min · 2026</div>
+          <h1>Black Friday : don&apos;t get fooled</h1>
+          <p className="lede">
+            It&apos;s the peak of the year on tech. There are real bargains — and a great many fake ones. Here&apos;s
+            how to tell the two apart, and leave with a genuinely good price.
+          </p>
+        </div>
+      </div>
+
+      <div className="ed-article" style={{ paddingBottom: 60 }}>
+        <img className="ed-article-cover" src="/img/blog-black-friday.webp" alt="" />
+        <p>
+          At the end of November, everything becomes «&nbsp;-50&nbsp;%&nbsp;». The problem is that a struck-through
+          price proves nothing&nbsp;: some merchants raise the price a few weeks before to better «&nbsp;drop&nbsp;»
+          it on the day. The good news&nbsp;: a few reflexes are enough not to fall for it.
+        </p>
+
+        <h2>The golden rule: judge on the history</h2>
+        <p>
+          A discount is only worth something relative to the <b>usual price of the last few months</b>, not the
+          struck-through price shown. A «&nbsp;-40&nbsp;%&nbsp;» product whose «&nbsp;promo&nbsp;» price stays above
+          its 90-day average is no bargain. The only reliable benchmark is the <b>price curve</b>.
+        </p>
+
+        <h2>The most common fake promos</h2>
+        <div className="ed-tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>What you see</th>
+                <th>What it often hides</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>Very high struck-through price</b></td><td>A «&nbsp;recommended&nbsp;» price no one was paying</td></tr>
+              <tr><td><b>Rise just before the offer</b></td><td>Price raised in October to «&nbsp;drop&nbsp;» in November</td></tr>
+              <tr><td><b>«&nbsp;Limited stock&nbsp;», countdown</b></td><td>Artificial pressure to buy fast</td></tr>
+              <tr><td><b>«&nbsp;Special Black Friday&nbsp;» model</b></td><td>Stripped-down version, less well equipped</td></tr>
+              <tr><td><b>-70&nbsp;% on an unknown brand</b></td><td>Product whose real price is already low elsewhere</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>What really drops at the end of November</h2>
+        <p>
+          Black Friday remains the <b>best moment of the year for tech</b>&nbsp;: TVs, laptops, headphones, large
+          appliances, consoles. Outgoing generations enjoy the biggest drops, just before the new releases.
+          Conversely, recent new releases barely move.
+        </p>
+
+        <h2>The method in 4 reflexes</h2>
+        <ul>
+          <li><b>Spot it beforehand.</b> Note the usual price of the products you want one to two weeks before.</li>
+          <li><b>Compare to the history</b>, never to the struck-through price.</li>
+          <li><b>Check the real final price</b>&nbsp;: merchant price + coupon + cashback, across all sellers.</li>
+          <li><b>Don&apos;t give in to the clock.</b> A real bargain rarely hangs on three minutes.</li>
+        </ul>
+
+        <div className="callout">
+          <b>The shortcut&nbsp;:</b> rather than watching everything by hand, ask FILON. It compares the price to its
+          <span className="g"> history</span>, across all merchants, and tells you at a glance whether it&apos;s a
+          real bargain — or just for show.
+        </div>
+
+        <h2>In short</h2>
+        <ul>
+          <li>The struck-through price proves nothing&nbsp;: judge on the <b>history</b>.</li>
+          <li>Beware <b>rises before the offer</b> and clock pressure.</li>
+          <li>Outgoing tech offers the <b>real drops</b>.</li>
+          <li>What counts is the <b>real final price</b>, not the advertised percentage.</li>
+        </ul>
+
+        <p style={{ marginTop: 30 }}>
+          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+            Real bargain or not ? Ask FILON
+          </a>
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export default function ArticlePage() {
   return (
     <>
@@ -195,7 +282,7 @@ export default function ArticlePage() {
           { name: "Black Friday sans se faire avoir", path: PATH },
         ])}
       />
-      <Localized fr={<ArticleFR />} nl={<ArticleNL />} />
+      <Localized fr={<ArticleFR />} nl={<ArticleNL />} en={<ArticleEN />} />
     </>
   );
 }

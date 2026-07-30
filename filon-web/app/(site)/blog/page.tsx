@@ -31,6 +31,15 @@ const POSTS_NL: Post[] = [
   { cat: "Vergelijking", title: "Welke cashback-app betaalt het meest ?", excerpt: "De percentages verschillen enorm van app tot app. Hoe je zeker het beste pakt bij elke aankoop.", href: "/blog/quelle-app-cashback-paie-le-plus", img: "/img/blog-app-cashback.webp", read: "6 min lezen" },
 ];
 
+const POSTS_EN: Post[] = [
+  { cat: "Guide", title: "Cashback simply explained : how it works", excerpt: "Where does the money come from, how much do you really get back, and which traps to avoid ? Cashback without jargon.", href: "/blog/cashback-comment-ca-marche", img: "/img/blog-cashback-explique.webp", read: "6 min read" },
+  { cat: "Guide", title: "Black Friday : the guide to not getting fooled", excerpt: "Real bargains, and lots of fake promos. How to spot the real discounts and avoid inflated prices.", href: "/blog/black-friday-sans-se-faire-avoir", img: "/img/blog-black-friday.webp", read: "7 min read" },
+  { cat: "Guide", title: "Choosing your laptop well : the simple guide", excerpt: "Which RAM, which storage, which processor ? The essentials explained simply, by your use and your budget.", href: "/blog/choisir-ordinateur-portable", img: "/img/blog-choisir-portable.webp", read: "7 min read" },
+  { cat: "Guide", title: "When to buy to pay less", excerpt: "Belgian sales, Black Friday, back to school, end of cycle. The calendar of the real moments to buy.", href: "/blog/quand-acheter-moins-cher", img: "/img/blog-quand-acheter.webp", read: "6 min read" },
+  { cat: "Guide", title: "New vs refurbished : the real saving, product by product", excerpt: "How much do you really save ? Differences by category, grades and warranties, to decide without hesitating.", href: "/blog/neuf-vs-reconditionne-economie-reelle", img: "/img/blog-neuf-vs-reconditionne.webp", read: "5 min read" },
+  { cat: "Comparison", title: "Which cashback app pays the most ?", excerpt: "Rates vary hugely from app to app. How to be sure you take the best on every purchase.", href: "/blog/quelle-app-cashback-paie-le-plus", img: "/img/blog-app-cashback.webp", read: "6 min read" },
+];
+
 function BlogList({ eyebrow, title, intro, posts }: { eyebrow: string; title: string; intro: string; posts: Post[] }) {
   return (
     <>
@@ -65,6 +74,7 @@ export default function BlogPage() {
     <Localized
       fr={<BlogList eyebrow="Blog" title="Acheter malin, ça s'apprend." intro="Des guides qui vous font vraiment économiser. Clairs, chiffrés, sans jargon." posts={POSTS_FR} />}
       nl={<BlogList eyebrow="Blog" title="Slim kopen kun je leren." intro="Gidsen die je echt doen besparen. Helder, becijferd, zonder jargon." posts={POSTS_NL} />}
+      en={<BlogList eyebrow="Blog" title="Buying smart is a skill." intro="Guides that genuinely save you money. Clear, quantified, jargon-free." posts={POSTS_EN} />}
     />
   );
 }

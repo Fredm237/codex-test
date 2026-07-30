@@ -205,6 +205,102 @@ function ArticleNL() {
   );
 }
 
+function ArticleEN() {
+  return (
+    <article>
+      <div className="ed-article-hero">
+        <div className="ed-article">
+          <div className="ed-article-meta">Guide · 6 min · 2026</div>
+          <h1>Cashback, simply explained</h1>
+          <p className="lede">
+            «&nbsp;Get money back on your purchases&nbsp;»&nbsp;: cashback sounds too good to be true. It isn&apos;t,
+            but you need to understand where the money comes from, and spot the traps.
+          </p>
+        </div>
+      </div>
+
+      <div className="ed-article" style={{ paddingBottom: 60 }}>
+        <img className="ed-article-cover" src="/img/blog-cashback-explique.webp" alt="" />
+        <p>
+          Cashback is a refund of part of your purchase, paid afterwards. You pay the normal price at the merchant,
+          and a few days or weeks later, a percentage comes back to your pot. Nothing magical&nbsp;: just a
+          well-organised commission share.
+        </p>
+
+        <h2>Where the money comes from, exactly</h2>
+        <p>
+          When a cashback site sends you to a merchant and you buy, the merchant pays it an{" "}
+          <b>affiliation commission</b>. The cashback site <b>gives you back a part of it</b>, and keeps the rest.
+          That&apos;s the whole model&nbsp;: a commission shared between the site and you.
+        </p>
+        <p>
+          Important consequence&nbsp;: cashback <b>doesn&apos;t change the price</b> you pay at the merchant. You pay
+          the same as direct&nbsp;; a part simply comes back to you afterwards.
+        </p>
+
+        <h2>How much do you really get back ?</h2>
+        <p>
+          Rates vary hugely by category and brand. Here are some common orders of magnitude&nbsp;:
+        </p>
+        <div className="ed-tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Category</th>
+                <th>Typical cashback</th>
+                <th>Good to know</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>Tech</b></td><td className="g">1 – 4 %</td><td>Low margins, so moderate rates</td></tr>
+              <tr><td><b>Fashion & clothing</b></td><td className="g">5 – 12 %</td><td>Often the best rates</td></tr>
+              <tr><td><b>Travel & hotels</b></td><td className="g">3 – 10 %</td><td>The amount can be high</td></tr>
+              <tr><td><b>Beauty & home</b></td><td className="g">4 – 8 %</td><td>Varies by brand</td></tr>
+              <tr><td><b>Subscriptions & telecom</b></td><td className="g">up to €100</td><td>Often a fixed amount on sign-up</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2>The traps to know</h2>
+        <p>
+          <b>The temporary «&nbsp;boosted&nbsp;» rate.</b> An «&nbsp;up to 16&nbsp;%&nbsp;» shown one day can fall
+          back to 4&nbsp;% the next. Check the rate <b>at the moment of purchase</b>, not the one seen the day before.
+        </p>
+        <p>
+          <b>The validation delay.</b> Cashback isn&apos;t immediate&nbsp;: it&apos;s first «&nbsp;pending&nbsp;»
+          until the merchant confirms (often 30 to 90 days), then withdrawable above a minimum threshold.
+        </p>
+        <p>
+          <b>The conditions that cancel it.</b> Using an unauthorised promo code, an ad blocker, or going through
+          another app just before, can void the cashback. Always complete the purchase right away, from the
+          service&apos;s link.
+        </p>
+
+        <div className="callout">
+          <b>The real calculation&nbsp;:</b> a good deal isn&apos;t the biggest cashback, it&apos;s the
+          <span className="g"> lowest final price</span> once everything is combined&nbsp;: merchant price, coupon and
+          cashback together. That&apos;s exactly what FILON calculates for you.
+        </div>
+
+        <h2>In short</h2>
+        <ul>
+          <li>Cashback = a share of the affiliation commission, given back to you.</li>
+          <li>It <b>doesn&apos;t change</b> the price paid at the merchant.</li>
+          <li>Rates go from <b>1&nbsp;%</b> (tech) to <b>12&nbsp;%+</b> (fashion).</li>
+          <li>Beware <b>temporary rates</b>, <b>delays</b> and the conditions that cancel it.</li>
+          <li>Judge on the <b>final price</b>, not the advertised rate.</li>
+        </ul>
+
+        <p style={{ marginTop: 30 }}>
+          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+            See my real price, cashback included
+          </a>
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export default function ArticlePage() {
   return (
     <>
@@ -216,7 +312,7 @@ export default function ArticlePage() {
           { name: "Le cashback expliqué", path: PATH },
         ])}
       />
-      <Localized fr={<ArticleFR />} nl={<ArticleNL />} />
+      <Localized fr={<ArticleFR />} nl={<ArticleNL />} en={<ArticleEN />} />
     </>
   );
 }

@@ -206,6 +206,104 @@ function ArticleNL() {
   );
 }
 
+function ArticleEN() {
+  return (
+    <article>
+      <div className="ed-article-hero">
+        <div className="ed-article">
+          <div className="ed-article-meta">Comparison · 6 min · 2026</div>
+          <h1>Which cashback app pays the most&nbsp;?</h1>
+          <p className="lede">
+            Spoiler: there&apos;s no universal « best app ». The highest rate changes by merchant, day and
+            promotions. Here&apos;s how never to leave money on the table again.
+          </p>
+        </div>
+      </div>
+
+      <div className="ed-article" style={{ paddingBottom: 60 }}>
+        <img className="ed-article-cover" src="/img/blog-app-cashback.webp" alt="" />
+        <p>
+          Cashback has become a reflex for millions of consumers. The principle is simple: by going through a partner
+          platform before you pay, you get back a percentage of your purchase. But one mistake keeps coming back:
+          <b> signing up for a single app and sticking to it</b>.
+        </p>
+        <p>
+          Yet rates vary hugely. For the same merchant, on the same day, you can find 3% here, 6% there, and a
+          boosted offer at 8% elsewhere. Choosing the wrong app often halves your cashback.
+        </p>
+
+        <h2>The main cashback apps</h2>
+        <p>Here are the players you find most often, and their strength:</p>
+        <div className="ed-tablewrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Platform</th>
+                <th>Strength</th>
+                <th>Watch out for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><b>iGraal</b></td><td>Broad coverage, many merchants</td><td>Rates vary by promo</td></tr>
+              <tr><td><b>Poulpeo</b></td><td>Often high rates, frequent boosts</td><td>Withdrawal thresholds</td></tr>
+              <tr><td><b>Widilo</b></td><td>Simple interface, good fashion/tech rates</td><td>Smaller catalogue</td></tr>
+              <tr><td><b>Joko</b></td><td>Polished mobile experience, points</td><td>Points logic to grasp</td></tr>
+              <tr><td><b>eBuyClub</b></td><td>Longevity, regular offers</td><td>Dated ergonomics</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>
+          None wins on every merchant. It&apos;s mathematical: the « best » depends on <b>where</b> and{" "}
+          <b>when</b> you buy.
+        </p>
+
+        <h2>The right method: compare before every purchase</h2>
+        <p>Concretely, to maximise your cashback, you&apos;d have to each time:</p>
+        <ul>
+          <li>check the merchant&apos;s rate on <b>each</b> platform where you have an account&nbsp;;</li>
+          <li>spot the temporary <b>boosted offers</b>&nbsp;;</li>
+          <li>check the conditions (validity, withdrawal threshold, validation delay)&nbsp;;</li>
+          <li>and only then, click and pay.</li>
+        </ul>
+        <p>
+          Done by hand, it&apos;s tedious, and most people give up. That&apos;s exactly the work that{" "}
+          <b>FILON automates</b>.
+        </p>
+
+        <div className="callout">
+          <b>The shortcut:</b> instead of comparing the apps one by one, let FILON do it. It finds the{" "}
+          <span className="g">best offer of the moment</span> and takes you there. You have nothing to search for.
+        </div>
+
+        <h2>Stop comparing cashback alone</h2>
+        <p>
+          The next mistake is reasoning in « cashback » when the real question is <b>the real final price</b>. A 6%
+          cashback on a new product can be beaten by an <b>equivalent refurbished</b> 30% cheaper, or by a stackable{" "}
+          <b>promo code</b>. The right reflex is to compare the <b>total cost</b>, not one single line.
+        </p>
+        <p>
+          That&apos;s FILON&apos;s philosophy: giving you one single number, your real price, and telling you whether
+          to buy or wait.
+        </p>
+
+        <h2>In short</h2>
+        <ul>
+          <li>No cashback app is « the best » everywhere&nbsp;: the winning rate changes by merchant.</li>
+          <li>Comparing before every purchase can double your cashback, but it&apos;s time-consuming by hand.</li>
+          <li>Reason in <b>real final price</b> (cashback + refurbished + promo code), not cashback alone.</li>
+          <li>FILON makes that comparison for you, free, on every purchase.</li>
+        </ul>
+
+        <p style={{ marginTop: 30 }}>
+          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+            Try the FILON assistant
+          </a>
+        </p>
+      </div>
+    </article>
+  );
+}
+
 export default function ArticlePage() {
   return (
     <>
@@ -217,7 +315,7 @@ export default function ArticlePage() {
           { name: "Quelle app de cashback paie le plus ?", path: PATH },
         ])}
       />
-      <Localized fr={<ArticleFR />} nl={<ArticleNL />} />
+      <Localized fr={<ArticleFR />} nl={<ArticleNL />} en={<ArticleEN />} />
     </>
   );
 }
