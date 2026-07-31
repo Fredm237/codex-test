@@ -86,6 +86,10 @@ class Settings(BaseSettings):
     awin_feed_limit: int = Field(default=0)
     # Nombre max de lignes ingérées par feed (garde-fou mémoire ; 0 = illimité).
     awin_max_rows_per_feed: int = Field(default=0)
+    # Synchronisation automatique du catalogue toutes les N heures (0 = désactivé).
+    # Mettre 6 sur Railway pour rafraîchir prix + alimenter l'historique sans rien
+    # relancer à la main. Nécessite AWIN_FEED_API_KEY et une base de données.
+    awin_auto_sync_hours: int = Field(default=0)
 
     @property
     def awin_regions_list(self) -> list[str]:

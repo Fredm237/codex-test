@@ -31,7 +31,15 @@ async def lifespan(app: FastAPI):
         except Exception as exc:  # pragma: no cover
             log.warning("Init base ignorée (%s)", exc)
 
+    # Cron interne : rafraîchit le catalogue toutes les N heures (si activé).
+    from app.ingest import scheduler
+
+    sync_task = scheduler.maybe_start()
+
     yield
+
+    if sync_task is not None:
+        sync_task.cancel()
     log.info("Arrêt de %s", settings.app_name)
 
 
