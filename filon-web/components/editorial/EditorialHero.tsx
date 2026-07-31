@@ -2,7 +2,6 @@
 
 import { useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
-import { ChromeCta } from "./ChromeCta";
 import { useLocale } from "@/lib/i18n";
 
 const IntelligenceCore = dynamic(
@@ -43,7 +42,6 @@ export function EditorialHero() {
           <div className="ed-hero-actions">
             <a className="ed-btn wave" href="/recherche">{t("cta.try")}</a>
             <a className="ed-btn ghost" href="/catalogue">{t("cta.catalogue")}</a>
-            <ChromeCta variant="ghost" label={t("cta.chrome")} />
           </div>
         </div>
 

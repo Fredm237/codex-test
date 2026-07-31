@@ -7,7 +7,7 @@ Ils dégradent proprement si la base est absente (listes vides).
 from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -254,8 +254,9 @@ async def highlights(
     fresh = [_card(o, m) for (o, m) in (await session.execute(fresh_stmt)).all()]
 
     # 💶 Moins de 100 € — la porte d'entrée « petits prix ».
+    # Strictement en euros : 95 £ n'est pas « moins de 100 € ».
     budget_stmt = (
-        base.where(*visible, models.Offer.price <= 100)
+        base.where(*visible, models.Offer.price <= 100, models.Offer.currency == "EUR")
         .order_by(models.Offer.price.desc(), models.Offer.id.desc())
         .limit(limit)
     )
@@ -428,3 +429,28 @@ async def sync_feeds_endpoint(
         raise HTTPException(status_code=400, detail="AWIN_FEED_API_KEY absent")
     background.add_task(_run_feed_ingest, limit)
     return {"started": True, "limit": limit, "note": "suivre /api/catalog/stats"}
+
+
+@router.post("/admin/reset-price-history")
+async def reset_price_history(
+    confirm: bool = Query(default=False, description="Doit valoir true pour exécuter"),
+    x_admin_token: str | None = Header(default=None),
+    session=Depends(db.get_session),
+) -> dict:
+    """Purge les relevés de prix (protégé par ADMIN_SYNC_TOKEN).
+
+    À n'utiliser qu'après une correction du parsing : les relevés produits avec
+    un prix mal lu faussent durablement « plus bas » et « plus haut ». L'action
+    est irréversible — l'historique ne se rattrape pas — mais mieux vaut repartir
+    de zéro que bâtir sur des valeurs fausses.
+    """
+    _require_admin(x_admin_token)
+    if session is None:
+        raise HTTPException(status_code=503, detail="base de données absente")
+    if not confirm:
+        raise HTTPException(status_code=400, detail="ajouter ?confirm=true pour exécuter")
+    before = await session.scalar(select(func.count()).select_from(models.PriceSnapshot))
+    await session.execute(delete(models.PriceSnapshot))
+    await session.commit()
+    log.warning("Historique de prix purgé : %s relevés supprimés", before)
+    return {"deleted_snapshots": int(before or 0)}
