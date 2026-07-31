@@ -5,6 +5,7 @@ import { useLocale, type Locale } from "@/lib/i18n";
 import { API } from "@/lib/api";
 
 type Offer = {
+  id: number;
   name: string;
   brand: string | null;
   category: string | null;
@@ -58,16 +59,18 @@ function OfferCard({ o, see, from }: { o: Offer; see: string; from: string }) {
   const [imgOk, setImgOk] = useState(true);
   return (
     <div style={{ display: "flex", flexDirection: "column", background: "var(--card)", border: "1px solid var(--line-2)", borderRadius: 16, overflow: "hidden" }}>
-      <div style={{ aspectRatio: "4 / 3", background: "#fff", display: "grid", placeItems: "center", overflow: "hidden" }}>
+      <a href={`/produit/?id=${o.id}`} style={{ aspectRatio: "4 / 3", background: "#fff", display: "grid", placeItems: "center", overflow: "hidden" }}>
         {o.image && imgOk ? (
           <img src={o.image} alt="" loading="lazy" onError={() => setImgOk(false)} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 12 }} />
         ) : (
           <span aria-hidden="true" style={{ color: "var(--ink-4, var(--ink-3))", fontSize: 12 }}>—</span>
         )}
-      </div>
+      </a>
       <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
         {o.brand && <span style={{ fontSize: 11.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--ink-3)" }}>{o.brand}</span>}
-        <b style={{ fontSize: 14, color: "var(--ink)", lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{o.name}</b>
+        <a href={`/produit/?id=${o.id}`} style={{ textDecoration: "none" }}>
+          <b style={{ fontSize: 14, color: "var(--ink)", lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{o.name}</b>
+        </a>
         <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>{from} {o.merchant.name}</span>
         <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: 8 }}>
           <b style={{ fontSize: 16, color: "var(--ink)" }}>{money(o.price, o.currency)}</b>
