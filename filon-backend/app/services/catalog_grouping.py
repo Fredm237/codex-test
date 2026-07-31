@@ -64,50 +64,132 @@ def normalize_ean(raw: str | None) -> str | None:
     return digits
 
 
-def _canonical(values: list[str | None]) -> str | None:
+def _consensus(counts: Counter) -> str | None:
     """Valeur la plus fréquente parmi les marchands (départage : la plus courte).
 
     Les marchands enjolivent les libellés (« - Livraison gratuite ! »). Le
     consensus est plus fiable que le premier venu.
     """
-    counts = Counter(v.strip() for v in values if v and v.strip())
     if not counts:
         return None
     best = max(counts.values())
     return min((v for v, n in counts.items() if n == best), key=len)
 
 
-async def rebuild_products(session, *, batch: int = 1000) -> dict:
+class _Aggregate:
+    """Agrégat compact d'un produit, alimenté au fil de la lecture.
+
+    On ne conserve jamais les lignes elles-mêmes : à 800 000 offres, les
+    matérialiser saturait la mémoire du conteneur et le processus était tué en
+    plein rattachement. Seuls quelques compteurs bornés survivent à la lecture.
+    """
+
+    __slots__ = ("names", "brands", "categories", "currencies", "image",
+                 "price_min", "price_max", "merchants", "count")
+
+    # Le consensus n'a pas besoin de tout voir : quelques variantes suffisent.
+    MAX_VARIANTS = 5
+
+    def __init__(self) -> None:
+        self.names: Counter = Counter()
+        self.brands: Counter = Counter()
+        self.categories: Counter = Counter()
+        self.currencies: Counter = Counter()
+        self.image: str | None = None
+        self.price_min: float | None = None
+        self.price_max: float | None = None
+        self.merchants: set[int] = set()
+        self.count = 0
+
+    @staticmethod
+    def _bump(counter: Counter, value: str | None) -> None:
+        if not value:
+            return
+        value = value.strip()
+        if value and (value in counter or len(counter) < _Aggregate.MAX_VARIANTS):
+            counter[value] += 1
+
+    def add(self, row) -> None:
+        self.count += 1
+        self._bump(self.names, row.name)
+        self._bump(self.brands, row.brand)
+        self._bump(self.categories, row.category)
+        self._bump(self.currencies, row.currency)
+        if self.image is None and row.image_url:
+            self.image = row.image_url
+        if row.price is not None and row.price > 0:
+            self.price_min = row.price if self.price_min is None else min(self.price_min, row.price)
+            self.price_max = row.price if self.price_max is None else max(self.price_max, row.price)
+        self.merchants.add(row.merchant_id)
+
+    def values(self, ean: str) -> dict:
+        return {
+            "ean": ean,
+            "name": (_consensus(self.names) or "")[:512],
+            "brand": _consensus(self.brands),
+            "category": _consensus(self.categories),
+            "image_url": self.image,
+            "offers_count": self.count,
+            "merchants_count": len(self.merchants),
+            "price_min": self.price_min,
+            "price_max": self.price_max,
+            "currency": _consensus(self.currencies),
+        }
+
+
+async def _iter_offer_pages(session, columns, *, page: int):
+    """Parcourt les offres par pages ordonnées par id (curseur, pas OFFSET).
+
+    OFFSET se dégrade linéairement sur des centaines de milliers de lignes ;
+    le curseur sur la clé primaire reste constant.
+    """
+    last_id = 0
+    while True:
+        rows = (
+            await session.execute(
+                select(*columns)
+                .where(models.Offer.id > last_id)
+                .order_by(models.Offer.id)
+                .limit(page)
+            )
+        ).all()
+        if not rows:
+            return
+        yield rows
+        last_id = rows[-1].id
+
+
+def _shard_of(ean: str, shards: int) -> int:
+    """Tranche déterministe d'un EAN (les derniers chiffres sont bien répartis)."""
+    return int(ean[-4:]) % shards
+
+
+async def rebuild_products(
+    session, *, batch: int = 1000, page: int = 5000, shards: int = 4
+) -> dict:
     """Reconstruit les produits à partir des offres. Idempotent.
 
-    Renvoie un résumé chiffré — dont le taux d'EAN exploitables, qui conditionne
-    tout ce qu'on pourra bâtir dessus (multi-marchands, verdict, alternatives).
+    Procède en deux passes en flux — agrégation, puis rattachement — afin que la
+    mémoire reste bornée quelle que soit la taille du catalogue. L'agrégation est
+    en outre découpée en `shards` tranches d'EAN : les agrégats sont
+    proportionnels au nombre de produits, et tout retenir d'un coup dépassait ce
+    dont dispose le conteneur.
+
+    Renvoie un résumé chiffré, dont le taux d'EAN exploitables : c'est lui qui
+    conditionne ce qu'on peut bâtir dessus (multi-marchands, verdict).
     """
-    rows = (
-        await session.execute(
-            select(
-                models.Offer.id,
-                models.Offer.ean,
-                models.Offer.name,
-                models.Offer.brand,
-                models.Offer.category,
-                models.Offer.image_url,
-                models.Offer.price,
-                models.Offer.currency,
-                models.Offer.merchant_id,
-            )
-        )
-    ).all()
-
-    total_offers = len(rows)
-    buckets: dict[str, list] = defaultdict(list)
-    for r in rows:
-        ean = normalize_ean(r.ean)
-        if ean:
-            buckets[ean].append(r)
-
-    grouped_offers = sum(len(v) for v in buckets.values())
-
+    # ── Passe 1 : agrégation par EAN, tranche par tranche ────────────────────
+    columns = (
+        models.Offer.id,
+        models.Offer.ean,
+        models.Offer.name,
+        models.Offer.brand,
+        models.Offer.category,
+        models.Offer.image_url,
+        models.Offer.price,
+        models.Offer.currency,
+        models.Offer.merchant_id,
+    )
     existing = {
         ean: pid
         for (ean, pid) in (
@@ -117,110 +199,110 @@ async def rebuild_products(session, *, batch: int = 1000) -> dict:
         ).all()
     }
 
-    # Construction en mémoire, puis écritures groupées. Une requête par produit
-    # ne tient pas à cette échelle : sur ~230 000 produits, cela représentait
-    # autant d'allers-retours et le rattachement n'arrivait jamais à son terme.
-    to_create: list[dict] = []
-    to_update: list[dict] = []
-    multi_merchant = 0
+    total_offers = 0
+    grouped_offers = 0
+    created = updated = multi_merchant = 0
 
-    for ean, items in buckets.items():
-        prices = [i.price for i in items if i.price is not None and i.price > 0]
-        merchants = {i.merchant_id for i in items}
-        if len(merchants) > 1:
-            multi_merchant += 1
+    for shard in range(shards):
+        aggregates: dict[str, _Aggregate] = {}
+        async for rows in _iter_offer_pages(session, columns, page=page):
+            if shard == 0:
+                total_offers += len(rows)
+            for r in rows:
+                ean = normalize_ean(r.ean)
+                if not ean or _shard_of(ean, shards) != shard:
+                    continue
+                grouped_offers += 1
+                agg = aggregates.get(ean)
+                if agg is None:
+                    agg = aggregates[ean] = _Aggregate()
+                agg.add(r)
 
-        values = {
-            "ean": ean,
-            "name": (_canonical([i.name for i in items]) or "")[:512],
-            "brand": _canonical([i.brand for i in items]),
-            "category": _canonical([i.category for i in items]),
-            "image_url": next((i.image_url for i in items if i.image_url), None),
-            "offers_count": len(items),
-            "merchants_count": len(merchants),
-            "price_min": min(prices) if prices else None,
-            "price_max": max(prices) if prices else None,
-            "currency": _canonical([i.currency for i in items]),
-        }
-        (to_update if ean in existing else to_create).append(values)
+        to_create: list[dict] = []
+        to_update: list[dict] = []
+        for ean, agg in aggregates.items():
+            if len(agg.merchants) > 1:
+                multi_merchant += 1
+            (to_update if ean in existing else to_create).append(agg.values(ean))
+        aggregates.clear()
 
-    # Création groupée, puis relecture des identifiants attribués.
-    for start in range(0, len(to_create), batch):
-        await session.execute(
-            models.CatalogProduct.__table__.insert(), to_create[start : start + batch]
-        )
-    await session.commit()
-
-    if to_create:
-        existing.update(
-            {
-                ean: pid
-                for (ean, pid) in (
-                    await session.execute(
-                        select(models.CatalogProduct.ean, models.CatalogProduct.id)
-                    )
-                ).all()
-            }
-        )
-
-    # Mise à jour groupée : un seul aller-retour par lot, au lieu d'un par produit.
-    if to_update:
-        # Table Core : la clé de mise à jour est l'EAN, pas la clé primaire —
-        # la machinerie ORM de bulk-update-by-PK ne s'applique pas ici.
-        t = models.CatalogProduct.__table__
-        stmt = (
-            t.update()
-            .where(t.c.ean == bindparam("_ean"))
-            .values(
-                name=bindparam("_name"),
-                brand=bindparam("_brand"),
-                category=bindparam("_category"),
-                image_url=bindparam("_image_url"),
-                offers_count=bindparam("_offers_count"),
-                merchants_count=bindparam("_merchants_count"),
-                price_min=bindparam("_price_min"),
-                price_max=bindparam("_price_max"),
-                currency=bindparam("_currency"),
-            )
-        )
-        for start in range(0, len(to_update), batch):
+        for start in range(0, len(to_create), batch):
             await session.execute(
-                stmt,
-                [
-                    {f"_{k}": v for k, v in row.items()}
-                    for row in to_update[start : start + batch]
-                ],
+                models.CatalogProduct.__table__.insert(),
+                to_create[start : start + batch],
             )
         await session.commit()
 
-    # Rattachement des offres, en écritures groupées elles aussi.
-    assignments = [
-        (item.id, existing[ean])
-        for ean, items in buckets.items()
-        if ean in existing
-        for item in items
-    ]
-    # Bulk update par clé primaire : SQLAlchemy génère un WHERE id = :id et
-    # regroupe les lignes en un seul aller-retour par lot.
+        if to_update:
+            # Table Core : la clé de mise à jour est l'EAN, pas la clé primaire —
+            # la machinerie ORM de bulk-update-by-PK ne s'applique pas ici.
+            t = models.CatalogProduct.__table__
+            stmt = (
+                t.update()
+                .where(t.c.ean == bindparam("_ean"))
+                .values(
+                    name=bindparam("_name"),
+                    brand=bindparam("_brand"),
+                    category=bindparam("_category"),
+                    image_url=bindparam("_image_url"),
+                    offers_count=bindparam("_offers_count"),
+                    merchants_count=bindparam("_merchants_count"),
+                    price_min=bindparam("_price_min"),
+                    price_max=bindparam("_price_max"),
+                    currency=bindparam("_currency"),
+                )
+            )
+            for start in range(0, len(to_update), batch):
+                await session.execute(
+                    stmt,
+                    [
+                        {f"_{k}": v for k, v in row.items()}
+                        for row in to_update[start : start + batch]
+                    ],
+                )
+            await session.commit()
+
+        created += len(to_create)
+        updated += len(to_update)
+        if to_create:
+            existing.update(
+                {
+                    ean: pid
+                    for (ean, pid) in (
+                        await session.execute(
+                            select(models.CatalogProduct.ean, models.CatalogProduct.id)
+                        )
+                    ).all()
+                }
+            )
+
+    # ── Passe 2 : rattachement, en flux également ─────────────────────────────
     linked = 0
-    for start in range(0, len(assignments), batch):
-        chunk = assignments[start : start + batch]
-        await session.execute(
-            update(models.Offer),
-            [{"id": oid, "product_id": pid} for oid, pid in chunk],
-        )
-        await session.commit()
-        linked += len(chunk)
+    async for rows in _iter_offer_pages(
+        session, (models.Offer.id, models.Offer.ean), page=page
+    ):
+        mapping = []
+        for r in rows:
+            ean = normalize_ean(r.ean)
+            pid = existing.get(ean) if ean else None
+            if pid is not None:
+                mapping.append({"id": r.id, "product_id": pid})
+        for start in range(0, len(mapping), batch):
+            # Bulk update par clé primaire : un aller-retour par lot.
+            await session.execute(update(models.Offer), mapping[start : start + batch])
+        if mapping:
+            await session.commit()
+            linked += len(mapping)
 
     summary = {
         "offers_total": total_offers,
         "offers_with_valid_ean": grouped_offers,
         "ean_coverage_pct": round(grouped_offers / total_offers * 100, 1) if total_offers else 0.0,
-        "products_total": len(buckets),
-        "products_created": len(to_create),
-        "products_updated": len(to_update),
-        "offers_linked": linked,
+        "products_total": len(existing),
+        "products_created": created,
+        "products_updated": updated,
         "products_multi_merchant": multi_merchant,
+        "offers_linked": linked,
     }
     log.info("Regroupement par EAN terminé : %s", summary)
     return summary

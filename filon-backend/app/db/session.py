@@ -52,13 +52,19 @@ def is_enabled() -> bool:
     return _sessionmaker is not None
 
 
-async def _migrate(conn) -> None:
+async def _migrate() -> None:
     """Migrations légères et idempotentes (le projet n'utilise pas Alembic).
 
     `create_all` crée les tables manquantes mais ne modifie jamais une table
     existante : une colonne ajoutée à un modèle déjà déployé doit donc l'être
     explicitement. Sans Postgres (tests SQLite), `create_all` produit déjà la
     définition complète — il n'y a rien à rattraper.
+
+    Chaque instruction s'exécute dans sa *propre* connexion en autocommit. Sous
+    PostgreSQL, une instruction qui échoue avorte toute la transaction : les
+    suivantes échouent en cascade et le commit final lève à son tour. Attraper
+    l'exception ne suffit donc pas — il faut l'isoler, sans quoi une migration
+    bénigne empêche l'application de démarrer.
     """
     if _engine is None or _engine.dialect.name != "postgresql":
         return
@@ -71,11 +77,12 @@ async def _migrate(conn) -> None:
     )
     for sql in statements:
         try:
-            await conn.execute(text(sql))
+            async with _engine.connect() as conn:
+                await conn.execution_options(isolation_level="AUTOCOMMIT")
+                await conn.execute(text(sql))
         except Exception as exc:  # pragma: no cover - dépend de l'état réel
-            # Une migration qui échoue ne doit pas empêcher l'application de
-            # démarrer : on trace et on continue.
-            log.warning("Migration ignorée (%s) : %s", sql.split()[0], exc)
+            # Une migration qui échoue ne doit jamais empêcher le démarrage.
+            log.warning("Migration ignorée (%s…) : %s", sql[:40], exc)
 
 
 async def create_all() -> None:
@@ -90,7 +97,8 @@ async def create_all() -> None:
 
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-        await _migrate(conn)
+    # Hors de la transaction précédente : voir _migrate.
+    await _migrate()
 
 
 async def get_session() -> AsyncIterator:
