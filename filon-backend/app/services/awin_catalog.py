@@ -55,19 +55,42 @@ def _slugify(text: str) -> str:
 
 
 def _to_float(value: str | None) -> float | None:
+    """Convertit un prix de flux en float, quel que soit le format du marchand.
+
+    Les feeds Awin melangent les conventions : « 799.90 », « 1.299,00 »,
+    « 1,299.00 », « 1.299 ». Le piege est le separateur unique suivi de trois
+    chiffres : « 1.299 » et « 1,299 » valent 1299, pas 1,30 — les lire comme des
+    decimales rangeait des produits a 1 299 EUR dans les petits prix.
+    """
     if not value:
         return None
-    v = value.strip().replace(" ", "").replace(" ", "")
-    # Le *dernier* séparateur est le décimal ; les autres sont des milliers.
-    # Gère « 1.299,00 » → 1299.00, « 1,299.00 » → 1299.00, « 799.90 » → 799.90.
+    # Retire les espaces (dont insecables/fins) puis tout ce qui n'est ni
+    # chiffre, ni separateur, ni signe : symboles monetaires et codes ISO.
+    cleaned = value.strip()
+    for ws in (" ", "\u00a0", "\u202f", "\u2009"):
+        cleaned = cleaned.replace(ws, "")
+    v = re.sub(r"[^0-9,.\-]", "", cleaned)
+    if not v:
+        return None
+
     if "," in v and "." in v:
+        # Les deux presents : le *dernier* separateur est le decimal.
         dec = "," if v.rfind(",") > v.rfind(".") else "."
-        thou = "." if dec == "," else ","
-        v = v.replace(thou, "").replace(dec, ".")
-    elif "," in v:
-        v = v.replace(",", ".")
+        v = v.replace("." if dec == "," else ",", "").replace(dec, ".")
+    elif "," in v or "." in v:
+        sep = "," if "," in v else "."
+        parts = v.split(sep)
+        if len(parts) > 2:
+            # « 1.234.567 » : separateurs de milliers repetes.
+            v = "".join(parts)
+        elif len(parts[1]) == 3 and parts[0].lstrip("-") not in ("", "0"):
+            # « 1.299 » / « 1,299 » : trois chiffres derriere = milliers.
+            v = parts[0] + parts[1]
+        else:
+            v = parts[0] + "." + parts[1]
+
     try:
-        return round(float(re.sub(r"[^0-9.\-]", "", v)), 2)
+        return round(float(v), 2)
     except ValueError:
         return None
 

@@ -14,6 +14,33 @@ def test_to_float_formats():
     assert a._to_float(None) is None
 
 
+def test_to_float_thousands_without_decimals():
+    """Non-régression : « 1.299 » vaut 1299, pas 1,30.
+
+    Lus comme des décimales, ces prix rangeaient des produits à 1 299 € parmi
+    les articles à moins de 100 € et faussaient tout l'historique.
+    """
+    assert a._to_float("1.299") == 1299.0
+    assert a._to_float("1,299") == 1299.0
+    assert a._to_float("19.990") == 19990.0
+    assert a._to_float("2.500") == 2500.0
+    assert a._to_float("1.234.567") == 1234567.0
+
+
+def test_to_float_keeps_real_decimals():
+    assert a._to_float("24,99") == 24.99
+    assert a._to_float("12,5") == 12.5
+    assert a._to_float("0,50") == 0.5
+    assert a._to_float("0.500") == 0.5   # « 0.xxx » reste un décimal
+    assert a._to_float("-12,50") == -12.5
+
+
+def test_to_float_strips_currency_noise():
+    assert a._to_float("EUR 49.95") == 49.95
+    assert a._to_float("49,95 €") == 49.95
+    assert a._to_float("abc") is None
+
+
 def test_to_bool():
     assert a._to_bool("1") is True
     assert a._to_bool("in stock") is True
