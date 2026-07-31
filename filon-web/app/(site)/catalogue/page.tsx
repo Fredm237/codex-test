@@ -3,6 +3,12 @@ import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
 import { OffersBrowser } from "@/components/editorial/OffersBrowser";
 import { Localized } from "@/components/editorial/Localized";
+import { CatalogueRails, type RailSection } from "@/components/editorial/CatalogueRails";
+import { API } from "@/lib/api";
+
+// Les rails sont rendus côté serveur (pas de spinner, et indexables), puis
+// revalidés toutes les 30 min — les baisses de prix bougent au rythme du cron.
+export const revalidate = 1800;
 
 export const metadata: Metadata = buildMetadata({
   path: "/catalogue",
@@ -11,11 +17,26 @@ export const metadata: Metadata = buildMetadata({
     "Parcourez les produits que FILON compare pour vous : prix réel, cashback et codes promo réunis, chez nos marchands partenaires.",
 });
 
+async function getHighlights(): Promise<RailSection[]> {
+  try {
+    const res = await fetch(`${API}/api/catalog/highlights?limit=12`, {
+      next: { revalidate: 1800 },
+    });
+    if (!res.ok) return [];
+    const data = await res.json();
+    return (data.sections || []) as RailSection[];
+  } catch {
+    return [];
+  }
+}
+
 function Hero({ eyebrow, title, intro, crumb }: { eyebrow: string; title: React.ReactNode; intro: string; crumb: string }) {
   return <ContentHero eyebrow={eyebrow} title={title} intro={intro} breadcrumb={[{ name: crumb, path: "/catalogue" }]} />;
 }
 
-export default function CataloguePage() {
+export default async function CataloguePage() {
+  const sections = await getHighlights();
+
   return (
     <>
       <Localized
@@ -23,8 +44,27 @@ export default function CataloguePage() {
         nl={<Hero eyebrow="Catalogus" crumb="Catalogus" title={<>Blader, FILON <span className="it">vergelijkt</span>.</>} intro="De producten van onze partnerwinkels. Zoek, vergelijk, en laat FILON je echte prijs vinden." />}
         en={<Hero eyebrow="Catalogue" crumb="Catalogue" title={<>Browse, FILON <span className="it">compares</span>.</>} intro="The products from our partner merchants. Search, compare, and let FILON find your real price." />}
       />
-      <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+
+      {sections.length > 0 && (
+        <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
+          <div className="ed-wrap">
+            <CatalogueRails sections={sections} />
+          </div>
+        </section>
+      )}
+
+      <section className="ed-band" style={{ paddingTop: sections.length ? undefined : 0, borderTop: sections.length ? undefined : 0 }}>
         <div className="ed-wrap">
+          <h2 className="cat-rail-title" style={{ marginBottom: 6 }}>
+            <Localized fr="Explorer tout le catalogue" nl="Verken de hele catalogus" en="Explore the whole catalogue" />
+          </h2>
+          <p className="cat-rail-sub" style={{ marginBottom: 22 }}>
+            <Localized
+              fr="Filtrez par catégorie, marque et budget."
+              nl="Filter op categorie, merk en budget."
+              en="Filter by category, brand and budget."
+            />
+          </p>
           <OffersBrowser />
         </div>
       </section>
