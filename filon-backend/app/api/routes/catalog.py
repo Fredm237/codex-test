@@ -177,6 +177,71 @@ def _card(o: models.Offer, m: models.Merchant, **extra) -> dict:
     }
 
 
+def _dedup_diversify(core, *, limit: int):
+    """Déduplique un rail et le rend divers, en deux passes.
+
+    `core` doit exposer les colonnes id, merchant_id et rail_rank (le rang
+    global déjà calculé, croissant = meilleur).
+
+    Les feeds déclinent un même article par taille ou coloris : sans traitement,
+    un rail affichait cinq fois la même chemise. On garde donc un exemplaire par
+    (marque, nom), puis on entrelace les marchands — meilleur produit de chaque
+    boutique d'abord, puis les seconds. Aucune boutique ne monopolise la rangée,
+    et le rail reste plein même quand peu de marchands sont éligibles (un simple
+    plafond par marchand, lui, laissait des rangées à moitié vides).
+    """
+    ranked = core.subquery()
+    unique = (
+        select(
+            ranked,
+            func.row_number()
+            .over(partition_by=ranked.c.dedup_key, order_by=ranked.c.rail_rank)
+            .label("rn_name"),
+        )
+        .subquery()
+    )
+    kept = select(unique).where(unique.c.rn_name == 1).subquery()
+    spread = (
+        select(
+            kept,
+            func.row_number()
+            .over(partition_by=kept.c.merchant_id, order_by=kept.c.rail_rank)
+            .label("rn_merchant"),
+        )
+        .subquery()
+    )
+    return (
+        select(spread)
+        .order_by(spread.c.rn_merchant, spread.c.rail_rank)
+        .limit(limit)
+    )
+
+
+async def _rail(session, core, *, limit: int, extra=()):
+    """Exécute un rail dédupliqué puis recharge les objets pour l'affichage."""
+    rows = (await session.execute(_dedup_diversify(core, limit=limit))).mappings().all()
+    if not rows:
+        return []
+    ids = [r["id"] for r in rows]
+    objects = {
+        o.id: (o, m)
+        for (o, m) in (
+            await session.execute(
+                select(models.Offer, models.Merchant)
+                .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+                .where(models.Offer.id.in_(ids))
+            )
+        ).all()
+    }
+    cards = []
+    for r in rows:  # l'ordre du rail fait foi
+        pair = objects.get(r["id"])
+        if pair:
+            o, m = pair
+            cards.append(_card(o, m, **{k: fn(r) for k, fn in extra}))
+    return cards
+
+
 @router.get("/highlights")
 async def highlights(
     limit: int = Query(default=12, le=24, description="Produits par section"),
@@ -204,63 +269,73 @@ async def highlights(
         .subquery()
     )
 
-    base = select(models.Offer, models.Merchant).join(
-        models.Merchant, models.Offer.merchant_id == models.Merchant.id
+    dedup_key = func.lower(
+        func.concat(func.coalesce(models.Offer.brand, ""), " ", models.Offer.name)
     )
+
+    def core(order_by, *extra_cols):
+        """Colonnes communes à tous les rails + rang global."""
+        return select(
+            models.Offer.id.label("id"),
+            models.Offer.merchant_id.label("merchant_id"),
+            dedup_key.label("dedup_key"),
+            func.row_number().over(order_by=order_by).label("rail_rank"),
+            *extra_cols,
+        ).join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+
     visible = (
         models.Offer.price.isnot(None),
         models.Offer.price > 0,
         models.Offer.image_url.isnot(None),
     )
 
-    drop_pct = ((snap.c.high - models.Offer.price) / snap.c.high * 100.0)
-
     # 📉 Les plus grosses baisses de prix (prix actuel < plus haut relevé).
-    drops_stmt = (
-        base.add_columns(snap.c.high, snap.c.low, drop_pct.label("drop_pct"))
+    drop_pct = ((snap.c.high - models.Offer.price) / snap.c.high * 100.0)
+    drops_core = (
+        core(drop_pct.desc(), snap.c.high.label("high"), snap.c.low.label("low"),
+             drop_pct.label("drop_pct"))
         .join(snap, snap.c.offer_id == models.Offer.id)
         .where(*visible, snap.c.high > models.Offer.price)
-        .order_by(drop_pct.desc())
-        .limit(limit)
     )
-    drops = [
-        _card(o, m, price_high=high, price_low=low, drop_pct=round(float(pct), 1))
-        for (o, m, high, low, pct) in (await session.execute(drops_stmt)).all()
-    ]
+    drops = await _rail(
+        session, drops_core, limit=limit,
+        extra=(
+            ("price_high", lambda r: r["high"]),
+            ("price_low", lambda r: r["low"]),
+            ("drop_pct", lambda r: round(float(r["drop_pct"]), 1)),
+        ),
+    )
 
     # 🏅 Au plus bas historique (et le prix a réellement varié).
-    lowest_stmt = (
-        base.add_columns(snap.c.high, snap.c.low)
+    depth = ((snap.c.high - snap.c.low) / snap.c.high)
+    lowest_core = (
+        core(depth.desc(), snap.c.high.label("high"), snap.c.low.label("low"))
         .join(snap, snap.c.offer_id == models.Offer.id)
-        .where(
-            *visible,
-            snap.c.high > snap.c.low,
-            models.Offer.price <= snap.c.low,
-        )
-        .order_by(((snap.c.high - snap.c.low) / snap.c.high).desc())
-        .limit(limit)
+        .where(*visible, snap.c.high > snap.c.low, models.Offer.price <= snap.c.low)
     )
-    lowest = [
-        _card(o, m, price_high=high, price_low=low, is_lowest=True)
-        for (o, m, high, low) in (await session.execute(lowest_stmt)).all()
-    ]
+    lowest = await _rail(
+        session, lowest_core, limit=limit,
+        extra=(
+            ("price_high", lambda r: r["high"]),
+            ("price_low", lambda r: r["low"]),
+            ("is_lowest", lambda r: True),
+        ),
+    )
 
     # 🆕 Derniers produits entrés au catalogue.
-    fresh_stmt = (
-        base.where(*visible)
-        .order_by(models.Offer.created_at.desc(), models.Offer.id.desc())
-        .limit(limit)
-    )
-    fresh = [_card(o, m) for (o, m) in (await session.execute(fresh_stmt)).all()]
+    fresh_core = core(models.Offer.created_at.desc()).where(*visible)
+    fresh = await _rail(session, fresh_core, limit=limit)
 
-    # 💶 Moins de 100 € — la porte d'entrée « petits prix ».
-    # Strictement en euros : 95 £ n'est pas « moins de 100 € ».
-    budget_stmt = (
-        base.where(*visible, models.Offer.price <= 100, models.Offer.currency == "EUR")
-        .order_by(models.Offer.price.desc(), models.Offer.id.desc())
-        .limit(limit)
+    # 💶 Moins de 100 € — strictement en euros : 95 £ n'est pas « moins de 100 € ».
+    # Dispersion déterministe plutôt qu'un tri par prix : trié par prix, le rail
+    # ne montrait que des articles collés au plafond, tous à 100,00 €.
+    budget_core = core((models.Offer.id % 997).asc()).where(
+        *visible,
+        models.Offer.price >= 10,
+        models.Offer.price <= 100,
+        models.Offer.currency == "EUR",
     )
-    budget = [_card(o, m) for (o, m) in (await session.execute(budget_stmt)).all()]
+    budget = await _rail(session, budget_core, limit=limit)
 
     sections = [
         {"key": "drops", "items": drops},
@@ -318,6 +393,60 @@ def _require_admin(x_admin_token: str | None) -> None:
     s = get_settings()
     if not s.admin_sync_token or x_admin_token != s.admin_sync_token:
         raise HTTPException(status_code=403, detail="admin token requis")
+
+
+@router.post("/admin/purge-offers")
+async def purge_offers(
+    merchant: str | None = Query(default=None, description="Slug marchand"),
+    brand: str | None = Query(default=None, description="Marque (correspondance partielle)"),
+    q: str | None = Query(default=None, description="Texte dans le nom du produit"),
+    confirm: bool = Query(default=False, description="Doit valoir true pour exécuter"),
+    dry_run: bool = Query(default=True, description="Ne compte que, sans supprimer"),
+    x_admin_token: str | None = Header(default=None),
+    session=Depends(db.get_session),
+) -> dict:
+    """Supprime des offres (et leurs relevés), par marchand, marque ou mot-clé.
+
+    Sert à retirer ce qu'un feed n'aurait jamais dû apporter — le contenu adulte
+    notamment : couper le flag à l'ingestion empêche les prochains imports, mais
+    ne retire pas les lignes déjà en base, qui continuent d'être indexées.
+
+    `dry_run=true` par défaut : on compte d'abord, on supprime ensuite.
+    """
+    _require_admin(x_admin_token)
+    if session is None:
+        raise HTTPException(status_code=503, detail="base de données absente")
+    if not (merchant or brand or q):
+        raise HTTPException(status_code=400, detail="préciser merchant, brand ou q")
+
+    stmt = select(models.Offer.id)
+    if merchant:
+        stmt = stmt.where(
+            models.Offer.merchant_id.in_(
+                select(models.Merchant.id).where(models.Merchant.slug == merchant)
+            )
+        )
+    if brand:
+        stmt = stmt.where(models.Offer.brand.ilike(f"%{brand}%"))
+    if q:
+        stmt = stmt.where(models.Offer.name.ilike(f"%{q}%"))
+
+    ids = [i for (i,) in (await session.execute(stmt)).all()]
+    if dry_run or not confirm:
+        return {
+            "matched_offers": len(ids),
+            "deleted": False,
+            "note": "ajouter ?confirm=true&dry_run=false pour supprimer",
+        }
+
+    # Les relevés d'abord : ils référencent les offres.
+    await session.execute(
+        delete(models.PriceSnapshot).where(models.PriceSnapshot.offer_id.in_(ids))
+    )
+    await session.execute(delete(models.Offer).where(models.Offer.id.in_(ids)))
+    await session.commit()
+    log.warning("Offres purgées : %s (merchant=%s brand=%s q=%s)", len(ids), merchant, brand, q)
+    return {"matched_offers": len(ids), "deleted": True}
 
 
 @router.post("/sync/merchants")
