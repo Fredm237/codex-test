@@ -147,6 +147,67 @@ async def _run_feed_ingest(limit: int | None) -> None:
             log.warning("Ingestion feeds échouée : %s", exc)
 
 
+@router.get("/debug/feeds")
+async def debug_feeds(
+    x_admin_token: str | None = Header(default=None),
+    session=Depends(db.get_session),
+) -> dict:
+    """Diagnostic : montre la réponse brute d'Awin (liste des feeds) pour caler
+    le parseur sur le format réel. Protégé par ADMIN_SYNC_TOKEN. Masque la clé.
+    """
+    _require_admin(x_admin_token)
+    import httpx
+
+    from app.services import awin_catalog
+
+    s = get_settings()
+    out: dict = {
+        "feed_key_present": bool(s.awin_feed_api_key),
+        "feed_base": s.awin_feed_base,
+        "regions": s.awin_regions_list,
+    }
+    if not s.awin_feed_api_key:
+        out["error"] = "AWIN_FEED_API_KEY absent"
+        return out
+
+    list_url = f"{s.awin_feed_base}/datafeed/list/apikey/{s.awin_feed_api_key}/"
+    out["list_url"] = list_url.replace(s.awin_feed_api_key, "***")
+    try:
+        async with httpx.AsyncClient(timeout=60.0, follow_redirects=True) as client:
+            resp = await client.get(list_url)
+        out["list_http_status"] = resp.status_code
+        out["list_body_head"] = resp.text[:1200]
+    except Exception as exc:
+        out["list_fetch_error"] = str(exc)
+
+    try:
+        feeds = await awin_catalog.list_feeds()
+        out["parsed_feeds_count"] = len(feeds)
+        out["sample_feeds"] = [
+            {
+                "feed_id": f.feed_id,
+                "advertiser_id": f.advertiser_id,
+                "advertiser_name": f.advertiser_name,
+                "region": f.region,
+                "products": f.products,
+            }
+            for f in feeds[:5]
+        ]
+        if session is not None:
+            rows = (await session.execute(select(models.Merchant.awin_mid))).all()
+            joined = {mid for (mid,) in rows}
+            matched = [f for f in feeds if f.advertiser_id in joined]
+            out["feeds_matching_joined_merchants"] = len(matched)
+            if matched:
+                out["sample_download_url"] = awin_catalog._download_url([matched[0].feed_id]).replace(
+                    s.awin_feed_api_key, "***"
+                )
+    except Exception as exc:
+        out["parse_error"] = str(exc)
+
+    return out
+
+
 @router.post("/sync/feeds")
 async def sync_feeds_endpoint(
     background: BackgroundTasks,
