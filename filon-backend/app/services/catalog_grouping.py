@@ -15,7 +15,7 @@ from __future__ import annotations
 import re
 from collections import Counter, defaultdict
 
-from sqlalchemy import func, select, update
+from sqlalchemy import bindparam, func, select, update
 
 from app.core.logging import get_logger
 from app.db import models
@@ -117,8 +117,11 @@ async def rebuild_products(session, *, batch: int = 1000) -> dict:
         ).all()
     }
 
-    assignments: list[tuple[int, int]] = []  # (offer_id, product_id)
-    created = updated = 0
+    # Construction en mémoire, puis écritures groupées. Une requête par produit
+    # ne tient pas à cette échelle : sur ~230 000 produits, cela représentait
+    # autant d'allers-retours et le rattachement n'arrivait jamais à son terme.
+    to_create: list[dict] = []
+    to_update: list[dict] = []
     multi_merchant = 0
 
     for ean, items in buckets.items():
@@ -129,7 +132,7 @@ async def rebuild_products(session, *, batch: int = 1000) -> dict:
 
         values = {
             "ean": ean,
-            "name": _canonical([i.name for i in items]) or "",
+            "name": (_canonical([i.name for i in items]) or "")[:512],
             "brand": _canonical([i.brand for i in items]),
             "category": _canonical([i.category for i in items]),
             "image_url": next((i.image_url for i in items if i.image_url), None),
@@ -139,48 +142,84 @@ async def rebuild_products(session, *, batch: int = 1000) -> dict:
             "price_max": max(prices) if prices else None,
             "currency": _canonical([i.currency for i in items]),
         }
+        (to_update if ean in existing else to_create).append(values)
 
-        pid = existing.get(ean)
-        if pid is None:
-            product = models.CatalogProduct(**values)
-            session.add(product)
-            await session.flush()
-            pid = product.id
-            existing[ean] = pid
-            created += 1
-        else:
-            await session.execute(
-                update(models.CatalogProduct)
-                .where(models.CatalogProduct.id == pid)
-                .values(**{k: v for k, v in values.items() if k != "ean"})
+    # Création groupée, puis relecture des identifiants attribués.
+    for start in range(0, len(to_create), batch):
+        await session.execute(
+            models.CatalogProduct.__table__.insert(), to_create[start : start + batch]
+        )
+    await session.commit()
+
+    if to_create:
+        existing.update(
+            {
+                ean: pid
+                for (ean, pid) in (
+                    await session.execute(
+                        select(models.CatalogProduct.ean, models.CatalogProduct.id)
+                    )
+                ).all()
+            }
+        )
+
+    # Mise à jour groupée : un seul aller-retour par lot, au lieu d'un par produit.
+    if to_update:
+        # Table Core : la clé de mise à jour est l'EAN, pas la clé primaire —
+        # la machinerie ORM de bulk-update-by-PK ne s'applique pas ici.
+        t = models.CatalogProduct.__table__
+        stmt = (
+            t.update()
+            .where(t.c.ean == bindparam("_ean"))
+            .values(
+                name=bindparam("_name"),
+                brand=bindparam("_brand"),
+                category=bindparam("_category"),
+                image_url=bindparam("_image_url"),
+                offers_count=bindparam("_offers_count"),
+                merchants_count=bindparam("_merchants_count"),
+                price_min=bindparam("_price_min"),
+                price_max=bindparam("_price_max"),
+                currency=bindparam("_currency"),
             )
-            updated += 1
-
-        assignments.extend((i.id, pid) for i in items)
-
-    # Rattachement des offres, par paquets pour éviter une requête géante.
-    for start in range(0, len(assignments), batch):
-        chunk = assignments[start : start + batch]
-        by_product: dict[int, list[int]] = defaultdict(list)
-        for offer_id, product_id in chunk:
-            by_product[product_id].append(offer_id)
-        for product_id, offer_ids in by_product.items():
+        )
+        for start in range(0, len(to_update), batch):
             await session.execute(
-                update(models.Offer)
-                .where(models.Offer.id.in_(offer_ids))
-                .values(product_id=product_id)
+                stmt,
+                [
+                    {f"_{k}": v for k, v in row.items()}
+                    for row in to_update[start : start + batch]
+                ],
             )
         await session.commit()
 
-    await session.commit()
+    # Rattachement des offres, en écritures groupées elles aussi.
+    assignments = [
+        (item.id, existing[ean])
+        for ean, items in buckets.items()
+        if ean in existing
+        for item in items
+    ]
+    # Bulk update par clé primaire : SQLAlchemy génère un WHERE id = :id et
+    # regroupe les lignes en un seul aller-retour par lot.
+    linked = 0
+    for start in range(0, len(assignments), batch):
+        chunk = assignments[start : start + batch]
+        await session.execute(
+            update(models.Offer),
+            [{"id": oid, "product_id": pid} for oid, pid in chunk],
+        )
+        await session.commit()
+        linked += len(chunk)
 
     summary = {
         "offers_total": total_offers,
         "offers_with_valid_ean": grouped_offers,
         "ean_coverage_pct": round(grouped_offers / total_offers * 100, 1) if total_offers else 0.0,
         "products_total": len(buckets),
-        "products_created": created,
-        "products_updated": updated,
+        "products_created": len(to_create),
+        "products_updated": len(to_update),
+        "offers_linked": linked,
         "products_multi_merchant": multi_merchant,
     }
     log.info("Regroupement par EAN terminé : %s", summary)
