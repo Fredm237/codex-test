@@ -7,6 +7,7 @@ export type Locale = "fr" | "nl" | "en";
 /** Dictionnaire FR/NL/EN. Clés courtes, regroupées par zone. */
 const DICT: Record<string, { fr: string; nl: string; en: string }> = {
   // Navigation
+  "nav.catalogue": { fr: "Catalogue", nl: "Catalogus", en: "Catalogue" },
   "nav.assistant": { fr: "Assistant", nl: "Assistent", en: "Assistant" },
   "nav.how": { fr: "Comment ça marche", nl: "Hoe het werkt", en: "How it works" },
   "nav.pricing": { fr: "Tarifs", nl: "Tarieven", en: "Pricing" },
@@ -18,6 +19,7 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
   "cta.try": { fr: "Essayer le copilote", nl: "Probeer de copiloot", en: "Try the copilot" },
   "cta.chrome": { fr: "Ajouter à Chrome", nl: "Toevoegen aan Chrome", en: "Add to Chrome" },
   "cta.discover": { fr: "Découvrir", nl: "Ontdekken", en: "Discover" },
+  "cta.catalogue": { fr: "Explorer le catalogue", nl: "Verken de catalogus", en: "Explore the catalogue" },
   // Hero (accueil)
   "hero.eyebrow": { fr: "Copilote d'achat", nl: "Koopcopiloot", en: "Shopping copilot" },
   "hero.h1a": { fr: "Est-ce", nl: "Is dit", en: "Is this" },
@@ -47,6 +49,7 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
 
 /** Éléments de navigation localisés. */
 export const NAV_KEYS: Array<{ key: string; href: string }> = [
+  { key: "nav.catalogue", href: "/catalogue" },
   { key: "nav.assistant", href: "/recherche" },
   { key: "nav.how", href: "/comment-ca-marche" },
   { key: "nav.pricing", href: "/tarifs" },

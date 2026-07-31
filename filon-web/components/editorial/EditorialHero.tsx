@@ -42,6 +42,7 @@ export function EditorialHero() {
           </p>
           <div className="ed-hero-actions">
             <a className="ed-btn wave" href="/recherche">{t("cta.try")}</a>
+            <a className="ed-btn ghost" href="/catalogue">{t("cta.catalogue")}</a>
             <ChromeCta variant="ghost" label={t("cta.chrome")} />
           </div>
         </div>
