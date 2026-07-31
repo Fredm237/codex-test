@@ -225,8 +225,12 @@ def _download_url(feed_ids: list[str]) -> str:
     )
 
 
-async def _download_feed_rows(feed_ids: list[str]) -> list[dict]:
-    """Télécharge et décompresse un lot de feeds (CSV gzip) → lignes dict."""
+async def _download_feed_rows(feed_ids: list[str], *, max_rows: int = 0) -> list[dict]:
+    """Télécharge un feed (CSV gzip) et renvoie ses lignes.
+
+    Lecture en flux : on s'arrête à `max_rows` sans matérialiser tout le feed
+    (essentiel pour les gros feeds — évite la saturation mémoire).
+    """
     url = _download_url(feed_ids)
     async with httpx.AsyncClient(timeout=300.0, follow_redirects=True) as client:
         resp = await client.get(url)
@@ -237,7 +241,13 @@ async def _download_feed_rows(feed_ids: list[str]) -> list[dict]:
     except (OSError, EOFError):
         data = raw  # au cas où la réponse ne serait pas gzip
     text = data.decode("utf-8", errors="replace")
-    return list(csv.DictReader(io.StringIO(text)))
+    reader = csv.DictReader(io.StringIO(text))
+    rows: list[dict] = []
+    for row in reader:
+        rows.append(row)
+        if max_rows and len(rows) >= max_rows:
+            break
+    return rows
 
 
 async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
@@ -311,7 +321,7 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
     skipped = 0
     for f in selected:
         try:
-            frows = await _download_feed_rows([f.feed_id])
+            frows = await _download_feed_rows([f.feed_id], max_rows=max_rows)
         except Exception as exc:  # pragma: no cover - réseau/compte
             log.warning("Feed %s (%s) indisponible (%s)", f.feed_id, f.advertiser_name, exc)
             skipped += 1
@@ -319,10 +329,10 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
         merchant_id = mid_to_id[f.advertiser_id]
         n = 0
         for row in frows:
-            if max_rows and n >= max_rows:
-                break
             await _upsert_offer(session, merchant_id, row)
             n += 1
+            if n % 200 == 0:  # commit périodique → progression visible dans /stats
+                await session.commit()
         await session.commit()
         total_offers += n
         log.info("Feed %s (%s) → %d offres", f.feed_id, f.advertiser_name, n)
