@@ -105,6 +105,35 @@ class Merchant(Base):
     offers: Mapped[list["Offer"]] = relationship(back_populates="merchant")
 
 
+class CatalogProduct(Base):
+    """Un produit réel, regroupant les offres de plusieurs marchands par EAN.
+
+    Distinct du modèle `Product` (mémoire classique, table `products`) : celui-ci
+    est l'unité du catalogue, celle qu'on présente à l'utilisateur et sur
+    laquelle on compare les marchands.
+    """
+
+    __tablename__ = "catalog_products"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ean: Mapped[str] = mapped_column(String(14), unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(512))
+    brand: Mapped[str | None] = mapped_column(String(191), nullable=True, index=True)
+    category: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    offers_count: Mapped[int] = mapped_column(Integer, default=0)
+    merchants_count: Mapped[int] = mapped_column(Integer, default=0, index=True)
+    price_min: Mapped[float | None] = mapped_column(Float, nullable=True, index=True)
+    price_max: Mapped[float | None] = mapped_column(Float, nullable=True)
+    currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    offers: Mapped[list["Offer"]] = relationship(back_populates="product")
+
+
 class Offer(Base):
     """Une offre produit issue d'un feed Awin (produit × marchand)."""
 
@@ -118,6 +147,11 @@ class Offer(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     merchant_id: Mapped[int] = mapped_column(ForeignKey("merchants.id"), index=True)
+    # Rattachement au produit regroupé par EAN. Nullable : une offre sans EAN
+    # exploitable reste autonome plutôt que d'être rattachée à tort.
+    product_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_products.id"), nullable=True, index=True
+    )
     awin_product_id: Mapped[str] = mapped_column(String(191))
     ean: Mapped[str | None] = mapped_column(String(64), nullable=True)
     name: Mapped[str] = mapped_column(String(512))
@@ -135,6 +169,7 @@ class Offer(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     merchant: Mapped["Merchant"] = relationship(back_populates="offers")
+    product: Mapped["CatalogProduct | None"] = relationship(back_populates="offers")
 
 
 class PriceSnapshot(Base):
