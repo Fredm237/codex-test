@@ -67,12 +67,23 @@ async def merchants(
     }
 
 
+_SORTS = {
+    "relevance": None,
+    "price_asc": (models.Offer.price.asc().nullslast(), models.Offer.id.asc()),
+    "price_desc": (models.Offer.price.desc().nullslast(), models.Offer.id.asc()),
+    "name": (models.Offer.name.asc(),),
+}
+
+
 @router.get("/offers")
 async def offers(
     q: str | None = Query(default=None, description="Recherche dans le nom"),
     merchant: str | None = Query(default=None, description="Slug marchand"),
     category: str | None = None,
     brand: str | None = None,
+    price_min: float | None = Query(default=None, ge=0),
+    price_max: float | None = Query(default=None, ge=0),
+    sort: str = Query(default="relevance", description="relevance|price_asc|price_desc|name"),
     limit: int = Query(default=48, le=200),
     offset: int = Query(default=0, ge=0),
     session=Depends(db.get_session),
@@ -90,7 +101,14 @@ async def offers(
         stmt = stmt.where(models.Offer.category.ilike(f"%{category}%"))
     if brand:
         stmt = stmt.where(models.Offer.brand.ilike(f"%{brand}%"))
+    if price_min is not None:
+        stmt = stmt.where(models.Offer.price >= price_min)
+    if price_max is not None:
+        stmt = stmt.where(models.Offer.price <= price_max)
     total = await session.scalar(select(func.count()).select_from(stmt.subquery()))
+    order = _SORTS.get(sort)
+    if order:
+        stmt = stmt.order_by(*order)
     rows = (await session.execute(stmt.limit(limit).offset(offset))).all()
     return {
         "total": int(total or 0),
@@ -109,6 +127,36 @@ async def offers(
             }
             for (o, m) in rows
         ],
+    }
+
+
+@router.get("/facets")
+async def facets(
+    limit: int = Query(default=40, le=200),
+    session=Depends(db.get_session),
+) -> dict:
+    """Catégories et marques les plus fréquentes, pour les menus de filtres."""
+    if session is None:
+        return {"categories": [], "brands": []}
+    cat_stmt = (
+        select(models.Offer.category, func.count().label("n"))
+        .where(models.Offer.category.isnot(None))
+        .group_by(models.Offer.category)
+        .order_by(func.count().desc())
+        .limit(limit)
+    )
+    brand_stmt = (
+        select(models.Offer.brand, func.count().label("n"))
+        .where(models.Offer.brand.isnot(None))
+        .group_by(models.Offer.brand)
+        .order_by(func.count().desc())
+        .limit(limit)
+    )
+    cats = (await session.execute(cat_stmt)).all()
+    brands = (await session.execute(brand_stmt)).all()
+    return {
+        "categories": [{"value": c, "count": int(n)} for (c, n) in cats if c],
+        "brands": [{"value": b, "count": int(n)} for (b, n) in brands if b],
     }
 
 
