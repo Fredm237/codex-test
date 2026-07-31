@@ -75,6 +75,24 @@ class Settings(BaseSettings):
     awin_api_base: str = Field(default="https://api.awin.com")
     awin_clickref: str = Field(default="filon")
 
+    # Ingestion des feeds produits Awin (Create-a-Feed / datafeed).
+    # La clé de feed peut différer du token API : elle se trouve dans l'URL
+    # générée par l'UI Awin (Toolbox → Create-a-Feed). SECRET → env AWIN_FEED_API_KEY.
+    awin_feed_api_key: str | None = Field(default=None)
+    awin_feed_base: str = Field(default="https://productdata.awin.com")
+    # Régions ciblées pour le catalogue (codes pays), séparées par des virgules.
+    awin_regions: str = Field(default="BE,FR,LU,NL")
+    # Nombre max de feeds à ingérer par run (garde-fou coût/temps ; 0 = tous).
+    awin_feed_limit: int = Field(default=0)
+
+    @property
+    def awin_regions_list(self) -> list[str]:
+        return [r.strip().upper() for r in (self.awin_regions or "").split(",") if r.strip()]
+
+    # Jeton protégeant les endpoints d'administration (déclenchement d'un sync).
+    # SECRET → env ADMIN_SYNC_TOKEN. Sans valeur, les endpoints admin sont fermés.
+    admin_sync_token: str | None = Field(default=None)
+
 
 @lru_cache
 def get_settings() -> Settings:

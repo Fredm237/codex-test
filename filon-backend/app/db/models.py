@@ -1,12 +1,28 @@
-"""Modèles de la mémoire classique (PostgreSQL) : utilisateurs, produits,
-recherches, alertes. Volontairement minimal pour la Phase 1.
+"""Modèles PostgreSQL de FILON.
+
+Deux familles :
+- Mémoire classique (utilisateurs, recherches, alertes).
+- Catalogue Awin (marchands inscrits, offres produits, historique de prix) — le
+  socle « couche de données » qui alimentera les pages catalogue/marchand/produit
+  et les scores. Alimenté par l'ingestion Awin (app/services/awin_catalog.py).
 """
 
 from __future__ import annotations
 
 from datetime import datetime
 
-from sqlalchemy import DateTime, Float, ForeignKey, String, Text, func
+from sqlalchemy import (
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -58,3 +74,77 @@ class Alert(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     user: Mapped["User"] = relationship(back_populates="alerts")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Catalogue Awin — le socle « couche de données »
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class Merchant(Base):
+    """Un annonceur Awin auquel l'éditeur FILON est inscrit (programme « joined »)."""
+
+    __tablename__ = "merchants"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    awin_mid: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    name: Mapped[str] = mapped_column(String(255))
+    slug: Mapped[str] = mapped_column(String(255), index=True)
+    domain: Mapped[str | None] = mapped_column(String(255), nullable=True, index=True)
+    region: Mapped[str | None] = mapped_column(String(8), nullable=True, index=True)
+    currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    sector: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    logo_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    cashback: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    joined: Mapped[bool] = mapped_column(Boolean, default=True)
+    last_synced_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    offers: Mapped[list["Offer"]] = relationship(back_populates="merchant")
+
+
+class Offer(Base):
+    """Une offre produit issue d'un feed Awin (produit × marchand)."""
+
+    __tablename__ = "offers"
+    __table_args__ = (
+        UniqueConstraint("merchant_id", "awin_product_id", name="uq_offer_merchant_product"),
+        Index("ix_offer_category", "category"),
+        Index("ix_offer_brand", "brand"),
+        Index("ix_offer_ean", "ean"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    merchant_id: Mapped[int] = mapped_column(ForeignKey("merchants.id"), index=True)
+    awin_product_id: Mapped[str] = mapped_column(String(191))
+    ean: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    name: Mapped[str] = mapped_column(String(512))
+    brand: Mapped[str | None] = mapped_column(String(191), nullable=True)
+    category: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
+    in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    deep_link: Mapped[str | None] = mapped_column(Text, nullable=True)
+    product_url: Mapped[str | None] = mapped_column(Text, nullable=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, server_default=func.now(), onupdate=func.now()
+    )
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+
+    merchant: Mapped["Merchant"] = relationship(back_populates="offers")
+
+
+class PriceSnapshot(Base):
+    """Un relevé de prix horodaté — la brique d'historique (ne se rattrape pas)."""
+
+    __tablename__ = "price_snapshots"
+    __table_args__ = (Index("ix_snapshot_offer_time", "offer_id", "captured_at"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    offer_id: Mapped[int] = mapped_column(ForeignKey("offers.id"), index=True)
+    price: Mapped[float] = mapped_column(Float)
+    in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    captured_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

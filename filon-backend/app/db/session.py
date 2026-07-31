@@ -42,6 +42,10 @@ async def create_all() -> None:
         return
     from app.db.base import Base
 
+    # Importe les modèles pour qu'ils soient enregistrés dans Base.metadata
+    # avant create_all (sinon aucune table n'est créée).
+    from app.db import models  # noqa: F401
+
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
@@ -53,3 +57,23 @@ async def get_session() -> AsyncIterator:
         return
     async with _sessionmaker() as session:
         yield session
+
+
+class session_scope:
+    """Context manager async pour obtenir une session hors requête HTTP
+    (scripts d'ingestion, tâches planifiées). Rend `None` si la base est absente.
+    """
+
+    def __init__(self) -> None:
+        self._cm = None
+
+    async def __aenter__(self):
+        _init()
+        if _sessionmaker is None:
+            return None
+        self._cm = _sessionmaker()
+        return await self._cm.__aenter__()
+
+    async def __aexit__(self, *exc) -> None:
+        if self._cm is not None:
+            await self._cm.__aexit__(*exc)
