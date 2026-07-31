@@ -84,6 +84,8 @@ class Settings(BaseSettings):
     awin_regions: str = Field(default="BE,FR,LU,NL")
     # Nombre max de feeds à ingérer par run (garde-fou coût/temps ; 0 = tous).
     awin_feed_limit: int = Field(default=0)
+    # Nombre max de lignes ingérées par feed (garde-fou mémoire ; 0 = illimité).
+    awin_max_rows_per_feed: int = Field(default=0)
 
     @property
     def awin_regions_list(self) -> list[str]:
