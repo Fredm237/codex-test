@@ -17,6 +17,21 @@ _engine = None
 _sessionmaker = None
 
 
+def _normalize_async_url(url: str) -> str:
+    """Force le driver async asyncpg.
+
+    Railway (et la plupart des hébergeurs) exposent DATABASE_URL au format
+    `postgres://` ou `postgresql://` (driver synchrone). Le moteur async a
+    besoin de `postgresql+asyncpg://` — on le convertit ici pour que la variable
+    Railway fonctionne sans réglage particulier.
+    """
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        url = "postgresql+asyncpg://" + url[len("postgresql://"):]
+    return url
+
+
 def _init() -> None:
     global _engine, _sessionmaker
     if _engine is not None:
@@ -25,6 +40,7 @@ def _init() -> None:
     if not url:
         log.info("DATABASE_URL absent → persistance désactivée")
         return
+    url = _normalize_async_url(url)
     from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
     _engine = create_async_engine(url, pool_pre_ping=True)
