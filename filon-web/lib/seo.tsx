@@ -6,12 +6,15 @@ export function buildMetadata(input: {
   title?: string;
   description?: string;
   path?: string;
+  image?: string;
 }): Metadata {
   const title = input.title ? `${input.title} · ${site.name}` : `${site.name} · ${site.tagline}`;
   const description = input.description ?? site.description;
   const url = `${site.url}${input.path ?? "/"}`;
 
-  const ogImage = { url: "/og.png", width: 1200, height: 630, alt: `${site.name}, ${site.tagline}` };
+  const ogImage = input.image
+    ? { url: input.image, alt: input.title ?? site.name }
+    : { url: "/og.png", width: 1200, height: 630, alt: `${site.name}, ${site.tagline}` };
 
   return {
     title,
@@ -31,7 +34,7 @@ export function buildMetadata(input: {
       title,
       description,
       site: site.twitter,
-      images: ["/og.png"],
+      images: [input.image ?? "/og.png"],
     },
   };
 }
