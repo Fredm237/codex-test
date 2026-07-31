@@ -8,6 +8,7 @@ import { useLocale } from "@/lib/i18n";
 // Libellés NL par href (FR reste la valeur d'origine des tableaux LINKS/LEGAL).
 const NL_LABELS: Record<string, string> = {
   "/recherche": "Assistent",
+  "/catalogue": "Catalogus",
   "/marchands": "Winkels",
   "/tarifs": "Tarieven",
   "/extension": "Extensie",
@@ -35,6 +36,7 @@ const NL_LABELS: Record<string, string> = {
 // Libellés EN par href.
 const EN_LABELS: Record<string, string> = {
   "/recherche": "AI assistant",
+  "/catalogue": "Catalogue",
   "/marchands": "Merchants",
   "/tarifs": "Pricing",
   "/extension": "Extension",
@@ -88,6 +90,7 @@ const FOOT = {
 
 const LINKS = [
   { label: "Assistant IA", href: "/recherche" },
+  { label: "Catalogue", href: "/catalogue" },
   { label: "Marchands", href: "/marchands" },
   { label: "Tarifs", href: "/tarifs" },
   { label: "Extension", href: "/extension" },
