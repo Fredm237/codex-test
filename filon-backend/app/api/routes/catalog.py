@@ -7,7 +7,7 @@ Ils dégradent proprement si la base est absente (listes vides).
 from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
-from sqlalchemy import delete, func, select
+from sqlalchemy import String, case, cast, delete, func, select
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -276,8 +276,20 @@ async def highlights(
         .subquery()
     )
 
-    dedup_key = func.lower(
-        func.concat(func.coalesce(models.Offer.brand, ""), " ", models.Offer.name)
+    # Clé de déduplication : le produit regroupé par EAN quand il existe, sinon
+    # (marque, nom). Le repli sur le nom est fragile — les feeds suffixent les
+    # déclinaisons (« … - Size M »), et l'affichage tronque le titre à deux
+    # lignes : deux cartes visuellement identiques peuvent porter des noms
+    # différents. L'EAN, lui, ne se laisse pas tromper.
+    # `concat` ignorant les NULL sous PostgreSQL, on branche explicitement.
+    dedup_key = case(
+        (
+            models.Offer.product_id.isnot(None),
+            func.concat("p:", cast(models.Offer.product_id, String)),
+        ),
+        else_=func.lower(
+            func.concat(func.coalesce(models.Offer.brand, ""), " ", models.Offer.name)
+        ),
     )
 
     def core(order_by, *extra_cols):
