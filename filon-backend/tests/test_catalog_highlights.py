@@ -80,6 +80,39 @@ async def test_rail_stays_full_when_few_merchants(session):
     assert len(await _budget(session, limit=12)) == 12
 
 
+async def test_rail_dedups_size_variants_via_ean(session):
+    """Le cas réel : mêmes produits, noms différents par suffixe de taille.
+
+    L'affichage tronque le titre à deux lignes, donc ces cartes paraissent
+    identiques sans l'être. Seul le regroupement par EAN les réunit.
+    """
+    from app.services.catalog_grouping import rebuild_products
+
+    m = models.Merchant(awin_mid=9, name="Overhemden - NL", slug="overhemden")
+    session.add(m)
+    await session.flush()
+    ean = "4006381333931"
+    for size in ("S", "M", "L", "XL"):
+        session.add(models.Offer(
+            merchant_id=m.id, awin_product_id=f"shirt-{size}",
+            name=f"GANT Regular Fit shirt green, Chequered - Size {size}",
+            brand="GANT", price=100.0, currency="EUR", ean=ean,
+            image_url="https://example.test/i.jpg",
+        ))
+    # Un autre produit pour que le rail ne soit pas réduit à un seul article.
+    session.add(models.Offer(
+        merchant_id=m.id, awin_product_id="other", name="Cravate",
+        brand="GANT", price=45.0, currency="EUR", ean="5901234123457",
+        image_url="https://example.test/i.jpg",
+    ))
+    await session.commit()
+    await rebuild_products(session)
+
+    items = await _budget(session, limit=12)
+    shirts = [i for i in items if "Chequered" in i["name"]]
+    assert len(shirts) == 1, f"les 4 tailles devraient donner 1 carte, obtenu {len(shirts)}"
+
+
 async def test_budget_rail_excludes_non_euro_and_out_of_range(session):
     await _seed(session)
     m = models.Merchant(awin_mid=3, name="UK Shop", slug="uk-shop")

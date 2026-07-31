@@ -7,8 +7,10 @@ import { CatalogueRails, type RailSection } from "@/components/editorial/Catalog
 import { API } from "@/lib/api";
 
 // Les rails sont rendus côté serveur (pas de spinner, et indexables), puis
-// revalidés toutes les 30 min — les baisses de prix bougent au rythme du cron.
-export const revalidate = 1800;
+// revalidés toutes les 5 min. Une fenêtre de 30 min rendait tout correctif
+// invisible pendant une demi-heure, au point de faire douter du correctif
+// lui-même ; le coût d'une régénération est négligeable à côté.
+export const revalidate = 300;
 
 export const metadata: Metadata = buildMetadata({
   path: "/catalogue",
@@ -20,7 +22,7 @@ export const metadata: Metadata = buildMetadata({
 async function getHighlights(): Promise<RailSection[]> {
   try {
     const res = await fetch(`${API}/api/catalog/highlights?limit=12`, {
-      next: { revalidate: 1800 },
+      next: { revalidate: 300 },
     });
     if (!res.ok) return [];
     const data = await res.json();
