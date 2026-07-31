@@ -12,7 +12,7 @@ import asyncio
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import session as db
-from app.services import awin_catalog
+from app.services import awin_catalog, catalog_grouping
 
 log = get_logger("scheduler")
 
@@ -29,7 +29,10 @@ async def _loop(hours: int) -> None:
                     continue
                 await awin_catalog.sync_merchants(session)
                 summary = await awin_catalog.ingest_feeds(session)
-            log.info("Auto-sync terminé : %s", summary)
+                # Les offres viennent de changer : les produits regroupés
+                # doivent suivre, sinon les fiches multi-marchands se périment.
+                grouping = await catalog_grouping.rebuild_products(session)
+            log.info("Auto-sync terminé : %s | regroupement : %s", summary, grouping)
         except asyncio.CancelledError:
             raise
         except Exception as exc:  # pragma: no cover - réseau/compte

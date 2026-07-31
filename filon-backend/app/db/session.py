@@ -52,6 +52,32 @@ def is_enabled() -> bool:
     return _sessionmaker is not None
 
 
+async def _migrate(conn) -> None:
+    """Migrations légères et idempotentes (le projet n'utilise pas Alembic).
+
+    `create_all` crée les tables manquantes mais ne modifie jamais une table
+    existante : une colonne ajoutée à un modèle déjà déployé doit donc l'être
+    explicitement. Sans Postgres (tests SQLite), `create_all` produit déjà la
+    définition complète — il n'y a rien à rattraper.
+    """
+    if _engine is None or _engine.dialect.name != "postgresql":
+        return
+    from sqlalchemy import text
+
+    statements = (
+        "ALTER TABLE offers ADD COLUMN IF NOT EXISTS product_id INTEGER "
+        "REFERENCES catalog_products(id)",
+        "CREATE INDEX IF NOT EXISTS ix_offers_product_id ON offers (product_id)",
+    )
+    for sql in statements:
+        try:
+            await conn.execute(text(sql))
+        except Exception as exc:  # pragma: no cover - dépend de l'état réel
+            # Une migration qui échoue ne doit pas empêcher l'application de
+            # démarrer : on trace et on continue.
+            log.warning("Migration ignorée (%s) : %s", sql.split()[0], exc)
+
+
 async def create_all() -> None:
     _init()
     if _engine is None:
@@ -64,6 +90,7 @@ async def create_all() -> None:
 
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
+        await _migrate(conn)
 
 
 async def get_session() -> AsyncIterator:

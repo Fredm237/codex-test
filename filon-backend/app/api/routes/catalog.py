@@ -26,12 +26,19 @@ async def stats(session=Depends(db.get_session)) -> dict:
     merchants = await session.scalar(select(func.count()).select_from(models.Merchant))
     offers = await session.scalar(select(func.count()).select_from(models.Offer))
     snapshots = await session.scalar(select(func.count()).select_from(models.PriceSnapshot))
-    return {
+    out = {
         "database": True,
         "merchants": int(merchants or 0),
         "offers": int(offers or 0),
         "snapshots": int(snapshots or 0),
     }
+    try:
+        from app.services import catalog_grouping
+
+        out.update(await catalog_grouping.product_stats(session))
+    except Exception:  # pragma: no cover - table absente avant la 1re migration
+        pass
+    return out
 
 
 @router.get("/merchants")
@@ -389,10 +396,139 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
     }
 
 
+@router.get("/products")
+async def products(
+    q: str | None = Query(default=None, description="Recherche dans le nom"),
+    brand: str | None = None,
+    multi_merchant: bool = Query(default=False, description="Vendus par 2+ marchands"),
+    limit: int = Query(default=48, le=200),
+    offset: int = Query(default=0, ge=0),
+    session=Depends(db.get_session),
+) -> dict:
+    """Produits regroupés par EAN — l'unité réelle, pas la ligne de feed."""
+    if session is None:
+        return {"total": 0, "items": []}
+    stmt = select(models.CatalogProduct)
+    if q:
+        stmt = stmt.where(models.CatalogProduct.name.ilike(f"%{q}%"))
+    if brand:
+        stmt = stmt.where(models.CatalogProduct.brand.ilike(f"%{brand}%"))
+    if multi_merchant:
+        stmt = stmt.where(models.CatalogProduct.merchants_count > 1)
+    total = await session.scalar(select(func.count()).select_from(stmt.subquery()))
+    stmt = stmt.order_by(
+        models.CatalogProduct.merchants_count.desc(), models.CatalogProduct.id.asc()
+    )
+    rows = (await session.execute(stmt.limit(limit).offset(offset))).scalars().all()
+    return {
+        "total": int(total or 0),
+        "items": [
+            {
+                "ean": p.ean,
+                "name": p.name,
+                "brand": p.brand,
+                "category": p.category,
+                "image": p.image_url,
+                "price_min": p.price_min,
+                "price_max": p.price_max,
+                "currency": p.currency,
+                "offers_count": p.offers_count,
+                "merchants_count": p.merchants_count,
+            }
+            for p in rows
+        ],
+    }
+
+
+@router.get("/product/{ean}")
+async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
+    """Fiche d'un produit regroupé : toutes les offres, du moins cher au plus cher."""
+    if session is None:
+        raise HTTPException(status_code=503, detail="base de données absente")
+    product = (
+        await session.execute(
+            select(models.CatalogProduct).where(models.CatalogProduct.ean == ean)
+        )
+    ).scalar_one_or_none()
+    if product is None:
+        raise HTTPException(status_code=404, detail="produit introuvable")
+
+    rows = (
+        await session.execute(
+            select(models.Offer, models.Merchant)
+            .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+            .where(models.Offer.product_id == product.id)
+            .order_by(models.Offer.price.asc().nullslast())
+        )
+    ).all()
+    return {
+        "ean": product.ean,
+        "name": product.name,
+        "brand": product.brand,
+        "category": product.category,
+        "image": product.image_url,
+        "price_min": product.price_min,
+        "price_max": product.price_max,
+        "currency": product.currency,
+        "offers_count": product.offers_count,
+        "merchants_count": product.merchants_count,
+        "offers": [
+            {
+                "id": o.id,
+                "price": o.price,
+                "currency": o.currency,
+                "in_stock": o.in_stock,
+                "link": o.deep_link,
+                "merchant": {"name": m.name, "slug": m.slug, "region": m.region},
+            }
+            for (o, m) in rows
+        ],
+    }
+
+
 def _require_admin(x_admin_token: str | None) -> None:
     s = get_settings()
     if not s.admin_sync_token or x_admin_token != s.admin_sync_token:
         raise HTTPException(status_code=403, detail="admin token requis")
+
+
+async def _run_rebuild_products() -> None:
+    """Reconstruction des produits en tâche de fond (session dédiée)."""
+    from app.services import catalog_grouping
+
+    async with db.session_scope() as session:
+        if session is None:
+            log.warning("Regroupement EAN : base absente")
+            return
+        try:
+            summary = await catalog_grouping.rebuild_products(session)
+            log.info("Regroupement EAN terminé : %s", summary)
+        except Exception as exc:  # pragma: no cover - dépend des données réelles
+            log.warning("Regroupement EAN échoué : %s", exc)
+
+
+@router.post("/admin/rebuild-products")
+async def rebuild_products_endpoint(
+    background: BackgroundTasks,
+    wait: bool = Query(default=False, description="Attendre la fin et renvoyer le bilan"),
+    x_admin_token: str | None = Header(default=None),
+    session=Depends(db.get_session),
+) -> dict:
+    """Regroupe les offres en produits, par EAN (protégé par ADMIN_SYNC_TOKEN).
+
+    `wait=true` renvoie le bilan chiffré — dont le taux d'EAN exploitables, qui
+    détermine ce qu'on pourra bâtir dessus. Sinon la reconstruction part en
+    arrière-plan et l'avancée se suit via /api/catalog/products.
+    """
+    _require_admin(x_admin_token)
+    if session is None:
+        raise HTTPException(status_code=503, detail="base de données absente")
+    if wait:
+        from app.services import catalog_grouping
+
+        return await catalog_grouping.rebuild_products(session)
+    background.add_task(_run_rebuild_products)
+    return {"started": True, "note": "suivre /api/catalog/products"}
 
 
 @router.post("/admin/purge-offers")
