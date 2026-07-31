@@ -244,7 +244,9 @@ def _download_url(feed_ids: list[str]) -> str:
     return (
         f"{s.awin_feed_base}/datafeed/download/apikey/{s.awin_feed_api_key}/"
         f"language/any/fid/{fid}/columns/{cols}/format/csv/delimiter/%2C/"
-        f"compression/gzip/adultcontent/1/"
+        # adultcontent/0 : FILON est un catalogue grand public. Ce flag valait 1,
+        # ce qui faisait remonter des produits pour adultes en page d'accueil.
+        f"compression/gzip/adultcontent/0/"
     )
 
 
