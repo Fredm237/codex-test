@@ -275,64 +275,57 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
         session.add(models.PriceSnapshot(offer_id=offer_id, price=price, in_stock=in_stock))
 
 
-async def ingest_feeds(session, *, batch: int = 10) -> dict:
+async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
     """Ingestion des feeds des marchands inscrits, régions ciblées.
 
-    Retourne un petit récapitulatif {feeds, offers}.
+    Un feed à la fois (rattachement marchand fiable). `limit_override` borne le
+    nombre de feeds pour ce run (prioritaire sur AWIN_FEED_LIMIT). Le garde-fou
+    AWIN_MAX_ROWS_PER_FEED limite les lignes par feed (mémoire). Retourne un
+    récapitulatif {feeds, offers, skipped}.
     """
     if session is None:
         log.warning("Pas de base de données → ingestion feeds ignorée")
-        return {"feeds": 0, "offers": 0}
+        return {"feeds": 0, "offers": 0, "skipped": 0}
     s = get_settings()
     regions = set(s.awin_regions_list)
+    max_rows = s.awin_max_rows_per_feed
 
     # Marchands inscrits connus en base : awin_mid -> merchant_id
     rows = (await session.execute(select(models.Merchant.id, models.Merchant.awin_mid))).all()
     mid_to_id = {mid: pk for (pk, mid) in rows}
     if not mid_to_id:
         log.warning("Aucun marchand en base → lancer sync_merchants d'abord")
-        return {"feeds": 0, "offers": 0}
+        return {"feeds": 0, "offers": 0, "skipped": 0}
 
     feeds = await list_feeds()
-    # ne garder que les feeds des marchands inscrits, dans les régions voulues
     selected = [
         f for f in feeds
         if f.advertiser_id in mid_to_id and (not regions or not f.region or f.region in regions)
     ]
-    if s.awin_feed_limit > 0:
-        selected = selected[: s.awin_feed_limit]
+    limit = limit_override if limit_override is not None else s.awin_feed_limit
+    if limit and limit > 0:
+        selected = selected[:limit]
     log.info("Feeds retenus pour ingestion : %d / %d", len(selected), len(feeds))
 
     total_offers = 0
-    for i in range(0, len(selected), batch):
-        chunk = selected[i : i + batch]
-        fid_to_merchant = {f.feed_id: mid_to_id[f.advertiser_id] for f in chunk}
+    skipped = 0
+    for f in selected:
         try:
-            rows = await _download_feed_rows(list(fid_to_merchant.keys()))
+            frows = await _download_feed_rows([f.feed_id])
         except Exception as exc:  # pragma: no cover - réseau/compte
-            log.warning("Feed lot %s indisponible (%s)", list(fid_to_merchant.keys()), exc)
+            log.warning("Feed %s (%s) indisponible (%s)", f.feed_id, f.advertiser_name, exc)
+            skipped += 1
             continue
-        # Un lot mélange plusieurs feeds ; on rattache par advertiser via aw_deep_link
-        # n'étant pas fiable, on ingère par feed unitaire quand le lot > 1.
-        if len(chunk) == 1:
-            merchant_id = next(iter(fid_to_merchant.values()))
-            for row in rows:
-                await _upsert_offer(session, merchant_id, row)
-                total_offers += 1
-            await session.commit()
-        else:
-            # Retéléchargement feed par feed pour un rattachement marchand fiable.
-            for f in chunk:
-                try:
-                    frows = await _download_feed_rows([f.feed_id])
-                except Exception as exc:  # pragma: no cover
-                    log.warning("Feed %s indisponible (%s)", f.feed_id, exc)
-                    continue
-                merchant_id = mid_to_id[f.advertiser_id]
-                for row in frows:
-                    await _upsert_offer(session, merchant_id, row)
-                    total_offers += 1
-                await session.commit()
+        merchant_id = mid_to_id[f.advertiser_id]
+        n = 0
+        for row in frows:
+            if max_rows and n >= max_rows:
+                break
+            await _upsert_offer(session, merchant_id, row)
+            n += 1
+        await session.commit()
+        total_offers += n
+        log.info("Feed %s (%s) → %d offres", f.feed_id, f.advertiser_name, n)
 
-    log.info("Ingestion terminée : %d feeds, %d offres", len(selected), total_offers)
-    return {"feeds": len(selected), "offers": total_offers}
+    log.info("Ingestion terminée : %d feeds, %d offres, %d ignorés", len(selected), total_offers, skipped)
+    return {"feeds": len(selected), "offers": total_offers, "skipped": skipped}

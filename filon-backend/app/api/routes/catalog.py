@@ -6,12 +6,15 @@ Ils dégradent proprement si la base est absente (listes vides).
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
 from sqlalchemy import func, select
 
 from app.core.config import get_settings
+from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
+
+log = get_logger("catalog")
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
 
@@ -127,3 +130,38 @@ async def sync_merchants_endpoint(
 
     count = await awin_catalog.sync_merchants(session)
     return {"synced_merchants": count}
+
+
+async def _run_feed_ingest(limit: int | None) -> None:
+    """Ingestion des feeds en tâche de fond (session dédiée hors requête)."""
+    from app.services import awin_catalog
+
+    async with db.session_scope() as session:
+        if session is None:
+            log.warning("Ingestion feeds : base absente")
+            return
+        try:
+            summary = await awin_catalog.ingest_feeds(session, limit_override=limit)
+            log.info("Ingestion feeds terminée : %s", summary)
+        except Exception as exc:  # pragma: no cover - réseau/compte
+            log.warning("Ingestion feeds échouée : %s", exc)
+
+
+@router.post("/sync/feeds")
+async def sync_feeds_endpoint(
+    background: BackgroundTasks,
+    limit: int | None = Query(default=None, description="Nb max de feeds pour ce run"),
+    x_admin_token: str | None = Header(default=None),
+) -> dict:
+    """Lance l'ingestion des feeds en arrière-plan (protégé par ADMIN_SYNC_TOKEN).
+
+    Longue par nature : renvoie immédiatement. Suivre l'avancée via /catalog/stats.
+    Utiliser ?limit=3 pour un premier test, avant un run complet (cron).
+    """
+    _require_admin(x_admin_token)
+    if not db.is_enabled():
+        raise HTTPException(status_code=503, detail="base de données absente")
+    if not get_settings().awin_feed_api_key:
+        raise HTTPException(status_code=400, detail="AWIN_FEED_API_KEY absent")
+    background.add_task(_run_feed_ingest, limit)
+    return {"started": True, "limit": limit, "note": "suivre /api/catalog/stats"}
