@@ -21,8 +21,13 @@ export const metadata: Metadata = buildMetadata({
 
 async function getHighlights(): Promise<RailSection[]> {
   try {
+    // Délai d'expiration explicite : cette page est prérendue au build. Sans
+    // lui, un backend injoignable ne refuse pas la connexion, il la laisse
+    // pendre — et c'est le déploiement entier qui échoue. Le site doit se
+    // construire même quand l'API est à terre : les rails sont alors masqués.
     const res = await fetch(`${API}/api/catalog/highlights?limit=12`, {
       next: { revalidate: 300 },
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return [];
     const data = await res.json();

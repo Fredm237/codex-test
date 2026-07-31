@@ -30,6 +30,9 @@ async function getOffer(id: string): Promise<Offer | null> {
   try {
     const res = await fetch(`${API}/api/catalog/offer/${encodeURIComponent(id)}`, {
       next: { revalidate: 3600 },
+      // Un backend qui ne répond pas doit donner un 404 franc, pas une page
+      // qui pend jusqu'au timeout de la plateforme.
+      signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return null;
     return (await res.json()) as Offer;
