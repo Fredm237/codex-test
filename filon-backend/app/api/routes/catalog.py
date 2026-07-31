@@ -96,6 +96,7 @@ async def offers(
         "total": int(total or 0),
         "items": [
             {
+                "id": o.id,
                 "name": o.name,
                 "brand": o.brand,
                 "category": o.category,
@@ -108,6 +109,49 @@ async def offers(
             }
             for (o, m) in rows
         ],
+    }
+
+
+@router.get("/offer/{offer_id}")
+async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
+    """Détail d'une offre + son historique de prix (pour la fiche produit)."""
+    if session is None:
+        raise HTTPException(status_code=503, detail="base de données absente")
+    row = (
+        await session.execute(
+            select(models.Offer, models.Merchant).join(
+                models.Merchant, models.Offer.merchant_id == models.Merchant.id
+            ).where(models.Offer.id == offer_id)
+        )
+    ).first()
+    if not row:
+        raise HTTPException(status_code=404, detail="offre introuvable")
+    o, m = row
+    hist = (
+        await session.execute(
+            select(models.PriceSnapshot.price, models.PriceSnapshot.captured_at)
+            .where(models.PriceSnapshot.offer_id == offer_id)
+            .order_by(models.PriceSnapshot.captured_at)
+        )
+    ).all()
+    prices = [p for (p, _) in hist if p is not None]
+    return {
+        "id": o.id,
+        "name": o.name,
+        "brand": o.brand,
+        "category": o.category,
+        "ean": o.ean,
+        "price": o.price,
+        "currency": o.currency,
+        "in_stock": o.in_stock,
+        "image": o.image_url,
+        "link": o.deep_link,
+        "merchant": {"name": m.name, "slug": m.slug, "domain": m.domain, "region": m.region},
+        "history": [
+            {"price": p, "at": at.isoformat() if at else None} for (p, at) in hist
+        ],
+        "price_min": min(prices) if prices else None,
+        "price_max": max(prices) if prices else None,
     }
 
 
