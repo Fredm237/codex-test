@@ -160,6 +160,116 @@ async def facets(
     }
 
 
+def _card(o: models.Offer, m: models.Merchant, **extra) -> dict:
+    """Charge utile compacte d'une carte produit (rails de la home catalogue)."""
+    return {
+        "id": o.id,
+        "name": o.name,
+        "brand": o.brand,
+        "category": o.category,
+        "price": o.price,
+        "currency": o.currency,
+        "in_stock": o.in_stock,
+        "image": o.image_url,
+        "link": o.deep_link,
+        "merchant": {"name": m.name, "slug": m.slug},
+        **extra,
+    }
+
+
+@router.get("/highlights")
+async def highlights(
+    limit: int = Query(default=12, le=24, description="Produits par section"),
+    session=Depends(db.get_session),
+) -> dict:
+    """Sections vivantes de la home catalogue.
+
+    Tout est calculé à partir des données réelles : les baisses et les plus bas
+    historiques viennent des `price_snapshots`. Les sections sans données sont
+    renvoyées vides — le front les masque plutôt que d'inventer du contenu.
+    """
+    if session is None:
+        return {"sections": []}
+
+    # Agrégat d'historique : uniquement les offres relevées au moins deux fois,
+    # sinon « baisse » et « plus bas » n'ont aucun sens.
+    snap = (
+        select(
+            models.PriceSnapshot.offer_id.label("offer_id"),
+            func.max(models.PriceSnapshot.price).label("high"),
+            func.min(models.PriceSnapshot.price).label("low"),
+        )
+        .group_by(models.PriceSnapshot.offer_id)
+        .having(func.count() > 1)
+        .subquery()
+    )
+
+    base = select(models.Offer, models.Merchant).join(
+        models.Merchant, models.Offer.merchant_id == models.Merchant.id
+    )
+    visible = (
+        models.Offer.price.isnot(None),
+        models.Offer.price > 0,
+        models.Offer.image_url.isnot(None),
+    )
+
+    drop_pct = ((snap.c.high - models.Offer.price) / snap.c.high * 100.0)
+
+    # 📉 Les plus grosses baisses de prix (prix actuel < plus haut relevé).
+    drops_stmt = (
+        base.add_columns(snap.c.high, snap.c.low, drop_pct.label("drop_pct"))
+        .join(snap, snap.c.offer_id == models.Offer.id)
+        .where(*visible, snap.c.high > models.Offer.price)
+        .order_by(drop_pct.desc())
+        .limit(limit)
+    )
+    drops = [
+        _card(o, m, price_high=high, price_low=low, drop_pct=round(float(pct), 1))
+        for (o, m, high, low, pct) in (await session.execute(drops_stmt)).all()
+    ]
+
+    # 🏅 Au plus bas historique (et le prix a réellement varié).
+    lowest_stmt = (
+        base.add_columns(snap.c.high, snap.c.low)
+        .join(snap, snap.c.offer_id == models.Offer.id)
+        .where(
+            *visible,
+            snap.c.high > snap.c.low,
+            models.Offer.price <= snap.c.low,
+        )
+        .order_by(((snap.c.high - snap.c.low) / snap.c.high).desc())
+        .limit(limit)
+    )
+    lowest = [
+        _card(o, m, price_high=high, price_low=low, is_lowest=True)
+        for (o, m, high, low) in (await session.execute(lowest_stmt)).all()
+    ]
+
+    # 🆕 Derniers produits entrés au catalogue.
+    fresh_stmt = (
+        base.where(*visible)
+        .order_by(models.Offer.created_at.desc(), models.Offer.id.desc())
+        .limit(limit)
+    )
+    fresh = [_card(o, m) for (o, m) in (await session.execute(fresh_stmt)).all()]
+
+    # 💶 Moins de 100 € — la porte d'entrée « petits prix ».
+    budget_stmt = (
+        base.where(*visible, models.Offer.price <= 100)
+        .order_by(models.Offer.price.desc(), models.Offer.id.desc())
+        .limit(limit)
+    )
+    budget = [_card(o, m) for (o, m) in (await session.execute(budget_stmt)).all()]
+
+    sections = [
+        {"key": "drops", "items": drops},
+        {"key": "lowest", "items": lowest},
+        {"key": "budget", "items": budget},
+        {"key": "fresh", "items": fresh},
+    ]
+    return {"sections": [s for s in sections if s["items"]]}
+
+
 @router.get("/offer/{offer_id}")
 async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
     """Détail d'une offre + son historique de prix (pour la fiche produit)."""
