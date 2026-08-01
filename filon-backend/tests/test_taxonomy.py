@@ -86,3 +86,50 @@ class TestClothingDoesNotShortCircuitOtherRules:
     def test_female_only_garments_need_no_explicit_marker(self):
         assert t.classify("", "Robe de soirée longue") == t.MODE_FEMME
         assert t.classify("", "Jupe plissée midi") == t.MODE_FEMME
+
+
+class TestEnrichedFromRealFeedLabels:
+    """Libellés relevés dans les 243 212 offres que rien ne reconnaissait."""
+
+    @pytest.mark.parametrize(
+        "label,expected",
+        [
+            ("Jewelry & Accessories", t.BIJOUX),
+            ("Apparel Accessories", t.ACCESSOIRES),
+            ("Men's Tops", t.MODE_HOMME),
+            ("Men's Socks", t.MODE_HOMME),
+            ("Men's Trousers", t.MODE_HOMME),
+            ("Shoes", t.CHAUSSURES),
+            ("Wheels", t.AUTO),
+            ("Equipamiento deportivo", t.SPORT),      # espagnol
+            ("Luggage & Bags", t.BAGAGERIE),
+            ("Beauty & Health", t.BEAUTE),
+            ("Software > Video Game Software", t.GAMING),
+            ("Haircare", t.BEAUTE),
+            ("Schoonmaak", t.MAISON),                 # néerlandais
+            ("Verzorgingsproducten", t.BEAUTE),
+            ("Gezicht- & huidverzorging", t.BEAUTE),
+            ("Wassen, strijken & drogen", t.ELECTROMENAGER),
+            ("Tuingereedschap & -apparatuur", t.JARDIN),
+            ("Mother & Kids", t.BEBE),
+            ("Make up", t.BEAUTE),
+            ("Shampoo & conditioner", t.BEAUTE),
+            ("Fragrance", t.BEAUTE),
+            ("Cellphones & Telecommunications", t.TELEPHONIE),
+            ("Home Appliances", t.ELECTROMENAGER),
+            ("Nails", t.BEAUTE),
+            ("Patrons", t.LOISIRS),
+            ("Hygiëne", t.SANTE),                     # tréma, pas accent grave
+        ],
+    )
+    def test_top_unclassified_labels_are_now_recognised(self, label, expected):
+        assert t.classify(label, "") == expected
+
+    def test_genderless_clothing_lands_in_the_generic_aisle(self):
+        """Plutôt qu'un rayon genré au hasard, ou nulle part."""
+        assert t.classify("Underwear & Sleepwears", "") == t.MODE
+        assert t.classify("", "Pyjama flanelle sans couture") == t.MODE
+
+    def test_the_generic_aisle_never_overrides_an_identified_audience(self):
+        assert t.classify("Underwear & Sleepwears", "Pyjama pour femme") == t.MODE_FEMME
+        assert t.classify("Men's Tops", "Polo ERREA Team") == t.MODE_HOMME

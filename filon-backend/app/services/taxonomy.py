@@ -41,12 +41,17 @@ BAGAGERIE = "Bagagerie"
 CULTURE = "Livres & Culture"
 ALIMENTATION = "Alimentation & Boissons"
 JOUETS = "Jeux & Jouets"
+ACCESSOIRES = "Accessoires"
+# Rayon générique : un vêtement dont le public n'est pas identifiable vaut mieux
+# ici que dans un rayon genré au hasard, ou nulle part.
+MODE = "Mode"
+LOISIRS = "Loisirs créatifs"
 
 ALL_CATEGORIES = [
     INFORMATIQUE, TELEPHONIE, PHOTO, GAMING, TV_SON, ELECTROMENAGER, MAISON,
     JARDIN, MODE_FEMME, MODE_HOMME, MODE_ENFANT, CHAUSSURES, BIJOUX, BEAUTE,
     SANTE, SPORT, AUTO, BEBE, ANIMALERIE, BAGAGERIE, CULTURE, ALIMENTATION,
-    JOUETS,
+    JOUETS, ACCESSOIRES, LOISIRS, MODE,
 ]
 
 # Marqueurs de public, testés avant tout classement de mode.
@@ -58,30 +63,77 @@ _HOMME = r"\b(homme|hommes|men|men's|mens|heren|male|masculin)\b"
 # (catégorie, motif). La première correspondance gagne : du plus spécifique au
 # plus général.
 _RULES: list[tuple[str, str]] = [
-    (BEBE, r"\b(b[ée]b[ée]s?|baby|babys|poussettes?|stroller|couches?|luier|biberons?|puericulture|puéricultur)\b"),
-    (ANIMALERIE, r"\b(chien|chat|dog|cat|hond|kat|hondenvoer|kattenvoer|animal|animalerie|croquette|aquarium|litiere|litière)\b"),
-    (AUTO, r"\b(pneu|pneus|tyre|tyres|band(en)?|jante|voiture|auto|moto|scooter|v[ée]hicule|car\s?parts?|huile moteur)\b"),
-    (TELEPHONIE, r"\b(smartphone|t[ée]l[ée]phone|iphone|samsung galaxy|mobile|gsm|coque|chargeur|powerbank|[ée]couteurs? sans fil|airpods)\b"),
-    (INFORMATIQUE, r"\b(ordinateur|laptop|pc\b|macbook|notebook|clavier|souris|[ée]cran|monitor|ssd|disque dur|imprimante|routeur|usb)\b"),
-    (GAMING, r"\b(gaming|jeu vid[ée]o|console|playstation|ps5|ps4|xbox|nintendo|switch|steam|manette|gamer)\b"),
-    (PHOTO, r"\b(appareil photo|camera|caméra|objectif|reflex|drone|gopro|tr[ée]pied|photographie)\b"),
-    (TV_SON, r"\b(t[ée]l[ée]viseur|\btv\b|home cinema|barre de son|soundbar|enceinte|casque audio|hifi|hi-fi|platine)\b"),
-    (ELECTROMENAGER, r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateur|frigo|cong[ée]lateur|four|micro-ondes|aspirateur|cafeti[èe]re|robot cuiseur|wasmachine|koelkast)\b"),
-    (BEAUTE, r"\b(parfum|eau de parfum|eau de toilette|maquillage|cosm[ée]tique|cr[èe]me|s[ée]rum|shampooing|soin visage|makeup|skincare|toner|lipstick)\b"),
-    (SANTE, r"\b(compl[ée]ments? alimentaires?|vitamines?|pharmacie|m[ée]dical|orthop[ée]dique|tensiom[èe]tre)\b"),
-    (BIJOUX, r"\b(bijou|bijoux|bague|collier|bracelet|boucles? d'oreille|montre|watch|horloge|sieraden|ketting)\b"),
-    (CHAUSSURES, r"\b(chaussure|chaussures|basket|baskets|sneakers?|bottes?|boots?|escarpins?|sandales?|schoenen|mocassins?)\b"),
-    (BAGAGERIE, r"\b(sac [àa] main|sac [àa] dos|valise|bagage|trolley|portefeuille|maroquinerie|handtas|rugzak)\b"),
-    (SPORT, r"\b(sports?|fitness|musculation|yoga|jogging|v[ée]los?|cyclisme|running|randonn[ée]e|camping|ski|natation|fietsen)\b"),
-    (JARDIN, r"\b(jardin|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|gereedschap|parquet|peinture murale)\b"),
-    (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|lampes?|luminaires?|matelas|linge de lit|rideaux?|d[ée]coration|meubles?|vaisselle|cuisine|meubel|verlichting)\b"),
-    (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeu de soci[ée]t[ée]|speelgoed|toys?)\b"),
+    (BEBE, r"\b(b[ée]b[ée]s?|baby|babys|poussettes?|stroller|couches?|luiers?|biberons?|"
+           r"puericulture|puéricultur|bavoirs?|slabbetjes?|mother\s*&\s*kids|tricycles?|"
+           r"draagzak|maternit[ée])\b"),
+    (ANIMALERIE, r"\b(chiens?|chats?|dogs?|cats?|hond|kat|hondenvoer|kattenvoer|animal|"
+                 r"animalerie|croquettes?|aquarium|liti[èe]re|dierenvoeding)\b"),
+    (AUTO, r"\b(pneus?|tyres?|banden|wheels?|jantes?|voitures?|autos?|automotive|motos?|"
+           r"scooters?|v[ée]hicules?|car\s?parts?|huile moteur|car\b|autoteile)\b"),
+    (TELEPHONIE, r"\b(smartphones?|t[ée]l[ée]phones?|iphone|samsung galaxy|mobiles?|gsm|"
+                 r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|cellphones?|"
+                 r"telecommunications?)\b"),
+    (GAMING, r"\b(gaming|jeux? vid[ée]o|video\s?games?|consoles?|playstation|ps5|ps4|xbox|"
+             r"nintendo|steam|manettes?|gamer|videogames?)\b"),
+    (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|souris|"
+                   r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|usb|"
+                   r"tablettes?|software)\b"),
+    (PHOTO, r"\b(appareils? photo|cameras?|caméras?|objectifs?|reflex|drones?|gopro|"
+            r"tr[ée]pieds?|photographie)\b"),
+    (TV_SON, r"\b(t[ée]l[ée]viseurs?|\btv\b|home cinema|barres? de son|soundbars?|enceintes?|"
+             r"casques? audio|hifi|hi-fi|platines?|headphones?)\b"),
+    (ELECTROMENAGER, r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
+                     r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|"
+                     r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
+                     r"huishoudelijke|ventilateurs?|vacuum cleaners?|wassen, strijken)\b"),
+    (BEAUTE, r"\b(parfums?|eaux? de parfum|eaux? de toilette|fragrances?|maquillage|make\s?up|"
+             r"cosm[ée]tiques?|cosmetics?|beauty|cr[èe]mes?|s[ée]rums?|shampooings?|shampoo|"
+             r"conditioner|soins? visage|skincare|haircare|hair care|haarverzorging|"
+             r"verzorgingsproducten|gezicht|huidverzorging|toner|lipstick|eyeliner|nails?|"
+             r"ongles?|perruques?|wigs?|hair extensions?|vernis)\b"),
+    (SANTE, r"\b(compl[ée]ments? alimentaires?|vitamines?|pharmacie|m[ée]dical|orthop[ée]dique|"
+            r"tensiom[èe]tre|hygi[èeë]ne|huiles? essentielles?)\b"),
+    (BIJOUX, r"\b(bijoux?|jewelry|jewellery|bagues?|rings?|colliers?|necklaces?|pendants?|"
+             r"bracelets?|boucles? d'oreille|earrings?|montres?|watch(es)?|horloges?|"
+             r"sieraden|ketting)\b"),
+    (CHAUSSURES, r"\b(chaussures?|shoes?|baskets?|sneakers?|bottes?|boots?|escarpins?|heels?|"
+                 r"mules?|sandales?|sandals?|schoenen|mocassins?|semelles?|insoles?|"
+                 r"pantoufles?|slippers?)\b"),
+    (BAGAGERIE, r"\b(sacs? [àa] main|sacs? [àa] dos|handbags?|backpacks?|valises?|suitcases?|"
+                r"bagages?|luggage|trolleys?|portefeuilles?|wallets?|maroquinerie|handtas|"
+                r"rugzak|bags?)\b"),
+    (ACCESSOIRES, r"\b(accessoires?|accessories|lunettes? de soleil|sunglasses|ceintures?|"
+                  r"belts?|[ée]charpes?|scarf|scarves|chapeaux?|hats?|casquettes?|caps?|"
+                  r"gants?|gloves|bonnets?|cravates?|ties?|riemen)\b"),
+    (SPORT, r"\b(sports?|deportivo|deporte|sportartikelen|fitness|musculation|yoga|jogging|"
+            r"v[ée]los?|cyclisme|running|randonn[ée]e|camping|ski|natation|fietsen|"
+            r"[ée]quipements? sportifs?)\b"),
+    (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
+             r"tuingereedschap|gereedschap|parquet|peinture murale|garden tools?)\b"),
+    (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|lampes?|luminaires?|matelas|"
+             r"linge de lit|rideaux?|d[ée]coration|meubles?|vaisselle|assiettes?|cuisine|"
+             r"meubel|verlichting|schoonmaak|nettoyage|serviettes?|tissus?|textile|"
+             r"home\s*&\s*garden|huishouden)\b"),
+    (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
+             r"toys?)\b"),
+    # « couture » est écarté : en français il désigne aussi une piqûre de
+    # vêtement, et « pyjama sans couture » atterrissait ici.
+    (LOISIRS, r"\b(patrons? de couture|patrons?|tricot|laine [àa] tricoter|mercerie|"
+              r"loisirs? cr[ée]atifs?|scrapbooking)\b"),
     (CULTURE, r"\b(livres?|romans?|manga|dvd|blu-ray|vinyles?|boek|books?)\b"),
-    (ALIMENTATION, r"\b(alimentation|[ée]picerie|caf[ée]|th[ée]|vin|bi[èe]re|chocolat|snack|boisson|voeding|wijn)\b"),
+    (ALIMENTATION, r"\b(alimentation|[ée]picerie|caf[ée]|th[ée]|vins?|bi[èe]res?|chocolats?|"
+                   r"snacks?|boissons?|voeding|wijn)\b"),
 ]
 
+
 # Vêtements : le rayon dépend du public, déterminé plus haut.
-_VETEMENT = r"\b(v[êe]tement|clothing|kleding|robe|dress|jupe|pantalon|jean|jeans|chemise|shirt|t-shirt|pull|sweat|hoodie|manteau|veste|jacket|blouse|costume|short|legging|lingerie|maillot|overhemd|broek|jas|blazer|combinaison|jumpsuit)\b"
+_VETEMENT = (
+    r"\b(v[êe]tements?|clothing|kleding|apparel|robes?|dress(es)?|jupes?|pantalons?|"
+    r"trousers?|jeans?|chemises?|shirts?|t-shirts?|tops?|pulls?|sweats?|sweaters?|hoodies?|"
+    r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|lingerie|underwear|"
+    r"sleepwears?|pyjamas?|maillots?|chaussettes?|socks?|polos?|overhemd|broek|jas|blazers?|"
+    r"combinaisons?|jumpsuits?|nachtkleding|ondergoed)\b"
+)
 
 
 _SLUG_OVERRIDES = {
@@ -96,6 +148,7 @@ _SLUG_OVERRIDES = {
     "Livres & Culture": "livres-culture",
     "Alimentation & Boissons": "alimentation-boissons",
     "Jeux & Jouets": "jeux-jouets",
+    "Loisirs créatifs": "loisirs-creatifs",
     "Électroménager": "electromenager",
     "Téléphonie": "telephonie",
     "Santé": "sante",
@@ -139,6 +192,7 @@ def classify(
     merchant_category = (merchant_category or "").strip()
     if not name and not merchant_category:
         return None
+    clothing = False
 
     # Le nom d'abord, la catégorie du marchand ensuite : l'ordre porte la règle.
     for text in (name, merchant_category):
@@ -161,11 +215,13 @@ def classify(
             # Pièces exclusivement féminines : le public est implicite.
             if _has(r"\b(robes?|jupes?|lingerie|blouses?|escarpins?)\b", text):
                 return MODE_FEMME
-            # Public indéterminé : on ne tranche pas ici, mais on laisse les
-            # autres règles s'exprimer — « pantalon de jogging » relève du sport.
+            # Public indéterminé : les autres règles s'expriment d'abord
+            # (« pantalon de jogging » relève du sport), et à défaut l'article
+            # rejoint le rayon Mode générique plutôt qu'un rayon genré au hasard.
+            clothing = True
 
         for category, pattern in _RULES:
             if _has(pattern, text):
                 return category
 
-    return None
+    return MODE if clothing else None
