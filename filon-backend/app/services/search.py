@@ -23,6 +23,32 @@ from app.db import models
 MAX_TERMS = 6
 MIN_TERM_LENGTH = 2
 
+# Le français accorde en genre et en nombre, pas les libellés des marchands :
+# « Chemise bleu » côtoie « chemise bleue » et « chemises bleues ». Chercher la
+# forme exacte saisie par l'utilisateur ne trouvait donc rien. On tronque les
+# terminaisons les plus courantes pour chercher le radical.
+#
+# Du plus long au plus court. « manteaux » ne perd que son x : retirer « eaux »
+# laissait « mant », un radical si court qu'il ramenait n'importe quoi.
+_SUFFIXES = ("es", "x", "s", "e")
+# En deçà, tronquer produit des radicaux trop courts, donc trop permissifs.
+_MIN_STEM = 3
+
+
+def stem(term: str) -> str:
+    """Radical approximatif d'un terme, pour absorber les accords.
+
+    Volontairement grossier : la sélection se fait déjà par sous-chaîne, et un
+    radical trop agressif ramènerait n'importe quoi. « bleue » et « bleus »
+    donnent « bleu » ; « robe » et « sony », trop courts, restent intacts.
+    """
+    if len(term) <= 4:
+        return term
+    for suffix in _SUFFIXES:
+        if term.endswith(suffix) and len(term) - len(suffix) >= _MIN_STEM:
+            return term[: -len(suffix)]
+    return term
+
 
 def terms_of(query: str | None) -> list[str]:
     """Termes exploitables d'une requête, dans l'ordre de saisie."""
@@ -46,8 +72,8 @@ def search_clause(query: str | None):
     return and_(
         *[
             or_(
-                models.Offer.name.ilike(f"%{t}%"),
-                models.Offer.brand.ilike(f"%{t}%"),
+                models.Offer.name.ilike(f"%{stem(t)}%"),
+                models.Offer.brand.ilike(f"%{stem(t)}%"),
             )
             for t in terms
         ]
