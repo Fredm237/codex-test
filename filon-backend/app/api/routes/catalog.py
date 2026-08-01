@@ -200,13 +200,31 @@ async def categories(session=Depends(db.get_session)) -> dict:
     if blocked is not None:
         stmt = stmt.where(blocked)
     rows = (await session.execute(stmt)).all()
-    return {
-        "items": [
-            {"name": c, "slug": taxonomy.slug_of(c), "count": int(n)}
-            for (c, n) in rows
-            if c
+    counts = {c: int(n) for (c, n) in rows if c}
+    items = [
+        {"name": c, "slug": taxonomy.slug_of(c), "count": n}
+        for c, n in counts.items()
+    ]
+
+    # Regroupement en départements : un menu à deux niveaux se parcourt, une
+    # liste de vingt-six rayons non. Les rayons vides ne sont pas proposés.
+    departments = []
+    for label, category_names in taxonomy.DEPARTMENTS:
+        children = [
+            {"name": c, "slug": taxonomy.slug_of(c), "count": counts[c]}
+            for c in category_names
+            if counts.get(c)
         ]
-    }
+        if children:
+            departments.append(
+                {
+                    "name": label,
+                    "slug": taxonomy.slug_of(label),
+                    "count": sum(c["count"] for c in children),
+                    "categories": children,
+                }
+            )
+    return {"items": items, "departments": departments}
 
 
 @router.get("/admin/unclassified")

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "./Brand";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { MegaMenu } from "./MegaMenu";
 import { NAV_KEYS, useLocale } from "@/lib/i18n";
 
 const DESKTOP = NAV_KEYS.slice(0, 5);
@@ -41,7 +42,8 @@ export function EditorialNav() {
         <nav className="ed-nav">
           <BrandLogo onClick={() => setOpen(false)} />
           <div className="ed-nav-mid">
-            {DESKTOP.map((n) => (
+            <MegaMenu />
+            {DESKTOP.filter((n) => n.href !== "/catalogue").map((n) => (
               <a key={n.href} href={n.href}>
                 {t(n.key)}
               </a>
