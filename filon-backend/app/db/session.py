@@ -43,7 +43,12 @@ def _init() -> None:
     url = _normalize_async_url(url)
     from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-    _engine = create_async_engine(url, pool_pre_ping=True)
+    # Pool élargi : le regroupement du catalogue mobilise une connexion longtemps
+    # et la valeur par défaut (5 + 10) a déjà été saturée en production, faisant
+    # expirer les requêtes ordinaires et échouer le healthcheck du déploiement.
+    _engine = create_async_engine(
+        url, pool_pre_ping=True, pool_size=10, max_overflow=20, pool_timeout=30
+    )
     _sessionmaker = async_sessionmaker(_engine, expire_on_commit=False)
 
 
