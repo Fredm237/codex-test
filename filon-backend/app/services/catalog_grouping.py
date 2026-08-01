@@ -12,6 +12,7 @@ pas regrouper du tout. Les offres sans EAN exploitable restent autonomes.
 
 from __future__ import annotations
 
+import asyncio
 import re
 from collections import Counter, defaultdict
 
@@ -21,6 +22,33 @@ from app.core.logging import get_logger
 from app.db import models
 
 log = get_logger("grouping")
+
+# Un seul regroupement à la fois, quel que soit l'appelant. Le cron appelle
+# rebuild_products directement : un verrou posé sur l'endpoint seul laissait
+# passer les exécutions concurrentes, d'où les interblocages et l'épuisement du
+# pool de connexions observés en production.
+_lock = asyncio.Lock()
+
+
+def is_rebuilding() -> bool:
+    return _lock.locked()
+
+
+def _insert_ignoring_duplicates(session, table):
+    """INSERT qui ignore les EAN déjà présents.
+
+    Deux exécutions qui se chevauchent peuvent voir le même EAN comme absent et
+    l'insérer toutes les deux : sans cette clause, la seconde violait la
+    contrainte d'unicité et faisait échouer tout le regroupement.
+    """
+    name = session.bind.dialect.name if session.bind is not None else ""
+    if name == "postgresql":
+        from sqlalchemy.dialects.postgresql import insert as _insert
+    elif name == "sqlite":
+        from sqlalchemy.dialects.sqlite import insert as _insert
+    else:
+        return table.insert()
+    return _insert(table).on_conflict_do_nothing(index_elements=["ean"])
 
 # Longueurs GTIN valides : EAN-8, UPC-A, EAN-13, GTIN-14.
 _VALID_LENGTHS = {8, 12, 13, 14}
@@ -167,6 +195,17 @@ def _shard_of(ean: str, shards: int) -> int:
 async def rebuild_products(
     session, *, batch: int = 1000, page: int = 5000, shards: int = 4
 ) -> dict:
+    """Regroupe les offres en produits. Ignore l'appel si un run est en cours."""
+    if _lock.locked():
+        log.warning("Regroupement EAN déjà en cours : appel ignoré")
+        return {"skipped": True, "reason": "regroupement déjà en cours"}
+    async with _lock:
+        return await _rebuild_products(session, batch=batch, page=page, shards=shards)
+
+
+async def _rebuild_products(
+    session, *, batch: int, page: int, shards: int
+) -> dict:
     """Reconstruit les produits à partir des offres. Idempotent.
 
     Procède en deux passes en flux — agrégation, puis rattachement — afin que la
@@ -226,11 +265,11 @@ async def rebuild_products(
             (to_update if ean in existing else to_create).append(agg.values(ean))
         aggregates.clear()
 
+        insert_stmt = _insert_ignoring_duplicates(
+            session, models.CatalogProduct.__table__
+        )
         for start in range(0, len(to_create), batch):
-            await session.execute(
-                models.CatalogProduct.__table__.insert(),
-                to_create[start : start + batch],
-            )
+            await session.execute(insert_stmt, to_create[start : start + batch])
         await session.commit()
 
         if to_update:

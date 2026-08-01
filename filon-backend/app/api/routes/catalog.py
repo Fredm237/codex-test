@@ -6,8 +6,6 @@ Ils dégradent proprement si la base est absente (listes vides).
 
 from __future__ import annotations
 
-import asyncio
-
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
 from sqlalchemy import String, case, cast, delete, func, select
 
@@ -506,33 +504,23 @@ def _require_admin(x_admin_token: str | None) -> None:
         raise HTTPException(status_code=403, detail="admin token requis")
 
 
-# Une seule reconstruction à la fois : lancées en parallèle, leurs empreintes
-# mémoire s'additionnent et le conteneur est tué. Un appel de trop ne doit pas
-# pouvoir mettre le service à terre.
-_rebuild_lock = asyncio.Lock()
-
-
-def rebuild_in_progress() -> bool:
-    return _rebuild_lock.locked()
-
-
 async def _run_rebuild_products() -> None:
-    """Reconstruction des produits en tâche de fond (session dédiée)."""
+    """Reconstruction des produits en tâche de fond (session dédiée).
+
+    Le verrou vit dans le service, pas ici : le cron appelle rebuild_products
+    directement et doit être couvert par la même garde.
+    """
     from app.services import catalog_grouping
 
-    if _rebuild_lock.locked():
-        log.warning("Regroupement EAN déjà en cours : appel ignoré")
-        return
-    async with _rebuild_lock:
-        async with db.session_scope() as session:
-            if session is None:
-                log.warning("Regroupement EAN : base absente")
-                return
-            try:
-                summary = await catalog_grouping.rebuild_products(session)
-                log.info("Regroupement EAN terminé : %s", summary)
-            except Exception as exc:  # pragma: no cover - dépend des données réelles
-                log.warning("Regroupement EAN échoué : %s", exc)
+    async with db.session_scope() as session:
+        if session is None:
+            log.warning("Regroupement EAN : base absente")
+            return
+        try:
+            summary = await catalog_grouping.rebuild_products(session)
+            log.info("Regroupement EAN terminé : %s", summary)
+        except Exception as exc:  # pragma: no cover - dépend des données réelles
+            log.warning("Regroupement EAN échoué : %s", exc)
 
 
 @router.post("/admin/rebuild-products")
@@ -551,16 +539,15 @@ async def rebuild_products_endpoint(
     _require_admin(x_admin_token)
     if session is None:
         raise HTTPException(status_code=503, detail="base de données absente")
-    if _rebuild_lock.locked():
+    from app.services import catalog_grouping
+
+    if catalog_grouping.is_rebuilding():
         raise HTTPException(
             status_code=409,
             detail="un regroupement est déjà en cours — suivre /api/catalog/stats",
         )
     if wait:
-        from app.services import catalog_grouping
-
-        async with _rebuild_lock:
-            return await catalog_grouping.rebuild_products(session)
+        return await catalog_grouping.rebuild_products(session)
     background.add_task(_run_rebuild_products)
     return {"started": True, "note": "suivre /api/catalog/stats"}
 
