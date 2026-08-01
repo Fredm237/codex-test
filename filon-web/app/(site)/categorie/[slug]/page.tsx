@@ -7,7 +7,11 @@ import { API } from "@/lib/api";
 export const revalidate = 1800;
 export const dynamicParams = true;
 
-type Category = { name: string; slug: string; count: number };
+type Subcategory = { name: string; count: number };
+type Category = {
+  name: string; slug: string; count: number;
+  subcategories?: Subcategory[];
+};
 
 type Offer = {
   id: number;
@@ -27,16 +31,25 @@ async function getCategories(): Promise<Category[]> {
       signal: AbortSignal.timeout(8000),
     });
     if (!res.ok) return [];
-    return ((await res.json()).items || []) as Category[];
+    const data = await res.json();
+    // On lit l'arborescence : elle porte les sous-rayons, pas la liste plate.
+    return (data.departments || []).flatMap(
+      (d: { categories: Category[] }) => d.categories
+    ) as Category[];
   } catch {
     return [];
   }
 }
 
-async function getOffers(category: string): Promise<{ total: number; items: Offer[] }> {
+async function getOffers(
+  category: string,
+  sub?: string
+): Promise<{ total: number; items: Offer[] }> {
   try {
+    const params = new URLSearchParams({ category, limit: "48" });
+    if (sub) params.set("subcategory", sub);
     const res = await fetch(
-      `${API}/api/catalog/offers?category=${encodeURIComponent(category)}&limit=48`,
+      `${API}/api/catalog/offers?${params.toString()}`,
       { next: { revalidate: 1800 }, signal: AbortSignal.timeout(8000) }
     );
     if (!res.ok) return { total: 0, items: [] };
@@ -66,13 +79,23 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   });
 }
 
-export default async function CategoriePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function CategoriePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ sub?: string }>;
+}) {
   const { slug } = await params;
+  const { sub } = await searchParams;
   const categories = await getCategories();
   const category = categories.find((c) => c.slug === slug);
   if (!category) notFound();
 
-  const { total, items } = await getOffers(category.name);
+  // Un sous-rayon inconnu est ignoré plutôt que de vider la page.
+  const subs = category.subcategories ?? [];
+  const active = subs.some((s) => s.name === sub) ? sub : undefined;
+  const { total, items } = await getOffers(category.name, active);
   const others = categories.filter((c) => c.slug !== slug).slice(0, 12);
 
   return (
@@ -86,6 +109,26 @@ export default async function CategoriePage({ params }: { params: Promise<{ slug
         <p className="cat-rail-sub" style={{ marginBottom: 24 }}>
           {total.toLocaleString("fr-FR")} produits comparés chez nos marchands partenaires.
         </p>
+
+        {subs.length > 0 && (
+          <nav className="cat-chips" aria-label="Sous-rayons">
+            <a
+              className={`cat-chip${active ? "" : " on"}`}
+              href={`/categorie/${category.slug}/`}
+            >
+              Tout
+            </a>
+            {subs.map((s) => (
+              <a
+                key={s.name}
+                className={`cat-chip${active === s.name ? " on" : ""}`}
+                href={`/categorie/${category.slug}/?sub=${encodeURIComponent(s.name)}`}
+              >
+                {s.name} <span>{s.count.toLocaleString("fr-FR")}</span>
+              </a>
+            ))}
+          </nav>
+        )}
 
         {others.length > 0 && (
           <nav className="cat-chips" aria-label="Autres rayons">

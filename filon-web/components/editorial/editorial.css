@@ -1089,3 +1089,12 @@
 }
 /* Le méga-menu est une affaire de survol : sur mobile, le menu plein écran prend le relais. */
 @media (max-width: 900px) { .mm-panel { display: none; } }
+
+/* Troisième niveau dans le méga-menu */
+.mm-sub { margin: 1px 0 7px 8px; display: flex; flex-direction: column; gap: 0; }
+.mm-sub a { font-size: 12.5px; color: var(--ink-3); padding: 3px 8px; }
+.mm-sub a:hover { color: var(--ink-2); background: transparent; text-decoration: underline;
+  text-underline-offset: 2px; }
+/* Puce de sous-rayon active */
+.cat-chip.on { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.cat-chip.on span { color: rgba(255,255,255,0.65); }

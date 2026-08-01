@@ -81,6 +81,8 @@ async def _migrate() -> None:
         "CREATE INDEX IF NOT EXISTS ix_offers_product_id ON offers (product_id)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS filon_category VARCHAR(64)",
         "CREATE INDEX IF NOT EXISTS ix_offers_filon_category ON offers (filon_category)",
+        "ALTER TABLE offers ADD COLUMN IF NOT EXISTS filon_subcategory VARCHAR(64)",
+        "CREATE INDEX IF NOT EXISTS ix_offers_filon_subcategory ON offers (filon_subcategory)",
     )
     for sql in statements:
         try:
