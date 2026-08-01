@@ -13,7 +13,9 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.api.routes.catalog import offers as offers_endpoint
 from app.db import models
 from app.db.base import Base
-from app.services.search import MAX_TERMS, relevance_order, search_clause, terms_of
+from app.services.search import (
+    MAX_TERMS, relevance_order, search_clause, stem, terms_of,
+)
 
 
 @pytest.fixture
@@ -34,7 +36,8 @@ async def session():
                 is_canonical=True,
             )
 
-        s.add(offer("1", "Chemise Regular Fit bleue rayée", "GANT", 89.0))
+        # Le libellé du marchand dit « bleu », l'utilisateur tapera « bleue ».
+        s.add(offer("1", "Chemise Regular Fit bleu rayé", "GANT", 89.0))
         s.add(offer("2", "Chemise Slim Fit verte", "GANT", 79.0))
         s.add(offer("3", "Pantalon chino beige", "GANT", 99.0))
         s.add(offer("4", "Casque audio sans fil Bluetooth", "Sony", 299.0))
@@ -75,7 +78,7 @@ class TestMultiWordSearch:
         """« chemise bleue gant » : les trois mots ne se suivent nulle part."""
         res = await _search(session, "chemise bleue gant")
         assert res["total"] == 1
-        assert res["items"][0]["name"].startswith("Chemise Regular Fit bleue")
+        assert res["items"][0]["name"].startswith("Chemise Regular Fit bleu")
 
     async def test_the_brand_is_searched_too(self, session):
         res = await _search(session, "gant chino")
@@ -91,6 +94,12 @@ class TestMultiWordSearch:
     async def test_search_is_case_insensitive(self, session):
         assert (await _search(session, "CHEMISE Bleue"))["total"] == 1
 
+    async def test_accord_is_absorbed(self, session):
+        """Le marchand écrit « bleu », l'utilisateur tape « bleue »."""
+        assert (await _search(session, "chemise bleue"))["total"] == 1
+        assert (await _search(session, "chemises bleues"))["total"] == 1
+        assert (await _search(session, "chemise bleu"))["total"] == 1
+
 
 class TestRelevance:
     async def test_the_exact_phrase_comes_first(self, session):
@@ -101,3 +110,28 @@ class TestRelevance:
         res = await _search(session, "chemise")
         # Les deux commencent par « Chemise » : le moins cher départage.
         assert [i["price"] for i in res["items"]] == [79.0, 89.0]
+
+
+class TestStem:
+    """Les libellés marchands n'accordent pas comme l'utilisateur écrit."""
+
+    @pytest.mark.parametrize(
+        "singular,plural",
+        [
+            ("bleu", "bleue"), ("bleu", "bleus"),
+            ("chemise", "chemises"),
+            ("manteau", "manteaux"),
+            ("chaussure", "chaussures"),
+        ],
+    )
+    def test_singular_and_plural_converge(self, singular, plural):
+        assert stem(singular) == stem(plural)
+
+    @pytest.mark.parametrize("term", ["robe", "sony", "prix", "ordinateur", "pantalon"])
+    def test_short_or_invariant_terms_are_left_alone(self, term):
+        assert stem(term) == term
+
+    def test_stems_never_get_too_short(self):
+        """Un radical trop court ramenerait n'importe quoi."""
+        for term in ("manteaux", "chemises", "bleues", "sacs"):
+            assert len(stem(term)) >= 3
