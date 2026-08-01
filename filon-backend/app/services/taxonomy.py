@@ -84,6 +84,42 @@ _RULES: list[tuple[str, str]] = [
 _VETEMENT = r"\b(v[êe]tement|clothing|kleding|robe|dress|jupe|pantalon|jean|jeans|chemise|shirt|t-shirt|pull|sweat|hoodie|manteau|veste|jacket|blouse|costume|short|legging|lingerie|maillot|overhemd|broek|jas|blazer|combinaison|jumpsuit)\b"
 
 
+_SLUG_OVERRIDES = {
+    "TV & Son": "tv-son",
+    "Maison & Déco": "maison-deco",
+    "Jardin & Bricolage": "jardin-bricolage",
+    "Bijoux & Montres": "bijoux-montres",
+    "Beauté & Parfum": "beaute-parfum",
+    "Sport & Plein air": "sport-plein-air",
+    "Auto & Moto": "auto-moto",
+    "Bébé & Puériculture": "bebe-puericulture",
+    "Livres & Culture": "livres-culture",
+    "Alimentation & Boissons": "alimentation-boissons",
+    "Jeux & Jouets": "jeux-jouets",
+    "Électroménager": "electromenager",
+    "Téléphonie": "telephonie",
+    "Santé": "sante",
+}
+
+
+def slug_of(category: str) -> str:
+    """Identifiant d'URL d'une catégorie. Stable : il entre dans les liens."""
+    if category in _SLUG_OVERRIDES:
+        return _SLUG_OVERRIDES[category]
+    text = category.lower()
+    for a, b in (("é", "e"), ("è", "e"), ("ê", "e"), ("à", "a"), ("ô", "o"), ("&", " ")):
+        text = text.replace(a, b)
+    return re.sub(r"[^a-z0-9]+", "-", text).strip("-")
+
+
+_BY_SLUG = {slug_of(c): c for c in ALL_CATEGORIES}
+
+
+def from_slug(slug: str) -> str | None:
+    """Catégorie correspondant à un slug d'URL, ou None si inconnu."""
+    return _BY_SLUG.get((slug or "").lower())
+
+
 def _has(pattern: str, text: str) -> bool:
     return re.search(pattern, text, re.IGNORECASE) is not None
 
