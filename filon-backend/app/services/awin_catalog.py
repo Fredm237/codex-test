@@ -31,6 +31,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.services import taxonomy
+from app.services.dedup import dedup_key
 
 log = get_logger("awin_catalog")
 
@@ -296,6 +297,9 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
         "filon_subcategory": taxonomy.classify_subcategory(
             _cat, name, row.get("merchant_category")
         ),
+        # Le rattachement au produit EAN se fait plus tard : la clé se contente
+        # ici du libellé, et le rattrapage la recalcule ensuite.
+        "dedup_key": dedup_key(product_id=None, brand=row.get("brand_name"), name=name),
         "price": price,
         "currency": (row.get("currency") or "").strip()[:8] or None,
         "in_stock": in_stock,

@@ -122,6 +122,7 @@ async def offers(
     price_min: float | None = Query(default=None, ge=0),
     price_max: float | None = Query(default=None, ge=0),
     sort: str = Query(default="relevance", description="relevance|price_asc|price_desc|name"),
+    duplicates: bool = Query(default=False, description="Inclure les doublons"),
     limit: int = Query(default=48, le=200),
     offset: int = Query(default=0, ge=0),
     session=Depends(db.get_session),
@@ -137,6 +138,10 @@ async def offers(
     # Une carte sans visuel n'est pas présentable : les rangées l'imposaient
     # déjà, la grille principale les laissait passer.
     stmt = stmt.where(models.Offer.image_url.isnot(None), models.Offer.image_url != "")
+    # Un article, une carte. Les déclinaisons de taille et les relistages
+    # remplissaient des pages entières du même produit.
+    if not duplicates:
+        stmt = stmt.where(models.Offer.is_canonical.is_(True))
     if q:
         stmt = stmt.where(models.Offer.name.ilike(f"%{q}%"))
     if merchant:
@@ -885,6 +890,26 @@ async def reclassify_offers(
         "offers_classified": classified,
         "coverage_pct": round(classified / updated * 100, 1) if updated else 0.0,
     }
+
+
+@router.post("/admin/rebuild-canonical")
+async def rebuild_canonical_endpoint(
+    x_admin_token: str | None = Header(default=None),
+) -> dict:
+    """Recalcule les clés de doublon et désigne un représentant par article.
+
+    À relancer après un regroupement par EAN : c'est lui qui fournit le signal
+    le plus fiable, qu'un suffixe de taille ne peut pas tromper.
+    """
+    _require_admin(x_admin_token)
+    if not db.is_enabled():
+        raise HTTPException(status_code=503, detail="base de données absente")
+    from app.services import dedup
+
+    async with db.session_scope() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="base de données absente")
+        return await dedup.rebuild_canonical(session)
 
 
 @router.post("/admin/purge-offers")

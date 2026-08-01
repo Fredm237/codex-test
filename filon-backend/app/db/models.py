@@ -163,6 +163,13 @@ class Offer(Base):
     filon_category: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     # Sous-rayon, à l'intérieur du rayon. Nullable : tous les rayons n'en ont pas.
     filon_subcategory: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # Clé de regroupement des doublons (déclinaisons de taille, mêmes articles
+    # relistés). Calculée à l'ingestion plutôt qu'à la requête : dédupliquer
+    # 795 000 lignes par fenêtrage à chaque affichage était trop coûteux.
+    dedup_key: Mapped[str | None] = mapped_column(String(191), nullable=True, index=True)
+    # Représentant retenu pour sa clé — le moins cher. Un booléen indexé rend le
+    # filtrage immédiat, là où un DISTINCT imposait un tri complet.
+    is_canonical: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
