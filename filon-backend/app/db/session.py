@@ -87,6 +87,14 @@ async def _migrate() -> None:
         "CREATE INDEX IF NOT EXISTS ix_offers_dedup_key ON offers (dedup_key)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS is_canonical BOOLEAN DEFAULT TRUE",
         "CREATE INDEX IF NOT EXISTS ix_offers_is_canonical ON offers (is_canonical)",
+        # Index trigramme : sans lui, une recherche par sous-chaîne impose un
+        # parcours complet des 795 000 lignes. L'extension peut être refusée
+        # selon les droits — la migration le tolère et trace un avertissement.
+        "CREATE EXTENSION IF NOT EXISTS pg_trgm",
+        "CREATE INDEX IF NOT EXISTS ix_offers_name_trgm ON offers "
+        "USING gin (name gin_trgm_ops)",
+        "CREATE INDEX IF NOT EXISTS ix_offers_brand_trgm ON offers "
+        "USING gin (brand gin_trgm_ops)",
     )
     for sql in statements:
         try:

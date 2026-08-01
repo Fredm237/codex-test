@@ -13,7 +13,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
-from app.services import taxonomy
+from app.services import search, taxonomy
 from app.services.verdict import compute_verdict
 
 log = get_logger("catalog")
@@ -143,7 +143,11 @@ async def offers(
     if not duplicates:
         stmt = stmt.where(models.Offer.is_canonical.is_(True))
     if q:
-        stmt = stmt.where(models.Offer.name.ilike(f"%{q}%"))
+        # Chaque terme cherché séparément : la requête entière en sous-chaîne
+        # exigeait que les mots se suivent, et ne renvoyait rien dès deux mots.
+        clause = search.search_clause(q)
+        if clause is not None:
+            stmt = stmt.where(clause)
     if merchant:
         stmt = stmt.where(models.Merchant.slug == merchant)
     if category:
@@ -168,6 +172,12 @@ async def offers(
     order = _SORTS.get(sort)
     if order:
         stmt = stmt.order_by(*order)
+    elif q:
+        # « Pertinence » n'avait aucun sens jusqu'ici : l'ordre était celui de
+        # la base. Les résultats les plus probables passent devant.
+        relevance = search.relevance_order(q)
+        if relevance is not None:
+            stmt = stmt.order_by(relevance, models.Offer.price.asc().nullslast())
     rows = (await session.execute(stmt.limit(limit).offset(offset))).all()
     return {
         "total": int(total or 0),
