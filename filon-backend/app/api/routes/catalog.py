@@ -181,6 +181,77 @@ async def offers(
     }
 
 
+@router.get("/categories")
+async def categories(session=Depends(db.get_session)) -> dict:
+    """Rayons FILON et leur volume, pour la navigation."""
+    if session is None:
+        return {"items": []}
+    stmt = (
+        select(models.Offer.filon_category, func.count().label("n"))
+        .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+        .where(
+            models.Offer.filon_category.isnot(None),
+            models.Offer.image_url.isnot(None),
+        )
+        .group_by(models.Offer.filon_category)
+        .order_by(func.count().desc())
+    )
+    blocked = _visible_merchant_clause()
+    if blocked is not None:
+        stmt = stmt.where(blocked)
+    rows = (await session.execute(stmt)).all()
+    return {
+        "items": [
+            {"name": c, "slug": taxonomy.slug_of(c), "count": int(n)}
+            for (c, n) in rows
+            if c
+        ]
+    }
+
+
+@router.get("/admin/unclassified")
+async def unclassified(
+    limit: int = Query(default=30, le=100),
+    x_admin_token: str | None = Header(default=None),
+    session=Depends(db.get_session),
+) -> dict:
+    """Ce que les règles ne reconnaissent pas encore.
+
+    Sert à enrichir la taxonomie à partir des libellés réellement présents dans
+    les flux, plutôt qu'au jugé : sans ce diagnostic, on ajoute des motifs au
+    hasard et on ne sait pas ce qu'ils rattrapent.
+    """
+    _require_admin(x_admin_token)
+    if session is None:
+        raise HTTPException(status_code=503, detail="base de données absente")
+
+    missing = models.Offer.filon_category.is_(None)
+    total = await session.scalar(
+        select(func.count()).select_from(models.Offer).where(missing)
+    )
+    cats = (
+        await session.execute(
+            select(models.Offer.category, func.count().label("n"))
+            .where(missing, models.Offer.category.isnot(None))
+            .group_by(models.Offer.category)
+            .order_by(func.count().desc())
+            .limit(limit)
+        )
+    ).all()
+    samples = (
+        await session.execute(
+            select(models.Offer.name).where(missing).limit(limit)
+        )
+    ).scalars().all()
+    return {
+        "unclassified_total": int(total or 0),
+        "top_merchant_categories": [
+            {"category": c, "count": int(n)} for (c, n) in cats
+        ],
+        "sample_names": list(samples),
+    }
+
+
 @router.get("/facets")
 async def facets(
     limit: int = Query(default=40, le=200),

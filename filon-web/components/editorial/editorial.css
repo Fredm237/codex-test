@@ -1029,3 +1029,13 @@
   .pgn-page { min-width: 34px; padding: 8px 9px; font-size: 13px; }
   .pgn-step { padding: 8px 12px; font-size: 13px; }
 }
+
+/* Puces de rayons — navigation entre catégories */
+.cat-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
+.cat-chip { font-family: var(--sans); font-size: 13px; font-weight: 600; text-decoration: none;
+  color: var(--ink-2); background: var(--card); border: 1px solid var(--line-2);
+  border-radius: var(--r-full); padding: 8px 14px; line-height: 1;
+  transition: border-color 0.22s, color 0.22s, transform 0.22s var(--ease-out); }
+.cat-chip:hover { border-color: var(--ink); color: var(--ink); transform: translateY(-2px); }
+.cat-chip span { color: var(--ink-3); font-weight: 500; font-variant-numeric: tabular-nums; margin-left: 4px; }
+@media (prefers-reduced-motion: reduce) { .cat-chip { transition: none; } .cat-chip:hover { transform: none; } }
