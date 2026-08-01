@@ -99,12 +99,16 @@ async def test_rail_dedups_size_variants_via_ean(session):
             brand="GANT", price=100.0, currency="EUR", ean=ean,
             image_url="https://example.test/i.jpg",
         ))
-    # Un autre produit pour que le rail ne soit pas réduit à un seul article.
-    session.add(models.Offer(
-        merchant_id=m.id, awin_product_id="other", name="Cravate",
-        brand="GANT", price=45.0, currency="EUR", ean="5901234123457",
-        image_url="https://example.test/i.jpg",
-    ))
+    # Assez d'articles distincts pour que le rail atteigne le minimum d'affichage.
+    for i, (pid, name, price) in enumerate([
+        ("tie", "Cravate", 45.0), ("belt", "Ceinture", 55.0),
+        ("sock", "Chaussettes", 15.0), ("scarf", "Écharpe", 65.0),
+    ]):
+        session.add(models.Offer(
+            merchant_id=m.id, awin_product_id=pid, name=name,
+            brand="GANT", price=price, currency="EUR",
+            image_url="https://example.test/i.jpg",
+        ))
     await session.commit()
     await rebuild_products(session)
 

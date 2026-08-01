@@ -1002,3 +1002,30 @@
 .vd-reasons li::before { content: ""; position: absolute; left: 0; top: 8px;
   width: 5px; height: 5px; border-radius: 99px; background: var(--line-2); }
 .vd-meta { margin-top: 11px; font-size: 11.5px; color: var(--ink-3); }
+
+/* ─────────────────────────────────────────────────────────────
+   Pagination du catalogue
+   ───────────────────────────────────────────────────────────── */
+.pgn { display: flex; align-items: center; justify-content: center; gap: 10px;
+  flex-wrap: wrap; margin-top: 34px; }
+.pgn-pages { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+
+.pgn-step, .pgn-page {
+  font-family: var(--sans); font-size: 13.5px; font-weight: 600; cursor: pointer;
+  background: var(--card); color: var(--ink-2); border: 1px solid var(--line-2);
+  border-radius: var(--r-full); padding: 9px 15px; line-height: 1;
+  transition: background 0.22s, color 0.22s, border-color 0.22s;
+}
+.pgn-page { min-width: 40px; padding: 9px 12px; font-variant-numeric: tabular-nums; }
+.pgn-step:hover:not(:disabled), .pgn-page:hover:not(.current) { border-color: var(--ink); color: var(--ink); }
+.pgn-step:disabled { opacity: 0.4; cursor: default; }
+.pgn-page.current { background: var(--ink); color: var(--paper); border-color: var(--ink); cursor: default; }
+.pgn-gap { color: var(--ink-3); padding: 0 2px; font-size: 13.5px; }
+
+.pgn-status { text-align: center; margin-top: 12px; font-size: 12.5px; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; }
+
+@media (max-width: 620px) {
+  .pgn-page { min-width: 34px; padding: 8px 9px; font-size: 13px; }
+  .pgn-step { padding: 8px 12px; font-size: 13px; }
+}
