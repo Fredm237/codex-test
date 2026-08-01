@@ -974,3 +974,31 @@
   .pg-offer, .pd-compare { transition: none; }
   .pg-offer:hover, .pd-compare:hover { transform: none; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Verdict FILON — la conclusion, avant les détails
+   ───────────────────────────────────────────────────────────── */
+.vd { border: 1px solid var(--line-2); border-left-width: 4px; border-radius: 14px;
+  padding: 16px 18px; margin-top: 20px; background: var(--card); }
+.vd-excellent { border-left-color: #12a37a; }
+.vd-bon       { border-left-color: #4fa3d1; }
+.vd-neutre    { border-left-color: var(--ink-3); }
+.vd-attendre  { border-left-color: #d99022; }
+.vd-insuffisant { border-left-color: var(--line-2); }
+
+.vd-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.vd-dot { width: 9px; height: 9px; border-radius: 99px; flex: none; }
+.vd-excellent .vd-dot { background: #12a37a; }
+.vd-bon       .vd-dot { background: #4fa3d1; }
+.vd-neutre    .vd-dot { background: var(--ink-3); }
+.vd-attendre  .vd-dot { background: #d99022; }
+.vd-insuffisant .vd-dot { background: var(--line-2); }
+
+.vd-title { font-size: 15.5px; font-weight: 700; color: var(--ink); }
+.vd-eyebrow { font-size: 10.5px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: var(--ink-3); font-weight: 600; display: block; margin-bottom: 8px; }
+.vd-reasons { list-style: none; margin: 10px 0 0; display: flex; flex-direction: column; gap: 6px; }
+.vd-reasons li { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; padding-left: 15px; position: relative; }
+.vd-reasons li::before { content: ""; position: absolute; left: 0; top: 8px;
+  width: 5px; height: 5px; border-radius: 99px; background: var(--line-2); }
+.vd-meta { margin-top: 11px; font-size: 11.5px; color: var(--ink-3); }

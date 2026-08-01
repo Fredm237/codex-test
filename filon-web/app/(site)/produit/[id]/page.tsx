@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
+import { Verdict, type VerdictData } from "@/components/editorial/Verdict";
 import { API } from "@/lib/api";
 
 // Rendu serveur + ISR : la page est mise en cache et revalidée toutes les heures.
@@ -24,6 +25,7 @@ type Offer = {
   history: Hist[];
   price_min: number | null;
   price_max: number | null;
+  verdict: VerdictData | null;
   product: {
     ean: string;
     merchants_count: number;
@@ -118,6 +120,8 @@ export default async function ProduitPage({ params }: { params: Promise<{ id: st
                 Voir l&apos;offre chez le marchand
               </a>
             )}
+
+            {o.verdict && <Verdict v={o.verdict} />}
 
             {/* Le même article est vendu ailleurs : c'est l'information la plus
                 utile de la page, on la met avant l'historique. */}
