@@ -161,6 +161,8 @@ class Offer(Base):
     # déclarent des libellés hétérogènes et parfois faux : celle-ci est la seule
     # sur laquelle on peut bâtir une navigation.
     filon_category: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # Sous-rayon, à l'intérieur du rayon. Nullable : tous les rayons n'en ont pas.
+    filon_subcategory: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)

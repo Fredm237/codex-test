@@ -117,6 +117,7 @@ async def offers(
     q: str | None = Query(default=None, description="Recherche dans le nom"),
     merchant: str | None = Query(default=None, description="Slug marchand"),
     category: str | None = None,
+    subcategory: str | None = None,
     brand: str | None = None,
     price_min: float | None = Query(default=None, ge=0),
     price_max: float | None = Query(default=None, ge=0),
@@ -150,6 +151,8 @@ async def offers(
             conflict = _gender_conflict_clause(category)
             if conflict is not None:
                 stmt = stmt.where(conflict)
+    if subcategory:
+        stmt = stmt.where(models.Offer.filon_subcategory == subcategory)
     if brand:
         stmt = stmt.where(models.Offer.brand.ilike(f"%{brand}%"))
     if price_min is not None:
@@ -201,6 +204,26 @@ async def categories(session=Depends(db.get_session)) -> dict:
         stmt = stmt.where(blocked)
     rows = (await session.execute(stmt)).all()
     counts = {c: int(n) for (c, n) in rows if c}
+
+    sub_stmt = (
+        select(
+            models.Offer.filon_category,
+            models.Offer.filon_subcategory,
+            func.count().label("n"),
+        )
+        .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+        .where(
+            models.Offer.filon_subcategory.isnot(None),
+            models.Offer.image_url.isnot(None),
+        )
+        .group_by(models.Offer.filon_category, models.Offer.filon_subcategory)
+    )
+    if blocked is not None:
+        sub_stmt = sub_stmt.where(blocked)
+    sub_counts: dict[str, dict[str, int]] = {}
+    for (cat, sub, n) in (await session.execute(sub_stmt)).all():
+        if cat and sub:
+            sub_counts.setdefault(cat, {})[sub] = int(n)
     items = [
         {"name": c, "slug": taxonomy.slug_of(c), "count": n}
         for c, n in counts.items()
@@ -211,7 +234,18 @@ async def categories(session=Depends(db.get_session)) -> dict:
     departments = []
     for label, category_names in taxonomy.DEPARTMENTS:
         children = [
-            {"name": c, "slug": taxonomy.slug_of(c), "count": counts[c]}
+            {
+                "name": c,
+                "slug": taxonomy.slug_of(c),
+                "count": counts[c],
+                # Sous-rayons dans l'ordre du menu, et seulement ceux qui ont
+                # des produits : un menu vers une page vide est pire que rien.
+                "subcategories": [
+                    {"name": s_, "count": sub_counts.get(c, {})[s_]}
+                    for s_ in taxonomy.subcategories_of(c)
+                    if sub_counts.get(c, {}).get(s_)
+                ],
+            }
             for c in category_names
             if counts.get(c)
         ]
@@ -832,7 +866,13 @@ async def reclassify_offers(
             payload = []
             for r in rows:
                 value = taxonomy.classify(r.category, r.name, r.brand)
-                payload.append({"id": r.id, "filon_category": value})
+                payload.append({
+                    "id": r.id,
+                    "filon_category": value,
+                    "filon_subcategory": taxonomy.classify_subcategory(
+                        value, r.name, r.category
+                    ),
+                })
                 if value:
                     classified += 1
             await session.execute(update(models.Offer), payload)

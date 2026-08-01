@@ -198,6 +198,192 @@ def from_slug(slug: str) -> str | None:
     return _BY_SLUG.get((slug or "").lower())
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Troisième niveau — les sous-rayons.
+#
+# « Chaussures » ne se parcourt pas : on cherche des baskets ou des bottes. Les
+# motifs sont évalués dans l'ordre au sein du rayon déjà déterminé, ce qui les
+# rend beaucoup plus sûrs qu'au premier niveau — « bottes » ne peut plus être
+# confondu avec autre chose une fois qu'on sait qu'on est dans les chaussures.
+# ─────────────────────────────────────────────────────────────────────────────
+SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
+    CHAUSSURES: [
+        ("Baskets & Sneakers", r"\b(baskets?|sneakers?|running|trainers?)\b"),
+        ("Bottes & Bottines", r"\b(bottes?|bottines?|boots?|laarzen)\b"),
+        ("Escarpins & Talons", r"\b(escarpins?|talons?|heels?|stiletto|mules?)\b"),
+        ("Sandales", r"\b(sandales?|sandals?|tongs?|claquettes?)\b"),
+        ("Mocassins & Ville", r"\b(mocassins?|derbies?|richelieu|habill[ée]es?|loafers?)\b"),
+        ("Chaussons", r"\b(chaussons?|pantoufles?|slippers?)\b"),
+        ("Semelles & Entretien", r"\b(semelles?|insoles?|lacets?|cirage)\b"),
+    ],
+    MODE_FEMME: [
+        ("Robes", r"\b(robes?|dress(es)?|jurk)\b"),
+        ("Jupes", r"\b(jupes?|skirts?|rok)\b"),
+        ("Hauts & T-shirts", r"\b(tops?|t-shirts?|blouses?|chemisiers?|d[ée]bardeurs?)\b"),
+        ("Pulls & Sweats", r"\b(pulls?|sweats?|sweaters?|hoodies?|gilets?|cardigans?)\b"),
+        ("Pantalons & Jeans", r"\b(pantalons?|jeans?|leggings?|shorts?|trousers?)\b"),
+        ("Manteaux & Vestes", r"\b(manteaux?|vestes?|jackets?|blousons?|parkas?|trench)\b"),
+        ("Lingerie & Nuit", r"\b(lingerie|soutien-gorge|culottes?|pyjamas?|nuisettes?|sleepwears?)\b"),
+        ("Maillots de bain", r"\b(maillots? de bain|bikinis?|swimwear)\b"),
+    ],
+    MODE_HOMME: [
+        ("Chemises", r"\b(chemises?|overhemd|shirts?)\b"),
+        ("T-shirts & Polos", r"\b(t-shirts?|polos?|d[ée]bardeurs?|maillots?|tops?)\b"),
+        ("Pulls & Sweats", r"\b(pulls?|sweats?|sweaters?|hoodies?|gilets?|cardigans?)\b"),
+        ("Pantalons & Jeans", r"\b(pantalons?|jeans?|chinos?|shorts?|trousers?|broek)\b"),
+        ("Manteaux & Vestes", r"\b(manteaux?|vestes?|jackets?|blousons?|parkas?|jas)\b"),
+        ("Sous-vêtements", r"\b(cale[çc]ons?|boxers?|slips?|underwear|ondergoed)\b"),
+        ("Chaussettes", r"\b(chaussettes?|socks?|sokken)\b"),
+        ("Costumes", r"\b(costumes?|suits?|blazers?|smoking)\b"),
+    ],
+    MODE_ENFANT: [
+        ("Bébé (0-2 ans)", r"\b(b[ée]b[ée]s?|baby|naissance|body|bodys?)\b"),
+        ("Fille", r"\b(filles?|girls?|meisjes)\b"),
+        ("Garçon", r"\b(gar[çc]ons?|boys?|jongens)\b"),
+        ("Manteaux & Vestes", r"\b(manteaux?|vestes?|jackets?|blousons?)\b"),
+    ],
+    INFORMATIQUE: [
+        ("Ordinateurs portables", r"\b(ordinateurs? portables?|laptops?|macbook|notebooks?)\b"),
+        ("Écrans", r"\b([ée]crans?|monitors?|moniteurs?)\b"),
+        ("Claviers & Souris", r"\b(claviers?|souris|keyboards?|mouse|mice)\b"),
+        ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire)\b"),
+        ("Imprimantes", r"\b(imprimantes?|scanners?|cartouches?|toner)\b"),
+        ("Réseau", r"\b(routeurs?|switch|wifi|r[ée]p[ée]teurs?|modems?)\b"),
+        ("Câbles & Adaptateurs", r"\b(c[âa]bles?|adaptateurs?|hubs?|docking)\b"),
+    ],
+    TELEPHONIE: [
+        ("Smartphones", r"\b(smartphones?|iphone|galaxy|t[ée]l[ée]phones? mobiles?)\b"),
+        ("Coques & Protections", r"\b(coques?|[ée]tuis?|prot[èe]ge-[ée]crans?|verre tremp[ée])\b"),
+        ("Chargeurs & Batteries", r"\b(chargeurs?|powerbanks?|batteries?|c[âa]bles? de charge)\b"),
+        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds|oreillettes?)\b"),
+        ("Montres connectées", r"\b(montres? connect[ée]es?|smartwatch|bracelets? connect[ée]s?)\b"),
+    ],
+    TV_SON: [
+        ("Téléviseurs", r"\b(t[ée]l[ée]viseurs?|\btv\b|oled|qled)\b"),
+        ("Casques audio", r"\b(casques?|headphones?|koptelefoon)\b"),
+        ("Enceintes", r"\b(enceintes?|speakers?|haut-parleurs?)\b"),
+        ("Barres de son", r"\b(barres? de son|soundbars?|home cinema)\b"),
+        ("Platines & Hi-Fi", r"\b(platines?|amplis?|hifi|hi-fi|vinyles?)\b"),
+    ],
+    BIJOUX: [
+        ("Colliers & Pendentifs", r"\b(colliers?|necklaces?|pendentifs?|pendants?|cha[îi]nes?|ketting)\b"),
+        ("Bracelets", r"\b(bracelets?|joncs?|gourmettes?)\b"),
+        ("Bagues", r"\b(bagues?|rings?|alliances?|chevali[èe]res?)\b"),
+        ("Boucles d'oreilles", r"\b(boucles? d'oreilles?|earrings?|cr[ée]oles?|puces?)\b"),
+        ("Montres", r"\b(montres?|watch(es)?|horloges?)\b"),
+    ],
+    BAGAGERIE: [
+        ("Sacs à main", r"\b(sacs? [àa] main|handbags?|handtas|cabas|besaces?|bandouli[èe]res?)\b"),
+        ("Sacs à dos", r"\b(sacs? [àa] dos|backpacks?|rugzak)\b"),
+        ("Valises & Bagages", r"\b(valises?|suitcases?|bagages?|luggage|trolleys?)\b"),
+        ("Portefeuilles", r"\b(portefeuilles?|wallets?|porte-cartes?|porte-monnaie)\b"),
+        ("Sacs banane & Pochettes", r"\b(sacs? banane|bananes?|pochettes?|sacoches?)\b"),
+    ],
+    ACCESSOIRES: [
+        ("Lunettes de soleil", r"\b(lunettes? de soleil|sunglasses|solaires?)\b"),
+        ("Ceintures", r"\b(ceintures?|belts?|riemen)\b"),
+        ("Chapeaux & Casquettes", r"\b(chapeaux?|casquettes?|bonnets?|b[ée]rets?|hats?|caps?|bobs?)\b"),
+        ("Écharpes & Foulards", r"\b([ée]charpes?|foulards?|ch[èa]les?|scarf|scarves)\b"),
+        ("Gants", r"\b(gants?|gloves|moufles?)\b"),
+        ("Cravates", r"\b(cravates?|ties?|n[oœ]uds? papillon)\b"),
+    ],
+    BEAUTE: [
+        ("Parfums", r"\b(parfums?|eaux? de parfum|eaux? de toilette|fragrances?)\b"),
+        ("Maquillage", r"\b(maquillage|make\s?up|rouges? [àa] l[èe]vres|lipstick|mascaras?|"
+                       r"fonds? de teint|eyeliner|fards?)\b"),
+        ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
+                         r"gezicht|toner|masques?)\b"),
+        ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
+                     r"haarverzorging|colorations?|perruques?|wigs?|extensions?)\b"),
+        ("Ongles", r"\b(ongles?|nails?|vernis|manucure)\b"),
+    ],
+    MAISON: [
+        ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|"
+                     r"[ée]tag[èe]res?|meubel)\b"),
+        ("Luminaires", r"\b(lampes?|luminaires?|suspensions?|appliques?|verlichting|ampoules?)\b"),
+        ("Linge de maison", r"\b(linge de lit|draps?|couettes?|serviettes?|rideaux?|"
+                             r"coussins?|plaids?|tapis)\b"),
+        ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?)\b"),
+        ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|vases?|miroirs?)\b"),
+        ("Entretien", r"\b(schoonmaak|nettoyage|entretien|lessives?|d[ée]tergents?)\b"),
+    ],
+    ELECTROMENAGER: [
+        ("Gros électroménager", r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
+                                 r"cong[ée]lateurs?|fours?|wasmachines?|koelkast)\b"),
+        ("Petit électroménager", r"\b(cafeti[èe]res?|bouilloires?|grille-pains?|blenders?|"
+                                  r"robots? cuiseur|friteuses?|micro-ondes)\b"),
+        ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
+        ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
+                                       r"radiateurs?|purificateurs?|humidificateurs?)\b"),
+    ],
+    SPORT: [
+        ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
+        ("Cyclisme", r"\b(v[ée]los?|cyclisme|fietsen|casques? v[ée]lo)\b"),
+        ("Running", r"\b(running|course [àa] pied|jogging)\b"),
+        ("Sports collectifs", r"\b(football|basket-?ball|handball|rugby|volley)\b"),
+        ("Camping & Randonnée", r"\b(camping|randonn[ée]e|tentes?|sacs? de couchage)\b"),
+        ("Sports d'hiver", r"\b(ski|snowboard|luges?)\b"),
+    ],
+    AUTO: [
+        ("Pneus", r"\b(pneus?|tyres?|banden)\b"),
+        ("Jantes & Roues", r"\b(jantes?|wheels?|enjoliveurs?)\b"),
+        ("Éclairage", r"\b([ée]clairages?|phares?|ampoules?|led|fog lights?|headlights?)\b"),
+        ("Entretien", r"\b(huiles? moteur|filtres?|batteries?|essuie-glaces?)\b"),
+        ("Accessoires auto", r"\b(tapis de sol|housses?|supports? t[ée]l[ée]phone|chargeurs? allume-cigare)\b"),
+    ],
+    BEBE: [
+        ("Poussettes & Sièges auto", r"\b(poussettes?|strollers?|si[èe]ges? auto|maxi-cosi)\b"),
+        ("Repas & Biberons", r"\b(biberons?|bavoirs?|slabbetjes?|chaises? hautes?|"
+                              r"st[ée]rilisateurs?)\b"),
+        ("Couches & Toilette", r"\b(couches?|luiers?|lingettes?|tables? [àa] langer)\b"),
+        ("Chambre bébé", r"\b(lits? b[ée]b[ée]|berceaux?|matelas b[ée]b[ée]|tours? de lit)\b"),
+    ],
+    ANIMALERIE: [
+        ("Chien", r"\b(chiens?|dogs?|hond|hondenvoer)\b"),
+        ("Chat", r"\b(chats?|cats?|\bkat\b|kattenvoer|liti[èe]res?)\b"),
+        ("Petits animaux", r"\b(rongeurs?|lapins?|hamsters?|oiseaux?|aquarium|poissons?)\b"),
+    ],
+    GAMING: [
+        ("Consoles", r"\b(consoles?|playstation|ps5|ps4|xbox|nintendo|switch)\b"),
+        ("Jeux vidéo", r"\b(jeux? vid[ée]o|video\s?games?|cd keys?|steam)\b"),
+        ("Accessoires gaming", r"\b(manettes?|controllers?|casques? gaming|si[èe]ges? gamer|"
+                                r"tapis de souris)\b"),
+    ],
+    JARDIN: [
+        ("Outillage", r"\b(perceuses?|visseuses?|scies?|outillages?|gereedschap|tournevis)\b"),
+        ("Jardinage", r"\b(tondeuses?|taille-haies?|arrosages?|tuingereedschap|s[ée]cateurs?)\b"),
+        ("Mobilier de jardin", r"\b(salons? de jardin|parasols?|barbecues?|transats?)\b"),
+        ("Revêtements", r"\b(parquets?|carrelages?|peintures?|papiers? peints?)\b"),
+    ],
+}
+
+
+def classify_subcategory(
+    category: str | None, name: str | None = None, merchant_category: str | None = None
+) -> str | None:
+    """Sous-rayon d'une offre à l'intérieur de son rayon, ou None.
+
+    Le rayon est déjà connu, ce qui rend les motifs bien plus sûrs qu'au premier
+    niveau : « bottes » ne peut plus être confondu avec autre chose une fois
+    qu'on sait qu'on est dans les chaussures.
+    """
+    rules = SUBCATEGORIES.get(category or "")
+    if not rules:
+        return None
+    for text in ((name or "").strip(), (merchant_category or "").strip()):
+        if not text:
+            continue
+        for label, pattern in rules:
+            if _has(pattern, text):
+                return label
+    return None
+
+
+def subcategories_of(category: str) -> list[str]:
+    """Sous-rayons publiés d'un rayon, dans l'ordre du menu."""
+    return [label for label, _ in SUBCATEGORIES.get(category, [])]
+
+
 def _has(pattern: str, text: str) -> bool:
     return re.search(pattern, text, re.IGNORECASE) is not None
 

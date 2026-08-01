@@ -290,8 +290,11 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
         "name": name[:512],
         "brand": (row.get("brand_name") or "").strip()[:191] or None,
         "category": (row.get("merchant_category") or "").strip()[:255] or None,
-        "filon_category": taxonomy.classify(
+        "filon_category": (_cat := taxonomy.classify(
             row.get("merchant_category"), name, row.get("brand_name")
+        )),
+        "filon_subcategory": taxonomy.classify_subcategory(
+            _cat, name, row.get("merchant_category")
         ),
         "price": price,
         "currency": (row.get("currency") or "").strip()[:8] or None,

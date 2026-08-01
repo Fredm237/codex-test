@@ -133,3 +133,41 @@ class TestEnrichedFromRealFeedLabels:
     def test_the_generic_aisle_never_overrides_an_identified_audience(self):
         assert t.classify("Underwear & Sleepwears", "Pyjama pour femme") == t.MODE_FEMME
         assert t.classify("Men's Tops", "Polo ERREA Team") == t.MODE_HOMME
+
+
+class TestSubcategories:
+    """Troisième niveau : le rayon est connu, les motifs sont donc plus sûrs."""
+
+    @pytest.mark.parametrize(
+        "category,name,expected",
+        [
+            (t.CHAUSSURES, "Nike Air Max sneakers homme", "Baskets & Sneakers"),
+            (t.CHAUSSURES, "Bottines femme cuir noir", "Bottes & Bottines"),
+            (t.CHAUSSURES, "Closed Toe Platform Mules Chunky Heels", "Escarpins & Talons"),
+            (t.MODE_HOMME, "Stenströms Regular Fit Chemise bleu", "Chemises"),
+            (t.MODE_HOMME, "Polo ERREA Team", "T-shirts & Polos"),
+            (t.MODE_FEMME, "Robe de soirée longue", "Robes"),
+            (t.BIJOUX, "Hip Hop Diamond Necklace Pendant", "Colliers & Pendentifs"),
+            (t.BAGAGERIE, "Sac à dos randonnée 30L", "Sacs à dos"),
+            (t.INFORMATIQUE, "MacBook Air M2 ordinateur portable", "Ordinateurs portables"),
+            (t.AUTO, "Pneu Michelin 205/55 R16", "Pneus"),
+            (t.BEAUTE, "Rasasi Fattan Eau De Parfum", "Parfums"),
+            (t.ELECTROMENAGER, "Aspirateur balai sans fil", "Aspirateurs"),
+        ],
+    )
+    def test_classifies_within_its_aisle(self, category, name, expected):
+        assert t.classify_subcategory(category, name) == expected
+
+    def test_returns_none_outside_a_mapped_aisle(self):
+        assert t.classify_subcategory(t.ALIMENTATION, "Café en grains") is None
+        assert t.classify_subcategory(None, "Peu importe") is None
+
+    def test_returns_none_when_nothing_matches(self):
+        assert t.classify_subcategory(t.CHAUSSURES, "Article 12345") is None
+
+    def test_every_subcategory_belongs_to_its_declared_aisle(self):
+        for category, rules in t.SUBCATEGORIES.items():
+            assert category in t.ALL_CATEGORIES
+            labels = [label for label, _ in rules]
+            assert len(labels) == len(set(labels)), f"doublon dans {category}"
+            assert t.subcategories_of(category) == labels

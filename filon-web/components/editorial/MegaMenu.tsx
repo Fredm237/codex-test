@@ -4,7 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { API } from "@/lib/api";
 import { useLocale, type Locale } from "@/lib/i18n";
 
-type Category = { name: string; slug: string; count: number };
+type Subcategory = { name: string; count: number };
+type Category = { name: string; slug: string; count: number; subcategories?: Subcategory[] };
 type Department = { name: string; slug: string; count: number; categories: Category[] };
 
 const L: Record<Locale, { label: string; all: string; products: (n: number) => string }> = {
@@ -119,6 +120,22 @@ export function MegaMenu() {
                       {c.name}
                       <span>{c.count.toLocaleString("fr-FR")}</span>
                     </a>
+                    {/* Troisième niveau : les quatre premiers sous-rayons
+                        suffisent à donner la profondeur sans noyer la colonne. */}
+                    {c.subcategories && c.subcategories.length > 0 && (
+                      <ul className="mm-sub">
+                        {c.subcategories.slice(0, 4).map((s) => (
+                          <li key={s.name}>
+                            <a
+                              href={`/categorie/${c.slug}/?sub=${encodeURIComponent(s.name)}`}
+                              onClick={() => setOpen(false)}
+                            >
+                              {s.name}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </li>
                 ))}
               </ul>
