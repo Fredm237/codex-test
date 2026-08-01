@@ -24,6 +24,29 @@ MIN_RAIL_ITEMS = 4
 # Baisse minimale pour figurer dans « les plus grosses baisses » : 5 %.
 MIN_DROP_FACTOR = 1.05
 
+# Marqueurs de genre présents dans les libellés produit. Les flux déclarent une
+# catégorie que le marchand choisit lui-même, et certains rangent des robes sous
+# « Men's Clothing » : le nom du produit est alors plus fiable que sa catégorie.
+_WOMEN_MARKERS = ("women", "woman", "femme", "dames", "girl", "fille", "robe")
+_MEN_MARKERS = ("men's", "mens ", " men ", "homme", "heren", "garçon", "boy")
+
+
+def _gender_conflict_clause(category: str):
+    """Écarte les produits dont le nom contredit la catégorie demandée.
+
+    « women » contient « men » : on teste donc toujours le féminin d'abord.
+    """
+    low = category.lower()
+    asks_women = any(m in low for m in ("women", "woman", "femme", "dames"))
+    asks_men = (not asks_women) and any(m in low for m in ("men", "homme", "heren"))
+
+    unwanted = _WOMEN_MARKERS if asks_men else _MEN_MARKERS if asks_women else ()
+    if not unwanted:
+        return None
+    from sqlalchemy import and_, not_
+
+    return and_(*[not_(models.Offer.name.ilike(f"%{m}%")) for m in unwanted])
+
 
 @router.get("/stats")
 async def stats(session=Depends(db.get_session)) -> dict:
@@ -109,12 +132,18 @@ async def offers(
     blocked = _visible_merchant_clause()
     if blocked is not None:
         stmt = stmt.where(blocked)
+    # Une carte sans visuel n'est pas présentable : les rangées l'imposaient
+    # déjà, la grille principale les laissait passer.
+    stmt = stmt.where(models.Offer.image_url.isnot(None), models.Offer.image_url != "")
     if q:
         stmt = stmt.where(models.Offer.name.ilike(f"%{q}%"))
     if merchant:
         stmt = stmt.where(models.Merchant.slug == merchant)
     if category:
         stmt = stmt.where(models.Offer.category.ilike(f"%{category}%"))
+        conflict = _gender_conflict_clause(category)
+        if conflict is not None:
+            stmt = stmt.where(conflict)
     if brand:
         stmt = stmt.where(models.Offer.brand.ilike(f"%{brand}%"))
     if price_min is not None:

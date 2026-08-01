@@ -1,13 +1,20 @@
 """Agent 2 — Recherche produit.
 
-Sélectionne, dans les sources disponibles (ici le catalogue de démo), les
-produits qui correspondent aux critères. Un score simple classe la pertinence.
+Interroge le catalogue réel de FILON (offres Awin ingérées, regroupées par EAN).
+Il lisait auparavant un fichier de démonstration de quatre ordinateurs portables
+chez des marchands sans partenariat : le copilote répondait à côté de sa propre
+base. Le catalogue de démonstration ne sert plus que de secours hors production,
+quand aucune base n'est configurée.
 """
 
 from __future__ import annotations
 
 from app.agents.state import AdviseState
+from app.core.logging import get_logger
 from app.data.catalog import all_products
+from app.services.catalog_source import search_products
+
+log = get_logger("product_search")
 
 
 def _score(product: dict, criteria) -> float:
@@ -29,6 +36,23 @@ def _score(product: dict, criteria) -> float:
 
 async def run(state: AdviseState) -> AdviseState:
     criteria = state["criteria"]
+
+    # Catalogue réel d'abord : c'est lui qui porte les vrais prix et les vrais
+    # marchands partenaires.
+    real = await search_products(
+        state.get("query", ""),
+        budget_max=criteria.budget_max,
+        limit=5,
+    )
+    if real:
+        state["candidates"] = real
+        state.setdefault("trace", []).append(
+            f"product_search: {len(real)} produits du catalogue FILON"
+        )
+        return state
+
+    # Repli : base absente (développement local) ou aucune correspondance.
+    log.info("Catalogue réel sans résultat — repli sur les données de démonstration")
     products = all_products()
 
     if criteria.category:
@@ -45,6 +69,6 @@ async def run(state: AdviseState) -> AdviseState:
     ranked = sorted(products, key=lambda p: _score(p, criteria), reverse=True)
     state["candidates"] = ranked[:5]
     state.setdefault("trace", []).append(
-        f"product_search: {len(ranked)} produits retenus"
+        f"product_search: {len(ranked)} produits (démonstration)"
     )
     return state
