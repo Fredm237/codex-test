@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata, JsonLd } from "@/lib/seo";
 import { API } from "@/lib/api";
+import { Verdict, type VerdictData } from "@/components/editorial/Verdict";
 import { site } from "@/lib/site";
 
 // Fiche d'un produit regroupé par EAN : le même article, comparé chez tous les
@@ -30,6 +31,7 @@ type Product = {
   offers_count: number;
   merchants_count: number;
   offers: ProductOffer[];
+  verdict: VerdictData | null;
 };
 
 async function getProduct(ean: string): Promise<Product | null> {
@@ -127,6 +129,8 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
                   chez {p.merchants_count} marchand{p.merchants_count > 1 ? "s" : ""}
                 </span>
               </div>
+
+              {p.verdict && <Verdict v={p.verdict} />}
 
               {saving != null && (
                 <p className="pg-saving">

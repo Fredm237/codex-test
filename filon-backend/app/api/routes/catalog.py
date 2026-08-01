@@ -13,6 +13,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
+from app.services.verdict import compute_verdict
 
 log = get_logger("catalog")
 
@@ -388,6 +389,7 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         )
     ).all()
     prices = [p for (p, _) in hist if p is not None]
+    grouped = await _grouped_product_summary(session, o.product_id)
     return {
         "id": o.id,
         "name": o.name,
@@ -407,7 +409,14 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         "price_max": max(prices) if prices else None,
         # Le produit regroupé, s'il est vendu ailleurs : c'est ce qui permet à la
         # fiche d'une offre de renvoyer vers la comparaison multi-marchands.
-        "product": await _grouped_product_summary(session, o.product_id),
+        "product": grouped,
+        "verdict": compute_verdict(
+            price=o.price,
+            currency=o.currency,
+            history=hist,
+            cheapest_elsewhere=grouped["price_min"] if grouped else None,
+            merchants_count=grouped["merchants_count"] if grouped else 1,
+        ),
     }
 
 
@@ -564,6 +573,16 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
             }
             for (o, m) in rows
         ],
+        # Verdict porté par le meilleur prix du produit : c'est celui que
+        # l'utilisateur retiendra, et l'écart entre marchands le nourrit sans
+        # dépendre de l'historique.
+        "verdict": compute_verdict(
+            price=product.price_min,
+            currency=product.currency,
+            history=[],
+            cheapest_elsewhere=None,
+            merchants_count=product.merchants_count or 1,
+        ),
     }
 
 
