@@ -19,6 +19,11 @@ log = get_logger("catalog")
 
 router = APIRouter(prefix="/catalog", tags=["catalog"])
 
+# Une rangée en dessous de ce seuil paraît cassée plutôt que sélective.
+MIN_RAIL_ITEMS = 4
+# Baisse minimale pour figurer dans « les plus grosses baisses » : 5 %.
+MIN_DROP_FACTOR = 1.05
+
 
 @router.get("/stats")
 async def stats(session=Depends(db.get_session)) -> dict:
@@ -101,6 +106,9 @@ async def offers(
     stmt = select(models.Offer, models.Merchant).join(
         models.Merchant, models.Offer.merchant_id == models.Merchant.id
     )
+    blocked = _visible_merchant_clause()
+    if blocked is not None:
+        stmt = stmt.where(blocked)
     if q:
         stmt = stmt.where(models.Offer.name.ilike(f"%{q}%"))
     if merchant:
@@ -166,6 +174,18 @@ async def facets(
         "categories": [{"value": c, "count": int(n)} for (c, n) in cats if c],
         "brands": [{"value": b, "count": int(n)} for (b, n) in brands if b],
     }
+
+
+def _visible_merchant_clause():
+    """Exclut les marchands bannis de tout affichage public.
+
+    Le flag adultcontent d'Awin ne suffit pas — des articles pour adultes
+    remontaient encore en page d'accueil après l'avoir coupé.
+    """
+    blocked = get_settings().blocked_merchant_slugs
+    if not blocked:
+        return None
+    return models.Merchant.slug.notin_(blocked)
 
 
 def _card(o: models.Offer, m: models.Merchant, **extra) -> dict:
@@ -303,11 +323,15 @@ async def highlights(
             *extra_cols,
         ).join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
 
-    visible = (
+    visible = [
         models.Offer.price.isnot(None),
         models.Offer.price > 0,
         models.Offer.image_url.isnot(None),
-    )
+    ]
+    blocked = _visible_merchant_clause()
+    if blocked is not None:
+        visible.append(blocked)
+    visible = tuple(visible)
 
     # 📉 Les plus grosses baisses de prix (prix actuel < plus haut relevé).
     drop_pct = ((snap.c.high - models.Offer.price) / snap.c.high * 100.0)
@@ -315,7 +339,9 @@ async def highlights(
         core(drop_pct.desc(), snap.c.high.label("high"), snap.c.low.label("low"),
              drop_pct.label("drop_pct"))
         .join(snap, snap.c.offer_id == models.Offer.id)
-        .where(*visible, snap.c.high > models.Offer.price)
+        # Une baisse d'un pour cent n'est pas une bonne affaire, c'est du bruit :
+        # afficher « -1 % » décrédibilise la rangée entière.
+        .where(*visible, snap.c.high > models.Offer.price * MIN_DROP_FACTOR)
     )
     drops = await _rail(
         session, drops_core, limit=limit,
@@ -363,7 +389,9 @@ async def highlights(
         {"key": "budget", "items": budget},
         {"key": "fresh", "items": fresh},
     ]
-    return {"sections": [s for s in sections if s["items"]]}
+    # Une rangée d'une seule carte fait cassé : mieux vaut ne pas l'afficher
+    # tant que les données ne la remplissent pas.
+    return {"sections": [s for s in sections if len(s["items"]) >= MIN_RAIL_ITEMS]}
 
 
 @router.get("/offer/{offer_id}")

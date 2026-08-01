@@ -99,6 +99,16 @@ class Settings(BaseSettings):
     # SECRET → env ADMIN_SYNC_TOKEN. Sans valeur, les endpoints admin sont fermés.
     admin_sync_token: str | None = Field(default=None)
 
+    # Marchands exclus de tout affichage public (slugs, séparés par des virgules).
+    # Le flag adultcontent d'Awin ne suffit pas : des articles pour adultes
+    # remontaient encore en page d'accueil. Filtrer par marchand est exact, sans
+    # les faux positifs qu'entraînerait une liste de mots-clés.
+    blocked_merchants: str = Field(default="montamour")
+
+    @property
+    def blocked_merchant_slugs(self) -> list[str]:
+        return [s.strip().lower() for s in (self.blocked_merchants or "").split(",") if s.strip()]
+
 
 @lru_cache
 def get_settings() -> Settings:
