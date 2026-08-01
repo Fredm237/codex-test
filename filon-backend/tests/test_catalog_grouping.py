@@ -185,3 +185,24 @@ async def test_offer_detail_links_to_grouped_product_only_when_useful(session):
         )
     ).scalars().first()
     assert (await offer_detail(offer_id=orphan, session=session))["product"] is None
+
+
+async def test_sitemap_only_lists_products_worth_indexing(session):
+    """Une fiche à un seul marchand redirait ce que dit déjà la fiche de l'offre."""
+    from app.api.routes.catalog import sitemap_products
+
+    await _seed(session)
+    await rebuild_products(session)
+
+    listed = await sitemap_products(limit=5000, offset=0, min_merchants=2, session=session)
+    eans = [i["ean"] for i in listed["items"]]
+    assert listed["total"] == 1
+    assert eans == [EAN_A]          # deux marchands
+    assert EAN_B not in eans        # un seul marchand : exclu
+
+    # Le seuil reste réglable, et la pagination est cohérente avec le total.
+    everything = await sitemap_products(limit=5000, offset=0, min_merchants=1, session=session)
+    assert everything["total"] == 2
+    page_two = await sitemap_products(limit=1, offset=1, min_merchants=1, session=session)
+    assert len(page_two["items"]) == 1
+    assert page_two["items"][0]["ean"] != everything["items"][0]["ean"]

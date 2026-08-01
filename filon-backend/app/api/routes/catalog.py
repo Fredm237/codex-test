@@ -480,6 +480,47 @@ async def products(
     }
 
 
+@router.get("/sitemap/products")
+async def sitemap_products(
+    limit: int = Query(default=5000, le=50000),
+    offset: int = Query(default=0, ge=0),
+    min_merchants: int = Query(default=2, ge=1, description="Marchands minimum"),
+    session=Depends(db.get_session),
+) -> dict:
+    """EAN et date de mise à jour, pour la génération du sitemap.
+
+    Charge utile volontairement minimale : un sitemap n'a besoin de rien d'autre,
+    et il s'agit de parcourir des dizaines de milliers de lignes.
+
+    `min_merchants=2` par défaut : une fiche regroupée n'apporte de contenu
+    propre qu'à partir de deux marchands. En dessous, elle redirait ce que dit
+    déjà la fiche de l'offre — soumettre ces pages à l'indexation reviendrait à
+    proposer des milliers de pages sans valeur ajoutée.
+    """
+    if session is None:
+        return {"total": 0, "items": []}
+    stmt = select(models.CatalogProduct).where(
+        models.CatalogProduct.merchants_count >= min_merchants
+    )
+    total = await session.scalar(select(func.count()).select_from(stmt.subquery()))
+    rows = (
+        await session.execute(
+            select(models.CatalogProduct.ean, models.CatalogProduct.updated_at)
+            .where(models.CatalogProduct.merchants_count >= min_merchants)
+            .order_by(models.CatalogProduct.id)
+            .limit(limit)
+            .offset(offset)
+        )
+    ).all()
+    return {
+        "total": int(total or 0),
+        "items": [
+            {"ean": ean, "updated": updated.isoformat() if updated else None}
+            for (ean, updated) in rows
+        ],
+    }
+
+
 @router.get("/product/{ean}")
 async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
     """Fiche d'un produit regroupé : toutes les offres, du moins cher au plus cher."""
