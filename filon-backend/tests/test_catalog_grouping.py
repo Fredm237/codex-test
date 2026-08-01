@@ -145,3 +145,43 @@ async def test_products_endpoint_can_filter_multi_merchant(session):
     shared = await products(multi_merchant=True, **common)
     assert shared["total"] == 1
     assert shared["items"][0]["ean"] == EAN_A
+
+
+async def test_offer_detail_links_to_grouped_product_only_when_useful(session):
+    """Annoncer « disponible chez 1 marchand » n'aide personne."""
+    from app.api.routes.catalog import offer_detail
+    from sqlalchemy import select as _select
+
+    await _seed(session)
+    await rebuild_products(session)
+
+    # EAN_A est vendu par deux marchands → le renvoi doit apparaître.
+    shared = (
+        await session.execute(
+            _select(models.Offer.id)
+            .join(models.CatalogProduct, models.Offer.product_id == models.CatalogProduct.id)
+            .where(models.CatalogProduct.ean == EAN_A)
+        )
+    ).scalars().first()
+    detail = await offer_detail(offer_id=shared, session=session)
+    assert detail["product"] is not None
+    assert detail["product"]["ean"] == EAN_A
+    assert detail["product"]["merchants_count"] == 2
+
+    # EAN_B n'a qu'un marchand → pas de renvoi.
+    alone = (
+        await session.execute(
+            _select(models.Offer.id)
+            .join(models.CatalogProduct, models.Offer.product_id == models.CatalogProduct.id)
+            .where(models.CatalogProduct.ean == EAN_B)
+        )
+    ).scalars().first()
+    assert (await offer_detail(offer_id=alone, session=session))["product"] is None
+
+    # Offre sans EAN exploitable → pas de renvoi non plus.
+    orphan = (
+        await session.execute(
+            _select(models.Offer.id).where(models.Offer.product_id.is_(None))
+        )
+    ).scalars().first()
+    assert (await offer_detail(offer_id=orphan, session=session))["product"] is None

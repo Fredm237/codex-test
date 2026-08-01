@@ -912,3 +912,65 @@
   .cat-card:hover { transform: none; }
   .cat-card:hover .cat-card-media img { transform: none; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   Fiche produit regroupée — le même article chez plusieurs marchands
+   ───────────────────────────────────────────────────────────── */
+.pg-grid { display: grid; gap: 34px; grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); align-items: start; }
+@media (max-width: 860px) { .pg-grid { grid-template-columns: 1fr; } }
+
+.pg-media { aspect-ratio: 1 / 1; background: #fff; border: 1px solid var(--line-2); border-radius: 20px;
+  display: grid; place-items: center; overflow: hidden; position: sticky; top: 96px; }
+@media (max-width: 860px) { .pg-media { position: static; } }
+.pg-media img { width: 100%; height: 100%; object-fit: contain; padding: 24px; }
+
+.pg-brand { font-size: 12.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+.pg-title { font-family: var(--serif); font-size: clamp(24px, 4vw, 34px); line-height: 1.15; margin: 6px 0 18px; }
+
+.pg-headline { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; }
+.pg-from { font-size: 13px; color: var(--ink-3); margin-right: 8px; }
+.pg-price { font-size: 32px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.pg-count { font-size: 14px; color: var(--ink-2); }
+
+.pg-saving { margin-top: 10px; font-size: 14px; color: var(--ink-2); background: var(--paper-2);
+  border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px; }
+.pg-saving b { color: var(--accent); }
+
+.pg-sub { font-family: var(--sans); font-size: 12.5px; letter-spacing: 0.06em; text-transform: uppercase;
+  color: var(--ink-3); margin: 34px 0 12px; font-weight: 600; }
+
+.pg-offers { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.pg-offer { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap;
+  background: var(--card); border: 1px solid var(--line-2); border-radius: 14px; padding: 13px 15px;
+  transition: border-color 0.25s, transform 0.25s var(--ease-out); }
+.pg-offer:hover { border-color: var(--ink-3); transform: translateY(-2px); }
+.pg-offer.best { border-color: var(--accent); }
+
+.pg-offer-merchant { display: flex; align-items: center; gap: 9px; font-size: 14.5px; font-weight: 600; color: var(--ink); }
+.pg-region { font-size: 10.5px; font-weight: 600; letter-spacing: 0.04em; color: var(--ink-3);
+  border: 1px solid var(--line-2); border-radius: 99px; padding: 2px 7px; }
+.pg-badge { font-size: 10.5px; font-weight: 700; letter-spacing: 0.03em; color: #fff;
+  background: var(--wave, var(--accent)); border-radius: 99px; padding: 3px 8px; }
+
+.pg-offer-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.pg-offer-right b { font-size: 16px; font-variant-numeric: tabular-nums; }
+.pg-stock { font-size: 12px; color: var(--ink-3); }
+.pg-go { font-family: var(--sans); font-size: 12.5px; font-weight: 600; text-decoration: none;
+  padding: 7px 14px; border-radius: 99px; border: 1px solid var(--line-2); color: var(--ink-2);
+  transition: background 0.25s, color 0.25s, border-color 0.25s; }
+.pg-go:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.pg-note { font-size: 12px; color: var(--ink-3); margin-top: 20px; line-height: 1.55; }
+
+/* Renvoi depuis la fiche d'une offre vers la comparaison multi-marchands */
+.pd-compare { margin-top: 18px; display: block; text-decoration: none; background: var(--paper-2);
+  border: 1px solid var(--line-2); border-radius: 14px; padding: 14px 16px;
+  transition: border-color 0.25s, transform 0.25s var(--ease-out); }
+.pd-compare:hover { border-color: var(--accent); transform: translateY(-2px); }
+.pd-compare b { color: var(--ink); font-size: 14.5px; }
+.pd-compare span { display: block; font-size: 13px; color: var(--ink-3); margin-top: 3px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .pg-offer, .pd-compare { transition: none; }
+  .pg-offer:hover, .pd-compare:hover { transform: none; }
+}

@@ -24,6 +24,12 @@ type Offer = {
   history: Hist[];
   price_min: number | null;
   price_max: number | null;
+  product: {
+    ean: string;
+    merchants_count: number;
+    price_min: number | null;
+    currency: string | null;
+  } | null;
 };
 
 async function getOffer(id: string): Promise<Offer | null> {
@@ -110,6 +116,20 @@ export default async function ProduitPage({ params }: { params: Promise<{ id: st
             {o.link && (
               <a className="ed-btn wave" href={o.link} target="_blank" rel="noopener noreferrer sponsored" style={{ marginTop: 18, textDecoration: "none" }}>
                 Voir l&apos;offre chez le marchand
+              </a>
+            )}
+
+            {/* Le même article est vendu ailleurs : c'est l'information la plus
+                utile de la page, on la met avant l'historique. */}
+            {o.product && (
+              <a className="pd-compare" href={`/produits/${o.product.ean}/`}>
+                <b>
+                  Aussi disponible chez {o.product.merchants_count} marchands
+                  {o.product.price_min != null && o.price != null && o.product.price_min < o.price
+                    ? ` — dès ${money(o.product.price_min, o.product.currency ?? o.currency)}`
+                    : ""}
+                </b>
+                <span>Comparer toutes les offres de ce produit →</span>
               </a>
             )}
 

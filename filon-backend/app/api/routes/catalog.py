@@ -405,6 +405,34 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         ],
         "price_min": min(prices) if prices else None,
         "price_max": max(prices) if prices else None,
+        # Le produit regroupé, s'il est vendu ailleurs : c'est ce qui permet à la
+        # fiche d'une offre de renvoyer vers la comparaison multi-marchands.
+        "product": await _grouped_product_summary(session, o.product_id),
+    }
+
+
+async def _grouped_product_summary(session, product_id: int | None) -> dict | None:
+    """Résumé du produit regroupé — uniquement s'il apporte quelque chose.
+
+    Renvoie None quand le produit n'a qu'un seul marchand : annoncer
+    « disponible chez 1 marchand » n'aide personne.
+    """
+    if product_id is None:
+        return None
+    p = (
+        await session.execute(
+            select(models.CatalogProduct).where(models.CatalogProduct.id == product_id)
+        )
+    ).scalar_one_or_none()
+    if p is None or (p.merchants_count or 0) < 2:
+        return None
+    return {
+        "ean": p.ean,
+        "merchants_count": p.merchants_count,
+        "offers_count": p.offers_count,
+        "price_min": p.price_min,
+        "price_max": p.price_max,
+        "currency": p.currency,
     }
 
 
