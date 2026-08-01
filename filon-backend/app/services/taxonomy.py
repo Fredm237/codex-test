@@ -54,6 +54,31 @@ ALL_CATEGORIES = [
     JOUETS, ACCESSOIRES, LOISIRS, MODE,
 ]
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Départements — le premier niveau de navigation.
+#
+# Vingt-six rayons dans une liste plate ne se parcourent pas. Les marchands
+# sérieux présentent deux niveaux : un département qu'on balaie du regard, puis
+# ses rayons. L'ordre ci-dessous est celui du menu.
+# ─────────────────────────────────────────────────────────────────────────────
+DEPARTMENTS: list[tuple[str, list[str]]] = [
+    ("Mode & Accessoires", [MODE_FEMME, MODE_HOMME, MODE_ENFANT, MODE, CHAUSSURES,
+                            ACCESSOIRES, BAGAGERIE, BIJOUX]),
+    ("High-Tech", [INFORMATIQUE, TELEPHONIE, TV_SON, PHOTO, GAMING]),
+    ("Maison", [MAISON, ELECTROMENAGER, JARDIN]),
+    ("Beauté & Santé", [BEAUTE, SANTE]),
+    ("Sport & Loisirs", [SPORT, JOUETS, CULTURE, LOISIRS]),
+    ("Famille & Quotidien", [BEBE, ANIMALERIE, AUTO, ALIMENTATION]),
+]
+
+_DEPARTMENT_OF = {c: d for d, cats in DEPARTMENTS for c in cats}
+
+
+def department_of(category: str) -> str | None:
+    """Département d'un rayon, ou None s'il n'est rattaché à aucun."""
+    return _DEPARTMENT_OF.get(category)
+
+
 # Marqueurs de public, testés avant tout classement de mode.
 # « women » contient « men » : l'ordre d'évaluation n'est pas négociable.
 _ENFANT = r"\b(enfant|kids?|child|children|kinder|jongens|meisjes|garçon|fille|boys?|girls?|junior)\b"
