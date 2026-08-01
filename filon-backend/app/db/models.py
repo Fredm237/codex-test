@@ -157,6 +157,10 @@ class Offer(Base):
     name: Mapped[str] = mapped_column(String(512))
     brand: Mapped[str | None] = mapped_column(String(191), nullable=True)
     category: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    # Catégorie FILON, dérivée du nom et de la catégorie du marchand. Les flux
+    # déclarent des libellés hétérogènes et parfois faux : celle-ci est la seule
+    # sur laquelle on peut bâtir une navigation.
+    filon_category: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)

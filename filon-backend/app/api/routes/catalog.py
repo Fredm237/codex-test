@@ -7,12 +7,13 @@ Ils dégradent proprement si la base est absente (listes vides).
 from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
-from sqlalchemy import String, case, cast, delete, func, select
+from sqlalchemy import String, case, cast, delete, func, select, update
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
+from app.services import taxonomy
 from app.services.verdict import compute_verdict
 
 log = get_logger("catalog")
@@ -140,10 +141,15 @@ async def offers(
     if merchant:
         stmt = stmt.where(models.Merchant.slug == merchant)
     if category:
-        stmt = stmt.where(models.Offer.category.ilike(f"%{category}%"))
-        conflict = _gender_conflict_clause(category)
-        if conflict is not None:
-            stmt = stmt.where(conflict)
+        # Catégorie FILON en priorité : c'est la seule cohérente entre marchands.
+        # Repli sur le libellé brut pour les offres pas encore reclassées.
+        if category in taxonomy.ALL_CATEGORIES:
+            stmt = stmt.where(models.Offer.filon_category == category)
+        else:
+            stmt = stmt.where(models.Offer.category.ilike(f"%{category}%"))
+            conflict = _gender_conflict_clause(category)
+            if conflict is not None:
+                stmt = stmt.where(conflict)
     if brand:
         stmt = stmt.where(models.Offer.brand.ilike(f"%{brand}%"))
     if price_min is not None:
@@ -183,10 +189,12 @@ async def facets(
     """Catégories et marques les plus fréquentes, pour les menus de filtres."""
     if session is None:
         return {"categories": [], "brands": []}
+    # Catégories FILON : un vocabulaire commun aux 154 marchands, là où les
+    # libellés bruts produisaient des centaines d'entrées incohérentes.
     cat_stmt = (
-        select(models.Offer.category, func.count().label("n"))
-        .where(models.Offer.category.isnot(None))
-        .group_by(models.Offer.category)
+        select(models.Offer.filon_category, func.count().label("n"))
+        .where(models.Offer.filon_category.isnot(None))
+        .group_by(models.Offer.filon_category)
         .order_by(func.count().desc())
         .limit(limit)
     )
@@ -695,6 +703,59 @@ async def rebuild_products_endpoint(
         return await catalog_grouping.rebuild_products(session)
     background.add_task(_run_rebuild_products)
     return {"started": True, "note": "suivre /api/catalog/stats"}
+
+
+@router.post("/admin/reclassify")
+async def reclassify_offers(
+    batch: int = Query(default=2000, le=10000),
+    x_admin_token: str | None = Header(default=None),
+) -> dict:
+    """Recalcule la catégorie FILON des offres déjà en base.
+
+    Le classement se fait à l'ingestion ; les offres antérieures doivent être
+    rattrapées. Procède en flux, par curseur sur la clé primaire, pour que la
+    mémoire reste bornée quelle que soit la taille du catalogue.
+    """
+    _require_admin(x_admin_token)
+    if not db.is_enabled():
+        raise HTTPException(status_code=503, detail="base de données absente")
+
+    updated = 0
+    classified = 0
+    async with db.session_scope() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="base de données absente")
+        last_id = 0
+        while True:
+            rows = (
+                await session.execute(
+                    select(
+                        models.Offer.id, models.Offer.category,
+                        models.Offer.name, models.Offer.brand,
+                    )
+                    .where(models.Offer.id > last_id)
+                    .order_by(models.Offer.id)
+                    .limit(batch)
+                )
+            ).all()
+            if not rows:
+                break
+            payload = []
+            for r in rows:
+                value = taxonomy.classify(r.category, r.name, r.brand)
+                payload.append({"id": r.id, "filon_category": value})
+                if value:
+                    classified += 1
+            await session.execute(update(models.Offer), payload)
+            await session.commit()
+            updated += len(payload)
+            last_id = rows[-1].id
+
+    return {
+        "offers_processed": updated,
+        "offers_classified": classified,
+        "coverage_pct": round(classified / updated * 100, 1) if updated else 0.0,
+    }
 
 
 @router.post("/admin/purge-offers")

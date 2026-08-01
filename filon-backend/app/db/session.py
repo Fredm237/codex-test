@@ -79,6 +79,8 @@ async def _migrate() -> None:
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS product_id INTEGER "
         "REFERENCES catalog_products(id)",
         "CREATE INDEX IF NOT EXISTS ix_offers_product_id ON offers (product_id)",
+        "ALTER TABLE offers ADD COLUMN IF NOT EXISTS filon_category VARCHAR(64)",
+        "CREATE INDEX IF NOT EXISTS ix_offers_filon_category ON offers (filon_category)",
     )
     for sql in statements:
         try:

@@ -30,6 +30,7 @@ from sqlalchemy.dialects.postgresql import insert as pg_insert
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
+from app.services import taxonomy
 
 log = get_logger("awin_catalog")
 
@@ -289,6 +290,9 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
         "name": name[:512],
         "brand": (row.get("brand_name") or "").strip()[:191] or None,
         "category": (row.get("merchant_category") or "").strip()[:255] or None,
+        "filon_category": taxonomy.classify(
+            row.get("merchant_category"), name, row.get("brand_name")
+        ),
         "price": price,
         "currency": (row.get("currency") or "").strip()[:8] or None,
         "in_stock": in_stock,
