@@ -44,11 +44,11 @@
 .ed-nav-mid a { font-size: 15px; color: rgba(255, 255, 255, 0.8); letter-spacing: 0; font-weight: 400; transition: color 0.2s; }
 .ed-nav-mid a:hover { color: #F5D78E; }
 @media (max-width: 760px) { .ed-nav-mid { display: none; } }
-.ed-nav-right { display: flex; align-items: center; gap: 12px; }
+.ed-nav-right { display: flex; align-items: center; gap: 16px; }
 /* Sélecteur de langue déroulant */
 .ed-lang { position: relative; display: inline-flex; }
-.ed-lang-trigger { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--line-2);
-  border-radius: var(--r-full); cursor: pointer; color: var(--ink-2); font-weight: 700; font-size: 12.5px; letter-spacing: 0.03em;
+.ed-lang-trigger { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--r-full); cursor: pointer; color: rgba(255, 255, 255, 0.8); font-weight: 700; font-size: 12.5px; letter-spacing: 0.03em;
   padding: 7px 11px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
 .ed-lang-trigger:hover { color: var(--ink); border-color: var(--line-3, var(--ink-3)); }
 .ed-lang-trigger .chev { transition: transform 0.2s var(--ease); opacity: 0.7; }
@@ -74,8 +74,8 @@
 .ed-nav-cta:hover { transform: translateY(-2px); box-shadow: var(--fx-elevation-2); }
 
 /* Mobile hamburger + menu */
-.ed-burger { display: none; width: 42px; height: 42px; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--card); cursor: pointer; position: relative; }
-.ed-burger span, .ed-burger span::before, .ed-burger span::after { content: ""; position: absolute; left: 11px; width: 20px; height: 2px; background: var(--ink); border-radius: 2px; transition: transform 0.3s var(--ease), opacity 0.2s; }
+.ed-burger { display: none; width: 44px; height: 44px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; background: transparent; cursor: pointer; position: relative; }
+.ed-burger span, .ed-burger span::before, .ed-burger span::after { content: ""; position: absolute; left: 12px; width: 20px; height: 2px; background: #ffffff; border-radius: 2px; transition: transform 0.3s var(--ease), opacity 0.2s; }
 .ed-burger span { top: 20px; }
 .ed-burger span::before { top: -6px; } .ed-burger span::after { top: 6px; }
 .ed-burger span.open { background: transparent; }
