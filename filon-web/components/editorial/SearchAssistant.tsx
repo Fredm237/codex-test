@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n";
 
 const SL = {
@@ -331,6 +331,18 @@ export function SearchAssistant() {
     }
     for await (const ev of mockAnalyze(q, reduce)) if (!apply(ev)) return;
   };
+
+  // Question passée dans l'URL (?q=…) — le hero et les suggestions y envoient.
+  // Lue depuis window plutôt qu'avec useSearchParams : ce dernier force le
+  // rendu dynamique de la page, qui est statique et doit le rester.
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search).get("q");
+    if (!q) return;
+    setQuery(q);
+    ask(q);
+    // Au montage uniquement : relancer à chaque rendu boucherait l'analyse.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>

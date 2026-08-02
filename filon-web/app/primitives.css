@@ -1,0 +1,253 @@
+/* ============================================================
+   FILON — Primitives
+   Les briques réutilisables du système. Elles ne lisent que la
+   couche sémantique de tokens.css, jamais une primitive brute.
+   Toute nouvelle surface se compose d'ici ; rien ne se redéfinit
+   dans un fichier de page.
+   ============================================================ */
+
+/* ── Gabarit ─────────────────────────────────────────────── */
+
+.fx-container {
+  width: 100%;
+  max-width: var(--fx-container);
+  margin-inline: auto;
+  padding-inline: var(--fx-gutter);
+}
+.fx-container.narrow { max-width: var(--fx-container-narrow); }
+
+.fx-section { padding-block: var(--fx-section-y); }
+.fx-section.lg { padding-block: var(--fx-section-y-lg); }
+.fx-section.sunken { background: var(--fx-bg-sunken); }
+.fx-section.ink { background: var(--fx-ink-900); color: var(--fx-text-on-dark); }
+.fx-section.ink .fx-eyebrow,
+.fx-section.ink .fx-lede { color: rgba(250, 249, 247, 0.68); }
+
+/* Dégagement sous la barre de navigation fixe, pour un haut de page */
+.fx-section.page-top { padding-top: var(--fx-page-top); }
+
+/* ── Titres ──────────────────────────────────────────────── */
+
+.fx-eyebrow {
+  display: block;
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--fx-tracking-wide);
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+}
+/* Le filet doré est la seule signature graphique de la marque.
+   Utilisé une fois par section, jamais deux. */
+.fx-eyebrow.brand { color: var(--fx-brand); }
+.fx-eyebrow.brand::before {
+  content: "";
+  display: inline-block;
+  width: 22px;
+  height: 1px;
+  margin-right: 10px;
+  vertical-align: 0.28em;
+  background: currentColor;
+}
+
+.fx-display {
+  font-family: var(--serif);
+  font-variation-settings: "opsz" 96, "SOFT" 0, "WONK" 0;
+  font-size: var(--fx-text-4xl);
+  line-height: var(--fx-leading-tight);
+  letter-spacing: var(--fx-tracking-tight);
+  font-weight: 400;
+}
+.fx-display.xl { font-size: var(--fx-text-5xl); }
+.fx-h2 {
+  font-family: var(--serif);
+  font-variation-settings: "opsz" 60;
+  font-size: var(--fx-text-3xl);
+  line-height: 1.1;
+  letter-spacing: var(--fx-tracking-tight);
+}
+.fx-h3 {
+  font-size: var(--fx-text-lg);
+  font-weight: 600;
+  line-height: var(--fx-leading-snug);
+  letter-spacing: var(--fx-tracking-normal);
+}
+.fx-lede {
+  font-size: var(--fx-text-lg);
+  line-height: 1.5;
+  color: var(--fx-text-secondary);
+  max-width: 56ch;
+}
+.fx-body { font-size: var(--fx-text-base); line-height: var(--fx-leading-normal); color: var(--fx-text-secondary); }
+.fx-fine { font-size: var(--fx-text-sm); color: var(--fx-text-muted); }
+
+/* ── Boutons ─────────────────────────────────────────────── */
+
+.fx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--fx-space-2);
+  min-height: var(--fx-btn-height);
+  padding-inline: var(--fx-btn-padding-x);
+  border: 1px solid transparent;
+  border-radius: var(--fx-btn-radius);
+  font-family: inherit;
+  font-size: var(--fx-text-base);
+  font-weight: 600;
+  letter-spacing: var(--fx-tracking-normal);
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color var(--fx-duration) var(--fx-ease-standard),
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    color var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration-fast) var(--fx-ease-standard);
+}
+.fx-btn:active { transform: translateY(1px); }
+
+.fx-btn.primary { background: var(--fx-action); color: var(--fx-on-action); }
+.fx-btn.primary:hover { background: var(--fx-action-hover); }
+
+.fx-btn.secondary {
+  background: transparent;
+  color: var(--fx-text);
+  border-color: var(--fx-border-strong);
+}
+.fx-btn.secondary:hover { border-color: var(--fx-text); background: var(--fx-surface); }
+
+.fx-btn.on-ink { background: var(--fx-paper-0); color: var(--fx-ink-900); }
+.fx-btn.on-ink:hover { background: var(--fx-paper-100); }
+
+.fx-btn.quiet { min-height: var(--fx-btn-height-sm); padding-inline: var(--fx-space-4); background: transparent; color: var(--fx-text-secondary); }
+.fx-btn.quiet:hover { color: var(--fx-text); background: var(--fx-bg-sunken); }
+
+.fx-btn[aria-disabled="true"], .fx-btn:disabled { opacity: 0.45; pointer-events: none; }
+
+/* ── Carte ───────────────────────────────────────────────── */
+
+.fx-card {
+  background: var(--fx-surface);
+  border: var(--fx-card-border);
+  border-radius: var(--fx-card-radius);
+  box-shadow: var(--fx-card-shadow);
+  transition:
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration) var(--fx-ease-out);
+}
+.fx-card.padded { padding: var(--fx-card-padding); }
+.fx-card.interactive:hover {
+  border-color: var(--fx-border-strong);
+  box-shadow: var(--fx-card-shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* ── Badge ───────────────────────────────────────────────── */
+
+.fx-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--fx-badge-height);
+  padding: 0 10px;
+  border-radius: var(--fx-badge-radius);
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  background: var(--fx-bg-sunken);
+  color: var(--fx-text-secondary);
+  white-space: nowrap;
+}
+/* Distinction — le seul emploi de l'or hors filets d'accroche */
+.fx-badge.brand { background: var(--fx-brand-subtle); color: var(--fx-brand-strong); }
+/* Économie constatée */
+.fx-badge.gain { background: var(--fx-gain-subtle); color: var(--fx-gain-strong); }
+.fx-badge.alert { background: var(--fx-alert-subtle); color: var(--fx-alert); }
+.fx-badge.outline { background: transparent; border: 1px solid var(--fx-border); }
+
+/* ── Puce de filtre ──────────────────────────────────────── */
+
+.fx-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: var(--fx-btn-height-sm);
+  padding: 0 var(--fx-space-4);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-full);
+  background: var(--fx-surface);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-secondary);
+  cursor: pointer;
+  transition: border-color var(--fx-duration) var(--fx-ease-standard), color var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-chip:hover { border-color: var(--fx-border-strong); color: var(--fx-text); }
+.fx-chip[aria-current="true"], .fx-chip.on {
+  background: var(--fx-ink-900);
+  border-color: var(--fx-ink-900);
+  color: var(--fx-paper-0);
+}
+.fx-chip span { color: var(--fx-text-muted); font-variant-numeric: tabular-nums; }
+.fx-chip[aria-current="true"] span, .fx-chip.on span { color: rgba(255, 255, 255, 0.6); }
+
+/* ── Champ de recherche ──────────────────────────────────── */
+
+.fx-field {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-3);
+  min-height: var(--fx-field-height);
+  padding: 0 6px 0 var(--fx-space-5);
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border-strong);
+  border-radius: var(--fx-field-radius);
+  box-shadow: var(--fx-elevation-2);
+  transition: border-color var(--fx-duration) var(--fx-ease-standard), box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-field:focus-within { border-color: var(--fx-text); box-shadow: var(--fx-elevation-3); }
+.fx-field input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: none;
+  outline: none;
+  font-family: inherit;
+  font-size: var(--fx-text-md);
+  color: var(--fx-text);
+}
+.fx-field input::placeholder { color: var(--fx-text-muted); }
+
+/* ── Chiffre de preuve ───────────────────────────────────── */
+
+.fx-stat-value {
+  font-family: var(--serif);
+  font-variation-settings: "opsz" 48;
+  font-size: var(--fx-text-2xl);
+  line-height: 1;
+  letter-spacing: var(--fx-tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+.fx-stat-label {
+  margin-top: var(--fx-space-2);
+  font-size: var(--fx-text-sm);
+  line-height: 1.4;
+  color: var(--fx-text-muted);
+}
+
+/* ── Grilles ─────────────────────────────────────────────── */
+
+.fx-grid { display: grid; gap: var(--fx-space-4); }
+.fx-grid.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.fx-grid.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.fx-grid.cols-4 { grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 900px) {
+  .fx-grid.cols-3, .fx-grid.cols-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .fx-grid.cols-2, .fx-grid.cols-3, .fx-grid.cols-4 { grid-template-columns: 1fr; }
+}
+
+/* ── Filet de séparation ─────────────────────────────────── */
+
+.fx-rule { height: 1px; background: var(--fx-border); border: 0; margin: 0; }

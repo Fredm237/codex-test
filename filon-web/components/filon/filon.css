@@ -1,0 +1,217 @@
+/* ============================================================
+   FILON — Composants de la refonte 2026
+   Ne lit que la couche sémantique (--fx-*) et les primitives.
+   Aucune valeur brute ici : une couleur ou un espacement en dur
+   dans ce fichier serait une régression du système.
+   ============================================================ */
+
+/* ── Hero ────────────────────────────────────────────────── */
+
+.fx-hero {
+  padding-top: var(--fx-page-top);
+  padding-bottom: var(--fx-section-y);
+  background:
+    radial-gradient(120% 80% at 82% 8%, var(--fx-brand-wash) 0%, transparent 58%),
+    var(--fx-bg);
+}
+
+.fx-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+  gap: clamp(32px, 5vw, 72px);
+  align-items: center;
+}
+.fx-hero.solo .fx-hero-grid { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
+@media (max-width: 940px) {
+  .fx-hero-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+.fx-hero-title { margin-top: var(--fx-space-5); }
+.fx-hero-lede { margin-top: var(--fx-space-5); }
+.fx-hero-search { margin-top: var(--fx-space-6); }
+.fx-hero-actions { margin-top: var(--fx-space-5); }
+.fx-hero-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 44px;
+  font-size: var(--fx-text-base);
+  font-weight: 600;
+  color: var(--fx-text);
+  border-bottom: 1px solid var(--fx-border-strong);
+  transition: border-color var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-hero-secondary:hover { border-color: var(--fx-text); }
+.fx-hero-secondary svg { transition: transform var(--fx-duration) var(--fx-ease-out); }
+.fx-hero-secondary:hover svg { transform: translateX(3px); }
+
+.fx-field-icon { flex: none; color: var(--fx-text-muted); }
+
+.fx-hero-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fx-space-2);
+  margin-top: var(--fx-space-4);
+}
+/* Les suggestions sont des liens : elles doivent se comporter comme des
+   puces, sans hériter du soulignement ni du curseur texte. */
+.fx-hero-suggestions .fx-chip { text-decoration: none; }
+
+.fx-hero-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fx-space-2);
+  margin-top: var(--fx-space-6);
+  padding-top: var(--fx-space-5);
+  border-top: 1px solid var(--fx-border);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.fx-hero-facts span[aria-hidden] { color: var(--fx-ink-300); }
+
+/* ── Sections ────────────────────────────────────────────── */
+
+.fx-section-title { margin-top: var(--fx-space-4); max-width: 20ch; }
+
+.fx-steps {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--fx-space-4);
+  margin: var(--fx-space-7) 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: none;
+}
+@media (max-width: 860px) { .fx-steps { grid-template-columns: 1fr; } }
+
+.fx-step-n {
+  display: block;
+  font-family: var(--mono);
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: var(--fx-brand);
+}
+.fx-step .fx-h3 { margin-top: var(--fx-space-4); }
+.fx-step .fx-body { margin-top: var(--fx-space-2); }
+
+/* ── Clôture ─────────────────────────────────────────────── */
+
+.fx-closing { text-align: center; }
+.fx-closing-title { margin-top: var(--fx-space-4); color: var(--fx-paper-0); }
+.fx-closing-lede { margin: var(--fx-space-5) auto 0; }
+.fx-closing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fx-space-3);
+  justify-content: center;
+  margin-top: var(--fx-space-6);
+}
+/* Variante fantôme sur fond encre : la bordure sombre par défaut y serait
+   invisible. */
+.fx-btn.fx-btn-on-ink-ghost {
+  color: var(--fx-paper-0);
+  border-color: rgba(250, 249, 247, 0.32);
+}
+.fx-btn.fx-btn-on-ink-ghost:hover {
+  border-color: var(--fx-paper-0);
+  background: rgba(250, 249, 247, 0.08);
+}
+
+/* ── Carte « produit suivi » du hero ─────────────────────── */
+
+.fx-hero-panel { min-width: 0; }
+.fx-hero-panel-note {
+  margin-top: var(--fx-space-3);
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+  text-align: center;
+}
+
+.fx-verdict-card { padding: var(--fx-space-5); box-shadow: var(--fx-elevation-3); }
+
+.fx-verdict-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fx-space-3);
+  flex-wrap: wrap;
+}
+
+.fx-verdict-product {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-4);
+  margin-top: var(--fx-space-5);
+  padding-bottom: var(--fx-space-5);
+  border-bottom: 1px solid var(--fx-border);
+}
+.fx-verdict-product > div { min-width: 0; }
+.fx-verdict-product img {
+  flex: none;
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  background: var(--fx-bg-sunken);
+  border-radius: var(--fx-radius-sm);
+}
+.fx-verdict-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 4px;
+  font-size: var(--fx-text-base);
+  font-weight: 600;
+  line-height: var(--fx-leading-snug);
+  color: var(--fx-text);
+  transition: color var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-verdict-name:hover { color: var(--fx-brand-strong); }
+
+.fx-verdict-rows { margin: 0; padding: var(--fx-space-4) 0 0; }
+.fx-verdict-rows > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fx-space-4);
+  padding: var(--fx-space-2) 0;
+}
+.fx-verdict-rows dt { font-size: var(--fx-text-sm); color: var(--fx-text-muted); }
+.fx-verdict-rows dd {
+  margin: 0;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fx-text-base);
+  color: var(--fx-text-secondary);
+}
+.fx-verdict-rows dd.strike { text-decoration: line-through; color: var(--fx-text-muted); }
+.fx-verdict-rows dd.lead {
+  font-size: var(--fx-text-xl);
+  font-weight: 700;
+  color: var(--fx-gain-strong);
+  letter-spacing: var(--fx-tracking-tight);
+}
+
+.fx-verdict-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fx-space-3);
+  flex-wrap: wrap;
+  margin-top: var(--fx-space-4);
+  padding-top: var(--fx-space-4);
+  border-top: 1px solid var(--fx-border);
+}
+.fx-verdict-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  color: var(--fx-text);
+}
+.fx-verdict-link svg { transition: transform var(--fx-duration) var(--fx-ease-out); }
+.fx-verdict-link:hover svg { transform: translateX(3px); }
