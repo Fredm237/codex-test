@@ -33,6 +33,7 @@ from sqlalchemy import func, select, update
 
 from app.core.logging import get_logger
 from app.db import models
+from app.services import taxonomy
 
 log = get_logger("coherence")
 
@@ -68,6 +69,13 @@ RAYONS_NON_DESTINATION = frozenset({"Accessoires"})
 # Un rayon secondaire qui tient un vingtième du catalogue est donc protégé :
 # ses offres ne bougent pas, seules les dispersées sont ramenées. Le marchand
 # reste traité, mais sa seconde activité survit.
+#
+# Le seuil se mesure aussi par *département*, et c'est indispensable. Mesuré
+# sur YesStyle : 90,6 % en beauté, et pas un seul rayon secondaire au-dessus du
+# seuil — parce que sa mode coréenne est éclatée entre Mode femme, Mode homme,
+# Chaussures, Bijoux et Bagagerie, chacun sous la barre. Prise rayon par rayon,
+# une seconde activité bien réelle passait pour du bruit. Prise par
+# département, elle se voit : ces rayons sont tous « Mode & Accessoires ».
 SECONDAIRE_REEL = 0.05
 
 
@@ -115,13 +123,92 @@ async def merchant_profiles(session) -> dict[int, Profil]:
         part = n / total
         if part < DOMINANCE:
             continue
-        proteges = frozenset(
-            autre
-            for autre, combien in repartition.items()
-            if autre != rayon and combien / total >= SECONDAIRE_REEL
-        )
-        profils[merchant_id] = Profil(rayon, part, total, proteges)
+        profils[merchant_id] = Profil(rayon, part, total, _proteges(rayon, repartition))
     return profils
+
+
+def _proteges(dominant: str, repartition: dict[str, int]) -> frozenset[str]:
+    """Rayons relevant d'une seconde activité, à ne pas déplacer.
+
+    Deux mesures, parce qu'une seule ne suffit pas : un rayon peut être fourni
+    à lui seul, ou n'exister que dispersé entre plusieurs rayons d'un même
+    département. Le second cas est celui de YesStyle, et il est invisible rayon
+    par rayon.
+
+    Le département du rayon dominant est exclu du calcul : à l'intérieur d'un
+    même département, une offre mal placée est précisément l'erreur de mot-clé
+    que le réalignement doit corriger.
+    """
+    total = sum(repartition.values())
+    if not total:
+        return frozenset()
+
+    proteges = {
+        autre
+        for autre, combien in repartition.items()
+        if autre != dominant and combien / total >= SECONDAIRE_REEL
+    }
+
+    dept_dominant = taxonomy.department_of(dominant)
+    par_departement: dict[str, int] = defaultdict(int)
+    for autre, combien in repartition.items():
+        dept = taxonomy.department_of(autre)
+        if dept and dept != dept_dominant:
+            par_departement[dept] += combien
+
+    for dept, combien in par_departement.items():
+        if combien / total >= SECONDAIRE_REEL:
+            proteges.update(
+                autre
+                for autre in repartition
+                if taxonomy.department_of(autre) == dept
+            )
+
+    return frozenset(proteges)
+
+
+async def repartition_marchand(session, merchant_id: int) -> dict:
+    """Répartition complète d'un marchand, rayon par rayon et département par
+    département — pour arbitrer un cas limite sur des chiffres plutôt que sur
+    une intuition.
+    """
+    rows = (
+        await session.execute(
+            select(models.Offer.filon_category, func.count().label("n"))
+            .where(models.Offer.merchant_id == merchant_id)
+            .where(models.Offer.filon_category.isnot(None))
+            .group_by(models.Offer.filon_category)
+        )
+    ).all()
+    repartition = {c: int(n) for c, n in rows}
+    total = sum(repartition.values())
+    if not total:
+        return {"total": 0, "rayons": [], "departements": []}
+
+    dominant = max(repartition.items(), key=lambda kv: kv[1])[0]
+    proteges = _proteges(dominant, repartition)
+
+    par_departement: dict[str, int] = defaultdict(int)
+    for rayon, n in repartition.items():
+        par_departement[taxonomy.department_of(rayon) or "—"] += n
+
+    return {
+        "total": total,
+        "dominant": dominant,
+        "rayons": [
+            {
+                "rayon": rayon,
+                "offres": n,
+                "part_pct": round(n / total * 100, 1),
+                "protege": rayon in proteges,
+            }
+            for rayon, n in sorted(repartition.items(), key=lambda kv: -kv[1])
+        ],
+        "departements": [
+            {"departement": d, "offres": n, "part_pct": round(n / total * 100, 1)}
+            for d, n in sorted(par_departement.items(), key=lambda kv: -kv[1])
+        ],
+    }
 
 
 async def realign(session, *, batch: int = 2000, dry_run: bool = False) -> dict:

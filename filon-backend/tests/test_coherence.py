@@ -161,6 +161,55 @@ class TestSecondeActivite:
         # Les 84 de mode restent ; seules les dix dispersées sont ramenées.
         assert res["offres_realignees"] == 10
 
+    async def test_une_seconde_activite_eclatee_est_vue_par_departement(self, session):
+        """Le cas YesStyle, et la raison d'être de la mesure par département.
+
+        90,6 % en beauté, et pas un seul rayon secondaire au-dessus du seuil :
+        la mode coréenne est éclatée entre Mode femme, Mode homme, Chaussures,
+        Bijoux et Bagagerie. Rayon par rayon, quatre mille articles réels
+        passaient pour du bruit et partaient en parfumerie.
+        """
+        m = await _merchant(session, "yesstyle", 14)
+        await _peupler(session, m, {
+            "Beauté & Parfum": 906,
+            # Aucun de ces cinq n'atteint 5 % seul ; ensemble ils font 8,4 %.
+            "Mode femme": 25, "Mode homme": 20, "Chaussures": 15,
+            "Bijoux & Montres": 15, "Bagagerie": 9,
+            "Informatique": 5, "Animalerie": 5,   # dispersé : du bruit
+        })
+        await session.commit()
+
+        profils = await coherence.merchant_profiles(session)
+        assert "Mode femme" in profils[m.id].proteges
+        assert "Bagagerie" in profils[m.id].proteges
+        assert "Informatique" not in profils[m.id].proteges
+
+        # Seules les dix dispersées bougent, pas les quatre-vingt-quatre de mode.
+        assert (await coherence.realign(session))["offres_realignees"] == 10
+
+    async def test_le_departement_dominant_nagrege_pas_avec_lui_meme(self, session):
+        """La mesure par département ne doit pas couvrir le rayon dominant.
+
+        Sinon un vendeur de chemises homme verrait tout « Mode & Accessoires »
+        protégé d'un bloc, et la confusion de genre — l'erreur de mots-clés la
+        plus courante du classement — deviendrait intouchable.
+
+        La règle par rayon, elle, continue de s'appliquer à l'intérieur du
+        département : un rayon frère assez fourni reste une activité réelle.
+        """
+        m = await _merchant(session, "overhemden", 15)
+        await _peupler(session, m, {
+            "Mode homme": 900,
+            "Mode femme": 60,      # 6 % : une vraie ligne, protégée
+            "Chaussures": 20,      # 2 % : dispersé, ramené
+            "Accessoires": 20,
+        })
+        await session.commit()
+
+        profils = await coherence.merchant_profiles(session)
+        assert profils[m.id].proteges == frozenset({"Mode femme"})
+        assert (await coherence.realign(session))["offres_realignees"] == 40
+
     async def test_une_minorite_dispersee_bouge_toujours(self, session):
         """Le garde-fou ne doit pas neutraliser la règle elle-même."""
         m = await _merchant(session, "tissus", 11)
