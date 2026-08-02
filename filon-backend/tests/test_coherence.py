@@ -114,7 +114,6 @@ class TestSpecialiste:
                 "vers": "Loisirs créatifs",
                 "offres": 5,
                 "sur": 100,
-                "rayons_proteges": [],
             }
         ]
 
@@ -135,90 +134,66 @@ class TestGeneraliste:
         assert res["offres_realignees"] == 0
 
 
-class TestSecondeActivite:
-    """Toute la règle suppose que la minorité est faite d'erreurs de mots-clés.
+class TestPasDeProtectionAutomatique:
+    """Deux tentatives de garde-fou automatique ont échoué sur les vrais
+    chiffres, et ces tests fixent la conclusion.
 
-    Or une erreur de mot-clé est *dispersée*. Une minorité concentrée dans un
-    seul rayon est une seconde activité : YesStyle vend de la beauté à 90 %, et
-    le reste est de la mode coréenne — 4 000 articles réels, qu'un réalignement
-    aveugle enterrerait en parfumerie.
+    L'idée était qu'une minorité concentrée — dans un rayon, puis dans un
+    département — signale une seconde activité plutôt que du bruit. Elle est
+    fausse : une erreur de mots-clés systématique est concentrée elle aussi.
+
+    Mesuré sur YesStyle, marchand de cosmétiques coréens : 2 113 offres en
+    Informatique (4,9 %), département High-Tech à 5,0 % — juste assez pour
+    déclencher la protection. Ce bloc n'est pas une activité, c'est exactement
+    la pollution du rayon Informatique qu'on veut retirer. Sa vraie mode tient
+    en 103 offres, soit 0,2 %.
+
+    La distinction relève de la connaissance du marchand. Elle est donc portée
+    par `exclude`, explicitement.
     """
 
-    async def test_un_rayon_secondaire_fourni_est_protege(self, session):
-        m = await _merchant(session, "yesstyle", 10)
-        await _peupler(session, m, {
-            "Beauté & Parfum": 906,   # l'activité principale
-            "Mode femme": 84,          # la seconde, bien réelle
-            "Informatique": 5,         # dispersé : du bruit
-            "Animalerie": 5,
-        })
-        await session.commit()
-
-        profils = await coherence.merchant_profiles(session)
-        assert profils[m.id].proteges == frozenset({"Mode femme"})
-
-        res = await coherence.realign(session)
-        # Les 84 de mode restent ; seules les dix dispersées sont ramenées.
-        assert res["offres_realignees"] == 10
-
-    async def test_une_seconde_activite_eclatee_est_vue_par_departement(self, session):
-        """Le cas YesStyle, et la raison d'être de la mesure par département.
-
-        90,6 % en beauté, et pas un seul rayon secondaire au-dessus du seuil :
-        la mode coréenne est éclatée entre Mode femme, Mode homme, Chaussures,
-        Bijoux et Bagagerie. Rayon par rayon, quatre mille articles réels
-        passaient pour du bruit et partaient en parfumerie.
-        """
+    async def test_un_bloc_concentre_est_realigne_comme_le_reste(self, session):
+        """Le cas YesStyle, aux proportions réelles."""
         m = await _merchant(session, "yesstyle", 14)
         await _peupler(session, m, {
-            "Beauté & Parfum": 906,
-            # Aucun de ces cinq n'atteint 5 % seul ; ensemble ils font 8,4 %.
-            "Mode femme": 25, "Mode homme": 20, "Chaussures": 15,
-            "Bijoux & Montres": 15, "Bagagerie": 9,
-            "Informatique": 5, "Animalerie": 5,   # dispersé : du bruit
+            "Beauté & Parfum": 38838,
+            "Informatique": 2113,          # concentré, et pourtant erroné
+            "Alimentation & Boissons": 1198,
+            "Mode femme": 103,             # la vraie seconde activité : 0,2 %
         })
         await session.commit()
 
-        profils = await coherence.merchant_profiles(session)
-        assert "Mode femme" in profils[m.id].proteges
-        assert "Bagagerie" in profils[m.id].proteges
-        assert "Informatique" not in profils[m.id].proteges
+        res = await coherence.realign(session)
+        assert res["offres_realignees"] == 2113 + 1198 + 103
 
-        # Seules les dix dispersées bougent, pas les quatre-vingt-quatre de mode.
-        assert (await coherence.realign(session))["offres_realignees"] == 10
-
-    async def test_le_departement_dominant_nagrege_pas_avec_lui_meme(self, session):
-        """La mesure par département ne doit pas couvrir le rayon dominant.
-
-        Sinon un vendeur de chemises homme verrait tout « Mode & Accessoires »
-        protégé d'un bloc, et la confusion de genre — l'erreur de mots-clés la
-        plus courante du classement — deviendrait intouchable.
-
-        La règle par rayon, elle, continue de s'appliquer à l'intérieur du
-        département : un rayon frère assez fourni reste une activité réelle.
-        """
-        m = await _merchant(session, "overhemden", 15)
-        await _peupler(session, m, {
-            "Mode homme": 900,
-            "Mode femme": 60,      # 6 % : une vraie ligne, protégée
-            "Chaussures": 20,      # 2 % : dispersé, ramené
-            "Accessoires": 20,
-        })
+    async def test_exclure_un_marchand_le_laisse_intact(self, session):
+        m = await _merchant(session, "yesstyle", 15)
+        await _peupler(session, m, {"Beauté & Parfum": 900, "Informatique": 100})
         await session.commit()
 
-        profils = await coherence.merchant_profiles(session)
-        assert profils[m.id].proteges == frozenset({"Mode femme"})
-        assert (await coherence.realign(session))["offres_realignees"] == 40
+        res = await coherence.realign(session, exclude={"yesstyle"})
+        assert res["offres_realignees"] == 0
+        assert res["merchants_specialises"] == 0
 
-    async def test_une_minorite_dispersee_bouge_toujours(self, session):
-        """Le garde-fou ne doit pas neutraliser la règle elle-même."""
-        m = await _merchant(session, "tissus", 11)
-        await _peupler(session, m, {
-            "Loisirs créatifs": 950,
-            "Informatique": 20, "Auto & Moto": 20, "Animalerie": 10,
-        })
+    async def test_l_exclusion_marche_aussi_par_nom(self, session):
+        m = await _merchant(session, "yesstyle", 16)
+        await _peupler(session, m, {"Beauté & Parfum": 900, "Informatique": 100})
         await session.commit()
-        assert (await coherence.realign(session))["offres_realignees"] == 50
+
+        # `_merchant` donne le slug comme nom : on vise l'autre champ.
+        res = await coherence.realign(session, exclude={"YESSTYLE"})
+        assert res["offres_realignees"] == 0
+
+    async def test_exclure_un_marchand_nen_ecarte_pas_un_autre(self, session):
+        a = await _merchant(session, "yesstyle", 17)
+        b = await _merchant(session, "tissus", 18)
+        await _peupler(session, a, {"Beauté & Parfum": 900, "Informatique": 100})
+        await _peupler(session, b, {"Loisirs créatifs": 900, "Informatique": 100})
+        await session.commit()
+
+        res = await coherence.realign(session, exclude={"yesstyle"})
+        assert res["offres_realignees"] == 100
+        assert [d["merchant"] for d in res["detail"]] == ["tissus"]
 
 
 class TestRayonFourreTout:
