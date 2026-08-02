@@ -8,6 +8,12 @@ import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
 import { useLocale } from "@/lib/i18n";
 
+const STEP_VIDEOS = [
+  "/video/method_step1.mp4",
+  "/video/method_step2.mp4",
+  null, // step 3 reste en image statique
+];
+
 const STEP_IMAGES = [
   "/img/method-step1.png",
   "/img/method-step2.png",
@@ -54,15 +60,28 @@ export function Method() {
                 show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.16, 1, 0.3, 1] } },
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                className="fx-method-step-img"
-                src={STEP_IMAGES[i]}
-                alt=""
-                loading="lazy"
-                width={240}
-                height={240}
-              />
+              {STEP_VIDEOS[i] ? (
+                <video
+                  className="fx-method-step-video"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  poster={STEP_IMAGES[i]}
+                >
+                  <source src={STEP_VIDEOS[i]!} type="video/mp4" />
+                </video>
+              ) : (
+                /* eslint-disable-next-line @next/next/no-img-element */
+                <img
+                  className="fx-method-step-img"
+                  src={STEP_IMAGES[i]}
+                  alt=""
+                  loading="lazy"
+                  width={240}
+                  height={240}
+                />
+              )}
               <div className="fx-method-step-content">
                 <span className="fx-method-step-n">0{n}</span>
                 <h3 className="fx-method-step-title">{t(`method.s${n}t`)}</h3>

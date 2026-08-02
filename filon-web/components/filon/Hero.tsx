@@ -14,6 +14,9 @@ import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
 import { useLocale } from "@/lib/i18n";
 import { HeroSearch } from "./HeroSearch";
+import dynamic from "next/dynamic";
+
+const OrbViewer3D = dynamic(() => import("./OrbViewer3D").then(m => ({ default: m.OrbViewer3D })), { ssr: false });
 
 function money(value: number, currency: string): string {
   const symbol = currency === "GBP" ? "£" : currency === "USD" ? "$" : "€";
@@ -58,20 +61,24 @@ export function Hero({ proof }: { proof: Proof | null }) {
         </motion.div>
 
         {/* Image dominante avec carte produit flottante — comme Phia */}
+        {/* Orbe 3D interactif — flotte et réagit au curseur */}
+        <motion.div
+          className="fx-hero-visual"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <OrbViewer3D />
+        </motion.div>
+
         {product && (
           <motion.div
-            className="fx-hero-visual"
-            initial={{ opacity: 0, y: 40 }}
+            className="fx-hero-float-section"
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ delay: 0.7, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
             <div className="fx-hero-image-wrap">
-              <img
-                className="fx-hero-lifestyle"
-                src="/img/hero-main.png"
-                alt=""
-                loading="eager"
-              />
               {/* Carte produit flottante sur l'image — comme Phia */}
               <article className="fx-hero-float-card">
                 {product.image && (

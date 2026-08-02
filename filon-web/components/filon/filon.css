@@ -1902,3 +1902,39 @@
   border-radius: var(--fx-radius-xl);
   box-shadow: var(--fx-elevation-3);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   ORB 3D VIEWER — Three.js interactif
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-orb-viewer {
+  width: 100%;
+  height: 400px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.fx-hero-float-section {
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (max-width: 768px) {
+  .fx-orb-viewer { height: 280px; }
+}
+
+/* Vidéos dans les étapes Method */
+.fx-method-step-video {
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: var(--fx-radius-lg);
+}
+
+@media (max-width: 768px) {
+  .fx-method-step-video {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+}
