@@ -332,26 +332,145 @@
 .fx-crumb [aria-current] { color: var(--fx-text); font-weight: 600; }
 
 .fx-catalogue-title { margin-top: var(--fx-space-4); font-size: var(--fx-text-3xl); }
+/* Sur un catalogue, le dégagement sous la barre fixe n'a pas à valoir celui
+   d'une page éditoriale : 70 px de barre suffisent, et chaque pixel gagné
+   rapproche le premier produit. */
+@media (max-width: 900px) {
+  .fx-catalogue.page-top { padding-top: 92px; }
+  .fx-catalogue-title { font-size: var(--fx-text-2xl); }
+}
 .fx-catalogue-lede { margin-top: var(--fx-space-4); }
 .fx-catalogue-search { margin-top: var(--fx-space-6); max-width: 620px; }
 .fx-catalogue-grid { margin-top: var(--fx-space-6); }
 .fx-catalogue-empty { margin-top: var(--fx-space-6); }
 .fx-catalogue-empty a { text-decoration: underline; text-underline-offset: 3px; }
 
-/* Départements — la structure du catalogue, montrée d'entrée */
-.fx-dept-grid { margin-top: var(--fx-space-7); }
-.fx-dept { display: flex; flex-direction: column; gap: var(--fx-space-3); }
-.fx-dept:hover { border-color: var(--fx-border-strong); box-shadow: var(--fx-card-shadow-hover); transform: translateY(-2px); }
-.fx-dept-head { display: flex; align-items: center; justify-content: space-between; gap: var(--fx-space-3); }
-.fx-dept-list { display: flex; flex-wrap: wrap; gap: 4px 10px; }
-.fx-dept-list span { font-size: var(--fx-text-sm); color: var(--fx-text-muted); }
-.fx-dept-list span:not(:last-child)::after { content: " ·"; color: var(--fx-ink-300); }
+/* Deux colonnes : arborescence à gauche, résultats à droite. */
+.fx-catalogue-layout {
+  display: grid;
+  grid-template-columns: 264px minmax(0, 1fr);
+  gap: clamp(24px, 3vw, 44px);
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .fx-catalogue-layout { grid-template-columns: minmax(0, 1fr); }
+}
 
-.fx-chips {
+/* Enveloppe dépliante. Au-dessus de 900 px la colonne est toujours ouverte et
+   son en-tête disparaît ; en dessous elle se replie, l'arborescence complète
+   mangeant sinon l'écran avant le premier produit. */
+.fx-nav-shell { position: sticky; top: 88px; }
+.fx-nav-toggle { display: none; }
+/* Au-dessus de 900 px la colonne est permanente : on révèle le contenu du
+   <details> même fermé, plutôt que de poser `open` au rendu — ce qui aurait
+   déplié l'arbre au-dessus des produits sur mobile (premier produit mesuré à
+   807 px du haut). Deux déclarations sont nécessaires : les navigateurs
+   récents masquent via ::details-content, les plus anciens en ne rendant pas
+   l'enfant. */
+@media (min-width: 901px) {
+  .fx-nav-shell::details-content { content-visibility: visible; block-size: auto; }
+  .fx-nav-shell > .fx-nav-tree { display: block; content-visibility: visible; }
+}
+@media (max-width: 900px) {
+  .fx-nav-shell {
+    position: static;
+    border: 1px solid var(--fx-border);
+    border-radius: var(--fx-radius-md);
+    background: var(--fx-surface);
+    margin-bottom: var(--fx-space-5);
+  }
+  .fx-nav-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--fx-space-3);
+    min-height: 52px;
+    padding: 0 var(--fx-space-4);
+    font-size: var(--fx-text-base);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .fx-nav-toggle::-webkit-details-marker { display: none; }
+  .fx-nav-shell[open] .fx-nav-toggle { border-bottom: 1px solid var(--fx-border); }
+  .fx-nav-shell[open] .fx-nav-toggle svg { transform: rotate(180deg); }
+  .fx-nav-toggle svg { transition: transform var(--fx-duration) var(--fx-ease-standard); }
+  .fx-nav-tree { padding: var(--fx-space-3) var(--fx-space-2); max-height: 60vh; overflow-y: auto; }
+}
+
+/* Arborescence — <details> natif : dépliable sans JavaScript, accessible au
+   clavier, et la branche courante s'ouvre dès le rendu serveur. */
+.fx-nav-tree-title {
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--fx-tracking-wide);
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+  margin-bottom: var(--fx-space-3);
+}
+@media (max-width: 900px) { .fx-nav-tree-title { display: none; } }
+
+.fx-nav-all,
+.fx-nav-link,
+.fx-nav-dept > summary,
+.fx-nav-cat > summary {
   display: flex;
-  flex-wrap: wrap;
+  align-items: center;
   gap: var(--fx-space-2);
-  margin-top: var(--fx-space-5);
+  min-height: 40px;
+  padding: 0 var(--fx-space-3);
+  border-radius: var(--fx-radius-xs);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-secondary);
+  cursor: pointer;
+  list-style: none;
+  transition: background-color var(--fx-duration) var(--fx-ease-standard), color var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-nav-dept > summary::-webkit-details-marker,
+.fx-nav-cat > summary::-webkit-details-marker { display: none; }
+
+.fx-nav-all:hover,
+.fx-nav-link:hover,
+.fx-nav-dept > summary:hover,
+.fx-nav-cat > summary:hover { background: var(--fx-bg-sunken); color: var(--fx-text); }
+
+.fx-nav-dept > summary { font-weight: 600; color: var(--fx-text); }
+.fx-nav-label { flex: 1; min-width: 0; }
+.fx-nav-count {
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.fx-nav-caret { flex: none; color: var(--fx-text-muted); transition: transform var(--fx-duration) var(--fx-ease-standard); }
+.fx-nav-dept[open] > summary .fx-nav-caret,
+.fx-nav-cat[open] > summary .fx-nav-caret { transform: rotate(90deg); }
+
+.fx-nav-cats, .fx-nav-subs { list-style: none; margin: 0; padding: 0; }
+.fx-nav-cats { margin-left: var(--fx-space-3); border-left: 1px solid var(--fx-border); padding-left: var(--fx-space-2); }
+.fx-nav-subs { margin-left: var(--fx-space-3); border-left: 1px solid var(--fx-border); padding-left: var(--fx-space-2); }
+.fx-nav-link { justify-content: space-between; }
+.fx-nav-link > span:first-child { flex: 1; min-width: 0; }
+
+/* L'élément courant se lit d'un coup d'œil, à tous les niveaux. */
+.fx-nav-all[aria-current],
+.fx-nav-link[aria-current] {
+  background: var(--fx-ink-900);
+  color: var(--fx-paper-0);
+  font-weight: 600;
+}
+.fx-nav-all[aria-current] .fx-nav-count,
+.fx-nav-link[aria-current] .fx-nav-count { color: rgba(255, 255, 255, 0.62); }
+
+.fx-nav-reset {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  margin-top: var(--fx-space-3);
+  padding: 0 var(--fx-space-3);
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  color: var(--fx-text);
+  border-bottom: 1px solid var(--fx-border-strong);
 }
 
 /* Réglages */
@@ -378,6 +497,37 @@
 }
 .fx-filter-pill span[aria-hidden] { font-size: 15px; line-height: 1; opacity: 0.7; }
 .fx-filter-pill:hover span[aria-hidden] { opacity: 1; }
+
+/* Enveloppe repliable des réglages — même mécanique que la colonne de
+   navigation : native, sans JavaScript, et rouverte d'office sur bureau. */
+.fx-controls-toggle { display: none; }
+@media (min-width: 901px) {
+  .fx-controls-shell::details-content { content-visibility: visible; block-size: auto; }
+  .fx-controls-shell > .fx-catalogue-form { display: flex; content-visibility: visible; }
+}
+@media (max-width: 900px) {
+  .fx-controls-shell {
+    border: 1px solid var(--fx-border);
+    border-radius: var(--fx-radius-md);
+    background: var(--fx-surface);
+  }
+  .fx-controls-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--fx-space-3);
+    min-height: 52px;
+    padding: 0 var(--fx-space-4);
+    font-size: var(--fx-text-base);
+    font-weight: 600;
+    cursor: pointer;
+    list-style: none;
+  }
+  .fx-controls-toggle::-webkit-details-marker { display: none; }
+  .fx-controls-shell[open] .fx-controls-toggle { border-bottom: 1px solid var(--fx-border); }
+  .fx-controls-shell[open] .fx-controls-toggle svg { transform: rotate(180deg); }
+  .fx-controls-shell > .fx-catalogue-form { padding: var(--fx-space-4); }
+}
 
 .fx-catalogue-form {
   display: flex;

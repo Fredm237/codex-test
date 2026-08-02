@@ -116,6 +116,9 @@ _SORTS = {
 async def offers(
     q: str | None = Query(default=None, description="Recherche dans le nom"),
     merchant: str | None = Query(default=None, description="Slug marchand"),
+    department: str | None = Query(
+        default=None, description="Département FILON (nom ou slug) — filtre tous ses rayons"
+    ),
     category: str | None = None,
     subcategory: str | None = None,
     brand: str | None = None,
@@ -150,6 +153,17 @@ async def offers(
             stmt = stmt.where(clause)
     if merchant:
         stmt = stmt.where(models.Merchant.slug == merchant)
+    if department:
+        # Un département n'est pas une colonne : c'est un groupe de rayons. Sans
+        # ce filtre, choisir « Beauté & Santé » ne restreignait rien du tout et
+        # la page affichait le catalogue entier — des pneus compris.
+        names = taxonomy.categories_of_department(department)
+        if names:
+            stmt = stmt.where(models.Offer.filon_category.in_(names))
+        else:
+            # Département inconnu : on ne renvoie rien plutôt que tout, sans
+            # quoi une URL erronée ressemble à un filtre qui ne marche pas.
+            stmt = stmt.where(models.Offer.id < 0)
     if category:
         # Catégorie FILON en priorité : c'est la seule cohérente entre marchands.
         # Repli sur le libellé brut pour les offres pas encore reclassées.

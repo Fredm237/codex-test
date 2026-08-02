@@ -123,6 +123,12 @@ export async function getOffers(
     sort: sortValue(query),
   });
   if (query.q) params.set("q", query.q);
+  // Le département filtre tout seul quand aucun rayon n'est choisi. Sans lui,
+  // sélectionner « Beauté & Santé » n'envoyait aucun critère et la page
+  // renvoyait le catalogue entier — des pneus dans la beauté.
+  if (resolved.department && !resolved.category) {
+    params.set("department", resolved.department.slug);
+  }
   if (resolved.category) params.set("category", resolved.category.name);
   if (resolved.subcategory) params.set("subcategory", resolved.subcategory);
   if (query.brand) params.set("brand", query.brand);

@@ -78,7 +78,18 @@ export function CatalogueControls({
         </div>
       )}
 
-      <form className="fx-catalogue-form" action="/catalogue/" method="get">
+      {/* Repliés sur mobile : déployés, prix, tri et pagination repoussaient
+          le premier produit à 807 px du haut — soit un écran entier de
+          réglages avant le moindre article. Sur bureau le CSS les rouvre. */}
+      <details className="fx-controls-shell">
+        <summary className="fx-controls-toggle">
+          <span>Filtrer et trier</span>
+          <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
+            <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.7"
+              strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </summary>
+        <form className="fx-catalogue-form" action="/catalogue/" method="get">
         <Hidden query={query} except={["min", "max", "sort", "per", "page"]} />
 
         <label className="fx-inline-field">
@@ -110,10 +121,11 @@ export function CatalogueControls({
           </select>
         </label>
 
-        <button className="fx-btn secondary" type="submit">
-          Appliquer
-        </button>
-      </form>
+          <button className="fx-btn secondary" type="submit">
+            Appliquer
+          </button>
+        </form>
+      </details>
     </div>
   );
 }
