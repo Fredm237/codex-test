@@ -1705,3 +1705,181 @@
    qui le précède, pas à un bloc séparé. */
 .fx-home-pulse { margin-top: calc(-1 * var(--fx-space-5)); }
 .fx-home-pulse .fx-pulse { margin-top: 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   REFONTE TOTALE — Method & Closing
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Method — avec illustrations 3D ──────────────────────── */
+
+.fx-method {
+  padding: var(--fx-section-y-lg) 0;
+}
+
+.fx-method-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto var(--fx-space-9);
+}
+
+.fx-method-title {
+  font-size: var(--fx-text-4xl);
+  font-weight: 400;
+  color: var(--fx-ink-700);
+}
+.fx-method-title em {
+  font-style: italic;
+  color: var(--fx-ink-900);
+}
+
+.fx-method-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fx-space-9);
+}
+
+.fx-method-step {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--fx-space-7);
+  align-items: center;
+}
+.fx-method-step:nth-child(even) {
+  direction: rtl;
+}
+.fx-method-step:nth-child(even) > * {
+  direction: ltr;
+}
+
+.fx-method-step-img {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+}
+
+.fx-method-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fx-space-3);
+}
+
+.fx-method-step-n {
+  font-size: var(--fx-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fx-brand);
+}
+
+.fx-method-step-title {
+  font-size: var(--fx-text-2xl);
+  font-weight: 400;
+  color: var(--fx-ink-700);
+}
+
+.fx-method-step-body {
+  font-size: var(--fx-text-base);
+  color: var(--fx-text-secondary);
+  line-height: var(--fx-leading-normal);
+  max-width: 480px;
+}
+
+@media (max-width: 768px) {
+  .fx-method-step {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .fx-method-step:nth-child(even) { direction: ltr; }
+  .fx-method-step-img {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+  .fx-method-step-body { max-width: none; }
+}
+
+/* ── Closing — fond dramatique avec particules dorées ─────── */
+
+.fx-closing {
+  position: relative;
+  padding: var(--fx-space-12) 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.fx-closing-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("/img/closing-bg.png");
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.fx-closing-content {
+  position: relative;
+  z-index: 1;
+}
+
+.fx-closing-title {
+  font-size: var(--fx-text-4xl);
+  font-weight: 400;
+  color: var(--fx-paper-0);
+}
+.fx-closing-title em {
+  font-style: italic;
+}
+
+.fx-closing-lede {
+  margin-top: var(--fx-space-5);
+  font-size: var(--fx-text-lg);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--sans);
+}
+
+.fx-closing-actions {
+  display: flex;
+  gap: var(--fx-space-4);
+  justify-content: center;
+  margin-top: var(--fx-space-7);
+}
+
+.fx-btn-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--fx-btn-height);
+  padding: 0 var(--fx-btn-padding-x);
+  border-radius: var(--fx-btn-radius);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+  background: var(--fx-paper-0);
+  color: var(--fx-ink-900);
+  transition: transform var(--fx-duration) var(--fx-ease-out), box-shadow var(--fx-duration) var(--fx-ease-out);
+}
+.fx-btn-light:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--fx-elevation-2);
+}
+
+.fx-btn-ghost-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--fx-btn-height);
+  padding: 0 var(--fx-btn-padding-x);
+  border-radius: var(--fx-btn-radius);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+  background: transparent;
+  color: var(--fx-paper-0);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: border-color var(--fx-duration) var(--fx-ease-out), background var(--fx-duration) var(--fx-ease-out);
+}
+.fx-btn-ghost-light:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+}
