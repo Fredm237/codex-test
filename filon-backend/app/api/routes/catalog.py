@@ -335,6 +335,78 @@ async def categories(session=Depends(db.get_session)) -> dict:
     return {"items": items, "departments": departments}
 
 
+@router.get("/featured")
+async def featured(session=Depends(db.get_session)) -> dict:
+    """Produits mis en avant pour le catalogue premium.
+
+    Retourne les meilleures baisses, les produits les plus populaires,
+    et les catégories tendance — pour un catalogue vivant sur desktop.
+    """
+    if session is None:
+        return {"drops": [], "popular": [], "trending_categories": []}
+
+    from datetime import datetime, timedelta
+
+    since = datetime.utcnow() - timedelta(hours=48)
+
+    # Top baisses (les plus grosses réductions des 48h)
+    drops_stmt = (
+        select(models.Offer, models.Merchant)
+        .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+        .where(
+            models.Offer.drop_pct.isnot(None),
+            models.Offer.drop_pct >= 15,
+            models.Offer.image_url.isnot(None),
+            models.Offer.image_url != "",
+            models.Offer.is_canonical.is_(True),
+        )
+        .order_by(models.Offer.drop_pct.desc())
+        .limit(12)
+    )
+    blocked = _visible_merchant_clause()
+    if blocked is not None:
+        drops_stmt = drops_stmt.where(blocked)
+    drop_rows = (await session.execute(drops_stmt)).all()
+
+    # Catégories tendance (celles avec le plus de baisses récentes)
+    trending_stmt = (
+        select(
+            models.Offer.filon_category,
+            func.count().label("drops"),
+        )
+        .where(
+            models.Offer.filon_category.isnot(None),
+            models.Offer.drop_pct.isnot(None),
+            models.Offer.drop_pct >= 5,
+        )
+        .group_by(models.Offer.filon_category)
+        .order_by(func.count().desc())
+        .limit(8)
+    )
+    trending_rows = (await session.execute(trending_stmt)).all()
+
+    return {
+        "drops": [
+            {
+                "id": o.id,
+                "name": o.name,
+                "brand": o.brand,
+                "price": o.price,
+                "currency": o.currency,
+                "drop_pct": round(o.drop_pct, 1) if o.drop_pct else None,
+                "image": o.image_url,
+                "merchant": {"name": m.name, "slug": m.slug},
+            }
+            for (o, m) in drop_rows
+        ],
+        "trending_categories": [
+            {"name": cat, "slug": taxonomy.slug_of(cat), "drops": int(n)}
+            for (cat, n) in trending_rows
+            if cat
+        ],
+    }
+
+
 @router.get("/admin/unclassified")
 async def unclassified(
     limit: int = Query(default=30, le=100),

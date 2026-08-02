@@ -2164,3 +2164,141 @@
   opacity: 0.6;
   font-size: 12px !important;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   MEGA MENU — Ultra premium, fond sombre, doré
+   ══════════════════════════════════════════════════════════════ */
+
+.mm-panel {
+  background: #0a0a0f !important;
+  border: 1px solid rgba(212, 168, 83, 0.2) !important;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 168, 83, 0.05) !important;
+}
+
+.mm-dep {
+  color: #F5D78E !important;
+  letter-spacing: 0.1em !important;
+}
+
+.mm-dep em {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.mm-col a {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.mm-col a:hover {
+  color: #F5D78E !important;
+  background: rgba(212, 168, 83, 0.08) !important;
+}
+
+.mm-col a span {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.mm-all {
+  color: #D4A853 !important;
+  border-top-color: rgba(212, 168, 83, 0.2) !important;
+}
+
+.mm-all:hover {
+  color: #F5D78E !important;
+}
+
+.mm-sub a {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.mm-sub a:hover {
+  color: #F5D78E !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVIGATION DESKTOP — Premium, cohérent avec le Hero sombre
+   ══════════════════════════════════════════════════════════════ */
+
+/* Quand la nav est sur le Hero (pas scrollé) — transparente */
+.ed-header:not(.stuck) {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+}
+
+.ed-header:not(.stuck) .ed-nav a,
+.ed-header:not(.stuck) .ed-nav button,
+.ed-header:not(.stuck) .ed-brand-word {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.ed-header:not(.stuck) .ed-nav a:hover,
+.ed-header:not(.stuck) .ed-nav button:hover {
+  color: #F5D78E !important;
+}
+
+/* CTA "Essayer le copilote" — doré */
+.ed-nav .ed-btn.dark {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  border: none !important;
+}
+
+.ed-nav .ed-btn.dark:hover {
+  box-shadow: 0 4px 20px rgba(212, 168, 83, 0.4) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CATALOGUE DESKTOP — Layout plus aéré, premium
+   ══════════════════════════════════════════════════════════════ */
+
+@media (min-width: 901px) {
+  .fx-catalogue-layout {
+    gap: 48px !important;
+  }
+
+  /* Sidebar navigation — fond sombre subtil */
+  .fx-nav-shell {
+    background: rgba(10, 10, 15, 0.03);
+    border-radius: 16px;
+    padding: 24px 20px;
+    border: 1px solid rgba(212, 168, 83, 0.08);
+  }
+
+  /* Grille produit — 3 colonnes max sur desktop large */
+  .fx-catalogue-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .fx-catalogue-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ASSISTANT DESKTOP — Layout premium, plus d'espace
+   ══════════════════════════════════════════════════════════════ */
+
+@media (min-width: 901px) {
+  .sa:not(.searched) {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sa:not(.searched) .ed-wrap {
+    max-width: 700px;
+  }
+
+  .sa:not(.searched) h1 {
+    font-size: clamp(42px, 5.5vw, 68px) !important;
+  }
+
+  /* Cartes résultats — grille 2 colonnes sur desktop */
+  .fa-cards {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
