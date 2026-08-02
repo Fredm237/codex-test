@@ -8,6 +8,7 @@
 // formulaires GET, et les champs cachés reconduisent les filtres en cours.
 
 import { href, SORTS, PER_PAGE, type CatalogueQuery } from "@/lib/catalogue";
+import { useLocale } from "@/lib/i18n";
 
 /** Reconduit les filtres non modifiés par ce formulaire. */
 function Hidden({ query, except }: { query: CatalogueQuery; except: string[] }) {
@@ -23,6 +24,7 @@ function Hidden({ query, except }: { query: CatalogueQuery; except: string[] }) 
 }
 
 export function CatalogueSearch({ query }: { query: CatalogueQuery }) {
+  const { t } = useLocale();
   return (
     <form className="fx-catalogue-search" action="/catalogue/" method="get" role="search">
       {/* La page repart à 1 : rester en page 7 après une nouvelle recherche
@@ -37,12 +39,12 @@ export function CatalogueSearch({ query }: { query: CatalogueQuery }) {
           type="search"
           name="q"
           defaultValue={query.q || ""}
-          placeholder="Rechercher dans le catalogue"
-          aria-label="Rechercher dans le catalogue"
+          placeholder={t("cat.search")}
+          aria-label={t("cat.search")}
           autoComplete="off"
         />
         <button className="fx-btn primary" type="submit">
-          Chercher
+          {t("cat.searchBtn")}
         </button>
       </div>
     </form>
@@ -58,11 +60,12 @@ export function CatalogueControls({
   sort: string;
   per: number;
 }) {
+  const { t } = useLocale();
   const active: Array<[string, string, string]> = [];
   if (query.q) active.push(["q", `« ${query.q} »`, href(query, { q: undefined })]);
   if (query.brand) active.push(["brand", query.brand, href(query, { brand: undefined })]);
-  if (query.min) active.push(["min", `à partir de ${query.min} €`, href(query, { min: undefined })]);
-  if (query.max) active.push(["max", `jusqu'à ${query.max} €`, href(query, { max: undefined })]);
+  if (query.min) active.push(["min", `${t("cat.from")} ${query.min} €`, href(query, { min: undefined })]);
+  if (query.max) active.push(["max", `${t("cat.upTo")} ${query.max} €`, href(query, { max: undefined })]);
 
   return (
     <div className="fx-catalogue-controls">
@@ -72,7 +75,7 @@ export function CatalogueControls({
             <a className="fx-filter-pill" key={key} href={to}>
               {label}
               <span aria-hidden="true">×</span>
-              <span className="fx-sr">Retirer ce filtre</span>
+              <span className="fx-sr">{t("cat.remove")}</span>
             </a>
           ))}
         </div>
@@ -83,7 +86,7 @@ export function CatalogueControls({
           réglages avant le moindre article. Sur bureau le CSS les rouvre. */}
       <details className="fx-controls-shell">
         <summary className="fx-controls-toggle">
-          <span>Filtrer et trier</span>
+          <span>{t("cat.filters")}</span>
           <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
             <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.7"
               strokeLinecap="round" strokeLinejoin="round" />
@@ -93,25 +96,25 @@ export function CatalogueControls({
         <Hidden query={query} except={["min", "max", "sort", "per", "page"]} />
 
         <label className="fx-inline-field">
-          <span>Prix min</span>
+          <span>{t("cat.min")}</span>
           <input type="number" name="min" min="0" step="1" defaultValue={query.min || ""} inputMode="numeric" />
         </label>
         <label className="fx-inline-field">
-          <span>Prix max</span>
+          <span>{t("cat.max")}</span>
           <input type="number" name="max" min="0" step="1" defaultValue={query.max || ""} inputMode="numeric" />
         </label>
         <label className="fx-inline-field">
-          <span>Trier par</span>
+          <span>{t("cat.sort")}</span>
           <select name="sort" defaultValue={sort}>
             {SORTS.map((s) => (
               <option value={s.value} key={s.value}>
-                {s.label}
+                {t(s.labelKey)}
               </option>
             ))}
           </select>
         </label>
         <label className="fx-inline-field">
-          <span>Par page</span>
+          <span>{t("cat.per")}</span>
           <select name="per" defaultValue={String(per)}>
             {PER_PAGE.map((n) => (
               <option value={n} key={n}>
@@ -122,7 +125,7 @@ export function CatalogueControls({
         </label>
 
           <button className="fx-btn secondary" type="submit">
-            Appliquer
+            {t("cat.apply")}
           </button>
         </form>
       </details>

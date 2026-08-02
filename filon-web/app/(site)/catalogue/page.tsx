@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ProductCard } from "@/components/filon/ProductCard";
-import { CARD_COPY } from "@/components/filon/product-copy";
 import { CatalogueSearch, CatalogueControls } from "@/components/filon/CatalogueControls";
 import { CatalogueNav } from "@/components/filon/CatalogueNav";
+import {
+  CatalogueHeader, CataloguePager, CatalogueEmpty, CatalogueNavToggle,
+} from "@/components/filon/CatalogueHeader";
 import {
   getDepartments,
   getOffers,
@@ -43,48 +45,6 @@ export async function generateMetadata({
   });
 }
 
-function Breadcrumb({
-  query,
-  department,
-  category,
-  subcategory,
-}: {
-  query: CatalogueQuery;
-  department: { name: string; slug: string } | null;
-  category: { name: string; slug: string } | null;
-  subcategory: string | null;
-}) {
-  return (
-    <nav className="fx-crumb" aria-label="Fil d'Ariane">
-      <a href="/catalogue/">Catalogue</a>
-      {department && (
-        <>
-          <span aria-hidden="true">/</span>
-          <a href={href({}, { dept: department.slug })}>{department.name}</a>
-        </>
-      )}
-      {category && (
-        <>
-          <span aria-hidden="true">/</span>
-          <a href={href({}, { dept: department?.slug, cat: category.slug })}>{category.name}</a>
-        </>
-      )}
-      {subcategory && (
-        <>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">{subcategory}</span>
-        </>
-      )}
-      {query.q && (
-        <>
-          <span aria-hidden="true">/</span>
-          <span aria-current="page">« {query.q} »</span>
-        </>
-      )}
-    </nav>
-  );
-}
-
 export default async function CataloguePage({
   searchParams,
 }: {
@@ -104,20 +64,11 @@ export default async function CataloguePage({
   return (
     <section className="fx-section page-top fx-catalogue">
       <div className="fx-container fx-catalogue-layout">
-        {/* Colonne de navigation. En dessous de 900 px elle se replie dans un
-            dépliant natif : l'arborescence complète mangerait l'écran avant
-            le premier produit. */}
         {/* Pas d'attribut `open` : replié par défaut, donc les produits
             viennent en premier sur mobile. Au-dessus de 900 px, le CSS force
             l'arborescence visible — la colonne y est permanente. */}
         <details className="fx-nav-shell">
-          <summary className="fx-nav-toggle">
-            <span>Parcourir les rayons</span>
-            <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
-              <path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" strokeWidth="1.7"
-                strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </summary>
+          <CatalogueNavToggle />
           <CatalogueNav
             departments={departments}
             query={query}
@@ -128,23 +79,14 @@ export default async function CataloguePage({
         </details>
 
         <div className="fx-catalogue-main">
-          <Breadcrumb query={query} department={department} category={category} subcategory={subcategory} />
-
-          <h1 className="fx-display fx-catalogue-title">
-            {subcategory || category?.name || department?.name || (
-              <>
-                Le catalogue,
-                <br />
-                <span className="it">rayon par rayon.</span>
-              </>
-            )}
-          </h1>
-
-          <p className="fx-lede fx-catalogue-lede">
-            {result === null
-              ? "Le catalogue est momentanément indisponible. Réessayez dans un instant."
-              : `${total.toLocaleString("fr-BE")} produits comparés chez nos marchands partenaires.`}
-          </p>
+          <CatalogueHeader
+            query={query}
+            department={department}
+            category={category}
+            subcategory={subcategory}
+            total={total}
+            unavailable={result === null}
+          />
 
           <CatalogueSearch query={query} />
 
@@ -152,63 +94,24 @@ export default async function CataloguePage({
             <>
               <CatalogueControls query={query} sort={sortValue(query)} per={per} />
 
+              {/* La grille reste rendue côté serveur : c'est elle que Google
+                  lit, et elle arrive peuplée quel que soit le réseau. */}
               <div className="fx-product-grid fx-catalogue-grid">
                 {result.items.map((o) => (
-                  <ProductCard key={o.id} offer={o} copy={CARD_COPY.fr} />
+                  <ProductCard key={o.id} offer={o} />
                 ))}
               </div>
 
-              {lastPage > 1 && (
-                <nav className="fx-pagination" aria-label={`Page ${page} sur ${lastPage}`}>
-                  <a
-                    className="fx-page-step"
-                    href={href(query, { page: String(Math.max(1, page - 1)) })}
-                    aria-disabled={page <= 1}
-                    tabIndex={page <= 1 ? -1 : undefined}
-                  >
-                    Précédent
-                  </a>
-                  <span className="fx-page-list">
-                    {pageWindow(page, lastPage).map((p, i) =>
-                      p === null ? (
-                        <span className="fx-page-gap" key={`gap-${i}`} aria-hidden="true">
-                          …
-                        </span>
-                      ) : (
-                        <a
-                          key={p}
-                          className="fx-page"
-                          aria-current={p === page ? "page" : undefined}
-                          href={href(query, { page: String(p) })}
-                        >
-                          {p}
-                        </a>
-                      )
-                    )}
-                  </span>
-                  <a
-                    className="fx-page-step"
-                    href={href(query, { page: String(Math.min(lastPage, page + 1)) })}
-                    aria-disabled={page >= lastPage}
-                    tabIndex={page >= lastPage ? -1 : undefined}
-                  >
-                    Suivant
-                  </a>
-                </nav>
-              )}
-
-              <p className="fx-fine fx-page-status">
-                Page {page} sur {lastPage.toLocaleString("fr-BE")}
-              </p>
+              <CataloguePager
+                query={query}
+                page={page}
+                lastPage={lastPage}
+                pages={pageWindow(page, lastPage)}
+              />
             </>
           )}
 
-          {result !== null && total === 0 && (
-            <p className="fx-body fx-catalogue-empty">
-              Aucun produit ne correspond à cette sélection.{" "}
-              <a href="/catalogue/">Repartir de tout le catalogue</a>.
-            </p>
-          )}
+          {result !== null && total === 0 && <CatalogueEmpty />}
         </div>
       </div>
     </section>

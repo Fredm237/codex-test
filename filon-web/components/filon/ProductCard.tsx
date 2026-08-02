@@ -16,7 +16,8 @@
 // lien marchand reste distinct, au-dessus, avec sa propre cible.
 
 import { useState } from "react";
-import { money, type CardCopy } from "./product-copy";
+import { CARD_COPY, money, type CardCopy } from "./product-copy";
+import { useLocale } from "@/lib/i18n";
 
 export type CardOffer = {
   id: number;
@@ -38,9 +39,14 @@ export function ProductCard({
   href,
 }: {
   offer: CardOffer;
-  copy: CardCopy;
+  /** Facultatif : sans lui, la carte lit la langue courante elle-même. Les
+   *  pages serveur n'ont donc rien à transmettre, et ne peuvent plus figer le
+   *  français par mégarde. */
+  copy?: CardCopy;
   href?: string;
 }) {
+  const { locale } = useLocale();
+  const words = copy ?? CARD_COPY[locale];
   const drop = offer.drop_pct && offer.drop_pct >= 1 ? Math.round(offer.drop_pct) : null;
   const target = href ?? `/produit/${offer.id}/`;
   // Les flux marchands livrent régulièrement des URL d'images mortes. Sans ce
@@ -60,12 +66,12 @@ export function ProductCard({
             onError={() => setImageOk(false)}
           />
         ) : (
-          <span className="fx-product-noimage">{copy.noImage}</span>
+          <span className="fx-product-noimage">{words.noImage}</span>
         )}
         {(drop || offer.is_lowest) && (
           <span className="fx-product-badges">
             {drop && <span className="fx-badge gain">−{drop}&nbsp;%</span>}
-            {offer.is_lowest && <span className="fx-badge brand">{copy.lowest}</span>}
+            {offer.is_lowest && <span className="fx-badge brand">{words.lowest}</span>}
           </span>
         )}
       </div>
@@ -81,7 +87,7 @@ export function ProductCard({
 
         {offer.merchant && (
           <span className="fx-product-merchant">
-            {copy.at} {offer.merchant.name}
+            {words.at} {offer.merchant.name}
           </span>
         )}
 
@@ -98,7 +104,7 @@ export function ProductCard({
               target="_blank"
               rel="noopener noreferrer sponsored"
             >
-              {copy.see}
+              {words.see}
             </a>
           )}
         </div>

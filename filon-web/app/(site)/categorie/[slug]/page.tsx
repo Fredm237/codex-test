@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import { API } from "@/lib/api";
 import { ProductCard } from "@/components/filon/ProductCard";
-import { CARD_COPY } from "@/components/filon/product-copy";
 
 // Page d'un rayon FILON. Rendu serveur + ISR : indexable, et sans spinner.
 export const revalidate = 1800;
@@ -144,7 +143,7 @@ export default async function CategoriePage({
           <>
             <div className="fx-product-grid" style={{ marginTop: 28 }}>
               {items.map((o) => (
-                <ProductCard key={o.id} offer={o} copy={CARD_COPY.fr} />
+                <ProductCard key={o.id} offer={o} />
               ))}
             </div>
 

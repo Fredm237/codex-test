@@ -50,11 +50,13 @@ export type CatalogueQuery = {
   per?: string;
 };
 
+// Clés de dictionnaire plutôt que libellés : le tri doit se lire en NL et en
+// EN comme en FR.
 export const SORTS = [
-  { value: "relevance", label: "Pertinence" },
-  { value: "price_asc", label: "Prix croissant" },
-  { value: "price_desc", label: "Prix décroissant" },
-  { value: "name", label: "Nom" },
+  { value: "relevance", labelKey: "cat.sortRelevance" },
+  { value: "price_asc", labelKey: "cat.sortPriceAsc" },
+  { value: "price_desc", labelKey: "cat.sortPriceDesc" },
+  { value: "name", labelKey: "cat.sortName" },
 ] as const;
 
 export const PER_PAGE = [24, 48, 96] as const;

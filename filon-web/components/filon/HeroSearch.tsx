@@ -8,14 +8,12 @@
 // détail — l'assistant la relit et lance l'analyse tout seul.
 
 import { useState } from "react";
+import { useLocale } from "@/lib/i18n";
 
-const SUGGESTIONS = [
-  "Un aspirateur robot fiable sous 300 €",
-  "Chemise en lin homme",
-  "Casque à réduction de bruit",
-];
+const SUGGESTION_KEYS = ["hero.sug1", "hero.sug2", "hero.sug3"];
 
 export function HeroSearch() {
+  const { t } = useLocale();
   const [query, setQuery] = useState("");
 
   return (
@@ -30,21 +28,24 @@ export function HeroSearch() {
           name="q"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Que voulez-vous acheter ?"
-          aria-label="Que voulez-vous acheter ?"
+          placeholder={t("hero.ask")}
+          aria-label={t("hero.ask")}
           autoComplete="off"
         />
         <button className="fx-btn primary" type="submit">
-          Demander
+          {t("hero.askBtn")}
         </button>
       </form>
 
       <div className="fx-hero-suggestions">
-        {SUGGESTIONS.map((s) => (
-          <a key={s} className="fx-chip" href={`/recherche/?q=${encodeURIComponent(s)}`}>
-            {s}
-          </a>
-        ))}
+        {SUGGESTION_KEYS.map((key) => {
+          const label = t(key);
+          return (
+            <a key={key} className="fx-chip" href={`/recherche/?q=${encodeURIComponent(label)}`}>
+              {label}
+            </a>
+          );
+        })}
       </div>
     </div>
   );
