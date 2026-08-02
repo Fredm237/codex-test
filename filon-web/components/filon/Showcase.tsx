@@ -48,21 +48,21 @@ type Panel = {
 // de banque d'images génériques.
 const PANELS: Panel[] = [
   {
-    photo: "/img/life-cafe.webp",
+    photo: "/img/section-price.png",
     titleKey: "show.t1",
     emphasisKey: "show.e1",
     bodyKey: "show.b1",
     badgeKey: "show.badge1",
   },
   {
-    photo: "/img/workspace.webp",
+    photo: "/img/section-history.png",
     titleKey: "show.t2",
     emphasisKey: "show.e2",
     bodyKey: "show.b2",
     badgeKey: "show.badge2",
   },
   {
-    photo: "/img/proof-unboxing.webp",
+    photo: "/img/section-verdict.png",
     titleKey: "show.t3",
     emphasisKey: "show.e3",
     bodyKey: "show.b3",

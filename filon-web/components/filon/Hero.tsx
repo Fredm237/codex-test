@@ -1,20 +1,14 @@
 "use client";
 
-// Hero de la refonte 2026.
+// Hero — Refonte TOTALE inspirée de Phia.com.
 //
-// Deux partis pris, tous deux issus des motifs de refus reçus d'Awin.
+// Structure Phia :
+// 1. Titre centré, GRAND, serif, avec un mot en italique
+// 2. Sous-titre d'une ligne, centré
+// 3. Image dominante (>60% de la hauteur du viewport)
+// 4. Logos presse ou stats en bandeau en bas
 //
-// 1. Le mot « cashback » n'y figure pas. Les refus « l'annonceur ne travaille
-//    pas avec ce type d'éditeurs » et « pas en affinité avec la marque »
-//    visent une catégorie d'éditeur — celle des sites de bons de réduction.
-//    FILON se présente donc par ce qu'il fait réellement : réunir les offres,
-//    conserver l'historique, et trancher.
-// 2. Le visuel n'est pas une abstraction mais une fiche du catalogue, avec un
-//    produit réel et son écart de prix constaté. Montrer le produit convainc
-//    un partenaire ; une animation ne le convainc pas.
-//
-// Sans catalogue joignable, la colonne de droite disparaît et la mise en page
-// se recentre : jamais de carte vide, jamais de chiffre inventé.
+// Pas de grille 2 colonnes. Pas de carte à côté. Le titre EST le hero.
 
 import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
@@ -36,124 +30,82 @@ export function Hero({ proof }: { proof: Proof | null }) {
   const stats = proof?.stats ?? null;
 
   return (
-    <section className={`fx-hero${product ? "" : " solo"}`}>
-      <motion.div 
-        className="fx-container fx-hero-grid"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="fx-hero-copy">
-          <span className="fx-eyebrow brand">{t("hero.eyebrowNew")}</span>
-
-          <h1 className="fx-display xl fx-hero-title">
-            {t("hero.l1")}
-            <br />
-            {t("hero.l2")}
-            <br />
-            <span className="it">{t("hero.l3")}</span>
+    <section className="fx-hero">
+      <div className="fx-hero-inner">
+        {/* Titre centré — comme Phia "Never Overpay Again" */}
+        <motion.div
+          className="fx-hero-headline"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <h1 className="fx-hero-title">
+            {t("hero.l1")} {t("hero.l2")} <em>{t("hero.l3")}</em>
           </h1>
-
-          <p className="fx-lede fx-hero-lede">
-            {t("hero.ledeA")} {stats ? stats.merchants.toLocaleString(tag) : t("hero.ledeOur")}{" "}
-            {t("hero.ledeB")}
+          <p className="fx-hero-subtitle">
+            {t("hero.ledeA")} {stats ? stats.merchants.toLocaleString(tag) : "150+"} {t("hero.ledeB")}
           </p>
+        </motion.div>
 
+        {/* Barre de recherche centrée */}
+        <motion.div
+          className="fx-hero-search-wrap"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
           <HeroSearch />
+        </motion.div>
 
-          {/* Lien et non bouton : à côté des suggestions, un second bouton
-              plein se lisait comme une puce de plus. */}
-          <p className="fx-hero-actions">
-            <a className="fx-hero-secondary" href="/catalogue/">
-              {t("hero.explore")}
-              <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
-                <path
-                  d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </a>
-          </p>
-
-          {stats && (
-            <p className="fx-hero-facts">
-              <span>{stats.offers.toLocaleString(tag)} {t("hero.offersTracked")}</span>
-              <span aria-hidden="true">·</span>
-              <span>{stats.multiMerchant.toLocaleString(tag)} {t("hero.multiMerchant")}</span>
-              <span aria-hidden="true">·</span>
-              <span>{stats.snapshots.toLocaleString(tag)} {t("hero.snapshots")}</span>
-            </p>
-          )}
-        </div>
-
+        {/* Image dominante avec carte produit flottante — comme Phia */}
         {product && (
-          <motion.aside 
-            className="fx-hero-panel" 
-            aria-label="Exemple de produit suivi"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          <motion.div
+            className="fx-hero-visual"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           >
-            <article className="fx-card fx-verdict-card">
-              <header className="fx-verdict-head">
-                <span className="fx-badge brand">{t("hero.tracked")}</span>
-                <span className="fx-fine">{product.merchants} {t("hero.sellIt")}</span>
-              </header>
-
-              <div className="fx-verdict-product">
+            <div className="fx-hero-image-wrap">
+              <img
+                className="fx-hero-lifestyle"
+                src="/img/hero-main.png"
+                alt=""
+                loading="eager"
+              />
+              {/* Carte produit flottante sur l'image — comme Phia */}
+              <article className="fx-hero-float-card">
                 {product.image && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={product.image} alt="" loading="lazy" width={72} height={72} />
+                  <img src={product.image} alt="" width={56} height={56} className="fx-hero-float-thumb" />
                 )}
-                <div>
-                  {product.brand && <span className="fx-eyebrow">{product.brand}</span>}
-                  <a className="fx-verdict-name" href={`/produits/${product.ean}/`}>
-                    {product.name}
-                  </a>
+                <div className="fx-hero-float-info">
+                  {product.brand && <span className="fx-hero-float-brand">{product.brand}</span>}
+                  <span className="fx-hero-float-name">{product.name}</span>
+                  <span className="fx-hero-float-price">
+                    <b>{money(product.priceMin, product.currency)}</b>
+                    <s>{money(product.priceMax, product.currency)}</s>
+                  </span>
                 </div>
-              </div>
-
-              <dl className="fx-verdict-rows">
-                <div>
-                  <dt>{t("hero.highest")}</dt>
-                  <dd className="strike">{money(product.priceMax, product.currency)}</dd>
-                </div>
-                <div>
-                  <dt>{t("hero.lowest")}</dt>
-                  <dd className="lead">{money(product.priceMin, product.currency)}</dd>
-                </div>
-              </dl>
-
-              <footer className="fx-verdict-foot">
-                <span className="fx-badge gain">
-                  −{money(product.priceMax - product.priceMin, product.currency)} {t("hero.gap")}
-                </span>
-                <a className="fx-verdict-link" href={`/produits/${product.ean}/`}>
-                  {t("hero.dossier")}
-                  <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
-                    <path
-                      d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.6"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                </a>
-              </footer>
-            </article>
-
-            <p className="fx-hero-panel-note">
-              {t("hero.realData")}
-            </p>
-          </motion.aside>
+              </article>
+            </div>
+          </motion.div>
         )}
-      </motion.div>
+
+        {/* Stats en bandeau — comme les logos presse chez Phia */}
+        {stats && (
+          <motion.div
+            className="fx-hero-stats"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.8, duration: 0.6 }}
+          >
+            <span><b>{stats.offers.toLocaleString(tag)}</b> {t("hero.offersTracked")}</span>
+            <span className="fx-hero-stats-sep" aria-hidden="true" />
+            <span><b>{stats.multiMerchant.toLocaleString(tag)}</b> {t("hero.multiMerchant")}</span>
+            <span className="fx-hero-stats-sep" aria-hidden="true" />
+            <span><b>{stats.snapshots.toLocaleString(tag)}</b> {t("hero.snapshots")}</span>
+          </motion.div>
+        )}
+      </div>
     </section>
   );
 }

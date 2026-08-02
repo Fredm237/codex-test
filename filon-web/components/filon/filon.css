@@ -78,45 +78,55 @@
 .pg-saving b { color: var(--fx-gain-strong); }
 .pg-offer { min-height: 60px; }
 
-/* ── Hero ────────────────────────────────────────────────── */
+/* ── Hero — Style Phia : centré, full-height, image dominante ──── */
 
 .fx-hero {
-  padding-top: var(--fx-page-top);
-  padding-bottom: var(--fx-section-y);
-  background:
-    radial-gradient(120% 80% at 82% 8%, var(--fx-brand-wash) 0%, transparent 58%),
-    var(--fx-bg);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--fx-page-top) var(--fx-gutter) var(--fx-space-8);
+  background: var(--fx-bg);
 }
 
-.fx-hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  gap: clamp(32px, 5vw, 72px);
+.fx-hero-inner {
+  width: 100%;
+  max-width: var(--fx-container);
+  display: flex;
+  flex-direction: column;
   align-items: center;
-}
-.fx-hero.solo .fx-hero-grid { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
-@media (max-width: 940px) {
-  .fx-hero-grid { grid-template-columns: minmax(0, 1fr); }
+  gap: var(--fx-space-7);
 }
 
-.fx-hero-title { margin-top: var(--fx-space-5); }
-.fx-hero-lede { margin-top: var(--fx-space-5); }
-.fx-hero-search { margin-top: var(--fx-space-6); }
-.fx-hero-actions { margin-top: var(--fx-space-5); }
-.fx-hero-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 44px;
-  font-size: var(--fx-text-base);
-  font-weight: 600;
-  color: var(--fx-text);
-  border-bottom: 1px solid var(--fx-border-strong);
-  transition: border-color var(--fx-duration) var(--fx-ease-standard);
+/* Titre centré, serif, GRAND */
+.fx-hero-headline {
+  text-align: center;
+  max-width: 900px;
 }
-.fx-hero-secondary:hover { border-color: var(--fx-text); }
-.fx-hero-secondary svg { transition: transform var(--fx-duration) var(--fx-ease-out); }
-.fx-hero-secondary:hover svg { transform: translateX(3px); }
+
+.fx-hero-title {
+  font-size: var(--fx-text-5xl);
+  font-weight: 400;
+  line-height: 1.08;
+  color: var(--fx-ink-700);
+}
+.fx-hero-title em {
+  font-style: italic;
+  color: var(--fx-ink-900);
+}
+
+.fx-hero-subtitle {
+  margin-top: var(--fx-space-5);
+  font-size: var(--fx-text-lg);
+  color: var(--fx-text-secondary);
+  font-family: var(--sans);
+}
+
+/* Barre de recherche centrée */
+.fx-hero-search-wrap {
+  width: 100%;
+  max-width: 600px;
+}
 
 .fx-field-icon { flex: none; color: var(--fx-text-muted); }
 
@@ -125,23 +135,121 @@
   flex-wrap: wrap;
   gap: var(--fx-space-2);
   margin-top: var(--fx-space-4);
+  justify-content: center;
 }
-/* Les suggestions sont des liens : elles doivent se comporter comme des
-   puces, sans hériter du soulignement ni du curseur texte. */
 .fx-hero-suggestions .fx-chip { text-decoration: none; }
 
-.fx-hero-facts {
+/* Image dominante avec carte flottante */
+.fx-hero-visual {
+  width: 100%;
+  max-width: 800px;
+}
+
+.fx-hero-image-wrap {
+  position: relative;
+  border-radius: var(--fx-radius-xl);
+  overflow: visible;
+}
+
+.fx-hero-lifestyle {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--fx-radius-xl);
+}
+
+/* Carte flottante sur l'image — comme Phia */
+.fx-hero-float-card {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--fx-space-2);
-  margin-top: var(--fx-space-6);
-  padding-top: var(--fx-space-5);
-  border-top: 1px solid var(--fx-border);
+  align-items: center;
+  gap: var(--fx-space-3);
+  padding: var(--fx-space-4);
+  background: var(--fx-surface);
+  border-radius: var(--fx-radius-lg);
+  box-shadow: var(--fx-elevation-3);
+  max-width: 360px;
+}
+
+.fx-hero-float-thumb {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  object-fit: contain;
+  border-radius: var(--fx-radius-sm);
+  background: var(--fx-paper-100);
+}
+
+.fx-hero-float-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fx-hero-float-brand {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fx-text-muted);
+}
+
+.fx-hero-float-name {
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  color: var(--fx-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.fx-hero-float-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.fx-hero-float-price b {
+  font-size: var(--fx-text-base);
+  font-weight: 700;
+  color: var(--fx-text);
+}
+.fx-hero-float-price s {
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+}
+
+/* Stats en bandeau */
+.fx-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-5);
+  padding-top: var(--fx-space-7);
   font-size: var(--fx-text-sm);
   color: var(--fx-text-muted);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--sans);
 }
-.fx-hero-facts span[aria-hidden] { color: var(--fx-ink-300); }
+.fx-hero-stats b {
+  color: var(--fx-text);
+  font-weight: 600;
+}
+.fx-hero-stats-sep {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--fx-ink-300);
+}
+
+@media (max-width: 768px) {
+  .fx-hero { min-height: auto; padding-top: 100px; }
+  .fx-hero-title { font-size: var(--fx-text-4xl); }
+  .fx-hero-stats { flex-direction: column; gap: var(--fx-space-3); }
+  .fx-hero-float-card { position: relative; bottom: auto; left: auto; transform: none; margin-top: var(--fx-space-4); }
+}
 
 /* ── Carte produit ───────────────────────────────────────── */
 
