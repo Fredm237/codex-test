@@ -70,8 +70,8 @@ const PANELS: Panel[] = [
   },
 ];
 
-/** Révélation dramatique à l'entrée dans le champ de vision.
- *  Seuil bas (15%) pour que l'animation commence plus tôt et soit plus visible. */
+/** Révélation à l'entrée dans le champ de vision, une seule fois.
+ *  Le mouvement accompagne la lecture : il ne se rejoue pas au retour. */
 function useReveal<T extends HTMLElement>() {
   const ref = useRef<T>(null);
   useEffect(() => {
@@ -87,7 +87,7 @@ function useReveal<T extends HTMLElement>() {
         entry.target.classList.add("shown");
         io.disconnect();
       },
-      { threshold: 0.15 }
+      { threshold: 0.25 }
     );
     io.observe(node);
     return () => io.disconnect();

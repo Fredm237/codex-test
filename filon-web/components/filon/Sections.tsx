@@ -41,10 +41,10 @@ export function Method() {
           className="fx-steps"
           initial="hidden"
           whileInView="show"
-          viewport={{ once: true, margin: "-40px" }}
+          viewport={{ once: true, margin: "-60px" }}
           variants={{
             hidden: { opacity: 0 },
-            show: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.1 } },
+            show: { opacity: 1, transition: { staggerChildren: 0.12 } },
           }}
         >
           {STEP_KEYS.map((n) => (
@@ -52,8 +52,8 @@ export function Method() {
               className="fx-card padded fx-step"
               key={n}
               variants={{
-                hidden: { opacity: 0, y: 60, scale: 0.92, rotateX: -8 },
-                show: { opacity: 1, y: 0, scale: 1, rotateX: 0, transition: { type: "spring", stiffness: 200, damping: 18, duration: 0.7 } },
+                hidden: { opacity: 0, y: 24 },
+                show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },
               }}
             >
               <span className="fx-step-n">0{n}</span>
