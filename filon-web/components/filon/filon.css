@@ -2302,3 +2302,142 @@
     gap: 20px !important;
   }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   CORRECTIONS MOBILE / TABLETTE — Ultra premium partout
+   ══════════════════════════════════════════════════════════════ */
+
+/* Supprimer le gap blanc entre la nav et le Hero */
+.ed-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.ed-header.stuck {
+  background: rgba(10, 10, 15, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  border-bottom: 1px solid rgba(212, 168, 83, 0.1) !important;
+}
+
+/* Hero — s'assurer que la vidéo commence à 0 (pas de padding-top pour la nav) */
+.fx-hero {
+  padding-top: 0 !important;
+}
+
+/* Mobile — nav compacte, pas de blanc */
+@media (max-width: 900px) {
+  .ed-header {
+    padding: 12px 16px !important;
+  }
+
+  /* Le texte FILON reste visible sur mobile */
+  .ed-brand-word {
+    display: inline !important;
+    font-size: 16px !important;
+  }
+
+  /* Hero mobile — titre plus petit, bien centré */
+  .fx-hero-title {
+    font-size: clamp(28px, 8vw, 42px) !important;
+    padding: 0 16px;
+  }
+
+  .fx-hero-content {
+    padding: 100px 20px 60px !important;
+  }
+
+  /* Barre de recherche — pleine largeur sur mobile */
+  .fx-hero-search-wrap {
+    max-width: 100% !important;
+    padding: 0 8px;
+  }
+
+  /* Suggestions — scroll horizontal sur mobile */
+  .fx-hero-suggestions {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    justify-content: flex-start !important;
+  }
+
+  .fx-hero-suggestions .fx-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Sections — moins de padding */
+  .fx-section {
+    padding: 48px 0 !important;
+  }
+
+  /* Method steps — colonne sur mobile */
+  .fx-method-steps {
+    flex-direction: column !important;
+  }
+
+  /* Closing — padding adapté */
+  .fx-closing-content {
+    padding: 60px 20px !important;
+  }
+}
+
+/* Tablette (iPad) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .fx-hero-title {
+    font-size: clamp(36px, 6vw, 52px) !important;
+  }
+
+  .fx-hero-content {
+    padding: 120px 40px 80px !important;
+  }
+
+  .fx-catalogue-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* iPhone SE / petits écrans */
+@media (max-width: 375px) {
+  .fx-hero-title {
+    font-size: 26px !important;
+  }
+
+  .fx-hero-content {
+    padding: 90px 16px 40px !important;
+  }
+
+  .sa-chips {
+    gap: 6px !important;
+  }
+
+  .sa-chip {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+/* Vidéo de fond — couvrir tout l'écran sur tous les devices */
+.fx-hero-bg-video,
+.sa-bg-video,
+.fx-closing-bg-video {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Safe area pour les iPhone avec notch */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .ed-header {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+}
