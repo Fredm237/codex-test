@@ -125,10 +125,10 @@ export function EditorialFooter() {
       <div className="ed-wrap">
         <div className="ed-newsblock">
           <div>
-            <h3 style={{ fontFamily: "var(--serif)", fontVariationSettings: '"opsz" 40', fontSize: 24, letterSpacing: "-0.01em" }}>
+            <h3 style={{ fontFamily: "var(--serif)", fontVariationSettings: '"opsz" 40', fontSize: 24, letterSpacing: "-0.01em", color: "var(--fx-text)" }}>
               {x.newsH}
             </h3>
-            <p style={{ color: "var(--ink-2)", fontSize: 14.5, marginTop: 6 }}>
+            <p style={{ color: "var(--fx-text-secondary)", fontSize: 14.5, marginTop: 6 }}>
               {x.newsP}
             </p>
           </div>

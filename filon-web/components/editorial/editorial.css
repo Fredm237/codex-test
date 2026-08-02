@@ -15,10 +15,10 @@
   transition: transform 0.2s var(--ease-out), background 0.2s, color 0.2s, filter 0.2s;
   display: inline-flex; align-items: center; gap: 9px; white-space: nowrap;
 }
-.ed-btn.dark { background: var(--ink); color: var(--paper); }
-.ed-btn.dark:hover { transform: translateY(-2px); }
-.ed-btn.wave { background: var(--wave); color: #fff; border-color: transparent; box-shadow: 0 10px 24px -10px var(--accent); }
-.ed-btn.wave:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.ed-btn.dark { background: var(--fx-action); color: var(--fx-on-action); box-shadow: var(--fx-elevation-1); }
+.ed-btn.dark:hover { transform: translateY(-2px); box-shadow: var(--fx-elevation-2); }
+.ed-btn.wave { background: var(--fx-action); color: var(--fx-on-action); border-color: transparent; box-shadow: var(--fx-elevation-1); }
+.ed-btn.wave:hover { transform: translateY(-2px); box-shadow: var(--fx-elevation-2); }
 .ed-btn.outline { background: transparent; color: var(--ink); }
 .ed-btn.outline:hover { background: var(--ink); color: var(--paper); }
 
@@ -110,10 +110,10 @@
 }
 @media (min-width: 761px) { .ed-mobile { display: none; } }
 
-/* Sticky mobile conversion CTA */
+/* Sticky mobile conversion CTA — Refonte premium */
 .ed-sticky-cta { position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 40; display: none;
-  padding: 14px; border-radius: var(--r-full); background: var(--wave); color: #fff; text-align: center; font-weight: 600; font-size: 15.5px;
-  box-shadow: 0 12px 30px -8px rgba(30,117,201,.5); transform: translateY(140%); transition: transform 0.4s var(--ease); }
+  padding: 14px; border-radius: var(--fx-btn-radius); background: var(--fx-action); color: var(--fx-on-action); text-align: center; font-weight: 600; font-size: 15.5px;
+  box-shadow: var(--fx-elevation-3); transform: translateY(140%); transition: transform 0.4s var(--fx-ease-out); }
 .ed-sticky-cta.show { transform: none; }
 @media (max-width: 760px) { .ed-sticky-cta { display: block; } }
 @media (prefers-reduced-motion: reduce) { .ed-sticky-cta { transition: none; } }

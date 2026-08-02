@@ -1201,3 +1201,180 @@
   font-size: var(--fx-text-xs);
   color: var(--fx-text-muted);
 }
+
+/* ── Catalogue — Filtres actifs et polish ─────────────────── */
+
+.fx-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fx-space-2);
+  margin-bottom: var(--fx-space-4);
+}
+
+.fx-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--fx-radius-full);
+  background: var(--fx-brand-wash);
+  border: 1px solid var(--fx-brand-subtle);
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  color: var(--fx-brand-strong);
+  transition: 
+    background var(--fx-duration) var(--fx-ease-standard),
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration-fast) var(--fx-ease-out);
+}
+.fx-filter-pill:hover {
+  background: var(--fx-brand-subtle);
+  border-color: var(--fx-brand);
+  transform: scale(0.97);
+}
+.fx-filter-pill span[aria-hidden] {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+/* Catalogue controls — transitions pour les selects et inputs */
+.fx-inline-field input,
+.fx-inline-field select {
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-inline-field input:focus,
+.fx-inline-field select:focus {
+  border-color: var(--fx-brand);
+  box-shadow: 0 0 0 3px var(--fx-brand-wash);
+  outline: none;
+}
+
+/* Pagination — hover premium */
+.fx-page,
+.fx-page-step {
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard), 
+    color var(--fx-duration) var(--fx-ease-standard),
+    background var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration-fast) var(--fx-ease-out),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-page:hover,
+.fx-page-step:hover { 
+  border-color: var(--fx-text); 
+  color: var(--fx-text); 
+  transform: translateY(-1px);
+  box-shadow: var(--fx-elevation-1);
+}
+.fx-page:active,
+.fx-page-step:active {
+  transform: scale(0.95);
+}
+
+/* ── Footer — Refonte premium ────────────────────────────── */
+
+.ed-footer {
+  border-top: 1px solid var(--fx-border);
+  background: var(--fx-bg-sunken);
+  padding: var(--fx-space-9) 0 var(--fx-space-7);
+}
+
+.ed-newsblock {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--fx-space-6);
+  align-items: center;
+  padding-bottom: var(--fx-space-7);
+  border-bottom: 1px solid var(--fx-border);
+  margin-bottom: var(--fx-space-7);
+}
+@media (max-width: 760px) {
+  .ed-newsblock { grid-template-columns: 1fr; }
+}
+
+.ed-foot-links a {
+  transition: color var(--fx-duration) var(--fx-ease-standard);
+}
+.ed-foot-links a:hover {
+  color: var(--fx-text);
+}
+
+/* ── Scroll-to-top button ────────────────────────────────── */
+
+.fx-scroll-top {
+  position: fixed;
+  bottom: var(--fx-space-5);
+  right: var(--fx-space-5);
+  z-index: 30;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  box-shadow: var(--fx-elevation-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: 
+    opacity var(--fx-duration-slow) var(--fx-ease-out),
+    transform var(--fx-duration-slow) var(--fx-ease-out),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+  pointer-events: none;
+}
+.fx-scroll-top.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.fx-scroll-top:hover {
+  box-shadow: var(--fx-elevation-3);
+  border-color: var(--fx-brand);
+}
+.fx-scroll-top:active {
+  transform: scale(0.9);
+}
+
+/* ── Global polish ───────────────────────────────────────── */
+
+/* Smooth underline pour tous les liens dans le contenu */
+.ed-prose a,
+.fx-body a {
+  text-decoration: underline;
+  text-decoration-color: var(--fx-brand-subtle);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--fx-duration) var(--fx-ease-standard);
+}
+.ed-prose a:hover,
+.fx-body a:hover {
+  text-decoration-color: var(--fx-brand);
+}
+
+/* Selection couleur marque */
+::selection {
+  background: var(--fx-brand-wash);
+  color: var(--fx-ink-900);
+}
+
+/* Scrollbar premium (Webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--fx-ink-300);
+  border-radius: var(--fx-radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fx-ink-500);
+  background-clip: content-box;
+}

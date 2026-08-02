@@ -1,3 +1,7 @@
+"use client";
+
+import { motion } from "framer-motion";
+
 export type VerdictData = {
   level: string;
   headline: string;
@@ -26,18 +30,46 @@ export function Verdict({ v }: { v: VerdictData }) {
     : "neutre";
 
   return (
-    <section className={`vd vd-${level}`} aria-label="Verdict FILON">
+    <motion.section
+      className={`vd vd-${level}`}
+      aria-label="Verdict FILON"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+    >
       <span className="vd-eyebrow">Verdict FILON</span>
       <div className="vd-head">
-        <span className="vd-dot" aria-hidden="true" />
+        <motion.span
+          className="vd-dot"
+          aria-hidden="true"
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.3, type: "spring", stiffness: 400, damping: 15 }}
+        />
         <b className="vd-title">{v.headline}</b>
       </div>
       {v.reasons?.length > 0 && (
-        <ul className="vd-reasons">
+        <motion.ul
+          className="vd-reasons"
+          initial="hidden"
+          animate="show"
+          variants={{
+            hidden: { opacity: 0 },
+            show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.2 } },
+          }}
+        >
           {v.reasons.map((r, i) => (
-            <li key={i}>{r}</li>
+            <motion.li
+              key={i}
+              variants={{
+                hidden: { opacity: 0, x: -8 },
+                show: { opacity: 1, x: 0 },
+              }}
+            >
+              {r}
+            </motion.li>
           ))}
-        </ul>
+        </motion.ul>
       )}
       {v.samples > 0 && (
         <p className="vd-meta">
@@ -45,6 +77,6 @@ export function Verdict({ v }: { v: VerdictData }) {
           {v.tracked_days > 1 ? "s" : ""} · {CONFIDENCE_LABEL[v.confidence] ?? v.confidence}
         </p>
       )}
-    </section>
+    </motion.section>
   );
 }
