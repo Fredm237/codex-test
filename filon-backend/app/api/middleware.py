@@ -63,7 +63,23 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     Limites : 30 requêtes/minute pour /api/advise, 60/min pour le reste.
     """
 
-    def __init__(self, app, expensive_limit: int = 30, general_limit: int = 120):
+    # Le rendu serveur de Vercel sort par quelques adresses partagées : une
+    # limite par IP compte donc *toutes* les pages régénérées ensemble, pas un
+    # visiteur. Une page catalogue déclenche à elle seule quatre appels ; à
+    # 120/min, une trentaine de régénérations suffisaient à nous limiter
+    # nous-mêmes, et le site affichait « catalogue momentanément indisponible ».
+    #
+    # Les lectures de catalogue sont donc exemptées : elles sont mises en cache,
+    # ne coûtent rien et ne sont pas la cible d'un abus. Le garde-fou reste là
+    # où il sert — les endpoints qui appellent un modèle.
+    _EXEMPT_PREFIXES = ("/health", "/api/catalog")
+
+    # Nombre d'adresses suivies simultanément. Sans plafond, le dictionnaire
+    # gardait une entrée par IP vue depuis le démarrage : une fuite lente, sur
+    # un service dont la mémoire a déjà saturé une fois.
+    _MAX_TRACKED_IPS = 10_000
+
+    def __init__(self, app, expensive_limit: int = 30, general_limit: int = 240):
         super().__init__(app)
         self._expensive_limit = expensive_limit
         self._general_limit = general_limit
@@ -82,21 +98,29 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         window = 60.0  # 1 minute
 
         # Nettoyage des entrées expirées
-        self._requests[ip] = [t for t in self._requests[ip] if now - t < window]
+        recent = [t for t in self._requests[ip] if now - t < window]
 
-        if len(self._requests[ip]) >= limit:
+        # Purge périodique des adresses devenues inactives : c'est la seule
+        # chose qui empêche le dictionnaire de croître indéfiniment.
+        if len(self._requests) > self._MAX_TRACKED_IPS:
+            for stale, times in list(self._requests.items()):
+                if not times or now - times[-1] >= window:
+                    del self._requests[stale]
+
+        if len(recent) >= limit:
+            self._requests[ip] = recent
             return True
 
-        self._requests[ip].append(now)
+        recent.append(now)
+        self._requests[ip] = recent
         return False
 
     async def dispatch(self, request: Request, call_next: Callable) -> Response:
-        # Pas de rate limiting sur les health checks
-        if request.url.path.startswith("/health"):
+        path = request.url.path
+        if path.startswith(self._EXEMPT_PREFIXES):
             return await call_next(request)
 
         ip = self._get_client_ip(request)
-        path = request.url.path
 
         # Limite plus stricte pour les endpoints coûteux
         is_expensive = "/advise" in path or "/chat" in path

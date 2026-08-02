@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import platform
 import sys
+import asyncio
 import time
 
 from fastapi import APIRouter
@@ -27,16 +28,32 @@ router = APIRouter(tags=["health"])
 _START_TIME = time.time()
 
 
+# Railway sonde /health en continu et coupe le déploiement au bout de 120 s.
+# Sans délai maximum, une base lente fait *pendre* la sonde au lieu de la faire
+# échouer proprement : c'est exactement le mode de panne des deux échecs de
+# déploiement déjà constatés. Deux secondes suffisent à distinguer une base
+# vivante d'une base injoignable.
+_DB_CHECK_TIMEOUT = 2.0
+
+
 async def _check_db() -> dict:
-    """Vérifie activement la connexion à la base de données."""
+    """Vérifie activement la connexion à la base de données, sous délai borné."""
     if not db.is_enabled():
         return {"status": "disabled", "latency_ms": 0}
-    try:
+
+    async def _probe() -> float:
         start = time.time()
         async with db.session_scope() as session:
             await session.execute(db.text("SELECT 1"))
-        latency = (time.time() - start) * 1000
+        return (time.time() - start) * 1000
+
+    try:
+        latency = await asyncio.wait_for(_probe(), timeout=_DB_CHECK_TIMEOUT)
         return {"status": "ok", "latency_ms": round(latency, 1)}
+    except asyncio.TimeoutError:
+        # « lent » n'est pas « mort » : on le distingue pour ne pas déclencher
+        # un redémarrage alors que la base répond, en retard.
+        return {"status": "slow", "latency_ms": _DB_CHECK_TIMEOUT * 1000}
     except Exception as exc:
         return {"status": "error", "error": str(exc)[:100], "latency_ms": 0}
 

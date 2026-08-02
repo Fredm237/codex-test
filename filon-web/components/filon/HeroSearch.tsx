@@ -9,14 +9,12 @@
 
 import { useState, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useLocale } from "@/lib/i18n";
 
-const SUGGESTIONS = [
-  "Un aspirateur robot fiable sous 300 €",
-  "Chemise en lin homme",
-  "Casque à réduction de bruit",
-];
+const SUGGESTION_KEYS = ["hero.sug1", "hero.sug2", "hero.sug3"];
 
 export function HeroSearch() {
+  const { t } = useLocale();
   const [query, setQuery] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -51,8 +49,8 @@ export function HeroSearch() {
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setFocused(true)}
           onBlur={() => setFocused(false)}
-          placeholder="Que voulez-vous acheter ?"
-          aria-label="Que voulez-vous acheter ?"
+          placeholder={t("hero.ask")}
+          aria-label={t("hero.ask")}
           autoComplete="off"
         />
         <motion.button
@@ -62,7 +60,7 @@ export function HeroSearch() {
           whileTap={{ scale: 0.97 }}
           transition={{ type: "spring", stiffness: 400, damping: 20 }}
         >
-          Demander
+          {t("hero.askBtn")}
         </motion.button>
       </motion.form>
 
@@ -75,21 +73,24 @@ export function HeroSearch() {
           show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.3 } },
         }}
       >
-        {SUGGESTIONS.map((s) => (
-          <motion.a
-            key={s}
-            className="fx-chip"
-            href={`/recherche/?q=${encodeURIComponent(s)}`}
-            variants={{
-              hidden: { opacity: 0, y: 8 },
-              show: { opacity: 1, y: 0 },
-            }}
-            whileHover={{ y: -2, boxShadow: "var(--fx-elevation-1)" }}
-            transition={{ type: "spring", stiffness: 300, damping: 20 }}
-          >
-            {s}
-          </motion.a>
-        ))}
+        {SUGGESTION_KEYS.map((key) => {
+          const label = t(key);
+          return (
+            <motion.a
+              key={key}
+              className="fx-chip"
+              href={`/recherche/?q=${encodeURIComponent(label)}`}
+              variants={{
+                hidden: { opacity: 0, y: 8 },
+                show: { opacity: 1, y: 0 },
+              }}
+              whileHover={{ y: -2, boxShadow: "var(--fx-elevation-1)" }}
+              transition={{ type: "spring", stiffness: 300, damping: 20 }}
+            >
+              {label}
+            </motion.a>
+          );
+        })}
       </motion.div>
     </div>
   );

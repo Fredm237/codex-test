@@ -13,26 +13,13 @@
 
 import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
+import { useLocale } from "@/lib/i18n";
 
-const STEPS: Array<{ n: string; title: string; body: string }> = [
-  {
-    n: "01",
-    title: "On réunit les offres",
-    body: "Le même produit est vendu par plusieurs marchands, sous des libellés différents. FILON les regroupe par code-barres pour qu'une comparaison porte bien sur un seul et même article.",
-  },
-  {
-    n: "02",
-    title: "On garde l'historique",
-    body: "Chaque prix est relevé et conservé. C'est la seule façon de savoir si une promotion en est une, ou si le prix barré n'a jamais existé.",
-  },
-  {
-    n: "03",
-    title: "On tranche",
-    body: "Le Verdict compare le prix du jour à ce que nous avons réellement observé, et le dit franchement : bon moment, moment ordinaire, ou attendez. Sans historique suffisant, il le dit aussi.",
-  },
-];
+// Les trois temps, désignés par leurs clés : le texte vit au dictionnaire.
+const STEP_KEYS = ["1", "2", "3"];
 
 export function Method() {
+  const { t } = useLocale();
   return (
     <section className="fx-section" id="methode">
       <div className="fx-container">
@@ -42,36 +29,36 @@ export function Method() {
           viewport={{ once: true, margin: "-80px" }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
         >
-          <span className="fx-eyebrow brand">La méthode</span>
+          <span className="fx-eyebrow brand">{t("method.eyebrow")}</span>
           <h2 className="fx-h2 fx-section-title">
-            Un avis vaut ce que vaut
+            {t("method.t1")}
             <br />
-            <span className="it">ce qu&apos;on a mesuré.</span>
+            <span className="it">{t("method.t2")}</span>
           </h2>
         </motion.div>
 
-        <motion.ol 
+        <motion.ol
           className="fx-steps"
           initial="hidden"
           whileInView="show"
           viewport={{ once: true, margin: "-60px" }}
           variants={{
             hidden: { opacity: 0 },
-            show: { opacity: 1, transition: { staggerChildren: 0.12 } }
+            show: { opacity: 1, transition: { staggerChildren: 0.12 } },
           }}
         >
-          {STEPS.map((s) => (
-            <motion.li 
-              className="fx-card padded fx-step" 
-              key={s.n}
+          {STEP_KEYS.map((n) => (
+            <motion.li
+              className="fx-card padded fx-step"
+              key={n}
               variants={{
                 hidden: { opacity: 0, y: 24 },
-                show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } }
+                show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } },
               }}
             >
-              <span className="fx-step-n">{s.n}</span>
-              <h3 className="fx-h3">{s.title}</h3>
-              <p className="fx-body">{s.body}</p>
+              <span className="fx-step-n">0{n}</span>
+              <h3 className="fx-h3">{t(`method.s${n}t`)}</h3>
+              <p className="fx-body">{t(`method.s${n}b`)}</p>
             </motion.li>
           ))}
         </motion.ol>
@@ -81,26 +68,28 @@ export function Method() {
 }
 
 export function Closing({ proof }: { proof: Proof | null }) {
+  const { t, locale } = useLocale();
+  const tag = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
   const stats = proof?.stats ?? null;
   return (
     <section className="fx-section ink fx-closing">
-      <motion.div 
+      <motion.div
         className="fx-container narrow"
         initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className="fx-eyebrow">Avant de payer</span>
+        <span className="fx-eyebrow">{t("closing.eyebrow")}</span>
         <h2 className="fx-h2 fx-closing-title">
-          Posez la question à FILON.
+          {t("closing.t1")}
           <br />
-          <span className="it">C&apos;est gratuit, et c&apos;est rapide.</span>
+          <span className="it">{t("closing.t2")}</span>
         </h2>
         <p className="fx-lede fx-closing-lede">
           {stats
-            ? `${stats.offers.toLocaleString("fr-BE")} offres suivies chez ${stats.merchants.toLocaleString("fr-BE")} marchands partenaires.`
-            : "Les offres de nos marchands partenaires, réunies et suivies dans le temps."}
+            ? `${stats.offers.toLocaleString(tag)} ${t("closing.factsA")} ${stats.merchants.toLocaleString(tag)} ${t("closing.factsB")}`
+            : t("closing.fallback")}
         </p>
         <motion.p 
           className="fx-closing-actions"
@@ -110,10 +99,10 @@ export function Closing({ proof }: { proof: Proof | null }) {
           transition={{ delay: 0.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
         >
           <a className="fx-btn on-ink" href="/recherche/">
-            Essayer le copilote
+            {t("cta.try")}
           </a>
           <a className="fx-btn secondary fx-btn-on-ink-ghost" href="/catalogue/">
-            Explorer le catalogue
+            {t("hero.explore")}
           </a>
         </motion.p>
       </motion.div>

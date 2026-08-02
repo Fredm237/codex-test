@@ -1,3 +1,5 @@
+"use client";
+
 // Navigation du catalogue : l'arborescence complète, dépliable.
 //
 // Elle remplace un mur de puces. Vingt-six rayons et cent sous-rayons étalés
@@ -12,10 +14,9 @@
 // aller-retour.
 
 import { href, type CatalogueQuery, type Department } from "@/lib/catalogue";
+import { useLocale } from "@/lib/i18n";
 
-function count(n: number): string {
-  return n.toLocaleString("fr-BE");
-}
+const TAG = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
 
 export function CatalogueNav({
   departments,
@@ -30,16 +31,18 @@ export function CatalogueNav({
   activeCategory: { slug: string } | null;
   activeSubcategory: string | null;
 }) {
+  const { t, locale } = useLocale();
+  const count = (n: number) => n.toLocaleString(TAG[locale]);
   return (
-    <nav className="fx-nav-tree" aria-label="Rayons du catalogue">
-      <p className="fx-nav-tree-title">Rayons</p>
+    <nav className="fx-nav-tree" aria-label={t("cat.aisles")}>
+      <p className="fx-nav-tree-title">{t("cat.aisles")}</p>
 
       <a
         className="fx-nav-all"
         href="/catalogue/"
         aria-current={!activeDepartment ? "true" : undefined}
       >
-        Tout le catalogue
+        {t("cat.all")}
       </a>
 
       {departments.map((d) => {
@@ -68,7 +71,7 @@ export function CatalogueNav({
                   aria-current={openDepartment && !activeCategory ? "true" : undefined}
                   href={href({}, { dept: d.slug })}
                 >
-                  Tout {d.name}
+                  {t("cat.allOf")} {d.name}
                 </a>
               </li>
 
@@ -113,7 +116,7 @@ export function CatalogueNav({
                             aria-current={openCategory && !activeSubcategory ? "true" : undefined}
                             href={href({}, { dept: d.slug, cat: c.slug })}
                           >
-                            Tout {c.name}
+                            {t("cat.allOf")} {c.name}
                           </a>
                         </li>
                         {subs.map((s) => (
@@ -144,7 +147,7 @@ export function CatalogueNav({
           l'arbre se referme, et il fallait pouvoir les retirer sans le rouvrir. */}
       {(query.q || query.brand || query.min || query.max) && (
         <a className="fx-nav-reset" href={href({}, { dept: query.dept, cat: query.cat, sub: query.sub })}>
-          Effacer les filtres
+          {t("cat.clear")}
         </a>
       )}
     </nav>

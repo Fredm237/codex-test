@@ -293,8 +293,24 @@ export function SearchAssistant() {
   const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
+  // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
+  // devise et les marchands disponibles en dépendent, et un visiteur français
+  // n'a aucune raison de partir sur la Belgique. Le sélecteur reste maître —
+  // la détection ne fait que choisir la valeur de départ.
   const [country, setCountry] = useState("be");
-  const { locale } = useLocale();
+  const { locale, country: geoCountry } = useLocale();
+  const geoApplied = useRef(false);
+  useEffect(() => {
+    if (geoApplied.current) return;
+    const detected = (geoCountry || "").toLowerCase();
+    if (!detected) return;
+    // La Belgique est bilingue : le néerlandophone part sur « be-nl ».
+    const code = detected === "be" && locale === "nl" ? "be-nl" : detected;
+    if (COUNTRIES.some((c) => c.code === code)) {
+      setCountry(code);
+      geoApplied.current = true;
+    }
+  }, [geoCountry, locale]);
   const S = SL[locale];
   const runId = useRef(0);
 

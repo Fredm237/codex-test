@@ -1378,3 +1378,222 @@
   background: var(--fx-ink-500);
   background-clip: content-box;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   VIVANT
+   Un site est mort quand rien n'y bouge et que rien n'y date.
+   Trois moyens, dans cet ordre d'importance : du contenu qui
+   change tout seul (les rangées), une fraîcheur affichée (le
+   pouls), et du mouvement qui porte une information (la
+   cascade d'apparition, l'ordre de lecture).
+   Tout est coupé par prefers-reduced-motion.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── Pouls ───────────────────────────────────────────────── */
+
+.fx-pulse {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fx-space-2);
+  margin-top: var(--fx-space-4);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.fx-pulse b { color: var(--fx-text-secondary); font-weight: 600; }
+.fx-pulse-drop b { color: var(--fx-gain-strong); }
+.fx-pulse span[aria-hidden] { color: var(--fx-ink-300); }
+
+.fx-pulse-dot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: var(--fx-radius-full);
+  background: var(--fx-ink-300);
+}
+/* Ne bat que si un relevé a vraiment eu lieu récemment : un point qui clignote
+   en permanence ment sur l'activité du service. */
+.fx-pulse-dot.on {
+  background: var(--fx-gain);
+  animation: fx-beat 2.4s ease-in-out infinite;
+}
+@keyframes fx-beat {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(10, 125, 116, 0.5); }
+  50% { box-shadow: 0 0 0 5px rgba(10, 125, 116, 0); }
+}
+
+/* ── Rangées ─────────────────────────────────────────────── */
+
+.fx-rails {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(36px, 5vw, 60px);
+  margin-top: var(--fx-space-7);
+}
+.fx-rail-head { margin-bottom: var(--fx-space-4); }
+.fx-rail-title { font-size: var(--fx-text-xl); }
+.fx-rail-head .fx-fine { margin-top: 4px; }
+
+.fx-rail-scroll {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(190px, 220px);
+  gap: var(--fx-space-4);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  /* Marge négative compensée : les cartes peuvent lever au survol sans être
+     coupées par le conteneur qui défile. */
+  padding: 6px 6px 16px;
+  margin: -6px -6px -16px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--fx-border-strong) transparent;
+}
+.fx-rail-scroll::-webkit-scrollbar { height: 6px; }
+.fx-rail-scroll::-webkit-scrollbar-thumb {
+  background: var(--fx-border-strong);
+  border-radius: var(--fx-radius-full);
+}
+.fx-rail-item { scroll-snap-align: start; }
+
+/* ── Cascade d'apparition ────────────────────────────────── */
+
+/* Le décalage suit l'ordre de lecture : le regard est conduit, il ne subit pas
+   une animation. Plafonné à huit crans — au-delà, l'attente se voit. */
+.fx-stagger .fx-rail-item,
+.fx-stagger > .fx-product {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.fx-stagger.shown .fx-rail-item,
+.fx-stagger.shown > .fx-product {
+  opacity: 1;
+  transform: none;
+  transition:
+    opacity 420ms var(--fx-ease-out),
+    transform 420ms var(--fx-ease-out);
+  transition-delay: calc(min(var(--i, 0), 8) * 45ms);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-stagger .fx-rail-item,
+  .fx-stagger > .fx-product { opacity: 1; transform: none; transition: none; }
+  .fx-pulse-dot.on { animation: none; }
+}
+
+/* ── Démonstrations : promesse + objet réel sur une scène de vie ──
+   Le dispositif central de la home de Phia, et de loin le plus efficace :
+   une photo d'une personne, et par-dessus une carte montrant un article
+   nommé avec son prix. La promesse et sa preuve occupent le même bloc.
+   Ce n'est pas une animation qui fait vivre la page — c'est la présence
+   humaine et l'objet réel. */
+
+.fx-shows {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(56px, 8vw, 112px);
+}
+
+.fx-show {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 72px);
+  align-items: center;
+}
+/* L'alternance gauche/droite évite le rythme mécanique d'une liste : deux
+   panneaux identiques d'affilée se lisent comme un gabarit. */
+.fx-show.flipped .fx-show-copy { order: 2; }
+@media (max-width: 860px) {
+  .fx-show { grid-template-columns: minmax(0, 1fr); }
+  .fx-show.flipped .fx-show-copy { order: 0; }
+}
+
+.fx-show-title { margin-top: var(--fx-space-4); font-size: var(--fx-text-2xl); }
+.fx-show-body { margin-top: var(--fx-space-4); max-width: 44ch; }
+
+.fx-show-stage { position: relative; }
+.fx-show-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--fx-radius-lg);
+}
+
+/* Carte posée sur la photo, débordant légèrement : ce léger dépassement est
+   ce qui donne la profondeur — une carte strictement contenue paraît collée. */
+.fx-show-card {
+  position: absolute;
+  left: clamp(-18px, -2vw, -8px);
+  bottom: clamp(-16px, -2vw, -8px);
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-3);
+  max-width: min(88%, 340px);
+  padding: var(--fx-space-3);
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-md);
+  box-shadow: var(--fx-elevation-3);
+}
+.fx-show-thumb {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  object-fit: contain;
+  background: var(--fx-bg-sunken);
+  border-radius: var(--fx-radius-sm);
+}
+.fx-show-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.fx-show-brand {
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+}
+.fx-show-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--fx-text);
+}
+.fx-show-price { display: flex; align-items: baseline; gap: 6px; margin-top: 2px; }
+.fx-show-price b {
+  font-size: var(--fx-text-base);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.fx-show-price s { font-size: var(--fx-text-xs); color: var(--fx-text-muted); }
+.fx-show-tag { position: absolute; top: -10px; right: var(--fx-space-3); }
+
+/* La carte monte à la rencontre du regard, la photo se pose : deux vitesses
+   pour que l'objet paraisse posé *sur* la scène et non peint dedans. */
+.fx-show .fx-show-photo,
+.fx-show .fx-show-card {
+  opacity: 0;
+  transform: translateY(16px);
+}
+.fx-show.shown .fx-show-photo {
+  opacity: 1;
+  transform: none;
+  transition: opacity 520ms var(--fx-ease-out), transform 520ms var(--fx-ease-out);
+}
+.fx-show.shown .fx-show-card {
+  opacity: 1;
+  transform: none;
+  transition: opacity 460ms var(--fx-ease-out) 160ms, transform 460ms var(--fx-ease-out) 160ms;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-show .fx-show-photo,
+  .fx-show .fx-show-card { opacity: 1; transform: none; transition: none; }
+}
+
+/* Le pouls sous le hero, sans section propre : il appartient à la promesse
+   qui le précède, pas à un bloc séparé. */
+.fx-home-pulse { margin-top: calc(-1 * var(--fx-space-5)); }
+.fx-home-pulse .fx-pulse { margin-top: 0; }

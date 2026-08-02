@@ -18,6 +18,7 @@
 
 import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
+import { useLocale } from "@/lib/i18n";
 import { HeroSearch } from "./HeroSearch";
 
 function money(value: number, currency: string): string {
@@ -29,6 +30,8 @@ function money(value: number, currency: string): string {
 }
 
 export function Hero({ proof }: { proof: Proof | null }) {
+  const { t, locale } = useLocale();
+  const tag = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
   const product = proof?.product ?? null;
   const stats = proof?.stats ?? null;
 
@@ -41,20 +44,19 @@ export function Hero({ proof }: { proof: Proof | null }) {
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
         <div className="fx-hero-copy">
-          <span className="fx-eyebrow brand">Copilote d&apos;achat · Belgique</span>
+          <span className="fx-eyebrow brand">{t("hero.eyebrowNew")}</span>
 
           <h1 className="fx-display xl fx-hero-title">
-            Est-ce vraiment
+            {t("hero.l1")}
             <br />
-            le bon moment
+            {t("hero.l2")}
             <br />
-            <span className="it">pour acheter&nbsp;?</span>
+            <span className="it">{t("hero.l3")}</span>
           </h1>
 
           <p className="fx-lede fx-hero-lede">
-            FILON réunit les offres de {stats ? stats.merchants.toLocaleString("fr-BE") : "nos"} marchands
-            partenaires, conserve l&apos;historique des prix, et vous dit ce que vaut
-            celui d&apos;aujourd&apos;hui.
+            {t("hero.ledeA")} {stats ? stats.merchants.toLocaleString(tag) : t("hero.ledeOur")}{" "}
+            {t("hero.ledeB")}
           </p>
 
           <HeroSearch />
@@ -63,7 +65,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
               plein se lisait comme une puce de plus. */}
           <p className="fx-hero-actions">
             <a className="fx-hero-secondary" href="/catalogue/">
-              Explorer le catalogue
+              {t("hero.explore")}
               <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
                 <path
                   d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"
@@ -79,11 +81,11 @@ export function Hero({ proof }: { proof: Proof | null }) {
 
           {stats && (
             <p className="fx-hero-facts">
-              <span>{stats.offers.toLocaleString("fr-BE")} offres suivies</span>
+              <span>{stats.offers.toLocaleString(tag)} {t("hero.offersTracked")}</span>
               <span aria-hidden="true">·</span>
-              <span>{stats.multiMerchant.toLocaleString("fr-BE")} produits comparés chez plusieurs marchands</span>
+              <span>{stats.multiMerchant.toLocaleString(tag)} {t("hero.multiMerchant")}</span>
               <span aria-hidden="true">·</span>
-              <span>{stats.snapshots.toLocaleString("fr-BE")} relevés de prix</span>
+              <span>{stats.snapshots.toLocaleString(tag)} {t("hero.snapshots")}</span>
             </p>
           )}
         </div>
@@ -98,8 +100,8 @@ export function Hero({ proof }: { proof: Proof | null }) {
           >
             <article className="fx-card fx-verdict-card">
               <header className="fx-verdict-head">
-                <span className="fx-badge brand">Produit suivi</span>
-                <span className="fx-fine">{product.merchants} marchands le vendent</span>
+                <span className="fx-badge brand">{t("hero.tracked")}</span>
+                <span className="fx-fine">{product.merchants} {t("hero.sellIt")}</span>
               </header>
 
               <div className="fx-verdict-product">
@@ -117,21 +119,21 @@ export function Hero({ proof }: { proof: Proof | null }) {
 
               <dl className="fx-verdict-rows">
                 <div>
-                  <dt>Le plus cher constaté</dt>
+                  <dt>{t("hero.highest")}</dt>
                   <dd className="strike">{money(product.priceMax, product.currency)}</dd>
                 </div>
                 <div>
-                  <dt>Le moins cher constaté</dt>
+                  <dt>{t("hero.lowest")}</dt>
                   <dd className="lead">{money(product.priceMin, product.currency)}</dd>
                 </div>
               </dl>
 
               <footer className="fx-verdict-foot">
                 <span className="fx-badge gain">
-                  −{money(product.priceMax - product.priceMin, product.currency)} d&apos;écart
+                  −{money(product.priceMax - product.priceMin, product.currency)} {t("hero.gap")}
                 </span>
                 <a className="fx-verdict-link" href={`/produits/${product.ean}/`}>
-                  Voir le dossier
+                  {t("hero.dossier")}
                   <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
                     <path
                       d="M3 8h9M8.5 4.5 12 8l-3.5 3.5"
@@ -147,7 +149,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
             </article>
 
             <p className="fx-hero-panel-note">
-              Données lues dans notre catalogue, pas un exemple illustratif.
+              {t("hero.realData")}
             </p>
           </motion.aside>
         )}

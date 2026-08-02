@@ -50,11 +50,13 @@ export type CatalogueQuery = {
   per?: string;
 };
 
+// Clés de dictionnaire plutôt que libellés : le tri doit se lire en NL et en
+// EN comme en FR.
 export const SORTS = [
-  { value: "relevance", label: "Pertinence" },
-  { value: "price_asc", label: "Prix croissant" },
-  { value: "price_desc", label: "Prix décroissant" },
-  { value: "name", label: "Nom" },
+  { value: "relevance", labelKey: "cat.sortRelevance" },
+  { value: "price_asc", labelKey: "cat.sortPriceAsc" },
+  { value: "price_desc", labelKey: "cat.sortPriceDesc" },
+  { value: "name", labelKey: "cat.sortName" },
 ] as const;
 
 export const PER_PAGE = [24, 48, 96] as const;
@@ -72,6 +74,34 @@ async function getJson(path: string, revalidate: number): Promise<any | null> {
   } catch {
     return null;
   }
+}
+
+export type PulsePayload = {
+  live: boolean;
+  lastReading: string | null;
+  readings24h: number;
+  drops24h: number;
+} | null;
+
+/** Le battement du catalogue. Fenêtre de cache courte : c'est précisément ce
+ *  chiffre qui doit paraître frais. */
+export async function getPulse(): Promise<PulsePayload> {
+  const data = await getJson("/api/catalog/pulse", 120);
+  if (!data?.live) return null;
+  return {
+    live: true,
+    lastReading: data.last_reading ?? null,
+    readings24h: Number(data.readings_24h || 0),
+    drops24h: Number(data.drops_24h || 0),
+  };
+}
+
+/** Rangées thématiques — le contenu qui change tout seul d'un jour à l'autre. */
+export async function getRails(): Promise<Array<{ key: string; items: any[] }>> {
+  const data = await getJson("/api/catalog/highlights?limit=12", 300);
+  return (data?.sections || []).filter(
+    (s: { items?: unknown[] }) => (s.items || []).length > 0
+  );
 }
 
 export async function getDepartments(): Promise<Department[]> {
