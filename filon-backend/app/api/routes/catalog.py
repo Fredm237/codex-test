@@ -1128,11 +1128,13 @@ async def merchant_profiles_endpoint(
     items = [
         {
             "merchant": noms.get(mid, str(mid)),
-            "rayon": rayon,
-            "part_pct": round(part * 100, 1),
-            "offres": total,
+            "rayon": p.rayon,
+            "part_pct": round(p.part * 100, 1),
+            "offres": p.total,
+            # Seconde activité du marchand, laissée intacte par le réalignement.
+            "rayons_proteges": sorted(p.proteges),
         }
-        for mid, (rayon, part, total) in profils.items()
+        for mid, p in profils.items()
     ]
     items.sort(key=lambda x: x["offres"], reverse=True)
     return {"specialistes": len(items), "items": items}

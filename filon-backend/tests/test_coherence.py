@@ -71,7 +71,7 @@ class TestSpecialiste:
         await session.commit()
 
         profils = await coherence.merchant_profiles(session)
-        assert profils[m.id][0] == "Loisirs créatifs"
+        assert profils[m.id].rayon == "Loisirs créatifs"
 
     async def test_les_egarees_sont_ramenees(self, session):
         m = await _merchant(session, "tissus-de-reve", 1)
@@ -88,14 +88,35 @@ class TestSpecialiste:
     async def test_la_simulation_ne_touche_a_rien(self, session):
         """Indispensable avant de modifier 795 000 lignes."""
         m = await _merchant(session, "acer", 2)
-        await _peupler(session, m, {"Informatique": 90, "Maison & Déco": 10})
+        await _peupler(session, m, {
+            "Informatique": 90, "Maison & Déco": 4, "Animalerie": 3, "Mode femme": 3,
+        })
         await session.commit()
 
         avant = await coherence.realign(session, dry_run=True)
         assert avant["offres_realignees"] == 10
 
         profils = await coherence.merchant_profiles(session)
-        assert profils[m.id][0] == "Informatique"
+        assert profils[m.id].rayon == "Informatique"
+
+    async def test_la_simulation_dit_d_ou_viennent_les_offres(self, session):
+        """« 24 369 offres » est invérifiable sans savoir chez qui."""
+        m = await _merchant(session, "tissus-de-reve", 3)
+        await _peupler(session, m, {
+            "Loisirs créatifs": 95, "Informatique": 2, "Auto & Moto": 2, "Animalerie": 1,
+        })
+        await session.commit()
+
+        res = await coherence.realign(session, dry_run=True)
+        assert res["detail"] == [
+            {
+                "merchant": "tissus-de-reve",
+                "vers": "Loisirs créatifs",
+                "offres": 5,
+                "sur": 100,
+                "rayons_proteges": [],
+            }
+        ]
 
 
 class TestGeneraliste:
@@ -112,6 +133,68 @@ class TestGeneraliste:
         assert await coherence.merchant_profiles(session) == {}
         res = await coherence.realign(session)
         assert res["offres_realignees"] == 0
+
+
+class TestSecondeActivite:
+    """Toute la règle suppose que la minorité est faite d'erreurs de mots-clés.
+
+    Or une erreur de mot-clé est *dispersée*. Une minorité concentrée dans un
+    seul rayon est une seconde activité : YesStyle vend de la beauté à 90 %, et
+    le reste est de la mode coréenne — 4 000 articles réels, qu'un réalignement
+    aveugle enterrerait en parfumerie.
+    """
+
+    async def test_un_rayon_secondaire_fourni_est_protege(self, session):
+        m = await _merchant(session, "yesstyle", 10)
+        await _peupler(session, m, {
+            "Beauté & Parfum": 906,   # l'activité principale
+            "Mode femme": 84,          # la seconde, bien réelle
+            "Informatique": 5,         # dispersé : du bruit
+            "Animalerie": 5,
+        })
+        await session.commit()
+
+        profils = await coherence.merchant_profiles(session)
+        assert profils[m.id].proteges == frozenset({"Mode femme"})
+
+        res = await coherence.realign(session)
+        # Les 84 de mode restent ; seules les dix dispersées sont ramenées.
+        assert res["offres_realignees"] == 10
+
+    async def test_une_minorite_dispersee_bouge_toujours(self, session):
+        """Le garde-fou ne doit pas neutraliser la règle elle-même."""
+        m = await _merchant(session, "tissus", 11)
+        await _peupler(session, m, {
+            "Loisirs créatifs": 950,
+            "Informatique": 20, "Auto & Moto": 20, "Animalerie": 10,
+        })
+        await session.commit()
+        assert (await coherence.realign(session))["offres_realignees"] == 50
+
+
+class TestRayonFourreTout:
+    """« Accessoires » se déclenche sur le mot « accessoire » lui-même.
+
+    Un vendeur de déshumidificateurs dont les libellés disent « accessoire
+    pour… » y tombe à 90 % — mesuré sur Trotec. La dominance est réelle ; ce
+    qu'elle mesure ne l'est pas, et y ramener le reste enterrerait les seules
+    offres correctement classées.
+    """
+
+    async def test_accessoires_ne_peut_pas_etre_une_destination(self, session):
+        m = await _merchant(session, "trotec", 12)
+        await _peupler(session, m, {"Accessoires": 90, "Maison & Déco": 10})
+        await session.commit()
+
+        assert await coherence.merchant_profiles(session) == {}
+        assert (await coherence.realign(session))["offres_realignees"] == 0
+
+    async def test_mais_reste_un_rayon_valable_pour_une_offre(self, session):
+        """Interdire la destination n'interdit pas le rayon."""
+        m = await _merchant(session, "mode", 13)
+        await _peupler(session, m, {"Mode femme": 90, "Accessoires": 10})
+        await session.commit()
+        assert (await coherence.merchant_profiles(session))[m.id].rayon == "Mode femme"
 
 
 class TestGardeFous:
