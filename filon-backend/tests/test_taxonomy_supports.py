@@ -71,6 +71,27 @@ class TestLObjetFiniLemporteSurLaMatiere:
     def test_les_vetements_restent_des_vetements(self):
         assert _rayon("Chemise en lin homme manches longues") == "Mode homme"
         assert _rayon("Robe en coton bio femme") == "Mode femme"
+        assert _rayon("Pyjama en jersey de coton enfant") == "Mode enfant"
+
+
+class TestCestLaTeteQuiDecide:
+    """Le garde-fou inverse ne peut pas être un simple veto.
+
+    « S'il y a un nom d'objet fini, on abandonne le support » envoyait
+    « Tissu chemise 100% coton » en Mode — un tissu vendu au mètre pour en
+    coudre une chemise, chez un marchand qui ne vend que du tissu. Le libellé
+    est au catalogue.
+
+    Ce qui départage les deux sens, c'est la position : le premier des deux
+    est le nom de tête, le second ne fait que le qualifier.
+    """
+
+    def test_un_tissu_a_coudre_reste_un_tissu(self):
+        assert _rayon("Tissu chemise 100% coton - Carreaux bleu & vert") == LOISIRS
+        assert _rayon("Tissu chemise - Carreaux bleu, rouge & rose") == LOISIRS
+
+    def test_et_l_objet_fini_garde_la_main_quand_il_est_en_tete(self):
+        assert _rayon("Housse de couette percale de coton 240x220") == MAISON
 
     def test_les_autres_rayons_ne_bougent_pas(self):
         attendu = {

@@ -516,6 +516,29 @@ def _has(pattern: str, text: str) -> bool:
     return re.search(pattern, text, re.IGNORECASE) is not None
 
 
+def _support_de_tete(text: str) -> str | None:
+    """Rayon du support, s'il tient la tête du libellé — sinon None.
+
+    Le principe est le même dans les deux sens : c'est le nom de tête qui
+    décide, et ce qui suit ne fait que le qualifier. « Housse de couette en
+    percale » est du linge de maison ; « Tissu chemise 100% coton » est du
+    tissu, vendu pour en coudre une chemise.
+
+    Comparer les deux positions dit lequel des deux est le nom de tête. Le
+    faire par un simple « s'il y a un objet fini, on abandonne le support »
+    envoyait ce second cas en Mode — il est au catalogue, chez un marchand
+    qui ne vend que du tissu.
+    """
+    fini = _OBJET_FINI.search(text)
+    limite = fini.start() if fini else len(text)
+    meilleur: tuple[int, str] | None = None
+    for category, pattern in _SUPPORTS:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m and m.start() < limite and (meilleur is None or m.start() < meilleur[0]):
+            meilleur = (m.start(), category)
+    return meilleur[1] if meilleur else None
+
+
 def classify(
     merchant_category: str | None,
     name: str | None = None,
@@ -541,11 +564,9 @@ def classify(
     for text in (name, merchant_category):
         if not text:
             continue
-        if _OBJET_FINI.search(text):
-            break
-        for category, pattern in _SUPPORTS:
-            if _has(pattern, text):
-                return category
+        support = _support_de_tete(text)
+        if support:
+            return support
 
     # Le nom d'abord, la catégorie du marchand ensuite : l'ordre porte la règle.
     for text in (name, merchant_category):
