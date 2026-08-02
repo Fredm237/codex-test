@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { fraunces } from "./fonts";
+import { fraunces, playfair, inter } from "./fonts";
 import { buildMetadata, organizationSchema, websiteSchema, JsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 
@@ -19,7 +19,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={fraunces.variable}>
+    <html lang="fr" className={`${fraunces.variable} ${playfair.variable} ${inter.variable}`}>
       <head>
         <JsonLd data={organizationSchema()} />
         <JsonLd data={websiteSchema()} />
