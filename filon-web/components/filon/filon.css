@@ -296,6 +296,47 @@
 .fx-step .fx-h3 { margin-top: var(--fx-space-4); }
 .fx-step .fx-body { margin-top: var(--fx-space-2); }
 
+/* ── Bande de preuves ────────────────────────────────────── */
+
+.fx-proof-stats { margin-top: var(--fx-space-7); }
+.fx-proof-stats .fx-card { text-align: center; }
+/* Quatre chiffres empilés en colonne unique gaspillaient un écran entier :
+   ils restent sur deux colonnes jusqu'en bas de l'échelle. */
+@media (max-width: 560px) {
+  .fx-proof-stats.fx-grid.cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--fx-space-3); }
+  .fx-proof-stats .fx-stat-value { font-size: var(--fx-text-xl); }
+}
+
+/* Les partenaires en liste de noms, pas en logos : nous n'hébergeons aucune
+   marque déposée, et un nom réel vaut mieux qu'un logo emprunté. */
+.fx-proof-merchants {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fx-space-2) var(--fx-space-4);
+  margin: var(--fx-space-6) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.fx-proof-merchants li {
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  color: var(--fx-text-secondary);
+}
+.fx-proof-note { margin-top: var(--fx-space-3); }
+
+.fx-proof-spread {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+  gap: clamp(28px, 5vw, 64px);
+  align-items: center;
+  margin-top: var(--fx-section-y);
+}
+@media (max-width: 900px) { .fx-proof-spread { grid-template-columns: minmax(0, 1fr); } }
+.fx-proof-spread-body { margin-top: var(--fx-space-4); max-width: 46ch; }
+
+.fx-proof-trust { margin-top: var(--fx-section-y); }
+.fx-proof-trust-body { margin-top: var(--fx-space-2); font-size: var(--fx-text-sm); }
+
 /* ── Clôture ─────────────────────────────────────────────── */
 
 .fx-closing { text-align: center; }

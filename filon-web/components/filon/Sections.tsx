@@ -7,7 +7,7 @@
 // partenaire n'allait jamais jusqu'au bout.
 //
 // Rien ici n'affirme de chiffre : les preuves chiffrées vivent dans
-// ProofSection, qui les lit dans le catalogue.
+// Proof, qui les lit dans le catalogue.
 
 import type { Proof } from "@/lib/proof";
 

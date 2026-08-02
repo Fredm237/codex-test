@@ -3,7 +3,7 @@ import { buildMetadata } from "@/lib/seo";
 import { Hero } from "@/components/filon/Hero";
 import { Method, Closing } from "@/components/filon/Sections";
 import { Transparency } from "@/components/editorial/EditorialSections";
-import { ProofSection } from "@/components/editorial/ProofSection";
+import { Proof } from "@/components/filon/Proof";
 import { Faq } from "@/components/editorial/Faq";
 import { getProof } from "@/lib/proof";
 
@@ -28,7 +28,7 @@ export default async function HomePage() {
     <>
       <Hero proof={proof} />
       <Method />
-      <ProofSection live={proof} />
+      <Proof live={proof} />
       <Transparency />
       <Faq />
       <Closing proof={proof} />
