@@ -18,16 +18,19 @@ dans `filon-web/lib/config.ts` (`CHROME_STORE_URL`) et **tous** les boutons
 **Nom** : FILON — le vrai prix, avant d'acheter
 
 **Description courte** (132 car. max) :
-> FILON trouve le vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis sur chaque fiche produit.
+> Votre copilote d'achat indépendant. Obtenez l'analyse complète des prix, du reconditionné et des codes promo sur chaque produit.
 
 **Description longue** :
-> FILON est votre copilote d'achat. Sur une fiche produit (Amazon, bol.com, Coolblue, MediaMarkt, Fnac, Cdiscount, Back Market…), FILON repère l'article et vous emmène en un clic vers l'analyse complète : le meilleur marchand du moment, l'équivalent reconditionné garanti quand il existe, le code promo vérifié et le cashback maximal — réunis en un seul « vrai prix ».
+> FILON est votre copilote d'achat indépendant, conçu pour vous aider à trouver le meilleur prix avant de finaliser votre commande. 
+> 
+> Lorsque vous consultez un produit sur vos boutiques en ligne préférées, FILON identifie l'article et rassemble pour vous toutes les offres disponibles sur le marché. En un seul clic, accédez à une analyse complète : le marchand le plus compétitif du moment, l'équivalent reconditionné garanti, les codes promotionnels vérifiés et le cashback disponible. Tous ces éléments sont calculés pour vous donner un seul indicateur clair : le vrai prix.
 >
-> • Gratuit, sans compte obligatoire.
-> • Indépendant : aucune marque ne peut acheter un meilleur classement.
-> • Respectueux : permissions minimales, aucune télémétrie, aucune revente de données.
+> Une expérience haut de gamme et transparente :
+> • Entièrement gratuit et sans création de compte obligatoire.
+> • Totalement indépendant : notre algorithme ne peut être influencé par aucun paiement ou placement sponsorisé.
+> • Respect strict de la vie privée : aucune télémétrie, aucune création de profil publicitaire et aucune revente de vos données personnelles.
 >
-> FILON ne fabrique aucun chiffre : le vrai prix est calculé sur des données réelles.
+> FILON ne se base pas sur des estimations, mais sur l'historique réel des prix. Ne surpayez plus jamais vos achats en ligne.
 
 **Catégorie** : Shopping
 **Langue** : Français

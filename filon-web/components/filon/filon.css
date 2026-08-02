@@ -78,45 +78,66 @@
 .pg-saving b { color: var(--fx-gain-strong); }
 .pg-offer { min-height: 60px; }
 
-/* ── Hero ────────────────────────────────────────────────── */
+/* ── Hero — Vidéo 3D en fond plein écran ──── */
 
 .fx-hero {
-  padding-top: var(--fx-page-top);
-  padding-bottom: var(--fx-section-y);
-  background:
-    radial-gradient(120% 80% at 82% 8%, var(--fx-brand-wash) 0%, transparent 58%),
-    var(--fx-bg);
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
 }
 
-.fx-hero-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
-  gap: clamp(32px, 5vw, 72px);
-  align-items: center;
-}
-.fx-hero.solo .fx-hero-grid { grid-template-columns: minmax(0, 1fr); max-width: 860px; }
-@media (max-width: 940px) {
-  .fx-hero-grid { grid-template-columns: minmax(0, 1fr); }
+.fx-hero-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
 }
 
-.fx-hero-title { margin-top: var(--fx-space-5); }
-.fx-hero-lede { margin-top: var(--fx-space-5); }
-.fx-hero-search { margin-top: var(--fx-space-6); }
-.fx-hero-actions { margin-top: var(--fx-space-5); }
-.fx-hero-secondary {
-  display: inline-flex;
-  align-items: center;
-  gap: 7px;
-  min-height: 44px;
-  font-size: var(--fx-text-base);
-  font-weight: 600;
-  color: var(--fx-text);
-  border-bottom: 1px solid var(--fx-border-strong);
-  transition: border-color var(--fx-duration) var(--fx-ease-standard);
+.fx-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1;
 }
-.fx-hero-secondary:hover { border-color: var(--fx-text); }
-.fx-hero-secondary svg { transition: transform var(--fx-duration) var(--fx-ease-out); }
-.fx-hero-secondary:hover svg { transform: translateX(3px); }
+
+.fx-hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--fx-space-7);
+  text-align: center;
+  padding: 120px 24px 60px;
+  max-width: 800px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.fx-hero-title {
+  font-size: clamp(28px, 7vw, 64px);
+  font-weight: 400;
+  line-height: 1.12;
+  color: #ffffff;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+.fx-hero-title em {
+  font-style: italic;
+}
+
+/* Barre de recherche centrée */
+.fx-hero-search-wrap {
+  width: 100%;
+  max-width: 600px;
+  padding: 0 8px;
+  box-sizing: border-box;
+}
 
 .fx-field-icon { flex: none; color: var(--fx-text-muted); }
 
@@ -125,23 +146,121 @@
   flex-wrap: wrap;
   gap: var(--fx-space-2);
   margin-top: var(--fx-space-4);
+  justify-content: center;
 }
-/* Les suggestions sont des liens : elles doivent se comporter comme des
-   puces, sans hériter du soulignement ni du curseur texte. */
 .fx-hero-suggestions .fx-chip { text-decoration: none; }
 
-.fx-hero-facts {
+/* Image dominante avec carte flottante */
+.fx-hero-visual {
+  width: 100%;
+  max-width: 800px;
+}
+
+.fx-hero-image-wrap {
+  position: relative;
+  border-radius: var(--fx-radius-xl);
+  overflow: visible;
+}
+
+.fx-hero-lifestyle {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--fx-radius-xl);
+}
+
+/* Carte flottante sur l'image — comme Phia */
+.fx-hero-float-card {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--fx-space-2);
-  margin-top: var(--fx-space-6);
-  padding-top: var(--fx-space-5);
-  border-top: 1px solid var(--fx-border);
+  align-items: center;
+  gap: var(--fx-space-3);
+  padding: var(--fx-space-4);
+  background: var(--fx-surface);
+  border-radius: var(--fx-radius-lg);
+  box-shadow: var(--fx-elevation-3);
+  max-width: 360px;
+}
+
+.fx-hero-float-thumb {
+  width: 56px;
+  height: 56px;
+  flex: none;
+  object-fit: contain;
+  border-radius: var(--fx-radius-sm);
+  background: var(--fx-paper-100);
+}
+
+.fx-hero-float-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.fx-hero-float-brand {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--fx-text-muted);
+}
+
+.fx-hero-float-name {
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  color: var(--fx-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.fx-hero-float-price {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.fx-hero-float-price b {
+  font-size: var(--fx-text-base);
+  font-weight: 700;
+  color: var(--fx-text);
+}
+.fx-hero-float-price s {
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+}
+
+/* Stats en bandeau */
+.fx-hero-stats {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-5);
+  padding-top: var(--fx-space-7);
   font-size: var(--fx-text-sm);
   color: var(--fx-text-muted);
-  font-variant-numeric: tabular-nums;
+  font-family: var(--sans);
 }
-.fx-hero-facts span[aria-hidden] { color: var(--fx-ink-300); }
+.fx-hero-stats b {
+  color: var(--fx-text);
+  font-weight: 600;
+}
+.fx-hero-stats-sep {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--fx-ink-300);
+}
+
+@media (max-width: 768px) {
+  .fx-hero { min-height: auto; padding-top: 100px; }
+  .fx-hero-title { font-size: var(--fx-text-4xl); }
+  .fx-hero-stats { flex-direction: column; gap: var(--fx-space-3); }
+  .fx-hero-float-card { position: relative; bottom: auto; left: auto; transform: none; margin-top: var(--fx-space-4); }
+}
 
 /* ── Carte produit ───────────────────────────────────────── */
 
@@ -1598,19 +1717,786 @@
 .fx-home-pulse { margin-top: calc(-1 * var(--fx-space-5)); }
 .fx-home-pulse .fx-pulse { margin-top: 0; }
 
-/* Échec de l'assistant : on l'annonce, on n'invente pas.
-   Le repli précédent fabriquait des cartes — marques, marchands et prix
-   inventés, chez des enseignes non partenaires. Sur un site dont la promesse
-   est « nous relevons les prix », c'est la seule chose interdite. */
-.sa-failed {
-  max-width: 52ch;
-  margin: var(--fx-space-6) 0;
-  padding: var(--fx-space-5);
-  border: 1px solid var(--fx-border);
-  border-left: 3px solid var(--fx-brand);
-  border-radius: var(--fx-radius-md);
-  background: var(--fx-surface);
+/* ══════════════════════════════════════════════════════════════
+   REFONTE TOTALE — Method & Closing
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Method — avec illustrations 3D ──────────────────────── */
+
+.fx-method {
+  padding: var(--fx-section-y-lg) 0;
+}
+
+.fx-method-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto var(--fx-space-9);
+}
+
+.fx-method-title {
+  font-size: var(--fx-text-4xl);
+  font-weight: 400;
+  color: var(--fx-ink-700);
+}
+.fx-method-title em {
+  font-style: italic;
+  color: var(--fx-ink-900);
+}
+
+.fx-method-steps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--fx-space-9);
+}
+
+.fx-method-step {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: var(--fx-space-7);
+  align-items: center;
+}
+.fx-method-step:nth-child(even) {
+  direction: rtl;
+}
+.fx-method-step:nth-child(even) > * {
+  direction: ltr;
+}
+
+.fx-method-step-img {
+  width: 240px;
+  height: 240px;
+  object-fit: contain;
+}
+
+.fx-method-step-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fx-space-3);
+}
+
+.fx-method-step-n {
+  font-size: var(--fx-text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--fx-brand);
+}
+
+.fx-method-step-title {
+  font-size: var(--fx-text-2xl);
+  font-weight: 400;
+  color: var(--fx-ink-700);
+}
+
+.fx-method-step-body {
   font-size: var(--fx-text-base);
-  line-height: var(--fx-leading-normal);
   color: var(--fx-text-secondary);
+  line-height: var(--fx-leading-normal);
+  max-width: 480px;
+}
+
+@media (max-width: 768px) {
+  .fx-method-step {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .fx-method-step:nth-child(even) { direction: ltr; }
+  .fx-method-step-img {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+  .fx-method-step-body { max-width: none; }
+}
+
+/* ── Closing — fond dramatique avec particules dorées ─────── */
+
+.fx-closing {
+  position: relative;
+  padding: var(--fx-space-12) 0;
+  overflow: hidden;
+  text-align: center;
+}
+
+.fx-closing-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("/img/closing-bg.png");
+  background-size: cover;
+  background-position: center;
+  z-index: 0;
+}
+
+.fx-closing-content {
+  position: relative;
+  z-index: 1;
+}
+
+.fx-closing-title {
+  font-size: var(--fx-text-4xl);
+  font-weight: 400;
+  color: var(--fx-paper-0);
+}
+.fx-closing-title em {
+  font-style: italic;
+}
+
+.fx-closing-lede {
+  margin-top: var(--fx-space-5);
+  font-size: var(--fx-text-lg);
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--sans);
+}
+
+.fx-closing-actions {
+  display: flex;
+  gap: var(--fx-space-4);
+  justify-content: center;
+  margin-top: var(--fx-space-7);
+}
+
+.fx-btn-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--fx-btn-height);
+  padding: 0 var(--fx-btn-padding-x);
+  border-radius: var(--fx-btn-radius);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+  background: var(--fx-paper-0);
+  color: var(--fx-ink-900);
+  transition: transform var(--fx-duration) var(--fx-ease-out), box-shadow var(--fx-duration) var(--fx-ease-out);
+}
+.fx-btn-light:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--fx-elevation-2);
+}
+
+.fx-btn-ghost-light {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--fx-btn-height);
+  padding: 0 var(--fx-btn-padding-x);
+  border-radius: var(--fx-btn-radius);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+  background: transparent;
+  color: var(--fx-paper-0);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: border-color var(--fx-duration) var(--fx-ease-out), background var(--fx-duration) var(--fx-ease-out);
+}
+.fx-btn-ghost-light:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION VIDÉO IMMERSIVE
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-video-section {
+  width: 100%;
+  padding: 0;
+  margin: var(--fx-space-9) 0;
+}
+
+.fx-video-hero {
+  width: 100%;
+  max-width: var(--fx-container);
+  margin: 0 auto;
+  display: block;
+  border-radius: var(--fx-radius-xl);
+  box-shadow: var(--fx-elevation-3);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ORB 3D VIEWER — Three.js interactif
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-orb-viewer {
+  width: 100%;
+  height: 400px;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.fx-hero-float-section {
+  width: 100%;
+  max-width: 400px;
+}
+
+@media (max-width: 768px) {
+  .fx-orb-viewer { height: 280px; }
+}
+
+/* Vidéos dans les étapes Method */
+.fx-method-step-video {
+  width: 240px;
+  height: 240px;
+  object-fit: cover;
+  border-radius: var(--fx-radius-lg);
+}
+
+@media (max-width: 768px) {
+  .fx-method-step-video {
+    width: 180px;
+    height: 180px;
+    margin: 0 auto;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CLOSING — Vidéo en fond (comme le Hero)
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-closing-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.fx-closing-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PAGE RECHERCHE — Vidéo de fond en état idle
+   ══════════════════════════════════════════════════════════════ */
+
+.sa {
+  position: relative;
+  overflow: hidden;
+}
+
+.sa-bg-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.sa-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1;
+}
+
+.sa-content {
+  position: relative;
+  z-index: 2;
+}
+
+.sa-title-light {
+  color: #ffffff !important;
+}
+
+.sa-eyebrow-light {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CATALOGUE — Premium, vivant, futuriste
+   ══════════════════════════════════════════════════════════════ */
+
+/* Header du catalogue — fond sombre avec dégradé doré */
+.fx-catalogue-title {
+  background: linear-gradient(135deg, #D4A853, #F5D78E, #C9963C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Grille produit — gap plus grand, cartes avec glow au hover */
+.fx-catalogue-grid {
+  gap: var(--fx-space-5) !important;
+}
+
+.fx-product {
+  border: 1px solid rgba(212, 168, 83, 0.08);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.fx-product:hover {
+  border-color: rgba(212, 168, 83, 0.3);
+  box-shadow: 0 8px 32px rgba(212, 168, 83, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Badge gain — doré au lieu de vert */
+.fx-badge.gain {
+  background: linear-gradient(135deg, #D4A853, #F5D78E);
+  color: #0a0a0f;
+  font-weight: 600;
+}
+
+/* Badge brand — fond sombre */
+.fx-badge.brand {
+  background: #0a0a0f;
+  color: #F5D78E;
+}
+
+/* Pagination — style premium */
+.fx-pagination {
+  margin-top: var(--fx-space-7);
+}
+
+.fx-page[aria-current="page"] {
+  background: linear-gradient(135deg, #D4A853, #F5D78E);
+  color: #0a0a0f;
+  font-weight: 600;
+}
+
+/* CTA produit — doré */
+.fx-product-cta {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fx-product-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3);
+}
+
+/* Navigation latérale — liens avec transition dorée */
+.fx-nav-shell a:hover,
+.fx-nav-shell a[aria-current] {
+  color: #D4A853;
+}
+
+/* Breadcrumb — séparateurs dorés */
+.fx-crumb span[aria-hidden] {
+  color: rgba(212, 168, 83, 0.4);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ASSISTANT — Premium, vivant, futuriste
+   ══════════════════════════════════════════════════════════════ */
+
+/* Steps de réflexion — accent doré */
+.fa-step.active { color: #D4A853 !important; }
+.fa-step.active .tk {
+  border-color: #D4A853 !important;
+}
+.fa-step.active .tk::after {
+  border-top-color: #D4A853 !important;
+}
+.fa-step.done .tk {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  border-color: transparent !important;
+}
+
+/* Carte gagnante — bordure dorée au lieu de l'accent par défaut */
+.fa-card.win {
+  border-color: rgba(212, 168, 83, 0.4) !important;
+  box-shadow: 0 0 0 1px rgba(212, 168, 83, 0.15), 0 8px 32px rgba(212, 168, 83, 0.08) !important;
+}
+
+/* Flag du gagnant — doré */
+.fa-flag {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+}
+
+/* Score ring — doré */
+.fa-score .ring {
+  border-color: #D4A853 !important;
+}
+
+/* Bouton "Voir l'offre" — doré */
+.fa-cta {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  font-weight: 600 !important;
+}
+.fa-cta:hover {
+  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* Chips de suggestion — hover doré */
+.sa-chip:hover {
+  border-color: #D4A853 !important;
+  color: #D4A853 !important;
+}
+
+/* Search box focus — glow doré */
+.sa-box:focus-within {
+  border-color: #D4A853 !important;
+  box-shadow: 0 0 0 5px rgba(212, 168, 83, 0.15) !important;
+}
+.sa-box:focus-within svg {
+  color: #D4A853 !important;
+}
+
+/* Bouton Ask — doré */
+.sa .ed-btn.wave {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+.sa .ed-btn.wave:hover {
+  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3) !important;
+}
+
+/* Cartes résultats — hover avec glow doré */
+.fa-card:hover {
+  border-color: rgba(212, 168, 83, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(212, 168, 83, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Historique prix — couleur dorée pour "en baisse" */
+.fa-specs .hist.baisse {
+  color: #D4A853 !important;
+}
+
+/* Disclaimer — plus discret */
+.sa-disc {
+  opacity: 0.6;
+  font-size: 12px !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   MEGA MENU — Ultra premium, fond sombre, doré
+   ══════════════════════════════════════════════════════════════ */
+
+.mm-panel {
+  background: #0a0a0f !important;
+  border: 1px solid rgba(212, 168, 83, 0.2) !important;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 168, 83, 0.05) !important;
+}
+
+.mm-dep {
+  color: #F5D78E !important;
+  letter-spacing: 0.1em !important;
+}
+
+.mm-dep em {
+  color: rgba(255, 255, 255, 0.4) !important;
+}
+
+.mm-col a {
+  color: rgba(255, 255, 255, 0.65) !important;
+}
+
+.mm-col a:hover {
+  color: #F5D78E !important;
+  background: rgba(212, 168, 83, 0.08) !important;
+}
+
+.mm-col a span {
+  color: rgba(255, 255, 255, 0.3) !important;
+}
+
+.mm-all {
+  color: #D4A853 !important;
+  border-top-color: rgba(212, 168, 83, 0.2) !important;
+}
+
+.mm-all:hover {
+  color: #F5D78E !important;
+}
+
+.mm-sub a {
+  color: rgba(255, 255, 255, 0.45) !important;
+}
+
+.mm-sub a:hover {
+  color: #F5D78E !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   NAVIGATION DESKTOP — Premium, cohérent avec le Hero sombre
+   ══════════════════════════════════════════════════════════════ */
+
+/* Quand la nav est sur le Hero (pas scrollé) — transparente */
+.ed-header:not(.stuck) {
+  background: transparent !important;
+  border-bottom-color: transparent !important;
+}
+
+.ed-header:not(.stuck) .ed-nav a,
+.ed-header:not(.stuck) .ed-nav button,
+.ed-header:not(.stuck) .ed-brand-word {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.ed-header:not(.stuck) .ed-nav a:hover,
+.ed-header:not(.stuck) .ed-nav button:hover {
+  color: #F5D78E !important;
+}
+
+/* CTA "Essayer le copilote" — doré */
+.ed-nav .ed-btn.dark {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  border: none !important;
+}
+
+.ed-nav .ed-btn.dark:hover {
+  box-shadow: 0 4px 20px rgba(212, 168, 83, 0.4) !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CATALOGUE DESKTOP — Layout plus aéré, premium
+   ══════════════════════════════════════════════════════════════ */
+
+@media (min-width: 901px) {
+  .fx-catalogue-layout {
+    gap: 48px !important;
+  }
+
+  /* Sidebar navigation — fond sombre subtil */
+  .fx-nav-shell {
+    background: rgba(10, 10, 15, 0.03);
+    border-radius: 16px;
+    padding: 24px 20px;
+    border: 1px solid rgba(212, 168, 83, 0.08);
+  }
+
+  /* Grille produit — 3 colonnes max sur desktop large */
+  .fx-catalogue-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .fx-catalogue-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ASSISTANT DESKTOP — Layout premium, plus d'espace
+   ══════════════════════════════════════════════════════════════ */
+
+@media (min-width: 901px) {
+  .sa:not(.searched) {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sa:not(.searched) .ed-wrap {
+    max-width: 700px;
+  }
+
+  .sa:not(.searched) h1 {
+    font-size: clamp(42px, 5.5vw, 68px) !important;
+  }
+
+  /* Cartes résultats — grille 2 colonnes sur desktop */
+  .fa-cards {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 20px !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CORRECTIONS MOBILE / TABLETTE — Ultra premium partout
+   ══════════════════════════════════════════════════════════════ */
+
+/* Supprimer le gap blanc entre la nav et le Hero */
+.ed-header {
+  position: fixed !important;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: transparent !important;
+  border-bottom: none !important;
+  transition: background 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.ed-header.stuck {
+  background: rgba(10, 10, 15, 0.85) !important;
+  backdrop-filter: blur(20px) saturate(1.4) !important;
+  -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
+  border-bottom: 1px solid rgba(212, 168, 83, 0.1) !important;
+}
+
+/* Hero — s'assurer que la vidéo commence à 0 (pas de padding-top pour la nav) */
+.fx-hero {
+  padding-top: 0 !important;
+}
+
+/* Mobile — nav compacte, pas de blanc */
+@media (max-width: 900px) {
+  .ed-header {
+    padding: 12px 16px !important;
+  }
+
+  /* Le texte FILON reste visible sur mobile */
+  .ed-brand-word {
+    display: inline !important;
+    font-size: 16px !important;
+  }
+
+  /* Hero mobile — titre plus petit, bien centré */
+  .fx-hero-title {
+    font-size: clamp(28px, 8vw, 42px) !important;
+    padding: 0 16px;
+  }
+
+  .fx-hero-content {
+    padding: 100px 20px 60px !important;
+  }
+
+  /* Barre de recherche — pleine largeur sur mobile */
+  .fx-hero-search-wrap {
+    max-width: 100% !important;
+    padding: 0 8px;
+  }
+
+  /* Suggestions — scroll horizontal sur mobile */
+  .fx-hero-suggestions {
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 8px;
+    justify-content: flex-start !important;
+  }
+
+  .fx-hero-suggestions .fx-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* Sections — moins de padding */
+  .fx-section {
+    padding: 48px 0 !important;
+  }
+
+  /* Method steps — colonne sur mobile */
+  .fx-method-steps {
+    flex-direction: column !important;
+  }
+
+  /* Closing — padding adapté */
+  .fx-closing-content {
+    padding: 60px 20px !important;
+  }
+}
+
+/* Tablette (iPad) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .fx-hero-title {
+    font-size: clamp(36px, 6vw, 52px) !important;
+  }
+
+  .fx-hero-content {
+    padding: 120px 40px 80px !important;
+  }
+
+  .fx-catalogue-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* iPhone SE / petits écrans */
+@media (max-width: 375px) {
+  .fx-hero-title {
+    font-size: 26px !important;
+  }
+
+  .fx-hero-content {
+    padding: 90px 16px 40px !important;
+  }
+
+  .sa-chips {
+    gap: 6px !important;
+  }
+
+  .sa-chip {
+    font-size: 11px !important;
+    padding: 6px 10px !important;
+  }
+}
+
+/* Vidéo de fond — couvrir tout l'écran sur tous les devices */
+.fx-hero-bg-video,
+.sa-bg-video,
+.fx-closing-bg-video {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+/* Safe area pour les iPhone avec notch */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .ed-header {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FIX MOBILE — Overflow, centrage, fond continu
+   ══════════════════════════════════════════════════════════════ */
+
+/* Empêcher tout overflow horizontal sur le body */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Pulse section — fond sombre pour continuité avec le Hero */
+.fx-home-pulse {
+  background: #0a0a0f;
+  padding: 20px 24px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.fx-home-pulse * {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.fx-home-pulse b,
+.fx-home-pulse strong {
+  color: #F5D78E;
+}
+
+/* Suggestions sur mobile — ne pas déborder */
+@media (max-width: 768px) {
+  .fx-hero-suggestions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 0 8px 8px;
+    gap: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .fx-hero-suggestions::-webkit-scrollbar {
+    display: none;
+  }
+  .fx-hero-suggestions .fx-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  /* Hero — hauteur adaptée au viewport mobile */
+  .fx-hero {
+    min-height: 100svh;
+  }
 }

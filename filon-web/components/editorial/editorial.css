@@ -23,31 +23,32 @@
 .ed-btn.outline:hover { background: var(--ink); color: var(--paper); }
 
 /* Nav — Refonte premium 2026 */
-.ed-header { position: sticky; top: 0; z-index: 60; 
-  background: color-mix(in srgb, var(--fx-bg) 88%, transparent);
-  backdrop-filter: blur(20px) saturate(1.4); 
-  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+.ed-header { position: fixed; top: 0; left: 0; right: 0; z-index: 100; 
+  background: transparent;
+  backdrop-filter: none; 
+  -webkit-backdrop-filter: none;
   border-bottom: 1px solid transparent; 
-  transition: border-color var(--fx-duration-slow) var(--fx-ease-out), 
+  transition: border-color 0.3s ease, 
     transform 0.5s var(--fx-ease-out),
-    background var(--fx-duration-slow) var(--fx-ease-out); }
-.ed-header.stuck { border-color: var(--fx-border); }
+    background 0.3s ease,
+    backdrop-filter 0.3s ease; }
+.ed-header.stuck { background: rgba(10, 10, 15, 0.88); backdrop-filter: blur(20px) saturate(1.4); -webkit-backdrop-filter: blur(20px) saturate(1.4); border-color: rgba(212, 168, 83, 0.12); }
 .ed-header:not(.stuck) { background: transparent; backdrop-filter: none; -webkit-backdrop-filter: none; }
 .ed-header.hide { transform: translateY(-102%); }
-.ed-nav { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad-x); display: flex; align-items: center; justify-content: space-between; height: 70px; }
-.ed-brand { display: inline-flex; align-items: center; gap: 10px; color: #26364B; }
+.ed-nav { max-width: var(--maxw); margin: 0 auto; padding: 0 var(--pad-x); display: flex; align-items: center; justify-content: space-between; height: 80px; }
+.ed-brand { display: inline-flex; align-items: center; gap: 10px; color: #ffffff; }
 .ed-brand-mark { display: block; flex: none; }
-.ed-brand-word { font-family: "Poppins FILON", var(--sans); font-weight: 600; font-size: 20px; letter-spacing: 0.14em; color: #26364B; line-height: 1; }
+.ed-brand-word { font-family: "Poppins FILON", var(--sans); font-weight: 600; font-size: 20px; letter-spacing: 0.14em; color: #ffffff; line-height: 1; }
 .ed-foot .ed-brand-word { font-size: 18px; }
-.ed-nav-mid { display: flex; gap: 30px; }
-.ed-nav-mid a { font-size: 13.5px; color: var(--ink-2); letter-spacing: 0.01em; transition: color 0.2s; }
-.ed-nav-mid a:hover { color: var(--ink); }
+.ed-nav-mid { display: flex; gap: 40px; }
+.ed-nav-mid a { font-size: 15px; color: rgba(255, 255, 255, 0.8); letter-spacing: 0; font-weight: 400; transition: color 0.2s; }
+.ed-nav-mid a:hover { color: #F5D78E; }
 @media (max-width: 760px) { .ed-nav-mid { display: none; } }
-.ed-nav-right { display: flex; align-items: center; gap: 12px; }
+.ed-nav-right { display: flex; align-items: center; gap: 16px; }
 /* Sélecteur de langue déroulant */
 .ed-lang { position: relative; display: inline-flex; }
-.ed-lang-trigger { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid var(--line-2);
-  border-radius: var(--r-full); cursor: pointer; color: var(--ink-2); font-weight: 700; font-size: 12.5px; letter-spacing: 0.03em;
+.ed-lang-trigger { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--r-full); cursor: pointer; color: rgba(255, 255, 255, 0.8); font-weight: 700; font-size: 12.5px; letter-spacing: 0.03em;
   padding: 7px 11px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
 .ed-lang-trigger:hover { color: var(--ink); border-color: var(--line-3, var(--ink-3)); }
 .ed-lang-trigger .chev { transition: transform 0.2s var(--ease); opacity: 0.7; }
@@ -73,8 +74,8 @@
 .ed-nav-cta:hover { transform: translateY(-2px); box-shadow: var(--fx-elevation-2); }
 
 /* Mobile hamburger + menu */
-.ed-burger { display: none; width: 42px; height: 42px; border: 1px solid var(--line-2); border-radius: var(--r-md); background: var(--card); cursor: pointer; position: relative; }
-.ed-burger span, .ed-burger span::before, .ed-burger span::after { content: ""; position: absolute; left: 11px; width: 20px; height: 2px; background: var(--ink); border-radius: 2px; transition: transform 0.3s var(--ease), opacity 0.2s; }
+.ed-burger { display: none; width: 44px; height: 44px; border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px; background: transparent; cursor: pointer; position: relative; }
+.ed-burger span, .ed-burger span::before, .ed-burger span::after { content: ""; position: absolute; left: 12px; width: 20px; height: 2px; background: #ffffff; border-radius: 2px; transition: transform 0.3s var(--ease), opacity 0.2s; }
 .ed-burger span { top: 20px; }
 .ed-burger span::before { top: -6px; } .ed-burger span::after { top: 6px; }
 .ed-burger span.open { background: transparent; }
@@ -517,6 +518,23 @@
 .sa-verdict .price { font-family: var(--mono); font-size: 30px; font-weight: 600; letter-spacing: -0.03em; }
 .sa-verdict .sv { font-size: 14px; color: #59e6cf; font-weight: 600; }
 .sa-disc { font-size: 11.5px; color: var(--ink-3); margin-top: 14px; }
+
+/* Échec de l'analyse. Volontairement sobre : pas de rouge d'alerte, pas
+   d'icône d'erreur. Le service est momentanément injoignable, ce n'est pas une
+   faute du visiteur — et ce bloc remplace des recommandations inventées, dont
+   il ne doit surtout pas reprendre l'apparence. */
+.fa-steps.hidden { display: none; }
+.sa-failed { max-width: 46ch; padding: 22px 0 4px; }
+.sa-failed-title { font-size: 17px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
+.sa-failed-body { font-size: 14px; line-height: 1.6; color: var(--ink-2); margin: 0 0 18px; }
+.sa-failed-retry {
+  font: inherit; font-size: 14px; cursor: pointer;
+  min-height: 44px; padding: 0 20px;
+  border: 1px solid var(--line); border-radius: var(--r-full);
+  background: var(--card); color: var(--ink);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.sa-failed-retry:hover { background: var(--ink); color: var(--paper, #fff); border-color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .sa-r, .sa-verdict, .sa-pick { opacity: 1; transform: none; } .sa-text .w { opacity: 1; transform: none; } }
 
 /* ---------- Assistant · need-based (Filon 2.0) ---------- */

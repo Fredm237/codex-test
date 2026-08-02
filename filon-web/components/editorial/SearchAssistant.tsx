@@ -15,9 +15,11 @@ const SL = {
     why: "Pourquoi", alt: "Alternative", see: "Voir l'offre", good: "Bon moment", wait: "Attendre",
     real: "Prix réels · Google Shopping", est: "Prix estimés, à titre indicatif",
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
+    failedTitle: "Je ne peux pas répondre pour le moment.",
+    failedBody: "L'analyse s'appuie sur les offres de nos marchands partenaires, et ce service est momentanément injoignable. Plutôt que de vous proposer des produits inventés, je préfère ne rien vous proposer. Réessayez dans un instant.",
+    retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
     at: "chez", cashback: "cashback", coupon: "coupon",
-    failed: "Nous n'avons pas pu interroger nos marchands partenaires à l'instant. Réessayez dans un moment — nous préférons ne rien afficher plutôt que de recommander une offre non vérifiée.",
     hist: { baisse: "En baisse", hausse: "En hausse", stable: "Stable" } as Record<Hist, string>,
   },
   nl: {
@@ -30,9 +32,11 @@ const SL = {
     why: "Waarom", alt: "Alternatief", see: "Bekijk de aanbieding", good: "Goed moment", wait: "Wachten",
     real: "Echte prijzen · Google Shopping", est: "Geschatte prijzen, ter indicatie",
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
+    failedTitle: "Ik kan nu niet antwoorden.",
+    failedBody: "De analyse steunt op de aanbiedingen van onze partnerwinkels, en die dienst is tijdelijk onbereikbaar. Liever niets voorstellen dan verzonnen producten. Probeer het zo meteen opnieuw.",
+    retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
     at: "bij", cashback: "cashback", coupon: "code",
-    failed: "We konden onze partnerwinkels zojuist niet bereiken. Probeer het straks opnieuw — liever niets tonen dan een niet-gecontroleerde aanbieding aanbevelen.",
     hist: { baisse: "Dalend", hausse: "Stijgend", stable: "Stabiel" } as Record<Hist, string>,
   },
   en: {
@@ -45,21 +49,21 @@ const SL = {
     why: "Why", alt: "Alternative", see: "See the offer", good: "Good time", wait: "Wait",
     real: "Real prices · Google Shopping", est: "Estimated prices, for guidance",
     analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
+    failedTitle: "I can't answer right now.",
+    failedBody: "The analysis draws on offers from our partner merchants, and that service is temporarily unreachable. Rather than show you invented products, I would rather show you nothing. Try again in a moment.",
+    retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
     at: "at", cashback: "cashback", coupon: "coupon",
-    failed: "We could not reach our partner merchants just now. Try again shortly — we would rather show nothing than recommend an unverified offer.",
     hist: { baisse: "Falling", hausse: "Rising", stable: "Stable" } as Record<Hist, string>,
   },
 };
 
 /* ──────────────────────────────────────────────────────────────────────────
    FILON assistant — a decision surface, not a chat.
-   The analysis is consumed as a stream of events (mockAnalyze below). A real
-   backend only has to yield the same events over SSE for this UI to light up
-   identically — nothing else changes.
+   The analysis is consumed as a stream of events, produced by the backend over
+   SSE. There is no second source: when the stream fails, the assistant says so.
    ────────────────────────────────────────────────────────────────────────── */
 
-const euro = (n: number) => `${n.toLocaleString("fr-FR")} €`;
 const money = (n: number, cur = "€") => `${n.toLocaleString("fr-FR")} ${cur}`;
 
 /** Pays supportés pour les prix (SerpApi côté backend). */
@@ -71,7 +75,6 @@ const COUNTRIES: Array<{ code: string; label: string }> = [
   { code: "lu", label: "Luxembourg" },
   { code: "nl", label: "Pays-Bas" },
 ];
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 /* Icônes ligne, nettes et sobres (currentColor) — remplacent les émojis. */
 const IconBase = ({ children }: { children: React.ReactNode }) => (
@@ -92,12 +95,6 @@ const IcBox = () => (
   </svg>
 );
 const HIST_ICON = { baisse: IcTrendDown, hausse: IcTrendUp, stable: IcTrendFlat } as const;
-
-const hash = (s: string) => {
-  let h = 0;
-  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
-  return h;
-};
 
 const STEPS = [
   "Compréhension du besoin",
@@ -120,72 +117,17 @@ type Card = {
 };
 type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; currency?: string; country?: string };
 
-const CATALOGS: Record<string, { usage: string; emoji: string; cards: Card[] }> = {
-  laptop: {
-    usage: "ordinateur portable", emoji: "💻",
-    cards: [
-      { rank: "Meilleur rapport qualité/prix", medal: "🥇", name: "Lenovo IdeaPad Slim 5", emoji: "💻", price: 749, merchant: "Fnac", delivery: "48 h", warranty: "24 mois", cashback: 5, coupon: "−30 €", hist: "baisse", histNote: "au plus bas sur 90 j", score: 94, why: "Le meilleur équilibre performances, autonomie et prix.", alt: "Acer Aspire 15", buy: true },
-      { rank: "Meilleur budget", medal: "🥈", name: "HP Pavilion 14", emoji: "💻", price: 499, merchant: "Cdiscount", delivery: "3-4 j", warranty: "24 mois", cashback: 3, coupon: null, hist: "stable", histNote: "proche de la moyenne", score: 87, why: "L'essentiel pour étudier, au prix le plus bas.", alt: "Asus Vivobook 15", buy: true },
-      { rank: "Meilleure autonomie", medal: "🥉", name: "MacBook Air (puce M)", emoji: "💻", price: 1049, merchant: "Amazon", delivery: "24 h", warranty: "24 mois", cashback: 4, coupon: null, hist: "baisse", histNote: "−80 € vs moyenne", score: 90, why: "Jusqu'à 18 h d'autonomie, silencieux et léger.", alt: null, buy: true },
-      { rank: "Meilleure performance", medal: "⭐", name: "Asus TUF Gaming A15", emoji: "💻", price: 1099, merchant: "Amazon", delivery: "24 h", warranty: "24 mois", cashback: 3, coupon: null, hist: "stable", histNote: "prix habituel", score: 86, why: "GPU RTX pour le jeu et la création exigeante.", alt: "MSI Katana", buy: false },
-      { rank: "Meilleur reconditionné", medal: "♻️", name: "Lenovo Legion · reconditionné A+", emoji: "💻", price: 899, merchant: "vendeur certifié", delivery: "3 j", warranty: "24 mois", cashback: 3, coupon: null, hist: "baisse", histNote: "−32 % vs neuf", score: 89, why: "Une machine puissante, garantie, bien moins chère.", alt: "Dell G15 recond.", buy: true },
-    ],
-  },
-  phone: {
-    usage: "smartphone", emoji: "📱",
-    cards: [
-      { rank: "Meilleur rapport qualité/prix", medal: "🥇", name: "Google Pixel (série a)", emoji: "📱", price: 459, merchant: "Amazon", delivery: "24 h", warranty: "24 mois", cashback: 4, coupon: "−20 €", hist: "baisse", histNote: "au plus bas sur 90 j", score: 93, why: "La meilleure photo à ce prix, 7 ans de mises à jour.", alt: "Samsung A55", buy: true },
-      { rank: "Meilleur budget", medal: "🥈", name: "Samsung Galaxy A (5G)", emoji: "📱", price: 299, merchant: "Boulanger", delivery: "48 h", warranty: "24 mois", cashback: 3, coupon: null, hist: "stable", histNote: "proche de la moyenne", score: 85, why: "Grand écran, grosse batterie, très polyvalent.", alt: null, buy: true },
-      { rank: "Meilleure autonomie", medal: "🥉", name: "Motorola Edge", emoji: "📱", price: 379, merchant: "Fnac", delivery: "48 h", warranty: "24 mois", cashback: 4, coupon: null, hist: "baisse", histNote: "−30 € vs moyenne", score: 88, why: "Deux jours d'autonomie sans forcer.", alt: null, buy: true },
-      { rank: "Meilleure performance", medal: "⭐", name: "iPhone (modèle récent)", emoji: "📱", price: 869, merchant: "Amazon", delivery: "24 h", warranty: "24 mois", cashback: 2, coupon: null, hist: "hausse", histNote: "mieux vaut attendre", score: 84, why: "La puissance et l'écosystème iOS, si le budget suit.", alt: "iPhone recond.", buy: false },
-      { rank: "Meilleur reconditionné", medal: "♻️", name: "iPhone · reconditionné A+", emoji: "📱", price: 449, merchant: "vendeur certifié", delivery: "3 j", warranty: "24 mois", cashback: 3, coupon: null, hist: "baisse", histNote: "−30 % vs neuf", score: 89, why: "Un iPhone récent garanti, à prix Android.", alt: null, buy: true },
-    ],
-  },
-  audio: {
-    usage: "casque / écouteurs", emoji: "🎧",
-    cards: [
-      { rank: "Meilleur rapport qualité/prix", medal: "🥇", name: "Sony WH (réduction de bruit)", emoji: "🎧", price: 279, merchant: "Fnac", delivery: "48 h", warranty: "24 mois", cashback: 5, coupon: "−15 €", hist: "baisse", histNote: "au plus bas sur 90 j", score: 92, why: "La référence anti-bruit, 30 h d'autonomie.", alt: "Bose QC", buy: true },
-      { rank: "Meilleur budget", medal: "🥈", name: "Écouteurs sans fil", emoji: "🎧", price: 79, merchant: "Amazon", delivery: "24 h", warranty: "24 mois", cashback: 3, coupon: null, hist: "stable", histNote: "prix habituel", score: 84, why: "Un très bon son sans se ruiner.", alt: null, buy: true },
-      { rank: "Meilleure autonomie", medal: "🥉", name: "Casque longue autonomie", emoji: "🎧", price: 189, merchant: "Boulanger", delivery: "48 h", warranty: "24 mois", cashback: 4, coupon: null, hist: "baisse", histNote: "−20 € vs moyenne", score: 87, why: "Jusqu'à 60 h d'écoute par charge.", alt: null, buy: true },
-      { rank: "Meilleure performance", medal: "⭐", name: "Casque audiophile", emoji: "🎧", price: 349, merchant: "Fnac", delivery: "3 j", warranty: "24 mois", cashback: 3, coupon: null, hist: "stable", histNote: "prix habituel", score: 85, why: "Le son le plus détaillé de la sélection.", alt: null, buy: false },
-      { rank: "Meilleur reconditionné", medal: "♻️", name: "Sony WH · reconditionné A+", emoji: "🎧", price: 189, merchant: "vendeur certifié", delivery: "3 j", warranty: "24 mois", cashback: 3, coupon: null, hist: "baisse", histNote: "−35 % vs neuf", score: 88, why: "Le même casque premium, garanti, moins cher.", alt: null, buy: true },
-    ],
-  },
-};
+/* Il n'y a plus de catalogue de démonstration ici, et c'est délibéré.
 
-function synthCards(q: string, budget: number | null): Card[] {
-  const seed = hash(q);
-  const base = budget || 200 + (seed % 700);
-  const M = ["Amazon", "Fnac", "Cdiscount", "Boulanger", "Darty"];
-  const defs: Array<[string, string, number, number, boolean, string, string | null, Hist, string]> = [
-    ["Meilleur rapport qualité/prix", "🥇", 0.98, 93, true, "Le meilleur équilibre global pour votre besoin.", "−20 €", "baisse", "sous la moyenne"],
-    ["Meilleur budget", "🥈", 0.8, 86, true, "Presque aussi bon, sensiblement moins cher.", null, "stable", "prix habituel"],
-    ["Meilleure autonomie", "🥉", 1.05, 88, false, "L'endurance en plus, si c'est votre priorité.", null, "stable", "proche moyenne"],
-    ["Meilleure performance", "⭐", 1.18, 85, false, "Le plus puissant de la sélection.", null, "hausse", "mieux vaut attendre"],
-    ["Meilleur reconditionné", "♻️", 0.72, 87, true, "L'équivalent reconditionné, garanti, au meilleur prix.", null, "baisse", "−28 % vs neuf"],
-  ];
-  const del = ["24 h", "48 h", "2-3 j", "3-4 j"];
-  return defs.map(([rank, medal, mult, score, buy, why, coupon, hist, histNote], i) => ({
-    rank, medal, name: `Option ${i + 1}`, emoji: "🛍️",
-    price: Math.round(base * mult), merchant: rank.includes("recond") ? "vendeur certifié" : M[(seed >> i) % 5],
-    delivery: del[i % 4], warranty: "24 mois", cashback: 3 + ((seed >> i) % 5), coupon, hist, histNote,
-    score, why, alt: null, buy,
-  }));
-}
+   Ce fichier contenait cinq recommandations écrites à la main par catégorie —
+   Fnac, Cdiscount, Boulanger, Darty, Amazon — avec des taux de cashback, des
+   historiques de prix et des Scores FILON inventés. Elles s'affichaient dès
+   que l'API échouait, sans rien qui les distingue d'une vraie analyse.
 
-function recommend(q: string, budget: number | null): Result {
-  const s = q.toLowerCase();
-  let key: string | null = null;
-  if (/portable|laptop|ordinateur|\bpc\b|macbook/.test(s)) key = "laptop";
-  else if (/t[ée]l[ée]phone|smartphone|iphone|pixel|galaxy|\btel\b/.test(s)) key = "phone";
-  else if (/casque|[ée]couteur|audio|\bson\b|airpods/.test(s)) key = "audio";
-  const cat = key ? CATALOGS[key] : null;
-  return {
-    usage: cat ? cat.usage : q.trim().toLowerCase() || "votre besoin",
-    offers: 26 + (hash(q) % 26),
-    cards: cat ? cat.cards : synthCards(q, budget),
-  };
-}
+   FILON n'est partenaire d'aucun de ces marchands. Recommander leurs produits
+   avec des chiffres fabriqués, c'est exactement ce qu'un comparateur ne peut
+   pas se permettre : le visiteur n'a aucun moyen de savoir qu'il lit une
+   maquette. Un assistant qui n'a pas de réponse doit le dire. */
 
 function detectBudget(q: string): number | null {
   const m = q.replace(/\s/g, "").match(/(\d{2,5})(?:€|eur)/i) || q.match(/(?:moins de|budget|à|max|environ|autour)\D{0,6}(\d{2,5})/i);
@@ -196,17 +138,6 @@ type Ev =
   | { type: "step"; i: number }
   | { type: "step-done"; i: number }
   | { type: "results"; data: Result };
-
-/* Local mock — used until the real backend is configured, and as a fallback. */
-async function* mockAnalyze(q: string, reduce: boolean): AsyncGenerator<Ev> {
-  const budget = detectBudget(q);
-  for (let i = 0; i < STEPS.length; i++) {
-    yield { type: "step", i };
-    await sleep(reduce ? 0 : 240 + Math.random() * 200);
-    yield { type: "step-done", i };
-  }
-  yield { type: "results", data: recommend(q, budget) };
-}
 
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
@@ -291,12 +222,11 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
 
 export function SearchAssistant() {
   const [query, setQuery] = useState("");
-  const [phase, setPhase] = useState<"idle" | "thinking" | "results">("idle");
+  const [phase, setPhase] = useState<"idle" | "thinking" | "results" | "failed">("idle");
   const [active, setActive] = useState(-1);
   const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
-  const [failed, setFailed] = useState(false);
   // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
   // devise et les marchands disponibles en dépendent, et un visiteur français
   // n'a aucune raison de partir sur la Belgique. Le sélecteur reste maître —
@@ -323,12 +253,10 @@ export function SearchAssistant() {
     if (!q) return;
     setAsked(q);
     const id = ++runId.current;
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     setPhase("thinking");
     setResult(null);
     setDone([]);
     setActive(0);
-    setFailed(false);
 
     const apply = (ev: Ev): boolean => {
       if (runId.current !== id) return false; // superseded by a newer query
@@ -342,30 +270,16 @@ export function SearchAssistant() {
       return true;
     };
 
-    // Le backend est la seule source. En cas d'échec on le dit — on ne
-    // fabrique pas de résultats.
-    //
-    // Le repli sur `mockAnalyze` synthétisait des cartes : marques, marchands
-    // et prix inventés, chez des enseignes qui ne sont pas nos partenaires.
-    // Constaté en ligne. Sur un site dont la promesse est « nous relevons les
-    // prix », c'est la seule chose qu'on ne peut pas se permettre.
-    if (API) {
-      try {
-        for await (const ev of streamAnalyze(q, country)) if (!apply(ev)) return;
-        return;
-      } catch {
-        if (runId.current !== id) return;
-        setActive(-1);
-        setDone([]);
-        setFailed(true);
-        setPhase("results");
-        return;
-      }
+    // Le backend, ou rien. Un repli qui invente des offres se présente comme une
+    // vraie analyse : le visiteur n'a aucun moyen de faire la différence.
+    try {
+      for await (const ev of streamAnalyze(q, country)) if (!apply(ev)) return;
+    } catch {
+      if (runId.current !== id) return;
+      setDone([]);
+      setActive(-1);
+      setPhase("failed");
     }
-
-    // Sans backend configuré (développement local), la démonstration reste
-    // utile — et elle s'annonce comme telle à l'écran.
-    for await (const ev of mockAnalyze(q, reduce)) if (!apply(ev)) return;
   };
 
   // Question passée dans l'URL (?q=…) — le hero et les suggestions y envoient.
@@ -382,9 +296,18 @@ export function SearchAssistant() {
 
   return (
     <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>
-      <div className="ed-wrap">
-        {phase === "idle" && <span className="eyebrow">{S.eyebrow}</span>}
-        <h1>{phase === "idle" ? S.h1Idle : S.h1Again}</h1>
+      {/* Vidéo de fond immersive en état idle */}
+      {phase === "idle" && (
+        <>
+          <video className="sa-bg-video" autoPlay muted loop playsInline>
+            <source src="/video/hf_orb.mp4" type="video/mp4" />
+          </video>
+          <div className="sa-bg-overlay" />
+        </>
+      )}
+      <div className="ed-wrap sa-content">
+        {phase === "idle" && <span className="eyebrow sa-eyebrow-light">{S.eyebrow}</span>}
+        <h1 className={phase === "idle" ? "sa-title-light" : ""}>{phase === "idle" ? S.h1Idle : S.h1Again}</h1>
 
         <form className="sa-search" onSubmit={(e) => { e.preventDefault(); ask(query || S.chips[0]); }}>
           <div className="sa-box">
@@ -426,9 +349,10 @@ export function SearchAssistant() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              {/* streamed reasoning */}
-              <motion.div 
-                className={`fa-steps ${phase === "results" ? "collapsed" : ""}`}
+              {/* streamed reasoning — retiré en cas d'échec : des étapes figées
+                  à mi-course laissent croire que l'analyse continue. */}
+              <motion.div
+                className={`fa-steps ${phase === "results" ? "collapsed" : ""} ${phase === "failed" ? "hidden" : ""}`}
                 layout
               >
                 {S.steps.map((s, i) => {
@@ -449,10 +373,20 @@ export function SearchAssistant() {
                 })}
               </motion.div>
 
-              {phase === "results" && failed && (
-                <p className="sa-failed" role="status">
-                  {S.failed}
-                </p>
+              {phase === "failed" && (
+                <motion.div
+                  className="sa-failed"
+                  role="status"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <p className="sa-failed-title">{S.failedTitle}</p>
+                  <p className="sa-failed-body">{S.failedBody}</p>
+                  <button type="button" className="sa-failed-retry" onClick={() => ask(asked)}>
+                    {S.retry}
+                  </button>
+                </motion.div>
               )}
 
               {phase === "results" && result && (

@@ -10,8 +10,8 @@
    ============================================================ */
 
 :root {
-  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Helvetica, Arial, sans-serif;
-  --serif: var(--font-serif), "Iowan Old Style", Palatino, Georgia, serif;
+  --sans: var(--fx-font-body);
+  --serif: var(--fx-font-display);
   --mono: "SF Mono", ui-monospace, "Geist Mono", Menlo, monospace;
   color-scheme: light;
 }
@@ -37,7 +37,7 @@ body {
   background: var(--fx-bg);
   color: var(--fx-text);
   font-family: var(--sans);
-  font-size: var(--fx-text-md);
+  font-size: var(--fx-text-base);
   line-height: var(--fx-leading-normal);
   letter-spacing: var(--fx-tracking-normal);
   -webkit-font-smoothing: antialiased;
@@ -47,7 +47,7 @@ body {
 
 ::selection { background: var(--fx-ink-900); color: var(--fx-paper-0); }
 a { color: inherit; text-decoration: none; }
-h1, h2, h3 { margin: 0; font-weight: 400; line-height: var(--fx-leading-tight); text-wrap: balance; }
+h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 300; line-height: var(--fx-leading-tight); text-wrap: balance; letter-spacing: var(--fx-tracking-tight); }
 p { text-wrap: pretty; }
 img, video { max-width: 100%; }
 

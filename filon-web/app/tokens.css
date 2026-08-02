@@ -1,70 +1,57 @@
 /* ============================================================
-   FILON — Système de design, refonte 2026
+   FILON — Design System, refonte TOTALE août 2026
    ------------------------------------------------------------
-   Direction : « Trust & Authority ». Ce n'est pas un choix
-   esthétique mais une réponse à un fait mesuré : des annonceurs
-   ont refusé le partenariat au motif « le site Web n'est pas en
-   affinité avec la marque ». Un site qui parle de codes promo et
-   de cashback en gradient bleu-turquoise se lit comme un site de
-   bons de réduction. Une marque premium n'y va pas.
+   Inspiré de Phia.com. Principes :
 
-   L'identité repose donc sur trois décisions :
-
-   1. L'action principale est encre, pas colorée. Le noir
-      éditorial est le langage des maisons premium — il ne
-      ressemble pas à une promotion.
-   2. L'accent est un or sourd, pas un bleu tech. « Filon » est
-      une veine de minerai : la marque a déjà sa couleur, et elle
-      n'appartient à aucun comparateur concurrent (tous bleus).
-   3. Le turquoise ne décore plus rien. Il ne signale plus qu'une
-      seule chose — l'économie réellement constatée — pour que
-      la couleur porte une information au lieu d'un style.
-
-   Trois couches, dans cet ordre : primitives → sémantique →
-   composants. Un composant ne lit jamais une primitive
-   directement ; c'est ce qui permet de retoucher la palette sans
-   ouvrir un seul fichier de composant.
+   1. BLANC PUR comme fond — pas de beige, pas de gris tiède.
+      Le blanc crée le contraste maximal avec les images.
+   2. SERIF pour les titres (GT Super Display → on utilise la
+      serif système + une Google Font). SANS-SERIF pour le corps.
+   3. ESPACEMENT MASSIF — les sections respirent. Minimum 120px
+      entre les blocs. Le hero fait 100vh.
+   4. IMAGES DOMINANTES — le ratio image/texte est 70/30.
+   5. TEXTE CENTRÉ pour les titres principaux.
+   6. MINIMALISME — peu de couleurs, peu de bordures, beaucoup
+      d'espace blanc.
    ============================================================ */
 
 :root {
-  /* ──────────────────────────────────────────────────────────
-     COUCHE 1 — PRIMITIVES
-     Valeurs brutes, sans intention. On ne les utilise pas dans
-     les composants : elles n'ont de sens que via la couche 2.
-     ────────────────────────────────────────────────────────── */
+  /* ── PRIMITIVES ─────────────────────────────────────────── */
 
-  /* Encre — neutre légèrement froid, jamais un noir pur (dur à l'œil) */
-  --fx-ink-950: #0b0d10;
-  --fx-ink-900: #14171c;
-  --fx-ink-800: #22262d;
-  --fx-ink-700: #3a4049;
-  --fx-ink-500: #6a7280;   /* 4.8:1 sur papier — plancher du texte secondaire */
-  --fx-ink-400: #949ba6;   /* décoratif uniquement, jamais du texte */
-  --fx-ink-300: #c4c9d0;
+  /* Encre */
+  --fx-ink-950: #0a0a0a;
+  --fx-ink-900: #1a1a1a;
+  --fx-ink-800: #2d2d2d;
+  --fx-ink-700: #3d3d3d;
+  --fx-ink-500: #6b6b6b;
+  --fx-ink-400: #9a9a9a;
+  --fx-ink-300: #c4c4c4;
+  --fx-ink-200: #e0e0e0;
+  --fx-ink-100: #f0f0f0;
 
-  /* Papier — tiède, pas le blanc bleuté des interfaces SaaS */
+  /* Papier — BLANC PUR, comme Phia */
   --fx-paper-0: #ffffff;
-  --fx-paper-50: #faf9f7;
-  --fx-paper-100: #f3f1ed;
-  --fx-paper-200: #e9e6e0;
+  --fx-paper-50: #fafafa;
+  --fx-paper-100: #f5f5f5;
+  --fx-paper-200: #eeeeee;
 
-  /* Or — la couleur de la marque. Sourd, jamais jaune vif. */
+  /* Or — la couleur de la marque, plus subtile */
   --fx-gold-700: #6f5518;
-  --fx-gold-600: #8a6a24;  /* 5.1:1 sur blanc — lisible en texte */
+  --fx-gold-600: #8a6a24;
   --fx-gold-500: #a98436;
   --fx-gold-100: #f5eedd;
   --fx-gold-50: #fbf7ee;
 
-  /* Turquoise — réservé à l'économie constatée */
+  /* Turquoise — économie constatée uniquement */
   --fx-gain-700: #08635c;
-  --fx-gain-600: #0a7d74;  /* 4.6:1 sur blanc */
+  --fx-gain-600: #0a7d74;
   --fx-gain-100: #def2f0;
 
   /* Alerte */
   --fx-alert-600: #b42318;
   --fx-alert-100: #fee4e2;
 
-  /* Espacement — base 4 px, densité standard */
+  /* Espacement — MASSIF, inspiré de Phia (beaucoup d'air) */
   --fx-space-1: 4px;
   --fx-space-2: 8px;
   --fx-space-3: 12px;
@@ -72,95 +59,79 @@
   --fx-space-5: 24px;
   --fx-space-6: 32px;
   --fx-space-7: 48px;
-  --fx-space-8: 64px;
+  --fx-space-8: 72px;
   --fx-space-9: 96px;
-  --fx-space-10: 128px;
+  --fx-space-10: 140px;
+  --fx-space-11: 180px;
+  --fx-space-12: 240px;
 
-  /* Échelle typographique — fluide, jamais sous 12,5 px */
-  --fx-text-xs: 12.5px;
-  --fx-text-sm: 13.5px;
+  /* Typographie — SERIF pour les titres comme Phia (GT Super Display) */
+  --fx-font-display: var(--font-display), var(--font-serif), "Playfair Display", "Georgia", serif;
+  --fx-font-body: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --fx-text-xs: 12px;
+  --fx-text-sm: 14px;
   --fx-text-base: 16px;
-  --fx-text-md: 17px;
-  --fx-text-lg: 19px;
-  --fx-text-xl: clamp(22px, 2.4vw, 26px);
-  --fx-text-2xl: clamp(26px, 3.4vw, 34px);
-  --fx-text-3xl: clamp(32px, 5vw, 46px);
-  --fx-text-4xl: clamp(40px, 7vw, 68px);
-  --fx-text-5xl: clamp(46px, 8.4vw, 88px);
+  --fx-text-md: 18px;
+  --fx-text-lg: 20px;
+  --fx-text-xl: clamp(24px, 2.5vw, 28px);
+  --fx-text-2xl: clamp(28px, 3.5vw, 36px);
+  --fx-text-3xl: clamp(36px, 4.5vw, 48px);
+  --fx-text-4xl: clamp(44px, 6vw, 64px);
+  --fx-text-5xl: clamp(52px, 8vw, 88px);
 
-  --fx-leading-tight: 1.06;
+  --fx-leading-tight: 1.1;
   --fx-leading-snug: 1.25;
-  --fx-leading-normal: 1.55;
-  --fx-tracking-tight: -0.022em;
-  --fx-tracking-normal: -0.006em;
-  --fx-tracking-wide: 0.18em;
+  --fx-leading-normal: 1.6;
+  --fx-tracking-tight: -0.02em;
+  --fx-tracking-normal: 0;
+  --fx-tracking-wide: 0.12em;
 
-  /* Rayons */
-  --fx-radius-xs: 6px;
-  --fx-radius-sm: 10px;
-  --fx-radius-md: 14px;
-  --fx-radius-lg: 20px;
-  --fx-radius-xl: 28px;
+  /* Rayons — plus doux, moins anguleux */
+  --fx-radius-xs: 8px;
+  --fx-radius-sm: 12px;
+  --fx-radius-md: 16px;
+  --fx-radius-lg: 24px;
+  --fx-radius-xl: 32px;
   --fx-radius-full: 999px;
 
-  /* Mouvement — 150-300 ms pour l'interaction, plus lent pour les
-     apparitions au scroll. Une seule courbe de sortie partout :
-     c'est ce qui fait qu'un site « se tient ». */
+  /* Mouvement */
   --fx-duration-fast: 150ms;
-  --fx-duration: 220ms;
-  --fx-duration-slow: 320ms;
-  --fx-duration-reveal: 620ms;
+  --fx-duration: 250ms;
+  --fx-duration-slow: 400ms;
+  --fx-duration-reveal: 800ms;
   --fx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --fx-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Élévation — trois niveaux, multi-couches pour un effet premium naturel */
-  --fx-elevation-1: 
-    0 1px 2px rgba(11, 13, 16, 0.02),
-    0 2px 4px rgba(11, 13, 16, 0.02),
-    0 4px 8px rgba(11, 13, 16, 0.02);
-  --fx-elevation-2: 
-    0 2px 4px rgba(11, 13, 16, 0.02),
-    0 4px 8px rgba(11, 13, 16, 0.02),
-    0 12px 24px rgba(11, 13, 16, 0.04),
-    0 24px 48px -12px rgba(11, 13, 16, 0.12);
-  --fx-elevation-3: 
-    0 4px 8px rgba(11, 13, 16, 0.02),
-    0 8px 16px rgba(11, 13, 16, 0.02),
-    0 24px 48px rgba(11, 13, 16, 0.04),
-    0 48px 96px -24px rgba(11, 13, 16, 0.16);
+  /* Élévation — subtile, comme Phia (pas de bordures, juste des ombres) */
+  --fx-elevation-1: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --fx-elevation-2: 0 4px 16px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.04);
+  --fx-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.08), 0 24px 64px rgba(0, 0, 0, 0.06);
 
-  /* ──────────────────────────────────────────────────────────
-     COUCHE 2 — SÉMANTIQUE
-     Ce que la valeur *signifie*. C'est cette couche que lisent
-     les composants.
-     ────────────────────────────────────────────────────────── */
+  /* ── SÉMANTIQUE ─────────────────────────────────────────── */
 
-  --fx-bg: var(--fx-paper-50);
-  --fx-bg-sunken: var(--fx-paper-100);
+  --fx-bg: var(--fx-paper-0);           /* BLANC PUR */
+  --fx-bg-sunken: var(--fx-paper-50);
   --fx-surface: var(--fx-paper-0);
   --fx-surface-raised: var(--fx-paper-0);
 
-  --fx-text: var(--fx-ink-900);
-  --fx-text-secondary: var(--fx-ink-700);
-  --fx-text-muted: var(--fx-ink-500);
-  --fx-text-on-dark: var(--fx-paper-50);
+  --fx-text: var(--fx-ink-700);          /* Gris foncé comme Phia, pas noir */
+  --fx-text-secondary: var(--fx-ink-500);
+  --fx-text-muted: var(--fx-ink-400);
+  --fx-text-on-dark: var(--fx-paper-0);
 
-  --fx-border: rgba(11, 13, 16, 0.1);
-  --fx-border-strong: rgba(11, 13, 16, 0.2);
+  --fx-border: rgba(0, 0, 0, 0.06);     /* Très subtil */
+  --fx-border-strong: rgba(0, 0, 0, 0.12);
 
-  /* Action principale : encre. Une CTA noire ne se lit pas comme
-     une promotion — c'est tout l'objet de la refonte. */
   --fx-action: var(--fx-ink-900);
   --fx-action-hover: var(--fx-ink-950);
   --fx-on-action: var(--fx-paper-0);
 
-  /* Marque — filets, capitales d'accroche, badges de distinction */
   --fx-brand: var(--fx-gold-600);
   --fx-brand-strong: var(--fx-gold-700);
   --fx-brand-subtle: var(--fx-gold-100);
   --fx-brand-wash: var(--fx-gold-50);
 
-  /* Économie constatée — et rien d'autre */
   --fx-gain: var(--fx-gain-600);
   --fx-gain-strong: var(--fx-gain-700);
   --fx-gain-subtle: var(--fx-gain-100);
@@ -168,49 +139,36 @@
   --fx-alert: var(--fx-alert-600);
   --fx-alert-subtle: var(--fx-alert-100);
 
-  --fx-focus: var(--fx-gold-600);
+  --fx-focus: var(--fx-ink-900);
 
-  /* Gabarit */
-  --fx-container: 1180px;
-  --fx-container-narrow: 760px;
-  --fx-gutter: clamp(20px, 5vw, 40px);
-  --fx-section-y: clamp(72px, 9vw, 120px);
-  --fx-section-y-lg: clamp(96px, 12vw, 168px);
-  /* Dégagement sous la barre de navigation fixe */
-  --fx-page-top: clamp(104px, 11vw, 148px);
+  /* Gabarit — plus large, plus aéré */
+  --fx-container: 1240px;
+  --fx-container-narrow: 800px;
+  --fx-gutter: clamp(24px, 5vw, 48px);
+  --fx-section-y: clamp(100px, 12vw, 160px);
+  --fx-section-y-lg: clamp(140px, 16vw, 220px);
+  --fx-page-top: clamp(120px, 13vw, 160px);
 
-  /* ──────────────────────────────────────────────────────────
-     COUCHE 3 — COMPOSANTS
-     ────────────────────────────────────────────────────────── */
+  /* ── COMPOSANTS ─────────────────────────────────────────── */
 
-  --fx-btn-height: 48px;          /* ≥ 44 px : cible tactile WCAG 2.2 */
+  --fx-btn-height: 52px;
   --fx-btn-height-sm: 44px;
-  --fx-btn-padding-x: var(--fx-space-5);
+  --fx-btn-padding-x: 28px;
   --fx-btn-radius: var(--fx-radius-full);
 
-  --fx-card-radius: var(--fx-radius-md);
-  --fx-card-padding: var(--fx-space-5);
-  --fx-card-border: 1px solid var(--fx-border);
+  --fx-card-radius: var(--fx-radius-lg);
+  --fx-card-padding: var(--fx-space-6);
+  --fx-card-border: none;               /* PAS DE BORDURES — comme Phia */
   --fx-card-shadow: var(--fx-elevation-1);
   --fx-card-shadow-hover: var(--fx-elevation-2);
 
-  --fx-badge-height: 24px;
+  --fx-badge-height: 28px;
   --fx-badge-radius: var(--fx-radius-full);
 
   --fx-field-height: 56px;
   --fx-field-radius: var(--fx-radius-full);
 
-  /* ──────────────────────────────────────────────────────────
-     COMPATIBILITÉ
-     Les 1 100 lignes d'editorial.css et les 35 pages existantes
-     lisent les anciens noms. Les rediriger vers la couche
-     sémantique fait adopter la nouvelle identité partout d'un
-     coup, sans réécrire une seule règle — et les composants se
-     migrent ensuite un par un, sans rupture visuelle.
-
-     Ces alias sont transitoires : tout nouveau code écrit
-     directement --fx-*.
-     ────────────────────────────────────────────────────────── */
+  /* ── COMPATIBILITÉ (anciens noms) ──────────────────────── */
 
   --paper: var(--fx-bg);
   --paper-2: var(--fx-bg-sunken);
@@ -220,10 +178,6 @@
   --ink-3: var(--fx-text-muted);
   --line: var(--fx-border);
   --line-2: var(--fx-border-strong);
-
-  /* L'ancien bleu et l'ancien turquoise pointent désormais sur la
-     marque : les composants non encore migrés cessent d'afficher
-     l'identité « SmartWave » que la refonte remplace. */
   --accent: var(--fx-brand);
   --accent-ink: var(--fx-brand-strong);
   --accent-soft: var(--fx-brand-subtle);
@@ -231,23 +185,17 @@
   --teal-ink: var(--fx-gain-strong);
   --save: var(--fx-gain);
   --save-soft: var(--fx-gain-subtle);
-
-  /* Les anciens dégradés deviennent des aplats : le gradient
-     bleu→turquoise était le marqueur visuel le plus daté du site. */
   --chrome: var(--fx-paper-100);
   --wave: var(--fx-ink-900);
-  --wave-text: var(--fx-brand);
+  --wave-text: var(--fx-paper-0);
   --wave3: var(--fx-ink-900);
-
   --maxw: var(--fx-container);
   --ease: var(--fx-ease-out);
   --ease-out: var(--fx-ease-out);
-
   --pad-x: var(--fx-gutter);
   --sp-section: var(--fx-section-y);
   --sp-hero: var(--fx-page-top);
   --sp-xl: var(--fx-section-y-lg);
-
   --r-sm: var(--fx-radius-xs);
   --r-md: var(--fx-radius-sm);
   --r-lg: var(--fx-radius-md);
@@ -255,7 +203,6 @@
   --r-full: var(--fx-radius-full);
   --shadow-soft: var(--fx-elevation-2);
   --shadow-glow: var(--fx-elevation-2);
-
   --bg: var(--fx-bg);
   --bg-2: var(--fx-bg-sunken);
   --text: var(--fx-text);

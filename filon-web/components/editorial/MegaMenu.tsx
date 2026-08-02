@@ -92,18 +92,24 @@ export function MegaMenu() {
       }}
       onMouseLeave={scheduleClose}
     >
-      <button
-        type="button"
+      <a
+        href="/catalogue/"
         className={`mm-trigger${open ? " open" : ""}`}
         aria-expanded={open}
         aria-haspopup="true"
-        onClick={() => setOpen((v) => !v)}
+        onClick={(e) => {
+          // Sur mobile : le clic ouvre le menu. Sur desktop : le hover l'ouvre déjà, le clic navigue.
+          if (window.innerWidth < 901) {
+            e.preventDefault();
+            setOpen((v) => !v);
+          }
+        }}
       >
         {t.label}
         <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
           <path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </button>
+      </a>
 
       <div className={`mm-panel${open ? " show" : ""}`} role="menu" aria-hidden={!open}>
         <div className="mm-grid">

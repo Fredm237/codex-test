@@ -64,34 +64,7 @@ export function HeroSearch() {
         </motion.button>
       </motion.form>
 
-      <motion.div
-        className="fx-hero-suggestions"
-        initial="hidden"
-        animate="show"
-        variants={{
-          hidden: { opacity: 0 },
-          show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.3 } },
-        }}
-      >
-        {SUGGESTION_KEYS.map((key) => {
-          const label = t(key);
-          return (
-            <motion.a
-              key={key}
-              className="fx-chip"
-              href={`/recherche/?q=${encodeURIComponent(label)}`}
-              variants={{
-                hidden: { opacity: 0, y: 8 },
-                show: { opacity: 1, y: 0 },
-              }}
-              whileHover={{ y: -2, boxShadow: "var(--fx-elevation-1)" }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {label}
-            </motion.a>
-          );
-        })}
-      </motion.div>
+
     </div>
   );
 }

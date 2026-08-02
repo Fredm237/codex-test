@@ -57,8 +57,11 @@ export function ProductCard({
   return (
     <motion.article
       className="fx-product"
-      whileHover={{ y: -4 }}
-      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "-40px" }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      transition={{ type: "spring", stiffness: 260, damping: 18 }}
     >
       <div className="fx-product-media">
         {offer.image && imageOk ? (
