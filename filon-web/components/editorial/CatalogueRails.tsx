@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale, type Locale } from "@/lib/i18n";
+import { ProductCard, CARD_COPY } from "@/components/filon/ProductCard";
 
 export type RailOffer = {
   id: number;
@@ -46,67 +47,10 @@ const SECTIONS: Record<Locale, Record<string, Copy>> = {
   },
 };
 
-const UI: Record<Locale, {
-  see: string; at: string; lowest: string; was: string; all: string; sinceNote: string;
-}> = {
-  fr: { see: "Voir l'offre", at: "chez", lowest: "Prix le plus bas", was: "avant", all: "Tout voir", sinceNote: "Relevés par FILON, jour après jour." },
-  nl: { see: "Bekijk aanbod", at: "bij", lowest: "Laagste prijs", was: "eerder", all: "Alles zien", sinceNote: "Dag na dag gemeten door FILON." },
-  en: { see: "See offer", at: "at", lowest: "Lowest price", was: "was", all: "See all", sinceNote: "Recorded by FILON, day after day." },
-};
-
-function money(price: number | null | undefined, currency: string | null): string {
-  if (price == null) return "—";
-  const sym = currency === "GBP" ? "£" : currency === "USD" ? "$" : "€";
-  return `${price.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${sym}`;
-}
-
-function Card({ o, t }: { o: RailOffer; t: (typeof UI)[Locale] }) {
-  const drop = o.drop_pct && o.drop_pct >= 1 ? Math.round(o.drop_pct) : null;
-  return (
-    <article className="cat-card">
-      <a className="cat-card-media" href={`/produit/${o.id}/`} aria-label={o.name}>
-        {o.image ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={o.image} alt="" loading="lazy" />
-        ) : (
-          <span aria-hidden="true">—</span>
-        )}
-        <span className="cat-badges">
-          {drop && <span className="cat-badge drop">−{drop}&nbsp;%</span>}
-          {o.is_lowest && <span className="cat-badge low">{t.lowest}</span>}
-        </span>
-      </a>
-      <div className="cat-card-body">
-        {o.brand && <span className="cat-card-brand">{o.brand}</span>}
-        <a className="cat-card-title" href={`/produit/${o.id}/`}>{o.name}</a>
-        <span className="cat-card-merchant">{t.at} {o.merchant.name}</span>
-        <div className="cat-card-foot">
-          <span className="cat-card-prices">
-            <b>{money(o.price, o.currency)}</b>
-            {drop && o.price_high != null && (
-              <s>{money(o.price_high, o.currency)}</s>
-            )}
-          </span>
-          {o.link && (
-            <a
-              className="cat-card-cta"
-              href={o.link}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
-            >
-              {t.see}
-            </a>
-          )}
-        </div>
-      </div>
-    </article>
-  );
-}
-
 export function CatalogueRails({ sections }: { sections: RailSection[] }) {
   const { locale } = useLocale();
   const copy = SECTIONS[locale];
-  const t = UI[locale];
+  const card = CARD_COPY[locale];
 
   if (!sections.length) return null;
 
@@ -125,7 +69,7 @@ export function CatalogueRails({ sections }: { sections: RailSection[] }) {
             </header>
             <div className="cat-rail-scroll">
               {s.items.map((o) => (
-                <Card key={`${s.key}-${o.id}`} o={o} t={t} />
+                <ProductCard key={`${s.key}-${o.id}`} offer={o} copy={card} />
               ))}
             </div>
           </section>

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import { API } from "@/lib/api";
+import { ProductCard, CARD_COPY } from "@/components/filon/ProductCard";
 
 // Page d'un rayon FILON. Rendu serveur + ISR : indexable, et sans spinner.
 export const revalidate = 1800;
@@ -58,12 +59,6 @@ async function getOffers(
   } catch {
     return { total: 0, items: [] };
   }
-}
-
-function money(price: number | null, currency: string | null): string {
-  if (price == null) return "—";
-  const sym = currency === "GBP" ? "£" : currency === "USD" ? "$" : "€";
-  return `${price.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${sym}`;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -146,41 +141,9 @@ export default async function CategoriePage({
           </p>
         ) : (
           <>
-            <div
-              style={{
-                display: "grid",
-                gap: 16,
-                gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
-                marginTop: 28,
-              }}
-            >
+            <div className="fx-product-grid" style={{ marginTop: 28 }}>
               {items.map((o) => (
-                <article className="cat-card" key={o.id}>
-                  <a className="cat-card-media" href={`/produit/${o.id}/`} aria-label={o.name}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    {o.image ? <img src={o.image} alt="" loading="lazy" /> : <span aria-hidden="true">—</span>}
-                  </a>
-                  <div className="cat-card-body">
-                    {o.brand && <span className="cat-card-brand">{o.brand}</span>}
-                    <a className="cat-card-title" href={`/produit/${o.id}/`}>{o.name}</a>
-                    <span className="cat-card-merchant">chez {o.merchant.name}</span>
-                    <div className="cat-card-foot">
-                      <span className="cat-card-prices">
-                        <b>{money(o.price, o.currency)}</b>
-                      </span>
-                      {o.link && (
-                        <a
-                          className="cat-card-cta"
-                          href={o.link}
-                          target="_blank"
-                          rel="noopener noreferrer sponsored"
-                        >
-                          Voir l&apos;offre
-                        </a>
-                      )}
-                    </div>
-                  </div>
-                </article>
+                <ProductCard key={o.id} offer={o} copy={CARD_COPY.fr} />
               ))}
             </div>
 

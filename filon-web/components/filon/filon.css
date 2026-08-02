@@ -5,6 +5,66 @@
    dans ce fichier serait une régression du système.
    ============================================================ */
 
+/* ── Reprise des fonds hérités ───────────────────────────────
+   Les dégradés menthe/bleu d'editorial.css sont écrits en rgba
+   en dur : les alias de tokens.css ne pouvaient pas les
+   atteindre. Ils habillaient les 35 pages de contenu et
+   juraient avec la nouvelle identité. Neutralisés ici plutôt
+   que dans editorial.css, pour que toute la refonte reste
+   lisible au même endroit — et réversible d'un bloc.
+   ──────────────────────────────────────────────────────────── */
+
+.ed-hero,
+.ed-content-hero {
+  background:
+    radial-gradient(120% 80% at 82% 6%, var(--fx-brand-wash) 0%, transparent 58%),
+    var(--fx-bg);
+}
+
+/* .ed-band habille toutes les sections de toutes les pages : c'était la plus
+   grosse poche restante de l'ancienne identité. L'alternance de fonds est
+   conservée, mais en nuance de papier plutôt qu'en lavis coloré — le rythme
+   reste lisible sans que la couleur prétende signifier quelque chose. */
+.ed-band { background: var(--fx-bg); }
+.ed-band.alt { background: var(--fx-bg-sunken); }
+@media (max-width: 900px) {
+  .ed-hero,
+  .ed-content-hero {
+    background:
+      radial-gradient(140% 46% at 84% 4%, var(--fx-brand-wash) 0%, transparent 60%),
+      var(--fx-bg);
+  }
+}
+
+/* CTA flottante mobile : l'ombre portait encore le bleu de l'ancienne
+   identité, et rien ne dégageait le bas de page — le dernier bloc de contenu
+   passait sous le bouton. */
+.ed-sticky-cta {
+  background: var(--fx-action);
+  box-shadow: var(--fx-elevation-3);
+  min-height: 52px;
+}
+@media (max-width: 760px) {
+  body { padding-bottom: 84px; }
+}
+
+/* Fiche produit : la structure était bonne, les cibles tactiles non. « Voir »
+   mesurait 12,5 px de texte dans une pastille de 30 px de haut, et le badge
+   « Meilleur prix » descendait à 10,5 px — sous le plancher de lisibilité. */
+.pg-go {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--fx-space-4);
+  font-size: var(--fx-text-sm);
+  border-radius: var(--fx-radius-full);
+}
+.pg-badge, .pg-region { font-size: var(--fx-text-xs); }
+.pg-badge { background: var(--fx-gain); color: var(--fx-paper-0); }
+.pg-offer.best { border-color: var(--fx-gain); }
+.pg-saving b { color: var(--fx-gain-strong); }
+.pg-offer { min-height: 60px; }
+
 /* ── Hero ────────────────────────────────────────────────── */
 
 .fx-hero {
@@ -69,6 +129,146 @@
   font-variant-numeric: tabular-nums;
 }
 .fx-hero-facts span[aria-hidden] { color: var(--fx-ink-300); }
+
+/* ── Carte produit ───────────────────────────────────────── */
+
+.fx-product {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-md);
+  overflow: hidden;
+  transition:
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration) var(--fx-ease-out);
+}
+.fx-product:hover { border-color: var(--fx-border-strong); box-shadow: var(--fx-elevation-2); transform: translateY(-2px); }
+/* La carte se signale au clavier comme à la souris. */
+.fx-product:focus-within { border-color: var(--fx-text); box-shadow: var(--fx-elevation-2); }
+
+.fx-product-media {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
+  background: var(--fx-paper-0);
+  overflow: hidden;
+}
+.fx-product-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: var(--fx-space-3);
+  transition: transform var(--fx-duration-slow) var(--fx-ease-out);
+}
+.fx-product:hover .fx-product-media img { transform: scale(1.04); }
+.fx-product-noimage {
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+  text-align: center;
+  padding: var(--fx-space-3);
+}
+
+.fx-product-badges {
+  position: absolute;
+  top: var(--fx-space-2);
+  left: var(--fx-space-2);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.fx-product-body {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+  padding: var(--fx-space-3) var(--fx-space-4) var(--fx-space-4);
+}
+.fx-product-brand {
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+}
+.fx-product-name {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--fx-text);
+}
+/* Étire la zone cliquable à toute la carte, sans imbriquer les ancres. */
+.fx-product-name::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+.fx-product-merchant { font-size: var(--fx-text-xs); color: var(--fx-text-muted); }
+
+/* Le pied enveloppe : un prix à quatre chiffres (« 1 899,00 € ») cassait sur
+   deux lignes en écrasant l'action à côté. Il passe alors au-dessus, entier. */
+.fx-product-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fx-space-2);
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: var(--fx-space-3);
+}
+/* Le bloc prix se rétrécit avant de passer à la ligne, et l'ancien prix se
+   replie sous le nouveau plutôt que d'élargir la rangée. */
+.fx-product-price { flex: 0 1 auto; min-width: 0; }
+.fx-product-price b { white-space: nowrap; }
+.fx-product-cta { flex: none; }
+/* L'ancien prix se place sous le nouveau, pas à côté : à 200 px de carte,
+   « 62,90 € 89,95 € » plus l'action ne tenaient pas sur une rangée, et
+   l'action tombait à la ligne une carte sur deux. */
+.fx-product-price { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; }
+.fx-product-price b {
+  font-size: var(--fx-text-base);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--fx-text);
+}
+.fx-product-price s { font-size: var(--fx-text-xs); color: var(--fx-text-muted); }
+
+/* Au-dessus du lien étiré, et jamais réservé au survol : sur un écran
+   tactile, une action qui n'apparaît qu'au hover n'existe pas. */
+.fx-product-cta {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--fx-space-4);
+  border: 1px solid var(--fx-border-strong);
+  border-radius: var(--fx-radius-full);
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  color: var(--fx-text);
+  white-space: nowrap;
+  transition: background-color var(--fx-duration) var(--fx-ease-standard), color var(--fx-duration) var(--fx-ease-standard), border-color var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-product-cta:hover { background: var(--fx-action); border-color: var(--fx-action); color: var(--fx-on-action); }
+
+.fx-product-grid {
+  display: grid;
+  gap: var(--fx-space-4);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+@media (max-width: 420px) {
+  /* Sous 420 px, deux colonnes valent mieux qu'une : la carte reste lisible
+     et la grille ne devient pas une liste interminable. */
+  .fx-product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--fx-space-3); }
+}
 
 /* ── Sections ────────────────────────────────────────────── */
 

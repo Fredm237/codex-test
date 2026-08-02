@@ -140,7 +140,7 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
               )}
 
               {best?.link && (
-                <a className="ed-btn wave" href={best.link} target="_blank" rel="noopener noreferrer sponsored" style={{ marginTop: 18, textDecoration: "none" }}>
+                <a className="fx-btn primary" href={best.link} target="_blank" rel="noopener noreferrer sponsored" style={{ marginTop: 18 }}>
                   Voir la meilleure offre chez {best.merchant.name}
                 </a>
               )}

@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale, type Locale } from "@/lib/i18n";
+import { ProductCard, CARD_COPY } from "@/components/filon/ProductCard";
 import { API } from "@/lib/api";
 
 type Offer = {
@@ -72,36 +73,6 @@ const inputStyle: React.CSSProperties = {
   background: "var(--card)", border: "1px solid var(--line-2)", borderRadius: "var(--r-full)",
   padding: "9px 14px", color: "var(--ink)", fontFamily: "var(--sans)", fontSize: 13.5, outline: "none", width: 100,
 };
-
-function OfferCard({ o, see, from }: { o: Offer; see: string; from: string }) {
-  const [imgOk, setImgOk] = useState(true);
-  return (
-    <div style={{ display: "flex", flexDirection: "column", background: "var(--card)", border: "1px solid var(--line-2)", borderRadius: 16, overflow: "hidden" }}>
-      <a href={`/produit/${o.id}/`} style={{ aspectRatio: "4 / 3", background: "#fff", display: "grid", placeItems: "center", overflow: "hidden" }}>
-        {o.image && imgOk ? (
-          <img src={o.image} alt="" loading="lazy" onError={() => setImgOk(false)} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 12 }} />
-        ) : (
-          <span aria-hidden="true" style={{ color: "var(--ink-4, var(--ink-3))", fontSize: 12 }}>—</span>
-        )}
-      </a>
-      <div style={{ padding: 14, display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
-        {o.brand && <span style={{ fontSize: 11.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--ink-3)" }}>{o.brand}</span>}
-        <a href={`/produit/${o.id}/`} style={{ textDecoration: "none" }}>
-          <b style={{ fontSize: 14, color: "var(--ink)", lineHeight: 1.3, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{o.name}</b>
-        </a>
-        <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>{from} {o.merchant.name}</span>
-        <div style={{ marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, paddingTop: 8 }}>
-          <b style={{ fontSize: 16, color: "var(--ink)" }}>{money(o.price, o.currency)}</b>
-          {o.link && (
-            <a className="ed-btn wave" href={o.link} target="_blank" rel="noopener noreferrer sponsored" style={{ fontSize: 12.5, padding: "8px 14px", textDecoration: "none" }}>
-              {see}
-            </a>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 /** Suite de pages à afficher, avec ellipses : 1 … 4 5 [6] 7 8 … 250. */
 function pageWindow(current: number, last: number): (number | "…")[] {
@@ -271,9 +242,13 @@ export function OffersBrowser() {
         <p style={{ color: "var(--ink-3)", fontSize: 14.5 }}>{t.empty}</p>
       ) : (
         <div ref={gridRef}>
-          <div style={{ display: "grid", gap: 16, gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))" }}>
+          <div className="fx-product-grid">
             {items.map((o, i) => (
-              <OfferCard key={`${o.merchant.slug}-${i}-${o.id}`} o={o} see={t.see} from={t.from} />
+              <ProductCard
+                key={`${o.merchant.slug}-${i}-${o.id}`}
+                offer={o}
+                copy={CARD_COPY[locale]}
+              />
             ))}
           </div>
           <Pagination page={page} lastPage={lastPage} onGo={goToPage} t={t} />
