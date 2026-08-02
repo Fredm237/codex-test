@@ -82,7 +82,17 @@ export function Closing({ proof }: { proof: Proof | null }) {
   const stats = proof?.stats ?? null;
   return (
     <section className="fx-closing">
-      <div className="fx-closing-bg" aria-hidden="true" />
+      <video
+        className="fx-closing-bg-video"
+        autoPlay
+        muted
+        loop
+        playsInline
+        aria-hidden="true"
+      >
+        <source src="/video/hf_seal.mp4" type="video/mp4" />
+      </video>
+      <div className="fx-closing-overlay" aria-hidden="true" />
       <motion.div
         className="fx-container narrow fx-closing-content"
         initial={{ opacity: 0, y: 40 }}
