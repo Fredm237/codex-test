@@ -78,48 +78,53 @@
 .pg-saving b { color: var(--fx-gain-strong); }
 .pg-offer { min-height: 60px; }
 
-/* ── Hero — Style Phia : centré, full-height, image dominante ──── */
+/* ── Hero — Vidéo 3D en fond plein écran ──── */
 
 .fx-hero {
+  position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: var(--fx-page-top) var(--fx-gutter) var(--fx-space-8);
-  background: var(--fx-bg);
+  overflow: hidden;
 }
 
-.fx-hero-inner {
+.fx-hero-bg-video {
+  position: absolute;
+  inset: 0;
   width: 100%;
-  max-width: var(--fx-container);
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+.fx-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 1;
+}
+
+.fx-hero-content {
+  position: relative;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--fx-space-7);
-}
-
-/* Titre centré, serif, GRAND */
-.fx-hero-headline {
   text-align: center;
-  max-width: 900px;
+  padding: var(--fx-space-8) var(--fx-gutter);
+  max-width: 800px;
 }
 
 .fx-hero-title {
   font-size: var(--fx-text-5xl);
   font-weight: 400;
   line-height: 1.08;
-  color: var(--fx-ink-700);
+  color: #ffffff;
 }
 .fx-hero-title em {
   font-style: italic;
-  color: var(--fx-ink-900);
-}
-
-.fx-hero-subtitle {
-  margin-top: var(--fx-space-5);
-  font-size: var(--fx-text-lg);
-  color: var(--fx-text-secondary);
-  font-family: var(--sans);
 }
 
 /* Barre de recherche centrée */

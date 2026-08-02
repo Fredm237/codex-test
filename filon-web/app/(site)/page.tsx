@@ -39,19 +39,6 @@ export default async function HomePage() {
         <Pulse data={pulse} />
       </div>
 
-      {/* Vidéo immersive — pas de texte, juste l'expérience */}
-      <section className="fx-video-section">
-        <video
-          className="fx-video-hero"
-          autoPlay
-          muted
-          loop
-          playsInline
-          poster="/img/closing-bg.png"
-        >
-          <source src="/video/filon_hf_promo.mp4" type="video/mp4" />
-        </video>
-      </section>
 
       {/* Showcase — les vrais produits parlent */}
       {showcase.length > 0 && (
