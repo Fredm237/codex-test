@@ -138,6 +138,60 @@ _ENFANT = r"\b(enfant|kids?|child|children|kinder|jongens|meisjes|garçon|fille|
 _FEMME = r"\b(femme|femmes|women|women's|woman|dames|dame|ladies|lady|feminin|féminin)\b"
 _HOMME = r"\b(homme|hommes|men|men's|mens|heren|male|masculin)\b"
 
+# Un objet fini fait d'une matière reste un objet fini : « housse de couette
+# en percale » est du linge de maison, pas de la mercerie. La règle du support
+# ne s'applique donc que si aucun nom d'objet fini n'apparaît — c'est le nom de
+# tête qui décide, pas la matière qui le qualifie.
+_OBJET_FINI = re.compile(
+    r"\b(housses?|couettes?|draps?|taies?|rideaux?|voilages?|nappes?|"
+    r"serviettes?|coussins?|plaids?|couvertures?|chemises?|chemisiers?|robes?|"
+    r"pantalons?|jupes?|vestes?|manteaux?|pulls?|blouses?|tuniques?|"
+    r"combinaisons?|tabliers?|torchons?|peignoirs?|pyjamas?|gigoteuses?|"
+    r"[ée]charpes?|bonnets?|gants?|sacs?\s+[àa]\s+main|matelas|oreillers?)\b",
+    re.IGNORECASE,
+)
+
+
+# ── Le support l'emporte sur le motif ───────────────────────────────────────
+#
+# Un tissu imprimé de souris est un tissu, pas un périphérique. Un patron de
+# couture pour peluches est un article de mercerie, pas un jouet. Un livre sur
+# les chiens est un livre, pas de l'animalerie. Une coque de téléphone à motif
+# chat est un accessoire de téléphonie.
+#
+# C'est la cause principale des rayons incohérents constatés en production, et
+# elle est bien plus large que le seul cas « souris » : sur un échantillon de
+# quinze libellés de mercerie, un seul était correctement classé. Le motif
+# imprimé sur un objet piège n'importe quel classement par mots-clés, quel que
+# soit le rayon visé.
+#
+# Ces règles passent donc AVANT toutes les autres, et gagnent. Elles sont
+# volontairement étroites : seuls des termes qui désignent le support sans
+# ambiguïté y figurent. « Lin » en est absent — « chemise en lin » est un
+# vêtement.
+_SUPPORTS: list[tuple[str, str]] = [
+    # Mercerie et tissus au mètre. Le nom du motif suit presque toujours un
+    # tiret : « Popeline coton - Petites voitures ».
+    (LOISIRS,
+     r"\b(tissus?|jerseys?|popelines?|cretonnes?|tricotines?|gabardines?|"
+     r"serg[ée]s?|mousselines?|batistes?|percales?|bord\s+c[ôo]tes?|"
+     r"molletons?|cr[ée]pons?|bourrettes?|piqu[ée]s?\s+\d*\s*%?\s*coton|"
+     r"sweat\s+molletonn[ée]|polaire\s+double\s+face|viscose\s+unie|"
+     r"coupons?\s+de\s+\d|au\s+m[èe]tre|mercerie|"
+     r"patrons?\s+(?:burda|mccall|simplicity|vogue|new\s+look)|"
+     r"patrons?\s+de\s+couture|fermetures?\s+[ée]clair|fil\s+[àa]\s+coudre)\b"),
+    # Livres et affiches : le sujet ne détermine pas le rayon.
+    (CULTURE,
+     r"\b(livres?\s+sur|guides?\s+de|romans?|beaux?[-\s]livres?|"
+     r"bandes?\s+dessin[ée]es?|mangas?)\b"),
+    (MAISON,
+     r"\b(affiches?|posters?|stickers?\s+muraux?|papiers?\s+peints?|"
+     r"toiles?\s+imprim[ée]es?|cadres?\s+photo)\b"),
+    # Coques et étuis : c'est de la téléphonie, quel que soit le dessin dessus.
+    (TELEPHONIE, r"\b(coques?|[ée]tuis?)\s+(?:de\s+)?(?:t[ée]l[ée]phone|smartphone|iphone|samsung)\b"),
+]
+
+
 # (catégorie, motif). La première correspondance gagne : du plus spécifique au
 # plus général.
 _RULES: list[tuple[str, str]] = [
@@ -197,9 +251,14 @@ _RULES: list[tuple[str, str]] = [
             r"[ée]quipements? sportifs?)\b"),
     (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
              r"tuingereedschap|gereedschap|parquet|peinture murale|garden tools?)\b"),
+    # « tissus » est retiré de cette règle : il désigne la mercerie, traitée
+    # plus haut par les supports. Le laisser ici renvoyait tous les coupons au
+    # rayon Maison. Le linge de maison, lui, manquait entièrement.
     (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|lampes?|luminaires?|matelas|"
-             r"linge de lit|rideaux?|d[ée]coration|meubles?|vaisselle|assiettes?|cuisine|"
-             r"meubel|verlichting|schoonmaak|nettoyage|serviettes?|tissus?|textile|"
+             r"linge de (?:lit|maison)|housses? de (?:couette|coussin)|couettes?|"
+             r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
+             r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
+             r"cuisine|meubel|verlichting|schoonmaak|nettoyage|serviettes?|textile|"
              r"home\s*&\s*garden|huishouden)\b"),
     (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
              r"toys?)\b"),
@@ -475,6 +534,18 @@ def classify(
     if not name and not merchant_category:
         return None
     clothing = False
+
+    # Le support d'abord : un tissu imprimé de souris reste un tissu. Sans ce
+    # passage préalable, le motif l'emportait et éparpillait la mercerie dans
+    # tous les rayons du catalogue.
+    for text in (name, merchant_category):
+        if not text:
+            continue
+        if _OBJET_FINI.search(text):
+            break
+        for category, pattern in _SUPPORTS:
+            if _has(pattern, text):
+                return category
 
     # Le nom d'abord, la catégorie du marchand ensuite : l'ordre porte la règle.
     for text in (name, merchant_category):
