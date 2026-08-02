@@ -87,6 +87,8 @@ async def _migrate() -> None:
         "CREATE INDEX IF NOT EXISTS ix_offers_dedup_key ON offers (dedup_key)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS is_canonical BOOLEAN DEFAULT TRUE",
         "CREATE INDEX IF NOT EXISTS ix_offers_is_canonical ON offers (is_canonical)",
+        "ALTER TABLE offers ADD COLUMN IF NOT EXISTS is_adult BOOLEAN DEFAULT FALSE",
+        "CREATE INDEX IF NOT EXISTS ix_offers_is_adult ON offers (is_adult)",
         # Index trigramme : sans lui, une recherche par sous-chaîne impose un
         # parcours complet des 795 000 lignes. L'extension peut être refusée
         # selon les droits — la migration le tolère et trace un avertissement.

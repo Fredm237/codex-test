@@ -352,15 +352,30 @@ async def facets(
 
 
 def _visible_merchant_clause():
-    """Exclut les marchands bannis de tout affichage public.
+    """Ce qui n'a rien à faire sur une page publique.
 
-    Le flag adultcontent d'Awin ne suffit pas — des articles pour adultes
-    remontaient encore en page d'accueil après l'avoir coupé.
+    Deux garde-fous cumulés, parce qu'aucun n'est suffisant seul :
+
+    - les marchands bannis (`BLOCKED_MERCHANTS`), exact et sans faux positif ;
+    - les articles marqués adultes à l'ingestion, qui attrapent les références
+      érotiques isolées dans le flux d'un marchand par ailleurs généraliste.
+
+    Le second a été ajouté après un refus de partenariat motivé par « Contenu
+    pour adultes » : le flag `adultcontent/0` du feed Awin et la liste de
+    marchands avaient laissé passer.
+
+    `is_adult IS NULL` reste visible : les lignes antérieures à la migration ne
+    doivent pas disparaître du catalogue avant leur requalification.
     """
+    from sqlalchemy import and_, or_
+
+    clauses = [
+        or_(models.Offer.is_adult.is_(False), models.Offer.is_adult.is_(None))
+    ]
     blocked = get_settings().blocked_merchant_slugs
-    if not blocked:
-        return None
-    return models.Merchant.slug.notin_(blocked)
+    if blocked:
+        clauses.append(models.Merchant.slug.notin_(blocked))
+    return and_(*clauses)
 
 
 def _card(o: models.Offer, m: models.Merchant, **extra) -> dict:
@@ -899,6 +914,64 @@ async def reclassify_offers(
         "offers_processed": updated,
         "offers_classified": classified,
         "coverage_pct": round(classified / updated * 100, 1) if updated else 0.0,
+    }
+
+
+@router.post("/admin/flag-adult")
+async def flag_adult_offers(
+    batch: int = Query(default=2000, le=10000),
+    x_admin_token: str | None = Header(default=None),
+) -> dict:
+    """Requalifie le rayon adulte des offres déjà en base.
+
+    Le drapeau est posé à l'ingestion ; les 795 000 offres antérieures ne l'ont
+    pas et restent visibles tant qu'elles n'ont pas été relues (voir
+    `_visible_merchant_clause`). Ce rattrapage les parcourt en flux, par curseur
+    sur la clé primaire, pour que la mémoire reste bornée.
+
+    Idempotent : relancer ne fait que réécrire les mêmes valeurs.
+    """
+    _require_admin(x_admin_token)
+    if not db.is_enabled():
+        raise HTTPException(status_code=503, detail="base de données absente")
+
+    from app.services import safety
+
+    processed = 0
+    flagged = 0
+    async with db.session_scope() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="base de données absente")
+        last_id = 0
+        while True:
+            rows = (
+                await session.execute(
+                    select(
+                        models.Offer.id, models.Offer.name,
+                        models.Offer.category, models.Offer.brand,
+                    )
+                    .where(models.Offer.id > last_id)
+                    .order_by(models.Offer.id)
+                    .limit(batch)
+                )
+            ).all()
+            if not rows:
+                break
+            payload = []
+            for r in rows:
+                value = safety.is_adult(name=r.name, category=r.category, brand=r.brand)
+                payload.append({"id": r.id, "is_adult": value})
+                if value:
+                    flagged += 1
+            await session.execute(update(models.Offer), payload)
+            await session.commit()
+            processed += len(payload)
+            last_id = rows[-1].id
+
+    return {
+        "offers_processed": processed,
+        "offers_flagged_adult": flagged,
+        "flagged_pct": round(flagged / processed * 100, 3) if processed else 0.0,
     }
 
 
