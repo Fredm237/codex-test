@@ -12,6 +12,7 @@ from __future__ import annotations
 from app.agents.state import AdviseState
 from app.core.logging import get_logger
 from app.data.catalog import all_products
+from app.db import session as db
 from app.services.catalog_source import search_products
 
 log = get_logger("product_search")
@@ -51,8 +52,27 @@ async def run(state: AdviseState) -> AdviseState:
         )
         return state
 
-    # Repli : base absente (développement local) ou aucune correspondance.
-    log.info("Catalogue réel sans résultat — repli sur les données de démonstration")
+    # Aucun résultat dans le catalogue réel.
+    #
+    # Le repli de démonstration ne doit JAMAIS servir en production. Il contient
+    # des produits chez des marchands avec lesquels nous n'avons aucun accord —
+    # recommander leurs marques revient à envoyer nos utilisateurs chez des
+    # enseignes qui ne sont pas nos partenaires, et à afficher des prix que nous
+    # n'avons jamais relevés. Constaté en ligne.
+    #
+    # Une réponse vide est un résultat honnête : l'étape suivante dira que nous
+    # n'avons rien trouvé chez nos partenaires. C'est préférable à une
+    # recommandation inventée.
+    if db.is_enabled():
+        state["candidates"] = []
+        state.setdefault("trace", []).append(
+            "product_search: aucun produit correspondant chez nos partenaires"
+        )
+        return state
+
+    # Base absente : développement local uniquement. Jamais en production, où
+    # DATABASE_URL est toujours défini.
+    log.info("Aucune base configurée — jeu de démonstration (développement local)")
     products = all_products()
 
     if criteria.category:

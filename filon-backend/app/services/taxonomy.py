@@ -90,6 +90,43 @@ def categories_of_department(department: str) -> list[str]:
     return []
 
 
+# ── Couleurs composées ──────────────────────────────────────────────────────
+# En français, une quantité de couleurs se nomment « <teinte> <objet> » :
+# gris souris, bleu marine, vert olive, gris perle, bleu canard, jaune
+# moutarde. Le second mot n'y désigne pas l'objet — il qualifie la teinte.
+#
+# Sans ce garde-fou, « Tissu tailleur de laine — Gris souris » atterrissait en
+# Informatique, sous-rayon « Claviers & Souris », et le rayon informatique du
+# catalogue affichait des coupons de tissu. Constaté en production.
+#
+# On neutralise donc le second terme avant tout classement : la teinte reste,
+# l'objet disparaît. « Gris souris » devient « gris », qui ne classe rien.
+_TEINTES = (
+    "gris|grise|bleu|bleue|vert|verte|rouge|jaune|rose|beige|brun|brune|noir|"
+    "noire|blanc|blanche|orange|violet|violette|taupe|kaki|bordeaux|ivoire|"
+    "anthracite|marron|mauve|turquoise|corail|sable|creme|crème"
+)
+_COULEUR_COMPOSEE = re.compile(
+    rf"\b({_TEINTES})[\s-]+"
+    r"(souris|marine|olive|perle|canard|moutarde|p[êe]che|amande|brique|"
+    r"cha(?:r|)bon|charbon|petrole|pétrole|lavande|prune|abricot|caramel|"
+    r"chocolat|caf[ée]|paille|argent|or|bronze|cuivre|nuit|ciel|ardoise|"
+    r"anthracite|poudr[ée]e?|glac[ée]e?|clair|claire|fonc[ée]e?|pastel)\b",
+    re.IGNORECASE,
+)
+
+
+def strip_colour_compounds(text: str) -> str:
+    """Retire l'objet d'une couleur composée, en gardant la teinte.
+
+    « Gris souris » → « gris ». « Bleu canard » → « bleu ». Sans quoi le
+    second terme est lu comme le produit lui-même.
+    """
+    if not text:
+        return text
+    return _COULEUR_COMPOSEE.sub(lambda m: m.group(1), text)
+
+
 def department_of(category: str) -> str | None:
     """Département d'un rayon, ou None s'il n'est rattaché à aucun."""
     return _DEPARTMENT_OF.get(category)
@@ -116,7 +153,16 @@ _RULES: list[tuple[str, str]] = [
                  r"telecommunications?)\b"),
     (GAMING, r"\b(gaming|jeux? vid[ée]o|video\s?games?|consoles?|playstation|ps5|ps4|xbox|"
              r"nintendo|steam|manettes?|gamer|videogames?)\b"),
-    (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|souris|"
+    # « souris » exige un contexte informatique : seul, il désigne bien plus
+    # souvent un animal, un imprimé de tissu ou une pièce de puzzle. Constaté en
+    # production — le rayon informatique affichait des coupons de tissu et des
+    # patrons de couture. Le qualificatif peut précéder ou suivre le mot.
+    (INFORMATIQUE,
+     r"(?=.*\bsouris\b)(?=.*\b(?:sans[-\s]?fil|optique|gamer|gaming|ergonomiques?|"
+     r"bluetooth|filaires?|verticales?|usb|dpi|laser|rechargeables?|claviers?|"
+     r"combo|molette)\b)"),
+    (INFORMATIQUE, r"\btapis de souris\b"),
+    (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
                    r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|usb|"
                    r"tablettes?|software)\b"),
     (PHOTO, r"\b(appareils? photo|cameras?|caméras?|objectifs?|reflex|drones?|gopro|"
@@ -261,7 +307,11 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     INFORMATIQUE: [
         ("Ordinateurs portables", r"\b(ordinateurs? portables?|laptops?|macbook|notebooks?)\b"),
         ("Écrans", r"\b([ée]crans?|monitors?|moniteurs?)\b"),
-        ("Claviers & Souris", r"\b(claviers?|souris|keyboards?|mouse|mice)\b"),
+        # Même garde-fou qu'au premier niveau : « souris » seul ne suffit pas.
+        ("Claviers & Souris",
+         r"\b(claviers?|keyboards?|mice)\b|"
+         r"(?=.*\bsouris\b)(?=.*\b(?:sans[-\s]?fil|optique|gamer|gaming|"
+         r"ergonomiques?|bluetooth|filaires?|verticales?|usb|dpi|laser|combo)\b)"),
         ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire)\b"),
         ("Imprimantes", r"\b(imprimantes?|scanners?|cartouches?|toner)\b"),
         ("Réseau", r"\b(routeurs?|switch|wifi|r[ée]p[ée]teurs?|modems?)\b"),
@@ -386,7 +436,10 @@ def classify_subcategory(
     rules = SUBCATEGORIES.get(category or "")
     if not rules:
         return None
-    for text in ((name or "").strip(), (merchant_category or "").strip()):
+    for text in (
+        strip_colour_compounds((name or "").strip()),
+        strip_colour_compounds((merchant_category or "").strip()),
+    ):
         if not text:
             continue
         for label, pattern in rules:
@@ -415,8 +468,10 @@ def classify(
     rayon que de libellé produit. Rendre None est un résultat acceptable — mieux
     vaut une offre non classée qu'une offre rangée au mauvais endroit.
     """
-    name = (name or "").strip()
-    merchant_category = (merchant_category or "").strip()
+    # Les couleurs composées sont neutralisées avant tout : « gris souris » ne
+    # doit pas être lu comme une souris d'ordinateur.
+    name = strip_colour_compounds((name or "").strip())
+    merchant_category = strip_colour_compounds((merchant_category or "").strip())
     if not name and not merchant_category:
         return None
     clothing = False

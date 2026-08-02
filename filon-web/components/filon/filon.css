@@ -1597,3 +1597,20 @@
    qui le précède, pas à un bloc séparé. */
 .fx-home-pulse { margin-top: calc(-1 * var(--fx-space-5)); }
 .fx-home-pulse .fx-pulse { margin-top: 0; }
+
+/* Échec de l'assistant : on l'annonce, on n'invente pas.
+   Le repli précédent fabriquait des cartes — marques, marchands et prix
+   inventés, chez des enseignes non partenaires. Sur un site dont la promesse
+   est « nous relevons les prix », c'est la seule chose interdite. */
+.sa-failed {
+  max-width: 52ch;
+  margin: var(--fx-space-6) 0;
+  padding: var(--fx-space-5);
+  border: 1px solid var(--fx-border);
+  border-left: 3px solid var(--fx-brand);
+  border-radius: var(--fx-radius-md);
+  background: var(--fx-surface);
+  font-size: var(--fx-text-base);
+  line-height: var(--fx-leading-normal);
+  color: var(--fx-text-secondary);
+}

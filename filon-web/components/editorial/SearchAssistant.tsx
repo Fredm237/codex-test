@@ -17,6 +17,7 @@ const SL = {
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
     at: "chez", cashback: "cashback", coupon: "coupon",
+    failed: "Nous n'avons pas pu interroger nos marchands partenaires à l'instant. Réessayez dans un moment — nous préférons ne rien afficher plutôt que de recommander une offre non vérifiée.",
     hist: { baisse: "En baisse", hausse: "En hausse", stable: "Stable" } as Record<Hist, string>,
   },
   nl: {
@@ -31,6 +32,7 @@ const SL = {
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
     at: "bij", cashback: "cashback", coupon: "code",
+    failed: "We konden onze partnerwinkels zojuist niet bereiken. Probeer het straks opnieuw — liever niets tonen dan een niet-gecontroleerde aanbieding aanbevelen.",
     hist: { baisse: "Dalend", hausse: "Stijgend", stable: "Stabiel" } as Record<Hist, string>,
   },
   en: {
@@ -45,6 +47,7 @@ const SL = {
     analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
     disc: "FILON is free. You never pay, and your data is not resold.",
     at: "at", cashback: "cashback", coupon: "coupon",
+    failed: "We could not reach our partner merchants just now. Try again shortly — we would rather show nothing than recommend an unverified offer.",
     hist: { baisse: "Falling", hausse: "Rising", stable: "Stable" } as Record<Hist, string>,
   },
 };
@@ -293,6 +296,7 @@ export function SearchAssistant() {
   const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
+  const [failed, setFailed] = useState(false);
   // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
   // devise et les marchands disponibles en dépendent, et un visiteur français
   // n'a aucune raison de partir sur la Belgique. Le sélecteur reste maître —
@@ -324,6 +328,7 @@ export function SearchAssistant() {
     setResult(null);
     setDone([]);
     setActive(0);
+    setFailed(false);
 
     const apply = (ev: Ev): boolean => {
       if (runId.current !== id) return false; // superseded by a newer query
@@ -337,18 +342,29 @@ export function SearchAssistant() {
       return true;
     };
 
-    // Prefer the real backend when configured; fall back to the local mock on
-    // any error so the assistant always answers.
+    // Le backend est la seule source. En cas d'échec on le dit — on ne
+    // fabrique pas de résultats.
+    //
+    // Le repli sur `mockAnalyze` synthétisait des cartes : marques, marchands
+    // et prix inventés, chez des enseignes qui ne sont pas nos partenaires.
+    // Constaté en ligne. Sur un site dont la promesse est « nous relevons les
+    // prix », c'est la seule chose qu'on ne peut pas se permettre.
     if (API) {
       try {
         for await (const ev of streamAnalyze(q, country)) if (!apply(ev)) return;
         return;
       } catch {
         if (runId.current !== id) return;
+        setActive(-1);
         setDone([]);
-        setActive(0);
+        setFailed(true);
+        setPhase("results");
+        return;
       }
     }
+
+    // Sans backend configuré (développement local), la démonstration reste
+    // utile — et elle s'annonce comme telle à l'écran.
     for await (const ev of mockAnalyze(q, reduce)) if (!apply(ev)) return;
   };
 
@@ -432,6 +448,12 @@ export function SearchAssistant() {
                   );
                 })}
               </motion.div>
+
+              {phase === "results" && failed && (
+                <p className="sa-failed" role="status">
+                  {S.failed}
+                </p>
+              )}
 
               {phase === "results" && result && (
                 <motion.div 
