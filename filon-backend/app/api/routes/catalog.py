@@ -1034,6 +1034,65 @@ async def flag_adult_offers(
     }
 
 
+@router.get("/admin/merchant-profiles")
+async def merchant_profiles_endpoint(
+    x_admin_token: str | None = Header(default=None),
+) -> dict:
+    """Rayon dominant de chaque marchand — à lire avant tout réalignement."""
+    _require_admin(x_admin_token)
+    if not db.is_enabled():
+        raise HTTPException(status_code=503, detail="base de données absente")
+
+    from app.services import coherence
+
+    async with db.session_scope() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="base de données absente")
+        profils = await coherence.merchant_profiles(session)
+        noms = dict(
+            (await session.execute(select(models.Merchant.id, models.Merchant.name))).all()
+        )
+
+    items = [
+        {
+            "merchant": noms.get(mid, str(mid)),
+            "rayon": rayon,
+            "part_pct": round(part * 100, 1),
+            "offres": total,
+        }
+        for mid, (rayon, part, total) in profils.items()
+    ]
+    items.sort(key=lambda x: x["offres"], reverse=True)
+    return {"specialistes": len(items), "items": items}
+
+
+@router.post("/admin/realign")
+async def realign_endpoint(
+    dry_run: bool = Query(
+        default=True,
+        description="Simulation par défaut : mesurer avant d'écrire sur 795 000 lignes",
+    ),
+    batch: int = Query(default=2000, le=10000),
+    x_admin_token: str | None = Header(default=None),
+) -> dict:
+    """Ramène les offres marginales au rayon dominant de leur marchand.
+
+    Simulation par défaut, à dessein. Cette opération peut déplacer des dizaines
+    de milliers d'offres : on mesure l'ampleur avant de la subir. Passer
+    `dry_run=false` pour écrire.
+    """
+    _require_admin(x_admin_token)
+    if not db.is_enabled():
+        raise HTTPException(status_code=503, detail="base de données absente")
+
+    from app.services import coherence
+
+    async with db.session_scope() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="base de données absente")
+        return await coherence.realign(session, batch=batch, dry_run=dry_run)
+
+
 @router.post("/admin/rebuild-canonical")
 async def rebuild_canonical_endpoint(
     x_admin_token: str | None = Header(default=None),
