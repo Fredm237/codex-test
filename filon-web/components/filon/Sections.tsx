@@ -90,7 +90,7 @@ export function Closing({ proof }: { proof: Proof | null }) {
         playsInline
         aria-hidden="true"
       >
-        <source src="/video/hf_seal.mp4" type="video/mp4" />
+        <source src="/video/closing_bg.mp4" type="video/mp4" />
       </video>
       <div className="fx-closing-overlay" aria-hidden="true" />
       <motion.div
