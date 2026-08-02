@@ -23,7 +23,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
         playsInline
         poster="/img/closing-bg.png"
       >
-        <source src="/video/hero_bg.mp4" type="video/mp4" />
+        <source src="/video/filon_hf_promo.mp4" type="video/mp4" />
       </video>
 
       {/* Overlay sombre pour lisibilité */}
