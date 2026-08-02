@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
 
 const SL = {
@@ -243,13 +244,16 @@ function ScoreRing({ score }: { score: number }) {
 function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
   const [imgOk, setImgOk] = useState(true);
   const S = SL[useLocale().locale];
-  // Real product URL when we have it (SerpApi mode). Otherwise search Google
-  // Shopping for the user's actual query — never the card name, which can be a
-  // generic placeholder in the estimated fallback ("Option 1" → junk results).
   const offerUrl = c.link || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q || c.name)}`;
   const showImg = c.image && imgOk;
   return (
-    <article className={`fa-card${i === 0 ? " win" : ""}`} style={{ ["--d" as string]: `${i * 90}ms` }}>
+    <motion.article 
+      className={`fa-card${i === 0 ? " win" : ""}`}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+      whileHover={{ y: -4, boxShadow: "var(--fx-elevation-3)" }}
+    >
       {i === 0
         ? <div className="fa-flag"><IcCheck /> {c.rank}</div>
         : <div className="fa-rank"><span className="num">{i + 1}</span> {c.rank}</div>}
@@ -278,7 +282,7 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
           <a className="ed-btn wave" href={offerUrl} target="_blank" rel="noopener noreferrer">{S.see}</a>
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
 
@@ -396,35 +400,59 @@ export function SearchAssistant() {
           </div>
         </form>
 
-        {phase !== "idle" && (
-          <div className="fa-out" aria-live="polite">
-            {/* streamed reasoning */}
-            <div className={`fa-steps ${phase === "results" ? "collapsed" : ""}`}>
-              {S.steps.map((s, i) => {
-                const st = done.includes(i) ? "done" : i === active ? "active" : "pending";
-                return (
-                  <div className={`fa-step ${st}`} key={i}>
-                    <span className="tk">{st === "done" ? "✓" : ""}</span>
-                    {s}
-                  </div>
-                );
-              })}
-            </div>
+        <AnimatePresence mode="wait">
+          {phase !== "idle" && (
+            <motion.div 
+              key="assistant-output"
+              className="fa-out" 
+              aria-live="polite"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {/* streamed reasoning */}
+              <motion.div 
+                className={`fa-steps ${phase === "results" ? "collapsed" : ""}`}
+                layout
+              >
+                {S.steps.map((s, i) => {
+                  const st = done.includes(i) ? "done" : i === active ? "active" : "pending";
+                  return (
+                    <motion.div 
+                      layout
+                      className={`fa-step ${st}`} 
+                      key={i}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                    >
+                      <span className="tk">{st === "done" ? "✓" : ""}</span>
+                      {s}
+                    </motion.div>
+                  );
+                })}
+              </motion.div>
 
-            {phase === "results" && result && (
-              <div className="fa-results">
-                <p className="fa-summary">
-                  <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.recos} {result.cards.length} {S.recoTail}{result.cards.length > 1 ? S.nounPl : ""}, {S.classed}{result.cards.length > 1 ? S.adjPl : ""}.
-                  <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{COUNTRIES.find((x) => x.code === (result.country || country))?.label || "Belgique"}.</span>
-                </p>
-                <div className="fa-cards">
-                  {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}
-                </div>
-                <p className="sa-disc">{S.disc}</p>
-              </div>
-            )}
-          </div>
-        )}
+              {phase === "results" && result && (
+                <motion.div 
+                  className="fa-results"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <p className="fa-summary">
+                    <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.recos} {result.cards.length} {S.recoTail}{result.cards.length > 1 ? S.nounPl : ""}, {S.classed}{result.cards.length > 1 ? S.adjPl : ""}.
+                    <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{COUNTRIES.find((x) => x.code === (result.country || country))?.label || "Belgique"}.</span>
+                  </p>
+                  <div className="fa-cards">
+                    {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}
+                  </div>
+                  <p className="sa-disc">{S.disc}</p>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </section>
   );

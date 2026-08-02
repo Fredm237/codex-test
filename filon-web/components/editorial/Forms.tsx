@@ -63,14 +63,15 @@ async function postForm(data: Record<string, string>): Promise<boolean> {
 
 const input: React.CSSProperties = {
   width: "100%",
-  background: "var(--card)",
-  border: "1px solid var(--line-2)",
-  borderRadius: "var(--r-md)",
+  background: "var(--fx-surface)",
+  border: "1px solid var(--fx-border-strong)",
+  borderRadius: "var(--fx-radius-sm)",
   padding: "14px 16px",
-  color: "var(--ink)",
+  color: "var(--fx-text)",
   fontFamily: "var(--sans)",
   fontSize: 15,
   outline: "none",
+  transition: "border-color 220ms cubic-bezier(0.16, 1, 0.3, 1), box-shadow 220ms cubic-bezier(0.16, 1, 0.3, 1)",
 };
 
 export function ContactForm() {
@@ -138,7 +139,7 @@ export function Newsletter() {
     <form className="ed-news" onSubmit={onSubmit}>
       <input name="email" type="email" aria-label={T.email} placeholder={T.email} required disabled={state === "ok"} />
       <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ display: "none" }} />
-      <button type="submit" className="ed-btn wave" disabled={state === "sending" || state === "ok"}>
+      <button type="submit" className="ed-btn dark" disabled={state === "sending" || state === "ok"}>
         {state === "ok" ? T.subscribed : state === "sending" ? "…" : T.subscribe}
       </button>
       {state === "error" && <span className="ed-news-msg err">{T.retry}</span>}

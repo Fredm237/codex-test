@@ -158,7 +158,7 @@
     box-shadow var(--fx-duration) var(--fx-ease-standard),
     transform var(--fx-duration) var(--fx-ease-out);
 }
-.fx-product:hover { border-color: var(--fx-border-strong); box-shadow: var(--fx-elevation-2); transform: translateY(-2px); }
+.fx-product:hover { border-color: var(--fx-border-strong); box-shadow: var(--fx-elevation-2); }
 /* La carte se signale au clavier comme à la souris. */
 .fx-product:focus-within { border-color: var(--fx-text); box-shadow: var(--fx-elevation-2); }
 
@@ -756,6 +756,628 @@
 }
 .fx-verdict-link svg { transition: transform var(--fx-duration) var(--fx-ease-out); }
 .fx-verdict-link:hover svg { transform: translateX(3px); }
+
+/* ── Animations utilitaires (Framer Motion / CSS) ────────── */
+
+.fx-stagger-child {
+  opacity: 0;
+}
+
+/* Ces classes sont destinées à être utilisées avec Framer Motion
+   pour assurer un rendu initial propre sans flash de contenu. */
+.fx-reveal-init {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+/* ── Micro-interactions globales ─────────────────────────── */
+
+/* Liens animés — soulignement progressif */
+.fx-animated-link {
+  position: relative;
+  display: inline-block;
+}
+.fx-animated-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--fx-brand);
+  transition: width var(--fx-duration) var(--fx-ease-out);
+}
+.fx-animated-link:hover::after {
+  width: 100%;
+}
+
+/* Boutons — effet de pression tactile */
+.fx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--fx-btn-height);
+  padding: 0 var(--fx-btn-padding-x);
+  border-radius: var(--fx-btn-radius);
+  font-size: var(--fx-text-base);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 
+    transform var(--fx-duration-fast) var(--fx-ease-out),
+    box-shadow var(--fx-duration) var(--fx-ease-out),
+    background var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-btn:active {
+  transform: scale(0.97);
+}
+
+.fx-btn.on-ink {
+  background: var(--fx-paper-0);
+  color: var(--fx-ink-900);
+  box-shadow: var(--fx-elevation-1);
+}
+.fx-btn.on-ink:hover {
+  box-shadow: var(--fx-elevation-2);
+  transform: translateY(-2px);
+}
+
+.fx-btn.secondary {
+  background: transparent;
+  color: var(--fx-text);
+  border: 1px solid var(--fx-border-strong);
+}
+.fx-btn.secondary:hover {
+  background: var(--fx-paper-100);
+  border-color: var(--fx-text);
+}
+
+.fx-btn-on-ink-ghost {
+  background: transparent;
+  color: var(--fx-paper-50);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.fx-btn-on-ink-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Chips — puces interactives */
+.fx-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: var(--fx-radius-full);
+  border: 1px solid var(--fx-border);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-secondary);
+  background: var(--fx-surface);
+  cursor: pointer;
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration-fast) var(--fx-ease-out);
+}
+.fx-chip:hover {
+  border-color: var(--fx-brand);
+  color: var(--fx-text);
+  box-shadow: var(--fx-elevation-1);
+  transform: translateY(-1px);
+}
+.fx-chip:active {
+  transform: scale(0.97);
+}
+
+/* Info cards — hover premium */
+.ed-info {
+  transition: 
+    box-shadow var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration) var(--fx-ease-out),
+    border-color var(--fx-duration) var(--fx-ease-standard);
+}
+.ed-info:hover {
+  box-shadow: var(--fx-elevation-2);
+  transform: translateY(-3px);
+  border-color: var(--fx-border-strong);
+}
+
+/* Newsletter input — focus premium */
+.ed-news input:focus {
+  border-color: var(--fx-brand);
+  box-shadow: 0 0 0 3px var(--fx-brand-wash);
+  outline: none;
+}
+
+/* ── Skeletons de chargement premium ─────────────────────── */
+
+@keyframes fx-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.fx-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--fx-paper-100) 25%,
+    var(--fx-paper-200) 50%,
+    var(--fx-paper-100) 75%
+  );
+  background-size: 200% 100%;
+  animation: fx-shimmer 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-skeleton { animation: none; background: var(--fx-paper-100); }
+}
+
+.fx-skeleton-card {
+  pointer-events: none;
+}
+
+.fx-skeleton-card .fx-product-media {
+  background: var(--fx-paper-100);
+}
+
+.fx-skeleton-verdict {
+  padding: var(--fx-space-5);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-md);
+  background: var(--fx-surface);
+}
+
+.fx-skeleton-offer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--fx-space-4) 0;
+  border-bottom: 1px solid var(--fx-border);
+}
+
+/* ── Champ de recherche — états focus premium ────────────── */
+
+.fx-field {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-3);
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-field-radius);
+  padding: 6px 6px 6px var(--fx-space-5);
+  min-height: var(--fx-field-height);
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+
+.fx-field-focused {
+  border-color: var(--fx-brand);
+  box-shadow: 0 0 0 4px var(--fx-brand-wash), var(--fx-elevation-2);
+}
+
+.fx-field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--fx-text-base);
+  color: var(--fx-text);
+  outline: none;
+}
+.fx-field input::placeholder {
+  color: var(--fx-text-muted);
+}
+
+.fx-btn.primary {
+  background: var(--fx-action);
+  color: var(--fx-on-action);
+  border: none;
+  min-height: 44px;
+  padding: 0 var(--fx-space-5);
+  border-radius: var(--fx-radius-full);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+  cursor: pointer;
+}
+
+/* ── Page produit — Refonte premium ──────────────────────── */
+
+.pg-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .pg-grid { grid-template-columns: 1fr; }
+}
+
+.pg-media {
+  position: sticky;
+  top: 100px;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-lg);
+  overflow: hidden;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--fx-elevation-1);
+  transition: box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+.pg-media:hover {
+  box-shadow: var(--fx-elevation-2);
+}
+.pg-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: var(--fx-space-6);
+}
+@media (max-width: 860px) {
+  .pg-media { position: static; aspect-ratio: 4/3; }
+}
+
+.pg-brand {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+}
+
+.pg-title {
+  font-family: var(--serif);
+  font-size: var(--fx-text-2xl);
+  font-weight: 400;
+  line-height: var(--fx-leading-snug);
+  letter-spacing: var(--fx-tracking-tight);
+  margin-top: var(--fx-space-2);
+}
+
+.pg-headline {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fx-space-4);
+  margin-top: var(--fx-space-5);
+  padding-bottom: var(--fx-space-4);
+  border-bottom: 1px solid var(--fx-border);
+}
+.pg-from {
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-muted);
+  margin-right: var(--fx-space-2);
+}
+.pg-price {
+  font-size: var(--fx-text-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--fx-text);
+}
+.pg-count {
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-muted);
+}
+
+.pg-saving {
+  margin-top: var(--fx-space-4);
+  padding: var(--fx-space-3) var(--fx-space-4);
+  background: var(--fx-gain-subtle);
+  border-radius: var(--fx-radius-sm);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-gain-strong);
+}
+.pg-saving b {
+  font-weight: 700;
+}
+
+.pg-sub {
+  font-size: var(--fx-text-lg);
+  font-weight: 600;
+  margin-top: var(--fx-space-7);
+  margin-bottom: var(--fx-space-4);
+  letter-spacing: var(--fx-tracking-tight);
+}
+
+.pg-offers {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pg-offer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fx-space-3);
+  padding: var(--fx-space-4) 0;
+  border-bottom: 1px solid var(--fx-border);
+  transition: background var(--fx-duration) var(--fx-ease-standard);
+}
+.pg-offer:hover {
+  background: var(--fx-paper-50);
+  margin: 0 calc(-1 * var(--fx-space-3));
+  padding-left: var(--fx-space-3);
+  padding-right: var(--fx-space-3);
+  border-radius: var(--fx-radius-sm);
+}
+
+.pg-offer.best {
+  border-color: var(--fx-gain);
+  background: var(--fx-gain-subtle);
+  margin: 0 calc(-1 * var(--fx-space-3));
+  padding-left: var(--fx-space-3);
+  padding-right: var(--fx-space-3);
+  border-radius: var(--fx-radius-sm);
+  border: 1px solid var(--fx-gain);
+}
+
+.pg-offer-merchant {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-2);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+}
+
+.pg-offer-right {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-3);
+}
+.pg-offer-right b {
+  font-size: var(--fx-text-base);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pg-stock {
+  font-size: var(--fx-text-xs);
+  color: var(--fx-gain);
+}
+
+.pg-note {
+  margin-top: var(--fx-space-6);
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+/* Verdict FILON — refonte premium */
+.vd {
+  margin-top: var(--fx-space-5);
+  padding: var(--fx-space-5);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-md);
+  background: var(--fx-surface);
+  box-shadow: var(--fx-elevation-1);
+}
+.vd-excellent { border-left: 3px solid var(--fx-gain); }
+.vd-bon { border-left: 3px solid var(--fx-gain); }
+.vd-neutre { border-left: 3px solid var(--fx-brand); }
+.vd-attendre { border-left: 3px solid var(--fx-alert-600); }
+.vd-insuffisant { border-left: 3px solid var(--fx-text-muted); }
+
+.vd-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+}
+.vd-head {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-2);
+  margin-top: var(--fx-space-2);
+}
+.vd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+.vd-excellent .vd-dot, .vd-bon .vd-dot { background: var(--fx-gain); }
+.vd-neutre .vd-dot { background: var(--fx-brand); }
+.vd-attendre .vd-dot { background: var(--fx-alert-600); }
+.vd-insuffisant .vd-dot { background: var(--fx-text-muted); }
+
+.vd-title {
+  font-size: var(--fx-text-lg);
+  font-weight: 700;
+}
+.vd-reasons {
+  margin: var(--fx-space-3) 0 0;
+  padding-left: var(--fx-space-5);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-secondary);
+  line-height: 1.6;
+}
+.vd-reasons li { margin-bottom: var(--fx-space-1); }
+.vd-meta {
+  margin-top: var(--fx-space-3);
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+}
+
+/* ── Catalogue — Filtres actifs et polish ─────────────────── */
+
+.fx-active-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--fx-space-2);
+  margin-bottom: var(--fx-space-4);
+}
+
+.fx-filter-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--fx-radius-full);
+  background: var(--fx-brand-wash);
+  border: 1px solid var(--fx-brand-subtle);
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  color: var(--fx-brand-strong);
+  transition: 
+    background var(--fx-duration) var(--fx-ease-standard),
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration-fast) var(--fx-ease-out);
+}
+.fx-filter-pill:hover {
+  background: var(--fx-brand-subtle);
+  border-color: var(--fx-brand);
+  transform: scale(0.97);
+}
+.fx-filter-pill span[aria-hidden] {
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.6;
+}
+
+/* Catalogue controls — transitions pour les selects et inputs */
+.fx-inline-field input,
+.fx-inline-field select {
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-inline-field input:focus,
+.fx-inline-field select:focus {
+  border-color: var(--fx-brand);
+  box-shadow: 0 0 0 3px var(--fx-brand-wash);
+  outline: none;
+}
+
+/* Pagination — hover premium */
+.fx-page,
+.fx-page-step {
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard), 
+    color var(--fx-duration) var(--fx-ease-standard),
+    background var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration-fast) var(--fx-ease-out),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-page:hover,
+.fx-page-step:hover { 
+  border-color: var(--fx-text); 
+  color: var(--fx-text); 
+  transform: translateY(-1px);
+  box-shadow: var(--fx-elevation-1);
+}
+.fx-page:active,
+.fx-page-step:active {
+  transform: scale(0.95);
+}
+
+/* ── Footer — Refonte premium ────────────────────────────── */
+
+.ed-footer {
+  border-top: 1px solid var(--fx-border);
+  background: var(--fx-bg-sunken);
+  padding: var(--fx-space-9) 0 var(--fx-space-7);
+}
+
+.ed-newsblock {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--fx-space-6);
+  align-items: center;
+  padding-bottom: var(--fx-space-7);
+  border-bottom: 1px solid var(--fx-border);
+  margin-bottom: var(--fx-space-7);
+}
+@media (max-width: 760px) {
+  .ed-newsblock { grid-template-columns: 1fr; }
+}
+
+.ed-foot-links a {
+  transition: color var(--fx-duration) var(--fx-ease-standard);
+}
+.ed-foot-links a:hover {
+  color: var(--fx-text);
+}
+
+/* ── Scroll-to-top button ────────────────────────────────── */
+
+.fx-scroll-top {
+  position: fixed;
+  bottom: var(--fx-space-5);
+  right: var(--fx-space-5);
+  z-index: 30;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  box-shadow: var(--fx-elevation-2);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: 
+    opacity var(--fx-duration-slow) var(--fx-ease-out),
+    transform var(--fx-duration-slow) var(--fx-ease-out),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+  pointer-events: none;
+}
+.fx-scroll-top.visible {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.fx-scroll-top:hover {
+  box-shadow: var(--fx-elevation-3);
+  border-color: var(--fx-brand);
+}
+.fx-scroll-top:active {
+  transform: scale(0.9);
+}
+
+/* ── Global polish ───────────────────────────────────────── */
+
+/* Smooth underline pour tous les liens dans le contenu */
+.ed-prose a,
+.fx-body a {
+  text-decoration: underline;
+  text-decoration-color: var(--fx-brand-subtle);
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--fx-duration) var(--fx-ease-standard);
+}
+.ed-prose a:hover,
+.fx-body a:hover {
+  text-decoration-color: var(--fx-brand);
+}
+
+/* Selection couleur marque */
+::selection {
+  background: var(--fx-brand-wash);
+  color: var(--fx-ink-900);
+}
+
+/* Scrollbar premium (Webkit) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--fx-ink-300);
+  border-radius: var(--fx-radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--fx-ink-500);
+  background-clip: content-box;
+}
 
 /* ═══════════════════════════════════════════════════════════
    VIVANT
