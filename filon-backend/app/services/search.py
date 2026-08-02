@@ -20,9 +20,24 @@ from app.db import models
 MAX_TERMS = 6
 MIN_TERM_LENGTH = 2
 
-# Suffixes FR + NL pour le stemming
-_SUFFIXES = ("tion", "ment", "eur", "euse", "ique", "ies", "es", "en", "er", "x", "s", "e")
-_MIN_STEM = 3
+# Seuls les accords — pluriel et genre, en français comme en néerlandais.
+#
+# Les suffixes dérivationnels (« tion », « ment », « eur », « ique »…) sont
+# volontairement exclus. Le radical sert de *sous-chaîne* dans la requête, si
+# bien qu'un radical trop court n'élargit pas la recherche : il la déporte.
+# Mesuré sur des libellés du catalogue : « robe » réduit à « rob » ramenait
+# robots et robinets, « chargeur » réduit à « charg » ramenait chargement et
+# chargeuse. C'est le même mélange de rayons que celui constaté au catalogue,
+# par un autre chemin.
+#
+# Du plus long au plus court : « manteaux » ne perd que son x, car retirer
+# « eaux » laisserait « mant », un radical si court qu'il ramène n'importe quoi.
+_SUFFIXES = ("es", "en", "x", "s", "e")
+
+# En deçà, le radical cesse d'identifier le mot. « robe » moins son « e » fait
+# trois lettres, et trois lettres se retrouvent dans des dizaines de produits
+# sans rapport.
+_MIN_STEM = 4
 
 
 def normalize(text: str) -> str:
@@ -32,12 +47,12 @@ def normalize(text: str) -> str:
 
 
 def stem(term: str) -> str:
-    """Radical approximatif — absorbe les accords FR/NL.
+    """Radical approximatif — absorbe les accords FR/NL, et rien de plus.
 
-    Plus intelligent que la version précédente :
-    - Normalise les accents
-    - Gère plus de suffixes
-    - Protège les termes courts
+    Les libellés des marchands ne s'accordent pas avec la requête : « Chemise
+    bleu » côtoie « chemise bleue » et « chemises bleues ». On tronque donc les
+    terminaisons d'accord pour chercher le radical — mais on s'arrête là, car
+    au-delà le radical ne désigne plus le même objet.
     """
     term = normalize(term)
     if len(term) <= 4:

@@ -132,3 +132,32 @@ class TestStem:
         """Un radical trop court ramenerait n'importe quoi."""
         for term in ("manteaux", "chemises", "bleues", "sacs"):
             assert len(stem(term)) >= 3
+
+    @pytest.mark.parametrize(
+        "terme,intrus",
+        [
+            ("robe", ["robot aspirateur", "robinet de cuisine"]),
+            ("chargeur", ["chargement automatique", "chargeuse compacte"]),
+            ("moniteur", ["monitorage cardiaque"]),
+            ("alimentation", ["aliments pour chien"]),
+        ],
+    )
+    def test_le_radical_ne_deporte_pas_la_recherche(self, terme, intrus):
+        """Le radical sert de sous-chaîne : trop court, il change de rayon.
+
+        Une passe de « stemming amélioré » avait ajouté les suffixes
+        dérivationnels — tion, ment, eur, ique. « robe » devenait « rob » et
+        ramenait robots et robinets ; « chargeur » devenait « charg » et
+        ramenait chargement et chargeuse. C'est le même mélange de rayons que
+        celui constaté au catalogue, par un autre chemin.
+        """
+        radical = stem(terme)
+        for libelle in intrus:
+            assert radical not in libelle, f"« {terme} » → « {radical} » ramène « {libelle} »"
+
+    def test_le_pluriel_neerlandais_reste_absorbe(self):
+        """La normalisation NL de la même passe était bonne, elle reste."""
+        assert stem("tafels") == stem("tafel")
+
+    def test_les_accents_sont_normalises(self):
+        assert stem("écouteurs") == stem("ecouteurs")

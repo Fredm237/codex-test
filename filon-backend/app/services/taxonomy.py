@@ -90,6 +90,43 @@ def categories_of_department(department: str) -> list[str]:
     return []
 
 
+# ── Couleurs composées ──────────────────────────────────────────────────────
+# En français, une quantité de couleurs se nomment « <teinte> <objet> » :
+# gris souris, bleu marine, vert olive, gris perle, bleu canard, jaune
+# moutarde. Le second mot n'y désigne pas l'objet — il qualifie la teinte.
+#
+# Sans ce garde-fou, « Tissu tailleur de laine — Gris souris » atterrissait en
+# Informatique, sous-rayon « Claviers & Souris », et le rayon informatique du
+# catalogue affichait des coupons de tissu. Constaté en production.
+#
+# On neutralise donc le second terme avant tout classement : la teinte reste,
+# l'objet disparaît. « Gris souris » devient « gris », qui ne classe rien.
+_TEINTES = (
+    "gris|grise|bleu|bleue|vert|verte|rouge|jaune|rose|beige|brun|brune|noir|"
+    "noire|blanc|blanche|orange|violet|violette|taupe|kaki|bordeaux|ivoire|"
+    "anthracite|marron|mauve|turquoise|corail|sable|creme|crème"
+)
+_COULEUR_COMPOSEE = re.compile(
+    rf"\b({_TEINTES})[\s-]+"
+    r"(souris|marine|olive|perle|canard|moutarde|p[êe]che|amande|brique|"
+    r"cha(?:r|)bon|charbon|petrole|pétrole|lavande|prune|abricot|caramel|"
+    r"chocolat|caf[ée]|paille|argent|or|bronze|cuivre|nuit|ciel|ardoise|"
+    r"anthracite|poudr[ée]e?|glac[ée]e?|clair|claire|fonc[ée]e?|pastel)\b",
+    re.IGNORECASE,
+)
+
+
+def strip_colour_compounds(text: str) -> str:
+    """Retire l'objet d'une couleur composée, en gardant la teinte.
+
+    « Gris souris » → « gris ». « Bleu canard » → « bleu ». Sans quoi le
+    second terme est lu comme le produit lui-même.
+    """
+    if not text:
+        return text
+    return _COULEUR_COMPOSEE.sub(lambda m: m.group(1), text)
+
+
 def department_of(category: str) -> str | None:
     """Département d'un rayon, ou None s'il n'est rattaché à aucun."""
     return _DEPARTMENT_OF.get(category)
@@ -100,6 +137,60 @@ def department_of(category: str) -> str | None:
 _ENFANT = r"\b(enfant|kids?|child|children|kinder|jongens|meisjes|garçon|fille|boys?|girls?|junior)\b"
 _FEMME = r"\b(femme|femmes|women|women's|woman|dames|dame|ladies|lady|feminin|féminin)\b"
 _HOMME = r"\b(homme|hommes|men|men's|mens|heren|male|masculin)\b"
+
+# Un objet fini fait d'une matière reste un objet fini : « housse de couette
+# en percale » est du linge de maison, pas de la mercerie. La règle du support
+# ne s'applique donc que si aucun nom d'objet fini n'apparaît — c'est le nom de
+# tête qui décide, pas la matière qui le qualifie.
+_OBJET_FINI = re.compile(
+    r"\b(housses?|couettes?|draps?|taies?|rideaux?|voilages?|nappes?|"
+    r"serviettes?|coussins?|plaids?|couvertures?|chemises?|chemisiers?|robes?|"
+    r"pantalons?|jupes?|vestes?|manteaux?|pulls?|blouses?|tuniques?|"
+    r"combinaisons?|tabliers?|torchons?|peignoirs?|pyjamas?|gigoteuses?|"
+    r"[ée]charpes?|bonnets?|gants?|sacs?\s+[àa]\s+main|matelas|oreillers?)\b",
+    re.IGNORECASE,
+)
+
+
+# ── Le support l'emporte sur le motif ───────────────────────────────────────
+#
+# Un tissu imprimé de souris est un tissu, pas un périphérique. Un patron de
+# couture pour peluches est un article de mercerie, pas un jouet. Un livre sur
+# les chiens est un livre, pas de l'animalerie. Une coque de téléphone à motif
+# chat est un accessoire de téléphonie.
+#
+# C'est la cause principale des rayons incohérents constatés en production, et
+# elle est bien plus large que le seul cas « souris » : sur un échantillon de
+# quinze libellés de mercerie, un seul était correctement classé. Le motif
+# imprimé sur un objet piège n'importe quel classement par mots-clés, quel que
+# soit le rayon visé.
+#
+# Ces règles passent donc AVANT toutes les autres, et gagnent. Elles sont
+# volontairement étroites : seuls des termes qui désignent le support sans
+# ambiguïté y figurent. « Lin » en est absent — « chemise en lin » est un
+# vêtement.
+_SUPPORTS: list[tuple[str, str]] = [
+    # Mercerie et tissus au mètre. Le nom du motif suit presque toujours un
+    # tiret : « Popeline coton - Petites voitures ».
+    (LOISIRS,
+     r"\b(tissus?|jerseys?|popelines?|cretonnes?|tricotines?|gabardines?|"
+     r"serg[ée]s?|mousselines?|batistes?|percales?|bord\s+c[ôo]tes?|"
+     r"molletons?|cr[ée]pons?|bourrettes?|piqu[ée]s?\s+\d*\s*%?\s*coton|"
+     r"sweat\s+molletonn[ée]|polaire\s+double\s+face|viscose\s+unie|"
+     r"coupons?\s+de\s+\d|au\s+m[èe]tre|mercerie|"
+     r"patrons?\s+(?:burda|mccall|simplicity|vogue|new\s+look)|"
+     r"patrons?\s+de\s+couture|fermetures?\s+[ée]clair|fil\s+[àa]\s+coudre)\b"),
+    # Livres et affiches : le sujet ne détermine pas le rayon.
+    (CULTURE,
+     r"\b(livres?\s+sur|guides?\s+de|romans?|beaux?[-\s]livres?|"
+     r"bandes?\s+dessin[ée]es?|mangas?)\b"),
+    (MAISON,
+     r"\b(affiches?|posters?|stickers?\s+muraux?|papiers?\s+peints?|"
+     r"toiles?\s+imprim[ée]es?|cadres?\s+photo)\b"),
+    # Coques et étuis : c'est de la téléphonie, quel que soit le dessin dessus.
+    (TELEPHONIE, r"\b(coques?|[ée]tuis?)\s+(?:de\s+)?(?:t[ée]l[ée]phone|smartphone|iphone|samsung)\b"),
+]
+
 
 # (catégorie, motif). La première correspondance gagne : du plus spécifique au
 # plus général.
@@ -116,7 +207,16 @@ _RULES: list[tuple[str, str]] = [
                  r"telecommunications?)\b"),
     (GAMING, r"\b(gaming|jeux? vid[ée]o|video\s?games?|consoles?|playstation|ps5|ps4|xbox|"
              r"nintendo|steam|manettes?|gamer|videogames?)\b"),
-    (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|souris|"
+    # « souris » exige un contexte informatique : seul, il désigne bien plus
+    # souvent un animal, un imprimé de tissu ou une pièce de puzzle. Constaté en
+    # production — le rayon informatique affichait des coupons de tissu et des
+    # patrons de couture. Le qualificatif peut précéder ou suivre le mot.
+    (INFORMATIQUE,
+     r"(?=.*\bsouris\b)(?=.*\b(?:sans[-\s]?fil|optique|gamer|gaming|ergonomiques?|"
+     r"bluetooth|filaires?|verticales?|usb|dpi|laser|rechargeables?|claviers?|"
+     r"combo|molette)\b)"),
+    (INFORMATIQUE, r"\btapis de souris\b"),
+    (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
                    r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|usb|"
                    r"tablettes?|software)\b"),
     (PHOTO, r"\b(appareils? photo|cameras?|caméras?|objectifs?|reflex|drones?|gopro|"
@@ -151,9 +251,14 @@ _RULES: list[tuple[str, str]] = [
             r"[ée]quipements? sportifs?)\b"),
     (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
              r"tuingereedschap|gereedschap|parquet|peinture murale|garden tools?)\b"),
+    # « tissus » est retiré de cette règle : il désigne la mercerie, traitée
+    # plus haut par les supports. Le laisser ici renvoyait tous les coupons au
+    # rayon Maison. Le linge de maison, lui, manquait entièrement.
     (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|lampes?|luminaires?|matelas|"
-             r"linge de lit|rideaux?|d[ée]coration|meubles?|vaisselle|assiettes?|cuisine|"
-             r"meubel|verlichting|schoonmaak|nettoyage|serviettes?|tissus?|textile|"
+             r"linge de (?:lit|maison)|housses? de (?:couette|coussin)|couettes?|"
+             r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
+             r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
+             r"cuisine|meubel|verlichting|schoonmaak|nettoyage|serviettes?|textile|"
              r"home\s*&\s*garden|huishouden)\b"),
     (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
              r"toys?)\b"),
@@ -261,7 +366,11 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     INFORMATIQUE: [
         ("Ordinateurs portables", r"\b(ordinateurs? portables?|laptops?|macbook|notebooks?)\b"),
         ("Écrans", r"\b([ée]crans?|monitors?|moniteurs?)\b"),
-        ("Claviers & Souris", r"\b(claviers?|souris|keyboards?|mouse|mice)\b"),
+        # Même garde-fou qu'au premier niveau : « souris » seul ne suffit pas.
+        ("Claviers & Souris",
+         r"\b(claviers?|keyboards?|mice)\b|"
+         r"(?=.*\bsouris\b)(?=.*\b(?:sans[-\s]?fil|optique|gamer|gaming|"
+         r"ergonomiques?|bluetooth|filaires?|verticales?|usb|dpi|laser|combo)\b)"),
         ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire)\b"),
         ("Imprimantes", r"\b(imprimantes?|scanners?|cartouches?|toner)\b"),
         ("Réseau", r"\b(routeurs?|switch|wifi|r[ée]p[ée]teurs?|modems?)\b"),
@@ -386,7 +495,10 @@ def classify_subcategory(
     rules = SUBCATEGORIES.get(category or "")
     if not rules:
         return None
-    for text in ((name or "").strip(), (merchant_category or "").strip()):
+    for text in (
+        strip_colour_compounds((name or "").strip()),
+        strip_colour_compounds((merchant_category or "").strip()),
+    ):
         if not text:
             continue
         for label, pattern in rules:
@@ -404,6 +516,29 @@ def _has(pattern: str, text: str) -> bool:
     return re.search(pattern, text, re.IGNORECASE) is not None
 
 
+def _support_de_tete(text: str) -> str | None:
+    """Rayon du support, s'il tient la tête du libellé — sinon None.
+
+    Le principe est le même dans les deux sens : c'est le nom de tête qui
+    décide, et ce qui suit ne fait que le qualifier. « Housse de couette en
+    percale » est du linge de maison ; « Tissu chemise 100% coton » est du
+    tissu, vendu pour en coudre une chemise.
+
+    Comparer les deux positions dit lequel des deux est le nom de tête. Le
+    faire par un simple « s'il y a un objet fini, on abandonne le support »
+    envoyait ce second cas en Mode — il est au catalogue, chez un marchand
+    qui ne vend que du tissu.
+    """
+    fini = _OBJET_FINI.search(text)
+    limite = fini.start() if fini else len(text)
+    meilleur: tuple[int, str] | None = None
+    for category, pattern in _SUPPORTS:
+        m = re.search(pattern, text, re.IGNORECASE)
+        if m and m.start() < limite and (meilleur is None or m.start() < meilleur[0]):
+            meilleur = (m.start(), category)
+    return meilleur[1] if meilleur else None
+
+
 def classify(
     merchant_category: str | None,
     name: str | None = None,
@@ -415,11 +550,23 @@ def classify(
     rayon que de libellé produit. Rendre None est un résultat acceptable — mieux
     vaut une offre non classée qu'une offre rangée au mauvais endroit.
     """
-    name = (name or "").strip()
-    merchant_category = (merchant_category or "").strip()
+    # Les couleurs composées sont neutralisées avant tout : « gris souris » ne
+    # doit pas être lu comme une souris d'ordinateur.
+    name = strip_colour_compounds((name or "").strip())
+    merchant_category = strip_colour_compounds((merchant_category or "").strip())
     if not name and not merchant_category:
         return None
     clothing = False
+
+    # Le support d'abord : un tissu imprimé de souris reste un tissu. Sans ce
+    # passage préalable, le motif l'emportait et éparpillait la mercerie dans
+    # tous les rayons du catalogue.
+    for text in (name, merchant_category):
+        if not text:
+            continue
+        support = _support_de_tete(text)
+        if support:
+            return support
 
     # Le nom d'abord, la catégorie du marchand ensuite : l'ordre porte la règle.
     for text in (name, merchant_category):

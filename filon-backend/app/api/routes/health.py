@@ -16,6 +16,7 @@ import asyncio
 import time
 
 from fastapi import APIRouter
+from sqlalchemy import text
 
 from app import __version__
 from app.core.config import get_settings
@@ -44,7 +45,7 @@ async def _check_db() -> dict:
     async def _probe() -> float:
         start = time.time()
         async with db.session_scope() as session:
-            await session.execute(db.text("SELECT 1"))
+            await session.execute(text("SELECT 1"))
         return (time.time() - start) * 1000
 
     try:

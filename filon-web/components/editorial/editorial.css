@@ -518,6 +518,23 @@
 .sa-verdict .price { font-family: var(--mono); font-size: 30px; font-weight: 600; letter-spacing: -0.03em; }
 .sa-verdict .sv { font-size: 14px; color: #59e6cf; font-weight: 600; }
 .sa-disc { font-size: 11.5px; color: var(--ink-3); margin-top: 14px; }
+
+/* Échec de l'analyse. Volontairement sobre : pas de rouge d'alerte, pas
+   d'icône d'erreur. Le service est momentanément injoignable, ce n'est pas une
+   faute du visiteur — et ce bloc remplace des recommandations inventées, dont
+   il ne doit surtout pas reprendre l'apparence. */
+.fa-steps.hidden { display: none; }
+.sa-failed { max-width: 46ch; padding: 22px 0 4px; }
+.sa-failed-title { font-size: 17px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
+.sa-failed-body { font-size: 14px; line-height: 1.6; color: var(--ink-2); margin: 0 0 18px; }
+.sa-failed-retry {
+  font: inherit; font-size: 14px; cursor: pointer;
+  min-height: 44px; padding: 0 20px;
+  border: 1px solid var(--line); border-radius: var(--r-full);
+  background: var(--card); color: var(--ink);
+  transition: background 0.18s ease, border-color 0.18s ease;
+}
+.sa-failed-retry:hover { background: var(--ink); color: var(--paper, #fff); border-color: var(--ink); }
 @media (prefers-reduced-motion: reduce) { .sa-r, .sa-verdict, .sa-pick { opacity: 1; transform: none; } .sa-text .w { opacity: 1; transform: none; } }
 
 /* ---------- Assistant · need-based (Filon 2.0) ---------- */
