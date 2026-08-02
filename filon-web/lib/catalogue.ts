@@ -76,6 +76,34 @@ async function getJson(path: string, revalidate: number): Promise<any | null> {
   }
 }
 
+export type PulsePayload = {
+  live: boolean;
+  lastReading: string | null;
+  readings24h: number;
+  drops24h: number;
+} | null;
+
+/** Le battement du catalogue. Fenêtre de cache courte : c'est précisément ce
+ *  chiffre qui doit paraître frais. */
+export async function getPulse(): Promise<PulsePayload> {
+  const data = await getJson("/api/catalog/pulse", 120);
+  if (!data?.live) return null;
+  return {
+    live: true,
+    lastReading: data.last_reading ?? null,
+    readings24h: Number(data.readings_24h || 0),
+    drops24h: Number(data.drops_24h || 0),
+  };
+}
+
+/** Rangées thématiques — le contenu qui change tout seul d'un jour à l'autre. */
+export async function getRails(): Promise<Array<{ key: string; items: any[] }>> {
+  const data = await getJson("/api/catalog/highlights?limit=12", 300);
+  return (data?.sections || []).filter(
+    (s: { items?: unknown[] }) => (s.items || []).length > 0
+  );
+}
+
 export async function getDepartments(): Promise<Department[]> {
   const data = await getJson("/api/catalog/categories", 3600);
   return (data?.departments || []) as Department[];

@@ -49,6 +49,51 @@ def _gender_conflict_clause(category: str):
     return and_(*[not_(models.Offer.name.ilike(f"%{m}%")) for m in unwanted])
 
 
+@router.get("/pulse")
+async def pulse(session=Depends(db.get_session)) -> dict:
+    """Le battement du catalogue : ce qui a bougé, et quand.
+
+    Un catalogue qui ne dit jamais quand il a été relevé se lit comme un
+    fichier figé. Ces trois chiffres — dernier relevé, relevés du jour, baisses
+    du jour — sont les seuls qui prouvent que quelque chose tourne. Ils sont
+    mesurés, jamais estimés : sans base, on rend `live: false` plutôt que des
+    zéros qui feraient croire à un catalogue vide.
+    """
+    if session is None:
+        return {"live": False}
+
+    from datetime import datetime, timedelta
+
+    since = datetime.utcnow() - timedelta(hours=24)
+    last = await session.scalar(select(func.max(models.PriceSnapshot.captured_at)))
+    readings = await session.scalar(
+        select(func.count())
+        .select_from(models.PriceSnapshot)
+        .where(models.PriceSnapshot.captured_at >= since)
+    )
+    # Offres dont le prix a reculé depuis leur relevé le plus ancien des 24 h.
+    # Une jointure suffit : on compare le dernier prix connu au plus haut relevé
+    # de la période, sans reconstituer tout l'historique.
+    drops_stmt = (
+        select(func.count(func.distinct(models.PriceSnapshot.offer_id)))
+        .select_from(models.PriceSnapshot)
+        .join(models.Offer, models.Offer.id == models.PriceSnapshot.offer_id)
+        .where(
+            models.PriceSnapshot.captured_at >= since,
+            models.Offer.price.isnot(None),
+            models.PriceSnapshot.price > models.Offer.price,
+        )
+    )
+    drops = await session.scalar(drops_stmt)
+
+    return {
+        "live": True,
+        "last_reading": last.isoformat() if last else None,
+        "readings_24h": int(readings or 0),
+        "drops_24h": int(drops or 0),
+    }
+
+
 @router.get("/stats")
 async def stats(session=Depends(db.get_session)) -> dict:
     if session is None:

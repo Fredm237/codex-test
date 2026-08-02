@@ -6,6 +6,40 @@ export type Locale = "fr" | "nl" | "en";
 
 /** Dictionnaire FR/NL/EN. Clés courtes, regroupées par zone. */
 const DICT: Record<string, { fr: string; nl: string; en: string }> = {
+  // Démonstrations — promesse + objet réel, sur une scène de vie.
+  "show.badge1": { fr: "Le vrai prix", nl: "De echte prijs", en: "The real price" },
+  "show.t1": { fr: "Le même article, vendu", nl: "Hetzelfde artikel, verkocht", en: "The same item, sold" },
+  "show.e1": { fr: "à deux prix.", nl: "voor twee prijzen.", en: "at two prices." },
+  "show.b1": { fr: "FILON regroupe les offres par code-barres et vous montre l'écart réel entre le marchand le plus cher et le moins cher. Pas une moyenne : deux prix relevés.", nl: "FILON groepeert de aanbiedingen per barcode en toont het echte verschil tussen de duurste en de goedkoopste winkel. Geen gemiddelde: twee gemeten prijzen.", en: "FILON groups offers by barcode and shows the real gap between the priciest and the cheapest merchant. Not an average: two recorded prices." },
+
+  "show.badge2": { fr: "Le bon moment", nl: "Het juiste moment", en: "The right moment" },
+  "show.t2": { fr: "Une promotion qui", nl: "Een korting die", en: "A promotion that" },
+  "show.e2": { fr: "en est vraiment une.", nl: "er echt een is.", en: "really is one." },
+  "show.b2": { fr: "Chaque prix est relevé et conservé. Le Verdict compare celui du jour à ce que nous avons observé, et dit s'il vaut mieux acheter ou attendre.", nl: "Elke prijs wordt gemeten en bewaard. Het Verdict vergelijkt die van vandaag met wat we hebben waargenomen, en zegt of je beter koopt of wacht.", en: "Every price is recorded and kept. The Verdict compares today's against what we observed, and says whether to buy or wait." },
+
+  "show.badge3": { fr: "Sans surprise", nl: "Zonder verrassing", en: "No surprises" },
+  "show.t3": { fr: "Le prix payé, connu", nl: "De betaalde prijs, gekend", en: "The price you pay, known" },
+  "show.e3": { fr: "avant de payer.", nl: "voor je betaalt.", en: "before you pay." },
+  "show.b3": { fr: "Le marchand, la disponibilité et le montant exact sont affichés avant le clic. Vous partez chez le vendeur en sachant ce qui vous attend.", nl: "De winkel, de beschikbaarheid en het exacte bedrag staan er vóór de klik. Je vertrekt naar de verkoper met volle kennis van zaken.", en: "The merchant, the availability and the exact amount are shown before the click. You reach the seller knowing what awaits." },
+
+  // Vivant — pouls du catalogue et rangées.
+  "pulse.last": { fr: "Dernier relevé", nl: "Laatste meting", en: "Last reading" },
+  "pulse.ago": { fr: "il y a", nl: "", en: "" },
+  "pulse.now": { fr: "à l'instant", nl: "zojuist", en: "just now" },
+  "pulse.yesterday": { fr: "hier", nl: "gisteren", en: "yesterday" },
+  "pulse.days": { fr: "jours", nl: "dagen geleden", en: "days ago" },
+  "pulse.readings": { fr: "prix relevés aujourd'hui", nl: "prijzen vandaag gemeten", en: "prices read today" },
+  "pulse.drops": { fr: "ont baissé", nl: "zijn gedaald", en: "have dropped" },
+
+  "rail.dropsT": { fr: "Les prix qui ont reculé", nl: "Prijzen die zijn gezakt", en: "Prices that fell" },
+  "rail.dropsS": { fr: "Depuis notre relevé précédent.", nl: "Sinds onze vorige meting.", en: "Since our previous reading." },
+  "rail.lowestT": { fr: "Au plus bas jamais vu", nl: "Laagste ooit gemeten", en: "Lowest ever seen" },
+  "rail.lowestS": { fr: "Jamais relevé moins cher depuis que FILON les suit.", nl: "Nooit goedkoper gemeten sinds FILON ze volgt.", en: "Never recorded cheaper since FILON started tracking." },
+  "rail.budgetT": { fr: "Moins de 100 €", nl: "Minder dan 100 €", en: "Under €100" },
+  "rail.budgetS": { fr: "Vérifiés au dernier relevé.", nl: "Gecontroleerd bij de laatste meting.", en: "Checked at the last reading." },
+  "rail.freshT": { fr: "Nouveaux au catalogue", nl: "Nieuw in de catalogus", en: "New in the catalogue" },
+  "rail.freshS": { fr: "Entrés chez nos marchands cette semaine.", nl: "Deze week bij onze winkels binnengekomen.", en: "Arrived at our merchants this week." },
+
   // Refonte 2026 — hero, méthode, clôture, catalogue.
   "hero.eyebrowNew": { fr: "Copilote d'achat · Belgique", nl: "Aankoopcopiloot · België", en: "Shopping copilot · Belgium" },
   "hero.l1": { fr: "Est-ce vraiment", nl: "Is dit echt", en: "Is this really" },

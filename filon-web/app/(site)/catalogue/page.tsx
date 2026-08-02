@@ -3,12 +3,16 @@ import { buildMetadata } from "@/lib/seo";
 import { ProductCard } from "@/components/filon/ProductCard";
 import { CatalogueSearch, CatalogueControls } from "@/components/filon/CatalogueControls";
 import { CatalogueNav } from "@/components/filon/CatalogueNav";
+import { Pulse } from "@/components/filon/Pulse";
+import { Rails } from "@/components/filon/Rails";
 import {
   CatalogueHeader, CataloguePager, CatalogueEmpty, CatalogueNavToggle,
 } from "@/components/filon/CatalogueHeader";
 import {
   getDepartments,
   getOffers,
+  getPulse,
+  getRails,
   resolve,
   href,
   pageNumber,
@@ -54,7 +58,14 @@ export default async function CataloguePage({
   const departments = await getDepartments();
   const resolved = resolve(departments, query);
   const { department, category, subcategory } = resolved;
-  const result = await getOffers(query, resolved);
+  // Le pouls et les rangées sont demandés en parallèle du reste : c'est ce qui
+  // rend la page vivante, pas ce qui doit la ralentir.
+  const browsing = !department && !category && !query.q;
+  const [result, pulse, rails] = await Promise.all([
+    getOffers(query, resolved),
+    getPulse(),
+    browsing ? getRails() : Promise.resolve([]),
+  ]);
 
   const per = pageSize(query);
   const page = pageNumber(query);
@@ -88,7 +99,13 @@ export default async function CataloguePage({
             unavailable={result === null}
           />
 
+          <Pulse data={pulse} />
+
           <CatalogueSearch query={query} />
+
+          {/* Les rangées ne s'affichent que sur la racine : sous un filtre,
+              elles parleraient d'autre chose que ce qui est demandé. */}
+          {rails.length > 0 && <Rails sections={rails} />}
 
           {result !== null && total > 0 && (
             <>
