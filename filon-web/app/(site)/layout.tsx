@@ -1,4 +1,6 @@
 import "@/components/editorial/editorial.css";
+// Chargé après editorial.css : à spécificité égale, la refonte gagne.
+import "@/components/filon/filon.css";
 import { EditorialNav } from "@/components/editorial/EditorialNav";
 import { EditorialFooter } from "@/components/editorial/EditorialFooter";
 import { StickyCta } from "@/components/editorial/StickyCta";

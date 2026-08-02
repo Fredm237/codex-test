@@ -1,74 +1,28 @@
 @import "tailwindcss";
+@import "./tokens.css";
+@import "./primitives.css";
 
 /* ============================================================
-   FILON — Éditorial luxe · palette SmartWave FX
-   Light editorial world (deliberate single theme).
+   FILON — Base
+   Les valeurs vivent dans tokens.css ; ce fichier ne contient
+   que la remise à zéro, les réglages typographiques de la page
+   et les quelques utilitaires transversaux.
    ============================================================ */
+
 :root {
-  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Helvetica, Arial, sans-serif;
+  --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Inter, Helvetica, Arial, sans-serif;
   --serif: var(--font-serif), "Iowan Old Style", Palatino, Georgia, serif;
   --mono: "SF Mono", ui-monospace, "Geist Mono", Menlo, monospace;
-
-  --paper: #f4f7fa;   /* blanc froid, métallique */
-  --paper-2: #e9eef4;
-  --card: #ffffff;
-  --ink: #0e1826;     /* encre bleu-nuit */
-  --ink-2: #47566b;
-  --ink-3: #8794a6;
-  --line: rgba(14, 24, 38, 0.12);
-  --line-2: rgba(14, 24, 38, 0.22);
-
-  /* SmartWave FX — SMART bleu royal · WAVE turquoise cyan · chrome argent */
-  --accent: #1e75c9;
-  --accent-ink: #155ba3;
-  --accent-soft: #e7f1fb;
-  --teal: #14c6c0;
-  --teal-ink: #0a8078; /* darker turquoise — AA-legible on light */
-  --chrome: linear-gradient(180deg, #edf1f5, #aeb9c6);
-  --wave: linear-gradient(100deg, #1e75c9, #14c6c0);           /* fills / on-dark */
-  --wave-text: linear-gradient(100deg, #1c6fc4, #0c8f86);      /* legible on light */
-  --wave3: linear-gradient(100deg, #1e75c9, #c3ccd6 50%, #14c6c0);
-  --save: #0a7d74;      /* AA 4.5:1 on white — used for text amounts */
-  --save-soft: #e1f5f4;
-
-  --maxw: 1160px;
-  --ease: cubic-bezier(0.22, 0.9, 0.3, 1);
-  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
-
-  /* Unified spacing scale — one vertical rhythm for every section */
-  --pad-x: clamp(22px, 5vw, 40px);          /* horizontal page padding */
-  --sp-section: clamp(80px, 10vw, 132px);   /* standard section top/bottom */
-  --sp-hero: clamp(104px, 11vw, 148px);     /* page-top heroes (nav clearance) */
-  --sp-xl: clamp(112px, 14vw, 188px);       /* immersive scenes / closing CTAs */
-
-  /* radii + shadows */
-  --r-sm: 8px; --r-md: 12px; --r-lg: 18px; --r-xl: 26px; --r-full: 100px;
-  --shadow-soft: 0 1px 2px rgba(17,18,20,.05), 0 22px 50px -30px rgba(17,18,20,.28);
-  --shadow-glow: 0 10px 24px -10px var(--accent);
-
-  /* Back-compat aliases so pre-existing components adopt the editorial palette */
-  --bg: var(--paper); --bg-2: var(--paper-2);
-  --text: var(--ink); --text-dim: var(--ink-2); --text-mute: var(--ink-3);
-  --surface: var(--card); --surface-2: #ffffff;
-  --border: var(--line); --border-2: var(--line-2);
-  --blue: var(--accent); --blue-2: var(--accent-ink);
-  --aqua: var(--teal); --aqua-2: var(--teal);
-  --violet: var(--accent);
-  --pos: var(--save); --pos-dim: var(--save-soft); --gold: var(--teal);
-  --vein: var(--wave);
-  --vein-soft: linear-gradient(100deg, rgba(30,116,224,.12), rgba(18,199,180,.12));
-
   color-scheme: light;
 }
 
 @theme inline {
-  --color-paper: var(--paper);
-  --color-card: var(--card);
-  --color-ink: var(--ink);
-  --color-dim: var(--ink-2);
-  --color-accent: var(--accent);
-  --color-teal: var(--teal);
-  --color-save: var(--save);
+  --color-paper: var(--fx-bg);
+  --color-card: var(--fx-surface);
+  --color-ink: var(--fx-text);
+  --color-dim: var(--fx-text-secondary);
+  --color-accent: var(--fx-brand);
+  --color-gain: var(--fx-gain);
   --font-sans: var(--sans);
   --font-serif: var(--serif);
   --font-mono: var(--mono);
@@ -77,36 +31,64 @@
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
 body {
   margin: 0;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--fx-bg);
+  color: var(--fx-text);
   font-family: var(--sans);
-  font-size: 17px;
-  line-height: 1.55;
-  letter-spacing: -0.006em;
+  font-size: var(--fx-text-md);
+  line-height: var(--fx-leading-normal);
+  letter-spacing: var(--fx-tracking-normal);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
 }
-::selection { background: var(--ink); color: var(--paper); }
-a { color: inherit; text-decoration: none; }
-h1, h2, h3 { margin: 0; font-weight: 400; line-height: 1; text-wrap: balance; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 
+::selection { background: var(--fx-ink-900); color: var(--fx-paper-0); }
+a { color: inherit; text-decoration: none; }
+h1, h2, h3 { margin: 0; font-weight: 400; line-height: var(--fx-leading-tight); text-wrap: balance; }
+p { text-wrap: pretty; }
+img, video { max-width: 100%; }
+
+/* L'anneau de focus est doré et jamais retiré : c'est la seule
+   façon dont une navigation au clavier reste lisible. */
+:focus-visible {
+  outline: 2px solid var(--fx-focus);
+  outline-offset: 3px;
+  border-radius: var(--fx-radius-xs);
+}
+
+/* Utilitaires typographiques */
 .serif { font-family: var(--serif); }
 .it { font-family: var(--serif); font-style: italic; font-weight: 400; }
 .mono { font-family: var(--mono); font-feature-settings: "tnum"; }
-.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; color: var(--ink-3); }
-.wave-text {
-  background: var(--wave-text);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.eyebrow {
+  font-size: var(--fx-text-xs);
+  font-weight: 600;
+  letter-spacing: var(--fx-tracking-wide);
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
 }
+/* Reliquat de l'ancienne identité : le texte en dégradé bleu→turquoise
+   devient un aplat de marque. Conservé le temps que les composants
+   migrent, pour ne pas laisser de texte transparent derrière. */
+.wave-text { color: var(--fx-brand); background: none; -webkit-background-clip: border-box; background-clip: border-box; }
 
-/* Reveal utility — cinematic: rise + soft scale + de-blur */
-.rv { opacity: 0; transform: translateY(38px) scale(0.985); filter: blur(8px); will-change: opacity, transform, filter;
-  transition: opacity 1s var(--ease-out), transform 1.1s var(--ease-out), filter 1s var(--ease-out); }
-.rv.in { opacity: 1; transform: none; filter: none; }
-@media (prefers-reduced-motion: reduce) { .rv { opacity: 1 !important; transform: none !important; filter: none !important; } }
+/* Apparition au scroll — une seule courbe, respect du réglage système */
+.rv {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity var(--fx-duration-reveal) var(--fx-ease-out),
+    transform var(--fx-duration-reveal) var(--fx-ease-out);
+}
+.rv.in { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+  .rv { opacity: 1 !important; transform: none !important; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

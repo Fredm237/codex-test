@@ -31,6 +31,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.services import taxonomy
+from app.services import safety
 from app.services.dedup import dedup_key
 
 log = get_logger("awin_catalog")
@@ -300,6 +301,13 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
         # Le rattachement au produit EAN se fait plus tard : la clé se contente
         # ici du libellé, et le rattrapage la recalcule ensuite.
         "dedup_key": dedup_key(product_id=None, brand=row.get("brand_name"), name=name),
+        # Posé dès l'ingestion : une référence érotique arrivée dans le flux
+        # d'un marchand généraliste ne doit jamais atteindre une page publique.
+        "is_adult": safety.is_adult(
+            name=name,
+            category=row.get("merchant_category"),
+            brand=row.get("brand_name"),
+        ),
         "price": price,
         "currency": (row.get("currency") or "").strip()[:8] or None,
         "in_stock": in_stock,
@@ -311,7 +319,10 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
         .values(**values)
         .on_conflict_do_update(
             constraint="uq_offer_merchant_product",
-            set_={k: values[k] for k in ("name", "brand", "category", "price", "currency", "in_stock", "image_url", "deep_link", "ean")},
+            # `is_adult` fait partie de la mise à jour : un marchand qui renomme
+            # une référence ne doit pas conserver un drapeau devenu faux, ni le
+            # perdre quand il le devient.
+            set_={k: values[k] for k in ("name", "brand", "category", "price", "currency", "in_stock", "image_url", "deep_link", "ean", "is_adult")},
         )
         .returning(models.Offer.id)
     )

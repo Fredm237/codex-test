@@ -74,6 +74,22 @@ DEPARTMENTS: list[tuple[str, list[str]]] = [
 _DEPARTMENT_OF = {c: d for d, cats in DEPARTMENTS for c in cats}
 
 
+def categories_of_department(department: str) -> list[str]:
+    """Rayons d'un département, désigné par son nom ou par son slug.
+
+    Un département n'existe pas en base : c'est un regroupement de rayons.
+    Filtrer dessus suppose donc de l'étendre à ses rayons — sans quoi
+    sélectionner « Beauté & Santé » ne restreint rien.
+    """
+    wanted = (department or "").strip().lower()
+    if not wanted:
+        return []
+    for label, categories in DEPARTMENTS:
+        if wanted in (label.lower(), slug_of(label)):
+            return list(categories)
+    return []
+
+
 def department_of(category: str) -> str | None:
     """Département d'un rayon, ou None s'il n'est rattaché à aucun."""
     return _DEPARTMENT_OF.get(category)

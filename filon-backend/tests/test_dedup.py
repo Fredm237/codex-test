@@ -11,6 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.api.routes.catalog import offers as offers_endpoint
+from tests.endpoint_call import call
 from app.db import models
 from app.db.base import Base
 from app.services.dedup import dedup_key, rebuild_canonical
@@ -79,12 +80,9 @@ async def test_the_five_shirts_become_two_cards(session):
     assert summary["offers_processed"] == 5
     assert summary["distinct_products"] == 2
 
-    common = dict(
-        q=None, merchant=None, category=None, subcategory=None, brand=None,
-        price_min=None, price_max=None, sort="relevance", limit=48, offset=0,
-        session=session,
-    )
-    shown = await offers_endpoint(duplicates=False, **common)
+    # Défauts lus dans la signature : un nouveau paramètre d'endpoint ne doit
+    # pas casser un test qui ne s'y intéresse pas.
+    shown = await call(offers_endpoint, duplicates=False, session=session)
     assert shown["total"] == 2
 
     # Le représentant retenu est le moins cher de son groupe.
@@ -92,7 +90,7 @@ async def test_the_five_shirts_become_two_cards(session):
     assert green["price"] == 100.0
 
     # Les doublons restent consultables pour qui les demande explicitement.
-    everything = await offers_endpoint(duplicates=True, **common)
+    everything = await call(offers_endpoint, duplicates=True, session=session)
     assert everything["total"] == 5
 
 

@@ -170,6 +170,11 @@ class Offer(Base):
     # Représentant retenu pour sa clé — le moins cher. Un booléen indexé rend le
     # filtrage immédiat, là où un DISTINCT imposait un tri complet.
     is_canonical: Mapped[bool] = mapped_column(Boolean, default=True, index=True)
+    # Article du rayon adulte, exclu de tout affichage public. Un annonceur a
+    # refusé le partenariat au motif « Contenu pour adultes » : le drapeau est
+    # posé à l'ingestion (app/services/safety.py) plutôt qu'évalué à la requête,
+    # pour que le filtre soit un simple index sur 795 000 lignes.
+    is_adult: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)

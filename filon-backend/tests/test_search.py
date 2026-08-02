@@ -11,6 +11,7 @@ import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.api.routes.catalog import offers as offers_endpoint
+from tests.endpoint_call import call
 from app.db import models
 from app.db.base import Base
 from app.services.search import (
@@ -64,13 +65,9 @@ class TestTerms:
 
 
 async def _search(session, q, **kw):
-    params = dict(
-        q=q, merchant=None, category=None, subcategory=None, brand=None,
-        price_min=None, price_max=None, sort="relevance", duplicates=False,
-        limit=48, offset=0, session=session,
-    )
-    params.update(kw)
-    return await offers_endpoint(**params)
+    # Les défauts viennent de la signature : ajouter un paramètre à l'endpoint
+    # ne doit pas casser des tests qui ne s'y intéressent pas.
+    return await call(offers_endpoint, q=q, session=session, **kw)
 
 
 class TestMultiWordSearch:

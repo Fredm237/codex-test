@@ -48,14 +48,21 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
 };
 
 /** Éléments de navigation localisés. */
+// L'ordre porte le positionnement, et le bureau n'affiche que les cinq
+// premiers. « Cashback » et « Codes promo » quittent cette tête de liste :
+// deux annonceurs ont refusé le partenariat au motif qu'ils ne travaillent pas
+// avec ce type d'éditeurs, et la navigation est le premier endroit où un
+// responsable d'affiliation lit à quelle catégorie appartient un site. Les
+// pages restent en ligne — elles gardent leur valeur de référencement — mais
+// elles ne définissent plus la marque.
 export const NAV_KEYS: Array<{ key: string; href: string }> = [
   { key: "nav.catalogue", href: "/catalogue" },
   { key: "nav.assistant", href: "/recherche" },
   { key: "nav.how", href: "/comment-ca-marche" },
+  { key: "nav.score", href: "/score" },
+  { key: "nav.refurb", href: "/reconditionne" },
   { key: "nav.pricing", href: "/tarifs" },
   { key: "nav.cashback", href: "/cashback" },
-  { key: "nav.refurb", href: "/reconditionne" },
-  { key: "nav.score", href: "/score" },
   { key: "nav.promos", href: "/codes-promo" },
 ];
 

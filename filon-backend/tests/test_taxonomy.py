@@ -171,3 +171,36 @@ class TestSubcategories:
             labels = [label for label, _ in rules]
             assert len(labels) == len(set(labels)), f"doublon dans {category}"
             assert t.subcategories_of(category) == labels
+
+
+class TestDepartements:
+    """Un département n'existe pas en base : il doit s'étendre à ses rayons.
+
+    Sans cette extension, sélectionner « Beauté & Santé » dans le catalogue
+    n'appliquait aucun filtre et la page renvoyait le catalogue entier.
+    """
+
+    def test_par_nom_et_par_slug(self):
+        from app.services.taxonomy import categories_of_department, slug_of
+
+        par_nom = categories_of_department("Beauté & Santé")
+        par_slug = categories_of_department(slug_of("Beauté & Santé"))
+        assert par_nom == par_slug
+        assert par_nom, "le département doit rendre au moins un rayon"
+
+    def test_casse_et_espaces_ignorés(self):
+        from app.services.taxonomy import categories_of_department
+
+        assert categories_of_department("  high-tech  ") == categories_of_department("High-Tech")
+
+    def test_departement_inconnu_ne_rend_rien(self):
+        from app.services.taxonomy import categories_of_department
+
+        assert categories_of_department("Rayon Inexistant") == []
+        assert categories_of_department("") == []
+
+    def test_tous_les_departements_sont_atteignables_par_slug(self):
+        from app.services.taxonomy import DEPARTMENTS, categories_of_department, slug_of
+
+        for label, categories in DEPARTMENTS:
+            assert categories_of_department(slug_of(label)) == list(categories)
