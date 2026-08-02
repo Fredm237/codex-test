@@ -16,6 +16,7 @@
 // Sans catalogue joignable, `live` vaut null : la section se réduit aux faits
 // de transparence, qui restent vrais. Jamais de zéro affiché.
 
+import { motion } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
 import type { Proof } from "@/lib/proof";
 
@@ -132,7 +133,19 @@ export function Proof({ live }: { live: Proof | null }) {
               <span className="it">{x.titleIt}</span>
             </h2>
 
-            <div className="fx-grid cols-4 fx-proof-stats">
+            <motion.div 
+              className="fx-grid cols-4 fx-proof-stats"
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true, margin: "-100px" }}
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: { staggerChildren: 0.1 }
+                }
+              }}
+            >
               {(
                 [
                   [n(live.stats.merchants), x.labels.merchants],
@@ -141,12 +154,19 @@ export function Proof({ live }: { live: Proof | null }) {
                   [n(live.stats.snapshots), x.labels.snapshots],
                 ] as Array<[string, string]>
               ).map(([value, label]) => (
-                <div className="fx-card padded" key={label}>
+                <motion.div 
+                  className="fx-card padded" 
+                  key={label}
+                  variants={{
+                    hidden: { opacity: 0, y: 20 },
+                    show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } }
+                  }}
+                >
                   <div className="fx-stat-value">{value}</div>
                   <div className="fx-stat-label">{label}</div>
-                </div>
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
 
             {live.merchants.length > 0 && (
               <>
@@ -219,14 +239,33 @@ export function Proof({ live }: { live: Proof | null }) {
           </div>
         )}
 
-        <div className="fx-grid cols-3 fx-proof-trust">
+        <motion.div 
+          className="fx-grid cols-3 fx-proof-trust"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-100px" }}
+          variants={{
+            hidden: { opacity: 0 },
+            show: {
+              opacity: 1,
+              transition: { staggerChildren: 0.15 }
+            }
+          }}
+        >
           {x.trust.map(([title, body]) => (
-            <div className="fx-card padded" key={title}>
+            <motion.div 
+              className="fx-card padded" 
+              key={title}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } }
+              }}
+            >
               <h3 className="fx-h3">{title}</h3>
               <p className="fx-body fx-proof-trust-body">{body}</p>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </div>
     </section>
   );

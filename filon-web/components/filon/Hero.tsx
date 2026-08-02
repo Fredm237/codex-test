@@ -1,3 +1,5 @@
+"use client";
+
 // Hero de la refonte 2026.
 //
 // Deux partis pris, tous deux issus des motifs de refus reçus d'Awin.
@@ -14,6 +16,7 @@
 // Sans catalogue joignable, la colonne de droite disparaît et la mise en page
 // se recentre : jamais de carte vide, jamais de chiffre inventé.
 
+import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
 import { HeroSearch } from "./HeroSearch";
 
@@ -31,7 +34,12 @@ export function Hero({ proof }: { proof: Proof | null }) {
 
   return (
     <section className={`fx-hero${product ? "" : " solo"}`}>
-      <div className="fx-container fx-hero-grid">
+      <motion.div 
+        className="fx-container fx-hero-grid"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      >
         <div className="fx-hero-copy">
           <span className="fx-eyebrow brand">Copilote d&apos;achat · Belgique</span>
 
@@ -81,7 +89,13 @@ export function Hero({ proof }: { proof: Proof | null }) {
         </div>
 
         {product && (
-          <aside className="fx-hero-panel" aria-label="Exemple de produit suivi">
+          <motion.aside 
+            className="fx-hero-panel" 
+            aria-label="Exemple de produit suivi"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
             <article className="fx-card fx-verdict-card">
               <header className="fx-verdict-head">
                 <span className="fx-badge brand">Produit suivi</span>
@@ -135,9 +149,9 @@ export function Hero({ proof }: { proof: Proof | null }) {
             <p className="fx-hero-panel-note">
               Données lues dans notre catalogue, pas un exemple illustratif.
             </p>
-          </aside>
+          </motion.aside>
         )}
-      </div>
+      </motion.div>
     </section>
   );
 }

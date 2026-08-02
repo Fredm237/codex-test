@@ -16,6 +16,7 @@
 // lien marchand reste distinct, au-dessus, avec sa propre cible.
 
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { money, type CardCopy } from "./product-copy";
 
 export type CardOffer = {
@@ -48,7 +49,11 @@ export function ProductCard({
   const [imageOk, setImageOk] = useState(true);
 
   return (
-    <article className="fx-product">
+    <motion.article
+      className="fx-product"
+      whileHover={{ y: -4 }}
+      transition={{ type: "spring", stiffness: 300, damping: 20 }}
+    >
       <div className="fx-product-media">
         {offer.image && imageOk ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -103,6 +108,6 @@ export function ProductCard({
           )}
         </div>
       </div>
-    </article>
+    </motion.article>
   );
 }
