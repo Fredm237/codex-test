@@ -26,7 +26,8 @@ Deux garde-fous, sans lesquels la règle ferait plus de mal que de bien :
 
 from __future__ import annotations
 
-from collections import defaultdict
+from collections import Counter, defaultdict
+from dataclasses import dataclass
 
 from sqlalchemy import func, select, update
 
@@ -44,9 +45,46 @@ DOMINANCE = 0.70
 # être « à 75 % en informatique » avec neuf produits.
 MIN_OFFERS = 50
 
+# Un rayon dont la règle se déclenche sur un mot générique n'est pas une
+# spécialité : c'est un fourre-tout. « Accessoires » attrape le mot
+# « accessoire » lui-même, si bien qu'un vendeur de déshumidificateurs dont les
+# libellés disent « accessoire pour… » y tombe à 90 % — mesuré sur Trotec.
+#
+# Y ramener ses offres minoritaires prendrait les seules qui sont correctement
+# classées pour les enterrer dans un rayon qui ne veut rien dire. La dominance
+# est réelle ; ce qu'elle mesure ne l'est pas. Ces rayons peuvent rester le
+# rayon d'une offre, ils ne peuvent pas devenir une destination.
+RAYONS_NON_DESTINATION = frozenset({"Accessoires"})
 
-async def merchant_profiles(session) -> dict[int, tuple[str, float, int]]:
-    """Rayon dominant de chaque marchand : {merchant_id: (rayon, part, total)}.
+# Part à partir de laquelle un rayon minoritaire cesse d'être du bruit.
+#
+# Toute la règle repose sur une hypothèse : la minorité est faite d'erreurs de
+# mots-clés. Or une erreur de mot-clé est *dispersée* — chez TISSUS DE REVE,
+# les égarées se comptent par unités dans chaque rayon. Une minorité
+# *concentrée* dans un seul rayon n'est pas du bruit : c'est une seconde
+# activité. YesStyle vend de la beauté à 90 %, et le reste est de la mode
+# coréenne — un vrai rayon, pas des faux positifs.
+#
+# Un rayon secondaire qui tient un vingtième du catalogue est donc protégé :
+# ses offres ne bougent pas, seules les dispersées sont ramenées. Le marchand
+# reste traité, mais sa seconde activité survit.
+SECONDAIRE_REEL = 0.05
+
+
+@dataclass(frozen=True)
+class Profil:
+    """Ce qu'on sait d'un marchand spécialisé."""
+
+    rayon: str
+    part: float
+    total: int
+    # Rayons secondaires assez fournis pour être une vraie activité, et non des
+    # faux positifs. Leurs offres sont laissées où elles sont.
+    proteges: frozenset[str]
+
+
+async def merchant_profiles(session) -> dict[int, Profil]:
+    """Rayon dominant de chaque marchand.
 
     Seuls les marchands dont un rayon dépasse le seuil sont rendus.
     """
@@ -66,15 +104,23 @@ async def merchant_profiles(session) -> dict[int, tuple[str, float, int]]:
     for merchant_id, category, n in rows:
         par_marchand[merchant_id][category] = int(n)
 
-    profils: dict[int, tuple[str, float, int]] = {}
+    profils: dict[int, Profil] = {}
     for merchant_id, repartition in par_marchand.items():
         total = sum(repartition.values())
         if total < MIN_OFFERS:
             continue
         rayon, n = max(repartition.items(), key=lambda kv: kv[1])
+        if rayon in RAYONS_NON_DESTINATION:
+            continue
         part = n / total
-        if part >= DOMINANCE:
-            profils[merchant_id] = (rayon, part, total)
+        if part < DOMINANCE:
+            continue
+        proteges = frozenset(
+            autre
+            for autre, combien in repartition.items()
+            if autre != rayon and combien / total >= SECONDAIRE_REEL
+        )
+        profils[merchant_id] = Profil(rayon, part, total, proteges)
     return profils
 
 
@@ -89,6 +135,9 @@ async def realign(session, *, batch: int = 2000, dry_run: bool = False) -> dict:
         return {"merchants_specialises": 0, "offres_realignees": 0, "dry_run": dry_run}
 
     realignees = 0
+    # Répartition par marchand : sans elle, « 24 369 offres » est un nombre
+    # qu'on ne peut ni vérifier ni contester avant d'écrire.
+    par_marchand: Counter[int] = Counter()
     last_id = 0
     while True:
         rows = (
@@ -111,14 +160,20 @@ async def realign(session, *, batch: int = 2000, dry_run: bool = False) -> dict:
             profil = profils.get(row.merchant_id)
             if not profil:
                 continue
-            dominant = profil[0]
-            # Seules les minoritaires bougent. Une offre déjà dans le rayon
-            # dominant, ou pas encore classée, est laissée telle quelle : une
-            # offre non classée relève du classement, pas de la cohérence.
-            if row.filon_category and row.filon_category != dominant:
-                payload.append(
-                    {"id": row.id, "filon_category": dominant, "filon_subcategory": None}
-                )
+            # Seules les minoritaires *dispersées* bougent. Une offre déjà dans
+            # le rayon dominant est à sa place ; une offre non classée relève du
+            # classement, pas de la cohérence ; et une offre appartenant à une
+            # seconde activité du marchand n'est pas une erreur de mot-clé.
+            if not row.filon_category:
+                continue
+            if row.filon_category == profil.rayon:
+                continue
+            if row.filon_category in profil.proteges:
+                continue
+            payload.append(
+                {"id": row.id, "filon_category": profil.rayon, "filon_subcategory": None}
+            )
+            par_marchand[row.merchant_id] += 1
 
         if payload and not dry_run:
             # Forme ORM, pas `__table__.update()` : sur la table Core, `id`
@@ -133,8 +188,28 @@ async def realign(session, *, batch: int = 2000, dry_run: bool = False) -> dict:
         "Cohérence marchand : %d spécialistes, %d offres réalignées%s",
         len(profils), realignees, " (simulation)" if dry_run else "",
     )
+    noms = dict(
+        (
+            await session.execute(
+                select(models.Merchant.id, models.Merchant.name).where(
+                    models.Merchant.id.in_(par_marchand.keys())
+                )
+            )
+        ).all()
+    ) if par_marchand else {}
+
     return {
         "merchants_specialises": len(profils),
         "offres_realignees": realignees,
         "dry_run": dry_run,
+        "detail": [
+            {
+                "merchant": noms.get(mid, str(mid)),
+                "vers": profils[mid].rayon,
+                "offres": n,
+                "sur": profils[mid].total,
+                "rayons_proteges": sorted(profils[mid].proteges),
+            }
+            for mid, n in par_marchand.most_common()
+        ],
     }
