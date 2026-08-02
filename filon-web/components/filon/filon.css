@@ -113,15 +113,19 @@
   align-items: center;
   gap: var(--fx-space-7);
   text-align: center;
-  padding: var(--fx-space-8) var(--fx-gutter);
+  padding: 120px 24px 60px;
   max-width: 800px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .fx-hero-title {
-  font-size: var(--fx-text-5xl);
+  font-size: clamp(28px, 7vw, 64px);
   font-weight: 400;
-  line-height: 1.08;
+  line-height: 1.12;
   color: #ffffff;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 .fx-hero-title em {
   font-style: italic;
@@ -131,6 +135,8 @@
 .fx-hero-search-wrap {
   width: 100%;
   max-width: 600px;
+  padding: 0 8px;
+  box-sizing: border-box;
 }
 
 .fx-field-icon { flex: none; color: var(--fx-text-muted); }
@@ -2439,5 +2445,58 @@
 @supports (padding-top: env(safe-area-inset-top)) {
   .ed-header {
     padding-top: env(safe-area-inset-top) !important;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   FIX MOBILE — Overflow, centrage, fond continu
+   ══════════════════════════════════════════════════════════════ */
+
+/* Empêcher tout overflow horizontal sur le body */
+html, body {
+  overflow-x: hidden;
+  max-width: 100vw;
+}
+
+/* Pulse section — fond sombre pour continuité avec le Hero */
+.fx-home-pulse {
+  background: #0a0a0f;
+  padding: 20px 24px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.fx-home-pulse * {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.fx-home-pulse b,
+.fx-home-pulse strong {
+  color: #F5D78E;
+}
+
+/* Suggestions sur mobile — ne pas déborder */
+@media (max-width: 768px) {
+  .fx-hero-suggestions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start;
+    padding: 0 8px 8px;
+    gap: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .fx-hero-suggestions::-webkit-scrollbar {
+    display: none;
+  }
+  .fx-hero-suggestions .fx-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 13px;
+  }
+
+  /* Hero — hauteur adaptée au viewport mobile */
+  .fx-hero {
+    min-height: 100svh;
   }
 }
