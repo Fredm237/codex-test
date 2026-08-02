@@ -1,22 +1,13 @@
 "use client";
 
-// Hero de la refonte 2026.
+// Hero — Refonte visuelle spectaculaire 2026.
 //
-// Deux partis pris, tous deux issus des motifs de refus reçus d'Awin.
-//
-// 1. Le mot « cashback » n'y figure pas. Les refus « l'annonceur ne travaille
-//    pas avec ce type d'éditeurs » et « pas en affinité avec la marque »
-//    visent une catégorie d'éditeur — celle des sites de bons de réduction.
-//    FILON se présente donc par ce qu'il fait réellement : réunir les offres,
-//    conserver l'historique, et trancher.
-// 2. Le visuel n'est pas une abstraction mais une fiche du catalogue, avec un
-//    produit réel et son écart de prix constaté. Montrer le produit convainc
-//    un partenaire ; une animation ne le convainc pas.
-//
-// Sans catalogue joignable, la colonne de droite disparaît et la mise en page
-// se recentre : jamais de carte vide, jamais de chiffre inventé.
+// Inspiré de Phia.com : chaque mot du titre apparaît individuellement avec un
+// décalage, le fond a un gradient animé qui respire, et la carte produit flotte
+// avec un léger effet parallax au mouvement de la souris.
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { useEffect, useRef } from "react";
 import type { Proof } from "@/lib/proof";
 import { useLocale } from "@/lib/i18n";
 import { HeroSearch } from "./HeroSearch";
@@ -29,41 +20,118 @@ function money(value: number, currency: string): string {
   })} ${symbol}`;
 }
 
+/** Mot animé individuellement dans le titre. */
+function Word({ children, delay }: { children: string; delay: number }) {
+  return (
+    <motion.span
+      className="fx-hero-word"
+      initial={{ opacity: 0, y: 40, rotateX: -40 }}
+      animate={{ opacity: 1, y: 0, rotateX: 0 }}
+      transition={{
+        delay,
+        duration: 0.7,
+        ease: [0.16, 1, 0.3, 1],
+      }}
+    >
+      {children}
+    </motion.span>
+  );
+}
+
+/** Ligne du titre avec mots animés individuellement. */
+function AnimatedLine({ text, startDelay }: { text: string; startDelay: number }) {
+  const words = text.split(" ");
+  return (
+    <span className="fx-hero-line">
+      {words.map((word, i) => (
+        <Word key={i} delay={startDelay + i * 0.08}>
+          {word}
+        </Word>
+      ))}
+    </span>
+  );
+}
+
 export function Hero({ proof }: { proof: Proof | null }) {
   const { t, locale } = useLocale();
   const tag = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
   const product = proof?.product ?? null;
   const stats = proof?.stats ?? null;
 
-  return (
-    <section className={`fx-hero${product ? "" : " solo"}`}>
-      <motion.div 
-        className="fx-container fx-hero-grid"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-      >
-        <div className="fx-hero-copy">
-          <span className="fx-eyebrow brand">{t("hero.eyebrowNew")}</span>
+  // Parallax de la carte au mouvement de la souris
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springX = useSpring(mouseX, { stiffness: 150, damping: 20 });
+  const springY = useSpring(mouseY, { stiffness: 150, damping: 20 });
+  const rotateX = useTransform(springY, [-0.5, 0.5], [6, -6]);
+  const rotateY = useTransform(springX, [-0.5, 0.5], [-6, 6]);
 
-          <h1 className="fx-display xl fx-hero-title">
-            {t("hero.l1")}
+  const heroRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const hero = heroRef.current;
+    if (!hero) return;
+    const handleMouse = (e: MouseEvent) => {
+      const rect = hero.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      mouseX.set(x);
+      mouseY.set(y);
+    };
+    hero.addEventListener("mousemove", handleMouse);
+    return () => hero.removeEventListener("mousemove", handleMouse);
+  }, [mouseX, mouseY]);
+
+  return (
+    <section className="fx-hero fx-hero-cinematic" ref={heroRef}>
+      {/* Gradient animé en arrière-plan */}
+      <div className="fx-hero-gradient" aria-hidden="true" />
+
+      <div className="fx-container fx-hero-grid">
+        <div className="fx-hero-copy">
+          <motion.span
+            className="fx-eyebrow brand"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            {t("hero.eyebrowNew")}
+          </motion.span>
+
+          <h1 className="fx-display xl fx-hero-title fx-hero-title-cinematic">
+            <AnimatedLine text={t("hero.l1")} startDelay={0.2} />
             <br />
-            {t("hero.l2")}
+            <AnimatedLine text={t("hero.l2")} startDelay={0.5} />
             <br />
-            <span className="it">{t("hero.l3")}</span>
+            <span className="fx-hero-line it">
+              <AnimatedLine text={t("hero.l3")} startDelay={0.8} />
+            </span>
           </h1>
 
-          <p className="fx-lede fx-hero-lede">
+          <motion.p
+            className="fx-lede fx-hero-lede"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
             {t("hero.ledeA")} {stats ? stats.merchants.toLocaleString(tag) : t("hero.ledeOur")}{" "}
             {t("hero.ledeB")}
-          </p>
+          </motion.p>
 
-          <HeroSearch />
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.4, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <HeroSearch />
+          </motion.div>
 
-          {/* Lien et non bouton : à côté des suggestions, un second bouton
-              plein se lisait comme une puce de plus. */}
-          <p className="fx-hero-actions">
+          <motion.p
+            className="fx-hero-actions"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.6, duration: 0.5 }}
+          >
             <a className="fx-hero-secondary" href="/catalogue/">
               {t("hero.explore")}
               <svg viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
@@ -77,26 +145,36 @@ export function Hero({ proof }: { proof: Proof | null }) {
                 />
               </svg>
             </a>
-          </p>
+          </motion.p>
 
           {stats && (
-            <p className="fx-hero-facts">
+            <motion.p
+              className="fx-hero-facts"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.8, duration: 0.5 }}
+            >
               <span>{stats.offers.toLocaleString(tag)} {t("hero.offersTracked")}</span>
               <span aria-hidden="true">·</span>
               <span>{stats.multiMerchant.toLocaleString(tag)} {t("hero.multiMerchant")}</span>
               <span aria-hidden="true">·</span>
               <span>{stats.snapshots.toLocaleString(tag)} {t("hero.snapshots")}</span>
-            </p>
+            </motion.p>
           )}
         </div>
 
         {product && (
-          <motion.aside 
-            className="fx-hero-panel" 
+          <motion.aside
+            className="fx-hero-panel"
             aria-label="Exemple de produit suivi"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+            style={{
+              rotateX,
+              rotateY,
+              transformPerspective: 1200,
+            }}
+            initial={{ opacity: 0, scale: 0.85, y: 40 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ delay: 0.6, duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
           >
             <article className="fx-card fx-verdict-card">
               <header className="fx-verdict-head">
@@ -153,7 +231,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
             </p>
           </motion.aside>
         )}
-      </motion.div>
+      </div>
     </section>
   );
 }

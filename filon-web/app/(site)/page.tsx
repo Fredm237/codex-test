@@ -8,6 +8,7 @@ import { Faq } from "@/components/editorial/Faq";
 import { getProof } from "@/lib/proof";
 import { Showcase } from "@/components/filon/Showcase";
 import { Pulse } from "@/components/filon/Pulse";
+import { Marquee } from "@/components/filon/Marquee";
 import { getPulse, getRails } from "@/lib/catalogue";
 
 // La home lit le catalogue au rendu : les preuves affichées sont les chiffres
@@ -49,6 +50,11 @@ export default async function HomePage() {
       <div className="fx-container fx-home-pulse">
         <Pulse data={pulse} />
       </div>
+
+      {/* Bandeau de marchands défilant — mouvement continu visible */}
+      {proof?.merchants && proof.merchants.length > 0 && (
+        <Marquee merchants={proof.merchants} />
+      )}
 
       {showcase.length > 0 && (
         <section className="fx-section">

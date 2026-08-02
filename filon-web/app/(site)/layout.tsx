@@ -7,6 +7,7 @@ import { StickyCta } from "@/components/editorial/StickyCta";
 import { SmoothScroll } from "@/components/editorial/SmoothScroll";
 import { PageTransition } from "@/components/filon/PageTransition";
 import { ScrollToTop } from "@/components/filon/ScrollToTop";
+import { NavScrollEffect } from "@/components/filon/NavScrollEffect";
 import { LocaleProvider } from "@/lib/i18n";
 
 // Editorial (SmartWave) chrome for the whole marketing site.
@@ -14,6 +15,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
   return (
     <LocaleProvider>
       <SmoothScroll />
+      <NavScrollEffect />
       <EditorialNav />
       <main id="top">
         <PageTransition>{children}</PageTransition>

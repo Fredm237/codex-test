@@ -1571,24 +1571,40 @@
 .fx-show-price s { font-size: var(--fx-text-xs); color: var(--fx-text-muted); }
 .fx-show-tag { position: absolute; top: -10px; right: var(--fx-space-3); }
 
-/* La carte monte à la rencontre du regard, la photo se pose : deux vitesses
-   pour que l'objet paraisse posé *sur* la scène et non peint dedans. */
-.fx-show .fx-show-photo,
+/* Animation spectaculaire : la photo arrive avec un scale et la carte glisse
+   depuis le bas avec un délai. Beaucoup plus visible que l'ancien 16px. */
+.fx-show .fx-show-copy {
+  opacity: 0;
+  transform: translateX(-30px);
+}
+.fx-show .fx-show-photo {
+  opacity: 0;
+  transform: scale(0.92) translateY(40px);
+}
 .fx-show .fx-show-card {
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(50px) scale(0.9);
+}
+.fx-show.shown .fx-show-copy {
+  opacity: 1;
+  transform: none;
+  transition: opacity 700ms var(--fx-ease-out) 100ms, transform 700ms var(--fx-ease-out) 100ms;
 }
 .fx-show.shown .fx-show-photo {
   opacity: 1;
   transform: none;
-  transition: opacity 520ms var(--fx-ease-out), transform 520ms var(--fx-ease-out);
+  transition: opacity 800ms var(--fx-ease-out), transform 800ms var(--fx-ease-out);
 }
 .fx-show.shown .fx-show-card {
   opacity: 1;
   transform: none;
-  transition: opacity 460ms var(--fx-ease-out) 160ms, transform 460ms var(--fx-ease-out) 160ms;
+  transition: opacity 600ms var(--fx-ease-out) 300ms, transform 600ms var(--fx-ease-out) 300ms;
+}
+.fx-show.flipped .fx-show-copy {
+  transform: translateX(30px);
 }
 @media (prefers-reduced-motion: reduce) {
+  .fx-show .fx-show-copy,
   .fx-show .fx-show-photo,
   .fx-show .fx-show-card { opacity: 1; transform: none; transition: none; }
 }
@@ -1597,3 +1613,235 @@
    qui le précède, pas à un bloc séparé. */
 .fx-home-pulse { margin-top: calc(-1 * var(--fx-space-5)); }
 .fx-home-pulse .fx-pulse { margin-top: 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   REDESIGN SPECTACULAIRE — Août 2026
+   Différence visible à l'œil nu. Inspiré de Phia.com.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Hero Cinématique ─────────────────────────────────────── */
+
+.fx-hero-cinematic {
+  position: relative;
+  overflow: hidden;
+  min-height: max(85vh, 600px);
+  display: flex;
+  align-items: center;
+}
+
+/* Gradient animé qui respire en arrière-plan */
+.fx-hero-gradient {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 20%, var(--fx-brand-wash) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 80% at 10% 80%, rgba(10, 125, 116, 0.04) 0%, transparent 50%);
+  animation: fx-gradient-breathe 8s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes fx-gradient-breathe {
+  0%, 100% { opacity: 0.7; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.05); }
+}
+
+/* Titre cinématique : chaque mot est un bloc inline avec perspective */
+.fx-hero-title-cinematic {
+  perspective: 800px;
+  font-size: clamp(2.8rem, 6.5vw, 5.5rem) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.03em !important;
+}
+
+.fx-hero-line {
+  display: inline;
+}
+
+.fx-hero-word {
+  display: inline-block;
+  margin-right: 0.25em;
+  will-change: transform, opacity;
+}
+
+/* La carte produit a un effet de profondeur 3D au hover */
+.fx-hero-cinematic .fx-hero-panel {
+  will-change: transform;
+  transform-style: preserve-3d;
+}
+
+.fx-hero-cinematic .fx-verdict-card {
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-lg);
+  box-shadow:
+    0 4px 6px rgba(0, 0, 0, 0.02),
+    0 12px 24px rgba(0, 0, 0, 0.04),
+    0 32px 64px -12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.4s var(--fx-ease-out);
+}
+.fx-hero-cinematic .fx-verdict-card:hover {
+  box-shadow:
+    0 8px 12px rgba(0, 0, 0, 0.03),
+    0 24px 48px rgba(0, 0, 0, 0.06),
+    0 48px 96px -24px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Marquee infini (bandeau de marchands) ────────────────── */
+
+.fx-marquee {
+  overflow: hidden;
+  white-space: nowrap;
+  padding: var(--fx-space-5) 0;
+  border-top: 1px solid var(--fx-border);
+  border-bottom: 1px solid var(--fx-border);
+  background: var(--fx-bg-sunken);
+}
+.fx-marquee-track {
+  display: inline-flex;
+  gap: var(--fx-space-6);
+  animation: fx-marquee-scroll 40s linear infinite;
+}
+.fx-marquee:hover .fx-marquee-track {
+  animation-play-state: paused;
+}
+.fx-marquee-item {
+  font-size: var(--fx-text-sm);
+  font-weight: 500;
+  color: var(--fx-text-muted);
+  letter-spacing: 0.02em;
+}
+@keyframes fx-marquee-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── Compteurs animés (Proof section) ─────────────────────── */
+
+.fx-counter {
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--fx-text);
+  line-height: 1;
+}
+.fx-counter-label {
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-muted);
+  margin-top: var(--fx-space-2);
+  font-weight: 500;
+}
+.fx-counters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--fx-space-7);
+  padding: var(--fx-space-8) 0;
+}
+
+/* ── Showcase avec parallax ───────────────────────────────── */
+
+.fx-show-stage {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.fx-show-photo {
+  transition: transform 0.6s var(--fx-ease-out) !important;
+}
+.fx-show:hover .fx-show-photo {
+  transform: scale(1.03) !important;
+}
+
+.fx-show-card {
+  transition:
+    transform 0.4s var(--fx-ease-out),
+    box-shadow 0.4s var(--fx-ease-out) !important;
+}
+.fx-show:hover .fx-show-card {
+  transform: translateY(-6px) scale(1.02) !important;
+  box-shadow:
+    0 8px 16px rgba(0, 0, 0, 0.04),
+    0 24px 48px -8px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* ── Sections avec reveal dramatique ──────────────────────── */
+
+.fx-section-dramatic {
+  opacity: 0;
+  transform: translateY(60px);
+  transition:
+    opacity 0.8s var(--fx-ease-out),
+    transform 0.8s var(--fx-ease-out);
+}
+.fx-section-dramatic.revealed {
+  opacity: 1;
+  transform: none;
+}
+
+/* ── Navigation vivante — effet de morphing au scroll ─────── */
+
+.ed-nav {
+  transition:
+    background 0.3s var(--fx-ease-out),
+    box-shadow 0.3s var(--fx-ease-out),
+    padding 0.3s var(--fx-ease-out) !important;
+}
+.ed-nav.scrolled {
+  background: rgba(255, 255, 255, 0.92) !important;
+  backdrop-filter: blur(24px) saturate(1.5) !important;
+  box-shadow: 0 1px 0 var(--fx-border), var(--fx-elevation-1) !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+}
+
+/* ── Bouton CTA avec effet de brillance ───────────────────── */
+
+.fx-btn.primary,
+.ed-nav-cta {
+  position: relative;
+  overflow: hidden;
+}
+.fx-btn.primary::after,
+.ed-nav-cta::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  animation: fx-shimmer-btn 3s ease-in-out infinite;
+}
+@keyframes fx-shimmer-btn {
+  0%, 100% { left: -100%; }
+  50% { left: 100%; }
+}
+
+/* ── Closing section — fond sombre dramatique ─────────────── */
+
+.fx-closing {
+  background: var(--fx-ink-900) !important;
+  color: var(--fx-paper-0) !important;
+  padding: clamp(80px, 12vw, 160px) 0 !important;
+  position: relative;
+  overflow: hidden;
+}
+.fx-closing::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 60% 60% at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.fx-closing .fx-display { color: var(--fx-paper-0); }
+.fx-closing .fx-lede { color: var(--fx-ink-300); }
+.fx-closing .fx-btn.primary {
+  background: var(--fx-paper-0);
+  color: var(--fx-ink-900);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-hero-gradient { animation: none; opacity: 1; }
+  .fx-marquee-track { animation: none; }
+  .fx-btn.primary::after,
+  .ed-nav-cta::after { animation: none; display: none; }
+}
