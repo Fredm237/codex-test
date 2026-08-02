@@ -5,6 +5,7 @@ import { EditorialNav } from "@/components/editorial/EditorialNav";
 import { EditorialFooter } from "@/components/editorial/EditorialFooter";
 import { StickyCta } from "@/components/editorial/StickyCta";
 import { SmoothScroll } from "@/components/editorial/SmoothScroll";
+import { PageTransition } from "@/components/filon/PageTransition";
 import { LocaleProvider } from "@/lib/i18n";
 
 // Editorial (SmartWave) chrome for the whole marketing site.
@@ -13,7 +14,9 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
     <LocaleProvider>
       <SmoothScroll />
       <EditorialNav />
-      <main id="top">{children}</main>
+      <main id="top">
+        <PageTransition>{children}</PageTransition>
+      </main>
       <EditorialFooter />
       <StickyCta />
     </LocaleProvider>

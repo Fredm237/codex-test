@@ -769,3 +769,123 @@
   opacity: 0;
   transform: translateY(20px);
 }
+
+/* ── Micro-interactions globales ─────────────────────────── */
+
+/* Liens animés — soulignement progressif */
+.fx-animated-link {
+  position: relative;
+  display: inline-block;
+}
+.fx-animated-link::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1.5px;
+  background: var(--fx-brand);
+  transition: width var(--fx-duration) var(--fx-ease-out);
+}
+.fx-animated-link:hover::after {
+  width: 100%;
+}
+
+/* Boutons — effet de pression tactile */
+.fx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: var(--fx-btn-height);
+  padding: 0 var(--fx-btn-padding-x);
+  border-radius: var(--fx-btn-radius);
+  font-size: var(--fx-text-base);
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: 
+    transform var(--fx-duration-fast) var(--fx-ease-out),
+    box-shadow var(--fx-duration) var(--fx-ease-out),
+    background var(--fx-duration) var(--fx-ease-standard);
+}
+.fx-btn:active {
+  transform: scale(0.97);
+}
+
+.fx-btn.on-ink {
+  background: var(--fx-paper-0);
+  color: var(--fx-ink-900);
+  box-shadow: var(--fx-elevation-1);
+}
+.fx-btn.on-ink:hover {
+  box-shadow: var(--fx-elevation-2);
+  transform: translateY(-2px);
+}
+
+.fx-btn.secondary {
+  background: transparent;
+  color: var(--fx-text);
+  border: 1px solid var(--fx-border-strong);
+}
+.fx-btn.secondary:hover {
+  background: var(--fx-paper-100);
+  border-color: var(--fx-text);
+}
+
+.fx-btn-on-ink-ghost {
+  background: transparent;
+  color: var(--fx-paper-50);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+.fx-btn-on-ink-ghost:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Chips — puces interactives */
+.fx-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: var(--fx-radius-full);
+  border: 1px solid var(--fx-border);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-secondary);
+  background: var(--fx-surface);
+  cursor: pointer;
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration-fast) var(--fx-ease-out);
+}
+.fx-chip:hover {
+  border-color: var(--fx-brand);
+  color: var(--fx-text);
+  box-shadow: var(--fx-elevation-1);
+  transform: translateY(-1px);
+}
+.fx-chip:active {
+  transform: scale(0.97);
+}
+
+/* Info cards — hover premium */
+.ed-info {
+  transition: 
+    box-shadow var(--fx-duration) var(--fx-ease-standard),
+    transform var(--fx-duration) var(--fx-ease-out),
+    border-color var(--fx-duration) var(--fx-ease-standard);
+}
+.ed-info:hover {
+  box-shadow: var(--fx-elevation-2);
+  transform: translateY(-3px);
+  border-color: var(--fx-border-strong);
+}
+
+/* Newsletter input — focus premium */
+.ed-news input:focus {
+  border-color: var(--fx-brand);
+  box-shadow: 0 0 0 3px var(--fx-brand-wash);
+  outline: none;
+}

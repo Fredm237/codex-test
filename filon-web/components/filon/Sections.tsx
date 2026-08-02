@@ -1,3 +1,5 @@
+"use client";
+
 // Sections de la home, refonte 2026.
 //
 // Elles remplacent les scènes WebGL défilantes de l'ancienne home. Mesure à
@@ -9,6 +11,7 @@
 // Rien ici n'affirme de chiffre : les preuves chiffrées vivent dans
 // Proof, qui les lit dans le catalogue.
 
+import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
 
 const STEPS: Array<{ n: string; title: string; body: string }> = [
@@ -33,22 +36,45 @@ export function Method() {
   return (
     <section className="fx-section" id="methode">
       <div className="fx-container">
-        <span className="fx-eyebrow brand">La méthode</span>
-        <h2 className="fx-h2 fx-section-title">
-          Un avis vaut ce que vaut
-          <br />
-          <span className="it">ce qu&apos;on a mesuré.</span>
-        </h2>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <span className="fx-eyebrow brand">La méthode</span>
+          <h2 className="fx-h2 fx-section-title">
+            Un avis vaut ce que vaut
+            <br />
+            <span className="it">ce qu&apos;on a mesuré.</span>
+          </h2>
+        </motion.div>
 
-        <ol className="fx-steps">
+        <motion.ol 
+          className="fx-steps"
+          initial="hidden"
+          whileInView="show"
+          viewport={{ once: true, margin: "-60px" }}
+          variants={{
+            hidden: { opacity: 0 },
+            show: { opacity: 1, transition: { staggerChildren: 0.12 } }
+          }}
+        >
           {STEPS.map((s) => (
-            <li className="fx-card padded fx-step" key={s.n}>
+            <motion.li 
+              className="fx-card padded fx-step" 
+              key={s.n}
+              variants={{
+                hidden: { opacity: 0, y: 24 },
+                show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 260, damping: 20 } }
+              }}
+            >
               <span className="fx-step-n">{s.n}</span>
               <h3 className="fx-h3">{s.title}</h3>
               <p className="fx-body">{s.body}</p>
-            </li>
+            </motion.li>
           ))}
-        </ol>
+        </motion.ol>
       </div>
     </section>
   );
@@ -58,7 +84,13 @@ export function Closing({ proof }: { proof: Proof | null }) {
   const stats = proof?.stats ?? null;
   return (
     <section className="fx-section ink fx-closing">
-      <div className="fx-container narrow">
+      <motion.div 
+        className="fx-container narrow"
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+      >
         <span className="fx-eyebrow">Avant de payer</span>
         <h2 className="fx-h2 fx-closing-title">
           Posez la question à FILON.
@@ -70,15 +102,21 @@ export function Closing({ proof }: { proof: Proof | null }) {
             ? `${stats.offers.toLocaleString("fr-BE")} offres suivies chez ${stats.merchants.toLocaleString("fr-BE")} marchands partenaires.`
             : "Les offres de nos marchands partenaires, réunies et suivies dans le temps."}
         </p>
-        <p className="fx-closing-actions">
+        <motion.p 
+          className="fx-closing-actions"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.2, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+        >
           <a className="fx-btn on-ink" href="/recherche/">
             Essayer le copilote
           </a>
           <a className="fx-btn secondary fx-btn-on-ink-ghost" href="/catalogue/">
             Explorer le catalogue
           </a>
-        </p>
-      </div>
+        </motion.p>
+      </motion.div>
     </section>
   );
 }
