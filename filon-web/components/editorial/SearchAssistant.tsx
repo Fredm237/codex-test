@@ -366,9 +366,18 @@ export function SearchAssistant() {
 
   return (
     <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>
-      <div className="ed-wrap">
-        {phase === "idle" && <span className="eyebrow">{S.eyebrow}</span>}
-        <h1>{phase === "idle" ? S.h1Idle : S.h1Again}</h1>
+      {/* Vidéo de fond immersive en état idle */}
+      {phase === "idle" && (
+        <>
+          <video className="sa-bg-video" autoPlay muted loop playsInline>
+            <source src="/video/hf_orb.mp4" type="video/mp4" />
+          </video>
+          <div className="sa-bg-overlay" />
+        </>
+      )}
+      <div className="ed-wrap sa-content">
+        {phase === "idle" && <span className="eyebrow sa-eyebrow-light">{S.eyebrow}</span>}
+        <h1 className={phase === "idle" ? "sa-title-light" : ""}>{phase === "idle" ? S.h1Idle : S.h1Again}</h1>
 
         <form className="sa-search" onSubmit={(e) => { e.preventDefault(); ask(query || S.chips[0]); }}>
           <div className="sa-box">
