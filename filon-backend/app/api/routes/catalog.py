@@ -7,7 +7,7 @@ Ils dégradent proprement si la base est absente (listes vides).
 from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
-from sqlalchemy import String, case, cast, delete, func, select, update
+from sqlalchemy import String, case, cast, delete, func, or_, select, update
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -1138,6 +1138,43 @@ async def merchant_profiles_endpoint(
     ]
     items.sort(key=lambda x: x["offres"], reverse=True)
     return {"specialistes": len(items), "items": items}
+
+
+@router.get("/admin/merchant-breakdown")
+async def merchant_breakdown_endpoint(
+    merchant: str = Query(description="Nom ou slug du marchand"),
+    x_admin_token: str | None = Header(default=None),
+) -> dict:
+    """Répartition complète d'un marchand, rayon par rayon et par département.
+
+    Un cas limite du réalignement — un marchand dont la seconde activité est
+    éclatée entre plusieurs rayons — ne se tranche pas sur une intuition. Ceci
+    donne les chiffres qui permettent de le trancher.
+    """
+    _require_admin(x_admin_token)
+    if not db.is_enabled():
+        raise HTTPException(status_code=503, detail="base de données absente")
+
+    from app.services import coherence
+
+    async with db.session_scope() as session:
+        if session is None:
+            raise HTTPException(status_code=503, detail="base de données absente")
+        row = (
+            await session.execute(
+                select(models.Merchant.id, models.Merchant.name).where(
+                    or_(
+                        models.Merchant.name.ilike(f"%{merchant}%"),
+                        models.Merchant.slug == merchant,
+                    )
+                ).limit(1)
+            )
+        ).first()
+        if row is None:
+            raise HTTPException(status_code=404, detail=f"marchand introuvable : {merchant}")
+        detail = await coherence.repartition_marchand(session, row.id)
+
+    return {"merchant": row.name, **detail}
 
 
 @router.post("/admin/realign")
