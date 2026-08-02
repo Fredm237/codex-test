@@ -2001,3 +2001,166 @@
 .sa-eyebrow-light {
   color: rgba(255, 255, 255, 0.7) !important;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   CATALOGUE — Premium, vivant, futuriste
+   ══════════════════════════════════════════════════════════════ */
+
+/* Header du catalogue — fond sombre avec dégradé doré */
+.fx-catalogue-title {
+  background: linear-gradient(135deg, #D4A853, #F5D78E, #C9963C);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Grille produit — gap plus grand, cartes avec glow au hover */
+.fx-catalogue-grid {
+  gap: var(--fx-space-5) !important;
+}
+
+.fx-product {
+  border: 1px solid rgba(212, 168, 83, 0.08);
+  transition: border-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.fx-product:hover {
+  border-color: rgba(212, 168, 83, 0.3);
+  box-shadow: 0 8px 32px rgba(212, 168, 83, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+/* Badge gain — doré au lieu de vert */
+.fx-badge.gain {
+  background: linear-gradient(135deg, #D4A853, #F5D78E);
+  color: #0a0a0f;
+  font-weight: 600;
+}
+
+/* Badge brand — fond sombre */
+.fx-badge.brand {
+  background: #0a0a0f;
+  color: #F5D78E;
+}
+
+/* Pagination — style premium */
+.fx-pagination {
+  margin-top: var(--fx-space-7);
+}
+
+.fx-page[aria-current="page"] {
+  background: linear-gradient(135deg, #D4A853, #F5D78E);
+  color: #0a0a0f;
+  font-weight: 600;
+}
+
+/* CTA produit — doré */
+.fx-product-cta {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.fx-product-cta:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3);
+}
+
+/* Navigation latérale — liens avec transition dorée */
+.fx-nav-shell a:hover,
+.fx-nav-shell a[aria-current] {
+  color: #D4A853;
+}
+
+/* Breadcrumb — séparateurs dorés */
+.fx-crumb span[aria-hidden] {
+  color: rgba(212, 168, 83, 0.4);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ASSISTANT — Premium, vivant, futuriste
+   ══════════════════════════════════════════════════════════════ */
+
+/* Steps de réflexion — accent doré */
+.fa-step.active { color: #D4A853 !important; }
+.fa-step.active .tk {
+  border-color: #D4A853 !important;
+}
+.fa-step.active .tk::after {
+  border-top-color: #D4A853 !important;
+}
+.fa-step.done .tk {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  border-color: transparent !important;
+}
+
+/* Carte gagnante — bordure dorée au lieu de l'accent par défaut */
+.fa-card.win {
+  border-color: rgba(212, 168, 83, 0.4) !important;
+  box-shadow: 0 0 0 1px rgba(212, 168, 83, 0.15), 0 8px 32px rgba(212, 168, 83, 0.08) !important;
+}
+
+/* Flag du gagnant — doré */
+.fa-flag {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+}
+
+/* Score ring — doré */
+.fa-score .ring {
+  border-color: #D4A853 !important;
+}
+
+/* Bouton "Voir l'offre" — doré */
+.fa-cta {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  font-weight: 600 !important;
+}
+.fa-cta:hover {
+  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+/* Chips de suggestion — hover doré */
+.sa-chip:hover {
+  border-color: #D4A853 !important;
+  color: #D4A853 !important;
+}
+
+/* Search box focus — glow doré */
+.sa-box:focus-within {
+  border-color: #D4A853 !important;
+  box-shadow: 0 0 0 5px rgba(212, 168, 83, 0.15) !important;
+}
+.sa-box:focus-within svg {
+  color: #D4A853 !important;
+}
+
+/* Bouton Ask — doré */
+.sa .ed-btn.wave {
+  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  color: #0a0a0f !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+.sa .ed-btn.wave:hover {
+  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3) !important;
+}
+
+/* Cartes résultats — hover avec glow doré */
+.fa-card:hover {
+  border-color: rgba(212, 168, 83, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(212, 168, 83, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Historique prix — couleur dorée pour "en baisse" */
+.fa-specs .hist.baisse {
+  color: #D4A853 !important;
+}
+
+/* Disclaimer — plus discret */
+.sa-disc {
+  opacity: 0.6;
+  font-size: 12px !important;
+}
