@@ -7,7 +7,8 @@
 // perd la question de l'utilisateur au premier clic est un défaut, pas un
 // détail — l'assistant la relit et lance l'analyse tout seul.
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SUGGESTIONS = [
   "Un aspirateur robot fiable sous 300 €",
@@ -17,35 +18,79 @@ const SUGGESTIONS = [
 
 export function HeroSearch() {
   const [query, setQuery] = useState("");
+  const [focused, setFocused] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   return (
     <div className="fx-hero-search">
-      <form className="fx-field" action="/recherche/" method="get" role="search">
-        <svg viewBox="0 0 24 24" aria-hidden="true" width="19" height="19" className="fx-field-icon">
+      <motion.form
+        className={`fx-field ${focused ? "fx-field-focused" : ""}`}
+        action="/recherche/"
+        method="get"
+        role="search"
+        animate={focused ? { scale: 1.01 } : { scale: 1 }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      >
+        <motion.svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          width="19"
+          height="19"
+          className="fx-field-icon"
+          animate={focused ? { scale: 1.1, rotate: -8 } : { scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+        >
           <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="1.8" />
           <path d="m21 21-4.2-4.2" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
+        </motion.svg>
         <input
+          ref={inputRef}
           type="search"
           name="q"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
           placeholder="Que voulez-vous acheter ?"
           aria-label="Que voulez-vous acheter ?"
           autoComplete="off"
         />
-        <button className="fx-btn primary" type="submit">
+        <motion.button
+          className="fx-btn primary"
+          type="submit"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
+          transition={{ type: "spring", stiffness: 400, damping: 20 }}
+        >
           Demander
-        </button>
-      </form>
+        </motion.button>
+      </motion.form>
 
-      <div className="fx-hero-suggestions">
+      <motion.div
+        className="fx-hero-suggestions"
+        initial="hidden"
+        animate="show"
+        variants={{
+          hidden: { opacity: 0 },
+          show: { opacity: 1, transition: { staggerChildren: 0.08, delayChildren: 0.3 } },
+        }}
+      >
         {SUGGESTIONS.map((s) => (
-          <a key={s} className="fx-chip" href={`/recherche/?q=${encodeURIComponent(s)}`}>
+          <motion.a
+            key={s}
+            className="fx-chip"
+            href={`/recherche/?q=${encodeURIComponent(s)}`}
+            variants={{
+              hidden: { opacity: 0, y: 8 },
+              show: { opacity: 1, y: 0 },
+            }}
+            whileHover={{ y: -2, boxShadow: "var(--fx-elevation-1)" }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
             {s}
-          </a>
+          </motion.a>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 }

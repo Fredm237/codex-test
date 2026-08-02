@@ -7,42 +7,39 @@
 ---
 
 **Project:** FILON
-**Generated:** 2026-08-02 05:17:55
-**Category:** Insurance Platform
-**Design Dials:** Variance 4/10 (Balanced / Modern) | Motion 4/10 (Standard) | Density 5/10 (Standard)
+**Category:** SaaS Premium / Assistant d'Achat
+**Design Dials:** Variance 3/10 (Minimaliste / Premium) | Motion 8/10 (Fluide / Vivant) | Density 3/10 (Aéré)
+**Inspiration:** Phia.com, Apple, Stripe, Linear
 
 ---
 
-## Global Rules
+## Règles Globales (Refonte 2026)
 
-### Color Palette
+### L'ADN Design
 
-| Role | Hex | CSS Variable |
-|------|-----|--------------|
-| Primary | `#18181B` | `--color-primary` |
-| On Primary | `#FFFFFF` | `--color-on-primary` |
-| Secondary | `#3F3F46` | `--color-secondary` |
-| Accent/CTA | `#EC4899` | `--color-accent` |
-| Background | `#FAFAFA` | `--color-background` |
-| Foreground | `#09090B` | `--color-foreground` |
-| Muted | `#E8ECF0` | `--color-muted` |
-| Border | `#E4E4E7` | `--color-border` |
-| Destructive | `#DC2626` | `--color-destructive` |
-| Ring | `#18181B` | `--color-ring` |
+1.  **La Respiration** : Ne surchargez jamais l'interface. Utilisez des espaces blancs généreux pour laisser le contenu respirer.
+2.  **La Profondeur Naturelle** : Évitez les designs plats. Utilisez des ombres multi-couches et diffuses pour créer un relief réaliste.
+3.  **Le Mouvement Subtil** : Toute interface doit paraître "vivante". Utilisez Framer Motion pour des animations *spring*, des transitions d'opacité douces et des micro-interactions au survol.
+4.  **La Typographie Sophistiquée** : Privilégiez des polices sans-serif modernes. N'utilisez jamais de noir pur (`#000`), préférez une encre foncée (`#14171c`).
+5.  **L'Effet "Humain"** : Évitez l'aspect "généré par IA". Utilisez des visuels de haute qualité et un langage clair.
 
-**Color Notes:** Editorial black + accent pink
+### Palette de Couleurs (Couche Sémantique)
 
-### Typography
+| Rôle | Description | CSS Variable |
+|------|-------------|--------------|
+| **Background** | Papier tiède, jamais blanc pur. | `--fx-bg` (`#faf9f7`) |
+| **Surface** | Cartes et éléments surélevés. | `--fx-surface` (`#ffffff`) |
+| **Text (Ink)** | Encre foncée, pas de noir pur. | `--fx-text` (`#14171c`) |
+| **Text Muted** | Texte secondaire, gris doux. | `--fx-text-muted` (`#6a7280`) |
+| **Action** | Boutons principaux (noir encre). | `--fx-action` (`#14171c`) |
+| **Brand (Or)** | Accents, badges, focus. | `--fx-brand` (`#8a6a24`) |
+| **Gain (Turquoise)** | Réservé uniquement aux économies. | `--fx-gain` (`#0a7d74`) |
 
-- **Heading Font:** Playfair Display
-- **Body Font:** Inter
-- **Mood:** elegant, luxury, sophisticated, timeless, premium, editorial
-- **Google Fonts:** [Playfair Display + Inter](https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap)
+### Typographie
 
-**CSS Import:**
-```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap');
-```
+- **Police principale :** Sans-serif moderne (Inter, SF Pro).
+- **Police secondaire (Titres spécifiques) :** Serif élégante (Playfair Display) utilisée avec parcimonie pour l'effet éditorial.
+- **Mood :** Premium, vivant, clair, digne de confiance.
 
 ### Spacing Variables
 
@@ -58,86 +55,36 @@
 | `--space-2xl` | `48px` / `3rem` | Section margins |
 | `--space-3xl` | `64px` / `4rem` | Hero padding |
 
-### Shadow Depths
+### Élévation et Ombres (Multi-couches)
 
-| Level | Value | Usage |
-|-------|-------|-------|
-| `--shadow-sm` | `0 1px 2px rgba(0,0,0,0.05)` | Subtle lift |
-| `--shadow-md` | `0 4px 6px rgba(0,0,0,0.1)` | Cards, buttons |
-| `--shadow-lg` | `0 10px 15px rgba(0,0,0,0.1)` | Modals, dropdowns |
-| `--shadow-xl` | `0 20px 25px rgba(0,0,0,0.15)` | Hero images, featured cards |
+Les ombres doivent être subtiles et naturelles, jamais dures.
+
+| Niveau | Usage | CSS Variable |
+|--------|-------|--------------|
+| **Level 1** | Cartes de base, boutons au repos. | `--fx-elevation-1` |
+| **Level 2** | Cartes au survol, dropdowns. | `--fx-elevation-2` |
+| **Level 3** | Modales, CTA flottants (Sticky). | `--fx-elevation-3` |
 
 ---
 
-## Component Specs
+## Composants et Micro-interactions
 
-### Buttons
+### Boutons (`.fx-btn`)
+- **Primary (`.on-ink`) :** Fond papier, texte encre, ombre Level 1. Au survol : élévation Level 2 et translation Y (-2px).
+- **Secondary (`.secondary`) :** Transparent, bordure forte. Au survol : fond papier légèrement assombri.
+- **Interaction :** Tous les boutons doivent avoir un effet de pression au clic (`transform: scale(0.97)`).
 
-```css
-/* Primary Button */
-.btn-primary {
-  background: #EC4899;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
+### Cartes (`.fx-card`, `.fx-product`)
+- **Base :** Bordure subtile, rayon moyen (`--fx-radius-md`), ombre Level 1.
+- **Survol :** Bordure plus forte, ombre Level 2, translation Y (-2px) avec une animation *spring* (Framer Motion).
 
-.btn-primary:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
+### Skeletons de Chargement (`.fx-skeleton`)
+- Utiliser une animation *shimmer* douce et continue.
+- Respecter les proportions finales des éléments pour éviter le *layout shift*.
 
-/* Secondary Button */
-.btn-secondary {
-  background: transparent;
-  color: #18181B;
-  border: 2px solid #18181B;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-```
-
-### Cards
-
-```css
-.card {
-  background: #FAFAFA;
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  transition: all 200ms ease;
-  cursor: pointer;
-}
-
-.card:hover {
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-2px);
-}
-```
-
-### Inputs
-
-```css
-.input {
-  padding: 12px 16px;
-  border: 1px solid #E2E8F0;
-  border-radius: 8px;
-  font-size: 16px;
-  transition: border-color 200ms ease;
-}
-
-.input:focus {
-  border-color: #18181B;
-  outline: none;
-  box-shadow: 0 0 0 3px #18181B20;
-}
-```
+### Transitions de Page (`PageTransition`)
+- Envelopper le contenu de `main` avec `AnimatePresence` et un composant `motion.div`.
+- Animation : Fondu enchaîné (opacity 0 -> 1) combiné à un léger glissement vertical (y: 8px -> 0).
 
 ### Modals
 
@@ -179,19 +126,30 @@
 
 ---
 
-## Motion
+## Mouvement et Animations (Framer Motion)
 
-**Stagger List** (Standard) — Trigger: load or scroll | Duration: 300-450ms | Easing: `back.out(1.4)`
+L'animation est au cœur de l'expérience Filon. Elle doit être fluide, basée sur la physique (spring) et jamais agressive.
 
-```js
-gsap.from('.grid-item', { opacity: 0, scale: 0.92, y: 16, duration: 0.4, stagger: { each: 0.06, from: 'start', grid: 'auto' }, ease: 'back.out(1.4)' });
+### Courbes de base (CSS)
+- `--fx-duration-fast`: `150ms` (Micro-interactions)
+- `--fx-duration`: `220ms` (Transitions standard)
+- `--fx-duration-slow`: `320ms` (Menus, éléments complexes)
+- `--fx-ease-out`: `cubic-bezier(0.16, 1, 0.3, 1)` (Signature Filon)
+
+### Framer Motion (React)
+Privilégier les animations de type `spring` pour un rendu naturel :
+```javascript
+transition={{ type: "spring", stiffness: 300, damping: 20 }}
 ```
 
-**Framework notes:** grid: 'auto' lets GSAP infer rows/columns from a CSS grid layout for a natural wave stagger
-
-- ✅ Combine with from: 'center' for a bento-grid layout to draw the eye inward first
-- ❌ Don't use back.out on dense data tables; the overshoot reads as sloppy on informational UI
-- ⚡ Group DOM writes; avoid interleaving layout reads (getBoundingClientRect) between staggered tweens
+**Stagger (Apparition en cascade) :**
+Idéal pour les listes, les grilles de produits et les étapes.
+```javascript
+variants={{
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+}}
+```
 
 ---
 
@@ -216,13 +174,10 @@ gsap.from('.grid-item', { opacity: 0, scale: 0.92, y: 16, duration: 0.4, stagger
 
 Before delivering any UI code, verify:
 
-- [ ] No emojis used as icons (use SVG instead)
-- [ ] All icons from consistent icon set (Heroicons/Lucide)
-- [ ] `cursor-pointer` on all clickable elements
-- [ ] Hover states with smooth transitions (150-300ms)
-- [ ] Light mode: text contrast 4.5:1 minimum
-- [ ] Focus states visible for keyboard navigation
-- [ ] `prefers-reduced-motion` respected
-- [ ] Responsive: 375px, 768px, 1024px, 1440px
-- [ ] No content hidden behind fixed navbars
-- [ ] No horizontal scroll on mobile
+- [ ] **Cohérence visuelle :** Plus aucun dégradé bleu/turquoise "SmartWave". Uniquement l'encre, le papier, l'or (marque) et le turquoise (économies).
+- [ ] **Icônes :** Utiliser exclusivement des SVG au trait fin (currentColor), jamais d'emojis.
+- [ ] **Micro-interactions :** Tous les éléments cliquables ont un effet au survol (hover) ET au clic (active/tap).
+- [ ] **Ombres :** Utiliser les variables `--fx-elevation-*` multi-couches, jamais de box-shadow en dur.
+- [ ] **Animations :** Les éléments importants apparaissent avec un effet *scroll-reveal* (Framer Motion).
+- [ ] **Accessibilité :** Focus visible (anneau doré), contraste > 4.5:1, respect de `prefers-reduced-motion`.
+- [ ] **Mobile :** Navigation fluide, pas de défilement horizontal, zones tactiles d'au moins 44px.

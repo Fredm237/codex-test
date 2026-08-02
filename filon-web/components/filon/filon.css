@@ -889,3 +889,315 @@
   box-shadow: 0 0 0 3px var(--fx-brand-wash);
   outline: none;
 }
+
+/* ── Skeletons de chargement premium ─────────────────────── */
+
+@keyframes fx-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.fx-skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--fx-paper-100) 25%,
+    var(--fx-paper-200) 50%,
+    var(--fx-paper-100) 75%
+  );
+  background-size: 200% 100%;
+  animation: fx-shimmer 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-skeleton { animation: none; background: var(--fx-paper-100); }
+}
+
+.fx-skeleton-card {
+  pointer-events: none;
+}
+
+.fx-skeleton-card .fx-product-media {
+  background: var(--fx-paper-100);
+}
+
+.fx-skeleton-verdict {
+  padding: var(--fx-space-5);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-md);
+  background: var(--fx-surface);
+}
+
+.fx-skeleton-offer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--fx-space-4) 0;
+  border-bottom: 1px solid var(--fx-border);
+}
+
+/* ── Champ de recherche — états focus premium ────────────── */
+
+.fx-field {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-3);
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-field-radius);
+  padding: 6px 6px 6px var(--fx-space-5);
+  min-height: var(--fx-field-height);
+  transition: 
+    border-color var(--fx-duration) var(--fx-ease-standard),
+    box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+
+.fx-field-focused {
+  border-color: var(--fx-brand);
+  box-shadow: 0 0 0 4px var(--fx-brand-wash), var(--fx-elevation-2);
+}
+
+.fx-field input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  font-size: var(--fx-text-base);
+  color: var(--fx-text);
+  outline: none;
+}
+.fx-field input::placeholder {
+  color: var(--fx-text-muted);
+}
+
+.fx-btn.primary {
+  background: var(--fx-action);
+  color: var(--fx-on-action);
+  border: none;
+  min-height: 44px;
+  padding: 0 var(--fx-space-5);
+  border-radius: var(--fx-radius-full);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+  cursor: pointer;
+}
+
+/* ── Page produit — Refonte premium ──────────────────────── */
+
+.pg-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: clamp(32px, 5vw, 64px);
+  align-items: start;
+}
+@media (max-width: 860px) {
+  .pg-grid { grid-template-columns: 1fr; }
+}
+
+.pg-media {
+  position: sticky;
+  top: 100px;
+  background: var(--fx-surface);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-lg);
+  overflow: hidden;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  box-shadow: var(--fx-elevation-1);
+  transition: box-shadow var(--fx-duration) var(--fx-ease-standard);
+}
+.pg-media:hover {
+  box-shadow: var(--fx-elevation-2);
+}
+.pg-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: var(--fx-space-6);
+}
+@media (max-width: 860px) {
+  .pg-media { position: static; aspect-ratio: 4/3; }
+}
+
+.pg-brand {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+}
+
+.pg-title {
+  font-family: var(--serif);
+  font-size: var(--fx-text-2xl);
+  font-weight: 400;
+  line-height: var(--fx-leading-snug);
+  letter-spacing: var(--fx-tracking-tight);
+  margin-top: var(--fx-space-2);
+}
+
+.pg-headline {
+  display: flex;
+  align-items: baseline;
+  gap: var(--fx-space-4);
+  margin-top: var(--fx-space-5);
+  padding-bottom: var(--fx-space-4);
+  border-bottom: 1px solid var(--fx-border);
+}
+.pg-from {
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-muted);
+  margin-right: var(--fx-space-2);
+}
+.pg-price {
+  font-size: var(--fx-text-xl);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--fx-text);
+}
+.pg-count {
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-muted);
+}
+
+.pg-saving {
+  margin-top: var(--fx-space-4);
+  padding: var(--fx-space-3) var(--fx-space-4);
+  background: var(--fx-gain-subtle);
+  border-radius: var(--fx-radius-sm);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-gain-strong);
+}
+.pg-saving b {
+  font-weight: 700;
+}
+
+.pg-sub {
+  font-size: var(--fx-text-lg);
+  font-weight: 600;
+  margin-top: var(--fx-space-7);
+  margin-bottom: var(--fx-space-4);
+  letter-spacing: var(--fx-tracking-tight);
+}
+
+.pg-offers {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.pg-offer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--fx-space-3);
+  padding: var(--fx-space-4) 0;
+  border-bottom: 1px solid var(--fx-border);
+  transition: background var(--fx-duration) var(--fx-ease-standard);
+}
+.pg-offer:hover {
+  background: var(--fx-paper-50);
+  margin: 0 calc(-1 * var(--fx-space-3));
+  padding-left: var(--fx-space-3);
+  padding-right: var(--fx-space-3);
+  border-radius: var(--fx-radius-sm);
+}
+
+.pg-offer.best {
+  border-color: var(--fx-gain);
+  background: var(--fx-gain-subtle);
+  margin: 0 calc(-1 * var(--fx-space-3));
+  padding-left: var(--fx-space-3);
+  padding-right: var(--fx-space-3);
+  border-radius: var(--fx-radius-sm);
+  border: 1px solid var(--fx-gain);
+}
+
+.pg-offer-merchant {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-2);
+  font-weight: 600;
+  font-size: var(--fx-text-base);
+}
+
+.pg-offer-right {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-3);
+}
+.pg-offer-right b {
+  font-size: var(--fx-text-base);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.pg-stock {
+  font-size: var(--fx-text-xs);
+  color: var(--fx-gain);
+}
+
+.pg-note {
+  margin-top: var(--fx-space-6);
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+  line-height: 1.6;
+  max-width: 60ch;
+}
+
+/* Verdict FILON — refonte premium */
+.vd {
+  margin-top: var(--fx-space-5);
+  padding: var(--fx-space-5);
+  border: 1px solid var(--fx-border);
+  border-radius: var(--fx-radius-md);
+  background: var(--fx-surface);
+  box-shadow: var(--fx-elevation-1);
+}
+.vd-excellent { border-left: 3px solid var(--fx-gain); }
+.vd-bon { border-left: 3px solid var(--fx-gain); }
+.vd-neutre { border-left: 3px solid var(--fx-brand); }
+.vd-attendre { border-left: 3px solid var(--fx-alert-600); }
+.vd-insuffisant { border-left: 3px solid var(--fx-text-muted); }
+
+.vd-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--fx-text-muted);
+}
+.vd-head {
+  display: flex;
+  align-items: center;
+  gap: var(--fx-space-2);
+  margin-top: var(--fx-space-2);
+}
+.vd-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+.vd-excellent .vd-dot, .vd-bon .vd-dot { background: var(--fx-gain); }
+.vd-neutre .vd-dot { background: var(--fx-brand); }
+.vd-attendre .vd-dot { background: var(--fx-alert-600); }
+.vd-insuffisant .vd-dot { background: var(--fx-text-muted); }
+
+.vd-title {
+  font-size: var(--fx-text-lg);
+  font-weight: 700;
+}
+.vd-reasons {
+  margin: var(--fx-space-3) 0 0;
+  padding-left: var(--fx-space-5);
+  font-size: var(--fx-text-sm);
+  color: var(--fx-text-secondary);
+  line-height: 1.6;
+}
+.vd-reasons li { margin-bottom: var(--fx-space-1); }
+.vd-meta {
+  margin-top: var(--fx-space-3);
+  font-size: var(--fx-text-xs);
+  color: var(--fx-text-muted);
+}
