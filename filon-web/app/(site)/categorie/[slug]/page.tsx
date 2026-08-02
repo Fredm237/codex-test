@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import { API } from "@/lib/api";
-import { ProductCard, CARD_COPY } from "@/components/filon/ProductCard";
+import { ProductCard } from "@/components/filon/ProductCard";
+import { CARD_COPY } from "@/components/filon/product-copy";
 
 // Page d'un rayon FILON. Rendu serveur + ISR : indexable, et sans spinner.
 export const revalidate = 1800;

@@ -1,80 +1,259 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
-import { ContentHero } from "@/components/editorial/ContentPage";
-import { OffersBrowser } from "@/components/editorial/OffersBrowser";
-import { Localized } from "@/components/editorial/Localized";
-import { CatalogueRails, type RailSection } from "@/components/editorial/CatalogueRails";
-import { API } from "@/lib/api";
+import { ProductCard } from "@/components/filon/ProductCard";
+import { CARD_COPY } from "@/components/filon/product-copy";
+import { CatalogueSearch, CatalogueControls } from "@/components/filon/CatalogueControls";
+import {
+  getDepartments,
+  getOffers,
+  resolve,
+  href,
+  pageNumber,
+  pageSize,
+  pageWindow,
+  sortValue,
+  type CatalogueQuery,
+} from "@/lib/catalogue";
 
-// Les rails sont rendus côté serveur (pas de spinner, et indexables), puis
-// revalidés toutes les 5 min. Une fenêtre de 30 min rendait tout correctif
-// invisible pendant une demi-heure, au point de faire douter du correctif
-// lui-même ; le coût d'une régénération est négligeable à côté.
+// Rendu serveur + ISR. La grille était chargée depuis le navigateur : elle
+// dépendait du réseau du visiteur, n'était pas indexable, et tombait sur une
+// phrase sans issue (« Impossible de charger le catalogue »). Ici la page
+// arrive peuplée, ou le dit clairement avec un moyen de repartir.
 export const revalidate = 300;
 
-export const metadata: Metadata = buildMetadata({
-  path: "/catalogue",
-  title: "Le catalogue",
-  description:
-    "Parcourez les produits que FILON compare pour vous : prix réel, cashback et codes promo réunis, chez nos marchands partenaires.",
-});
-
-async function getHighlights(): Promise<RailSection[]> {
-  try {
-    // Délai d'expiration explicite : cette page est prérendue au build. Sans
-    // lui, un backend injoignable ne refuse pas la connexion, il la laisse
-    // pendre — et c'est le déploiement entier qui échoue. Le site doit se
-    // construire même quand l'API est à terre : les rails sont alors masqués.
-    const res = await fetch(`${API}/api/catalog/highlights?limit=12`, {
-      next: { revalidate: 300 },
-      signal: AbortSignal.timeout(8000),
-    });
-    if (!res.ok) return [];
-    const data = await res.json();
-    return (data.sections || []) as RailSection[];
-  } catch {
-    return [];
-  }
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<CatalogueQuery>;
+}): Promise<Metadata> {
+  const query = await searchParams;
+  const departments = await getDepartments();
+  const { category, subcategory } = resolve(departments, query);
+  const title = subcategory
+    ? `${subcategory} — ${category?.name}`
+    : category
+      ? category.name
+      : "Le catalogue";
+  return buildMetadata({
+    path: "/catalogue",
+    title,
+    description:
+      "Les produits de nos marchands partenaires, regroupés par code-barres et comparés. Prix relevés, historique conservé, meilleure offre en évidence.",
+  });
 }
 
-function Hero({ eyebrow, title, intro, crumb }: { eyebrow: string; title: React.ReactNode; intro: string; crumb: string }) {
-  return <ContentHero eyebrow={eyebrow} title={title} intro={intro} breadcrumb={[{ name: crumb, path: "/catalogue" }]} />;
+function Breadcrumb({
+  query,
+  department,
+  category,
+  subcategory,
+}: {
+  query: CatalogueQuery;
+  department: { name: string; slug: string } | null;
+  category: { name: string; slug: string } | null;
+  subcategory: string | null;
+}) {
+  return (
+    <nav className="fx-crumb" aria-label="Fil d'Ariane">
+      <a href="/catalogue/">Catalogue</a>
+      {department && (
+        <>
+          <span aria-hidden="true">/</span>
+          <a href={href({}, { dept: department.slug })}>{department.name}</a>
+        </>
+      )}
+      {category && (
+        <>
+          <span aria-hidden="true">/</span>
+          <a href={href({}, { dept: department?.slug, cat: category.slug })}>{category.name}</a>
+        </>
+      )}
+      {subcategory && (
+        <>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">{subcategory}</span>
+        </>
+      )}
+      {query.q && (
+        <>
+          <span aria-hidden="true">/</span>
+          <span aria-current="page">« {query.q} »</span>
+        </>
+      )}
+    </nav>
+  );
 }
 
-export default async function CataloguePage() {
-  const sections = await getHighlights();
+export default async function CataloguePage({
+  searchParams,
+}: {
+  searchParams: Promise<CatalogueQuery>;
+}) {
+  const query = await searchParams;
+  const departments = await getDepartments();
+  const resolved = resolve(departments, query);
+  const { department, category, subcategory } = resolved;
+  const result = await getOffers(query, resolved);
+
+  const per = pageSize(query);
+  const page = pageNumber(query);
+  const total = result?.total ?? 0;
+  const lastPage = Math.max(1, Math.ceil(total / per));
+  const browsing = !department && !category && !query.q;
 
   return (
-    <>
-      <Localized
-        fr={<Hero eyebrow="Catalogue" crumb="Catalogue" title={<>Parcourez, FILON <span className="it">compare</span>.</>} intro="Les produits de nos marchands partenaires. Cherchez, comparez, et laissez FILON trouver votre vrai prix." />}
-        nl={<Hero eyebrow="Catalogus" crumb="Catalogus" title={<>Blader, FILON <span className="it">vergelijkt</span>.</>} intro="De producten van onze partnerwinkels. Zoek, vergelijk, en laat FILON je echte prijs vinden." />}
-        en={<Hero eyebrow="Catalogue" crumb="Catalogue" title={<>Browse, FILON <span className="it">compares</span>.</>} intro="The products from our partner merchants. Search, compare, and let FILON find your real price." />}
-      />
+    <section className="fx-section page-top fx-catalogue">
+      <div className="fx-container">
+        <Breadcrumb query={query} department={department} category={category} subcategory={subcategory} />
 
-      {sections.length > 0 && (
-        <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
-          <div className="ed-wrap">
-            <CatalogueRails sections={sections} />
+        <h1 className="fx-display fx-catalogue-title">
+          {subcategory || category?.name || department?.name || (
+            <>
+              Le catalogue,
+              <br />
+              <span className="it">rayon par rayon.</span>
+            </>
+          )}
+        </h1>
+
+        <p className="fx-lede fx-catalogue-lede">
+          {result === null
+            ? "Le catalogue est momentanément indisponible. Réessayez dans un instant."
+            : `${total.toLocaleString("fr-BE")} produits comparés chez nos marchands partenaires.`}
+        </p>
+
+        <CatalogueSearch query={query} />
+
+        {/* Navigation par départements : c'est la structure réelle du
+            catalogue, et elle n'apparaissait nulle part. Sans département
+            choisi on montre les six ; ensuite ses rayons ; puis les
+            sous-rayons. */}
+        {browsing ? (
+          <div className="fx-grid cols-3 fx-dept-grid">
+            {departments.map((d) => (
+              <a className="fx-card padded fx-dept" key={d.slug} href={href({}, { dept: d.slug })}>
+                <span className="fx-dept-head">
+                  <span className="fx-h3">{d.name}</span>
+                  <span className="fx-badge">{d.count.toLocaleString("fr-BE")}</span>
+                </span>
+                <span className="fx-dept-list">
+                  {d.categories.slice(0, 6).map((c) => (
+                    <span key={c.slug}>{c.name}</span>
+                  ))}
+                </span>
+              </a>
+            ))}
           </div>
-        </section>
-      )}
+        ) : (
+          <>
+            {department && (
+              <nav className="fx-chips" aria-label="Rayons">
+                <a
+                  className="fx-chip"
+                  aria-current={!category ? "true" : undefined}
+                  href={href({}, { dept: department.slug })}
+                >
+                  Tout {department.name}
+                </a>
+                {department.categories.map((c) => (
+                  <a
+                    key={c.slug}
+                    className="fx-chip"
+                    aria-current={category?.slug === c.slug ? "true" : undefined}
+                    href={href({}, { dept: department.slug, cat: c.slug })}
+                  >
+                    {c.name} <span>{c.count.toLocaleString("fr-BE")}</span>
+                  </a>
+                ))}
+              </nav>
+            )}
 
-      <section className="ed-band" style={{ paddingTop: sections.length ? undefined : 0, borderTop: sections.length ? undefined : 0 }}>
-        <div className="ed-wrap">
-          <h2 className="cat-rail-title" style={{ marginBottom: 6 }}>
-            <Localized fr="Explorer tout le catalogue" nl="Verken de hele catalogus" en="Explore the whole catalogue" />
-          </h2>
-          <p className="cat-rail-sub" style={{ marginBottom: 22 }}>
-            <Localized
-              fr="Filtrez par catégorie, marque et budget."
-              nl="Filter op categorie, merk en budget."
-              en="Filter by category, brand and budget."
-            />
+            {category && (category.subcategories || []).length > 0 && (
+              <nav className="fx-chips" aria-label="Sous-rayons">
+                <a
+                  className="fx-chip"
+                  aria-current={!subcategory ? "true" : undefined}
+                  href={href({}, { dept: department?.slug, cat: category.slug })}
+                >
+                  Tout {category.name}
+                </a>
+                {(category.subcategories || []).map((s) => (
+                  <a
+                    key={s.name}
+                    className="fx-chip"
+                    aria-current={subcategory === s.name ? "true" : undefined}
+                    href={href({}, { dept: department?.slug, cat: category.slug, sub: s.name })}
+                  >
+                    {s.name} <span>{s.count.toLocaleString("fr-BE")}</span>
+                  </a>
+                ))}
+              </nav>
+            )}
+          </>
+        )}
+
+        {result !== null && total > 0 && (
+          <>
+            <CatalogueControls query={query} sort={sortValue(query)} per={per} />
+
+            <div className="fx-product-grid fx-catalogue-grid">
+              {result.items.map((o) => (
+                <ProductCard key={o.id} offer={o} copy={CARD_COPY.fr} />
+              ))}
+            </div>
+
+            {lastPage > 1 && (
+              <nav className="fx-pagination" aria-label={`Page ${page} sur ${lastPage}`}>
+                <a
+                  className="fx-page-step"
+                  href={href(query, { page: String(Math.max(1, page - 1)) })}
+                  aria-disabled={page <= 1}
+                  tabIndex={page <= 1 ? -1 : undefined}
+                >
+                  Précédent
+                </a>
+                <span className="fx-page-list">
+                  {pageWindow(page, lastPage).map((p, i) =>
+                    p === null ? (
+                      <span className="fx-page-gap" key={`gap-${i}`} aria-hidden="true">
+                        …
+                      </span>
+                    ) : (
+                      <a
+                        key={p}
+                        className="fx-page"
+                        aria-current={p === page ? "page" : undefined}
+                        href={href(query, { page: String(p) })}
+                      >
+                        {p}
+                      </a>
+                    )
+                  )}
+                </span>
+                <a
+                  className="fx-page-step"
+                  href={href(query, { page: String(Math.min(lastPage, page + 1)) })}
+                  aria-disabled={page >= lastPage}
+                  tabIndex={page >= lastPage ? -1 : undefined}
+                >
+                  Suivant
+                </a>
+              </nav>
+            )}
+
+            <p className="fx-fine fx-page-status">
+              Page {page} sur {lastPage.toLocaleString("fr-BE")}
+            </p>
+          </>
+        )}
+
+        {result !== null && total === 0 && (
+          <p className="fx-body fx-catalogue-empty">
+            Aucun produit ne correspond à cette sélection.{" "}
+            <a href="/catalogue/">Repartir de tout le catalogue</a>.
           </p>
-          <OffersBrowser />
-        </div>
-      </section>
-    </>
+        )}
+      </div>
+    </section>
   );
 }

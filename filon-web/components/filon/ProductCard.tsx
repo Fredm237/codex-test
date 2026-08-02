@@ -16,6 +16,7 @@
 // lien marchand reste distinct, au-dessus, avec sa propre cible.
 
 import { useState } from "react";
+import { money, type CardCopy } from "./product-copy";
 
 export type CardOffer = {
   id: number;
@@ -30,28 +31,6 @@ export type CardOffer = {
   price_high?: number | null;
   is_lowest?: boolean;
 };
-
-export type CardCopy = {
-  see: string;
-  at: string;
-  lowest: string;
-  noImage: string;
-};
-
-export const CARD_COPY: Record<"fr" | "nl" | "en", CardCopy> = {
-  fr: { see: "Voir l'offre", at: "chez", lowest: "Au plus bas", noImage: "Visuel indisponible" },
-  nl: { see: "Bekijk aanbod", at: "bij", lowest: "Laagste ooit", noImage: "Geen afbeelding" },
-  en: { see: "See offer", at: "at", lowest: "Lowest ever", noImage: "No image" },
-};
-
-export function money(price: number | null | undefined, currency: string | null | undefined): string {
-  if (price == null) return "—";
-  const symbol = currency === "GBP" ? "£" : currency === "USD" ? "$" : "€";
-  return `${price.toLocaleString("fr-BE", {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} ${symbol}`;
-}
 
 export function ProductCard({
   offer,
