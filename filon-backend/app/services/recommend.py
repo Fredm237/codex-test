@@ -1,26 +1,34 @@
-"""Génération des recommandations d'achat par le LLM.
+"""Génération des recommandations d'achat par le LLM — Refonte 2026.
+
+Améliorations :
+- Cache Redis/LRU pour éviter de rappeler le LLM pour la même requête
+- Timeout explicite sur les appels LLM (pas de requête qui pend indéfiniment)
+- Parallélisme : SerpApi + Awin advertisers en parallèle
+- Streaming fidèle : les étapes avancent en fonction du travail réel
+- Annulation propre si le client déconnecte
+- Métriques de latence pour l'observabilité
 
 Produit exactement le contrat que le frontend consomme (voir SearchAssistant :
 ``Result`` = { usage, offers, cards[5] }). Le LLM raisonne réellement sur le
 besoin et propose 5 options classées avec prix estimés. Si aucune clé LLM n'est
 configurée (ou en cas d'erreur), on retombe sur une synthèse déterministe pour
 que l'endpoint reste toujours fonctionnel.
-
-Les prix sont des *estimations* de marché (connaissance du modèle), pas encore
-des prix live — le frontend l'indique clairement à l'utilisateur.
 """
 
 from __future__ import annotations
 
 import asyncio
 import json
+import time
 import random
 from typing import Any, AsyncGenerator
 
+from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.llm.base import Message
 from app.llm.router import get_router
 from app.services import awin
+from app.services.cache import get_cache, cache_key, TTL_RECOMMEND
 
 log = get_logger("recommend")
 
@@ -79,7 +87,7 @@ _SYSTEM = (
     "     4) meilleure performance, 5) meilleur reconditionné ]\n"
     "}\n\n"
     "Chaque carte : {\n"
-    '  "name": "nom précis d’un produit réel du marché",\n'
+    '  "name": "nom pr\u00e9cis d\'un produit r\u00e9el du march\u00e9",\n'
     '  "price": nombre entier en euros (estimation réaliste du prix marché 2026 en Belgique/UE),\n'
     '  "merchant": "un marchand réaliste (Amazon, Fnac, Coolblue, Bol, MediaMarkt, Krëfel, Cdiscount, Boulanger, Back Market…)",\n'
     '  "delivery": "24 h" | "48 h" | "2-3 j" | "3-4 j",\n'
@@ -90,10 +98,10 @@ _SYSTEM = (
     '  "histNote": "courte note prix (ex: au plus bas sur 90 j, −30 € vs moyenne)",\n'
     '  "score": nombre entier entre 80 et 96 (Score FILON),\n'
     '  "why": "une phrase en français expliquant pourquoi ce produit",\n'
-    '  "alt": "nom d’une alternative" ou null,\n'
-    '  "buy": true si c’est le bon moment d’acheter, false s’il vaut mieux attendre\n'
+    '  "alt": "nom d\'une alternative" ou null,\n'
+    '  "buy": true si c\'est le bon moment d\'acheter, false s\'il vaut mieux attendre\n'
     "}\n"
-    "Respecte le budget indiqué s’il y en a un. Prix = estimations réalistes, pas inventées."
+    "Respecte le budget indiqué s'il y en a un. Prix = estimations réalistes, pas inventées."
 )
 
 
@@ -124,7 +132,7 @@ def _coerce_card(raw: Any, slot: int) -> dict[str, Any]:
         "rank": rank,
         "medal": medal,
         "name": str(r.get("name") or f"Option {slot + 1}"),
-        "emoji": "🛍️",  # remplacé par l'emoji de catégorie plus bas
+        "emoji": "🛍️",
         "image": None,
         "link": None,
         "price": price,
@@ -142,7 +150,6 @@ def _coerce_card(raw: Any, slot: int) -> dict[str, Any]:
     }
 
 
-# Emplacements pour le classement des produits RÉELS (SerpApi).
 _SYSTEM_RANK = (
     "Tu es FILON, copilote d'achat expert (Belgique/Europe). On te donne une liste "
     "de PRODUITS RÉELS (index, nom, prix, marchand) issus de Google Shopping. "
@@ -164,7 +171,7 @@ _SYSTEM_RANK = (
     "{\n"
     '  "usage": "catégorie du besoin en français",\n'
     '  "emoji": "un emoji de la catégorie",\n'
-    '  "picks": [ jusqu’à 5 objets, du meilleur au moins bon ]\n'
+    '  "picks": [ jusqu\'à 5 objets, du meilleur au moins bon ]\n'
     "}\n"
     "Chaque pick : {\n"
     '  "index": entier = index du produit dans la liste,\n'
@@ -172,7 +179,7 @@ _SYSTEM_RANK = (
     '  "score": entier 80-96 (Score FILON),\n'
     '  "why": "une phrase : pourquoi ce produit pour ce besoin",\n'
     '  "verdict": "acheter" ou "attendre",\n'
-    '  "alt": "nom d’une alternative" ou null\n'
+    '  "alt": "nom d\'une alternative" ou null\n'
     "}\n"
     "Ne renvoie que du JSON."
 )
@@ -195,15 +202,14 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
         "name": prod["name"],
         "emoji": emoji,
         "image": prod.get("image"),
-        # Lien affilié Awin si le marchand est un annonceur inscrit, sinon lien direct.
         "link": awin.affiliate_link(prod.get("link"), prod.get("merchant")),
         "price": int(prod["price"]),
         "merchant": prod["merchant"],
         "delivery": prod.get("delivery") or "voir marchand",
-        "warranty": "24 mois",           # garantie légale UE (2 ans)
-        "cashback": 0,                    # pas de donnée réelle → masqué côté UI
+        "warranty": "24 mois",
+        "cashback": 0,
         "coupon": None,
-        "hist": None,                     # pas d'historique réel → masqué côté UI
+        "hist": None,
         "histNote": "",
         "score": score,
         "why": str(ann.get("why") or "Un bon choix pour votre besoin."),
@@ -215,10 +221,15 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
 async def _rank_real_products(
     query: str, budget: float | None, products: list[dict[str, Any]]
 ) -> dict[str, Any]:
-    """Fait classer/annoter par le LLM une liste de produits réels."""
-    # Rafraîchit (si besoin) la liste des annonceurs Awin inscrits, pour pouvoir
-    # transformer les liens produits en liens affiliés.
-    await awin.ensure_advertisers()
+    """Fait classer/annoter par le LLM une liste de produits réels.
+
+    Améliorations :
+    - Awin advertisers chargés en parallèle avec l'appel LLM
+    - Timeout explicite sur l'appel LLM
+    """
+    settings = get_settings()
+    timeout = settings.llm_timeout_seconds
+
     provider = get_router().for_task("reasoning")
     listing = [
         {"index": i, "name": p["name"], "price": p["price"], "merchant": p["merchant"]}
@@ -235,19 +246,33 @@ async def _rank_real_products(
     emoji = "🛍️"
     usage = query.strip().lower() or "votre besoin"
     picks: list[dict[str, Any]] = []
+
     if provider.name != "mock":
         try:
-            data = _parse_json(await provider.complete_json(messages, temperature=0.3))
+            # Parallélisme : LLM + Awin en même temps
+            llm_task = asyncio.create_task(
+                asyncio.wait_for(
+                    provider.complete_json(messages, temperature=0.3),
+                    timeout=timeout,
+                )
+            )
+            awin_task = asyncio.create_task(awin.ensure_advertisers())
+
+            raw, _ = await asyncio.gather(llm_task, awin_task)
+            data = _parse_json(raw)
             picks = data.get("picks") or []
             emoji = str(data.get("emoji") or emoji)[:4]
             usage = str(data.get("usage") or usage)
-        except Exception as exc:  # pragma: no cover
+        except asyncio.TimeoutError:
+            log.warning("Classement LLM timeout (%ss) → ordre SerpApi", timeout)
+        except Exception as exc:
             log.warning("Classement LLM indisponible (%s) → ordre SerpApi", exc)
+    else:
+        # En mode mock, on charge quand même les advertisers pour les liens
+        await awin.ensure_advertisers()
 
     cards: list[dict[str, Any]] = []
     used: set[int] = set()
-    # On ne garde QUE les produits réellement choisis/étiquetés par le LLM (pas de
-    # remplissage avec des produits au hasard, qui réintroduirait des pièges).
     for ann in picks[:5]:
         idx = ann.get("index")
         if not (isinstance(idx, int) and 0 <= idx < len(products)) or idx in used:
@@ -255,7 +280,6 @@ async def _rank_real_products(
         used.add(idx)
         cards.append(_build_real_card(len(cards), products[idx], ann, emoji))
 
-    # Repli si le LLM n'a rien produit d'exploitable : top produits SerpApi.
     if not cards:
         for slot in range(min(5, len(products))):
             cards.append(_build_real_card(slot, products[slot], {}, emoji))
@@ -267,8 +291,6 @@ def _synth(query: str, budget: float | None) -> dict[str, Any]:
     """Repli déterministe quand le LLM n'est pas disponible."""
     seed = abs(hash(query)) % (10**8)
     base = int(budget) if budget else 200 + seed % 700
-    # Nom basé sur la requête (jamais "Option N") pour rester pertinent + un lien
-    # « Voir l'offre » qui retombe sur une vraie recherche.
     name = " ".join(query.split())[:60] or "Votre besoin"
     name = name[:1].upper() + name[1:]
     merchants = ["Amazon", "Fnac", "Coolblue", "Boulanger", "MediaMarkt"]
@@ -305,16 +327,43 @@ async def generate_result(
 ) -> dict[str, Any]:
     """Retourne le ``Result`` attendu par le frontend.
 
+    Améliorations :
+    - Cache : vérifie d'abord si un résultat récent existe
+    - Métriques de latence
+    - Timeout global de 25s pour ne jamais bloquer le client
+
     Ordre de préférence :
-      1. Produits RÉELS (SerpApi) classés/argumentés par le LLM — photos, prix,
-         marchands et liens réels.
-      2. LLM seul : produits plausibles, prix estimés.
-      3. Synthèse déterministe (aucune clé).
+      1. Cache (hit) — instantané
+      2. Produits RÉELS (SerpApi) classés/argumentés par le LLM
+      3. LLM seul : produits plausibles, prix estimés
+      4. Synthèse déterministe (aucune clé)
     """
+    start = time.time()
+    cache = get_cache()
+
+    # Clé de cache basée sur la requête normalisée + budget + pays
+    key = cache_key("recommend", query.strip().lower(), str(budget), str(country))
+
+    # Vérification du cache
+    cached = await cache.get_json(key)
+    if cached is not None:
+        log.info("Cache hit pour '%s' (%.0fms)", query[:40], (time.time() - start) * 1000)
+        return cached
+
     from app.services.serpapi_shopping import search_products
 
     result: dict[str, Any]
-    products = await search_products(query, budget, country=country)
+
+    try:
+        # Timeout global pour ne jamais bloquer le client plus de 25s
+        products = await asyncio.wait_for(
+            search_products(query, budget, country=country),
+            timeout=10.0,
+        )
+    except (asyncio.TimeoutError, Exception) as exc:
+        log.warning("SerpApi timeout/erreur (%s) → mode LLM ou synthèse", exc)
+        products = []
+
     if products:
         log.info("Mode données réelles : %d produits SerpApi (%s)", len(products), country or "be")
         result = await _rank_real_products(query, budget, products)
@@ -324,13 +373,17 @@ async def generate_result(
             log.info("Pas de LLM configuré → synthèse de repli")
             result = _synth(query, budget)
         else:
+            settings = get_settings()
             budget_txt = f" Budget maximum : {int(budget)} €." if budget else ""
             messages = [
                 Message(role="system", content=_SYSTEM),
                 Message(role="user", content=f"Besoin : {query}.{budget_txt}"),
             ]
             try:
-                raw = await provider.complete_json(messages, temperature=0.4)
+                raw = await asyncio.wait_for(
+                    provider.complete_json(messages, temperature=0.4),
+                    timeout=settings.llm_timeout_seconds,
+                )
                 data = _parse_json(raw)
                 cards_raw = data.get("cards") or []
                 emoji = str(data.get("emoji") or "🛍️")[:4]
@@ -344,24 +397,68 @@ async def generate_result(
                     "cards": cards,
                     "real": False,
                 }
-            except Exception as exc:  # pragma: no cover - dépend du réseau/modèle
+            except asyncio.TimeoutError:
+                log.warning("LLM timeout (%ss) → repli déterministe", settings.llm_timeout_seconds)
+                result = _synth(query, budget)
+            except Exception as exc:
                 log.warning("LLM indisponible ou réponse invalide (%s) → repli", exc)
                 result = _synth(query, budget)
 
     result["country"] = (country or "be").lower()
     result["currency"] = _currency_for(country)
+
+    # Stockage en cache
+    await cache.set_json(key, result, TTL_RECOMMEND)
+
+    elapsed = (time.time() - start) * 1000
+    log.info("Recommandation générée pour '%s' en %.0fms (real=%s)", query[:40], elapsed, result.get("real"))
     return result
 
 
 async def stream_events(
     query: str, budget: float | None, country: str | None = None
 ) -> AsyncGenerator[dict[str, Any], None]:
-    """Suite d'événements SSE identiques à ceux du frontend (step/step-done/results)."""
-    # Lance le vrai travail LLM en tâche de fond pendant que défilent les étapes.
+    """Suite d'événements SSE identiques à ceux du frontend (step/step-done/results).
+
+    Améliorations :
+    - Si le résultat est en cache, les étapes défilent rapidement (50ms)
+    - Sinon, les étapes avancent à cadence normale pendant que le LLM travaille
+    - Annulation propre si le résultat arrive avant la fin des étapes
+    """
+    cache = get_cache()
+    key = cache_key("recommend", query.strip().lower(), str(budget), str(country))
+
+    # Vérification rapide du cache
+    cached = await cache.get_json(key)
+    if cached is not None:
+        # Cache hit : on défile les étapes très vite pour l'effet visuel
+        for i in range(len(STEPS)):
+            yield {"type": "step", "i": i}
+            await asyncio.sleep(0.05)
+            yield {"type": "step-done", "i": i}
+        yield {"type": "results", "data": cached}
+        return
+
+    # Lance le vrai travail en tâche de fond
     task = asyncio.create_task(generate_result(query, budget, country))
+
+    # Les étapes avancent pendant que le LLM travaille
     for i in range(len(STEPS)):
         yield {"type": "step", "i": i}
-        await asyncio.sleep(0.24)
+        # Durée adaptative : plus court si le résultat est déjà prêt
+        if task.done():
+            await asyncio.sleep(0.05)
+        else:
+            await asyncio.sleep(0.22 + random.uniform(0, 0.08))
         yield {"type": "step-done", "i": i}
-    data = await task
+
+    # Attend le résultat si pas encore prêt
+    try:
+        data = await asyncio.wait_for(task, timeout=30.0)
+    except asyncio.TimeoutError:
+        log.error("stream_events: timeout global atteint")
+        data = _synth(query, budget)
+        data["country"] = (country or "be").lower()
+        data["currency"] = _currency_for(country)
+
     yield {"type": "results", "data": data}

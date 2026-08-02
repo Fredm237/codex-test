@@ -11,6 +11,7 @@ from app import __version__
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
 from app.api.routes import advise, catalog, chat, health, stream
+from app.api.middleware import RequestLoggingMiddleware, RateLimitMiddleware
 
 log = get_logger("main")
 
@@ -51,12 +52,12 @@ def create_app() -> FastAPI:
         description="Agent IA d'achat : comprendre le besoin, comparer, décider.",
         lifespan=lifespan,
     )
+    # Middlewares — ordre d'exécution : RateLimit → Logging → CORS → Route
+    app.add_middleware(RequestLoggingMiddleware)
+    app.add_middleware(RateLimitMiddleware)
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins_list,
-        # Le frontend n'envoie aucun cookie/credential : on garde credentials=False,
-        # ce qui rend "*" pleinement valide et évite tout blocage CORS navigateur,
-        # quelle que soit la valeur de CORS_ORIGINS.
         allow_credentials=False,
         allow_methods=["*"],
         allow_headers=["*"],
