@@ -49,7 +49,7 @@ export default async function HomePage() {
           playsInline
           poster="/img/closing-bg.png"
         >
-          <source src="/video/filon_promo.mp4" type="video/mp4" />
+          <source src="/video/filon_hf_promo.mp4" type="video/mp4" />
         </video>
       </section>
 
