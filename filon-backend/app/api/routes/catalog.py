@@ -1131,8 +1131,6 @@ async def merchant_profiles_endpoint(
             "rayon": p.rayon,
             "part_pct": round(p.part * 100, 1),
             "offres": p.total,
-            # Seconde activité du marchand, laissée intacte par le réalignement.
-            "rayons_proteges": sorted(p.proteges),
         }
         for mid, p in profils.items()
     ]
@@ -1183,6 +1181,10 @@ async def realign_endpoint(
         default=True,
         description="Simulation par défaut : mesurer avant d'écrire sur 795 000 lignes",
     ),
+    exclude: str | None = Query(
+        default=None,
+        description="Marchands à laisser intacts, séparés par des virgules (nom ou slug)",
+    ),
     batch: int = Query(default=2000, le=10000),
     x_admin_token: str | None = Header(default=None),
 ) -> dict:
@@ -1201,7 +1203,12 @@ async def realign_endpoint(
     async with db.session_scope() as session:
         if session is None:
             raise HTTPException(status_code=503, detail="base de données absente")
-        return await coherence.realign(session, batch=batch, dry_run=dry_run)
+        return await coherence.realign(
+            session,
+            batch=batch,
+            dry_run=dry_run,
+            exclude=set(exclude.split(",")) if exclude else None,
+        )
 
 
 @router.post("/admin/rebuild-canonical")

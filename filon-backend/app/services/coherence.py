@@ -57,27 +57,23 @@ MIN_OFFERS = 50
 # rayon d'une offre, ils ne peuvent pas devenir une destination.
 RAYONS_NON_DESTINATION = frozenset({"Accessoires"})
 
-# Part à partir de laquelle un rayon minoritaire cesse d'être du bruit.
+# Il n'y a pas de garde-fou automatique contre le déplacement d'une seconde
+# activité, et ce n'est pas un oubli : deux tentatives ont échoué sur les
+# chiffres réels.
 #
-# Toute la règle repose sur une hypothèse : la minorité est faite d'erreurs de
-# mots-clés. Or une erreur de mot-clé est *dispersée* — chez TISSUS DE REVE,
-# les égarées se comptent par unités dans chaque rayon. Une minorité
-# *concentrée* dans un seul rayon n'est pas du bruit : c'est une seconde
-# activité. YesStyle vend de la beauté à 90 %, et le reste est de la mode
-# coréenne — un vrai rayon, pas des faux positifs.
+# L'idée était qu'une minorité *concentrée* dans un rayon, ou dans un
+# département, signale une activité réelle plutôt que du bruit. Elle est
+# fausse. Une erreur de mots-clés systématique est concentrée elle aussi :
+# mesuré sur YesStyle, marchand de cosmétiques coréens, 2 113 offres tombent en
+# Informatique (4,9 %) et le département High-Tech pèse exactement 5,0 % — juste
+# assez pour déclencher la protection. Or ce bloc n'est pas une activité : c'est
+# précisément la pollution du rayon Informatique qu'on cherche à retirer. Sa
+# vraie mode, elle, tient en 103 offres, soit 0,2 %.
 #
-# Un rayon secondaire qui tient un vingtième du catalogue est donc protégé :
-# ses offres ne bougent pas, seules les dispersées sont ramenées. Le marchand
-# reste traité, mais sa seconde activité survit.
-#
-# Le seuil se mesure aussi par *département*, et c'est indispensable. Mesuré
-# sur YesStyle : 90,6 % en beauté, et pas un seul rayon secondaire au-dessus du
-# seuil — parce que sa mode coréenne est éclatée entre Mode femme, Mode homme,
-# Chaussures, Bijoux et Bagagerie, chacun sous la barre. Prise rayon par rayon,
-# une seconde activité bien réelle passait pour du bruit. Prise par
-# département, elle se voit : ces rayons sont tous « Mode & Accessoires ».
-SECONDAIRE_REEL = 0.05
-
+# Concentration et erreur systématique sont indiscernables sur ces données. La
+# distinction relève de la connaissance du marchand, pas d'un seuil — et vingt
+# spécialistes se relisent à la main. `realign(exclude=…)` porte donc cette
+# décision, explicitement.
 
 @dataclass(frozen=True)
 class Profil:
@@ -86,9 +82,6 @@ class Profil:
     rayon: str
     part: float
     total: int
-    # Rayons secondaires assez fournis pour être une vraie activité, et non des
-    # faux positifs. Leurs offres sont laissées où elles sont.
-    proteges: frozenset[str]
 
 
 async def merchant_profiles(session) -> dict[int, Profil]:
@@ -123,48 +116,8 @@ async def merchant_profiles(session) -> dict[int, Profil]:
         part = n / total
         if part < DOMINANCE:
             continue
-        profils[merchant_id] = Profil(rayon, part, total, _proteges(rayon, repartition))
+        profils[merchant_id] = Profil(rayon, part, total)
     return profils
-
-
-def _proteges(dominant: str, repartition: dict[str, int]) -> frozenset[str]:
-    """Rayons relevant d'une seconde activité, à ne pas déplacer.
-
-    Deux mesures, parce qu'une seule ne suffit pas : un rayon peut être fourni
-    à lui seul, ou n'exister que dispersé entre plusieurs rayons d'un même
-    département. Le second cas est celui de YesStyle, et il est invisible rayon
-    par rayon.
-
-    Le département du rayon dominant est exclu du calcul : à l'intérieur d'un
-    même département, une offre mal placée est précisément l'erreur de mot-clé
-    que le réalignement doit corriger.
-    """
-    total = sum(repartition.values())
-    if not total:
-        return frozenset()
-
-    proteges = {
-        autre
-        for autre, combien in repartition.items()
-        if autre != dominant and combien / total >= SECONDAIRE_REEL
-    }
-
-    dept_dominant = taxonomy.department_of(dominant)
-    par_departement: dict[str, int] = defaultdict(int)
-    for autre, combien in repartition.items():
-        dept = taxonomy.department_of(autre)
-        if dept and dept != dept_dominant:
-            par_departement[dept] += combien
-
-    for dept, combien in par_departement.items():
-        if combien / total >= SECONDAIRE_REEL:
-            proteges.update(
-                autre
-                for autre in repartition
-                if taxonomy.department_of(autre) == dept
-            )
-
-    return frozenset(proteges)
 
 
 async def repartition_marchand(session, merchant_id: int) -> dict:
@@ -186,7 +139,6 @@ async def repartition_marchand(session, merchant_id: int) -> dict:
         return {"total": 0, "rayons": [], "departements": []}
 
     dominant = max(repartition.items(), key=lambda kv: kv[1])[0]
-    proteges = _proteges(dominant, repartition)
 
     par_departement: dict[str, int] = defaultdict(int)
     for rayon, n in repartition.items():
@@ -200,7 +152,6 @@ async def repartition_marchand(session, merchant_id: int) -> dict:
                 "rayon": rayon,
                 "offres": n,
                 "part_pct": round(n / total * 100, 1),
-                "protege": rayon in proteges,
             }
             for rayon, n in sorted(repartition.items(), key=lambda kv: -kv[1])
         ],
@@ -211,15 +162,44 @@ async def repartition_marchand(session, merchant_id: int) -> dict:
     }
 
 
-async def realign(session, *, batch: int = 2000, dry_run: bool = False) -> dict:
+async def realign(
+    session,
+    *,
+    batch: int = 2000,
+    dry_run: bool = False,
+    exclude: set[str] | None = None,
+) -> dict:
     """Ramène les offres marginales au rayon dominant de leur marchand.
 
     `dry_run` mesure sans écrire — indispensable pour vérifier l'ampleur avant
     de toucher à 795 000 lignes.
+
+    `exclude` met un marchand entièrement de côté, par nom ou par slug. C'est
+    la forme que prend la seule décision qu'aucun seuil ne sait prendre : celle
+    de savoir si la minorité d'un marchand donné est une seconde activité ou
+    une erreur de classement. Vingt spécialistes se relisent à la main.
     """
     profils = await merchant_profiles(session)
+    if exclude:
+        vises = {e.strip().lower() for e in exclude if e.strip()}
+        if vises:
+            ecartes = {
+                mid
+                for mid, nom, slug in (
+                    await session.execute(
+                        select(models.Merchant.id, models.Merchant.name, models.Merchant.slug)
+                    )
+                ).all()
+                if (nom or "").lower() in vises or (slug or "").lower() in vises
+            }
+            profils = {mid: p for mid, p in profils.items() if mid not in ecartes}
     if not profils:
-        return {"merchants_specialises": 0, "offres_realignees": 0, "dry_run": dry_run}
+        return {
+            "merchants_specialises": 0,
+            "offres_realignees": 0,
+            "dry_run": dry_run,
+            "detail": [],
+        }
 
     realignees = 0
     # Répartition par marchand : sans elle, « 24 369 offres » est un nombre
@@ -254,8 +234,6 @@ async def realign(session, *, batch: int = 2000, dry_run: bool = False) -> dict:
             if not row.filon_category:
                 continue
             if row.filon_category == profil.rayon:
-                continue
-            if row.filon_category in profil.proteges:
                 continue
             payload.append(
                 {"id": row.id, "filon_category": profil.rayon, "filon_subcategory": None}
@@ -295,7 +273,6 @@ async def realign(session, *, batch: int = 2000, dry_run: bool = False) -> dict:
                 "vers": profils[mid].rayon,
                 "offres": n,
                 "sur": profils[mid].total,
-                "rayons_proteges": sorted(profils[mid].proteges),
             }
             for mid, n in par_marchand.most_common()
         ],
