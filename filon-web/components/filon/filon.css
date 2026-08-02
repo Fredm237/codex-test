@@ -1883,3 +1883,22 @@
   border-color: rgba(255, 255, 255, 0.6);
   background: rgba(255, 255, 255, 0.05);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   SECTION VIDÉO IMMERSIVE
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-video-section {
+  width: 100%;
+  padding: 0;
+  margin: var(--fx-space-9) 0;
+}
+
+.fx-video-hero {
+  width: 100%;
+  max-width: var(--fx-container);
+  margin: 0 auto;
+  display: block;
+  border-radius: var(--fx-radius-xl);
+  box-shadow: var(--fx-elevation-3);
+}
