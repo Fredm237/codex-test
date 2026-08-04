@@ -25,9 +25,13 @@ class Criteria(BaseModel):
 class Offer(BaseModel):
     merchant: str
     price: float
-    delivery_days: int
+    # Les flux marchands (Awin) ne portent ni délai de livraison ni durée de
+    # garantie : `catalog_source._shape()` les laisse volontairement à None
+    # plutôt que d'inventer une valeur. Le schéma doit donc les accepter comme
+    # absents, sinon la sérialisation de la réponse échoue en ValidationError.
+    delivery_days: int | None = None
     delivery_cost: float = 0.0
-    warranty_months: int = 24
+    warranty_months: int | None = None
     in_stock: bool = True
     affiliate_network: str | None = None
 
