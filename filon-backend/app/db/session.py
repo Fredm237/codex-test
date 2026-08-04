@@ -70,6 +70,13 @@ async def _migrate() -> None:
     suivantes échouent en cascade et le commit final lève à son tour. Attraper
     l'exception ne suffit donc pas — il faut l'isoler, sans quoi une migration
     bénigne empêche l'application de démarrer.
+
+    Chaque instruction est en outre bornée par un `lock_timeout`. Une migration
+    qui réclame un verrou déjà tenu doit renoncer et laisser démarrer
+    l'application : ce code tourne au démarrage, et `price_snapshots` comme
+    `offers` sont lues en permanence par l'ingestion. Sans cette borne, un
+    redémarrage pendant un cycle d'ingestion attend le verrou indéfiniment, le
+    healthcheck expire, et le déploiement échoue en boucle.
     """
     if _engine is None or _engine.dialect.name != "postgresql":
         return
@@ -89,6 +96,59 @@ async def _migrate() -> None:
         "CREATE INDEX IF NOT EXISTS ix_offers_is_canonical ON offers (is_canonical)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS is_adult BOOLEAN DEFAULT FALSE",
         "CREATE INDEX IF NOT EXISTS ix_offers_is_adult ON offers (is_adult)",
+        # Mémorise le prix qui précède chaque écriture, pour n'ajouter un relevé
+        # d'historique que lorsque le prix bouge (voir awin_catalog._upsert_offer).
+        "ALTER TABLE offers ADD COLUMN IF NOT EXISTS previous_price DOUBLE PRECISION",
+        # Garde-fou en base. L'écriture conditionnelle vit dans l'ingestion, mais
+        # un script d'appoint, un rattrapage ou un futur chemin d'écriture peuvent
+        # l'ignorer — c'est ainsi que 2,4 millions de lignes quotidiennes se sont
+        # accumulées sans que personne ne le remarque. Le trigger rend la règle
+        # inviolable quel que soit l'appelant, et reste sans effet lorsque
+        # l'application fait déjà le tri.
+        """
+        CREATE OR REPLACE FUNCTION filon_skip_unchanged_snapshot()
+        RETURNS TRIGGER AS $$
+        DECLARE
+            dernier DOUBLE PRECISION;
+        BEGIN
+            SELECT price INTO dernier
+            FROM price_snapshots
+            WHERE offer_id = NEW.offer_id
+            ORDER BY captured_at DESC, id DESC
+            LIMIT 1;
+            -- Premier relèvement de cette offre : l'historique doit avoir une
+            -- origine, on laisse passer.
+            IF dernier IS NULL THEN
+                RETURN NEW;
+            END IF;
+            -- Moins d'un demi-centime d'écart : les prix sont en flottant, et ce
+            -- bruit ne représente aucune variation commerciale.
+            IF abs(dernier - NEW.price) < 0.005 THEN
+                RETURN NULL;
+            END IF;
+            RETURN NEW;
+        END;
+        $$ LANGUAGE plpgsql
+        """,
+        # Création conditionnelle, sans `DROP TRIGGER` préalable. `DROP TRIGGER`
+        # exige un ACCESS EXCLUSIVE sur price_snapshots, qu'une simple lecture
+        # encore ouverte suffit à bloquer ; au démarrage, cela suspend
+        # l'application. Mettre à jour la fonction suffit d'ailleurs à changer le
+        # comportement, le trigger la désignant par son nom.
+        """
+        DO $$
+        BEGIN
+            IF NOT EXISTS (
+                SELECT 1 FROM pg_trigger
+                WHERE tgname = 'trg_skip_unchanged_snapshot'
+                  AND tgrelid = 'price_snapshots'::regclass
+            ) THEN
+                CREATE TRIGGER trg_skip_unchanged_snapshot
+                BEFORE INSERT ON price_snapshots
+                FOR EACH ROW EXECUTE FUNCTION filon_skip_unchanged_snapshot();
+            END IF;
+        END $$
+        """,
         # Index trigramme : sans lui, une recherche par sous-chaîne impose un
         # parcours complet des 795 000 lignes. L'extension peut être refusée
         # selon les droits — la migration le tolère et trace un avertissement.
@@ -102,10 +162,13 @@ async def _migrate() -> None:
         try:
             async with _engine.connect() as conn:
                 await conn.execution_options(isolation_level="AUTOCOMMIT")
+                # Renoncer vite plutôt que bloquer le démarrage : la migration
+                # sera retentée au redémarrage suivant.
+                await conn.execute(text("SET lock_timeout = '5s'"))
                 await conn.execute(text(sql))
         except Exception as exc:  # pragma: no cover - dépend de l'état réel
             # Une migration qui échoue ne doit jamais empêcher le démarrage.
-            log.warning("Migration ignorée (%s…) : %s", sql[:40], exc)
+            log.warning("Migration ignorée (%s…) : %s", " ".join(sql.split())[:60], exc)
 
 
 async def create_all() -> None:

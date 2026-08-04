@@ -24,6 +24,7 @@ import re
 from dataclasses import dataclass
 
 import httpx
+from sqlalchemy import insert as sa_insert
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
@@ -102,6 +103,31 @@ def _to_bool(value: str | None) -> bool | None:
     if value is None or value == "":
         return None
     return value.strip().lower() in {"1", "true", "yes", "y", "in stock", "instock"}
+
+
+# Seuil de variation en dessous duquel deux prix sont tenus pour identiques.
+# Les prix sont stockés en Float : deux écritures du même 19,99 peuvent différer
+# du dernier bit, ce qui suffirait à recréer l'hémorragie qu'on corrige. Un demi
+# centime est en dessous de toute variation commercialement significative.
+_PRICE_EPSILON = 0.005
+
+
+def _price_changed(previous: float | None, current: float | None) -> bool:
+    """Le prix a-t-il réellement bougé depuis le dernier relevé ?
+
+    Détermine si un `price_snapshots` doit être écrit. L'insertion était
+    inconditionnelle, ce qui produisait 2 413 308 lignes par jour pour 5 447
+    changements de prix effectifs : 99,8 % des écritures ne portaient aucune
+    information, pour environ 65 Go par an.
+
+    Un `previous` à NULL vaut changement : c'est le premier prix connu de
+    l'offre, et l'historique doit avoir une origine.
+    """
+    if current is None:
+        return False
+    if previous is None:
+        return True
+    return abs(previous - current) >= _PRICE_EPSILON
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -314,6 +340,18 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
         "image_url": (row.get("merchant_image_url") or "").strip() or None,
         "deep_link": (row.get("aw_deep_link") or "").strip() or None,
     }
+    updated = {
+        k: values[k]
+        for k in (
+            "name", "brand", "category", "price", "currency", "in_stock",
+            "image_url", "deep_link", "ean", "is_adult",
+        )
+    }
+    # Dans la clause SET d'un ON CONFLICT, `offers.price` désigne encore la valeur
+    # *avant* écriture : c'est le seul endroit où l'ancien prix reste lisible.
+    # Vérifié sur PostgreSQL 16 ; `excluded` est par ailleurs interdit en
+    # RETURNING, ce qui exclut de comparer après coup.
+    updated["previous_price"] = models.Offer.price
     stmt = (
         pg_insert(models.Offer)
         .values(**values)
@@ -322,14 +360,31 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
             # `is_adult` fait partie de la mise à jour : un marchand qui renomme
             # une référence ne doit pas conserver un drapeau devenu faux, ni le
             # perdre quand il le devient.
-            set_={k: values[k] for k in ("name", "brand", "category", "price", "currency", "in_stock", "image_url", "deep_link", "ean", "is_adult")},
+            set_=updated,
         )
-        .returning(models.Offer.id)
+        .returning(models.Offer.id, models.Offer.previous_price)
     )
-    result = await session.execute(stmt)
-    offer_id = result.scalar_one_or_none()
-    if offer_id is not None and price is not None:
-        session.add(models.PriceSnapshot(offer_id=offer_id, price=price, in_stock=in_stock))
+    result = (await session.execute(stmt)).first()
+    if result is None:
+        return
+    offer_id, previous_price = result[0], result[1]
+    # Un relevé n'est écrit que si le prix a effectivement changé. L'insertion
+    # était inconditionnelle : 2 413 308 lignes par jour pour 5 447 changements
+    # réels, soit 99,8 % de déchet et environ 65 Go par an sur une base hébergée.
+    # Le premier prix connu d'une offre est toujours conservé (previous_price est
+    # NULL à l'insertion), sans quoi l'historique n'aurait pas d'origine.
+    if offer_id is not None and price is not None and _price_changed(previous_price, price):
+        # INSERT Core, et non `session.add()`. Un trigger BEFORE INSERT protège la
+        # table contre les doublons écrits par d'autres chemins ; quand il écarte
+        # une ligne, aucun identifiant n'est renvoyé. L'ORM y voit une anomalie et
+        # lève `FlushError: did not produce a new primary key result`, ce qui
+        # ferait échouer tout le cycle d'ingestion. Constaté sur PostgreSQL 16 ;
+        # invisible en test SQLite, faute de trigger. Core tolère zéro ligne.
+        await session.execute(
+            sa_insert(models.PriceSnapshot).values(
+                offer_id=offer_id, price=price, in_stock=in_stock
+            )
+        )
 
 
 async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:

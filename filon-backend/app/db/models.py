@@ -176,6 +176,13 @@ class Offer(Base):
     # pour que le filtre soit un simple index sur 795 000 lignes.
     is_adult: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     price: Mapped[float | None] = mapped_column(Float, nullable=True)
+    # Prix relevé juste avant la dernière écriture, alimenté par l'ingestion dans
+    # le `SET` du `ON CONFLICT` (où `offers.price` désigne encore l'ancienne
+    # valeur). Sert à n'écrire un `price_snapshots` que lorsque le prix bouge
+    # réellement : l'insertion était inconditionnelle et produisait 2 413 308
+    # lignes par jour pour 5 447 changements effectifs, soit 99,8 % d'écritures
+    # inutiles et environ 65 Go par an. Voir app/services/awin_catalog.py.
+    previous_price: Mapped[float | None] = mapped_column(Float, nullable=True)
     currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     image_url: Mapped[str | None] = mapped_column(Text, nullable=True)
