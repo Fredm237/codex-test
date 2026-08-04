@@ -147,7 +147,13 @@ _OBJET_FINI = re.compile(
     r"serviettes?|coussins?|plaids?|couvertures?|chemises?|chemisiers?|robes?|"
     r"pantalons?|jupes?|vestes?|manteaux?|pulls?|blouses?|tuniques?|"
     r"combinaisons?|tabliers?|torchons?|peignoirs?|pyjamas?|gigoteuses?|"
-    r"[ée]charpes?|bonnets?|gants?|sacs?\s+[àa]\s+main|matelas|oreillers?)\b",
+    r"[ée]charpes?|bonnets?|gants?|sacs?\s+[àa]\s+main|matelas|oreillers?|"
+    # Néerlandais : « Zomerslaapzak Jersey » est une gigoteuse en jersey, pas
+    # un coupon de jersey. Sans ces noms d'objet fini, le support gagnait et
+    # l'article partait en Loisirs créatifs.
+    r"slaapzakken?|zomerslaapzak|winterslaapzak|dekbedovertrekken?|"
+    r"dekbedovertrek|hoeslakens?|kussenslopen?|kussensloop|handdoeken?|"
+    r"badjassen?|badjas|rompers?|rompertjes?)\b",
     re.IGNORECASE,
 )
 
@@ -197,11 +203,21 @@ _SUPPORTS: list[tuple[str, str]] = [
 _RULES: list[tuple[str, str]] = [
     (BEBE, r"\b(b[ée]b[ée]s?|baby|babys|poussettes?|stroller|couches?|luiers?|biberons?|"
            r"puericulture|puéricultur|bavoirs?|slabbetjes?|mother\s*&\s*kids|tricycles?|"
-           r"draagzak|maternit[ée])\b"),
+           r"draagzak|maternit[ée]|kinderstoel|kinderwagen|babyfoon|wieg|wiegjes?|"
+           r"slaapzakken?|zomerslaapzak|winterslaapzak|gigoteuses?|"
+           r"si[èe]ges? auto|chaises? hautes?|tables? [àa] langer|st[ée]rilisateurs?)\b"),
     (ANIMALERIE, r"\b(chiens?|chats?|dogs?|cats?|hond|kat|hondenvoer|kattenvoer|animal|"
-                 r"animalerie|croquettes?|aquarium|liti[èe]re|dierenvoeding)\b"),
+                 r"animalerie|croquettes?|aquarium|liti[èe]re|dierenvoeding|"
+                 r"chiots?|puppy|puppies|chatons?|kittens?|niches?\s+pour|"
+                 r"paniers?\s+pour\s+(?:chien|chat)|laisses?|colliers?\s+pour\s+(?:chien|chat))\b"),
     (AUTO, r"\b(pneus?|tyres?|banden|wheels?|jantes?|voitures?|autos?|automotive|motos?|"
-           r"scooters?|v[ée]hicules?|car\s?parts?|huile moteur|car\b|autoteile)\b"),
+           r"scooters?|v[ée]hicules?|car\s?parts?|huile moteur|car\b|autoteile|"
+           r"zomerbanden?|winterbanden?|allseasonbanden?|vierseizoenenbanden?|"
+           r"pneus? (?:[ée]t[ée]|hiver|4 saisons))\b"),
+    # Dimension de pneu : « 225/60 R17 99H ». C'est le signal le plus fiable du
+    # catalogue, et il ne peut désigner rien d'autre. Il rattrape les références
+    # dont le nom ne dit que la gamme (« Sport Maxx Race 2 »).
+    (AUTO, r"\b\d{3}/\d{2}\s*(?:z)?r\s?\d{2}\b"),
     (TELEPHONIE, r"\b(smartphones?|t[ée]l[ée]phones?|iphone|samsung galaxy|mobiles?|gsm|"
                  r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|cellphones?|"
                  r"telecommunications?)\b"),
@@ -219,6 +235,14 @@ _RULES: list[tuple[str, str]] = [
     (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
                    r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|usb|"
                    r"tablettes?|software)\b"),
+    # Stations d'alimentation et batteries nomades : famille absente de toute
+    # règle jusqu'ici. « Station d'alimentation » exige un contexte électrique :
+    # sans cela on capturait « Station d'alimentation pour oiseaux », qui est un
+    # distributeur de graines de jardin.
+    (INFORMATIQUE, r"\b(powerstations?|power\s+stations?|groupes? [ée]lectrog[èe]nes?|"
+                   r"batteries? nomades?|onduleurs?)\b"),
+    (INFORMATIQUE, r"\bstations? d'alimentation\b(?=.*\b(?:portables?|solaires?|"
+                   r"[ée]lectriques?|batteries?|\d+\s*wh|\d+\s*w\b))"),
     (PHOTO, r"\b(appareils? photo|cameras?|caméras?|objectifs?|reflex|drones?|gopro|"
             r"tr[ée]pieds?|photographie)\b"),
     (TV_SON, r"\b(t[ée]l[ée]viseurs?|\btv\b|home cinema|barres? de son|soundbars?|enceintes?|"
@@ -227,16 +251,72 @@ _RULES: list[tuple[str, str]] = [
                      r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|"
                      r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
                      r"huishoudelijke|ventilateurs?|vacuum cleaners?|wassen, strijken)\b"),
+    # « crème » n'y figure plus comme mot nu : en néerlandais c'est une teinte,
+    # et le rayon affichait un salon de jardin « Bruin Crème », un paravent
+    # « Uitschuifbaar – Crème » et une applique murale « wandlamp – crème ».
+    # Constaté en production. Seules les crèmes qualifiées classent désormais.
     (BEAUTE, r"\b(parfums?|eaux? de parfum|eaux? de toilette|fragrances?|maquillage|make\s?up|"
-             r"cosm[ée]tiques?|cosmetics?|beauty|cr[èe]mes?|s[ée]rums?|shampooings?|shampoo|"
+             r"cosm[ée]tiques?|cosmetics?|beauty|s[ée]rums?|shampooings?|shampoo|"
              r"conditioner|soins? visage|skincare|haircare|hair care|haarverzorging|"
              r"verzorgingsproducten|gezicht|huidverzorging|toner|lipstick|eyeliner|nails?|"
              r"ongles?|perruques?|wigs?|hair extensions?|vernis)\b"),
+    # Les crèmes qualifiées, elles, sont bien des soins. Le qualificatif peut
+    # précéder (handcrème) ou suivre (crème hydratante) le mot.
+    (BEAUTE, r"\bcr[èe]mes?\s+(?:hydratantes?|nourrissantes?|solaires?|de\s+jour|"
+             r"de\s+nuit|anti[-\s]?[âa]ge|amincissantes?|d[ée]pilatoires?|lavantes?|"
+             r"pour\s+les\s+mains|mains|corps|visage|contour\s+des\s+yeux)\b"),
+    (BEAUTE, r"\b(?:hand|dag|nacht|body|zonne|oog|gezichts)cr[èe]mes?\b"),
+    (BEAUTE, r"\bcr[èe]me\s+(?:soft|douche|de\s+douche)\b"),
+    # Signaux échappés à la première passe : huiles de massage et parapharmacie.
+    (BEAUTE, r"\b(?:huiles? de massage|massageolie|massage oils?|parapharmacie|"
+             r"gommages?|scrubs?|d[ée]odorants?|deodorants?|savons?|zeep)\b"),
+    # Pendules et horloges d'intérieur : placées AVANT Bijoux pour l'emporter sur
+    # le « horloge » générique, qui désigne une montre chez les marchands belges.
+    (MAISON, r"\bhorloges?\s+(?:murales?|de\s+parquet|comtoises?|à\s+coucou|de\s+table|"
+             r"de\s+cuisine|d[ée]coratives?)\b"),
+    (MAISON, r"\b(?:wandklokken?|wandklok|staande\s+klok|koekoeksklok)\b"),
+    # Vaisselle et arts de la table : « tableware » et « eetset » manquaient, si
+    # bien qu'un service de table « / Crème » n'était rangé nulle part.
+    (MAISON, r"\b(?:tableware|eetsets?|servies|dinnerware|arts? de la table|"
+             r"couverts?|cutlery|bestek)\b"),
+    # Un luminaire décoré d'un ballon reste un luminaire : même principe que le
+    # support qui l'emporte sur le motif. Placé avant Sport, sinon
+    # « Lampe LED 3D avec impression ballon de football » partait en Sport.
+    (MAISON, r"\b(?:lampes?|veilleuses?|lamps?|nachtlamp(?:jes?)?)\b(?=.*\b(?:led|3d|"
+             r"d[ée]corative?s?|impression|murale?s?)\b)"),
+    # Les pièges photographiques sont vendus avec un kit solaire : la caméra est
+    # le produit, le panneau l'accessoire. Sans cette règle placée avant Jardin,
+    # « panneaux solaires » l'emportait et les envoyait en Jardin & Bricolage.
+    (PHOTO, r"\b(?:pi[èe]ges? photographiques?|cam[ée]ras? de chasse|"
+            r"cam[ée]ras? pour la faune|trail cameras?|wildcameras?)\b"),
     (SANTE, r"\b(compl[ée]ments? alimentaires?|vitamines?|pharmacie|m[ée]dical|orthop[ée]dique|"
             r"tensiom[èe]tre|hygi[èeë]ne|huiles? essentielles?)\b"),
-    (BIJOUX, r"\b(bijoux?|jewelry|jewellery|bagues?|rings?|colliers?|necklaces?|pendants?|"
-             r"bracelets?|boucles? d'oreille|earrings?|montres?|watch(es)?|horloges?|"
-             r"sieraden|ketting)\b"),
+    # « ketting » et « pendant » sont retirés comme mots nus : en néerlandais
+    # « kettingzaag » est une tronçonneuse et « fietsketting » une chaîne de vélo ;
+    # en anglais « pendant lamp » est une suspension. Tous deux peuplaient le
+    # rayon Bijoux & Montres en production.
+    #
+    # « horloge », en revanche, est CONSERVÉ ici. En Belgique francophone le mot
+    # désigne commercialement une montre-bracelet : les flux marchands listent
+    # « MIDO Ocean Star GMT Horloge » ou « Tissot PRC 100 Solar Horloge » en
+    # catégorie « Watch ». Le retirer déplaçait 57 vraies montres vers Maison &
+    # Déco sur un simple échantillon. Les pendules murales sont captées en amont
+    # par une règle dédiée (« horloge murale », « wandklok »).
+    (BIJOUX, r"\b(bijoux?|jewelry|jewellery|bagues?|rings?|colliers?|necklaces?|"
+             r"pendentifs?|bracelets?|boucles? d'oreille|earrings?|montres?|"
+             r"watch(es)?|horloges?|sieraden|halsketting|schakelketting)\b"),
+    (BIJOUX, r"\bpendant\s+(?:necklaces?|charms?|earrings?)\b"),
+    # Bracelets de montre : les flux les listent en catégorie « Strap », avec des
+    # noms comme « Fossil Straps Flynn Sport Horlogeband ». Ils n'étaient rangés
+    # nulle part.
+    (BIJOUX, r"\b(?:horlogeband(?:en)?|bracelets? de montres?|watch straps?|"
+             r"watchbands?)\b"),
+    # Les mêmes bracelets apparaissent aussi en « … Sport band » ou « sport
+    # bandje » sous la catégorie marchande « Strap » / « Smartwatch Strap ».
+    # « band » seul est trop faible (bande de résistance, bandeau) : on exige le
+    # contexte horloger apporté par « strap ».
+    (BIJOUX, r"(?=.*\bstraps?\b)(?=.*\b(?:bandjes?|band|bands|horloge|watch|"
+             r"smartwatch|fitbit|garmin)\b)"),
     (CHAUSSURES, r"\b(chaussures?|shoes?|baskets?|sneakers?|bottes?|boots?|escarpins?|heels?|"
                  r"mules?|sandales?|sandals?|schoenen|mocassins?|semelles?|insoles?|"
                  r"pantoufles?|slippers?)\b"),
@@ -246,11 +326,43 @@ _RULES: list[tuple[str, str]] = [
     (ACCESSOIRES, r"\b(accessoires?|accessories|lunettes? de soleil|sunglasses|ceintures?|"
                   r"belts?|[ée]charpes?|scarf|scarves|chapeaux?|hats?|casquettes?|caps?|"
                   r"gants?|gloves|bonnets?|cravates?|ties?|riemen)\b"),
-    (SPORT, r"\b(sports?|deportivo|deporte|sportartikelen|fitness|musculation|yoga|jogging|"
-            r"v[ée]los?|cyclisme|running|randonn[ée]e|camping|ski|natation|fietsen|"
+    # « sport » seul ne classe plus : c'est un adjectif de gamme omniprésent dans
+    # les noms commerciaux. « Potenza Sport » et « Cross Sport SP-9 » sont des
+    # pneus Bridgestone, rangés en Sport & Loisirs en production. Un contexte
+    # sportif explicite est désormais exigé, comme pour « souris ».
+    (SPORT, r"\b(?:v[êée]tements?|chaussures?|maillots?|shorts?|brassi[èe]res?|sacs?|"
+            r"[ée]quipements?|accessoires?|articles?|mat[ée]riels?|salles?|tenues?|"
+            r"soutiens?[-\s]gorges?)\s+(?:de\s+)?sport\b"),
+    (SPORT, r"\b(sportswear|sportartikelen|sportkleding|deportivo|deporte|"
             r"[ée]quipements? sportifs?)\b"),
+    (SPORT, r"\b(fitness|musculation|halt[èe]res?|yoga|pilates|jogging|v[ée]los?|"
+            r"cyclisme|running|course [àa] pied|randonn[ée]e|camping|ski|snowboard|"
+            r"natation|fietsen|football|basket-?ball|handball|rugby|volley|tennis|"
+            r"golf|boxe|escalade|kayak|p[ée]che|piscines?|spas? gonflables?|"
+            r"zwembaden?)\b"),
+    # « Surf » exige un contexte : c'est aussi une marque de lessive Unilever, dont
+    # les références (« Surf Wasmiddel Berry Bliss ») atterrissaient en Sport.
+    (SPORT, r"\b(?:planches? de surf|surfboards?|surfen|kitesurf|windsurf|"
+            r"surf\s+(?:shop|camp|wax|leash)|combinaisons? de surf)\b"),
+    # Angles morts constatés : ces familles n'étaient reconnues par aucune règle,
+    # ce qui contribuait aux 20,3 % d'offres non rangées.
+    (SPORT, r"\b(trottinettes?|steps?\s+elektrisch|elektrische\s+steps?|"
+            r"gyroroues?|hoverboards?|monowheels?)\b"),
+    # Plongée, snorkeling et masques de ski : familles absentes de toute règle,
+    # ces masques n'étaient rangés nulle part.
+    (SPORT, r"\b(?:plong[ée]e|diving|snorkel(?:ing|s)?|duiken|duikmaskers?|"
+            r"masques? de plong[ée]e|tubas?|palmes?|apn[ée]e|skibrillen?|"
+            r"snow(?:board)?\s+goggles?|ski\s+goggles?|masques? de ski)\b"),
+    # Articles de baignade gonflables : « floating chair », « bouée », « luchtbed ».
+    # Ces fauteuils flottants n'étaient rangés nulle part.
+    (SPORT, r"\b(?:bou[ée]es?|zwembanden?|luchtbedden?|luchtbed|matelas gonflables?|"
+            r"floating\s+(?:chairs?|loungers?|mats?)|pool\s+(?:floats?|loungers?)|"
+            r"inflatable\s+(?:pool|lounge|float|floating)|brassards? de natation)\b"),
     (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
-             r"tuingereedschap|gereedschap|parquet|peinture murale|garden tools?)\b"),
+             r"tuingereedschap|gereedschap|parquet|peinture murale|garden tools?|"
+             r"tron[çc]onneuses?|kettingzagen?|kettingzaag|panneaux? solaires?|"
+             r"zonnepane(?:el|len)|barbecues?|salons? de jardin|tuinsets?|"
+             r"tuinschermen?|tuinscherm|polyrattan)\b"),
     # « tissus » est retiré de cette règle : il désigne la mercerie, traitée
     # plus haut par les supports. Le laisser ici renvoyait tous les coupons au
     # rayon Maison. Le linge de maison, lui, manquait entièrement.
@@ -259,7 +371,11 @@ _RULES: list[tuple[str, str]] = [
              r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
              r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
              r"cuisine|meubel|verlichting|schoonmaak|nettoyage|serviettes?|textile|"
-             r"home\s*&\s*garden|huishouden)\b"),
+             r"home\s*&\s*garden|huishouden|wandklokken?|wandklok|pendules?|"
+             r"wandlampen?|wandlamp|appliques?|suspensions?|dekbedovertrekken?|"
+             r"dekbedovertrek|hoeslakens?|kussenslopen?|kussensloop|handdoeken?|"
+             r"paravents?|tuinkussens?)\b"),
+    (MAISON, r"\bpendant\s+(?:lamps?|lights?|lighting)\b"),
     (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
              r"toys?)\b"),
     # « couture » est écarté : en français il désigne aussi une piqûre de
@@ -272,13 +388,43 @@ _RULES: list[tuple[str, str]] = [
 ]
 
 
+# Usage sportif explicite : il tranche avant le public.
+#
+# Un maillot de football reste un article de sport, qu'il soit taillé pour homme,
+# femme ou enfant. Ne figurent ici que des termes qui désignent la pratique
+# elle-même, jamais une simple coupe : « sportif » ou « sport » nus en sont
+# absents, sans quoi tout survêtement de ville y passerait.
+_USAGE_SPORTIF = (
+    r"\b(football|voetbal|basket-?ball|handball|rugby|volley(?:-?ball)?|tennis|"
+    r"natation|swimming|zwemmen|cyclisme|v[ée]lo|wielrennen|running|jogging|"
+    r"trail|marathon|fitness|musculation|yoga|pilates|ski|snowboard|escalade|"
+    r"randonn[ée]e|trekking|boxe|judo|karat[ée]|athl[ée]tisme|gymnastique|"
+    r"[ée]quitation|golf|hockey|badminton|padel|kayak|aviron|"
+    r"maillots? de bain|zwembroek|badpak)\b"
+    # « surf » n'est pas repris nu ici non plus : marque de lessive.
+    r"|\b(?:planches? de surf|surfboards?|kitesurf|windsurf|surfen)\b"
+    # « vêtements de sport », « tenue de sport » : le mot « sport » n'y est plus
+    # nu, il est qualifié par le nom qu'il complète. On l'accepte donc ici.
+    # Attention : la classe [ée] ne couvre pas « ê ». « Vêtements » s'écrit avec
+    # un circonflexe (U+00EA) et échappait donc à ce motif.
+    r"|\b(?:v[êée]tements?|tenues?|habits?|maillots?|brassi[èe]res?|shorts?|"
+    r"leggings?|surv[êée]tements?|soutiens?[-\s]gorges?|chaussettes?|"
+    r"sacs?|[ée]quipements?|articles?)\s+(?:de\s+)?sport\b"
+    r"|\b(?:sportkleding|sportswear|sporttenues?|multisports?|sportartikelen)\b"
+)
+
+
 # Vêtements : le rayon dépend du public, déterminé plus haut.
 _VETEMENT = (
     r"\b(v[êe]tements?|clothing|kleding|apparel|robes?|dress(es)?|jupes?|pantalons?|"
     r"trousers?|jeans?|chemises?|shirts?|t-shirts?|tops?|pulls?|sweats?|sweaters?|hoodies?|"
     r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|lingerie|underwear|"
     r"sleepwears?|pyjamas?|maillots?|chaussettes?|socks?|polos?|overhemd|broek|jas|blazers?|"
-    r"combinaisons?|jumpsuits?|nachtkleding|ondergoed)\b"
+    r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|"
+    # « Débardeur Proact Sport », catégorisé « Multisports > Débardeur », n'était
+    # rangé nulle part : le mot manquait à la liste, donc la branche vêtement
+    # n'était jamais atteinte et l'usage sportif ne pouvait pas s'exprimer.
+    r"d[ée]bardeurs?|tank\s?tops?|sweatshirts?|hemdjes?|singlets?)\b"
 )
 
 
@@ -568,6 +714,16 @@ def classify(
         if support:
             return support
 
+    # Un signal peut n'exister qu'en croisant les deux sources. Les flux
+    # horlogers listent « Calvin Klein 459300030 Gauge Sport band » sous la
+    # catégorie « Strap » : ni le nom ni la catégorie ne suffisent seuls, mais
+    # ensemble ils désignent sans ambiguïté un bracelet de montre. Sans ce
+    # croisement, ces références partaient en Sport ou nulle part.
+    if _has(r"\bstraps?\b", merchant_category) and _has(
+        r"\b(?:bandjes?|bands?|horlogeband(?:en)?|watch|horloge)\b", name
+    ):
+        return BIJOUX
+
     # Le nom d'abord, la catégorie du marchand ensuite : l'ordre porte la règle.
     for text in (name, merchant_category):
         if not text:
@@ -577,6 +733,14 @@ def classify(
         # sources avant de trancher.
         if _has(_VETEMENT, text):
             other = merchant_category if text is name else name
+            # Mais l'usage l'emporte sur le public quand il est explicite : un
+            # maillot de football est un article de sport, pas de la mode homme.
+            # Le libellé « Maillot arbitre Macron », catégorisé
+            # « Football > Maillot > Adulte > Homme », partait en Mode homme —
+            # le genre était tranché avant qu'on regarde le sport.
+            for source in (text, other):
+                if source and _has(_USAGE_SPORTIF, source):
+                    return SPORT
             for source in (text, other):
                 if not source:
                     continue
