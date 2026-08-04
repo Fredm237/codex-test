@@ -1097,34 +1097,54 @@
   background: none; border: 0; padding: 0; font: inherit; color: inherit; }
 .mm-trigger svg { transition: transform 0.25s var(--ease-out); opacity: 0.6; }
 .mm-trigger.open svg { transform: rotate(180deg); }
+.mm-trigger:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; border-radius: 4px; }
 
+/* Positionnement : ancré à gauche du déclencheur, puis recadré par `--mm-shift`
+   que le composant calcule d'après la fenêtre réelle. Le panneau était
+   auparavant centré sur le déclencheur (`left: 50%`), donc amputé à gauche dès
+   que la fenêtre se resserrait — cas courant sur un portable en écran partagé.
+
+   `max-height` + défilement : avec 36 lignes dans la colonne « Mode », le
+   panneau dépassait le bas de l'écran et ses derniers rayons étaient hors
+   d'atteinte. Le plafond retenu d'abord (620 px) était toutefois trop bas :
+   sur une fenêtre haute de 1 100 px il imposait un défilement alors que
+   1 004 px étaient libres. On suit donc la hauteur réelle disponible, avec un
+   maximum au-delà duquel le panneau deviendrait un mur de liens. */
 .mm-panel {
-  position: absolute; top: calc(100% + 16px); left: 50%; transform: translate(-50%, -6px);
-  width: min(920px, calc(100vw - 40px));
+  --mm-shift: 0px;
+  position: absolute; top: calc(100% + 14px); left: 0;
+  transform: translate(var(--mm-shift), -6px);
+  width: min(940px, calc(100vw - 32px));
+  max-height: min(calc(100vh - 120px), 780px); overflow-y: auto; overscroll-behavior: contain;
   background: var(--paper); border: 1px solid var(--line-2); border-radius: 18px;
   box-shadow: 0 30px 70px -30px rgba(0,0,0,0.32);
-  padding: 26px 28px 20px; z-index: 60;
-  opacity: 0; visibility: hidden; pointer-events: none;
-  transition: opacity 0.2s, transform 0.24s var(--ease-out), visibility 0.2s;
+  padding: 24px 26px 18px; z-index: 60;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.18s, transform 0.22s var(--ease-out);
 }
-.mm-panel.show { opacity: 1; visibility: visible; pointer-events: auto; transform: translate(-50%, 0); }
-/* Pont invisible : le curseur traverse le vide sans refermer le menu. */
-.mm-panel::before { content: ""; position: absolute; top: -18px; left: 0; right: 0; height: 18px; }
+.mm-panel.show { opacity: 1; pointer-events: auto; transform: translate(var(--mm-shift), 0); }
+/* `hidden` est posé par le composant : le panneau fermé sort de l'ordre de
+   tabulation et du lecteur d'écran, ce que `visibility` seule ne garantit pas. */
+.mm-panel[hidden] { display: none; }
 
-.mm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px 30px; }
-@media (max-width: 780px) { .mm-grid { grid-template-columns: repeat(2, 1fr); } }
+.mm-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 26px 30px; }
+
+.mm-dept + .mm-dept { margin-top: 22px; }
 
 .mm-dep { display: block; font-family: var(--sans); font-size: 11px; font-weight: 700;
-  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); margin-bottom: 9px; }
+  letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink);
+  margin-bottom: 9px; text-decoration: none; }
 .mm-dep em { display: block; font-style: normal; font-size: 10.5px; font-weight: 500;
   letter-spacing: 0.02em; text-transform: none; color: var(--ink-3); margin-top: 2px; }
+.mm-dep:hover { color: var(--accent); }
 
-.mm-col ul { list-style: none; display: flex; flex-direction: column; gap: 1px; }
+.mm-col ul { list-style: none; display: flex; flex-direction: column; gap: 1px; margin: 0; padding: 0; }
 .mm-col a { display: flex; align-items: baseline; justify-content: space-between; gap: 10px;
   font-size: 13.5px; color: var(--ink-2); text-decoration: none;
   padding: 5px 8px; margin-left: -8px; border-radius: 8px;
   transition: background 0.18s, color 0.18s; }
 .mm-col a:hover { background: var(--paper-2); color: var(--ink); }
+.mm-col a:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; background: var(--paper-2); }
 .mm-col a span { font-size: 11.5px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 
 .mm-all { display: inline-block; margin-top: 20px; padding-top: 16px;
@@ -1135,8 +1155,19 @@
 @media (prefers-reduced-motion: reduce) {
   .mm-panel, .mm-trigger svg { transition: none; }
 }
-/* Le méga-menu est une affaire de survol : sur mobile, le menu plein écran prend le relais. */
-@media (max-width: 900px) { .mm-panel { display: none; } }
+
+/* Écrans intermédiaires — portable en fenêtre partagée, tablette, zoom à 125 %.
+   Le panneau était ici purement `display: none` alors que le chevron restait
+   visible et pivotait : le menu paraissait cassé. Il se resserre désormais en
+   deux colonnes, puis une, plutôt que de disparaître. */
+@media (max-width: 900px) {
+  .mm-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .mm-panel { width: min(680px, calc(100vw - 24px)); padding: 20px 20px 16px; }
+}
+@media (max-width: 620px) {
+  .mm-grid { grid-template-columns: minmax(0, 1fr); }
+  .mm-panel { max-height: min(calc(100vh - 96px), 560px); }
+}
 
 /* Troisième niveau dans le méga-menu */
 .mm-sub { margin: 1px 0 7px 8px; display: flex; flex-direction: column; gap: 0; }

@@ -9,14 +9,23 @@ import { MotionProvider } from "@/components/filon/MotionProvider";
 import { PageTransition } from "@/components/filon/PageTransition";
 import { ScrollToTop } from "@/components/filon/ScrollToTop";
 import { LocaleProvider } from "@/lib/i18n";
+import { getDepartments } from "@/lib/catalogue";
 
 // Editorial (SmartWave) chrome for the whole marketing site.
-export default function SiteLayout({ children }: { children: React.ReactNode }) {
+//
+// La taxonomie du méga-menu est lue ici, côté serveur, avec la même fonction que
+// les pages rayon (cache d'une heure). Le menu la récupérait auparavant par un
+// appel depuis le navigateur, sans revalidation : il dépendait du réseau du
+// visiteur, n'était pas dans le HTML servi, et disparaissait sans un mot quand
+// l'appel échouait.
+export default async function SiteLayout({ children }: { children: React.ReactNode }) {
+  const departments = await getDepartments();
+
   return (
     <LocaleProvider>
       <MotionProvider>
         <SmoothScroll />
-        <EditorialNav />
+        <EditorialNav departments={departments} />
         <main id="top">
           <PageTransition>{children}</PageTransition>
         </main>
