@@ -13,11 +13,15 @@ async def run(state: AdviseState) -> AdviseState:
     enriched = state.setdefault("enriched", {})
     for product in state.get("candidates", []):
         pid = product["product_id"]
+        # Les flux marchands (Awin) ne portent ni note ni nombre d'avis : les
+        # champs valent None. Le schéma ReviewSummary attend des non-nuls et le
+        # tri de l'agent décision inverse le signe de la note, donc on normalise
+        # ici plutôt que de laisser un None se propager dans le graphe.
         enriched[pid]["reviews"] = {
-            "count": product.get("reviews_count", 0),
-            "rating": product.get("rating", 0.0),
-            "pros": product.get("pros", []),
-            "cons": product.get("cons", []),
+            "count": product.get("reviews_count") or 0,
+            "rating": product.get("rating") or 0.0,
+            "pros": product.get("pros") or [],
+            "cons": product.get("cons") or [],
         }
     state.setdefault("trace", []).append("reviews: synthèses générées")
     return state
