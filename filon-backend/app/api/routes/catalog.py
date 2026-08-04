@@ -177,8 +177,17 @@ async def offers(
 ) -> dict:
     if session is None:
         return {"total": 0, "items": []}
-    stmt = select(models.Offer, models.Merchant).join(
-        models.Merchant, models.Offer.merchant_id == models.Merchant.id
+    # Jointure externe sur le produit regroupé : elle n'ajoute aucun filtre (une
+    # offre sans EAN exploitable reste visible) et fournit le seul signal de tri
+    # qui distingue un produit réel d'un accessoire — le nombre de marchands qui
+    # le référencent. Voir app/services/search.order_columns.
+    stmt = (
+        select(models.Offer, models.Merchant)
+        .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+        .outerjoin(
+            models.CatalogProduct,
+            models.Offer.product_id == models.CatalogProduct.id,
+        )
     )
     blocked = _visible_merchant_clause()
     if blocked is not None:
@@ -232,11 +241,16 @@ async def offers(
     if order:
         stmt = stmt.order_by(*order)
     elif q:
-        # « Pertinence » n'avait aucun sens jusqu'ici : l'ordre était celui de
-        # la base. Les résultats les plus probables passent devant.
-        relevance = search.relevance_order(q)
-        if relevance is not None:
-            stmt = stmt.order_by(relevance, models.Offer.price.asc().nullslast())
+        # « Pertinence » : palier textuel, puis départage par la concurrence
+        # marchande. Le départage se faisait par prix croissant, ce qui plaçait
+        # systématiquement les accessoires devant le produit cherché — mesuré en
+        # production, « iphone 16 » rendait quatre protections d'écran à 0,49 €
+        # avant le premier téléphone.
+        columns = search.order_columns(
+            q, merchants_count=models.CatalogProduct.merchants_count
+        )
+        if columns:
+            stmt = stmt.order_by(*columns)
     rows = (await session.execute(stmt.limit(limit).offset(offset))).all()
     return {
         "total": int(total or 0),
