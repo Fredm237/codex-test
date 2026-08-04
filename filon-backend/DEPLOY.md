@@ -21,12 +21,22 @@ backend n'est pas configurée, le site utilise automatiquement le mock local
 3. **Variables** (Settings → Variables) :
 
    ```
+   ENV=production                 # ← indispensable, voir ci-dessous
    LLM_PROVIDER_DEFAULT=deepseek
    LLM_PROVIDER_REASONING=deepseek
    LLM_PROVIDER_LONG=deepseek
    DEEPSEEK_API_KEY=sk-...        # votre clé
    CORS_ORIGINS=["https://filon.be","https://www.filon.be"]
    ```
+
+   **`ENV=production` n'est pas cosmétique.** Sans lui, le service se croit en
+   développement et sert publiquement `/docs` et `/openapi.json`, qui énumèrent
+   les routes d'administration — `purge-offers`, `reset-price-history`,
+   `rebuild-*` — avec leurs paramètres et le nom de l'en-tête d'authentification
+   attendu. Ces routes refusent bien toute requête sans `ADMIN_SYNC_TOKEN`, mais
+   autant ne pas afficher le plan du bâtiment à l'entrée. `ENV=production`
+   restreint aussi `/health`, qui annonçait la version exacte de Python et les
+   messages d'erreur bruts de la base.
 
    (Laisser `DATABASE_URL`, `REDIS_URL`, `QDRANT_URL` vides : non requis pour l'assistant.)
 4. Déployer. Railway fournit une URL publique, ex. `https://filon-backend-production.up.railway.app`.

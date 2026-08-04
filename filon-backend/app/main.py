@@ -46,11 +46,22 @@ async def lifespan(app: FastAPI):
 
 def create_app() -> FastAPI:
     settings = get_settings()
+
+    # Schéma OpenAPI fermé hors développement. Il énumérait publiquement les onze
+    # routes d'administration (`purge-offers`, `reset-price-history`, `rebuild-*`)
+    # ainsi que `debug/feeds`. Chacune exige bien `ADMIN_SYNC_TOKEN` et répond 403
+    # sans lui — vérifié en production — mais publier la carte des opérations
+    # destructrices, leurs paramètres et le nom de l'en-tête attendu offre
+    # gratuitement à un attaquant tout ce qu'il lui faut pour cibler ses essais.
+    docs_publics = not settings.is_production
     app = FastAPI(
         title=settings.app_name,
         version=__version__,
         description="Agent IA d'achat : comprendre le besoin, comparer, décider.",
         lifespan=lifespan,
+        docs_url="/docs" if docs_publics else None,
+        redoc_url="/redoc" if docs_publics else None,
+        openapi_url="/openapi.json" if docs_publics else None,
     )
     # Middlewares — ordre d'exécution : RateLimit → Logging → CORS → Route
     app.add_middleware(RequestLoggingMiddleware)
@@ -71,7 +82,11 @@ def create_app() -> FastAPI:
 
     @app.get("/")
     async def root() -> dict:
-        return {"service": settings.app_name, "version": __version__, "docs": "/docs"}
+        # Ne pas annoncer une documentation qui n'est pas servie.
+        corps = {"service": settings.app_name, "version": __version__}
+        if docs_publics:
+            corps["docs"] = "/docs"
+        return corps
 
     return app
 

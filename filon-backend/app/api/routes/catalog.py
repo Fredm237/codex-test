@@ -6,6 +6,8 @@ Ils dégradent proprement si la base est absente (listes vides).
 
 from __future__ import annotations
 
+from datetime import date, datetime, time
+
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
 from sqlalchemy import String, case, cast, delete, func, or_, select, update
 
@@ -177,8 +179,17 @@ async def offers(
 ) -> dict:
     if session is None:
         return {"total": 0, "items": []}
-    stmt = select(models.Offer, models.Merchant).join(
-        models.Merchant, models.Offer.merchant_id == models.Merchant.id
+    # Jointure externe sur le produit regroupé : elle n'ajoute aucun filtre (une
+    # offre sans EAN exploitable reste visible) et fournit le seul signal de tri
+    # qui distingue un produit réel d'un accessoire — le nombre de marchands qui
+    # le référencent. Voir app/services/search.order_columns.
+    stmt = (
+        select(models.Offer, models.Merchant)
+        .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+        .outerjoin(
+            models.CatalogProduct,
+            models.Offer.product_id == models.CatalogProduct.id,
+        )
     )
     blocked = _visible_merchant_clause()
     if blocked is not None:
@@ -232,11 +243,16 @@ async def offers(
     if order:
         stmt = stmt.order_by(*order)
     elif q:
-        # « Pertinence » n'avait aucun sens jusqu'ici : l'ordre était celui de
-        # la base. Les résultats les plus probables passent devant.
-        relevance = search.relevance_order(q)
-        if relevance is not None:
-            stmt = stmt.order_by(relevance, models.Offer.price.asc().nullslast())
+        # « Pertinence » : palier textuel, puis départage par la concurrence
+        # marchande. Le départage se faisait par prix croissant, ce qui plaçait
+        # systématiquement les accessoires devant le produit cherché — mesuré en
+        # production, « iphone 16 » rendait quatre protections d'écran à 0,49 €
+        # avant le premier téléphone.
+        columns = search.order_columns(
+            q, merchants_count=models.CatalogProduct.merchants_count
+        )
+        if columns:
+            stmt = stmt.order_by(*columns)
     rows = (await session.execute(stmt.limit(limit).offset(offset))).all()
     return {
         "total": int(total or 0),
@@ -794,6 +810,61 @@ async def _grouped_product_summary(session, product_id: int | None) -> dict | No
     }
 
 
+async def _grouped_price_history(
+    session, product_id: int, *, max_points: int = 180
+) -> list[tuple[float, datetime]]:
+    """Historique d'un produit regroupé : le meilleur prix constaté chaque jour.
+
+    Un produit vendu par cinq marchands possède cinq historiques distincts. Les
+    concaténer tels quels donnerait une courbe en dents de scie reflétant
+    l'alternance des marchands, non l'évolution du marché : le verdict y lirait
+    une amplitude spectaculaire et conclurait à tort « mieux vaut attendre ».
+
+    On retient donc le minimum par jour, ce qui correspond exactement au prix
+    affiché sur la fiche (`price_min`) et à la question posée : « ce produit a-t-il
+    déjà été moins cher qu'aujourd'hui ? »
+
+    L'agrégation est faite en base plutôt qu'en Python : un produit populaire
+    suivi un an cumule des milliers de relevés sur l'ensemble de ses offres.
+    """
+    jour = func.date(models.PriceSnapshot.captured_at).label("jour")
+    stmt = (
+        select(func.min(models.PriceSnapshot.price).label("prix"), jour)
+        .join(models.Offer, models.PriceSnapshot.offer_id == models.Offer.id)
+        .where(
+            models.Offer.product_id == product_id,
+            models.PriceSnapshot.price.isnot(None),
+            models.PriceSnapshot.price > 0,
+        )
+        .group_by(jour)
+        .order_by(jour.desc())
+        .limit(max_points)
+    )
+    rows = (await session.execute(stmt)).all()
+
+    points: list[tuple[float, datetime]] = []
+    for prix, jour_valeur in rows:
+        if prix is None or jour_valeur is None:
+            continue
+        # `date()` rend un objet date sous PostgreSQL, une chaîne sous SQLite :
+        # le verdict, lui, calcule une durée et exige des datetime.
+        if isinstance(jour_valeur, datetime):
+            horodatage = jour_valeur
+        elif isinstance(jour_valeur, date):
+            horodatage = datetime.combine(jour_valeur, time.min)
+        else:
+            try:
+                horodatage = datetime.fromisoformat(str(jour_valeur))
+            except ValueError:
+                continue
+        points.append((float(prix), horodatage))
+
+    # Rendu par ordre chronologique : c'est ce qu'attendent le graphique de la
+    # fiche comme le calcul de la durée de suivi.
+    points.reverse()
+    return points
+
+
 @router.get("/products")
 async def products(
     q: str | None = Query(default=None, description="Recherche dans le nom"),
@@ -900,6 +971,14 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
             .order_by(models.Offer.price.asc().nullslast())
         )
     ).all()
+
+    # Historique du produit regroupé : le meilleur prix relevé à chaque instant,
+    # toutes offres confondues. C'est la bonne granularité pour cette fiche, dont
+    # le prix affiché est précisément `price_min` ; prendre les relevés bruts
+    # ferait alterner l'historique entre marchands cher et bon marché et
+    # fabriquerait une volatilité qui n'a jamais existé.
+    hist = await _grouped_price_history(session, product.id)
+
     return {
         "ean": product.ean,
         "name": product.name,
@@ -922,13 +1001,18 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
             }
             for (o, m) in rows
         ],
+        "history": [
+            {"price": p, "at": at.isoformat() if at else None} for (p, at) in hist
+        ],
         # Verdict porté par le meilleur prix du produit : c'est celui que
-        # l'utilisateur retiendra, et l'écart entre marchands le nourrit sans
-        # dépendre de l'historique.
+        # l'utilisateur retiendra. L'historique est celui du produit regroupé,
+        # toutes offres confondues — il était passé vide, ce qui condamnait la
+        # fiche à répondre éternellement « historique trop récent », quelle que
+        # soit la profondeur réellement accumulée.
         "verdict": compute_verdict(
             price=product.price_min,
             currency=product.currency,
-            history=[],
+            history=hist,
             cheapest_elsewhere=None,
             merchants_count=product.merchants_count or 1,
         ),

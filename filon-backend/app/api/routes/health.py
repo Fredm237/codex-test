@@ -100,26 +100,46 @@ async def health() -> dict:
     if db_status["status"] == "error":
         overall = "degraded"
 
-    return {
+    corps: dict = {
         "status": overall,
         "app": s.app_name,
         "version": __version__,
-        "env": s.env,
         "uptime_seconds": round(uptime_seconds),
         "latency_ms": round(latency, 1),
-        "python": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
-        "platform": platform.system(),
-        "dependencies": {
+    }
+
+    if s.is_production:
+        # L'état des dépendances se résume à un mot : de quoi diagnostiquer une
+        # panne sans dresser l'inventaire de l'infrastructure. Cet endpoint est
+        # public et sondé en continu ; il annonçait la version exacte de Python,
+        # le système, les fournisseurs de LLM retenus et le message d'erreur brut
+        # de la base — or une trace SQLAlchemy laisse volontiers filtrer un hôte
+        # ou un nom de base, et un numéro d'interpréteur précis indique les
+        # vulnérabilités connues à tenter.
+        corps["dependencies"] = {
+            "database": db_status["status"],
+            "redis": redis_status["status"],
+            "qdrant": "ok" if vs.enabled else "disabled",
+        }
+    else:
+        corps["env"] = s.env
+        corps["python"] = (
+            f"{sys.version_info.major}.{sys.version_info.minor}."
+            f"{sys.version_info.micro}"
+        )
+        corps["platform"] = platform.system()
+        corps["dependencies"] = {
             "database": db_status,
             "redis": redis_status,
             "qdrant": {"status": "ok" if vs.enabled else "disabled"},
-        },
-        "llm": {
+        }
+        corps["llm"] = {
             "default": s.llm_provider_default,
             "reasoning": s.llm_provider_reasoning,
             "long": s.llm_provider_long,
-        },
-    }
+        }
+
+    return corps
 
 
 @router.get("/health/ready")
