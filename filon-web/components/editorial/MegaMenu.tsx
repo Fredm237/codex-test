@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { API } from "@/lib/api";
 import { useLocale, type Locale } from "@/lib/i18n";
 
@@ -26,24 +26,116 @@ const L: Record<Locale, { label: string; all: string; products: (n: number) => s
   },
 };
 
-/** Méga-menu du catalogue : départements puis rayons.
+/** Nombre de sous-rayons montrés sous un rayon détaillé. */
+const SUBS_SHOWN = 4;
+
+/** Nombre de rayons détaillés par département.
+ *
+ *  Détailler les huit rayons de « Mode & Accessoires » produisait 1 240 px de
+ *  contenu dans un panneau haut de 620 px : la moitié du menu était hors de vue
+ *  et « Famille & Quotidien » exigeait de faire défiler. Un méga-menu oriente,
+ *  il n'énumère pas. On détaille donc les rayons de tête et on laisse les autres
+ *  en accès direct — ils restent à un clic.
+ */
+const DETAILED_PER_DEPT = 3;
+
+/** Les plus gros sous-rayons, pas les premiers venus.
+ *
+ *  L'API renvoie les sous-rayons dans un ordre qui n'est pas celui de leur
+ *  poids. Prendre les quatre premiers écartait « Montres » (18 662 produits) au
+ *  profit de « Boucles d'oreilles » (2 883) : sur les douze rayons qui comptent
+ *  plus de quatre sous-rayons, huit affichaient ainsi les mauvais. Le menu
+ *  doit conduire là où il y a de la marchandise.
+ *
+ *  À nombre de produits égal, l'ordre alphabétique tranche : sans cela, deux
+ *  chargements successifs peuvent inverser deux entrées et le menu paraît
+ *  instable.
+ */
+export function pickSubcategories(subs: Subcategory[] | undefined, limit = SUBS_SHOWN): Subcategory[] {
+  if (!subs || subs.length === 0) return [];
+  return [...subs]
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "fr"))
+    .slice(0, limit);
+}
+
+/** Les rayons dont on déploie les sous-rayons.
+ *
+ *  Le poids en produits sert d'arbitre : dans « High-Tech », Téléphonie
+ *  (72 634) mérite son détail, Photo (1 261) se contente de son lien.
+ */
+export function detailedCategorySlugs(dep: Department, limit = DETAILED_PER_DEPT): Set<string> {
+  return new Set(
+    [...dep.categories]
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "fr"))
+      .slice(0, limit)
+      .map((c) => c.slug)
+  );
+}
+
+/** Répartit les départements en colonnes de hauteur comparable.
+ *
+ *  Une grille à trois colonnes égales plaçait 36 lignes (« Mode & Accessoires »)
+ *  à côté de 6 (« Beauté & Santé ») : le panneau était haut et visiblement
+ *  bancal. On mesure ici le coût en lignes de chaque département, puis on
+ *  remplit la colonne la moins chargée — un ordonnancement glouton, suffisant
+ *  pour six éléments et stable d'un rendu à l'autre.
+ */
+export function balanceColumns(departments: Department[], columns = 3): Department[][] {
+  const cols: Department[][] = Array.from({ length: columns }, () => []);
+  const load = new Array(columns).fill(0);
+  const cost = (d: Department) => {
+    const detailed = detailedCategorySlugs(d);
+    return (
+      1 +
+      d.categories.length +
+      d.categories.reduce(
+        (n, c) => n + (detailed.has(c.slug) ? pickSubcategories(c.subcategories).length : 0),
+        0
+      )
+    );
+  };
+
+  for (const d of [...departments].sort((a, b) => cost(b) - cost(a))) {
+    let target = 0;
+    for (let i = 1; i < columns; i++) if (load[i] < load[target]) target = i;
+    cols[target].push(d);
+    load[target] += cost(d);
+  }
+  return cols.filter((c) => c.length > 0);
+}
+
+/** Méga-menu du catalogue : départements, rayons, sous-rayons.
  *
  *  Vingt-six rayons dans une liste plate ne se parcourent pas. Deux niveaux
- *  suffisent à rendre le catalogue lisible d'un coup d'œil — c'est ce que font
- *  les marchands sérieux, et ce qui manquait ici.
+ *  suffisent à rendre le catalogue lisible d'un coup d'œil.
+ *
+ *  Le menu s'ouvre au clic et non au survol. Sur un trackpad, un déplacement
+ *  du pointeur pendant le défilement suffisait à déployer un panneau de 920 px
+ *  sans que rien n'ait été demandé ; c'est aussi la seule façon d'offrir le même
+ *  comportement au clavier, au toucher et à la souris.
+ *
+ *  `initialDepartments` vient du rendu serveur : le menu est complet dès la
+ *  première image, sans attendre un aller-retour réseau depuis le navigateur.
  */
-export function MegaMenu() {
+export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Department[] }) {
   const { locale } = useLocale();
   const t = L[locale];
-  const [departments, setDepartments] = useState<Department[]>([]);
+  const [departments, setDepartments] = useState<Department[]>(initialDepartments);
   const [open, setOpen] = useState(false);
   const wrap = useRef<HTMLDivElement>(null);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const panelId = useId();
 
+  // Repli : si le serveur n'a rien fourni (rendu statique, API momentanément
+  // muette), le navigateur retente. La donnée est mise en cache par le CDN :
+  // cet appel reste l'exception, non la règle.
   useEffect(() => {
+    if (initialDepartments.length > 0) return;
+    const ctrl = new AbortController();
     (async () => {
       try {
-        const res = await fetch(`${API}/api/catalog/categories`);
+        const res = await fetch(`${API}/api/catalog/categories`, { signal: ctrl.signal });
         if (!res.ok) return;
         const data = await res.json();
         setDepartments((data.departments || []) as Department[]);
@@ -51,57 +143,112 @@ export function MegaMenu() {
         // Sans catalogue joignable, le lien simple reste utilisable.
       }
     })();
+    return () => ctrl.abort();
+  }, [initialDepartments.length]);
+
+  const close = useCallback((focusTrigger = false) => {
+    setOpen(false);
+    if (focusTrigger) trigger.current?.focus();
   }, []);
 
+  // Fermetures : Échap, clic extérieur, sortie du menu au clavier, défilement.
   useEffect(() => {
     if (!open) return;
-    const onClick = (e: MouseEvent) => {
-      if (!wrap.current?.contains(e.target as Node)) setOpen(false);
+
+    const onPointerDown = (e: PointerEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) close();
     };
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        close(true);
+      }
     };
-    document.addEventListener("mousedown", onClick);
+    // Le focus qui sort du menu le referme : sans cela, tabuler au-delà du
+    // dernier lien laisse un panneau ouvert derrière la page.
+    const onFocusIn = (e: FocusEvent) => {
+      if (!wrap.current?.contains(e.target as Node)) close();
+    };
+    // Un panneau ancré qui suit la page pendant le défilement donne une
+    // impression de flottement ; on le referme.
+    const onScroll = () => close();
+
+    document.addEventListener("pointerdown", onPointerDown);
     document.addEventListener("keydown", onKey);
+    document.addEventListener("focusin", onFocusIn);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => {
-      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("pointerdown", onPointerDown);
       document.removeEventListener("keydown", onKey);
+      document.removeEventListener("focusin", onFocusIn);
+      window.removeEventListener("scroll", onScroll);
     };
-  }, [open]);
+  }, [open, close]);
 
-  // Petite latence à la sortie : traverser le vide entre le lien et le panneau
-  // ne doit pas refermer le menu.
-  const scheduleClose = () => {
-    closeTimer.current = setTimeout(() => setOpen(false), 180);
-  };
-  const cancelClose = () => {
-    if (closeTimer.current) clearTimeout(closeTimer.current);
+  // Recadrage horizontal : le panneau était centré sur son déclencheur, donc
+  // amputé à gauche dès que la fenêtre se resserrait. On le décale du strict
+  // nécessaire pour qu'il tienne dans la fenêtre, marge comprise.
+  useEffect(() => {
+    if (!open) return;
+    const el = panel.current;
+    if (!el) return;
+
+    const fit = () => {
+      el.style.setProperty("--mm-shift", "0px");
+      const box = el.getBoundingClientRect();
+      const margin = 16;
+      let shift = 0;
+      if (box.left < margin) shift = margin - box.left;
+      else if (box.right > window.innerWidth - margin) shift = window.innerWidth - margin - box.right;
+      el.style.setProperty("--mm-shift", `${Math.round(shift)}px`);
+    };
+
+    fit();
+    window.addEventListener("resize", fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [open, departments]);
+
+  // Navigation clavier dans le panneau : flèches, Home/End.
+  const onPanelKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const keys = ["ArrowDown", "ArrowUp", "Home", "End"];
+    if (!keys.includes(e.key)) return;
+    const links = Array.from(panel.current?.querySelectorAll<HTMLAnchorElement>("a[href]") || []);
+    if (links.length === 0) return;
+    e.preventDefault();
+    const at = links.indexOf(document.activeElement as HTMLAnchorElement);
+    const next =
+      e.key === "Home" ? 0
+      : e.key === "End" ? links.length - 1
+      : e.key === "ArrowDown" ? (at + 1) % links.length
+      : (at - 1 + links.length) % links.length;
+    links[next]?.focus();
   };
 
+  const columns = useMemo(() => balanceColumns(departments), [departments]);
+
+  // Sans données, le lien simple fait le travail : mieux vaut une navigation
+  // qui marche qu'un menu vide.
   if (departments.length === 0) {
     return <a href="/catalogue/">{t.label}</a>;
   }
 
   return (
-    <div
-      className="mm"
-      ref={wrap}
-      onMouseEnter={() => {
-        cancelClose();
-        setOpen(true);
-      }}
-      onMouseLeave={scheduleClose}
-    >
-      <a
-        href="/catalogue/"
+    <div className="mm" ref={wrap}>
+      <button
+        type="button"
+        ref={trigger}
         className={`mm-trigger${open ? " open" : ""}`}
         aria-expanded={open}
-        aria-haspopup="true"
-        onClick={(e) => {
-          // Sur mobile : le clic ouvre le menu. Sur desktop : le hover l'ouvre déjà, le clic navigue.
-          if (window.innerWidth < 901) {
+        aria-controls={panelId}
+        onClick={() => setOpen((v) => !v)}
+        onKeyDown={(e) => {
+          if (e.key === "ArrowDown" && !open) {
             e.preventDefault();
-            setOpen((v) => !v);
+            setOpen(true);
+            // Le panneau n'est pas encore peint : on attend la frame suivante.
+            requestAnimationFrame(() =>
+              panel.current?.querySelector<HTMLAnchorElement>("a[href]")?.focus()
+            );
           }
         }}
       >
@@ -109,46 +256,57 @@ export function MegaMenu() {
         <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
           <path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
-      </a>
+      </button>
 
-      <div className={`mm-panel${open ? " show" : ""}`} role="menu" aria-hidden={!open}>
+      <div
+        id={panelId}
+        ref={panel}
+        className={`mm-panel${open ? " show" : ""}`}
+        hidden={!open}
+        onKeyDown={onPanelKeyDown}
+      >
         <div className="mm-grid">
-          {departments.map((d) => (
-            <div className="mm-col" key={d.slug}>
-              <span className="mm-dep">
-                {d.name}
-                <em>{t.products(d.count)}</em>
-              </span>
-              <ul>
-                {d.categories.map((c) => (
-                  <li key={c.slug}>
-                    <a href={`/categorie/${c.slug}/`} onClick={() => setOpen(false)}>
-                      {c.name}
-                      <span>{c.count.toLocaleString("fr-FR")}</span>
-                    </a>
-                    {/* Troisième niveau : les quatre premiers sous-rayons
-                        suffisent à donner la profondeur sans noyer la colonne. */}
-                    {c.subcategories && c.subcategories.length > 0 && (
-                      <ul className="mm-sub">
-                        {c.subcategories.slice(0, 4).map((s) => (
-                          <li key={s.name}>
-                            <a
-                              href={`/categorie/${c.slug}/?sub=${encodeURIComponent(s.name)}`}
-                              onClick={() => setOpen(false)}
-                            >
-                              {s.name}
-                            </a>
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                ))}
-              </ul>
+          {columns.map((col, i) => (
+            <div className="mm-col" key={i}>
+              {col.map((d) => {
+                const detailed = detailedCategorySlugs(d);
+                return (
+                <section className="mm-dept" key={d.slug} aria-labelledby={`${panelId}-${d.slug}`}>
+                  <a className="mm-dep" id={`${panelId}-${d.slug}`} href={`/catalogue/?dept=${d.slug}`} onClick={() => close()}>
+                    {d.name}
+                    <em>{t.products(d.count)}</em>
+                  </a>
+                  <ul>
+                    {d.categories.map((c) => (
+                      <li key={c.slug}>
+                        <a href={`/categorie/${c.slug}/`} onClick={() => close()}>
+                          {c.name}
+                          <span>{c.count.toLocaleString(locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-FR")}</span>
+                        </a>
+                        {detailed.has(c.slug) && pickSubcategories(c.subcategories).length > 0 && (
+                          <ul className="mm-sub">
+                            {pickSubcategories(c.subcategories).map((s) => (
+                              <li key={s.name}>
+                                <a
+                                  href={`/categorie/${c.slug}/?sub=${encodeURIComponent(s.name)}`}
+                                  onClick={() => close()}
+                                >
+                                  {s.name}
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+                );
+              })}
             </div>
           ))}
         </div>
-        <a className="mm-all" href="/catalogue/" onClick={() => setOpen(false)}>
+        <a className="mm-all" href="/catalogue/" onClick={() => close()}>
           {t.all} →
         </a>
       </div>

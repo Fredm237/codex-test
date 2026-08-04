@@ -5,10 +5,14 @@ import { BrandLogo } from "./Brand";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MegaMenu } from "./MegaMenu";
 import { NAV_KEYS, useLocale } from "@/lib/i18n";
+import type { Department } from "@/lib/catalogue";
 
 const DESKTOP = NAV_KEYS.slice(0, 5);
 
-export function EditorialNav() {
+/** `departments` est lu côté serveur par le layout et traversé jusqu'ici : le
+ *  méga-menu est ainsi complet dès la première image, sans dépendre du réseau
+ *  du visiteur. */
+export function EditorialNav({ departments = [] }: { departments?: Department[] }) {
   const ref = useRef<HTMLElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useLocale();
@@ -42,7 +46,7 @@ export function EditorialNav() {
         <nav className="ed-nav">
           <BrandLogo onClick={() => setOpen(false)} />
           <div className="ed-nav-mid">
-            <MegaMenu />
+            <MegaMenu initialDepartments={departments} />
             {DESKTOP.filter((n) => n.href !== "/catalogue").map((n) => (
               <a key={n.href} href={n.href}>
                 {t(n.key)}
