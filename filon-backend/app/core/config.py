@@ -23,6 +23,18 @@ class Settings(BaseSettings):
     cors_origins: str = Field(default="*")
 
     @property
+    def is_production(self) -> bool:
+        """Vrai dès que l'environnement n'est pas un poste de développement.
+
+        Les plateformes d'hébergement n'écrivent pas toutes la même valeur :
+        `production`, `prod`, `staging`… Plutôt que d'énumérer ce qui doit être
+        protégé, on énumère ce qui ne l'est pas. Un `ENV` mal orthographié rend
+        ainsi le service plus prudent, jamais moins — c'est le sens que doit
+        prendre une erreur de configuration.
+        """
+        return (self.env or "").strip().lower() not in {"dev", "development", "local", "test"}
+
+    @property
     def cors_origins_list(self) -> list[str]:
         raw = (self.cors_origins or "").strip()
         if raw in ("", "*"):
