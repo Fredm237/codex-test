@@ -20,6 +20,13 @@
         "FACEBOOK_APP_ID": "${FACEBOOK_APP_ID}",
         "FACEBOOK_APP_SECRET": "${FACEBOOK_APP_SECRET}"
       }
+    },
+    "firecrawl": {
+      "type": "http",
+      "url": "https://mcp.firecrawl.dev/v2/mcp",
+      "headers": {
+        "Authorization": "Bearer ${FIRECRAWL_API_KEY}"
+      }
     }
   }
 }
