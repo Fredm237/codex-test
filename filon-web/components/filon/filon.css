@@ -2659,3 +2659,32 @@ html, body {
 @media (prefers-reduced-motion: no-preference) {
   .fx-chapter { scroll-margin-top: 0; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   SCÈNE — le canvas unique, fixe derrière le contenu
+   --------------------------------------------------------------
+   Pas de ScrollControls : il détourne le défilement et sort le
+   contenu du DOM. Le canvas est fixe et transparent, le DOM
+   défile normalement par-dessus, Lenis lisse le mouvement.
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Les chapitres posés sur la scène doivent la laisser voir : pas de
+   fond opaque, et le texte remonte au-dessus du canvas. */
+.fx-chapter.sur-scene {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+  border-top: 0;
+}
+/* Le texte garde sa lisibilité au-dessus d'un rendu qui bouge :
+   un voile local, pas un fond plein. */
+.fx-chapter.sur-scene .fx-container > * {
+  text-shadow: 0 2px 24px rgba(8, 7, 6, 0.85);
+}
