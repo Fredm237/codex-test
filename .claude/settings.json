@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "permissions": {
+    "allow": [
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git fetch:*)",
+      "Bash(git branch:*)",
+      "Bash(git show:*)",
+      "Bash(git add:*)",
+      "Bash(python3 .claude/agent/mission.py:*)",
+      "Bash(python3 .claude/agent/web.py:*)",
+      "Bash(cd filon-backend && python -m pytest:*)",
+      "Bash(cd filon-web && npm run build:*)",
+      "Bash(cd filon-web && npm run typecheck:*)",
+      "Bash(npm run build:*)",
+      "Bash(npm run typecheck:*)",
+      "Bash(npm run lint:*)",
+      "Bash(curl -sS https://web-production-c6842.up.railway.app/health:*)",
+      "Read",
+      "Glob",
+      "Grep",
+      "WebSearch",
+      "WebFetch",
+      "mcp__firecrawl__firecrawl_scrape",
+      "mcp__firecrawl__firecrawl_search",
+      "mcp__firecrawl__firecrawl_map",
+      "mcp__github__pull_request_read",
+      "mcp__github__list_pull_requests",
+      "mcp__github__get_file_contents",
+      "mcp__github__list_commits",
+      "mcp__github__search_code"
+    ],
+    "ask": [
+      "Bash(git push:*)",
+      "Bash(rm:*)",
+      "mcp__github__merge_pull_request",
+      "mcp__github__create_pull_request"
+    ],
+    "deny": [
+      "Bash(git push --force:*)",
+      "Bash(git reset --hard:*)",
+      "Read(./**/.env)",
+      "Read(./**/.env.*)",
+      "Read(./**/*credentials*)"
+    ]
+  },
+  "env": {
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash .claude/agent/garde-secrets.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

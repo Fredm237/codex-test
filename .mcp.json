@@ -4,16 +4,19 @@
       "type": "stdio",
       "command": "npx",
       "args": [
-        "@playwright/mcp@latest"
+        "@playwright/mcp@latest",
+        "--browser", "chromium",
+        "--executable-path", "/opt/pw-browsers/chromium-1194/chrome-linux/chrome",
+        "--no-sandbox"
       ],
-      "env": {}
+      "env": {
+        "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+      }
     },
     "instagram": {
       "type": "stdio",
       "command": "npx",
-      "args": [
-        "@mcpware/instagram-mcp"
-      ],
+      "args": ["@mcpware/instagram-mcp"],
       "env": {
         "INSTAGRAM_ACCESS_TOKEN": "${INSTAGRAM_ACCESS_TOKEN}",
         "INSTAGRAM_ACCOUNT_ID": "${INSTAGRAM_ACCOUNT_ID}",
