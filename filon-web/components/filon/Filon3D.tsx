@@ -1,39 +1,35 @@
 "use client";
 
-// Le filon — la scène 3D unique qui traverse toute la page d'accueil.
+// La traversée — l'environnement 3D plein écran de la page d'accueil.
 //
-// Repris du mécanisme observé chez w.wearebrand : un seul objet, tenu d'un
-// bout à l'autre, dont la transformation raconte le produit. Le burger se
-// sépare en ses couches, le transporteur enchaîne globe, conteneurs, camion.
-// Jamais une galerie d'effets : une seule chose qui se transforme.
+// Correction d'après un second passage sur le compte, six Reels de plus.
+// Ce que w.wearebrand appelle « site 3D » n'est pas un objet posé dans une
+// page : c'est un LIEU plein cadre dans lequel on se déplace. Un chantier vu
+// du ciel, un palais qu'on remonte, l'Everest, un intérieur qu'on traverse
+// pièce par pièce. Le site est le monde ; le texte est rare et incrusté.
 //
-// L'objet est donné par le nom de la marque. Un filon est une veine de
-// minerai dans la roche : ce que l'on cherche est enfermé dans un bloc qui ne
-// le montre pas. La séquence suit exactement cette idée.
+// Le premier jet faisait l'inverse — un bloc abstrait au centre d'un fond
+// noir, avec du texte à côté. Il est remplacé.
 //
-//   0.00 → 0.22   le bloc est fermé, massif, il tourne lentement
-//   0.22 → 0.48   il se fend, la veine ambrée apparaît à l'intérieur
-//   0.48 → 0.74   il éclate en dalles — les composantes du prix
-//   0.74 → 1.00   les dalles se referment autour de la veine
+// Le lieu est un atrium de béton banché : c'est l'architecture même du
+// compte, et elle sert le propos de FILON — on descend dans un espace où les
+// offres sont exposées, au lieu de les lire en liste.
 //
-// Le parti technique : PAS de ScrollControls. Il détourne le défilement,
-// casse l'ancrage clavier et sort le contenu du DOM — inacceptable pour un
-// site qui doit être lu et indexé. Le canvas est donc fixe et transparent
-// derrière un DOM qui défile normalement, et Lenis (déjà en place) lisse le
-// mouvement. C'est le montage de r3f-scroll-rig, sans la dépendance.
+// L'image d'environnement vient de Higgsfield, dirigée sur ce qui a été relevé
+// sur les plans : béton chaud à trous de banche, spots ambrés à 2700 K,
+// sous-exposition franche, végétation tropicale en contre-jour.
 //
-// Les couleurs viennent du système existant : béton chaud, ambre du spot.
-// Elles ne sont pas redéfinies ici, elles sont lues.
+// Toujours pas de ScrollControls : il détourne le défilement et sort le
+// contenu du DOM. Canvas fixe, DOM qui défile par-dessus, Lenis pour lisser.
 
-import { Suspense, useRef, useState, useEffect, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Suspense, useRef, useState, useEffect } from "react";
+import { Canvas, useFrame, useLoader } from "@react-three/fiber";
 import * as THREE from "three";
 
-const BETON = "#2a2521";
-const BETON_SOMBRE = "#1a1613";
-const AMBRE = "#c89544";
+const BETON_CLAIR = "#3a332c";
+const BETON_SOMBRE = "#241f1a";
 
-/** Progression 0→1 sur toute la hauteur défilable de la page. */
+/** Progression 0→1 sur toute la hauteur défilable. */
 function useProgressionPage() {
   const p = useRef(0);
   useEffect(() => {
@@ -58,148 +54,87 @@ function useProgressionPage() {
   return p;
 }
 
-/** Interpolation bornée, avec adoucissement aux extrémités. */
-function phase(p: number, debut: number, fin: number) {
-  const t = THREE.MathUtils.clamp((p - debut) / (fin - debut), 0, 1);
-  return t * t * (3 - 2 * t);
-}
-
-/** Une dalle du bloc. Six dalles forment la gangue autour de la veine. */
-function Dalle({
-  index,
-  total,
-  prog,
-}: {
-  index: number;
-  total: number;
-  prog: React.MutableRefObject<number>;
-}) {
-  const ref = useRef<THREE.Mesh>(null);
-  const centre = index - (total - 1) / 2;
-  // Chaque dalle part dans sa direction propre : l'éclatement doit se lire
-  // comme une ouverture, pas comme un accordéon.
-  const ecart = useMemo(() => {
-    const a = (index / total) * Math.PI * 2;
-    return new THREE.Vector3(Math.cos(a) * 1.5, centre * 0.5, Math.sin(a) * 1.1);
-  }, [index, total, centre]);
-
-  useFrame((_, dt) => {
-    if (!ref.current) return;
-    const p = prog.current;
-    const fente = phase(p, 0.22, 0.48);
-    const eclat = phase(p, 0.48, 0.74);
-    const refermeture = phase(p, 0.74, 1);
-    // ouverture puis retour : la gangue se referme sur la veine
-    const ouvert = Math.max(fente * 0.28 + eclat, 0) * (1 - refermeture * 0.82);
-
-    const cible = new THREE.Vector3(
-      ecart.x * ouvert,
-      centre * 0.42 + ecart.y * ouvert,
-      ecart.z * ouvert
-    );
-    ref.current.position.lerp(cible, 1 - Math.pow(0.001, dt));
-    ref.current.rotation.y = THREE.MathUtils.lerp(
-      ref.current.rotation.y,
-      ouvert * (index % 2 ? 0.5 : -0.5),
-      1 - Math.pow(0.004, dt)
-    );
-  });
-
+/** Le fond : l'atrium, projeté sur une sphère qui enveloppe la caméra. */
+function Atrium() {
+  const tex = useLoader(THREE.TextureLoader, "/3d/atrium.jpg");
+  tex.mapping = THREE.EquirectangularReflectionMapping;
+  tex.colorSpace = THREE.SRGBColorSpace;
   return (
-    <mesh ref={ref} castShadow receiveShadow>
-      <boxGeometry args={[2.5, 0.42, 1.7]} />
-      <meshStandardMaterial
-        color={index % 2 ? BETON : BETON_SOMBRE}
-        roughness={0.95}
-        metalness={0.05}
-      />
+    <mesh scale={[-1, 1, 1]}>
+      <sphereGeometry args={[60, 48, 32]} />
+      <meshBasicMaterial map={tex} side={THREE.BackSide} toneMapped={false} />
     </mesh>
   );
 }
 
-/** La veine — ce que le bloc cache, et que le produit sert à trouver. */
-function Veine({ prog }: { prog: React.MutableRefObject<number> }) {
-  const ref = useRef<THREE.Mesh>(null);
-  const mat = useRef<THREE.MeshStandardMaterial>(null);
-
-  useFrame((_, dt) => {
-    const p = prog.current;
-    // Elle ne s'allume que lorsque la gangue s'ouvre : avant, rien ne prouve
-    // qu'elle est là. C'est tout le propos.
-    const revelee = phase(p, 0.24, 0.55);
-    if (mat.current) {
-      mat.current.emissiveIntensity = THREE.MathUtils.lerp(
-        mat.current.emissiveIntensity,
-        revelee * 2.4,
-        1 - Math.pow(0.005, dt)
-      );
-      mat.current.opacity = 0.25 + revelee * 0.75;
-    }
-    if (ref.current) {
-      const s = 0.55 + revelee * 0.45;
-      ref.current.scale.setScalar(THREE.MathUtils.lerp(ref.current.scale.x, s, 0.08));
-    }
-  });
-
+/** Un portique de béton. Répétés en enfilade, ils font le couloir. */
+function Portique({ z, teinte }: { z: number; teinte: string }) {
   return (
-    <mesh ref={ref}>
-      <icosahedronGeometry args={[0.82, 1]} />
-      <meshStandardMaterial
-        ref={mat}
-        color={AMBRE}
-        emissive={AMBRE}
-        emissiveIntensity={0}
-        roughness={0.35}
-        metalness={0.7}
-        transparent
-        opacity={0.25}
-      />
-    </mesh>
+    <group position={[0, 0, z]}>
+      {/* jambages */}
+      <mesh position={[-3.1, 0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.85, 7.2, 1.5]} />
+        <meshStandardMaterial color={teinte} roughness={0.95} metalness={0.03} />
+      </mesh>
+      <mesh position={[3.1, 0, 0]} castShadow receiveShadow>
+        <boxGeometry args={[0.85, 7.2, 1.5]} />
+        <meshStandardMaterial color={teinte} roughness={0.95} metalness={0.03} />
+      </mesh>
+      {/* linteau */}
+      <mesh position={[0, 3.5, 0]} castShadow receiveShadow>
+        <boxGeometry args={[7.05, 0.9, 1.5]} />
+        <meshStandardMaterial color={teinte} roughness={0.95} metalness={0.03} />
+      </mesh>
+      {/* la flaque de spot sur le jambage droit — la lumière vient par
+          points, jamais uniformément */}
+      <pointLight position={[2.2, 1.6, 0.9]} intensity={5} distance={7} color="#ffcf8a" />
+    </group>
   );
 }
 
-function Scene({ prog }: { prog: React.MutableRefObject<number> }) {
-  const groupe = useRef<THREE.Group>(null);
-  const DALLES = 6;
+function Traversee({ prog }: { prog: React.MutableRefObject<number> }) {
+  const PORTIQUES = 9;
+  const PAS = 7;
+  const sol = useRef<THREE.Mesh>(null);
 
   useFrame((state, dt) => {
-    if (!groupe.current) return;
     const p = prog.current;
-    // Rotation continue lente — le plan respire, il ne tourne pas en vitrine.
-    groupe.current.rotation.y += dt * 0.12;
-    groupe.current.rotation.x = THREE.MathUtils.lerp(
-      groupe.current.rotation.x,
-      0.34 - p * 0.3,
-      1 - Math.pow(0.01, dt)
+    // La caméra avance dans le couloir : c'est le déplacement qui raconte,
+    // pas la rotation d'un objet. Léger dévers pour éviter le rail de train.
+    const z = 10 - p * (PORTIQUES - 1.5) * PAS;
+    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, z, 1 - Math.pow(0.02, dt));
+    state.camera.position.x = THREE.MathUtils.lerp(
+      state.camera.position.x,
+      Math.sin(p * Math.PI * 1.6) * 0.85,
+      1 - Math.pow(0.05, dt)
     );
-    // La caméra recule pendant l'éclatement, puis revient : le mouvement
-    // accompagne l'ouverture au lieu de la subir.
-    const recul = 6.4 + phase(p, 0.4, 0.74) * 2.2 - phase(p, 0.78, 1) * 1.4;
-    state.camera.position.z = THREE.MathUtils.lerp(state.camera.position.z, recul, 0.05);
-    state.camera.lookAt(0, 0, 0);
+    state.camera.position.y = THREE.MathUtils.lerp(
+      state.camera.position.y,
+      -0.4 + Math.sin(p * Math.PI * 2.2) * 0.22,
+      1 - Math.pow(0.05, dt)
+    );
+    state.camera.lookAt(0, -0.2, state.camera.position.z - 12);
+    if (sol.current) sol.current.position.z = state.camera.position.z;
   });
 
   return (
     <>
-      {/* Un seul spot chaud rasant, une ambiance très basse : l'étalonnage
-          des plans observés, où la lumière est rare et vient par flaques. */}
-      <ambientLight intensity={0.18} color="#b9ac97" />
-      <spotLight
-        position={[4, 6.5, 3.5]}
-        angle={0.55}
-        penumbra={1}
-        intensity={46}
-        color="#ffcf8a"
-        castShadow
-        shadow-mapSize={[1024, 1024]}
-      />
-      <pointLight position={[-4, -2, -3]} intensity={6} color="#4a5a3c" />
-      <group ref={groupe}>
-        <Veine prog={prog} />
-        {Array.from({ length: DALLES }, (_, i) => (
-          <Dalle key={i} index={i} total={DALLES} prog={prog} />
-        ))}
-      </group>
+      {/* Ambiance très basse : dans les plans observés, la lumière est rare.
+          Le fond enveloppant fournit le reste. */}
+      <ambientLight intensity={0.5} color="#c2b5a0" />
+      <directionalLight position={[6, 9, 4]} intensity={1.1} color="#ffd7a0" castShadow />
+
+      <Atrium />
+
+      {/* Sol en dalles sombres, collé à la caméra pour rester infini */}
+      <mesh ref={sol} rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.6, 0]} receiveShadow>
+        <planeGeometry args={[60, 160]} />
+        <meshStandardMaterial color="#1d1916" roughness={0.8} metalness={0.12} />
+      </mesh>
+
+      {Array.from({ length: PORTIQUES }, (_, i) => (
+        <Portique key={i} z={-i * PAS} teinte={i % 2 ? BETON_CLAIR : BETON_SOMBRE} />
+      ))}
     </>
   );
 }
@@ -208,9 +143,8 @@ export function Filon3D() {
   const prog = useProgressionPage();
   const [actif, setActif] = useState(false);
 
-  // La scène ne se monte que si l'appareil et le réglage système l'autorisent.
-  // « Éviter la 3D pour la 3D » : sur mobile elle rame, et sous « mouvement
-  // réduit » elle n'a rien à faire là. Le site reste entier sans elle.
+  // Ni sous « mouvement réduit », ni sur petit écran : la 3D pour la 3D
+  // ralentit un site, et celui-ci reste entier sans elle.
   useEffect(() => {
     const reduit = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const petit = window.matchMedia("(max-width: 900px)").matches;
@@ -224,11 +158,11 @@ export function Filon3D() {
       <Canvas
         shadows
         dpr={[1, 1.6]}
-        camera={{ position: [0, 0.5, 6.4], fov: 42 }}
-        gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
+        camera={{ position: [0, -0.4, 10], fov: 58 }}
+        gl={{ antialias: true, powerPreference: "high-performance" }}
       >
         <Suspense fallback={null}>
-          <Scene prog={prog} />
+          <Traversee prog={prog} />
         </Suspense>
       </Canvas>
     </div>
