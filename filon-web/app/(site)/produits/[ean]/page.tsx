@@ -34,16 +34,45 @@ type Product = {
   verdict: VerdictData | null;
 };
 
+/** Signale une indisponibilité passagère, à ne surtout pas confondre avec une
+ *  page absente. Voir `getProduct` pour la raison. */
+class CatalogueIndisponible extends Error {
+  constructor(cause: string) {
+    super(`Catalogue indisponible : ${cause}`);
+    this.name = "CatalogueIndisponible";
+  }
+}
+
+/** Rend le produit, `null` s'il n'existe pas — et LÈVE si le catalogue est
+ *  seulement injoignable.
+ *
+ *  La distinction est tout sauf cosmétique. Cette fonction rendait `null`
+ *  dans les deux cas, et l'appelant faisait `notFound()` : une panne de base
+ *  transformait donc toutes les fiches produit déjà indexées en 404, et la
+ *  Search Console a fini par signaler leur désindexation.
+ *
+ *  Un 404 dit à un moteur « cette page n'existe pas, oublie-la ». Un 5xx dit
+ *  « indisponible pour le moment, repasse ». Une panne d'API doit dire la
+ *  seconde chose. C'est la différence entre perdre son référencement et
+ *  attendre la fin d'un incident. */
 async function getProduct(ean: string): Promise<Product | null> {
+  let res: Response;
   try {
-    const res = await fetch(`${API}/api/catalog/product/${encodeURIComponent(ean)}`, {
+    res = await fetch(`${API}/api/catalog/product/${encodeURIComponent(ean)}`, {
       next: { revalidate: 1800 },
       signal: AbortSignal.timeout(8000),
     });
-    if (!res.ok) return null;
+  } catch (e) {
+    // Réseau coupé ou délai dépassé : on ne sait rien du produit.
+    throw new CatalogueIndisponible(e instanceof Error ? e.name : "réseau");
+  }
+  // Seul un 404 franc prouve que le produit n'existe pas.
+  if (res.status === 404) return null;
+  if (!res.ok) throw new CatalogueIndisponible(`HTTP ${res.status}`);
+  try {
     return (await res.json()) as Product;
   } catch {
-    return null;
+    throw new CatalogueIndisponible("réponse illisible");
   }
 }
 
