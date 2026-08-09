@@ -1,13 +1,46 @@
 # Agent FILON — architecture
 
-Trois fichiers, trois rôles. Rien d'autre : un agent qui a besoin d'un
-framework pour tenir debout ne tient pas debout.
+Quatre fichiers, quatre rôles, plus trois sous-agents. Rien d'autre : un agent
+qui a besoin d'un framework pour tenir debout ne tient pas debout.
 
 | Fichier | Rôle |
 |---|---|
 | `mission.py` | l'état qui survit à la perte de contexte |
 | `web.py` | une seule porte vers le web, avec ordre de repli imposé |
 | `garde-secrets.sh` | refuse qu'un secret parte dans un commit |
+| `tableau.py` | rend l'état en page consultable |
+
+## Routage des modèles
+
+Trois sous-agents dans `.claude/agents/`, chacun sur le modèle que sa tâche
+mérite. Le principe : payer le raisonnement là où l'erreur coûte cher, pas là
+où il s'agit de ramener du volume.
+
+| Agent | Modèle | Pourquoi |
+|---|---|---|
+| `filon-collecte` | haiku | lire trente pages est un travail de volume, pas de jugement |
+| `filon-verificateur` | sonnet | mesurer et contredire demande de la rigueur, pas de l'invention |
+| `filon-catalogue` | opus | une erreur de rangement se paie sur 799 435 lignes |
+
+`filon-collecte` ramène de la matière et ne conclut jamais.
+`filon-verificateur` ne répare rien : il constate et il prouve, et il connaît
+les pièges maison (`/health`, les documents périmés, le port de proxy
+dynamique). `filon-catalogue` porte la règle du département et la liste de ce
+qui a été réfuté, pour que personne ne reconstruise les seuils de volume.
+
+## tableau.py — la vue
+
+```bash
+python3 .claude/agent/tableau.py            # écrit mission.html
+```
+
+Sommaire d'abord — jauge et compteurs —, puis ce qui bloque, puis les tâches.
+Le statut se lit au liseré autant qu'au marqueur, pour ne pas dépendre de la
+couleur seule. La palette vient de `filon-web/app/tokens.css` : un tableau de
+bord qui ressemble au produit qu'il surveille se lit plus vite. Contrastes
+mesurés au-dessus de 4,5:1 en clair comme en sombre.
+
+Le fichier produit n'est pas suivi par git : il se régénère depuis l'état.
 
 Les règles de comportement sont dans `CLAUDE.md`, à la racine — c'est lui qui
 est chargé à chaque session.
