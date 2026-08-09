@@ -70,10 +70,10 @@
   min-height: 44px;
   padding: 0 var(--fx-space-4);
   font-size: var(--fx-text-sm);
-  border-radius: var(--fx-radius-full);
+  border-radius: var(--fx-btn-radius);
 }
 .pg-badge, .pg-region { font-size: var(--fx-text-xs); }
-.pg-badge { background: var(--fx-gain); color: var(--fx-paper-0); }
+.pg-badge { background: var(--fx-gain); color: var(--fx-ink-1000); font-weight: 500; }
 .pg-offer.best { border-color: var(--fx-gain); }
 .pg-saving b { color: var(--fx-gain-strong); }
 .pg-offer { min-height: 60px; }
@@ -96,13 +96,25 @@
   height: 100%;
   object-fit: cover;
   z-index: 0;
+  /* Étalonnage. Le média d'origine est une poussière dorée à dominante
+     bleue : l'inverse exact de la référence. On ne peut pas le remplacer
+     en CSS, mais on peut le ramener dans le monde — désaturé, réchauffé,
+     nettement sous-exposé. Le vrai correctif est une direction
+     artistique de plans d'architecture ; voir la note de refonte. */
+  filter: saturate(0.55) contrast(1.12) brightness(0.62) sepia(0.28);
 }
 
 .fx-hero-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.35);
   z-index: 1;
+  /* Trois couches : un voile chaud qui tue la dominante bleue, un
+     vignettage qui referme le cadre comme un plan sous-exposé, et un
+     dégradé bas qui fait naître le contenu de l'ombre. */
+  background:
+    linear-gradient(to bottom, rgba(14, 12, 11, 0.55) 0%, rgba(14, 12, 11, 0.35) 42%, var(--fx-bg) 97%),
+    radial-gradient(120% 85% at 50% 38%, transparent 28%, rgba(8, 7, 6, 0.72) 100%),
+    rgba(24, 17, 10, 0.42);
 }
 
 .fx-hero-content {
@@ -192,7 +204,7 @@
   flex: none;
   object-fit: contain;
   border-radius: var(--fx-radius-sm);
-  background: var(--fx-paper-100);
+  background: var(--fx-surface);
 }
 
 .fx-hero-float-info {
@@ -286,7 +298,7 @@
   aspect-ratio: 4 / 3;
   display: grid;
   place-items: center;
-  background: var(--fx-paper-0);
+  background: var(--fx-surface-raised);
   overflow: hidden;
 }
 .fx-product-media img {
@@ -382,7 +394,7 @@
   min-height: 44px;
   padding: 0 var(--fx-space-4);
   border: 1px solid var(--fx-border-strong);
-  border-radius: var(--fx-radius-full);
+  border-radius: var(--fx-btn-radius);
   font-size: var(--fx-text-xs);
   font-weight: 600;
   color: var(--fx-text);
@@ -574,7 +586,7 @@
 .fx-nav-all[aria-current],
 .fx-nav-link[aria-current] {
   background: var(--fx-ink-900);
-  color: var(--fx-paper-0);
+  color: var(--fx-text-strong);
   font-weight: 600;
 }
 .fx-nav-all[aria-current] .fx-nav-count,
@@ -608,9 +620,9 @@
   gap: 8px;
   min-height: 36px;
   padding: 0 var(--fx-space-3);
-  border-radius: var(--fx-radius-full);
+  border-radius: var(--fx-radius-caption);
   background: var(--fx-ink-900);
-  color: var(--fx-paper-0);
+  color: var(--fx-text-strong);
   font-size: var(--fx-text-xs);
   font-weight: 600;
 }
@@ -709,7 +721,7 @@
 .fx-page[aria-current="page"] {
   background: var(--fx-ink-900);
   border-color: var(--fx-ink-900);
-  color: var(--fx-paper-0);
+  color: var(--fx-text-strong);
 }
 .fx-page-step[aria-disabled="true"] { opacity: 0.4; pointer-events: none; }
 .fx-page-gap { display: inline-flex; align-items: center; padding: 0 4px; color: var(--fx-text-muted); }
@@ -759,7 +771,7 @@
 /* ── Clôture ─────────────────────────────────────────────── */
 
 .fx-closing { text-align: center; }
-.fx-closing-title { margin-top: var(--fx-space-4); color: var(--fx-paper-0); }
+.fx-closing-title { margin-top: var(--fx-space-4); color: var(--fx-text-strong); }
 .fx-closing-lede { margin: var(--fx-space-5) auto 0; }
 .fx-closing-actions {
   display: flex;
@@ -771,11 +783,11 @@
 /* Variante fantôme sur fond encre : la bordure sombre par défaut y serait
    invisible. */
 .fx-btn.fx-btn-on-ink-ghost {
-  color: var(--fx-paper-0);
+  color: var(--fx-text-strong);
   border-color: rgba(250, 249, 247, 0.32);
 }
 .fx-btn.fx-btn-on-ink-ghost:hover {
-  border-color: var(--fx-paper-0);
+  border-color: var(--fx-text-strong);
   background: rgba(250, 249, 247, 0.08);
 }
 
@@ -933,7 +945,7 @@
 }
 
 .fx-btn.on-ink {
-  background: var(--fx-paper-0);
+  background: var(--fx-surface-raised);
   color: var(--fx-ink-900);
   box-shadow: var(--fx-elevation-1);
 }
@@ -948,13 +960,13 @@
   border: 1px solid var(--fx-border-strong);
 }
 .fx-btn.secondary:hover {
-  background: var(--fx-paper-100);
+  background: var(--fx-surface);
   border-color: var(--fx-text);
 }
 
 .fx-btn-on-ink-ghost {
   background: transparent;
-  color: var(--fx-paper-50);
+  color: var(--fx-text-secondary);
   border: 1px solid rgba(255, 255, 255, 0.25);
 }
 .fx-btn-on-ink-ghost:hover {
@@ -967,7 +979,7 @@
   display: inline-flex;
   align-items: center;
   padding: 8px 16px;
-  border-radius: var(--fx-radius-full);
+  border-radius: var(--fx-radius-caption);
   border: 1px solid var(--fx-border);
   font-size: var(--fx-text-sm);
   color: var(--fx-text-secondary);
@@ -1019,16 +1031,16 @@
 .fx-skeleton {
   background: linear-gradient(
     90deg,
-    var(--fx-paper-100) 25%,
-    var(--fx-paper-200) 50%,
-    var(--fx-paper-100) 75%
+    var(--fx-ink-850) 25%,
+    var(--fx-ink-700) 50%,
+    var(--fx-ink-850) 75%
   );
   background-size: 200% 100%;
   animation: fx-shimmer 1.8s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .fx-skeleton { animation: none; background: var(--fx-paper-100); }
+  .fx-skeleton { animation: none; background: var(--fx-surface); }
 }
 
 .fx-skeleton-card {
@@ -1036,7 +1048,7 @@
 }
 
 .fx-skeleton-card .fx-product-media {
-  background: var(--fx-paper-100);
+  background: var(--fx-surface);
 }
 
 .fx-skeleton-verdict {
@@ -1094,7 +1106,7 @@
   border: none;
   min-height: 44px;
   padding: 0 var(--fx-space-5);
-  border-radius: var(--fx-radius-full);
+  border-radius: var(--fx-btn-radius);
   font-weight: 600;
   font-size: var(--fx-text-base);
   cursor: pointer;
@@ -1215,7 +1227,7 @@
   transition: background var(--fx-duration) var(--fx-ease-standard);
 }
 .pg-offer:hover {
-  background: var(--fx-paper-50);
+  background: var(--fx-bg-sunken);
   margin: 0 calc(-1 * var(--fx-space-3));
   padding-left: var(--fx-space-3);
   padding-right: var(--fx-space-3);
@@ -1276,7 +1288,7 @@
 .vd-excellent { border-left: 3px solid var(--fx-gain); }
 .vd-bon { border-left: 3px solid var(--fx-gain); }
 .vd-neutre { border-left: 3px solid var(--fx-brand); }
-.vd-attendre { border-left: 3px solid var(--fx-alert-600); }
+.vd-attendre { border-left: 3px solid var(--fx-alert); }
 .vd-insuffisant { border-left: 3px solid var(--fx-text-muted); }
 
 .vd-eyebrow {
@@ -1300,7 +1312,7 @@
 }
 .vd-excellent .vd-dot, .vd-bon .vd-dot { background: var(--fx-gain); }
 .vd-neutre .vd-dot { background: var(--fx-brand); }
-.vd-attendre .vd-dot { background: var(--fx-alert-600); }
+.vd-attendre .vd-dot { background: var(--fx-alert); }
 .vd-insuffisant .vd-dot { background: var(--fx-text-muted); }
 
 .vd-title {
@@ -1335,7 +1347,7 @@
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  border-radius: var(--fx-radius-full);
+  border-radius: var(--fx-radius-caption);
   background: var(--fx-brand-wash);
   border: 1px solid var(--fx-brand-subtle);
   font-size: var(--fx-text-xs);
@@ -1838,7 +1850,7 @@
 .fx-closing-title {
   font-size: var(--fx-text-4xl);
   font-weight: 400;
-  color: var(--fx-paper-0);
+  color: var(--fx-text-strong);
 }
 .fx-closing-title em {
   font-style: italic;
@@ -1867,7 +1879,7 @@
   border-radius: var(--fx-btn-radius);
   font-weight: 600;
   font-size: var(--fx-text-base);
-  background: var(--fx-paper-0);
+  background: var(--fx-surface-raised);
   color: var(--fx-ink-900);
   transition: transform var(--fx-duration) var(--fx-ease-out), box-shadow var(--fx-duration) var(--fx-ease-out);
 }
@@ -1886,7 +1898,7 @@
   font-weight: 600;
   font-size: var(--fx-text-base);
   background: transparent;
-  color: var(--fx-paper-0);
+  color: var(--fx-text-strong);
   border: 1px solid rgba(255, 255, 255, 0.3);
   transition: border-color var(--fx-duration) var(--fx-ease-out), background var(--fx-duration) var(--fx-ease-out);
 }
@@ -2014,10 +2026,7 @@
 
 /* Header du catalogue — fond sombre avec dégradé doré */
 .fx-catalogue-title {
-  background: linear-gradient(135deg, #D4A853, #F5D78E, #C9963C);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--fx-brand);
 }
 
 /* Grille produit — gap plus grand, cartes avec glow au hover */
@@ -2026,26 +2035,26 @@
 }
 
 .fx-product {
-  border: 1px solid rgba(212, 168, 83, 0.08);
+  border: 1px solid rgba(200, 149, 68, 0.08);
   transition: border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 .fx-product:hover {
-  border-color: rgba(212, 168, 83, 0.3);
-  box-shadow: 0 8px 32px rgba(212, 168, 83, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-color: rgba(200, 149, 68, 0.3);
+  box-shadow: 0 8px 32px rgba(200, 149, 68, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
 }
 
 /* Badge gain — doré au lieu de vert */
 .fx-badge.gain {
-  background: linear-gradient(135deg, #D4A853, #F5D78E);
-  color: #0a0a0f;
+  background: var(--fx-brand);
+  color: var(--fx-ink-1000);
   font-weight: 600;
 }
 
 /* Badge brand — fond sombre */
 .fx-badge.brand {
-  background: #0a0a0f;
-  color: #F5D78E;
+  background: var(--fx-ink-1000);
+  color: var(--fx-brand-strong);
 }
 
 /* Pagination — style premium */
@@ -2054,33 +2063,33 @@
 }
 
 .fx-page[aria-current="page"] {
-  background: linear-gradient(135deg, #D4A853, #F5D78E);
-  color: #0a0a0f;
+  background: var(--fx-brand);
+  color: var(--fx-ink-1000);
   font-weight: 600;
 }
 
 /* CTA produit — doré */
 .fx-product-cta {
-  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
-  color: #0a0a0f !important;
+  background: var(--fx-brand) !important;
+  color: var(--fx-ink-1000) !important;
   font-weight: 600;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .fx-product-cta:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3);
+  box-shadow: 0 4px 16px rgba(200, 149, 68, 0.3);
 }
 
 /* Navigation latérale — liens avec transition dorée */
 .fx-nav-shell a:hover,
 .fx-nav-shell a[aria-current] {
-  color: #D4A853;
+  color: var(--fx-brand);
 }
 
 /* Breadcrumb — séparateurs dorés */
 .fx-crumb span[aria-hidden] {
-  color: rgba(212, 168, 83, 0.4);
+  color: rgba(200, 149, 68, 0.4);
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -2088,81 +2097,81 @@
    ══════════════════════════════════════════════════════════════ */
 
 /* Steps de réflexion — accent doré */
-.fa-step.active { color: #D4A853 !important; }
+.fa-step.active { color: var(--fx-brand) !important; }
 .fa-step.active .tk {
-  border-color: #D4A853 !important;
+  border-color: var(--fx-brand) !important;
 }
 .fa-step.active .tk::after {
-  border-top-color: #D4A853 !important;
+  border-top-color: var(--fx-brand) !important;
 }
 .fa-step.done .tk {
-  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
+  background: var(--fx-brand) !important;
   border-color: transparent !important;
 }
 
 /* Carte gagnante — bordure dorée au lieu de l'accent par défaut */
 .fa-card.win {
-  border-color: rgba(212, 168, 83, 0.4) !important;
-  box-shadow: 0 0 0 1px rgba(212, 168, 83, 0.15), 0 8px 32px rgba(212, 168, 83, 0.08) !important;
+  border-color: rgba(200, 149, 68, 0.4) !important;
+  box-shadow: 0 0 0 1px rgba(200, 149, 68, 0.15), 0 8px 32px rgba(200, 149, 68, 0.08) !important;
 }
 
 /* Flag du gagnant — doré */
 .fa-flag {
-  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
-  color: #0a0a0f !important;
+  background: var(--fx-brand) !important;
+  color: var(--fx-ink-1000) !important;
 }
 
 /* Score ring — doré */
 .fa-score .ring {
-  border-color: #D4A853 !important;
+  border-color: var(--fx-brand) !important;
 }
 
 /* Bouton "Voir l'offre" — doré */
 .fa-cta {
-  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
-  color: #0a0a0f !important;
+  background: var(--fx-brand) !important;
+  color: var(--fx-ink-1000) !important;
   font-weight: 600 !important;
 }
 .fa-cta:hover {
-  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(200, 149, 68, 0.3) !important;
   transform: translateY(-1px);
 }
 
 /* Chips de suggestion — hover doré */
 .sa-chip:hover {
-  border-color: #D4A853 !important;
-  color: #D4A853 !important;
+  border-color: var(--fx-brand) !important;
+  color: var(--fx-brand) !important;
 }
 
 /* Search box focus — glow doré */
 .sa-box:focus-within {
-  border-color: #D4A853 !important;
-  box-shadow: 0 0 0 5px rgba(212, 168, 83, 0.15) !important;
+  border-color: var(--fx-brand) !important;
+  box-shadow: 0 0 0 5px rgba(200, 149, 68, 0.15) !important;
 }
 .sa-box:focus-within svg {
-  color: #D4A853 !important;
+  color: var(--fx-brand) !important;
 }
 
 /* Bouton Ask — doré */
 .sa .ed-btn.wave {
-  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
-  color: #0a0a0f !important;
+  background: var(--fx-brand) !important;
+  color: var(--fx-ink-1000) !important;
   border: none !important;
   font-weight: 600 !important;
 }
 .sa .ed-btn.wave:hover {
-  box-shadow: 0 4px 16px rgba(212, 168, 83, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(200, 149, 68, 0.3) !important;
 }
 
 /* Cartes résultats — hover avec glow doré */
 .fa-card:hover {
-  border-color: rgba(212, 168, 83, 0.25) !important;
-  box-shadow: 0 8px 32px rgba(212, 168, 83, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+  border-color: rgba(200, 149, 68, 0.25) !important;
+  box-shadow: 0 8px 32px rgba(200, 149, 68, 0.1), 0 2px 8px rgba(0, 0, 0, 0.04) !important;
 }
 
 /* Historique prix — couleur dorée pour "en baisse" */
 .fa-specs .hist.baisse {
-  color: #D4A853 !important;
+  color: var(--fx-brand) !important;
 }
 
 /* Disclaimer — plus discret */
@@ -2176,13 +2185,13 @@
    ══════════════════════════════════════════════════════════════ */
 
 .mm-panel {
-  background: #0a0a0f !important;
-  border: 1px solid rgba(212, 168, 83, 0.2) !important;
-  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(212, 168, 83, 0.05) !important;
+  background: var(--fx-ink-1000) !important;
+  border: 1px solid rgba(200, 149, 68, 0.2) !important;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7), 0 0 40px rgba(200, 149, 68, 0.05) !important;
 }
 
 .mm-dep {
-  color: #F5D78E !important;
+  color: var(--fx-brand-strong) !important;
   letter-spacing: 0.1em !important;
 }
 
@@ -2195,8 +2204,8 @@
 }
 
 .mm-col a:hover {
-  color: #F5D78E !important;
-  background: rgba(212, 168, 83, 0.08) !important;
+  color: var(--fx-brand-strong) !important;
+  background: rgba(200, 149, 68, 0.08) !important;
 }
 
 .mm-col a span {
@@ -2204,12 +2213,12 @@
 }
 
 .mm-all {
-  color: #D4A853 !important;
-  border-top-color: rgba(212, 168, 83, 0.2) !important;
+  color: var(--fx-brand) !important;
+  border-top-color: rgba(200, 149, 68, 0.2) !important;
 }
 
 .mm-all:hover {
-  color: #F5D78E !important;
+  color: var(--fx-brand-strong) !important;
 }
 
 .mm-sub a {
@@ -2217,7 +2226,7 @@
 }
 
 .mm-sub a:hover {
-  color: #F5D78E !important;
+  color: var(--fx-brand-strong) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -2238,18 +2247,18 @@
 
 .ed-header:not(.stuck) .ed-nav a:hover,
 .ed-header:not(.stuck) .ed-nav button:hover {
-  color: #F5D78E !important;
+  color: var(--fx-brand-strong) !important;
 }
 
 /* CTA "Essayer le copilote" — doré */
 .ed-nav .ed-btn.dark {
-  background: linear-gradient(135deg, #D4A853, #F5D78E) !important;
-  color: #0a0a0f !important;
+  background: var(--fx-brand) !important;
+  color: var(--fx-ink-1000) !important;
   border: none !important;
 }
 
 .ed-nav .ed-btn.dark:hover {
-  box-shadow: 0 4px 20px rgba(212, 168, 83, 0.4) !important;
+  box-shadow: 0 4px 20px rgba(200, 149, 68, 0.4) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -2266,7 +2275,7 @@
     background: rgba(10, 10, 15, 0.03);
     border-radius: 16px;
     padding: 24px 20px;
-    border: 1px solid rgba(212, 168, 83, 0.08);
+    border: 1px solid rgba(200, 149, 68, 0.08);
   }
 
   /* Grille produit — 3 colonnes max sur desktop large */
@@ -2329,7 +2338,7 @@
   background: rgba(10, 10, 15, 0.85) !important;
   backdrop-filter: blur(20px) saturate(1.4) !important;
   -webkit-backdrop-filter: blur(20px) saturate(1.4) !important;
-  border-bottom: 1px solid rgba(212, 168, 83, 0.1) !important;
+  border-bottom: 1px solid rgba(200, 149, 68, 0.1) !important;
 }
 
 /* Hero — s'assurer que la vidéo commence à 0 (pas de padding-top pour la nav) */
@@ -2460,7 +2469,7 @@ html, body {
 
 /* Pulse section — fond sombre pour continuité avec le Hero */
 .fx-home-pulse {
-  background: #0a0a0f;
+  background: var(--fx-ink-1000);
   padding: 20px 24px;
   color: rgba(255, 255, 255, 0.7);
 }
@@ -2471,7 +2480,7 @@ html, body {
 
 .fx-home-pulse b,
 .fx-home-pulse strong {
-  color: #F5D78E;
+  color: var(--fx-brand-strong);
 }
 
 /* Suggestions sur mobile — ne pas déborder */
@@ -2499,4 +2508,154 @@ html, body {
   .fx-hero {
     min-height: 100svh;
   }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   PILE DE COÛT — la scène 3D pilotée au défilement
+   --------------------------------------------------------------
+   Le mécanisme repris de w.wearebrand : un objet unique qui se
+   transforme pendant qu'on descend, et dont la transformation
+   explique le produit. Ici l'offre s'ouvre en ses composantes.
+
+   La section est haute — c'est elle qui fournit la course de
+   défilement. Le contenu reste collé au centre pendant ce temps.
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-stack {
+  position: relative;
+  /* Trois hauteurs d'écran : assez pour lire les couches sans
+     que le défilement devienne interminable. */
+  height: 300vh;
+  background: var(--fx-bg);
+}
+
+.fx-stack-sticky {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  align-items: center;
+  gap: var(--fx-space-8);
+  max-width: var(--fx-container);
+  margin-inline: auto;
+  padding-inline: var(--fx-gutter);
+}
+
+.fx-stack-canvas {
+  position: relative;
+  height: 72vh;
+  /* La flaque de spot, posée derrière la scène. */
+  background: radial-gradient(58% 52% at 42% 44%, rgba(200, 149, 68, 0.13), transparent 72%);
+}
+
+.fx-stack-legend { max-width: 40ch; }
+
+.fx-stack-list {
+  list-style: none;
+  margin: var(--fx-space-6) 0 0;
+  padding: 0;
+  border-top: 1px solid var(--fx-border);
+}
+
+.fx-stack-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--fx-space-4);
+  padding: var(--fx-space-4) 0;
+  border-bottom: 1px solid var(--fx-border);
+  color: var(--fx-text-muted);
+  transition: color var(--fx-duration) var(--fx-ease-standard);
+}
+
+/* La ligne courante s'allume avec la couche : c'est le même
+   événement, lu deux fois — en volume et en toutes lettres. */
+.fx-stack-item[aria-current="true"] { color: var(--fx-text-strong); }
+.fx-stack-item[aria-current="true"] .fx-stack-amount { color: var(--fx-brand); }
+
+.fx-stack-label { font-size: var(--fx-text-md); }
+.fx-stack-amount {
+  font-variant-numeric: tabular-nums;
+  font-size: var(--fx-text-md);
+  color: var(--fx-text-secondary);
+  transition: color var(--fx-duration) var(--fx-ease-standard);
+}
+
+/* Sans 3D — mobile, ou « mouvement réduit » — la section cesse
+   d'être une scène et redevient un tableau. Rien ne disparaît. */
+@media (max-width: 900px), (prefers-reduced-motion: reduce) {
+  .fx-stack { height: auto; }
+  .fx-stack-sticky {
+    position: static;
+    height: auto;
+    grid-template-columns: 1fr;
+    padding-block: var(--fx-section-y);
+  }
+  .fx-stack-canvas { display: none; }
+  .fx-stack-legend { max-width: none; }
+  .fx-stack-item { color: var(--fx-text-secondary); }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CHAPITRE — une idée par écran
+   --------------------------------------------------------------
+   La structure lue sur les Reels : chaque section occupe la
+   hauteur d'écran entière, porte une seule idée, un titre très
+   court et très grand, et bascule de ton avec la précédente.
+   Le défilement devient une narration, pas une liste.
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-chapter {
+  min-height: 100vh;
+  display: grid;
+  align-content: center;
+  padding-block: var(--fx-section-y);
+  background: var(--fx-bg);
+  color: var(--fx-text);
+  /* La bascule de ton doit se voir comme une coupe franche,
+     jamais comme un dégradé : c'est un changement de plan. */
+  border-top: 1px solid var(--fx-border);
+}
+
+/* Le titre de chapitre est la seule chose qui a le droit d'être
+   énorme. Il tient en trois ou quatre mots. */
+.fx-chapter-title {
+  font-family: var(--serif);
+  font-weight: 200;
+  font-size: clamp(40px, 7.5vw, 104px);
+  line-height: 0.98;
+  letter-spacing: var(--fx-tracking-display);
+  text-wrap: balance;
+  margin: 0;
+  color: var(--fx-text-strong);
+}
+
+.fx-chapter-lede {
+  margin-top: var(--fx-space-5);
+  max-width: 48ch;
+  font-size: var(--fx-text-lg);
+  line-height: 1.5;
+  color: var(--fx-text-secondary);
+}
+
+/* Le chiffre géant — « 2 500+ » chez le transporteur. Une preuve
+   qui se lit à trois mètres. */
+.fx-chapter-figure {
+  font-family: var(--serif);
+  font-weight: 200;
+  font-size: clamp(64px, 14vw, 190px);
+  line-height: 0.86;
+  letter-spacing: -0.05em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fx-brand);
+}
+.fx-chapter-figure-label {
+  margin-top: var(--fx-space-4);
+  max-width: 34ch;
+  color: var(--fx-text-secondary);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .fx-chapter { scroll-margin-top: 0; }
 }

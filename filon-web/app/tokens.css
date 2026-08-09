@@ -1,57 +1,81 @@
 /* ============================================================
-   FILON — Design System, refonte TOTALE août 2026
+   FILON — Design System, refonte août 2026
    ------------------------------------------------------------
-   Inspiré de Phia.com. Principes :
+   Référence : le compte Instagram w.wearebrand, observé
+   directement (profil, 18 posts, images et vidéos échantillonnées
+   image par image). Rien ici n'est déduit d'une légende.
 
-   1. BLANC PUR comme fond — pas de beige, pas de gris tiède.
-      Le blanc crée le contraste maximal avec les images.
-   2. SERIF pour les titres (GT Super Display → on utilise la
-      serif système + une Google Font). SANS-SERIF pour le corps.
-   3. ESPACEMENT MASSIF — les sections respirent. Minimum 120px
-      entre les blocs. Le hero fait 100vh.
-   4. IMAGES DOMINANTES — le ratio image/texte est 70/30.
-   5. TEXTE CENTRÉ pour les titres principaux.
-   6. MINIMALISME — peu de couleurs, peu de bordures, beaucoup
-      d'espace blanc.
+   Ce qui a été vu, et qui fonde chaque valeur ci-dessous :
+
+   1. SOUS-EXPOSITION ASSUMÉE. Les noirs dominent le cadre. La
+      lumière est rare et vient par flaques. On ne peint pas un
+      fond sombre : on peint une obscurité que la lumière troue.
+   2. BÉTON BANCHÉ, PAS GRIS BLEU. La matière est chaude, presque
+      taupe, avec ses trous de banche visibles. Toute la grise
+      neutre est décalée vers le rouge.
+   3. UNE SEULE COULEUR : l'ambre des spots sur le béton. Autour
+      de 2700 K. C'est la couleur de marque de FILON depuis
+      toujours — elle est ici réchauffée, pas remplacée.
+   4. LE VERT VIENT DU VIVANT. Feuillage tropical en contre-jour.
+      Il remplace le turquoise, qui jurait en ambiance chaude.
+   5. GÉOMÉTRIE ORTHOGONALE. L'architecture est à angles vifs.
+      Les rayons tombent de 24px à 4px. La pilule disparaît,
+      sauf en pastille — clin d'œil au bandeau des Reels.
+   6. LA LUMIÈRE REMPLACE L'OMBRE PORTÉE. Sur fond sombre une
+      ombre ne se voit pas. Le relief se fait par une arête haute
+      qui capte la lumière, et par des halos.
+   7. UNE SEULE GROTESQUE, EN BAS DE CASSE, POINT FINAL. Le
+      mot-signe « wearebrand. » ne dit rien d'autre. La serif
+      Playfair est retirée.
+
+   Deux densités, une seule identité — voir [data-density] plus
+   bas. La vitrine respire ; le catalogue à 799 435 offres
+   remonte le contraste et resserre l'espace. C'est le même
+   monde, pas le même débit d'information.
    ============================================================ */
 
 :root {
   /* ── PRIMITIVES ─────────────────────────────────────────── */
 
-  /* Encre */
-  --fx-ink-950: #0a0a0a;
-  --fx-ink-900: #1a1a1a;
-  --fx-ink-800: #2d2d2d;
-  --fx-ink-700: #3d3d3d;
-  --fx-ink-500: #6b6b6b;
-  --fx-ink-400: #9a9a9a;
-  --fx-ink-300: #c4c4c4;
-  --fx-ink-200: #e0e0e0;
-  --fx-ink-100: #f0f0f0;
+  /* Béton — gris chauds, décalés vers le rouge. Jamais de gris bleu :
+     c'est ce qui distingue le béton banché d'un thème sombre générique. */
+  --fx-ink-1000: #080706;  /* l'ombre la plus profonde du cadre */
+  --fx-ink-950: #0e0c0b;   /* fond de page */
+  --fx-ink-900: #16130f;   /* béton dans l'ombre */
+  --fx-ink-850: #1e1a16;   /* surface posée */
+  --fx-ink-800: #272219;   /* surface levée */
+  --fx-ink-700: #38312a;   /* arête, séparation franche */
+  --fx-ink-600: #4d453b;
+  --fx-ink-500: #6b6155;   /* béton en demi-teinte */
+  --fx-ink-400: #8d8375;   /* texte discret */
+  --fx-ink-300: #a89e90;   /* texte secondaire */
+  --fx-ink-200: #c9c0b3;
+  --fx-ink-100: #e4ded4;   /* béton en pleine lumière = texte courant */
+  --fx-ink-50: #f2eee7;    /* le point le plus clair, rare */
 
-  /* Papier — BLANC PUR, comme Phia */
-  --fx-paper-0: #ffffff;
-  --fx-paper-50: #fafafa;
-  --fx-paper-100: #f5f5f5;
-  --fx-paper-200: #eeeeee;
+  /* Ambre — la flaque de spot sur le mur. Seule couleur de l'image. */
+  --fx-gold-900: #3a2a0e;
+  --fx-gold-800: #56400f;
+  --fx-gold-700: #7a5c1c;
+  --fx-gold-600: #a37c2b;
+  --fx-gold-500: #c89544;  /* cœur de la flaque */
+  --fx-gold-400: #d9ab5f;
+  --fx-gold-300: #e8c489;
+  --fx-gold-100: #f0dcb4;
 
-  /* Or — la couleur de la marque, plus subtile */
-  --fx-gold-700: #6f5518;
-  --fx-gold-600: #8a6a24;
-  --fx-gold-500: #a98436;
-  --fx-gold-100: #f5eedd;
-  --fx-gold-50: #fbf7ee;
+  /* Feuillage — le vert du contre-jour tropical. Remplace le turquoise. */
+  --fx-leaf-900: #1b2416;
+  --fx-leaf-700: #3d5230;
+  --fx-leaf-500: #6d8f52;
+  --fx-leaf-400: #8fb072;
+  --fx-leaf-300: #b0cb96;
 
-  /* Turquoise — économie constatée uniquement */
-  --fx-gain-700: #08635c;
-  --fx-gain-600: #0a7d74;
-  --fx-gain-100: #def2f0;
+  /* Alerte — terre cuite, pas rouge signal : ça reste dans la palette. */
+  --fx-alert-900: #3a1a14;
+  --fx-alert-500: #c4573f;
+  --fx-alert-300: #e59480;
 
-  /* Alerte */
-  --fx-alert-600: #b42318;
-  --fx-alert-100: #fee4e2;
-
-  /* Espacement — MASSIF, inspiré de Phia (beaucoup d'air) */
+  /* Espacement — la vitrine respire large. */
   --fx-space-1: 4px;
   --fx-space-2: 8px;
   --fx-space-3: 12px;
@@ -65,8 +89,10 @@
   --fx-space-11: 180px;
   --fx-space-12: 240px;
 
-  /* Typographie — SERIF pour les titres comme Phia (GT Super Display) */
-  --fx-font-display: var(--font-display), var(--font-serif), "Playfair Display", "Georgia", serif;
+  /* Typographie — une seule grotesque. Le display est la même famille
+     que le corps, tenue en graisse légère et en interlettrage serré :
+     c'est ce qui donne le calme, pas un changement de famille. */
+  --fx-font-display: var(--font-display), var(--font-sans), "Inter", -apple-system, sans-serif;
   --fx-font-body: var(--font-sans), "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --fx-text-xs: 12px;
@@ -80,68 +106,87 @@
   --fx-text-4xl: clamp(44px, 6vw, 64px);
   --fx-text-5xl: clamp(52px, 8vw, 88px);
 
-  --fx-leading-tight: 1.1;
-  --fx-leading-snug: 1.25;
-  --fx-leading-normal: 1.6;
+  --fx-leading-tight: 1.06;
+  --fx-leading-snug: 1.22;
+  --fx-leading-normal: 1.62;
+  /* Le grand display se resserre franchement ; le petit texte s'ouvre
+     légèrement, parce que sur fond sombre les contours bavent. */
+  --fx-tracking-display: -0.035em;
   --fx-tracking-tight: -0.02em;
-  --fx-tracking-normal: 0;
-  --fx-tracking-wide: 0.12em;
+  --fx-tracking-normal: 0.006em;
+  --fx-tracking-wide: 0.16em;
 
-  /* Rayons — plus doux, moins anguleux */
-  --fx-radius-xs: 8px;
-  --fx-radius-sm: 12px;
-  --fx-radius-md: 16px;
-  --fx-radius-lg: 24px;
-  --fx-radius-xl: 32px;
+  /* Rayons — l'architecture est à angles vifs. */
+  --fx-radius-xs: 2px;
+  --fx-radius-sm: 3px;
+  --fx-radius-md: 4px;
+  --fx-radius-lg: 6px;
+  --fx-radius-xl: 8px;
   --fx-radius-full: 999px;
+  /* Le seul arrondi généreux du système : le bandeau de sous-titre
+     des Reels. Réservé aux pastilles. */
+  --fx-radius-caption: 10px;
 
-  /* Mouvement */
-  --fx-duration-fast: 150ms;
-  --fx-duration: 250ms;
-  --fx-duration-slow: 400ms;
-  --fx-duration-reveal: 800ms;
+  /* Mouvement — lent, comme les plans du compte. Rien ne claque. */
+  --fx-duration-fast: 160ms;
+  --fx-duration: 280ms;
+  --fx-duration-slow: 520ms;
+  --fx-duration-reveal: 1100ms;
   --fx-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --fx-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Élévation — subtile, comme Phia (pas de bordures, juste des ombres) */
-  --fx-elevation-1: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --fx-elevation-2: 0 4px 16px rgba(0, 0, 0, 0.06), 0 12px 32px rgba(0, 0, 0, 0.04);
-  --fx-elevation-3: 0 8px 24px rgba(0, 0, 0, 0.08), 0 24px 64px rgba(0, 0, 0, 0.06);
+  /* Relief — sur fond sombre, une ombre portée ne se voit pas.
+     Le relief vient d'une arête haute qui capte la lumière, doublée
+     d'une ombre ambiante très large. */
+  --fx-edge: inset 0 1px 0 rgba(232, 222, 205, 0.07);
+  --fx-edge-strong: inset 0 1px 0 rgba(232, 222, 205, 0.12);
+  --fx-elevation-1: var(--fx-edge), 0 1px 2px rgba(0, 0, 0, 0.5);
+  --fx-elevation-2: var(--fx-edge), 0 8px 28px rgba(0, 0, 0, 0.55);
+  --fx-elevation-3: var(--fx-edge-strong), 0 24px 70px rgba(0, 0, 0, 0.65);
+  /* Halo ambré : la flaque de spot. À poser derrière un élément, pas dessus. */
+  --fx-glow: 0 0 60px -12px rgba(200, 149, 68, 0.35);
+  --fx-glow-strong: 0 0 90px -10px rgba(200, 149, 68, 0.5);
 
   /* ── SÉMANTIQUE ─────────────────────────────────────────── */
 
-  --fx-bg: var(--fx-paper-0);           /* BLANC PUR */
-  --fx-bg-sunken: var(--fx-paper-50);
-  --fx-surface: var(--fx-paper-0);
-  --fx-surface-raised: var(--fx-paper-0);
+  --fx-bg: var(--fx-ink-950);
+  --fx-bg-sunken: var(--fx-ink-1000);
+  --fx-surface: var(--fx-ink-900);
+  --fx-surface-raised: var(--fx-ink-850);
+  --fx-surface-overlay: var(--fx-ink-800);
 
-  --fx-text: var(--fx-ink-700);          /* Gris foncé comme Phia, pas noir */
-  --fx-text-secondary: var(--fx-ink-500);
+  --fx-text: var(--fx-ink-100);
+  --fx-text-strong: var(--fx-ink-50);
+  --fx-text-secondary: var(--fx-ink-300);
   --fx-text-muted: var(--fx-ink-400);
-  --fx-text-on-dark: var(--fx-paper-0);
+  --fx-text-on-dark: var(--fx-ink-100);
+  --fx-text-on-action: var(--fx-ink-1000);
 
-  --fx-border: rgba(0, 0, 0, 0.06);     /* Très subtil */
-  --fx-border-strong: rgba(0, 0, 0, 0.12);
+  /* Les séparations sont des arêtes éclairées, pas des traits noirs. */
+  --fx-border: rgba(232, 222, 205, 0.09);
+  --fx-border-strong: rgba(232, 222, 205, 0.17);
 
-  --fx-action: var(--fx-ink-900);
-  --fx-action-hover: var(--fx-ink-950);
-  --fx-on-action: var(--fx-paper-0);
+  /* L'action principale est la lumière elle-même : ambre plein,
+     texte sombre. C'est le seul élément vraiment lumineux d'un écran. */
+  --fx-action: var(--fx-gold-500);
+  --fx-action-hover: var(--fx-gold-400);
+  --fx-on-action: var(--fx-ink-1000);
 
-  --fx-brand: var(--fx-gold-600);
-  --fx-brand-strong: var(--fx-gold-700);
-  --fx-brand-subtle: var(--fx-gold-100);
-  --fx-brand-wash: var(--fx-gold-50);
+  --fx-brand: var(--fx-gold-500);
+  --fx-brand-strong: var(--fx-gold-300);
+  --fx-brand-subtle: var(--fx-gold-800);
+  --fx-brand-wash: var(--fx-gold-900);
 
-  --fx-gain: var(--fx-gain-600);
-  --fx-gain-strong: var(--fx-gain-700);
-  --fx-gain-subtle: var(--fx-gain-100);
+  --fx-gain: var(--fx-leaf-400);
+  --fx-gain-strong: var(--fx-leaf-300);
+  --fx-gain-subtle: var(--fx-leaf-900);
 
-  --fx-alert: var(--fx-alert-600);
-  --fx-alert-subtle: var(--fx-alert-100);
+  --fx-alert: var(--fx-alert-300);
+  --fx-alert-subtle: var(--fx-alert-900);
 
-  --fx-focus: var(--fx-ink-900);
+  --fx-focus: var(--fx-gold-400);
 
-  /* Gabarit — plus large, plus aéré */
+  /* Gabarit */
   --fx-container: 1240px;
   --fx-container-narrow: 800px;
   --fx-gutter: clamp(24px, 5vw, 48px);
@@ -153,23 +198,131 @@
 
   --fx-btn-height: 52px;
   --fx-btn-height-sm: 44px;
-  --fx-btn-padding-x: 28px;
-  --fx-btn-radius: var(--fx-radius-full);
+  --fx-btn-padding-x: 30px;
+  --fx-btn-radius: var(--fx-radius-md);
 
   --fx-card-radius: var(--fx-radius-lg);
   --fx-card-padding: var(--fx-space-6);
-  --fx-card-border: none;               /* PAS DE BORDURES — comme Phia */
+  --fx-card-border: 1px solid var(--fx-border);
   --fx-card-shadow: var(--fx-elevation-1);
   --fx-card-shadow-hover: var(--fx-elevation-2);
 
-  --fx-badge-height: 28px;
-  --fx-badge-radius: var(--fx-radius-full);
+  --fx-badge-height: 26px;
+  --fx-badge-radius: var(--fx-radius-caption);
 
   --fx-field-height: 56px;
-  --fx-field-radius: var(--fx-radius-full);
+  --fx-field-radius: var(--fx-radius-md);
+  --fx-field-bg: var(--fx-ink-900);
+}
 
-  /* ── COMPATIBILITÉ (anciens noms) ──────────────────────── */
+/* ============================================================
+   DENSITÉ CATALOGUE
+   ------------------------------------------------------------
+   Même palette, même géométrie, autre débit. À 799 435 offres,
+   ce qui décide n'est plus l'atmosphère mais la lisibilité et la
+   vitesse de balayage. Trois choses changent, et seulement trois :
 
+   — le contraste du texte monte au maximum de la palette ;
+   — les surfaces se détachent plus franchement du fond, pour que
+     l'œil sépare les lignes sans avoir à lire ;
+   — l'espace vertical est divisé par deux environ.
+
+   L'ambiance reste : c'est le même béton, sous une lampe de
+   travail plutôt qu'un spot d'accueil.
+   ============================================================ */
+
+[data-density="catalogue"] {
+  --fx-text: var(--fx-ink-50);
+  --fx-text-secondary: var(--fx-ink-200);
+  --fx-text-muted: var(--fx-ink-300);
+
+  --fx-surface: var(--fx-ink-850);
+  --fx-surface-raised: var(--fx-ink-800);
+
+  --fx-border: rgba(232, 222, 205, 0.14);
+  --fx-border-strong: rgba(232, 222, 205, 0.24);
+
+  --fx-section-y: clamp(40px, 5vw, 64px);
+  --fx-section-y-lg: clamp(56px, 7vw, 88px);
+  --fx-page-top: clamp(88px, 9vw, 112px);
+
+  --fx-card-padding: var(--fx-space-4);
+  --fx-leading-normal: 1.5;
+  --fx-tracking-normal: 0.01em;
+}
+
+/* ============================================================
+   TON CLAIR — la section inversée
+   ------------------------------------------------------------
+   Correction d'après un second passage sur les Reels : les sites
+   montrés ne sont pas sombres de bout en bout. Ils ALTERNENT,
+   franchement, écran par écran. Le burger bascule sur fond blanc
+   pour la vue éclatée « THE STACK » ; le site de fret enchaîne
+   hero noir, « WE MOVE FREIGHT » sur crème, camion sur noir,
+   « TRUSTED BY » sur clair.
+
+   L'alternance n'est pas décorative : elle découpe le récit. Un
+   changement de fond = un changement de sujet. Et c'est ce qui
+   permet au catalogue d'être lisible sans sortir du monde.
+
+   Le ton clair n'est pas « le thème clair » : c'est le béton en
+   plein soleil. Même matière, même ambre, autre exposition.
+   ============================================================ */
+
+[data-tone="light"] {
+  --fx-bg: #e7e2d8;
+  --fx-bg-sunken: #dcd6ca;
+  --fx-surface: #f2eee7;
+  --fx-surface-raised: #ffffff;
+  --fx-surface-overlay: #ffffff;
+
+  --fx-text: #1a1611;
+  --fx-text-strong: #080706;
+  --fx-text-secondary: #4d453b;
+  --fx-text-muted: #6b6155;
+  --fx-text-on-dark: #f2eee7;
+
+  --fx-border: rgba(8, 7, 6, 0.12);
+  --fx-border-strong: rgba(8, 7, 6, 0.22);
+
+  /* L'ambre s'assombrit pour rester lisible sur clair : c'est la
+     même couleur, à l'ombre plutôt qu'en pleine lumière. */
+  --fx-action: var(--fx-gold-700);
+  --fx-action-hover: var(--fx-gold-800);
+  --fx-on-action: #f2eee7;
+  --fx-brand: var(--fx-gold-700);
+  --fx-brand-strong: var(--fx-gold-800);
+  --fx-brand-subtle: #f0dcb4;
+  --fx-brand-wash: #f7ecd8;
+
+  --fx-gain: var(--fx-leaf-700);
+  --fx-gain-strong: #2b3a21;
+  --fx-gain-subtle: #dbe6cf;
+
+  --fx-alert: #8f3b28;
+  --fx-alert-subtle: #f3ddd6;
+
+  --fx-focus: var(--fx-gold-700);
+
+  /* Sur clair, l'ombre portée redevient visible : on la retrouve,
+     mais discrète — la lumière reste dure et directionnelle. */
+  --fx-edge: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  --fx-elevation-1: 0 1px 2px rgba(8, 7, 6, 0.08);
+  --fx-elevation-2: 0 10px 30px -12px rgba(8, 7, 6, 0.22);
+  --fx-elevation-3: 0 30px 70px -20px rgba(8, 7, 6, 0.32);
+  --fx-glow: 0 0 60px -14px rgba(122, 92, 28, 0.28);
+
+  color-scheme: light;
+  background: var(--fx-bg);
+  color: var(--fx-text);
+}
+
+/* ── COMPATIBILITÉ (anciens noms) ────────────────────────────
+   86 fichiers en dépendent. La couche est conservée telle quelle
+   et repointée : c'est elle qui fait basculer tout le site sans
+   toucher aux composants un par un. */
+
+:root {
   --paper: var(--fx-bg);
   --paper-2: var(--fx-bg-sunken);
   --card: var(--fx-surface);
@@ -185,9 +338,9 @@
   --teal-ink: var(--fx-gain-strong);
   --save: var(--fx-gain);
   --save-soft: var(--fx-gain-subtle);
-  --chrome: var(--fx-paper-100);
+  --chrome: var(--fx-surface-raised);
   --wave: var(--fx-ink-900);
-  --wave-text: var(--fx-paper-0);
+  --wave-text: var(--fx-text);
   --wave3: var(--fx-ink-900);
   --maxw: var(--fx-container);
   --ease: var(--fx-ease-out);
@@ -200,16 +353,16 @@
   --r-md: var(--fx-radius-sm);
   --r-lg: var(--fx-radius-md);
   --r-xl: var(--fx-radius-lg);
-  --r-full: var(--fx-radius-full);
+  --r-full: var(--fx-radius-caption);
   --shadow-soft: var(--fx-elevation-2);
-  --shadow-glow: var(--fx-elevation-2);
+  --shadow-glow: var(--fx-glow);
   --bg: var(--fx-bg);
   --bg-2: var(--fx-bg-sunken);
   --text: var(--fx-text);
   --text-dim: var(--fx-text-secondary);
   --text-mute: var(--fx-text-muted);
   --surface: var(--fx-surface);
-  --surface-2: var(--fx-surface);
+  --surface-2: var(--fx-surface-raised);
   --border: var(--fx-border);
   --border-2: var(--fx-border-strong);
   --blue: var(--fx-brand);
@@ -220,6 +373,6 @@
   --pos: var(--fx-gain);
   --pos-dim: var(--fx-gain-subtle);
   --gold: var(--fx-brand);
-  --vein: var(--fx-ink-900);
+  --vein: var(--fx-border-strong);
   --vein-soft: var(--fx-brand-wash);
 }

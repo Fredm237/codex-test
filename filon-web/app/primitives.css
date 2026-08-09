@@ -19,9 +19,11 @@
 .fx-section { padding-block: var(--fx-section-y); }
 .fx-section.lg { padding-block: var(--fx-section-y-lg); }
 .fx-section.sunken { background: var(--fx-bg-sunken); }
-.fx-section.ink { background: var(--fx-ink-900); color: var(--fx-text-on-dark); }
+/* Sur fond déjà sombre, un bloc « ink » ne peut pas être plus noir :
+   il devient le mur éclairé, légèrement remonté. */
+.fx-section.ink { background: var(--fx-surface-raised); color: var(--fx-text); }
 .fx-section.ink .fx-eyebrow,
-.fx-section.ink .fx-lede { color: rgba(250, 249, 247, 0.68); }
+.fx-section.ink .fx-lede { color: var(--fx-text-secondary); }
 
 /* Dégagement sous la barre de navigation fixe, pour un haut de page */
 .fx-section.page-top { padding-top: var(--fx-page-top); }
@@ -51,16 +53,14 @@
 
 .fx-display {
   font-family: var(--serif);
-  font-variation-settings: "opsz" 96, "SOFT" 0, "WONK" 0;
   font-size: var(--fx-text-4xl);
   line-height: var(--fx-leading-tight);
-  letter-spacing: var(--fx-tracking-tight);
-  font-weight: 400;
+  letter-spacing: var(--fx-tracking-display);
+  font-weight: 300;
 }
 .fx-display.xl { font-size: var(--fx-text-5xl); }
 .fx-h2 {
   font-family: var(--serif);
-  font-variation-settings: "opsz" 60;
   font-size: var(--fx-text-3xl);
   line-height: 1.1;
   letter-spacing: var(--fx-tracking-tight);
@@ -116,11 +116,14 @@
 }
 .fx-btn.secondary:hover { border-color: var(--fx-text); background: var(--fx-surface); }
 
-.fx-btn.on-ink { background: var(--fx-paper-0); color: var(--fx-ink-900); }
-.fx-btn.on-ink:hover { background: var(--fx-paper-100); }
+/* Posé sur un bloc encore plus sombre : le bouton devient la surface
+   claire. C'est l'inverse exact du bouton primaire, et le seul autre
+   élément d'un écran qui ait le droit d'être lumineux. */
+.fx-btn.on-ink { background: var(--fx-ink-100); color: var(--fx-ink-1000); }
+.fx-btn.on-ink:hover { background: var(--fx-ink-50); }
 
 .fx-btn.quiet { min-height: var(--fx-btn-height-sm); padding-inline: var(--fx-space-4); background: transparent; color: var(--fx-text-secondary); }
-.fx-btn.quiet:hover { color: var(--fx-text); background: var(--fx-bg-sunken); }
+.fx-btn.quiet:hover { color: var(--fx-text); background: var(--fx-surface-raised); }
 
 .fx-btn[aria-disabled="true"], .fx-btn:disabled { opacity: 0.45; pointer-events: none; }
 
@@ -175,7 +178,7 @@
   min-height: var(--fx-btn-height-sm);
   padding: 0 var(--fx-space-4);
   border: 1px solid var(--fx-border);
-  border-radius: var(--fx-radius-full);
+  border-radius: var(--fx-radius-caption);
   background: var(--fx-surface);
   font-size: var(--fx-text-sm);
   color: var(--fx-text-secondary);
@@ -183,13 +186,16 @@
   transition: border-color var(--fx-duration) var(--fx-ease-standard), color var(--fx-duration) var(--fx-ease-standard);
 }
 .fx-chip:hover { border-color: var(--fx-border-strong); color: var(--fx-text); }
+/* Le filtre actif s'allume : c'est la seule façon de le distinguer
+   sans bordure épaisse, et ça reprend la flaque de spot. */
 .fx-chip[aria-current="true"], .fx-chip.on {
-  background: var(--fx-ink-900);
-  border-color: var(--fx-ink-900);
-  color: var(--fx-paper-0);
+  background: var(--fx-brand);
+  border-color: var(--fx-brand);
+  color: var(--fx-ink-1000);
+  font-weight: 500;
 }
 .fx-chip span { color: var(--fx-text-muted); font-variant-numeric: tabular-nums; }
-.fx-chip[aria-current="true"] span, .fx-chip.on span { color: rgba(255, 255, 255, 0.6); }
+.fx-chip[aria-current="true"] span, .fx-chip.on span { color: rgba(8, 7, 6, 0.62); }
 
 /* ── Champ de recherche ──────────────────────────────────── */
 
@@ -222,7 +228,6 @@
 
 .fx-stat-value {
   font-family: var(--serif);
-  font-variation-settings: "opsz" 48;
   font-size: var(--fx-text-2xl);
   line-height: 1;
   letter-spacing: var(--fx-tracking-tight);
