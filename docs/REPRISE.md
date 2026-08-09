@@ -55,12 +55,14 @@ fusionne. Railway et Vercel redéploient seuls. Vérifie que c'est en ligne :
 
 ```bash
 export FILON_API=https://web-production-c6842.up.railway.app
-export FILON_TOKEN=filon-sync-9x2vale     # ADMIN_SYNC_TOKEN — secret, jamais commité
+export FILON_TOKEN=...                    # ADMIN_SYNC_TOKEN — à récupérer dans les
+                                          # variables Railway, jamais écrit ici
 curl -s $FILON_API/health | python3 -m json.tool | head -5
 ```
 
-`"status": "ok"` signale le nouveau build. S'il rend `"degraded"` avec
-`module 'app.db.session' has no attribute 'text'`, c'est l'ancien.
+Attention : `"status": "ok"` ne prouve pas que le nouveau build est en ligne —
+l'ancien le rend déjà. Le seul indice fiable est `uptime_seconds`, qui doit
+repartir de zéro après un redéploiement.
 
 **2. Reclasser, puis simuler.**
 

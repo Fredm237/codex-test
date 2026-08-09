@@ -7,7 +7,17 @@ Ils dégradent proprement si la base est absente (listes vides).
 from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
-from sqlalchemy import String, case, cast, delete, func, or_, select, update
+from sqlalchemy import (
+    Numeric,
+    String,
+    case,
+    cast,
+    delete,
+    func,
+    or_,
+    select,
+    update,
+)
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
@@ -24,6 +34,32 @@ router = APIRouter(prefix="/catalog", tags=["catalog"])
 MIN_RAIL_ITEMS = 4
 # Baisse minimale pour figurer dans « les plus grosses baisses » : 5 %.
 MIN_DROP_FACTOR = 1.05
+
+# ── Plausibilité des remises ────────────────────────────────────────────────
+#
+# Un prix de référence tiré du simple `max()` de l'historique n'est pas une
+# donnée, c'est une hypothèse. Les feeds marchands contiennent des prix par
+# défaut, des erreurs de saisie et des valeurs sentinelles : une offre relevée
+# une fois à 250 € puis six fois à 2,79 € produit « −99 % », et le tri par
+# remise décroissante place précisément cette aberration en vitrine.
+#
+# Trois garde-fous, chacun visant une famille d'erreurs observée en production :
+
+# 1. Une remise au-delà de ce seuil est un artefact de feed, pas une promotion.
+#    Aucun marchand ne solde durablement à −85 % ; au-delà, on a affaire à un
+#    changement de conditionnement (lot → pièce), une erreur de devise, ou un
+#    prix sentinelle. Les soldes réelles les plus agressives plafonnent à −80 %.
+MAX_PLAUSIBLE_DROP_PCT = 85.0
+
+# 2. Le prix haut doit avoir été observé plusieurs fois. Un pic isolé sur un
+#    seul relevé est un accident de collecte : le LEGO à 250 € vu une fois
+#    contre six relevés à 2,79 €. Un prix réellement pratiqué laisse plusieurs
+#    traces.
+MIN_HIGH_OBSERVATIONS = 2
+
+# 3. Le prix haut doit peser dans l'historique. Observé 2 fois sur 40 relevés,
+#    il reste une anomalie ; 2 fois sur 5, c'est un prix qui a existé.
+MIN_HIGH_SHARE = 0.15
 
 # Marqueurs de genre présents dans les libellés produit. Les flux déclarent une
 # catégorie que le marchand choisit lui-même, et certains rangent des robes sous
@@ -335,76 +371,17 @@ async def categories(session=Depends(db.get_session)) -> dict:
     return {"items": items, "departments": departments}
 
 
-@router.get("/featured")
-async def featured(session=Depends(db.get_session)) -> dict:
-    """Produits mis en avant pour le catalogue premium.
-
-    Retourne les meilleures baisses, les produits les plus populaires,
-    et les catégories tendance — pour un catalogue vivant sur desktop.
-    """
-    if session is None:
-        return {"drops": [], "popular": [], "trending_categories": []}
-
-    from datetime import datetime, timedelta
-
-    since = datetime.utcnow() - timedelta(hours=48)
-
-    # Top baisses (les plus grosses réductions des 48h)
-    drops_stmt = (
-        select(models.Offer, models.Merchant)
-        .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
-        .where(
-            models.Offer.drop_pct.isnot(None),
-            models.Offer.drop_pct >= 15,
-            models.Offer.image_url.isnot(None),
-            models.Offer.image_url != "",
-            models.Offer.is_canonical.is_(True),
-        )
-        .order_by(models.Offer.drop_pct.desc())
-        .limit(12)
-    )
-    blocked = _visible_merchant_clause()
-    if blocked is not None:
-        drops_stmt = drops_stmt.where(blocked)
-    drop_rows = (await session.execute(drops_stmt)).all()
-
-    # Catégories tendance (celles avec le plus de baisses récentes)
-    trending_stmt = (
-        select(
-            models.Offer.filon_category,
-            func.count().label("drops"),
-        )
-        .where(
-            models.Offer.filon_category.isnot(None),
-            models.Offer.drop_pct.isnot(None),
-            models.Offer.drop_pct >= 5,
-        )
-        .group_by(models.Offer.filon_category)
-        .order_by(func.count().desc())
-        .limit(8)
-    )
-    trending_rows = (await session.execute(trending_stmt)).all()
-
-    return {
-        "drops": [
-            {
-                "id": o.id,
-                "name": o.name,
-                "brand": o.brand,
-                "price": o.price,
-                "currency": o.currency,
-                "drop_pct": round(o.drop_pct, 1) if o.drop_pct else None,
-                "image": o.image_url,
-                "merchant": {"name": m.name, "slug": m.slug},
-            }
-            for (o, m) in drop_rows
-        ],
-        "trending_categories": [
-            {"name": cat, "slug": taxonomy.slug_of(cat), "drops": int(n)}
-            for (cat, n) in trending_rows
-            if cat
-        ],
-    }
+# NOTE — `GET /catalog/featured` a été retiré le 04/08/2026.
+#
+# Il interrogeait `models.Offer.drop_pct`, une colonne qui n'existe pas dans
+# `models.py` : l'endpoint répondait donc 500 sur *toutes* les requêtes, en
+# production comme ailleurs. Aucune page du front ne l'appelait, ce qui explique
+# qu'il soit passé inaperçu.
+#
+# Un 5xx permanent n'est pas inoffensif : il pollue les logs et rend inutilisable
+# toute alerte fondée sur le taux d'erreurs. Les rails de la home sont servis par
+# `/catalog/highlights`, qui calcule les baisses depuis `price_snapshots` avec
+# contrôle de vraisemblance ; c'est la seule source à utiliser.
 
 
 @router.get("/admin/unclassified")
@@ -605,17 +582,64 @@ async def highlights(
     if session is None:
         return {"sections": []}
 
-    # Agrégat d'historique : uniquement les offres relevées au moins deux fois,
-    # sinon « baisse » et « plus bas » n'ont aucun sens.
-    snap = (
+    # ── Agrégat d'historique, avec prix de référence validé ────────────────
+    #
+    # `max()` seul n'est pas un prix de référence : c'est le pire relevé, erreurs
+    # de feed incluses. On calcule donc aussi combien de fois ce maximum a été
+    # observé et sur combien de relevés, pour pouvoir écarter les pics isolés.
+    #
+    # `count(*) FILTER (WHERE price = max)` n'est pas exprimable en une passe :
+    # on agrège d'abord, puis on rejoint pour compter les occurrences du haut.
+    agg = (
         select(
             models.PriceSnapshot.offer_id.label("offer_id"),
             func.max(models.PriceSnapshot.price).label("high"),
             func.min(models.PriceSnapshot.price).label("low"),
+            func.count().label("samples"),
         )
         .group_by(models.PriceSnapshot.offer_id)
         .having(func.count() > 1)
         .subquery()
+    )
+
+    # Occurrences du prix haut. Comparaison à l'arrondi au centime : deux
+    # relevés du « même » prix peuvent différer d'un epsilon en flottant.
+    high_hits = (
+        select(
+            agg.c.offer_id.label("offer_id"),
+            func.count().label("high_count"),
+        )
+        .select_from(
+            agg.join(
+                models.PriceSnapshot,
+                (models.PriceSnapshot.offer_id == agg.c.offer_id)
+                & (
+                    func.round(cast(models.PriceSnapshot.price, Numeric(12, 2)), 2)
+                    == func.round(cast(agg.c.high, Numeric(12, 2)), 2)
+                ),
+            )
+        )
+        .group_by(agg.c.offer_id)
+        .subquery()
+    )
+
+    snap = (
+        select(
+            agg.c.offer_id.label("offer_id"),
+            agg.c.high.label("high"),
+            agg.c.low.label("low"),
+            agg.c.samples.label("samples"),
+            func.coalesce(high_hits.c.high_count, 1).label("high_count"),
+        )
+        .select_from(agg.join(high_hits, high_hits.c.offer_id == agg.c.offer_id))
+        .subquery()
+    )
+
+    # Un prix de référence crédible : observé plusieurs fois, et assez souvent
+    # pour ne pas être un accident.
+    trusted_high = (
+        snap.c.high_count >= MIN_HIGH_OBSERVATIONS,
+        snap.c.high_count >= snap.c.samples * MIN_HIGH_SHARE,
     )
 
     # Clé de déduplication : le produit regroupé par EAN quand il existe, sinon
@@ -655,6 +679,10 @@ async def highlights(
     visible = tuple(visible)
 
     # 📉 Les plus grosses baisses de prix (prix actuel < plus haut relevé).
+    #
+    # Le tri par remise décroissante est un amplificateur d'erreurs : sans
+    # plafond, il met en tête les feeds les plus abîmés. On borne donc la remise
+    # par le haut *et* on exige un prix de référence observé plusieurs fois.
     drop_pct = ((snap.c.high - models.Offer.price) / snap.c.high * 100.0)
     drops_core = (
         core(drop_pct.desc(), snap.c.high.label("high"), snap.c.low.label("low"),
@@ -662,7 +690,12 @@ async def highlights(
         .join(snap, snap.c.offer_id == models.Offer.id)
         # Une baisse d'un pour cent n'est pas une bonne affaire, c'est du bruit :
         # afficher « -1 % » décrédibilise la rangée entière.
-        .where(*visible, snap.c.high > models.Offer.price * MIN_DROP_FACTOR)
+        .where(
+            *visible,
+            *trusted_high,
+            snap.c.high > models.Offer.price * MIN_DROP_FACTOR,
+            drop_pct <= MAX_PLAUSIBLE_DROP_PCT,
+        )
     )
     drops = await _rail(
         session, drops_core, limit=limit,
@@ -674,11 +707,32 @@ async def highlights(
     )
 
     # 🏅 Au plus bas historique (et le prix a réellement varié).
-    depth = ((snap.c.high - snap.c.low) / snap.c.high)
+    #
+    # Trié par profondeur `(high - low) / high`, ce rail renvoyait exactement les
+    # mêmes produits que « baisses », dans le même ordre : les deux mesures sont
+    # colinéaires quand le prix courant est au plus bas. Deux rangées identiques
+    # sur la même page donnent l'impression d'un catalogue vide.
+    #
+    # La question propre à ce rail est « depuis combien de temps ce prix est-il
+    # au plancher ? ». On trie donc par richesse d'historique : un plus-bas
+    # confirmé sur trente relevés vaut mieux qu'un plus-bas de deux jours.
     lowest_core = (
-        core(depth.desc(), snap.c.high.label("high"), snap.c.low.label("low"))
+        core(
+            snap.c.samples.desc(),
+            snap.c.high.label("high"),
+            snap.c.low.label("low"),
+        )
         .join(snap, snap.c.offer_id == models.Offer.id)
-        .where(*visible, snap.c.high > snap.c.low, models.Offer.price <= snap.c.low)
+        .where(
+            *visible,
+            *trusted_high,
+            snap.c.high > snap.c.low,
+            models.Offer.price <= snap.c.low,
+            # Même exigence de vraisemblance : un « plus bas » adossé à un haut
+            # aberrant raconte la même contre-vérité.
+            ((snap.c.high - snap.c.low) / snap.c.high * 100.0)
+            <= MAX_PLAUSIBLE_DROP_PCT,
+        )
     )
     lowest = await _rail(
         session, lowest_core, limit=limit,

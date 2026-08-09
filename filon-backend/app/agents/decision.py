@@ -37,9 +37,13 @@ def _build_analysis(product: dict, e: dict) -> dict:
 
 
 def _rank_key(a: dict) -> tuple:
-    rating = (a.get("reviews") or {}).get("rating", 0.0)
+    # `rating` peut être absent OU explicitement None : les flux Awin ne
+    # fournissent aucune note (voir catalog_source._shape). `.get(k, 0.0)` ne
+    # protège que de la clé manquante, pas d'une valeur None présente, d'où le
+    # `or 0.0` qui couvre les deux cas avant l'inversion de signe.
+    rating = (a.get("reviews") or {}).get("rating") or 0.0
     # Prix réel croissant d'abord, puis meilleure note.
-    return (a["real_price"], -rating)
+    return (a["real_price"], -float(rating))
 
 
 async def run(state: AdviseState) -> AdviseState:
@@ -71,8 +75,11 @@ async def run(state: AdviseState) -> AdviseState:
         reasons.append(f"Cashback {cb['rate_percent']}% via {cb['platform']} ({cb['amount']} €).")
     if best.get("promo"):
         reasons.append(f"Code {best['promo']['code']} : -{best['promo']['amount']} €.")
-    if best.get("reviews") and best["reviews"]["pros"]:
-        reasons.append(best["reviews"]["pros"][0] + ".")
+    # `pros` peut manquer ou être nul selon la source de données : on lit sans
+    # supposer la présence de la clé, sinon un KeyError fait tomber la requête.
+    pros = (best.get("reviews") or {}).get("pros") or []
+    if pros:
+        reasons.append(str(pros[0]).rstrip(".") + ".")
 
     verdict = (best.get("history") or {}).get("buy_signal", "acheter")
     headline = (
