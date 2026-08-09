@@ -2461,9 +2461,15 @@
    FIX MOBILE — Overflow, centrage, fond continu
    ══════════════════════════════════════════════════════════════ */
 
-/* Empêcher tout overflow horizontal sur le body */
+/* Empêcher tout débordement horizontal.
+   `clip` et non `hidden` : les deux coupent le débordement, mais `hidden`
+   fait de l'élément un conteneur de défilement, ce qui casse
+   `position: sticky` pour TOUS ses descendants. La séquence pilotée au
+   défilement en dépend — le symptôme était une image qui se décollait et du
+   texte qui sortait du cadre. Cette règle-ci écrasait celle de globals.css,
+   étant chargée après. */
 html, body {
-  overflow-x: hidden;
+  overflow-x: clip;
   max-width: 100vw;
 }
 
@@ -2687,4 +2693,71 @@ html, body {
    un voile local, pas un fond plein. */
 .fx-chapter.sur-scene .fx-container > * {
   text-shadow: 0 2px 24px rgba(8, 7, 6, 0.85);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   SÉQUENCE PILOTÉE AU DÉFILEMENT
+   --------------------------------------------------------------
+   Le film est calculé hors ligne et découpé en images ; le
+   défilement choisit laquelle dessiner. La section est haute :
+   c'est elle qui fournit la course. Le contenu reste collé au
+   centre pendant ce temps.
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-seq { position: relative; background: var(--fx-bg); }
+
+.fx-seq-collee {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.fx-seq-toile {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Le texte se pose sur l'image, une strate à la fois. L'ombre portée
+   remplace un voile plein : elle garde l'image lisible sans la ternir. */
+.fx-seq-texte {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  align-content: center;
+  opacity: 0;
+  transition: opacity var(--fx-duration-slow) var(--fx-ease-standard);
+  pointer-events: none;
+}
+.fx-seq-texte[data-on] { opacity: 1; }
+.fx-seq-texte .fx-chapter-title {
+  max-width: 17ch;
+  text-shadow: 0 2px 44px rgba(8, 7, 6, 0.95), 0 1px 4px rgba(8, 7, 6, 0.85);
+}
+
+/* Repli sous « mouvement réduit » : une image fixe, les titres empilés.
+   Rien ne disparaît, rien ne bouge. */
+.fx-seq-repli { position: relative; background: var(--fx-bg); }
+.fx-seq-repli img {
+  width: 100%;
+  height: 46vh;
+  object-fit: cover;
+  display: block;
+  opacity: 0.55;
+}
+.fx-seq-repli .fx-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--fx-space-7);
+  padding-block: var(--fx-section-y);
+}
+
+/* Sur petit écran la course est raccourcie : autant d'images, moins de
+   défilement, sinon la section devient interminable au doigt. */
+@media (max-width: 720px) {
+  .fx-seq { height: 300vh !important; }
+  .fx-seq-texte .fx-chapter-title { max-width: 13ch; }
 }

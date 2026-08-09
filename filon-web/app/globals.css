@@ -42,7 +42,12 @@ body {
   letter-spacing: var(--fx-tracking-normal);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  /* `clip` et non `hidden` : les deux empêchent le débordement horizontal,
+     mais `hidden` fait du body un conteneur de défilement, ce qui casse
+     `position: sticky` pour TOUS les descendants. La séquence pilotée au
+     défilement en dépend — le symptôme était une image qui se décollait et
+     du texte qui sortait du cadre. */
+  overflow-x: clip;
 }
 
 /* La sélection est une flaque de spot : ambre plein, texte sombre. */
