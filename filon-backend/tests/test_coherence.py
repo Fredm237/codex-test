@@ -134,37 +134,81 @@ class TestGeneraliste:
         assert res["offres_realignees"] == 0
 
 
-class TestPasDeProtectionAutomatique:
-    """Deux tentatives de garde-fou automatique ont échoué sur les vrais
-    chiffres, et ces tests fixent la conclusion.
+class TestCestLeDepartementQuiDecide:
+    """Ce qui sépare une seconde activité d'une erreur, c'est la distance.
 
-    L'idée était qu'une minorité concentrée — dans un rayon, puis dans un
-    département — signale une seconde activité plutôt que du bruit. Elle est
-    fausse : une erreur de mots-clés systématique est concentrée elle aussi.
+    Deux seuils de volume ont été essayés avant celui-ci et ont échoué sur les
+    vrais chiffres : ils supposaient qu'une minorité fournie signale une
+    activité, alors qu'une erreur de mots-clés systématique est fournie elle
+    aussi. La quantité ne dit rien ; le département, si.
 
-    Mesuré sur YesStyle, marchand de cosmétiques coréens : 2 113 offres en
-    Informatique (4,9 %), département High-Tech à 5,0 % — juste assez pour
-    déclencher la protection. Ce bloc n'est pas une activité, c'est exactement
-    la pollution du rayon Informatique qu'on veut retirer. Sa vraie mode tient
-    en 103 offres, soit 0,2 %.
-
-    La distinction relève de la connaissance du marchand. Elle est donc portée
-    par `exclude`, explicitement.
+    Les quatre cas ci-dessous sont les répartitions réelles du catalogue.
     """
 
-    async def test_un_bloc_concentre_est_realigne_comme_le_reste(self, session):
-        """Le cas YesStyle, aux proportions réelles."""
-        m = await _merchant(session, "yesstyle", 14)
+    async def test_les_rayons_voisins_du_departement_restent(self, session):
+        """Kinguin : 87,9 % en Gaming, mais le département High-Tech fait 98 %.
+
+        Les 1 238 recharges en Téléphonie et les 840 licences en Informatique
+        sont une seule activité rangée sur trois rayons — les forcer en Gaming
+        classerait une licence Windows comme un jeu.
+        """
+        m = await _merchant(session, "kinguin", 20)
+        await _peupler(session, m, {
+            "Gaming": 18180, "Téléphonie": 1238, "Informatique": 840,
+            "Alimentation & Boissons": 97, "Animalerie": 96, "Auto & Moto": 83,
+        })
+        await session.commit()
+
+        res = await coherence.realign(session)
+        assert res["offres_realignees"] == 97 + 96 + 83
+
+    async def test_un_bloc_d_un_autre_departement_est_ramene(self, session):
+        """YesStyle : cosmétiques coréens, et 2 113 offres en Informatique.
+
+        Même volume que Kinguin, conclusion inverse — parce qu'Informatique
+        n'est pas le département de la beauté. C'est la pollution du rayon
+        Informatique, et non une activité : la mode réelle tient en 103 offres.
+        """
+        m = await _merchant(session, "yesstyle", 21)
         await _peupler(session, m, {
             "Beauté & Parfum": 38838,
-            "Informatique": 2113,          # concentré, et pourtant erroné
+            "Informatique": 2113,
             "Alimentation & Boissons": 1198,
-            "Mode femme": 103,             # la vraie seconde activité : 0,2 %
+            "Mode femme": 103,
         })
         await session.commit()
 
         res = await coherence.realign(session)
         assert res["offres_realignees"] == 2113 + 1198 + 103
+
+    async def test_les_accessoires_d_un_specialiste_de_la_mode_restent(self, session):
+        """Overhemden : 94,6 % en chemises homme, 1 979 cravates et ceintures.
+
+        « Accessoires » est du même département : c'est le rayon voisin d'un
+        chemisier, pas une erreur. En revanche ses 729 offres en Loisirs
+        créatifs — des chemises nommées d'après leur tissu — reviennent.
+        """
+        m = await _merchant(session, "overhemden", 22)
+        await _peupler(session, m, {
+            "Mode homme": 55846, "Accessoires": 1979, "Mode femme": 303,
+            "Chaussures": 143, "Loisirs créatifs": 729, "Beauté & Parfum": 18,
+        })
+        await session.commit()
+
+        res = await coherence.realign(session)
+        assert res["offres_realignees"] == 729 + 18
+
+    async def test_les_tissus_nommes_d_apres_le_vetement_reviennent(self, session):
+        """TISSUS DE REVE, le cas d'origine : la mercerie n'est pas de la mode."""
+        m = await _merchant(session, "tissus-de-reve", 23)
+        await _peupler(session, m, {
+            "Loisirs créatifs": 5938,
+            "Mode femme": 548, "Informatique": 320, "Auto & Moto": 213,
+        })
+        await session.commit()
+
+        res = await coherence.realign(session)
+        assert res["offres_realignees"] == 548 + 320 + 213
 
     async def test_exclure_un_marchand_le_laisse_intact(self, session):
         m = await _merchant(session, "yesstyle", 15)

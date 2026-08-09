@@ -57,23 +57,37 @@ MIN_OFFERS = 50
 # rayon d'une offre, ils ne peuvent pas devenir une destination.
 RAYONS_NON_DESTINATION = frozenset({"Accessoires"})
 
-# Il n'y a pas de garde-fou automatique contre le déplacement d'une seconde
-# activité, et ce n'est pas un oubli : deux tentatives ont échoué sur les
-# chiffres réels.
+# Ce qui distingue une seconde activité d'une erreur de classement, ce n'est pas
+# le volume — c'est le département.
 #
-# L'idée était qu'une minorité *concentrée* dans un rayon, ou dans un
-# département, signale une activité réelle plutôt que du bruit. Elle est
-# fausse. Une erreur de mots-clés systématique est concentrée elle aussi :
-# mesuré sur YesStyle, marchand de cosmétiques coréens, 2 113 offres tombent en
-# Informatique (4,9 %) et le département High-Tech pèse exactement 5,0 % — juste
-# assez pour déclencher la protection. Or ce bloc n'est pas une activité : c'est
-# précisément la pollution du rayon Informatique qu'on cherche à retirer. Sa
-# vraie mode, elle, tient en 103 offres, soit 0,2 %.
+# Deux seuils ont été essayés avant celui-ci, et les deux ont échoué sur les
+# chiffres réels : ils supposaient qu'une minorité *fournie* signale une
+# activité, alors qu'une erreur de mots-clés systématique est fournie elle
+# aussi. La quantité ne dit rien. La distance, si.
 #
-# Concentration et erreur systématique sont indiscernables sur ces données. La
-# distinction relève de la connaissance du marchand, pas d'un seuil — et vingt
-# spécialistes se relisent à la main. `realign(exclude=…)` porte donc cette
-# décision, explicitement.
+# Un spécialiste étale naturellement son catalogue sur les rayons voisins de son
+# département — c'est du rangement, pas une erreur :
+#
+#   Overhemden vend des chemises homme (94,6 %), et 1 979 cravates et ceintures
+#   en « Accessoires ». Kinguin vend des clés de jeu (87,9 %), et 1 238 recharges
+#   en « Téléphonie », 840 licences logicielles en « Informatique ». Dans les
+#   deux cas le département tient 98 % : une seule activité, plusieurs rayons.
+#
+# Un bloc tombé dans un *autre* département, en revanche, est la signature même
+# de l'erreur de mots-clés :
+#
+#   YesStyle vend des cosmétiques coréens, et 2 113 offres partent en
+#   « Informatique » — un autre département. C'est la pollution du rayon
+#   Informatique, pas une activité. Sa mode réelle tient en 103 offres.
+#   TISSUS DE REVE voit ses tissus filer en « Mode » parce qu'ils portent le nom
+#   du vêtement auquel ils sont destinés.
+#
+# Le département du rayon dominant est donc protégé en entier, et tout ce qui en
+# sort est ramené. Vérifié sur les cinq marchands ci-dessus.
+#
+# Ce que la règle ne saura jamais trancher reste porté par `realign(exclude=…)` :
+# vingt spécialistes se relisent à la main.
+
 
 @dataclass(frozen=True)
 class Profil:
@@ -82,6 +96,10 @@ class Profil:
     rayon: str
     part: float
     total: int
+
+    @property
+    def departement(self) -> str | None:
+        return taxonomy.department_of(self.rayon)
 
 
 async def merchant_profiles(session) -> dict[int, Profil]:
@@ -227,11 +245,17 @@ async def realign(
             profil = profils.get(row.merchant_id)
             if not profil:
                 continue
-            # Seules les minoritaires *dispersées* bougent. Une offre déjà dans
-            # le rayon dominant est à sa place ; une offre non classée relève du
-            # classement, pas de la cohérence ; et une offre appartenant à une
-            # seconde activité du marchand n'est pas une erreur de mot-clé.
+            # Une offre non classée relève du classement, pas de la cohérence.
             if not row.filon_category:
+                continue
+            # Tout le département du rayon dominant est à sa place : les rayons
+            # voisins sont le rangement normal d'un spécialiste, pas une erreur.
+            # `is not None` compte : deux rayons hors département ne sont pas
+            # « du même département », ils sont seulement tous deux non rattachés.
+            if (
+                profil.departement is not None
+                and taxonomy.department_of(row.filon_category) == profil.departement
+            ):
                 continue
             if row.filon_category == profil.rayon:
                 continue
