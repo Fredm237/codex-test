@@ -2761,3 +2761,69 @@ html, body {
   .fx-seq { height: 300vh !important; }
   .fx-seq-texte .fx-chapter-title { max-width: 13ch; }
 }
+
+/* ══════════════════════════════════════════════════════════════
+   CIBLES TACTILES
+   --------------------------------------------------------------
+   Mesuré au navigateur : les liens de navigation faisaient 24 px
+   de haut, ceux du pied de page 21 px, les champs 26 px. La règle
+   demande 44 px — c'est la taille d'un doigt, pas une convention.
+
+   Deux partis pris. On n'agrandit QUE sur pointeur grossier : une
+   souris vise au pixel, gonfler les zones au bureau écarterait la
+   mise en page sans rien résoudre. Et on étend la zone par un
+   pseudo-élément plutôt que par du remplissage : la cible grandit,
+   le texte ne bouge pas d'un pixel, la maquette est intacte.
+   ══════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+  .ed-nav-mid a,
+  .ed-foot-links a,
+  .ed-foot-nav a,
+  .fx-nav-link,
+  .fx-nav-all,
+  .fx-nav-sub a,
+  .ed-brand,
+  .ed-lang-trigger,
+  .fx-crumb a {
+    position: relative;
+  }
+  /* La zone déborde symétriquement jusqu'à 44 px sans déplacer le texte. */
+  .ed-nav-mid a::after,
+  .ed-foot-links a::after,
+  .ed-foot-nav a::after,
+  .fx-nav-link::after,
+  .fx-nav-all::after,
+  .fx-nav-sub a::after,
+  .ed-brand::after,
+  .ed-lang-trigger::after,
+  .fx-crumb a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 44px;
+    transform: translateY(-50%);
+    /* Sous le texte, jamais devant : le lien reste sélectionnable. */
+    z-index: 0;
+  }
+
+  /* Les champs et boutons, eux, ont le droit de grandir pour de bon :
+     un champ trop court est aussi pénible à viser qu'à lire. */
+  .fx-field,
+  .fx-field input,
+  .sa-box input,
+  .ed-news input,
+  input[type="text"],
+  input[type="search"],
+  input[type="email"],
+  select {
+    min-height: 44px;
+  }
+}
+
+/* Une exception assumée : les liens EN LIGNE dans un paragraphe — « en savoir
+   plus » de la mention d'affiliation, par exemple. Leur imposer 44 px
+   écarterait les lignes du texte courant et rendrait le paragraphe illisible.
+   La règle vise les commandes, pas les mots d'une phrase. */
