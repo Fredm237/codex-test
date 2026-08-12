@@ -31,31 +31,27 @@ const CHAPITRES: Chapitre[] = [
   {
     debut: 0.0,
     fin: 0.2,
-    titre: "Est-ce vraiment le bon moment pour acheter ?",
-    sousTitre: "FILON vous donne la réponse.",
+    titre: "Est-ce vraiment le bon prix ?",
   },
   {
     debut: 0.22,
     fin: 0.4,
-    titre: "On compare les prix pour vous.",
-    sousTitre: "Plus de 800 000 offres suivies chez 40+ marchands.",
+    titre: "800 000 offres. 40 marchands. Un seul verdict.",
   },
   {
     debut: 0.42,
     fin: 0.6,
-    titre: "Le meilleur prix, trouvé en secondes.",
-    sousTitre: "Historique des prix, codes promo, reconditionné — tout en un.",
+    titre: "Le prix que personne d'autre ne vous montre.",
   },
   {
     debut: 0.62,
     fin: 0.8,
-    titre: "Économisez sans effort.",
-    sousTitre: "En moyenne 23% d'économie sur chaque achat.",
+    titre: "Vous venez d'économiser 47€.",
   },
   {
     debut: 0.82,
     fin: 1.0,
-    titre: "Prêt à trouver le bon prix ?",
+    titre: "FILON.",
     cta: { label: "Essayer le copilote", href: "/recherche/" },
   },
 ];
