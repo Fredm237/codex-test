@@ -1,8 +1,8 @@
 "use client";
 
-// Sections de la home — Refonte TOTALE août 2026.
-// Chaque étape a maintenant une illustration 3D premium.
-// Le Closing utilise un fond dramatique avec particules dorées.
+// Sections de la home — Direction w.wearebrand août 2026.
+// Béton banché, ambre, géométrie orthogonale.
+// Pas de sphères dorées, pas de vidéo décorative.
 
 import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
@@ -82,17 +82,6 @@ export function Closing({ proof }: { proof: Proof | null }) {
   const stats = proof?.stats ?? null;
   return (
     <section className="fx-closing">
-      <video
-        className="fx-closing-bg-video"
-        autoPlay
-        muted
-        loop
-        playsInline
-        aria-hidden="true"
-      >
-        <source src="/video/closing_bg.mp4" type="video/mp4" />
-      </video>
-      <div className="fx-closing-overlay" aria-hidden="true" />
       <motion.div
         className="fx-container narrow fx-closing-content"
         initial={{ opacity: 0, y: 40 }}

@@ -1,8 +1,8 @@
 "use client";
 
-// Hero — Vidéo 3D en fond plein écran.
-// Le titre et la recherche flottent par-dessus.
-// Minimum de texte. Maximum d'impact visuel.
+// Hero — fond sombre béton, titre ambre, barre de recherche.
+// Pas de vidéo : la séquence scrubée qui suit EST l'expérience.
+// Le Hero pose la question, la séquence la joue.
 
 import { motion } from "framer-motion";
 import type { Proof } from "@/lib/proof";
@@ -14,22 +14,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
 
   return (
     <section className="fx-hero">
-      {/* Vidéo 3D en fond — plein écran */}
-      <video
-        className="fx-hero-bg-video"
-        autoPlay
-        muted
-        loop
-        playsInline
-        poster="/img/closing-bg.png"
-      >
-        <source src="/video/filon_hf_promo.mp4" type="video/mp4" />
-      </video>
-
-      {/* Overlay sombre pour lisibilité */}
-      <div className="fx-hero-overlay" aria-hidden="true" />
-
-      {/* Contenu centré par-dessus */}
+      {/* Contenu centré */}
       <div className="fx-hero-content">
         <motion.h1
           className="fx-hero-title"

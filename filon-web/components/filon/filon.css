@@ -82,39 +82,11 @@
 
 .fx-hero {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-}
-
-.fx-hero-bg-video {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
-  /* Étalonnage. Le média d'origine est une poussière dorée à dominante
-     bleue : l'inverse exact de la référence. On ne peut pas le remplacer
-     en CSS, mais on peut le ramener dans le monde — désaturé, réchauffé,
-     nettement sous-exposé. Le vrai correctif est une direction
-     artistique de plans d'architecture ; voir la note de refonte. */
-  filter: saturate(0.55) contrast(1.12) brightness(0.62) sepia(0.28);
-}
-
-.fx-hero-overlay {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  /* Trois couches : un voile chaud qui tue la dominante bleue, un
-     vignettage qui referme le cadre comme un plan sous-exposé, et un
-     dégradé bas qui fait naître le contenu de l'ombre. */
-  background:
-    linear-gradient(to bottom, rgba(14, 12, 11, 0.55) 0%, rgba(14, 12, 11, 0.35) 42%, var(--fx-bg) 97%),
-    radial-gradient(120% 85% at 50% 38%, transparent 28%, rgba(8, 7, 6, 0.72) 100%),
-    rgba(24, 17, 10, 0.42);
+  background: var(--fx-bg, #0e0c0b);
 }
 
 .fx-hero-content {
@@ -125,42 +97,35 @@
   align-items: center;
   gap: var(--fx-space-7);
   text-align: center;
-  padding: 120px 24px 60px;
-  max-width: 800px;
+  padding: 160px 24px 80px;
+  max-width: 720px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .fx-hero-title {
-  font-size: clamp(28px, 7vw, 64px);
-  font-weight: 400;
-  line-height: 1.12;
-  color: #ffffff;
+  font-size: clamp(32px, 8vw, 72px);
+  font-weight: 200;
+  line-height: 1.08;
+  color: var(--fx-text, #e4ded4);
+  letter-spacing: -0.035em;
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
 .fx-hero-title em {
-  font-style: italic;
+  font-style: normal;
+  color: var(--fx-accent, #c89544);
 }
 
 /* Barre de recherche centrée */
 .fx-hero-search-wrap {
   width: 100%;
-  max-width: 600px;
+  max-width: 560px;
   padding: 0 8px;
   box-sizing: border-box;
 }
 
-.fx-field-icon { flex: none; color: var(--fx-text-muted); }
-
-.fx-hero-suggestions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--fx-space-2);
-  margin-top: var(--fx-space-4);
-  justify-content: center;
-}
-.fx-hero-suggestions .fx-chip { text-decoration: none; }
+.fx-field-icon { flex: none; color: var(--fx-ink-400, #8d8375); }
 
 /* Image dominante avec carte flottante */
 .fx-hero-visual {
