@@ -7,6 +7,7 @@ import { getProof } from "@/lib/proof";
 import { Showcase } from "@/components/filon/Showcase";
 import { SequenceScroll } from "@/components/filon/SequenceScroll";
 import { Pulse } from "@/components/filon/Pulse";
+import { Relief } from "@/components/filon/Relief";
 import { getPulse, getRails } from "@/lib/catalogue";
 
 export const revalidate = 3600;
@@ -73,6 +74,8 @@ export default async function HomePage() {
         <Pulse data={pulse} />
       </div>
 
+      {/* Relief — le paysage des prix, les colonnes qui bougent */}
+      <Relief />
 
       {/* Showcase — les vrais produits parlent */}
       {showcase.length > 0 && (

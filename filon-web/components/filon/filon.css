@@ -2915,3 +2915,107 @@ html, body {
   border-color: var(--_accent);
   outline: none;
 }
+
+/* ══════════════════════════════════════════════════════════════
+   RELIEF — Le paysage des prix
+   ──────────────────────────────────────────────────────────────
+   Chaque colonne est une offre. La hauteur est le prix. La
+   couleur est l'intensité de la baisse (ambre). Les colonnes
+   en retrait (confidence: "low") sont atténuées.
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-relief {
+  padding: var(--fx-space-9, 80px) 0;
+  background: var(--fx-ink-1000, #080706);
+}
+
+.fx-relief-title {
+  font-size: clamp(24px, 5vw, 48px);
+  font-weight: 200;
+  letter-spacing: -0.035em;
+  color: var(--fx-ink-100, #e4ded4);
+}
+.fx-relief-title em {
+  font-style: normal;
+  color: var(--fx-gold-500, #c89544);
+}
+
+.fx-relief-lede {
+  margin-top: var(--fx-space-3, 12px);
+  color: var(--fx-ink-400, #8d8375);
+  font-size: 15px;
+}
+
+.fx-relief-landscape {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  height: 280px;
+  margin-top: var(--fx-space-7, 48px);
+  padding: 0 var(--fx-space-5, 24px);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.fx-relief-landscape::-webkit-scrollbar { display: none; }
+
+.fx-relief-col {
+  position: relative;
+  flex: 1 0 4px;
+  min-width: 4px;
+  max-width: 12px;
+  height: var(--h, 50%);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-decoration: none;
+  transition: transform 0.15s ease;
+}
+.fx-relief-col:hover {
+  transform: scaleY(1.05);
+  z-index: 2;
+}
+
+.fx-relief-bar {
+  flex: 1;
+  border-radius: 2px 2px 0 0;
+  background: color-mix(
+    in srgb,
+    var(--fx-gold-500, #c89544) calc(var(--intensity, 0.5) * 100%),
+    var(--fx-ink-700, #38312a)
+  );
+  border-top: 1px solid color-mix(
+    in srgb,
+    var(--fx-gold-400, #d9ab5f) calc(var(--intensity, 0.5) * 100%),
+    var(--fx-ink-600, #4d453b)
+  );
+  transition: background 0.2s ease;
+}
+.fx-relief-col:hover .fx-relief-bar {
+  background: var(--fx-gold-500, #c89544);
+}
+
+.fx-relief-drop {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--fx-gold-300, #e8c489);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  pointer-events: none;
+}
+.fx-relief-col:hover .fx-relief-drop {
+  opacity: 1;
+}
+
+/* Confiance basse — colonne en retrait */
+.fx-relief-col[data-confidence="low"] {
+  opacity: 0.4;
+}
+.fx-relief-col[data-confidence="low"] .fx-relief-bar {
+  background: var(--fx-ink-800, #272219);
+  border-top-color: var(--fx-ink-700, #38312a);
+}
