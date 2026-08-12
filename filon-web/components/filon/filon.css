@@ -89,6 +89,33 @@
   background: var(--fx-bg, #0e0c0b);
 }
 
+/* Séquence scrubable — le Hero fait 300vh pour laisser le scroll piloter */
+.fx-hero--seq {
+  min-height: auto;
+  display: block;
+}
+.fx-hero-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+.fx-hero-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fx-hero-bg-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .fx-hero-content {
   position: relative;
   z-index: 2;
@@ -101,6 +128,13 @@
   max-width: 720px;
   width: 100%;
   box-sizing: border-box;
+}
+.fx-hero--seq .fx-hero-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 0 24px;
 }
 
 .fx-hero-title {
@@ -234,7 +268,8 @@
 
 @media (max-width: 768px) {
   .fx-hero { min-height: auto; padding-top: 100px; }
-  .fx-hero-title { font-size: var(--fx-text-4xl); }
+  .fx-hero--seq { padding-top: 0; }
+  .fx-hero-title { font-size: clamp(28px, 7vw, 48px); }
   .fx-hero-stats { flex-direction: column; gap: var(--fx-space-3); }
   .fx-hero-float-card { position: relative; bottom: auto; left: auto; transform: none; margin-top: var(--fx-space-4); }
 }
