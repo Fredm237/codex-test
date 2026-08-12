@@ -36,7 +36,7 @@ const CHAPITRES: Chapitre[] = [
   {
     debut: 0.22,
     fin: 0.4,
-    titre: "800 000 offres. 40 marchands. Un seul verdict.",
+    titre: "1,3 million d'offres. 207 marchands. Un seul verdict.",
   },
   {
     debut: 0.42,
