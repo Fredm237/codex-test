@@ -2792,3 +2792,126 @@ html, body {
    plus » de la mention d'affiliation, par exemple. Leur imposer 44 px
    écarterait les lignes du texte courant et rendrait le paragraphe illisible.
    La règle vise les commandes, pas les mots d'une phrase. */
+
+/* ══════════════════════════════════════════════════════════════
+   CATALOGUE — Grammaire propre (direction w.wearebrand)
+   ──────────────────────────────────────────────────────────────
+   Le catalogue est le même monde que la vitrine, mais sous une
+   lampe de travail plutôt qu'un spot d'accueil. Le contraste
+   monte, les surfaces se détachent plus fort, l'espace vertical
+   se resserre. C'est [data-density="catalogue"].
+   ══════════════════════════════════════════════════════════════ */
+
+.fx-catalogue {
+  --_surface: var(--fx-ink-900, #16130f);
+  --_surface-raised: var(--fx-ink-850, #1e1a16);
+  --_border: var(--fx-ink-700, #38312a);
+  --_border-lit: var(--fx-ink-600, #4d453b);
+  --_text: var(--fx-ink-100, #e4ded4);
+  --_text-muted: var(--fx-ink-400, #8d8375);
+  --_accent: var(--fx-gold-500, #c89544);
+}
+
+/* Titre du catalogue — grotesque, poids léger, interlettrage serré */
+.fx-catalogue .fx-catalogue-title {
+  font-weight: 200;
+  letter-spacing: -0.035em;
+  color: var(--_text);
+}
+
+/* Arborescence — arête éclairée à gauche, pas de bordure pleine */
+.fx-catalogue .fx-nav-tree {
+  border-left: 1px solid var(--_border-lit);
+}
+
+/* Élément actif dans la nav — fond surface levée + arête haute ambre */
+.fx-catalogue .fx-nav-link[aria-current],
+.fx-catalogue .fx-nav-all[aria-current] {
+  background: var(--_surface-raised);
+  border-top: 1px solid var(--_accent);
+  color: var(--_text);
+}
+
+/* Cartes produit — surface détachée, arête haute éclairée, pas d'ombre */
+.fx-catalogue .fx-product-grid .fx-card {
+  background: var(--_surface);
+  border: 1px solid var(--_border);
+  border-top-color: var(--_border-lit);
+  border-radius: 6px;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.fx-catalogue .fx-product-grid .fx-card:hover {
+  border-color: var(--_accent);
+  transform: translateY(-2px);
+}
+
+/* Prix — ambre pour le prix actuel, terre cuite barré pour l'ancien */
+.fx-catalogue .fx-card-price {
+  color: var(--_text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.fx-catalogue .fx-card-old-price {
+  color: var(--fx-alert-300, #e59480);
+  text-decoration: line-through;
+}
+
+/* Badge économie — feuillage, pas turquoise */
+.fx-catalogue .fx-card-badge {
+  background: var(--fx-leaf-900, #1b2416);
+  color: var(--fx-leaf-400, #8fb072);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+/* Pagination — sobre, ambre sur l'élément courant */
+.fx-catalogue .fx-pager-link {
+  min-width: 40px;
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  font-variant-numeric: tabular-nums;
+  color: var(--_text-muted);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+.fx-catalogue .fx-pager-link:hover {
+  color: var(--_text);
+  background: var(--_surface-raised);
+}
+.fx-catalogue .fx-pager-link[aria-current="page"] {
+  background: var(--_accent);
+  color: var(--fx-ink-1000, #080706);
+  font-weight: 700;
+}
+
+/* Filtres actifs — pastilles ambre */
+.fx-catalogue .fx-filter-pill {
+  background: var(--fx-gold-900, #3a2a0e);
+  color: var(--fx-gold-300, #e8c489);
+  border: 1px solid var(--fx-gold-700, #7a5c1c);
+}
+
+/* Champ de recherche catalogue — arête éclairée au focus */
+.fx-catalogue .fx-field:focus-within {
+  border-color: var(--_accent);
+  box-shadow: 0 0 0 2px rgba(200, 149, 68, 0.15);
+}
+
+/* Contrôles (tri, par page) — select sobre */
+.fx-catalogue select {
+  background: var(--_surface);
+  border: 1px solid var(--_border);
+  color: var(--_text);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13px;
+}
+.fx-catalogue select:focus {
+  border-color: var(--_accent);
+  outline: none;
+}
