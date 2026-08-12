@@ -1,61 +1,75 @@
-# Dépôt Chrome Web Store — FILON
+# FILON — Chrome Web Store Listing
 
-Tout ce qu'il faut pour publier. Une fois en ligne, on colle l'URL de la fiche
-dans `filon-web/lib/config.ts` (`CHROME_STORE_URL`) et **tous** les boutons
-« Ajouter à Chrome » du site installent l'extension en un clic.
+---
 
-## Pré-requis (côté toi)
+## Identité
 
-1. Un **compte développeur Chrome Web Store** : https://chrome.google.com/webstore/devconsole — frais **uniques de 5 $**.
-2. Vérifier le compte (Google demande parfois une adresse / e-mail pro).
+| Champ | Valeur |
+|-------|--------|
+| Nom | FILON — le vrai prix, avant d'acheter |
+| Nom court | FILON |
+| Catégorie | Shopping |
+| Langue principale | Français |
+| Éditeur | FILON |
+| Version | 1.0.0 |
 
-## Fichier à téléverser
+---
 
-- Le **ZIP de l'extension** (dossier `filon-extension/` compressé, `manifest.json` à la racine). Je le régénère à la demande.
+## Description courte
 
-## Champs de la fiche
-
-**Nom** : FILON — le vrai prix, avant d'acheter
-
-**Description courte** (132 car. max) :
 > Votre copilote d'achat indépendant. Obtenez l'analyse complète des prix, du reconditionné et des codes promo sur chaque produit.
 
-**Description longue** :
-> FILON est votre copilote d'achat indépendant, conçu pour vous aider à trouver le meilleur prix avant de finaliser votre commande. 
-> 
-> Lorsque vous consultez un produit sur vos boutiques en ligne préférées, FILON identifie l'article et rassemble pour vous toutes les offres disponibles sur le marché. En un seul clic, accédez à une analyse complète : le marchand le plus compétitif du moment, l'équivalent reconditionné garanti, les codes promotionnels vérifiés et le cashback disponible. Tous ces éléments sont calculés pour vous donner un seul indicateur clair : le vrai prix.
->
-> Une expérience haut de gamme et transparente :
-> • Entièrement gratuit et sans création de compte obligatoire.
-> • Totalement indépendant : notre algorithme ne peut être influencé par aucun paiement ou placement sponsorisé.
-> • Respect strict de la vie privée : aucune télémétrie, aucune création de profil publicitaire et aucune revente de vos données personnelles.
->
-> FILON ne se base pas sur des estimations, mais sur l'historique réel des prix. Ne surpayez plus jamais vos achats en ligne.
+---
 
-**Catégorie** : Shopping
-**Langue** : Français
-**Éditeur** : FILON
+## Description longue
 
-## Visuels demandés par Google
+FILON est votre copilote d'achat indépendant, conçu pour vous aider à trouver le meilleur prix avant de finaliser votre commande.
 
-| Élément | Format | Statut |
-| --- | --- | --- |
-| Icône | 128×128 PNG | ✅ `icons/icon128.png` |
-| Petite tuile promo | 440×280 PNG | à générer (je peux le faire) |
-| Capture(s) d'écran | 1280×800 ou 640×400 | à faire (popup + overlay sur une fiche) |
-| Grande tuile (option) | 920×680 | facultatif |
+Lorsque vous consultez un produit sur vos boutiques en ligne préférées, FILON identifie l'article et rassemble pour vous toutes les offres disponibles sur le marché. En un seul clic, accédez à une analyse complète : le marchand le plus compétitif du moment, l'équivalent reconditionné garanti, les codes promotionnels vérifiés et le cashback disponible. Tous ces éléments sont calculés pour vous donner un seul indicateur clair : le vrai prix.
 
-## Confidentialité (obligatoire)
+**Une expérience haut de gamme et transparente :**
 
-- **Politique de confidentialité** : URL requise → https://filon.be/confidentialite (déjà en ligne).
-- Justification des permissions à cocher :
-  - `activeTab` : lire le titre de la page **uniquement quand l'utilisateur clique** sur « Analyser la page ».
-  - `storage` : mémoriser la fermeture de l'overlay (12 h) — local, aucune donnée personnelle.
-  - `host_permissions` : limités aux marchands supportés, pas d'accès « tous les sites ».
-- Déclaration : **aucune donnée collectée / vendue / transférée**.
+— Entièrement gratuit et sans création de compte obligatoire.
+— Totalement indépendant : notre algorithme ne peut être influencé par aucun paiement ou placement sponsorisé.
+— Respect strict de la vie privée : aucune télémétrie, aucune création de profil publicitaire et aucune revente de vos données personnelles.
 
-## Après validation (2–5 jours ouvrés en général)
+FILON ne se base pas sur des estimations, mais sur l'historique réel des prix. Ne surpayez plus jamais vos achats en ligne.
 
-1. Copier l'URL de la fiche (`https://chromewebstore.google.com/detail/…/<ID>`).
-2. La coller dans `filon-web/lib/config.ts` → `CHROME_STORE_URL`.
-3. Redéployer : le bouton « Ajouter à Chrome » installe désormais en un clic, partout.
+---
+
+## Visuels
+
+| Élément | Format | Fichier |
+|---------|--------|---------|
+| Icône | 128 × 128 PNG | `icons/icon128.png` |
+| Tuile promotionnelle | 440 × 280 PNG | `store/promo-tile-440x280.png` |
+| Capture d'écran 1 | 1280 × 800 PNG | `store/screenshot-1-1280x800.png` |
+| Capture d'écran 2 | 1280 × 800 PNG | `store/screenshot-2-1280x800.png` |
+| Bannière marquee | 1400 × 560 PNG | `store/marquee-1400x560.png` |
+
+---
+
+## Confidentialité et permissions
+
+**Politique de confidentialité** : https://filon.be/confidentialite
+
+| Permission | Justification |
+|------------|---------------|
+| `activeTab` | Lire le titre et l'URL de la page uniquement lorsque l'utilisateur clique sur « Analyser ». Aucune lecture automatique. |
+| `storage` | Mémoriser la préférence de fermeture de l'overlay (12 heures). Stockage local uniquement, aucune donnée personnelle. |
+| `host_permissions` | Limité aux sites marchands supportés. Aucun accès à l'ensemble de la navigation. |
+
+**Déclaration de données** : aucune donnée collectée, vendue ou transférée à des tiers.
+
+---
+
+## Publication
+
+1. Compresser le dossier `filon-extension/` en ZIP (manifest.json à la racine).
+2. Téléverser sur le [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole).
+3. Renseigner les champs ci-dessus.
+4. Après validation, copier l'URL de la fiche dans `filon-web/lib/config.ts` → `CHROME_STORE_URL`.
+
+---
+
+*FILON — Designed in Bruxelles.*

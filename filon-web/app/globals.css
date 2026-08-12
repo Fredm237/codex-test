@@ -13,7 +13,7 @@
   --sans: var(--fx-font-body);
   --serif: var(--fx-font-display);
   --mono: "SF Mono", ui-monospace, "Geist Mono", Menlo, monospace;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 @theme inline {
@@ -42,12 +42,31 @@ body {
   letter-spacing: var(--fx-tracking-normal);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  /* `clip` et non `hidden` : les deux empêchent le débordement horizontal,
+     mais `hidden` fait du body un conteneur de défilement, ce qui casse
+     `position: sticky` pour TOUS les descendants. La séquence pilotée au
+     défilement en dépend — le symptôme était une image qui se décollait et
+     du texte qui sortait du cadre. */
+  overflow-x: clip;
 }
 
-::selection { background: var(--fx-ink-900); color: var(--fx-paper-0); }
+/* La sélection est une flaque de spot : ambre plein, texte sombre. */
+::selection { background: var(--fx-gold-500); color: var(--fx-ink-1000); }
 a { color: inherit; text-decoration: none; }
-h1, h2, h3 { margin: 0; font-family: var(--serif); font-weight: 300; line-height: var(--fx-leading-tight); text-wrap: balance; letter-spacing: var(--fx-tracking-tight); }
+
+/* Les titres sont la même grotesque que le corps, en graisse légère et
+   très resserrée. Sur fond sombre une graisse lourde s'empâte : c'est
+   l'échelle qui porte, pas le gras. */
+h1, h2, h3 {
+  margin: 0;
+  font-family: var(--serif);
+  font-weight: 300;
+  line-height: var(--fx-leading-tight);
+  text-wrap: balance;
+  letter-spacing: var(--fx-tracking-display);
+  color: var(--fx-text-strong);
+}
+h4, h5, h6 { font-family: var(--serif); font-weight: 400; letter-spacing: var(--fx-tracking-tight); }
 p { text-wrap: pretty; }
 img, video { max-width: 100%; }
 
@@ -59,16 +78,57 @@ img, video { max-width: 100%; }
   border-radius: var(--fx-radius-xs);
 }
 
-/* Utilitaires typographiques */
-.serif { font-family: var(--serif); }
-.it { font-family: var(--serif); font-style: italic; font-weight: 400; }
+/* Utilitaires typographiques.
+   `.serif` conserve son nom — 86 fichiers l'appellent — mais désigne
+   désormais la grotesque de titrage. Seul `.it` reste une vraie serif :
+   Outfit n'a pas d'italique, et l'éditorial en a besoin. */
+.serif { font-family: var(--serif); letter-spacing: var(--fx-tracking-display); }
+/* L'italique serif était la signature de l'ancienne référence. Elle est
+   retirée : la marque observée n'a ni serif ni italique. L'emphase se
+   fait par la graisse et la lumière — un cran plus léger que ce qui
+   l'entoure, posé dans l'ambre. */
+.it,
+h1 em, h2 em, .fx-display em, .fx-hero-title em {
+  font-family: var(--serif);
+  font-style: normal;
+  font-weight: 200;
+  letter-spacing: var(--fx-tracking-display);
+  color: var(--fx-brand);
+}
 .mono { font-family: var(--mono); font-feature-settings: "tnum"; }
+
+/* Le surtitre est la seule majuscule du système. Très interlettré,
+   discret : c'est une légende de plan, pas un titre. */
 .eyebrow {
   font-size: var(--fx-text-xs);
-  font-weight: 600;
+  font-weight: 500;
   letter-spacing: var(--fx-tracking-wide);
   text-transform: uppercase;
   color: var(--fx-text-muted);
+}
+
+/* Le mot-signe. Bas de casse, point final — la forme lue chez
+   w.wearebrand, transposée à FILON. */
+.wordmark {
+  font-family: var(--serif);
+  font-weight: 400;
+  text-transform: lowercase;
+  letter-spacing: -0.03em;
+  color: var(--fx-text-strong);
+}
+.wordmark::after { content: "."; color: var(--fx-brand); }
+
+/* Flaque de lumière : le halo ambré posé DERRIÈRE un bloc, jamais
+   dessus. C'est le seul effet lumineux autorisé. */
+.pool { position: relative; isolation: isolate; }
+.pool::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto;
+  height: 70%;
+  z-index: -1;
+  background: radial-gradient(60% 100% at 50% 0%, rgba(200, 149, 68, 0.16), transparent 70%);
+  pointer-events: none;
 }
 /* Reliquat de l'ancienne identité : le texte en dégradé bleu→turquoise
    devient un aplat de marque. Conservé le temps que les composants

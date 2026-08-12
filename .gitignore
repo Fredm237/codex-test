@@ -22,3 +22,4 @@ uploads/
 # ui-ux-pro-max skill ships its searchable database as CSV data files;
 # keep them tracked despite the global *.csv ignore above.
 !.claude/skills/**/*.csv
+mission.html

@@ -3,8 +3,12 @@ export const site = {
   tagline: "Le réflexe malin avant chaque achat.",
   description:
     "Avant chaque achat, FILON compare le meilleur cashback, le meilleur prix en reconditionné et les codes promo qui marchent vraiment. En toute transparence.",
-  url: "https://filon.be",
-  domain: "filon.be",
+  // Avec `www` : c'est la forme réellement servie. L'apex redirige en 308 vers
+  // elle, donc déclarer l'apex ici faisait subir une redirection à CHAQUE URL
+  // du sitemap et à chaque balise canonique — un moteur y voit des pages
+  // redirigées plutôt que des pages, et l'indexation s'en ressent.
+  url: "https://www.filon.be",
+  domain: "www.filon.be",
   locale: "fr_BE",
   twitter: "@filon",
   founder: "Freddy Mvogo Eloundou",

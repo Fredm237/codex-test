@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
-import { fraunces, playfair, inter } from "./fonts";
+import { fraunces, outfit, inter } from "./fonts";
 import { buildMetadata, organizationSchema, websiteSchema, JsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 
@@ -14,12 +14,12 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#F4F7FA",
+  themeColor: "#0e0c0b",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${fraunces.variable} ${playfair.variable} ${inter.variable}`}>
+    <html lang="fr" className={`${fraunces.variable} ${outfit.variable} ${inter.variable}`}>
       <head>
         <JsonLd data={organizationSchema()} />
         <JsonLd data={websiteSchema()} />

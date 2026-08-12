@@ -95,9 +95,19 @@ async def health() -> dict:
     uptime_seconds = time.time() - _START_TIME
     latency = (time.time() - start) * 1000
 
-    # Statut global : "ok" si toutes les dépendances critiques sont fonctionnelles
+    # Statut global : "ok" seulement si les dépendances critiques répondent.
+    #
+    # « slow » comptait auparavant comme sain, et c'est ce qui a rendu la sonde
+    # inutile : une base qui ne répond pas à `SELECT 1` en deux secondes ne sert
+    # plus une seule requête — tous les endpoints du catalogue rendaient 500
+    # pendant que /health affichait « ok ». Une sonde qui ne bouge pas quand le
+    # service est à terre ne surveille rien.
+    #
+    # « slow » reste distinct d'« error » dans le détail des dépendances : c'est
+    # ce qui permet à l'hébergeur de ne pas redémarrer un service dont la base
+    # répond, en retard. Mais le statut global, lui, doit le dire.
     overall = "ok"
-    if db_status["status"] == "error":
+    if db_status["status"] in ("error", "slow"):
         overall = "degraded"
 
     return {
