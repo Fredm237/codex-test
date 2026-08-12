@@ -350,22 +350,39 @@ async def generate_result(
         log.info("Cache hit pour '%s' (%.0fms)", query[:40], (time.time() - start) * 1000)
         return cached
 
+    from app.services.catalog_search import search_internal_products
     from app.services.serpapi_shopping import search_products
 
     result: dict[str, Any]
 
+    # PRIORITÉ 1 : Catalogue interne FILON (1,3M offres, 207 marchands)
     try:
-        # Timeout global pour ne jamais bloquer le client plus de 25s
         products = await asyncio.wait_for(
-            search_products(query, budget, country=country),
-            timeout=10.0,
+            search_internal_products(query, budget, country=country),
+            timeout=5.0,
         )
+        if products:
+            log.info("Catalogue interne : %d résultats pour '%s'", len(products), query[:40])
     except (asyncio.TimeoutError, Exception) as exc:
-        log.warning("SerpApi timeout/erreur (%s) → mode LLM ou synthèse", exc)
+        log.warning("Catalogue interne timeout/erreur (%s) → fallback SerpApi", exc)
         products = []
 
+    # PRIORITÉ 2 (fallback) : SerpApi/Google Shopping si le catalogue interne est vide
+    if not products:
+        try:
+            products = await asyncio.wait_for(
+                search_products(query, budget, country=country),
+                timeout=10.0,
+            )
+            if products:
+                log.info("Fallback SerpApi : %d résultats pour '%s'", len(products), query[:40])
+        except (asyncio.TimeoutError, Exception) as exc:
+            log.warning("SerpApi timeout/erreur (%s) → mode LLM ou synthèse", exc)
+            products = []
+
     if products:
-        log.info("Mode données réelles : %d produits SerpApi (%s)", len(products), country or "be")
+        source = "catalogue interne" if products[0].get("source") == "filon_catalog" else "SerpApi"
+        log.info("Mode données réelles : %d produits via %s (%s)", len(products), source, country or "be")
         result = await _rank_real_products(query, budget, products)
     else:
         provider = get_router().for_task("reasoning")
