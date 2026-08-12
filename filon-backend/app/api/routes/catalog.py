@@ -6,6 +6,8 @@ Ils dégradent proprement si la base est absente (listes vides).
 
 from __future__ import annotations
 
+import time
+
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
 from sqlalchemy import (
     Numeric,
@@ -1046,6 +1048,9 @@ async def rebuild_products_endpoint(
 @router.post("/admin/reclassify")
 async def reclassify_offers(
     batch: int = Query(default=2000, le=10000),
+    after_id: int = Query(default=0, ge=0),
+    max_offers: int = Query(default=0, ge=0),
+    max_seconds: float = Query(default=120.0, gt=0, le=600),
     x_admin_token: str | None = Header(default=None),
 ) -> dict:
     """Recalcule la catégorie FILON des offres déjà en base.
@@ -1053,18 +1058,40 @@ async def reclassify_offers(
     Le classement se fait à l'ingestion ; les offres antérieures doivent être
     rattrapées. Procède en flux, par curseur sur la clé primaire, pour que la
     mémoire reste bornée quelle que soit la taille du catalogue.
+
+    Reprenable et borné par construction. Traiter le million d'offres en une
+    seule requête a fait tomber la production : le proxy coupe la connexion bien
+    avant la fin, et surtout le volume d'écritures accumulé a saturé le disque
+    de la base (`No space left on device` sur `pg_wal`). Trois garde-fous en
+    découlent :
+
+    - `max_seconds` arrête la passe avant que la requête n'expire ;
+    - `max_offers` plafonne le nombre d'offres touchées par appel ;
+    - `after_id` reprend là où la passe précédente s'est arrêtée.
+
+    La réponse renvoie `next_after_id` et `done` : l'appelant boucle jusqu'à
+    `done`, ce qui laisse Postgres recycler son journal entre deux passes.
+    Chaque lot est validé séparément, donc une interruption ne perd que le lot
+    en cours.
     """
     _require_admin(x_admin_token)
     if not db.is_enabled():
         raise HTTPException(status_code=503, detail="base de données absente")
 
+    started = time.monotonic()
     updated = 0
     classified = 0
+    last_id = after_id
+    done = False
     async with db.session_scope() as session:
         if session is None:
             raise HTTPException(status_code=503, detail="base de données absente")
-        last_id = 0
         while True:
+            remaining = batch
+            if max_offers:
+                remaining = min(remaining, max_offers - updated)
+                if remaining <= 0:
+                    break
             rows = (
                 await session.execute(
                     select(
@@ -1073,10 +1100,11 @@ async def reclassify_offers(
                     )
                     .where(models.Offer.id > last_id)
                     .order_by(models.Offer.id)
-                    .limit(batch)
+                    .limit(remaining)
                 )
             ).all()
             if not rows:
+                done = True
                 break
             payload = []
             for r in rows:
@@ -1094,11 +1122,16 @@ async def reclassify_offers(
             await session.commit()
             updated += len(payload)
             last_id = rows[-1].id
+            if time.monotonic() - started >= max_seconds:
+                break
 
     return {
         "offers_processed": updated,
         "offers_classified": classified,
         "coverage_pct": round(classified / updated * 100, 1) if updated else 0.0,
+        "next_after_id": last_id,
+        "done": done,
+        "elapsed_seconds": round(time.monotonic() - started, 1),
     }
 
 
