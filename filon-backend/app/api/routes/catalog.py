@@ -1520,6 +1520,9 @@ async def reset_price_history(
 RELIEF_MAX_COLUMNS = 300
 # En dessous de deux relevés, il n'y a pas de palier : rien à dessiner.
 RELIEF_MIN_SAMPLES = 2
+# Une heure : la collecte de prix tourne au mieux quelques fois par jour, donc un
+# TTL court ne ferait que repayer 20 s de calcul sans rien rafraîchir.
+TTL_RELIEF = 3600
 
 # Erreurs d'échelle des feeds : un marchand qui envoie les centimes au lieu des
 # euros produit un palier hors de proportion (G-Shock relevée à 69,93 puis
@@ -1616,6 +1619,17 @@ async def relief(
 
     from datetime import datetime, timedelta
 
+    from app.services.cache import cache_key, get_cache
+
+    # La requête balaie 12,6 millions de relevés : 20 s mesurées sans cache, ce
+    # qui est disqualifiant pour une page d'accueil. Le relief ne change qu'à
+    # chaque collecte de prix, donc rien ne justifie de le recalculer par visite.
+    cache = get_cache()
+    cle = cache_key("relief", str(limit), str(window_days), category or "tous")
+    en_cache = await cache.get_json(cle)
+    if en_cache is not None:
+        return {**en_cache, "cached": True}
+
     depuis = datetime.utcnow() - timedelta(days=window_days)
 
     # Présélection : les offres qui ont bougé dans la fenêtre. On agrège d'abord
@@ -1708,6 +1722,8 @@ async def relief(
 
     lignes = (await session.execute(stmt)).all()
     if not lignes:
+        # Un relief vide n'est pas mis en cache : c'est probablement le signe que
+        # la collecte est en panne, et il ne faut pas figer cet état.
         return {"live": True, "window_days": window_days, "columns": []}
 
     # Historique détaillé des seules colonnes retenues, en une requête.
@@ -1786,10 +1802,13 @@ async def relief(
             }
         )
 
-    return {
+    charge = {
         "live": True,
         "generated_at": datetime.utcnow().isoformat(),
         "window_days": window_days,
         "count": len(colonnes),
         "columns": colonnes,
     }
+    if colonnes:
+        await cache.set_json(cle, charge, TTL_RELIEF)
+    return {**charge, "cached": False}
