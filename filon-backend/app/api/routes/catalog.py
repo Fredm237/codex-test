@@ -1506,3 +1506,190 @@ async def reset_price_history(
     await session.commit()
     log.warning("Historique de prix purgé : %s relevés supprimés", before)
     return {"deleted_snapshots": int(before or 0)}
+
+
+# ── Relief de prix : la matière de la scène 3D ───────────────────────────────
+#
+# La page d'accueil rend un paysage où chaque offre est une colonne dont la
+# hauteur est son prix et dont les strates sont ses paliers successifs. Un
+# endpoint dédié est nécessaire : `offer/{id}` ne donne l'historique que d'une
+# offre, et il en faut plusieurs centaines en une requête pour remplir un
+# `InstancedMesh` sans multiplier les allers-retours.
+
+# Au-delà, le JSON dépasse le budget de charge utile de la page d'accueil.
+RELIEF_MAX_COLUMNS = 300
+# En dessous de deux relevés, il n'y a pas de palier : rien à dessiner.
+RELIEF_MIN_SAMPLES = 2
+
+
+def _confiance(jours: float, releves: int) -> str:
+    """Qualifie ce que l'historique autorise à affirmer.
+
+    Le front module l'opacité et le texte sur cette valeur : une colonne peu
+    suivie s'affiche en retrait plutôt que d'asséner une tendance que trois
+    relevés ne soutiennent pas.
+    """
+    if releves >= 10 and jours >= 10:
+        return "bonne"
+    if releves >= 5 and jours >= 4:
+        return "moyenne"
+    return "faible"
+
+
+@router.get("/relief")
+async def relief(
+    limit: int = Query(default=180, le=RELIEF_MAX_COLUMNS, ge=12),
+    window_days: int = Query(default=21, le=90, ge=3),
+    category: str | None = Query(default=None, description="Rayon FILON à isoler"),
+    session=Depends(db.get_session),
+) -> dict:
+    """Le relief des prix : N offres, leurs paliers, prêtes à être instanciées.
+
+    Chaque colonne porte ses `steps` — des paires `[jours, prix]` — plutôt qu'une
+    courbe lissée : sur trois semaines un prix ne décrit pas une pente mais des
+    paliers, tenus puis rompus. C'est cette marche d'escalier que la scène rend,
+    et c'est la forme réelle de la donnée, pas une interprétation.
+
+    Les offres sont classées par ampleur de baisse : le premier plan du paysage
+    est occupé par ce qui vient de décrocher, puisque c'est la seule information
+    qui répond à « est-ce le bon moment ? ».
+    """
+    if session is None:
+        return {"live": False, "columns": []}
+
+    from datetime import datetime, timedelta
+
+    depuis = datetime.utcnow() - timedelta(days=window_days)
+
+    # Présélection : les offres qui ont bougé dans la fenêtre. On agrège d'abord
+    # pour ne rapatrier l'historique détaillé que des colonnes retenues — sortir
+    # tous les relevés de 1,29 million d'offres pour n'en garder que 180 serait
+    # absurde.
+    agg = (
+        select(
+            models.PriceSnapshot.offer_id.label("offer_id"),
+            func.max(models.PriceSnapshot.price).label("haut"),
+            func.min(models.PriceSnapshot.price).label("bas"),
+            func.count().label("releves"),
+            func.min(models.PriceSnapshot.captured_at).label("debut"),
+        )
+        .where(models.PriceSnapshot.captured_at >= depuis)
+        .group_by(models.PriceSnapshot.offer_id)
+        .having(func.count() >= RELIEF_MIN_SAMPLES)
+        .subquery()
+    )
+
+    conditions = [
+        models.Offer.price.isnot(None),
+        models.Offer.price > 0,
+        models.Offer.is_canonical.is_(True),
+        models.Offer.is_adult.is_(False),
+        models.Offer.filon_category.isnot(None),
+        # Une baisse réelle : le haut de la fenêtre dépasse le prix courant.
+        agg.c.haut > models.Offer.price,
+    ]
+    if category:
+        conditions.append(models.Offer.filon_category == category)
+
+    # Ampleur de la baisse, en pourcentage du prix haut observé.
+    ampleur = ((agg.c.haut - models.Offer.price) / agg.c.haut).label("ampleur")
+
+    stmt = (
+        select(
+            models.Offer.id,
+            models.Offer.name,
+            models.Offer.brand,
+            models.Offer.filon_category,
+            models.Offer.price,
+            models.Offer.currency,
+            models.Offer.image_url,
+            models.Merchant.name.label("marchand"),
+            agg.c.haut,
+            agg.c.bas,
+            agg.c.releves,
+            agg.c.debut,
+            ampleur,
+        )
+        .select_from(
+            agg.join(models.Offer, models.Offer.id == agg.c.offer_id).join(
+                models.Merchant, models.Merchant.id == models.Offer.merchant_id
+            )
+        )
+        .where(*conditions)
+        .order_by(ampleur.desc())
+        .limit(limit)
+    )
+
+    lignes = (await session.execute(stmt)).all()
+    if not lignes:
+        return {"live": True, "window_days": window_days, "columns": []}
+
+    # Historique détaillé des seules colonnes retenues, en une requête.
+    ids = [r.id for r in lignes]
+    hist_rows = (
+        await session.execute(
+            select(
+                models.PriceSnapshot.offer_id,
+                models.PriceSnapshot.price,
+                models.PriceSnapshot.captured_at,
+            )
+            .where(
+                models.PriceSnapshot.offer_id.in_(ids),
+                models.PriceSnapshot.captured_at >= depuis,
+            )
+            .order_by(models.PriceSnapshot.offer_id, models.PriceSnapshot.captured_at)
+        )
+    ).all()
+
+    par_offre: dict[int, list[tuple[float, object]]] = {}
+    for oid, prix, quand in hist_rows:
+        if prix is None or quand is None:
+            continue
+        par_offre.setdefault(oid, []).append((float(prix), quand))
+
+    colonnes = []
+    for r in lignes:
+        brut = par_offre.get(r.id, [])
+        if len(brut) < RELIEF_MIN_SAMPLES:
+            continue
+
+        t0 = brut[0][1]
+        # Réduction aux paliers : on ne garde qu'un point quand le prix change.
+        # Quinze relevés d'un prix identique décrivent un seul palier, et
+        # transmettre les quinze gonflerait la charge utile sans rien ajouter.
+        paliers: list[list[float]] = []
+        dernier: float | None = None
+        for prix, quand in brut:
+            if dernier is None or abs(prix - dernier) >= 0.01:
+                jours = round((quand - t0).total_seconds() / 86400.0, 3)
+                paliers.append([jours, round(prix, 2)])
+                dernier = prix
+
+        duree = round((brut[-1][1] - t0).total_seconds() / 86400.0, 2)
+        colonnes.append(
+            {
+                "id": r.id,
+                "name": r.name,
+                "brand": r.brand,
+                "merchant": r.marchand,
+                "category": r.filon_category,
+                "price": round(float(r.price), 2),
+                "currency": r.currency or "EUR",
+                "image": r.image_url,
+                "high": round(float(r.haut), 2),
+                "low": round(float(r.bas), 2),
+                "drop_pct": round(float(r.ampleur) * -100.0, 1),
+                "steps": paliers,
+                "tracked_days": duree,
+                "samples": int(r.releves),
+                "confidence": _confiance(duree, int(r.releves)),
+            }
+        )
+
+    return {
+        "live": True,
+        "generated_at": datetime.utcnow().isoformat(),
+        "window_days": window_days,
+        "count": len(colonnes),
+        "columns": colonnes,
+    }
