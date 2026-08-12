@@ -1521,6 +1521,63 @@ RELIEF_MAX_COLUMNS = 300
 # En dessous de deux relevés, il n'y a pas de palier : rien à dessiner.
 RELIEF_MIN_SAMPLES = 2
 
+# Erreurs d'échelle des feeds : un marchand qui envoie les centimes au lieu des
+# euros produit un palier hors de proportion (G-Shock relevée à 69,93 puis
+# 6993,00 puis 99,90). Un simple plafond de remise ne suffit pas : le palier
+# aberrant doit être retiré de la colonne, sans quoi la scène rendrait une
+# flèche de cathédrale au milieu d'un paysage de plain-pied.
+#
+# Chercher un facteur exact (×100, ×1000) échoue en pratique : la référence
+# calculée sur une colonne déjà polluée n'est pas le prix que le feed a
+# multiplié. Sur le cas G-Shock, la médiane vaut 87,41 et 6993/87,41 = 80,0 :
+# aucun facteur rond. Le critère robuste est l'ordre de grandeur.
+_ECART_ORDRE_GRANDEUR = 10.0
+
+
+def _est_hors_echelle(prix: float, reference: float) -> bool:
+    """Vrai si `prix` s'écarte de `reference` de plus d'un ordre de grandeur.
+
+    Test symétrique : le feed peut gonfler le prix (centimes lus comme euros) ou
+    l'écraser (l'inverse). Un facteur 10 est déjà hors de portée d'une promotion :
+    la remise la plus agressive observée plafonne à −80 %, soit un facteur 5.
+    """
+    if prix <= 0 or reference <= 0:
+        return False
+    return prix >= reference * _ECART_ORDRE_GRANDEUR or prix <= reference / _ECART_ORDRE_GRANDEUR
+
+
+def _paliers_plausibles(paliers: list[list[float]], prix_courant: float) -> list[list[float]]:
+    """Retire les paliers hors d'échelle par rapport au reste de la colonne.
+
+    La référence est la médiane des *autres* paliers, recalculée pour chacun :
+    inclure le palier testé dans sa propre référence l'aiderait à se justifier,
+    et sur une colonne de deux points la médiane serait tirée à mi-chemin de
+    l'aberration.
+    """
+    if len(paliers) < 3:
+        # À deux points, aucun des deux n'est plus légitime que l'autre : les
+        # écarter reviendrait à choisir au hasard. Le filtre SQL de plausibilité
+        # (MAX_PLAUSIBLE_DROP_PCT) a déjà écarté les cas les plus grossiers.
+        return paliers
+    import statistics
+
+    gardes = []
+    for i, p in enumerate(paliers):
+        autres = [q[1] for j, q in enumerate(paliers) if j != i]
+        if not _est_hors_echelle(p[1], statistics.median(autres)):
+            gardes.append(p)
+
+    # Ne jamais rendre une colonne indessinable : s'il reste moins de deux
+    # paliers, c'est la colonne entière qui est douteuse, et on préfère le brut
+    # — le filtre SQL amont l'aura déjà bornée.
+    if len(gardes) < 2:
+        return paliers
+    # Le premier palier doit rester à l'origine du temps, sinon la colonne
+    # flotterait après le début de la fenêtre.
+    if gardes[0][0] != 0.0:
+        gardes = [[0.0, gardes[0][1]]] + gardes[1:]
+    return gardes
+
 
 def _confiance(jours: float, releves: int) -> str:
     """Qualifie ce que l'historique autorise à affirmer.
@@ -1579,6 +1636,29 @@ async def relief(
         .subquery()
     )
 
+    # Combien de fois le prix haut a-t-il été observé ? Un pic vu une seule fois
+    # est un accident de collecte, pas un prix pratiqué. Cette vérification
+    # existait déjà pour les rangs de la home (cf. MIN_HIGH_OBSERVATIONS) ; la
+    # scène 3D la réutilise plutôt que d'en inventer une variante.
+    hauts = (
+        select(
+            agg.c.offer_id.label("offer_id"),
+            func.count().label("occurrences_haut"),
+        )
+        .select_from(
+            agg.join(
+                models.PriceSnapshot,
+                (models.PriceSnapshot.offer_id == agg.c.offer_id)
+                & (
+                    func.round(cast(models.PriceSnapshot.price, Numeric(12, 2)), 2)
+                    == func.round(cast(agg.c.haut, Numeric(12, 2)), 2)
+                ),
+            )
+        )
+        .group_by(agg.c.offer_id)
+        .subquery()
+    )
+
     conditions = [
         models.Offer.price.isnot(None),
         models.Offer.price > 0,
@@ -1587,6 +1667,12 @@ async def relief(
         models.Offer.filon_category.isnot(None),
         # Une baisse réelle : le haut de la fenêtre dépasse le prix courant.
         agg.c.haut > models.Offer.price,
+        # Garde-fous de plausibilité, identiques à ceux des rangs de la home.
+        # Sans eux, le premier plan du paysage — la colonne la plus éclairée,
+        # celle qui affirme « achetez maintenant » — serait une erreur de feed.
+        func.coalesce(hauts.c.occurrences_haut, 1) >= MIN_HIGH_OBSERVATIONS,
+        func.coalesce(hauts.c.occurrences_haut, 1) >= agg.c.releves * MIN_HIGH_SHARE,
+        models.Offer.price >= agg.c.haut * (1.0 - MAX_PLAUSIBLE_DROP_PCT / 100.0),
     ]
     if category:
         conditions.append(models.Offer.filon_category == category)
@@ -1611,9 +1697,9 @@ async def relief(
             ampleur,
         )
         .select_from(
-            agg.join(models.Offer, models.Offer.id == agg.c.offer_id).join(
-                models.Merchant, models.Merchant.id == models.Offer.merchant_id
-            )
+            agg.join(models.Offer, models.Offer.id == agg.c.offer_id)
+            .join(models.Merchant, models.Merchant.id == models.Offer.merchant_id)
+            .outerjoin(hauts, hauts.c.offer_id == agg.c.offer_id)
         )
         .where(*conditions)
         .order_by(ampleur.desc())
@@ -1665,6 +1751,20 @@ async def relief(
                 paliers.append([jours, round(prix, 2)])
                 dernier = prix
 
+        paliers = _paliers_plausibles(paliers, float(r.price))
+        if len(paliers) < 2:
+            continue
+
+        # Les extrêmes sont recalculés sur les paliers retenus : annoncer un haut
+        # de 6993 € écarté de la scène mais conservé dans le libellé rendrait le
+        # nettoyage invisible et le chiffre mensonger.
+        valeurs = [p[1] for p in paliers]
+        haut = max(valeurs)
+        bas = min(valeurs)
+        if haut <= 0:
+            continue
+        ampleur_reelle = (haut - float(r.price)) / haut
+
         duree = round((brut[-1][1] - t0).total_seconds() / 86400.0, 2)
         colonnes.append(
             {
@@ -1676,9 +1776,9 @@ async def relief(
                 "price": round(float(r.price), 2),
                 "currency": r.currency or "EUR",
                 "image": r.image_url,
-                "high": round(float(r.haut), 2),
-                "low": round(float(r.bas), 2),
-                "drop_pct": round(float(r.ampleur) * -100.0, 1),
+                "high": round(haut, 2),
+                "low": round(bas, 2),
+                "drop_pct": round(ampleur_reelle * -100.0, 1),
                 "steps": paliers,
                 "tracked_days": duree,
                 "samples": int(r.releves),
