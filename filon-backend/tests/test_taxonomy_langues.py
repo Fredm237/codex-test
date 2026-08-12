@@ -406,3 +406,98 @@ class TestLuminaireAMotifSportif:
 
     def test_une_lampe_a_motif_football_reste_en_maison(self):
         assert _rayon("Lampe LED 3D avec impression ballon de football") == t.MAISON
+
+
+class TestAnglesMortsMesuresEnBase:
+    """Angles morts relevés sur les offres réellement sans rayon en base.
+
+    Les cas précédents venaient d'échantillons de l'API filtrés PAR rayon, donc
+    ne contenaient par construction que des offres déjà classées. Ceux-ci
+    proviennent de `GET /api/catalog/admin/unclassified`, qui interroge
+    directement `filon_category IS NULL`. Les volumes cités sont les comptes
+    réels observés sur les 245 293 offres sans rayon.
+    """
+
+    @pytest.mark.parametrize(
+        "cat,nom",
+        [
+            # 13 640 offres. « Lamper » est du danois : le catalogue contient une
+            # quatrième langue, non anticipée au diagnostic initial.
+            ("Lamper", "Fritz Hansen Orient P2 Hanglamp Koper"),
+            ("Lamper", "Lampe Gras N317 Tafellamp Mat Zwart & Mat Rood"),
+            ("Wonen & Koken > Wonen > Binnenverlichting", "Hanglamp zwart metaal"),
+            ("Wonen & Koken > Wonen > Woondecoratie", "Vaas keramiek beige"),
+            ("Wonen & Koken > Wonen > Tafels & stoelen", "Eettafel eiken 180cm"),
+        ],
+    )
+    def test_les_luminaires_scandinaves_et_neerlandais_vont_en_maison(self, cat, nom):
+        assert t.classify(cat, nom) == t.MAISON, nom
+
+    @pytest.mark.parametrize(
+        "cat,nom",
+        [
+            # ~12 000 offres cumulées sur Phone/Tablet/Ereader Cover.
+            ("Phone Cover", "imoshion Color Backcover voor de Samsung Galaxy S21"),
+            ("Tablet Cover", "Selencia Echt Leren Bookcase voor de iPad"),
+            ("Phone Screenprotector", "Screenprotector Galaxy A51"),
+            ("Ereader Cover", "Kobo Clara hoes zwart"),
+        ],
+    )
+    def test_les_accessoires_de_protection_vont_en_telephonie(self, cat, nom):
+        assert t.classify(cat, nom) == t.TELEPHONIE, nom
+
+    @pytest.mark.parametrize(
+        "cat,nom",
+        [
+            # ~10 000 offres cumulées sur les familles de maquillage et de soins,
+            # en français, néerlandais et anglais.
+            ("Foundation", "MAC Studio Fix Fluid SPF15"),
+            ("Fond de teint", "Bourjois Healthy Mix"),
+            ("Concealer", "MAC Waterweight Concealer - NW50"),
+            ("Anti-cerne", "Correcteur teint clair"),
+            ("Mascara", "Bourjois Volume Glamour"),
+            ("Lipgloss", "L'Oréal Infallible Matte Lipgloss - 207"),
+            ("Lippenstift", "Rimmel Lasting Finish"),
+            ("Rouge à lèvres", "Rouge Dior 999"),
+            ("Oogschaduw", "Palette 12 kleuren"),
+            ("Fard à paupières", "Palette nude essentielle"),
+            ("Nagels", "Royal Kunstnagels Midnight Minx Stiletto"),
+            ("Wimpers & wenkbrauwen", "Wenkbrauwpotlood bruin"),
+            ("Gezichtsverzorging", "Nivea gezichtscrème"),
+            ("Lichaamsverzorging", "Bodylotion amandel 400ml"),
+            ("Bodywash & douchegel", "Dove douchegel"),
+        ],
+    )
+    def test_les_familles_de_maquillage_vont_en_beaute(self, cat, nom):
+        assert t.classify(cat, nom) == t.BEAUTE, nom
+
+
+class TestBlushNestPasQuUnFard:
+    """« blush » désigne autant un fard qu'une teinte rosée.
+
+    Ajouté comme mot nu, il faisait basculer en Beauté une robe, des sneakers et
+    une bague. Il n'est donc retenu que qualifié, ou seul comme libellé marchand.
+    Même principe que « crème » et « souris ».
+    """
+
+    @pytest.mark.parametrize(
+        "cat,nom,attendu",
+        [
+            ("Mode femme", "Robe blush rose", t.MODE_FEMME),
+            ("Chaussures", "Sneakers blush", t.CHAUSSURES),
+            ("Bijoux & Montres", "Bague blush gold", t.BIJOUX),
+        ],
+    )
+    def test_la_teinte_blush_ne_bascule_pas_en_beaute(self, cat, nom, attendu):
+        assert t.classify(cat, nom) == attendu, nom
+
+    @pytest.mark.parametrize(
+        "cat,nom",
+        [
+            ("Blush", "Benefit Dandelion"),
+            ("Blush", "Blush poudre Chanel"),
+            ("Makeup", "Blush palette nude"),
+        ],
+    )
+    def test_le_fard_blush_va_bien_en_beaute(self, cat, nom):
+        assert t.classify(cat, nom) == t.BEAUTE, nom

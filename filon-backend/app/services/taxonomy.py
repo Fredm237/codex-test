@@ -195,6 +195,14 @@ _SUPPORTS: list[tuple[str, str]] = [
      r"toiles?\s+imprim[ée]es?|cadres?\s+photo)\b"),
     # Coques et étuis : c'est de la téléphonie, quel que soit le dessin dessus.
     (TELEPHONIE, r"\b(coques?|[ée]tuis?)\s+(?:de\s+)?(?:t[ée]l[ée]phone|smartphone|iphone|samsung)\b"),
+    # Accessoires de protection sous libellé marchand anglais : ~12 000 offres non
+    # classées (Phone Cover, Tablet Cover, Screenprotector, Ereader Cover). Le
+    # rayon Téléphonie les accueille, y compris pour tablette et liseuse, faute de
+    # rayon dédié aux accessoires mobiles.
+    (TELEPHONIE, r"\b(?:phone|tablet|ereader|e-reader)\s*[-–]?\s*"
+                 r"(?:covers?|cases?|screenprotectors?|screen protectors?|"
+                 r"buttons?|cord straps?)\b"),
+    (TELEPHONIE, r"\b(?:screenprotectors?|bookcases?|backcovers?)\b"),
 ]
 
 
@@ -270,6 +278,22 @@ _RULES: list[tuple[str, str]] = [
     # Signaux échappés à la première passe : huiles de massage et parapharmacie.
     (BEAUTE, r"\b(?:huiles? de massage|massageolie|massage oils?|parapharmacie|"
              r"gommages?|scrubs?|d[ée]odorants?|deodorants?|savons?|zeep)\b"),
+    # Familles de maquillage mesurées sur les offres réellement non classées en
+    # base (`admin/unclassified`) : ~10 000 offres portaient un libellé marchand
+    # de maquillage courant qu'aucune règle ne couvrait, en français comme en
+    # néerlandais et en anglais.
+    (BEAUTE, r"\b(?:foundations?|fonds? de teint|concealers?|anti[-\s]?cernes?|"
+             r"mascaras?|lipglos+e?s?|lip\s?gloss|lippenstift(?:en)?|"
+             r"rouges? à l[èe]vres|oogschaduw|fards? à paupi[èe]res|"
+             r"eyeshadows?|wimpers|wenkbrauwen|nagels|nagellak|"
+             r"gezichtsverzorging|lichaamsverzorging|huidverzorging|"
+             r"bodywash|douchegel|face cleansers?|moisturi[sz]ers?|"
+             r"scheren|ontharing|zonnebrand|sunscreens?|cr[èe]me & lotion)\b"),
+    # « blush » est aussi un nom de couleur (robe blush, sneakers blush, coussin
+    # blush) : mesuré comme régression sur trois rayons. Il n'est retenu que
+    # qualifié ou seul en tête de libellé marchand.
+    (BEAUTE, r"\bblush(?:es)?\s+(?:cr[èe]me|poudre|palette|stick|liquide|compact)\b"),
+    (BEAUTE, r"^blush(?:es)?$"),
     # Pendules et horloges d'intérieur : placées AVANT Bijoux pour l'emporter sur
     # le « horloge » générique, qui désigne une montre chez les marchands belges.
     (MAISON, r"\bhorloges?\s+(?:murales?|de\s+parquet|comtoises?|à\s+coucou|de\s+table|"
@@ -284,6 +308,16 @@ _RULES: list[tuple[str, str]] = [
     # « Lampe LED 3D avec impression ballon de football » partait en Sport.
     (MAISON, r"\b(?:lampes?|veilleuses?|lamps?|nachtlamp(?:jes?)?)\b(?=.*\b(?:led|3d|"
              r"d[ée]corative?s?|impression|murale?s?)\b)"),
+    # Luminaires en danois/norvégien et néerlandais. `Lamper` (« lampes » en
+    # danois) était à lui seul la 3e catégorie marchand non classée, avec 13 640
+    # offres : le catalogue contient une quatrième langue, non anticipée au
+    # diagnostic initial. Le mot est sans ambiguïté, contrairement à `pendant`.
+    (MAISON, r"\b(?:lamper|lampen|binnenverlichting|buitenverlichting|"
+             r"hanglamp(?:en)?|tafellamp(?:en)?|wandlamp(?:en)?|vloerlamp(?:en)?|"
+             r"plafondlamp(?:en)?|staanlamp(?:en)?|lampenkap(?:pen)?)\b"),
+    # Mobilier et décoration sous arborescence néerlandaise `Wonen & Koken`.
+    (MAISON, r"\b(?:woondecoratie|overige meubels|tafels & stoelen|"
+             r"woonaccessoires|keukenaccessoires)\b"),
     # Les pièges photographiques sont vendus avec un kit solaire : la caméra est
     # le produit, le panneau l'accessoire. Sans cette règle placée avant Jardin,
     # « panneaux solaires » l'emportait et les envoyait en Jardin & Bricolage.
