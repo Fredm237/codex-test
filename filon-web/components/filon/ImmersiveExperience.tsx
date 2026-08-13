@@ -85,7 +85,7 @@ export function ImmersiveExperience() {
           setPret(true);
         }
       };
-      im.src = `${BASE}/${String(i + 1).padStart(3, "0")}.jpg`;
+      im.src = `${BASE}/${String(i).padStart(3, "0")}.jpg`;
     }
     return () => { vivant = false; };
   }, [actif]);
@@ -143,7 +143,7 @@ export function ImmersiveExperience() {
   if (!actif) {
     return (
       <section className="fx-immersive-repli">
-        <img src={`${BASE}/001.jpg`} alt="" className="fx-immersive-repli-img" />
+        <img src={`${BASE}/000.jpg`} alt="" className="fx-immersive-repli-img" />
         <div className="fx-immersive-repli-content">
           <h1>Est-ce vraiment le bon moment pour acheter ?</h1>
           <p>FILON compare les prix de vos produits préférés chez tous les marchands et vous dit quand acheter.</p>
