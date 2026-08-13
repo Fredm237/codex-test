@@ -3664,3 +3664,23 @@ html, body {
 @media (prefers-reduced-motion: reduce) {
   .fx-product-media.is-loading::before { animation: none; }
 }
+
+/* Accessibilité clavier — n’apparaît qu’au focus, au-dessus de toute scène. */
+.fx-skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: 14px;
+  left: 50%;
+  transform: translate(-50%, -180%);
+  padding: 11px 16px;
+  border: 1px solid rgba(200, 149, 68, 0.65);
+  border-radius: 999px;
+  background: var(--fx-ink-950);
+  color: var(--fx-text-strong);
+  box-shadow: 0 12px 34px rgba(0,0,0,0.35);
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  transition: transform 180ms var(--fx-ease-out);
+}
+.fx-skip-link:focus { transform: translate(-50%, 0); outline: 2px solid var(--fx-gold-500); outline-offset: 3px; }
+#main-content:focus { outline: none; }

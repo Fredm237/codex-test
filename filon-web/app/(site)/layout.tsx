@@ -5,6 +5,7 @@ import { EditorialNav } from "@/components/editorial/EditorialNav";
 import { EditorialFooter } from "@/components/editorial/EditorialFooter";
 import { StickyCta } from "@/components/editorial/StickyCta";
 import { SmoothScroll } from "@/components/editorial/SmoothScroll";
+import { SkipToContent } from "@/components/editorial/SkipToContent";
 import { MotionProvider } from "@/components/filon/MotionProvider";
 import { PageTransition } from "@/components/filon/PageTransition";
 import { ScrollToTop } from "@/components/filon/ScrollToTop";
@@ -25,8 +26,9 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
     <LocaleProvider>
       <MotionProvider>
         <SmoothScroll />
+        <SkipToContent />
         <EditorialNav departments={departments} />
-        <main id="top">
+        <main id="main-content" tabIndex={-1}>
           <PageTransition>{children}</PageTransition>
         </main>
         <EditorialFooter />
