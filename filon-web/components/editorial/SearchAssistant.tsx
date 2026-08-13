@@ -291,7 +291,10 @@ export function SearchAssistant() {
         // lieu de brouiller la promesse de catalogue partenaire.
         const verifiedCards = ev.data.cards.filter((card) => !isGoogleShoppingUrl(card.link));
         setActive(-1);
-        if (ev.data.cards.length > 0 && verifiedCards.length === 0) {
+        // `real: false` signifie que le backend n’a pas trouvé de réponse dans
+        // le catalogue FILON : ce sont des estimations et non des offres à
+        // recommander. Elles restent donc hors de l’interface de décision.
+        if (!ev.data.real || (ev.data.cards.length > 0 && verifiedCards.length === 0)) {
           setBlockedExternal(true);
           setPhase("failed");
           return true;

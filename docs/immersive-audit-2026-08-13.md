@@ -38,3 +38,19 @@ Le premier affichage peut rester noir pendant le court instant de téléchargeme
 - la recherche reste visible et dans la zone de clic.
 
 Le prochain axe est de supprimer l’instant noir restant avec une poster image/fallback immédiat et de finaliser le rendu mobile/tablette.
+
+## Vérification du poster — commit `7b17e38`
+
+Le contrôle de production confirme que le poster `/seq/hero/001.jpg` est visible immédiatement dès l’ouverture. La scène, le premier message, la barre de recherche et l’indicateur de défilement apparaissent sans écran noir ni état de chargement bloquant. Le scroll a ensuite été positionné à mi-parcours afin d’inspecter la continuité de la narration.
+
+## Validation de la homepage mobile
+
+La capture finale à 390 × 844 confirme que l’accroche raccourcie tient sur une seule ligne, que le titre conserve deux lignes lisibles, et que les contrôles de langue, menu, recherche et action restent séparés, accessibles et sans débordement. La première scène est nette dès l’ouverture grâce au poster prioritaire.
+
+## Audit de l’assistant — commit `ccc5655`
+
+L’état initial de l’assistant affiche désormais une scène cinématique fiable au lieu d’une vidéo inexistante. Le formulaire, le choix du territoire et les suggestions restent lisibles au-dessus du fond. Une recherche réelle a été lancée pour contrôler les résultats, les libellés de source et les liens d’offre.
+
+## Contrôle de provenance des résultats — commit `bba88cc`
+
+La page Assistant est rechargée après déploiement du garde-fou. Une requête de test est prête à être envoyée afin de confirmer que les résultats provenant de Google Shopping ne sont plus présentés comme des recommandations FILON.
