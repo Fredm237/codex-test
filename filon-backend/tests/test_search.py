@@ -17,7 +17,7 @@ from app.db.base import Base
 from app.services.search import (
     MAX_TERMS, relevance_order, search_clause, stem, terms_of,
 )
-from app.services.catalog_search import _catalogue_intent
+from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent
 
 
 @pytest.fixture
@@ -116,6 +116,11 @@ class TestCatalogueIntent:
 
     def test_unrecognised_request_is_not_forced_into_a_category(self):
         assert _catalogue_intent("lampe de bureau minimaliste") is None
+
+    def test_primary_product_thresholds_only_reject_implausible_feed_prices(self):
+        assert _PRIMARY_MIN_PRICE["laptop"] == 200.0
+        assert _PRIMARY_MIN_PRICE["smartphone"] == 80.0
+        assert _PRIMARY_MIN_PRICE["casque"] == 25.0
 
 
 class TestRelevance:

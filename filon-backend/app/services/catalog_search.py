@@ -43,6 +43,12 @@ _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
 )
 
 
+# Un flux peut publier un prix technique (1 €) ou une garantie sous un nom de
+# produit. Ces seuils ne donnent pas une valeur de marché : ils empêchent
+# seulement qu'un produit principal soit présenté à un prix invraisemblable.
+_PRIMARY_MIN_PRICE = {"laptop": 200.0, "smartphone": 80.0, "casque": 25.0}
+
+
 def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
     """Retourne une ancre catalogue et les accessoires à exclure pour un besoin courant."""
     normalized = " ".join(terms_of(query))
@@ -103,11 +109,14 @@ async def search_internal_products(
             # sous-rayon qu'un ordinateur ou un téléphone. Pour un besoin explicite
             # de produit principal, on les exclut avant de classer les résultats.
             if intent:
-                _, excluded = intent
+                anchor, excluded = intent
                 lowered_name = func.lower(Offer.name)
                 stmt = stmt.where(
                     not_(or_(*[lowered_name.contains(term) for term in excluded]))
                 )
+                min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
+                if min_primary_price is not None:
+                    stmt = stmt.where(Offer.price >= min_primary_price)
 
             # Filtre budget si spécifié
             if budget:
