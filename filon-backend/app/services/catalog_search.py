@@ -26,7 +26,7 @@ log = get_logger("catalog_search")
 # résultat et ne font appel à aucune source externe.
 _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
     (
-        ("ordinateur", "laptop", "notebook", "macbook", "computer", "pc portable"),
+        ("ordinateur", "laptop", "notebook", "macbook", "computer", "pc portable", "montage", "video editing", "videomontage"),
         "laptop",
         ("housse", "hoes", "sleeve", "pochette", "sac", "support", "stand", "chargeur", "charger", "cable", "adaptateur", "keyboard", "clavier", "souris", "mouse"),
     ),

@@ -107,6 +107,11 @@ class TestCatalogueIntent:
         assert anchor == "laptop"
         assert {"housse", "sleeve", "support"}.issubset(excluded)
 
+    def test_video_editing_request_routes_to_catalogue_laptop_intent(self):
+        intent = _catalogue_intent("une machine pour le montage vidéo")
+        assert intent is not None
+        assert intent[0] == "laptop"
+
     def test_smartphone_request_keeps_product_anchor_and_excludes_cases(self):
         intent = _catalogue_intent("un smartphone à 500 €")
         assert intent is not None
