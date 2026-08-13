@@ -15,13 +15,14 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Les frames sont versionnées avec le build et ne changent pas entre
-        // deux déploiements : le navigateur peut les réutiliser immédiatement.
+        // Le CDN peut conserver les frames longtemps, mais le navigateur les
+        // revalide : une nouvelle séquence déployée ne reste jamais bloquée
+        // dans un cache local obsolète.
         source: "/seq/hero/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
+            value: "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
           },
         ],
       },
