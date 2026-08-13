@@ -128,3 +128,7 @@ Le commit `862d1cc` applique la couche `catalogueLabel` aux sous-catégories, qu
 ## Catalogue — couverture étendue de la taxonomie
 
 Le commit `66c968a` complète les libellés des rayons secondaires. Le contrôle de production anglais confirme notamment `Ties`, `Lighting`, `Tableware & kitchen`, `Air conditioning & heating`, `Make-up`, `Car accessories`, `Team sports`, `Nursery` et les sous-catégories déjà validées dans les rayons Mode et High-Tech. Les noms marchands et produits restent dans leur langue source, car ils proviennent des offres réelles ; la taxonomie et les contrôles de navigation sont, eux, localisés.
+
+## Catalogue — ergonomie tactile
+
+Le commit `a813f7c` renforce le parcours sous 900 px : les entrées d’arborescence, les pastilles de filtre et les contrôles affichent désormais une hauteur tactile minimale de 44 px. Sous 480 px, le bouton de recherche se place sur une ligne dédiée de 48 px afin que le champ ne soit jamais comprimé. La compilation locale et le chargement de la feuille de styles Vercel ont été contrôlés en production. Le navigateur de validation ne permet pas de fixer un viewport mobile natif ; les règles responsive déployées ont donc été vérifiées dans la feuille de styles et devront aussi être parcourues sur appareil physique lors de la recette mobile finale.
