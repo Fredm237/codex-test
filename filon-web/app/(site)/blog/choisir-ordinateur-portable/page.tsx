@@ -48,15 +48,15 @@ function ArticleFR() {
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Mémoire (RAM)</b></td><td><b>16 Go</b> pour durer. 8 Go suffisent pour un usage léger, mais vieillissent vite.</td></tr>
-              <tr><td><b>Stockage</b></td><td>Un <b>SSD</b>, jamais un disque mécanique. 512 Go est le bon confort.</td></tr>
-              <tr><td><b>Processeur</b></td><td>Gamme intermédiaire (type Core i5 / Ryzen 5) pour l&apos;équilibre prix-performance.</td></tr>
-              <tr><td><b>Écran</b></td><td>Résolution <b>Full HD</b> minimum, et une bonne luminosité si vous travaillez près d&apos;une fenêtre.</td></tr>
+              <tr><td><b>Mémoire (RAM)</b></td><td>Vérifiez le besoin des logiciels utilisés ; 8 Go et 16 Go ne conviennent pas aux mêmes usages.</td></tr>
+              <tr><td><b>Stockage</b></td><td>Un <b>SSD</b> améliore généralement la réactivité ; choisissez la capacité selon vos fichiers.</td></tr>
+              <tr><td><b>Processeur</b></td><td>Comparez le processeur à la charge prévue et aux exigences de vos logiciels.</td></tr>
+              <tr><td><b>Écran</b></td><td>Choisissez résolution, taille et luminosité selon l&apos;usage et votre environnement.</td></tr>
             </tbody>
           </table>
         </div>
         <p>
-          Le reste (marque, design, détails) vient après. Ces quatre points décident 90&nbsp;% de la satisfaction.
+          La marque, le design, la connectique et la réparabilité peuvent aussi compter selon votre usage.
         </p>
 
         <h2>3. Quel niveau de configuration, selon le besoin</h2>
@@ -78,9 +78,9 @@ function ArticleFR() {
 
         <h2>4. Les pièges classiques</h2>
         <ul>
-          <li><b>Trop peu de RAM</b>&nbsp;: 8 Go aujourd&apos;hui, c&apos;est déjà juste pour les années à venir.</li>
-          <li><b>Un disque mécanique</b> caché derrière un gros chiffre de stockage&nbsp;: fuyez, c&apos;est lent.</li>
-          <li><b>Un écran terne</b>&nbsp;: on l&apos;oublie en magasin, on le regrette tous les jours.</li>
+          <li><b>Une RAM insuffisante</b>&nbsp;: vérifiez les besoins de vos applications et la possibilité d&apos;évoluer.</li>
+          <li><b>Le type de stockage</b>&nbsp;: contrôlez si l&apos;offre mentionne SSD ou disque mécanique.</li>
+          <li><b>L&apos;écran</b>&nbsp;: vérifiez taille, résolution, luminosité et connectique selon votre usage.</li>
           <li><b>La «&nbsp;promo&nbsp;» gonflée</b>&nbsp;: un prix barré n&apos;est pas une preuve de bonne affaire.</li>
         </ul>
 
@@ -154,15 +154,15 @@ function ArticleNL() {
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Geheugen (RAM)</b></td><td><b>16 GB</b> om lang mee te gaan. 8 GB volstaat voor licht gebruik, maar veroudert snel.</td></tr>
-              <tr><td><b>Opslag</b></td><td>Een <b>SSD</b>, nooit een mechanische schijf. 512 GB is het goede comfort.</td></tr>
-              <tr><td><b>Processor</b></td><td>Middenklasse (type Core i5 / Ryzen 5) voor de balans prijs-prestatie.</td></tr>
-              <tr><td><b>Scherm</b></td><td><b>Full HD</b>-resolutie minimum, en een goede helderheid als je naast een raam werkt.</td></tr>
+              <tr><td><b>Geheugen (RAM)</b></td><td>Controleer de vereisten van je software; 8 GB en 16 GB passen niet bij dezelfde gebruiken.</td></tr>
+              <tr><td><b>Opslag</b></td><td>Een <b>SSD</b> verbetert doorgaans de reactiesnelheid; kies capaciteit volgens je bestanden.</td></tr>
+              <tr><td><b>Processor</b></td><td>Vergelijk de processor met de geplande belasting en vereisten van je software.</td></tr>
+              <tr><td><b>Scherm</b></td><td>Kies resolutie, formaat en helderheid volgens gebruik en omgeving.</td></tr>
             </tbody>
           </table>
         </div>
         <p>
-          De rest (merk, design, details) komt daarna. Deze vier punten bepalen 90&nbsp;% van de tevredenheid.
+          Merk, design, aansluitingen en repareerbaarheid kunnen ook tellen volgens je gebruik.
         </p>
 
         <h2>3. Welk configuratieniveau, volgens de behoefte</h2>
@@ -184,9 +184,9 @@ function ArticleNL() {
 
         <h2>4. De klassieke valkuilen</h2>
         <ul>
-          <li><b>Te weinig RAM</b>&nbsp;: 8 GB vandaag is al krap voor de komende jaren.</li>
-          <li><b>Een mechanische schijf</b> verborgen achter een groot opslagcijfer&nbsp;: vlucht ervoor, het is traag.</li>
-          <li><b>Een fletse scherm</b>&nbsp;: je vergeet het in de winkel, je betreurt het elke dag.</li>
+          <li><b>Onvoldoende RAM</b>&nbsp;: controleer de behoeften van je toepassingen en eventuele uitbreidbaarheid.</li>
+          <li><b>Het type opslag</b>&nbsp;: controleer of het aanbod SSD of een mechanische schijf vermeldt.</li>
+          <li><b>Het scherm</b>&nbsp;: controleer formaat, resolutie, helderheid en aansluitingen volgens je gebruik.</li>
           <li><b>De opgeblazen «&nbsp;promo&nbsp;»</b>&nbsp;: een doorstreepte prijs bewijst geen koopje.</li>
         </ul>
 
@@ -260,15 +260,15 @@ function ArticleEN() {
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Memory (RAM)</b></td><td><b>16 GB</b> to last. 8 GB is enough for light use, but ages fast.</td></tr>
-              <tr><td><b>Storage</b></td><td>An <b>SSD</b>, never a mechanical drive. 512 GB is the sweet spot.</td></tr>
-              <tr><td><b>Processor</b></td><td>Mid-range (like Core i5 / Ryzen 5) for the price-performance balance.</td></tr>
-              <tr><td><b>Screen</b></td><td><b>Full HD</b> resolution minimum, and good brightness if you work near a window.</td></tr>
+              <tr><td><b>Memory (RAM)</b></td><td>Check the needs of your software; 8 GB and 16 GB do not suit the same uses.</td></tr>
+              <tr><td><b>Storage</b></td><td>An <b>SSD</b> generally improves responsiveness; choose capacity for your files.</td></tr>
+              <tr><td><b>Processor</b></td><td>Compare the processor with the workload and requirements of your software.</td></tr>
+              <tr><td><b>Screen</b></td><td>Choose resolution, size and brightness for your use and environment.</td></tr>
             </tbody>
           </table>
         </div>
         <p>
-          The rest (brand, design, details) comes after. These four points decide 90&nbsp;% of satisfaction.
+          Brand, design, ports and repairability can also matter depending on your use.
         </p>
 
         <h2>3. Which configuration level, by need</h2>
@@ -290,9 +290,9 @@ function ArticleEN() {
 
         <h2>4. The classic traps</h2>
         <ul>
-          <li><b>Too little RAM</b>&nbsp;: 8 GB today is already tight for the years ahead.</li>
-          <li><b>A mechanical drive</b> hidden behind a big storage number&nbsp;: run away, it&apos;s slow.</li>
-          <li><b>A dull screen</b>&nbsp;: you forget it in the shop, you regret it every day.</li>
+          <li><b>Insufficient RAM</b>&nbsp;: check the needs of your applications and upgrade options.</li>
+          <li><b>The storage type</b>&nbsp;: check whether the offer states an SSD or mechanical drive.</li>
+          <li><b>The screen</b>&nbsp;: check size, resolution, brightness and ports for your use.</li>
           <li><b>The inflated «&nbsp;promo&nbsp;»</b>&nbsp;: a struck-through price is no proof of a bargain.</li>
         </ul>
 
