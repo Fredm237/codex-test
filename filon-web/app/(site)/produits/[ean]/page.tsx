@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata, JsonLd } from "@/lib/seo";
 import { API } from "@/lib/api";
-import { Verdict, type VerdictData } from "@/components/editorial/Verdict";
+import type { VerdictData } from "@/components/editorial/Verdict";
+import { ProductDetails } from "@/components/filon/ProductDetails";
 import { site } from "@/lib/site";
 
 // Fiche d'un produit regroupé par EAN : le même article, comparé chez tous les
@@ -145,63 +146,7 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
               ) : <span aria-hidden="true">—</span>}
             </div>
 
-            <div>
-              {p.brand && <span className="pg-brand">{p.brand}</span>}
-              <h1 className="pg-title">{p.name}</h1>
-
-              <div className="pg-headline">
-                <span>
-                  <span className="pg-from">à partir de</span>
-                  <b className="pg-price">{money(p.price_min, p.currency)}</b>
-                </span>
-                <span className="pg-count">
-                  chez {p.merchants_count} marchand{p.merchants_count > 1 ? "s" : ""}
-                </span>
-              </div>
-
-              {p.verdict && <Verdict v={p.verdict} />}
-
-              {saving != null && (
-                <p className="pg-saving">
-                  Vous économisez <b>{money(saving, p.currency)}</b> en choisissant le
-                  moins cher plutôt que le plus cher.
-                </p>
-              )}
-
-              {best?.link && (
-                <a className="fx-btn primary" href={best.link} target="_blank" rel="noopener noreferrer sponsored" style={{ marginTop: 18 }}>
-                  Voir la meilleure offre chez {best.merchant.name}
-                </a>
-              )}
-
-              <h2 className="pg-sub">Toutes les offres</h2>
-              <ul className="pg-offers">
-                {p.offers.map((o, i) => (
-                  <li key={o.id} className={`pg-offer${i === 0 ? " best" : ""}`}>
-                    <span className="pg-offer-merchant">
-                      {o.merchant.name}
-                      {o.merchant.region && <span className="pg-region">{o.merchant.region}</span>}
-                      {i === 0 && <span className="pg-badge">Meilleur prix</span>}
-                    </span>
-                    <span className="pg-offer-right">
-                      <b>{money(o.price, o.currency)}</b>
-                      <span className="pg-stock">{o.in_stock === false ? "Indisponible" : "En stock"}</span>
-                      {o.link && (
-                        <a className="pg-go" href={o.link} target="_blank" rel="noopener noreferrer sponsored">
-                          Voir
-                        </a>
-                      )}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-
-              <p className="pg-note">
-                Prix indicatifs, susceptibles d&apos;évoluer chez les marchands. Les
-                offres sont regroupées par code-barres (EAN&nbsp;{p.ean}). En achetant
-                via ces liens, FILON peut percevoir une commission, sans surcoût pour vous.
-              </p>
-            </div>
+            <ProductDetails p={p} best={best} saving={saving} />
           </div>
         </div>
       </section>
