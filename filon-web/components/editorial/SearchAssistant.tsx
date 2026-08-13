@@ -17,6 +17,8 @@ const SL = {
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
     failedTitle: "Je ne peux pas répondre pour le moment.",
     failedBody: "L'analyse s'appuie sur les offres de nos marchands partenaires, et ce service est momentanément injoignable. Plutôt que de vous proposer des produits inventés, je préfère ne rien vous proposer. Réessayez dans un instant.",
+    sourceTitle: "Des offres non vérifiées ont été écartées.",
+    sourceBody: "FILON n’affiche que les offres de son catalogue partenaire. La source reçue ne répondait pas à ce standard, nous ne vous proposerons donc pas de recommandation incertaine.",
     retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
     at: "chez", cashback: "cashback", coupon: "coupon",
@@ -34,6 +36,8 @@ const SL = {
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
     failedTitle: "Ik kan nu niet antwoorden.",
     failedBody: "De analyse steunt op de aanbiedingen van onze partnerwinkels, en die dienst is tijdelijk onbereikbaar. Liever niets voorstellen dan verzonnen producten. Probeer het zo meteen opnieuw.",
+    sourceTitle: "Niet-geverifieerde aanbiedingen zijn geweerd.",
+    sourceBody: "FILON toont alleen aanbiedingen uit zijn partnercatalogus. De ontvangen bron voldeed niet aan die standaard, daarom tonen we geen onzekere aanbeveling.",
     retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
     at: "bij", cashback: "cashback", coupon: "code",
@@ -51,6 +55,8 @@ const SL = {
     analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
     failedTitle: "I can't answer right now.",
     failedBody: "The analysis draws on offers from our partner merchants, and that service is temporarily unreachable. Rather than show you invented products, I would rather show you nothing. Try again in a moment.",
+    sourceTitle: "Unverified offers were withheld.",
+    sourceBody: "FILON only displays offers from its partner catalogue. The returned source did not meet that standard, so we will not show an uncertain recommendation.",
     retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
     at: "at", cashback: "cashback", coupon: "coupon",
@@ -139,6 +145,9 @@ type Ev =
   | { type: "step-done"; i: number }
   | { type: "results"; data: Result };
 
+const isGoogleShoppingUrl = (value?: string | null) =>
+  Boolean(value && /(^|\.)google\.[^/]+\/search/i.test(value) && /(?:[?&]tbm=shop|[?&]ibp=oshop)/i.test(value));
+
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
@@ -180,8 +189,10 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
   const S = SL[useLocale().locale];
   // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
   // Google Shopping : on le laisse explorer le même produit dans FILON.
-  const hasMerchantLink = Boolean(c.link);
-  const offerUrl = c.link || `/catalogue/?q=${encodeURIComponent(q || c.name)}`;
+  const hasMerchantLink = Boolean(c.link) && !isGoogleShoppingUrl(c.link);
+  const offerUrl = hasMerchantLink
+    ? (c.link as string)
+    : `/catalogue/?q=${encodeURIComponent(q || c.name)}`;
   const showImg = c.image && imgOk;
   return (
     <motion.article 
@@ -237,6 +248,7 @@ export function SearchAssistant() {
   const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
+  const [blockedExternal, setBlockedExternal] = useState(false);
   // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
   // devise et les marchands disponibles en dépendent, et un visiteur français
   // n'a aucune raison de partir sur la Belgique. Le sélecteur reste maître —
@@ -265,6 +277,7 @@ export function SearchAssistant() {
     const id = ++runId.current;
     setPhase("thinking");
     setResult(null);
+    setBlockedExternal(false);
     setDone([]);
     setActive(0);
 
@@ -273,8 +286,17 @@ export function SearchAssistant() {
       if (ev.type === "step") setActive(ev.i);
       else if (ev.type === "step-done") setDone((d) => [...d, ev.i]);
       else if (ev.type === "results") {
+        // Une recommandation ne peut pas être présentée comme FILON lorsqu’elle
+        // ne contient que des liens Google Shopping. On bloque le résultat au
+        // lieu de brouiller la promesse de catalogue partenaire.
+        const verifiedCards = ev.data.cards.filter((card) => !isGoogleShoppingUrl(card.link));
         setActive(-1);
-        setResult(ev.data);
+        if (ev.data.cards.length > 0 && verifiedCards.length === 0) {
+          setBlockedExternal(true);
+          setPhase("failed");
+          return true;
+        }
+        setResult({ ...ev.data, cards: verifiedCards });
         setPhase("results");
       }
       return true;
@@ -396,8 +418,8 @@ export function SearchAssistant() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <p className="sa-failed-title">{S.failedTitle}</p>
-                  <p className="sa-failed-body">{S.failedBody}</p>
+                  <p className="sa-failed-title">{blockedExternal ? S.sourceTitle : S.failedTitle}</p>
+                  <p className="sa-failed-body">{blockedExternal ? S.sourceBody : S.failedBody}</p>
                   <button type="button" className="sa-failed-retry" onClick={() => ask(asked)}>
                     {S.retry}
                   </button>
