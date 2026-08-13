@@ -404,13 +404,26 @@ export function SearchAssistant() {
       {/* Scène cinématique fiable : aucun média absent, aucun visuel inventé. */}
       {phase === "idle" && (
         <>
+          {/* Poster immobile par défaut ; la vidéo reste limitée au grand écran
+              et disparaît aussi lorsque le visiteur réduit les animations. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            className="sa-bg-visual"
-            src="/seq/hero/001.jpg"
+            className="sa-bg-visual sa-bg-poster"
+            src="/immersive/filon-materialized-anchor-16x9.png"
             alt=""
             aria-hidden="true"
             fetchPriority="high"
+          />
+          <video
+            className="sa-bg-visual sa-bg-video"
+            src="/immersive/filon-materialized-1080p.mp4"
+            poster="/immersive/filon-materialized-anchor-16x9.png"
+            aria-hidden="true"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
           />
           <div className="sa-bg-overlay" />
         </>
