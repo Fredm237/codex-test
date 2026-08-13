@@ -8,7 +8,7 @@ const SL = {
   fr: {
     steps: ["Compréhension du besoin", "Analyse des marchands", "Analyse des prix", "Analyse de l'historique", "Analyse du cashback", "Analyse des avis", "Recherche d'alternatives", "Calcul du Score FILON"],
     eyebrow: "Assistant d'achat",
-    h1Idle: "Que voulez-vous acheter, ou décider ?", h1Again: "Un autre achat à décider ?",
+    h1Idle: "Que cherchez-vous ?", h1Again: "Un autre achat à analyser ?",
     placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
     priceFor: "Prix pour",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
@@ -27,7 +27,7 @@ const SL = {
   nl: {
     steps: ["Begrip van de behoefte", "Analyse van de winkels", "Prijsanalyse", "Analyse van de geschiedenis", "Analyse van de cashback", "Analyse van de reviews", "Alternatieven zoeken", "Berekening van de FILON-Score"],
     eyebrow: "Koopassistent",
-    h1Idle: "Wat wil je kopen, of beslissen ?", h1Again: "Nog een aankoop om te beslissen ?",
+    h1Idle: "Wat zoek je?", h1Again: "Nog een aankoop om te analyseren?",
     placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
     priceFor: "Prijs voor",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
@@ -46,7 +46,7 @@ const SL = {
   en: {
     steps: ["Understanding the need", "Analysing merchants", "Analysing prices", "Analysing price history", "Analysing cashback", "Analysing reviews", "Searching for alternatives", "Computing the FILON Score"],
     eyebrow: "Shopping assistant",
-    h1Idle: "What do you want to buy, or decide ?", h1Again: "Another purchase to decide ?",
+    h1Idle: "What are you looking for?", h1Again: "Another purchase to analyse?",
     placeholder: "Describe a need, or a product…", ask: "Ask",
     priceFor: "Price for",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
