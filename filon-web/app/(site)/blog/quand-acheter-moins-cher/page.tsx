@@ -17,8 +17,8 @@ function ArticleFR() {
           <div className="ed-article-meta">Guide · 6 min · 2026</div>
           <h1>Quand acheter pour payer moins cher</h1>
           <p className="lede">
-            Le même produit ne coûte pas le même prix en janvier et en octobre. Le bon timing peut valoir des dizaines
-            d&apos;euros. Voici quand les prix baissent vraiment, et quand se retenir.
+            Les prix d&apos;un même produit peuvent évoluer au fil de l&apos;année. Voici des repères pour comparer une offre et
+            vérifier son contexte, sans présumer d&apos;une baisse garantie.
           </p>
         </div>
       </div>
@@ -26,9 +26,8 @@ function ArticleFR() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-quand-acheter.webp" alt="" />
         <p>
-          Bien acheter, ce n&apos;est pas seulement trouver le bon produit. C&apos;est aussi l&apos;acheter au bon
-          moment. Les prix suivent des cycles assez réguliers : les connaître, c&apos;est payer moins sans rien
-          sacrifier.
+          Le moment d&apos;achat peut influencer le prix affiché, mais les évolutions dépendent du marchand, du modèle, du
+          stock et de la zone de vente. Un calendrier sert de point de départ, pas de garantie de prix.
         </p>
 
         <h2>Les soldes, mais les vraies dates</h2>
@@ -41,62 +40,60 @@ function ArticleFR() {
           réductions sont limitées. Une «&nbsp;promo&nbsp;» affichée à ce moment mérite un œil méfiant.
         </p>
 
-        <h2>Le calendrier des baisses, période par période</h2>
+        <h2>Les périodes à surveiller</h2>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
                 <th>Période</th>
-                <th>Ce qui baisse</th>
-                <th>Bon à savoir</th>
+                <th>À surveiller</th>
+                <th>Bon réflexe</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Janvier</b> (soldes hiver)</td><td className="g">Mode, électro, high-tech</td><td>Les meilleurs rabais de l&apos;hiver</td></tr>
-              <tr><td><b>Février-mars</b></td><td className="g">High-tech sortant</td><td>Avant l&apos;arrivée des nouveautés du printemps</td></tr>
-              <tr><td><b>Juillet</b> (soldes été)</td><td className="g">Presque tout</td><td>Le grand rendez-vous de mi-année</td></tr>
-              <tr><td><b>Fin août</b> (rentrée)</td><td className="g">Portables, offres étudiantes</td><td>Idéal pour un PC d&apos;études</td></tr>
-              <tr><td><b>Fin novembre</b> (Black Friday)</td><td className="g">High-tech, gros électro</td><td>Le pic de l&apos;année sur la tech</td></tr>
-              <tr><td><b>Décembre</b> (avant Noël)</td><td>Peu, voire hausses</td><td>Prudence : certains prix remontent</td></tr>
+              <tr><td><b>Janvier</b> (soldes hiver)</td><td className="g">Les offres publiées</td><td>Comparez le produit et ses conditions</td></tr>
+              <tr><td><b>Février-mars</b></td><td className="g">Les changements de gamme</td><td>Vérifiez le modèle exact et sa configuration</td></tr>
+              <tr><td><b>Juillet</b> (soldes été)</td><td className="g">Les offres publiées</td><td>Ne déduisez pas une réduction du seul calendrier</td></tr>
+              <tr><td><b>Fin août</b> (rentrée)</td><td className="g">Les offres adaptées aux études</td><td>Contrôlez les conditions de l&apos;offre</td></tr>
+              <tr><td><b>Fin novembre</b> (Black Friday)</td><td className="g">Les promotions affichées</td><td>Utilisez l&apos;historique lorsqu&apos;il est disponible</td></tr>
+              <tr><td><b>Décembre</b> (avant Noël)</td><td>Le stock et les délais de livraison</td><td>Vérifiez le prix et les conditions au moment d&apos;acheter</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>Le bon moment d&apos;un produit précis</h2>
         <p>
-          Au-delà du calendrier, chaque produit a son propre cycle. Le prix est le plus <b>haut au lancement</b>, puis
-          il baisse progressivement, et touche souvent son <b>plancher juste avant l&apos;arrivée de la génération
-          suivante</b>.
+          Au-delà du calendrier, les prix d&apos;un modèle peuvent évoluer avec les stocks, les nouveautés et les décisions
+          de chaque marchand. Une évolution passée ne permet pas de garantir le prix à venir.
         </p>
         <p>
-          Concrètement&nbsp;: les smartphones se renouvellent surtout à l&apos;automne, les gammes de PC au printemps.
-          Acheter le modèle de l&apos;an dernier, quelques semaines avant la nouveauté, c&apos;est souvent le meilleur
-          rapport qualité-prix de l&apos;année.
+          Un modèle précédent peut parfois être proposé à un prix différent, mais il faut comparer ses caractéristiques,
+          sa disponibilité et ses conditions avec les autres offres accessibles au moment de votre recherche.
         </p>
 
         <h2>Le piège des fausses promos</h2>
         <p>
-          Un prix barré n&apos;est pas une preuve de bonne affaire. Le vrai repère, c&apos;est l&apos;<b>historique</b>
-          &nbsp;: un prix «&nbsp;réduit&nbsp;» qui reste au-dessus de sa moyenne des derniers mois n&apos;a rien
-          d&apos;une aubaine. Comparez toujours au niveau habituel, pas au prix barré.
+          Un prix barré n&apos;est pas une preuve de bonne affaire. Lorsqu&apos;un <b>historique</b> est disponible, il peut
+          apporter du contexte, mais il ne remplace pas la vérification du modèle, des frais, du stock et des conditions.
         </p>
 
         <div className="callout">
-          <b>Le bon réflexe :</b> avant d&apos;acheter, demandez-vous si le prix est bas <span className="g">dans son
-          cycle</span>. FILON vous le dit d&apos;un coup d&apos;œil : acheter maintenant, ou attendre.
+          <b>Le bon réflexe :</b> avant d&apos;acheter, consultez les informations disponibles pour l&apos;offre. FILON peut
+          afficher le prix, le score ou l&apos;historique lorsqu&apos;ils sont renseignés afin de vous aider à comparer ; la
+          décision finale vous appartient.
         </div>
 
         <h2>En résumé</h2>
         <ul>
-          <li>Deux grandes fenêtres en Belgique&nbsp;: <b>janvier</b> et <b>juillet</b>.</li>
-          <li>Pour la tech, le pic reste le <b>Black Friday</b> fin novembre.</li>
-          <li>Le meilleur prix d&apos;un produit tombe souvent <b>avant sa nouvelle génération</b>.</li>
-          <li>Jugez une promo sur l&apos;<b>historique</b>, jamais sur le prix barré.</li>
+          <li>Les périodes de soldes peuvent être des moments utiles à surveiller en Belgique.</li>
+          <li>Les promotions et leur niveau varient selon le marchand et l&apos;offre.</li>
+          <li>Un changement de gamme ne garantit pas le prix d&apos;un modèle.</li>
+          <li>Utilisez l&apos;<b>historique</b> lorsqu&apos;il est disponible, avec les autres informations de l&apos;offre.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
           <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
-            Savoir si c&apos;est le bon moment
+            Comparer les offres disponibles
           </a>
         </p>
       </div>
@@ -204,8 +201,8 @@ function ArticleEN() {
           <div className="ed-article-meta">Guide · 6 min · 2026</div>
           <h1>When to buy to pay less</h1>
           <p className="lede">
-            The same product doesn&apos;t cost the same in January and in October. The right timing can be worth tens
-            of euros. Here&apos;s when prices really drop, and when to hold back.
+            The price of a product can move through the year. Here are reference points to compare an offer and check
+            its context, without assuming a guaranteed price drop.
           </p>
         </div>
       </div>
@@ -213,8 +210,8 @@ function ArticleEN() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-quand-acheter.webp" alt="" />
         <p>
-          Buying well isn&apos;t just finding the right product. It&apos;s also buying it at the right moment. Prices
-          follow fairly regular cycles: knowing them means paying less without sacrificing anything.
+          Timing can influence a displayed price, but changes depend on the merchant, model, stock and selling area.
+          A calendar is a starting point, not a price guarantee.
         </p>
 
         <h2>The sales, but the real dates</h2>
@@ -227,60 +224,59 @@ function ArticleEN() {
           limited. A «&nbsp;promo&nbsp;» shown at that time deserves a wary eye.
         </p>
 
-        <h2>The drop calendar, period by period</h2>
+        <h2>Periods to watch</h2>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
                 <th>Period</th>
-                <th>What drops</th>
-                <th>Good to know</th>
+                <th>What to watch</th>
+                <th>Useful reflex</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>January</b> (winter sales)</td><td className="g">Fashion, appliances, tech</td><td>The best winter discounts</td></tr>
-              <tr><td><b>February-March</b></td><td className="g">Outgoing tech</td><td>Before the spring releases arrive</td></tr>
-              <tr><td><b>July</b> (summer sales)</td><td className="g">Almost everything</td><td>The big mid-year event</td></tr>
-              <tr><td><b>Late August</b> (back to school)</td><td className="g">Laptops, student offers</td><td>Ideal for a study PC</td></tr>
-              <tr><td><b>Late November</b> (Black Friday)</td><td className="g">Tech, large appliances</td><td>The peak of the year on tech</td></tr>
-              <tr><td><b>December</b> (before Christmas)</td><td>Little, even rises</td><td>Careful: some prices go back up</td></tr>
+              <tr><td><b>January</b> (winter sales)</td><td className="g">Published offers</td><td>Compare the product and its terms</td></tr>
+              <tr><td><b>February-March</b></td><td className="g">Range changes</td><td>Check the exact model and configuration</td></tr>
+              <tr><td><b>July</b> (summer sales)</td><td className="g">Published offers</td><td>Do not infer a discount from the calendar alone</td></tr>
+              <tr><td><b>Late August</b> (back to school)</td><td className="g">Education-oriented offers</td><td>Check the offer terms</td></tr>
+              <tr><td><b>Late November</b> (Black Friday)</td><td className="g">Displayed promotions</td><td>Use history when it is available</td></tr>
+              <tr><td><b>December</b> (before Christmas)</td><td>Stock and delivery times</td><td>Check price and terms when buying</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>The right moment for a specific product</h2>
         <p>
-          Beyond the calendar, each product has its own cycle. The price is <b>highest at launch</b>, then drops
-          gradually, and often hits its <b>floor just before the next generation arrives</b>.
+          Beyond the calendar, a model&apos;s price can change with stock, new releases and each merchant&apos;s decisions.
+          Past movement cannot guarantee a future price.
         </p>
         <p>
-          Concretely&nbsp;: smartphones renew mostly in autumn, PC ranges in spring. Buying last year&apos;s model, a
-          few weeks before the new one, is often the best value of the year.
+          A previous model can sometimes be offered at a different price, but compare its features, availability and
+          terms with the other offers accessible at the time of your search.
         </p>
 
         <h2>The fake-promo trap</h2>
         <p>
-          A struck-through price is no proof of a bargain. The real benchmark is the <b>history</b>&nbsp;: a
-          «&nbsp;reduced&nbsp;» price that stays above its average of recent months is no windfall. Always compare to
-          the usual level, never to the struck-through price.
+          A struck-through price is no proof of a bargain. When <b>history</b> is available, it can add context, but it
+          does not replace checking the model, fees, stock and terms.
         </p>
 
         <div className="callout">
-          <b>The right reflex :</b> before buying, ask yourself whether the price is low <span className="g">within
-          its cycle</span>. FILON tells you at a glance: buy now, or wait.
+          <b>The useful reflex:</b> before buying, consult the information available for the offer. FILON can display
+          the price, score or history when listed to help you compare; the final decision remains yours.
         </div>
 
         <h2>In short</h2>
         <ul>
-          <li>Two big windows in Belgium&nbsp;: <b>January</b> and <b>July</b>.</li>
-          <li>For tech, the peak remains <b>Black Friday</b> in late November.</li>
-          <li>A product&apos;s best price often falls <b>before its new generation</b>.</li>
-          <li>Judge a promo on the <b>history</b>, never on the struck-through price.</li>
+          <li>Sale periods can be useful moments to watch in Belgium.</li>
+          <li>Promotions and their level vary by merchant and offer.</li>
+          <li>A range change does not guarantee a model&apos;s price.</li>
+          <li>Use <b>history</b> when it is available, with the other offer information.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
           <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
-            Know if it&apos;s the right moment
+            Compare available offers
           </a>
         </p>
       </div>
