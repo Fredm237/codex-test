@@ -15,7 +15,7 @@
 // La carte entière est désormais cliquable (lien étiré depuis le titre), et le
 // lien marchand reste distinct, au-dessus, avec sa propre cible.
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import { CARD_COPY, money, type CardCopy } from "./product-copy";
 import { useLocale } from "@/lib/i18n";
@@ -54,6 +54,11 @@ export function ProductCard({
   // repli, la carte affichait un cadre vide sans rien expliquer.
   const [imageOk, setImageOk] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
+  // Si le navigateur a terminé l'image avant l'hydratation, `onLoad` ne se
+  // déclenche plus. Le ref rend alors immédiatement le visuel réel.
+  const imageRef = useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete && node.naturalWidth > 0) setImageLoaded(true);
+  }, []);
 
   return (
     <motion.article
@@ -68,6 +73,7 @@ export function ProductCard({
         {offer.image && imageOk ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
+            ref={imageRef}
             src={offer.image}
             alt=""
             loading="lazy"
