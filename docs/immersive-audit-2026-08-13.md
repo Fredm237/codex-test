@@ -72,3 +72,7 @@ Le test de production confirme le comportement attendu : les réponses estimées
 - **iPhone 390×844** : logo, sélecteur de langue et menu respectent les marges de sécurité ; le titre tient sur deux lignes sans coupe ; le champ de recherche reste entièrement visible et son bouton conserve une cible tactile confortable.
 - **Tablette 834×1112** : la scène couvre correctement le viewport ; la hiérarchie logo → promesse → recherche reste équilibrée ; aucun débordement horizontal observé.
 - **Constat** : le préchargement progressif conserve une image immédiate via le poster et la scène reste lisible sur les deux formats contrôlés.
+
+## Contrôle mobile Catalogue et Assistant — 390×844
+
+Le catalogue conserve une grille à deux colonnes lisible, une recherche accessible et une navigation compacte. L’assistant conserve une hiérarchie claire, un fond cinématique cohérent et une zone de saisie immédiatement actionnable. Deux points à traiter sont néanmoins identifiés : le total du catalogue affiché dans son en-tête est obsolète et la ligne de contexte du territoire de l’assistant manque d’espace vertical autour du sélecteur.
