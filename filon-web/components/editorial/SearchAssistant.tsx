@@ -12,7 +12,7 @@ const SL = {
     placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
     priceFor: "Prix pour",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
-    why: "Pourquoi", alt: "Alternative", see: "Voir l'offre", good: "Bon moment", wait: "Attendre",
+    why: "Pourquoi", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", good: "Bon moment", wait: "Attendre",
     real: "Prix réels · Catalogue FILON", est: "Prix estimés, à titre indicatif",
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
     failedTitle: "Je ne peux pas répondre pour le moment.",
@@ -29,7 +29,7 @@ const SL = {
     placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
     priceFor: "Prijs voor",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
-    why: "Waarom", alt: "Alternatief", see: "Bekijk de aanbieding", good: "Goed moment", wait: "Wachten",
+    why: "Waarom", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", good: "Goed moment", wait: "Wachten",
     real: "Echte prijzen · FILON Catalogus", est: "Geschatte prijzen, ter indicatie",
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
     failedTitle: "Ik kan nu niet antwoorden.",
@@ -46,7 +46,7 @@ const SL = {
     placeholder: "Describe a need, or a product…", ask: "Ask",
     priceFor: "Price for",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
-    why: "Why", alt: "Alternative", see: "See the offer", good: "Good time", wait: "Wait",
+    why: "Why", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", good: "Good time", wait: "Wait",
     real: "Real prices · FILON Catalogue", est: "Estimated prices, for guidance",
     analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
     failedTitle: "I can't answer right now.",
@@ -66,7 +66,7 @@ const SL = {
 
 const money = (n: number, cur = "€") => `${n.toLocaleString("fr-FR")} ${cur}`;
 
-/** Pays supportés pour les prix (SerpApi côté backend). */
+/** Pays couverts par les offres et prix suivis dans le catalogue FILON. */
 const COUNTRIES: Array<{ code: string; label: string }> = [
   { code: "be", label: "Belgique (FR)" },
   { code: "be-nl", label: "België (NL)" },
@@ -178,7 +178,10 @@ function ScoreRing({ score }: { score: number }) {
 function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
   const [imgOk, setImgOk] = useState(true);
   const S = SL[useLocale().locale];
-  const offerUrl = c.link || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q || c.name)}`;
+  // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
+  // Google Shopping : on le laisse explorer le même produit dans FILON.
+  const hasMerchantLink = Boolean(c.link);
+  const offerUrl = c.link || `/catalogue/?q=${encodeURIComponent(q || c.name)}`;
   const showImg = c.image && imgOk;
   return (
     <motion.article 
@@ -213,7 +216,14 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         <div className="fa-aside">
           <ScoreRing score={c.score} />
           <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> {S.good}</> : <><IcClock /> {S.wait}</>}</span>
-          <a className="ed-btn wave" href={offerUrl} target="_blank" rel="noopener noreferrer">{S.see}</a>
+          <a
+            className="ed-btn wave"
+            href={offerUrl}
+            target={hasMerchantLink ? "_blank" : undefined}
+            rel={hasMerchantLink ? "noopener noreferrer" : undefined}
+          >
+            {hasMerchantLink ? S.see : S.catalogue}
+          </a>
         </div>
       </div>
     </motion.article>
@@ -296,12 +306,17 @@ export function SearchAssistant() {
 
   return (
     <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>
-      {/* Vidéo de fond immersive en état idle */}
+      {/* Scène cinématique fiable : aucun média absent, aucun visuel inventé. */}
       {phase === "idle" && (
         <>
-          <video className="sa-bg-video" autoPlay muted loop playsInline>
-            <source src="/video/hf_orb.mp4" type="video/mp4" />
-          </video>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="sa-bg-visual"
+            src="/seq/hero/001.jpg"
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+          />
           <div className="sa-bg-overlay" />
         </>
       )}
