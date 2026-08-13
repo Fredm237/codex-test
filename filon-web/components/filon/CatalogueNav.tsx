@@ -129,7 +129,7 @@ export function CatalogueNav({
                               }
                               href={href({}, { dept: d.slug, cat: c.slug, sub: s.name })}
                             >
-                              <span>{s.name}</span>
+                              <span>{catalogueLabel(s.name, locale)}</span>
                               <span className="fx-nav-count">{count(s.count)}</span>
                             </a>
                           </li>
