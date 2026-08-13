@@ -2461,8 +2461,9 @@
   }
 
   .sa-chip {
-    font-size: 11px !important;
-    padding: 6px 10px !important;
+    min-height: 44px;
+    font-size: 12px !important;
+    padding: 0 12px !important;
   }
 }
 
