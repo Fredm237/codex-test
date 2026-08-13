@@ -31,8 +31,8 @@ function ArticleFR() {
           erreur revient sans cesse : <b>s&apos;inscrire à une seule app et s&apos;y tenir</b>.
         </p>
         <p>
-          Or les taux varient énormément. Pour un même marchand, un même jour, vous pouvez trouver 3 % ici, 6 % là, et une
-          offre boostée à 8 % ailleurs. Choisir la mauvaise app, c&apos;est souvent diviser votre cashback par deux.
+          Les taux, les plafonds, les exclusions et les délais peuvent varier selon le marchand, le pays et le moment.
+          Consultez toujours les conditions affichées par la plateforme et l&apos;offre avant de passer commande.
         </p>
 
         <h2>Les principales apps de cashback francophones</h2>
@@ -69,32 +69,33 @@ function ArticleFR() {
           <li>et seulement ensuite, cliquer et payer.</li>
         </ul>
         <p>
-          Fait à la main, c&apos;est fastidieux, et la plupart des gens abandonnent. C&apos;est exactement le travail que{" "}
-          <b>FILON automatise</b>.
+          Fait à la main, ce contrôle peut être fastidieux. FILON recherche des offres dans son propre catalogue et
+          présente les informations disponibles pour vous aider à les comparer.
         </p>
 
         <div className="callout">
-          <b>Le raccourci :</b> au lieu de comparer les apps une par une, laissez FILON le faire. Il trouve la{" "}
-          <span className="g">meilleure offre du moment</span> et vous y emmène. Vous n&apos;avez rien à chercher.
+          <b>Un point de départ :</b> demandez à FILON de rechercher une offre dans son catalogue. Prix affiché,
+          cashback, code promo et score peuvent être montrés lorsqu&apos;ils sont renseignés ; vérifiez les conditions du
+          marchand avant de commander.
         </div>
 
         <h2>Ne comparez plus le cashback seul</h2>
         <p>
-          L&apos;erreur suivante est de raisonner « cashback » alors que la vraie question est <b>le prix réel final</b>. Un
-          cashback de 6 % sur un produit neuf peut être battu par un <b>reconditionné équivalent</b> 30 % moins cher, ou par
-          un <b>code promo</b> cumulable. Le bon réflexe, c&apos;est de comparer le <b>coût total</b>, pas une seule ligne.
+          Il est utile de ne pas raisonner uniquement en cashback. Comparez le <b>prix affiché</b>, les frais, les
+          conditions, et les éventuels avantages indiqués pour l&apos;offre. Un produit reconditionné ou un code promo ne se
+          compare qu&apos;après avoir vérifié son état, son éligibilité et ses propres conditions.
         </p>
         <p>
-          C&apos;est la philosophie de FILON : vous donner un seul chiffre, votre vrai prix, et vous dire s&apos;il faut
-          acheter ou attendre.
+          FILON organise les informations disponibles dans son catalogue pour vous aider à comparer. Il ne remplace pas
+          votre vérification du prix, de la disponibilité et des conditions du marchand.
         </p>
 
         <h2>En résumé</h2>
         <ul>
           <li>Il n&apos;existe pas d&apos;app de cashback « meilleure » partout&nbsp;: le taux gagnant change selon le marchand.</li>
-          <li>Comparer avant chaque achat peut doubler votre cashback, mais c&apos;est chronophage à la main.</li>
-          <li>Raisonnez <b>prix réel final</b> (cashback + reconditionné + code promo), pas cashback seul.</li>
-          <li>FILON fait cette comparaison pour vous, gratuitement, à chaque achat.</li>
+          <li>Comparer les conditions peut prendre du temps et les résultats varient selon l&apos;offre.</li>
+          <li>Comparez <b>prix affiché</b>, frais, conditions et avantages éventuels, pas le cashback seul.</li>
+          <li>FILON présente les informations disponibles de son catalogue pour aider votre comparaison.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
@@ -129,8 +130,8 @@ function ArticleNL() {
           terug : <b>je inschrijven bij één enkele app en daaraan vasthouden</b>.
         </p>
         <p>
-          Nu variëren de percentages enorm. Voor eenzelfde winkel, op eenzelfde dag, kun je hier 3 % vinden, daar 6 %, en
-          elders een geboosterd aanbod aan 8 %. De verkeerde app kiezen, is vaak je cashback halveren.
+          Percentages, plafonds, uitsluitingen en termijnen kunnen variëren per winkel, land en moment. Raadpleeg altijd
+          de voorwaarden die het platform en aanbod tonen vóór je bestelt.
         </p>
 
         <h2>De voornaamste cashback-apps</h2>
@@ -167,33 +168,32 @@ function ArticleNL() {
           <li>en pas daarna klikken en betalen.</li>
         </ul>
         <p>
-          Met de hand gedaan is dat omslachtig, en de meeste mensen geven op. Dat is precies het werk dat{" "}
-          <b>FILON automatiseert</b>.
+          Handmatig kan die controle omslachtig zijn. FILON zoekt aanbiedingen in zijn eigen catalogus en toont de
+          beschikbare informatie om je te helpen vergelijken.
         </p>
 
         <div className="callout">
-          <b>De shortcut :</b> in plaats van de apps één voor één te vergelijken, laat FILON het doen. Hij vindt het{" "}
-          <span className="g">beste aanbod van het moment</span> en brengt je erheen. Je hoeft niets te zoeken.
+          <b>Een vertrekpunt:</b> vraag FILON om een aanbod in zijn catalogus te zoeken. Getoonde prijs, cashback,
+          promocode en score kunnen verschijnen wanneer ze vermeld zijn; controleer de winkelvoorwaarden vóór je bestelt.
         </div>
 
         <h2>Vergelijk niet langer cashback alleen</h2>
         <p>
-          De volgende fout is redeneren in « cashback » terwijl de echte vraag <b>de echte eindprijs</b> is. Een cashback
-          van 6 % op een nieuw product kan verslagen worden door een <b>gelijkwaardig refurbished</b> 30 % goedkoper, of
-          door een cumuleerbare <b>promocode</b>. De goede reflex is de <b>totale kost</b> vergelijken, niet één enkele
-          lijn.
+          Het is nuttig om niet alleen in cashback te redeneren. Vergelijk de <b>getoonde prijs</b>, kosten,
+          voorwaarden en eventuele voordelen voor het aanbod. Een refurbished product of promocode vergelijk je pas na
+          controle van staat, geldigheid en eigen voorwaarden.
         </p>
         <p>
-          Dat is de filosofie van FILON : je één enkel cijfer geven, je echte prijs, en je zeggen of je moet kopen of
-          wachten.
+          FILON ordent de beschikbare informatie in zijn catalogus om je te helpen vergelijken. Het vervangt niet je
+          eigen controle van prijs, beschikbaarheid en winkelvoorwaarden.
         </p>
 
         <h2>Samengevat</h2>
         <ul>
           <li>Er bestaat geen cashback-app die overal « de beste » is&nbsp;: het winnende percentage verandert per winkel.</li>
-          <li>Vergelijken vóór elke aankoop kan je cashback verdubbelen, maar het is tijdrovend met de hand.</li>
-          <li>Redeneer in <b>echte eindprijs</b> (cashback + refurbished + promocode), niet cashback alleen.</li>
-          <li>FILON maakt die vergelijking voor je, gratis, bij elke aankoop.</li>
+          <li>Voorwaarden vergelijken kan tijd kosten en de uitkomst varieert per aanbod.</li>
+          <li>Vergelijk <b>getoonde prijs</b>, kosten, voorwaarden en eventuele voordelen, niet alleen cashback.</li>
+          <li>FILON toont beschikbare catalogusinformatie om je vergelijking te helpen.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
@@ -228,8 +228,8 @@ function ArticleEN() {
           <b> signing up for a single app and sticking to it</b>.
         </p>
         <p>
-          Yet rates vary hugely. For the same merchant, on the same day, you can find 3% here, 6% there, and a
-          boosted offer at 8% elsewhere. Choosing the wrong app often halves your cashback.
+          Rates, caps, exclusions and timing can vary by merchant, country and moment. Always consult the conditions
+          displayed by the platform and offer before ordering.
         </p>
 
         <h2>The main cashback apps</h2>
@@ -266,32 +266,32 @@ function ArticleEN() {
           <li>and only then, click and pay.</li>
         </ul>
         <p>
-          Done by hand, it&apos;s tedious, and most people give up. That&apos;s exactly the work that{" "}
-          <b>FILON automates</b>.
+          Checked manually, this can be time-consuming. FILON searches offers in its own catalogue and presents the
+          available information to help you compare.
         </p>
 
         <div className="callout">
-          <b>The shortcut:</b> instead of comparing the apps one by one, let FILON do it. It finds the{" "}
-          <span className="g">best offer of the moment</span> and takes you there. You have nothing to search for.
+          <b>A starting point:</b> ask FILON to search an offer in its catalogue. Displayed price, cashback, promo code
+          and score may be shown when listed; check the merchant&apos;s terms before ordering.
         </div>
 
         <h2>Stop comparing cashback alone</h2>
         <p>
-          The next mistake is reasoning in « cashback » when the real question is <b>the real final price</b>. A 6%
-          cashback on a new product can be beaten by an <b>equivalent refurbished</b> 30% cheaper, or by a stackable{" "}
-          <b>promo code</b>. The right reflex is to compare the <b>total cost</b>, not one single line.
+          It is useful not to reason in cashback alone. Compare the <b>displayed price</b>, fees, terms and any
+          benefits listed for the offer. Only compare a refurbished product or promo code after checking its condition,
+          eligibility and own terms.
         </p>
         <p>
-          That&apos;s FILON&apos;s philosophy: giving you one single number, your real price, and telling you whether
-          to buy or wait.
+          FILON organises the available information in its catalogue to help you compare. It does not replace your own
+          verification of the price, availability and merchant terms.
         </p>
 
         <h2>In short</h2>
         <ul>
           <li>No cashback app is « the best » everywhere&nbsp;: the winning rate changes by merchant.</li>
-          <li>Comparing before every purchase can double your cashback, but it&apos;s time-consuming by hand.</li>
-          <li>Reason in <b>real final price</b> (cashback + refurbished + promo code), not cashback alone.</li>
-          <li>FILON makes that comparison for you, free, on every purchase.</li>
+          <li>Comparing terms can take time and results vary by offer.</li>
+          <li>Compare <b>displayed price</b>, fees, terms and any benefits, not cashback alone.</li>
+          <li>FILON presents available catalogue information to help your comparison.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
