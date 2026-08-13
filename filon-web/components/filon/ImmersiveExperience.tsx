@@ -2,27 +2,64 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { HeroSearch } from "./HeroSearch";
+import { useLocale } from "@/lib/i18n";
 
 const TOTAL_FRAMES = 271;
 const SCROLL_HEIGHT = 1400; // vh — hauteur totale du scroll
 
-type Chapter = {
-  start: number; // % du scroll
-  end: number;
+type ChapterTexts = {
   titre: string;
-  sousTitre?: string;
   cta?: { label: string; href: string };
 };
 
-const CHAPTERS: Chapter[] = [
-  { start: 0, end: 20, titre: "Est-ce vraiment\nle bon prix ?" },
-  { start: 20, end: 40, titre: "1,3 million d'offres.\n207 marchands." },
-  { start: 40, end: 60, titre: "Le prix que personne\nd'autre ne vous montre." },
-  { start: 60, end: 80, titre: "Vous venez\nd'économiser 47€." },
-  { start: 80, end: 100, titre: "FILON.", cta: { label: "Essayer le copilote", href: "/recherche" } },
+const CHAPTERS_I18N: Record<string, ChapterTexts[]> = {
+  fr: [
+    { titre: "Est-ce vraiment\nle bon prix ?" },
+    { titre: "1,3 million d'offres.\n207 marchands." },
+    { titre: "Le prix que personne\nd'autre ne vous montre." },
+    { titre: "Vous venez\nd'économiser 47€." },
+    { titre: "FILON.", cta: { label: "Essayer le copilote", href: "/recherche" } },
+  ],
+  nl: [
+    { titre: "Is dit echt\nde juiste prijs?" },
+    { titre: "1,3 miljoen aanbiedingen.\n207 winkels." },
+    { titre: "De prijs die niemand\nanders je laat zien." },
+    { titre: "Je hebt zojuist\n47€ bespaard." },
+    { titre: "FILON.", cta: { label: "Probeer de copiloot", href: "/recherche" } },
+  ],
+  en: [
+    { titre: "Is this really\nthe right price?" },
+    { titre: "1.3 million offers.\n207 merchants." },
+    { titre: "The price no one\nelse shows you." },
+    { titre: "You just\nsaved €47." },
+    { titre: "FILON.", cta: { label: "Try the copilot", href: "/recherche" } },
+  ],
+};
+
+const CHAPTER_RANGES = [
+  { start: 0, end: 20 },
+  { start: 20, end: 40 },
+  { start: 40, end: 60 },
+  { start: 60, end: 80 },
+  { start: 80, end: 100 },
 ];
 
+const SCROLL_HINT: Record<string, string> = {
+  fr: "Scrollez pour explorer",
+  nl: "Scroll om te ontdekken",
+  en: "Scroll to explore",
+};
+
+const LOADING_TEXT: Record<string, string> = {
+  fr: "Chargement de l'expérience...",
+  nl: "Ervaring laden...",
+  en: "Loading experience...",
+};
+
 export function ImmersiveExperience() {
+  const { locale } = useLocale();
+  const chapters = CHAPTERS_I18N[locale] || CHAPTERS_I18N.fr;
+
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<HTMLImageElement[]>([]);
@@ -66,11 +103,10 @@ export function ImmersiveExperience() {
 
     // Chapitre actif
     const pct = progress * 100;
-    for (let i = 0; i < CHAPTERS.length; i++) {
-      if (pct >= CHAPTERS[i].start && pct < CHAPTERS[i].end) {
+    for (let i = 0; i < CHAPTER_RANGES.length; i++) {
+      if (pct >= CHAPTER_RANGES[i].start && pct < CHAPTER_RANGES[i].end) {
         setActiveChapter(i);
-        // Fade in/out aux bords du chapitre
-        const chapterProgress = (pct - CHAPTERS[i].start) / (CHAPTERS[i].end - CHAPTERS[i].start);
+        const chapterProgress = (pct - CHAPTER_RANGES[i].start) / (CHAPTER_RANGES[i].end - CHAPTER_RANGES[i].start);
         const fade = chapterProgress < 0.15 ? chapterProgress / 0.15
           : chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15
           : 1;
@@ -93,7 +129,7 @@ export function ImmersiveExperience() {
     return () => cancelAnimationFrame(rafRef.current);
   }, [loaded, draw]);
 
-  const chapter = CHAPTERS[activeChapter];
+  const chapter = chapters[activeChapter];
 
   return (
     <div ref={containerRef} className="fx-imm-wrap" style={{ height: `${SCROLL_HEIGHT}vh` }}>
@@ -107,7 +143,6 @@ export function ImmersiveExperience() {
         {/* Texte du chapitre */}
         <div className="fx-imm-chapter" style={{ opacity: chapterOpacity }}>
           <h2 className="fx-imm-titre">{chapter.titre}</h2>
-          {chapter.sousTitre && <p className="fx-imm-sous">{chapter.sousTitre}</p>}
           {chapter.cta && (
             <a href={chapter.cta.href} className="fx-imm-cta">{chapter.cta.label}</a>
           )}
@@ -120,10 +155,10 @@ export function ImmersiveExperience() {
 
         {/* Indicateur de scroll */}
         {!loaded ? (
-          <div className="fx-imm-loading">Chargement de l&apos;expérience...</div>
+          <div className="fx-imm-loading">{LOADING_TEXT[locale] || LOADING_TEXT.fr}</div>
         ) : (
           <div className="fx-imm-scroll-hint">
-            <span>Scrollez pour explorer</span>
+            <span>{SCROLL_HINT[locale] || SCROLL_HINT.fr}</span>
             <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
         )}
