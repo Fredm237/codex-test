@@ -29,6 +29,10 @@ export function Verdict({ v }: { v: VerdictData }) {
     ? v.level
     : "neutre";
 
+  const trackingMeta = v.tracked_days > 0
+    ? `${v.samples} relevé${v.samples > 1 ? "s" : ""} sur ${v.tracked_days} jour${v.tracked_days > 1 ? "s" : ""}`
+    : `${v.samples} relevé${v.samples > 1 ? "s" : ""} · suivi démarré récemment`;
+
   return (
     <motion.section
       className={`vd vd-${level}`}
@@ -73,8 +77,7 @@ export function Verdict({ v }: { v: VerdictData }) {
       )}
       {v.samples > 0 && (
         <p className="vd-meta">
-          {v.samples} relevé{v.samples > 1 ? "s" : ""} sur {v.tracked_days} jour
-          {v.tracked_days > 1 ? "s" : ""} · {CONFIDENCE_LABEL[v.confidence] ?? v.confidence}
+          {trackingMeta} · {CONFIDENCE_LABEL[v.confidence] ?? v.confidence}
         </p>
       )}
     </motion.section>
