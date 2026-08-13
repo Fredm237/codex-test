@@ -147,8 +147,17 @@ type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; cu
    maquette. Un assistant qui n'a pas de réponse doit le dire. */
 
 function detectBudget(q: string): number | null {
-  const m = q.replace(/\s/g, "").match(/(\d{2,5})(?:€|eur)/i) || q.match(/(?:moins de|budget|à|max|environ|autour)\D{0,6}(\d{2,5})/i);
-  return m ? parseInt(m[1], 10) : null;
+  const compact = q.replace(/\s/g, "");
+  const explicit = compact.match(/(\d{2,5})(?:€|eur)/i)
+    || q.match(/(?:moins de|budget|à|max|environ|autour|under|budget|about|tot|maximaal|onder)\D{0,6}(\d{2,5})/i);
+  if (explicit) return parseInt(explicit[1], 10);
+
+  // Dans une recherche libre, « ordinateur portable étudiant 800 » est une
+  // formulation fréquente d'un budget. On accepte seulement un montant final
+  // à trois chiffres ou plus pour ne pas confondre un modèle (par ex. iPhone 16)
+  // avec une limite de prix.
+  const trailing = q.trim().match(/\b(\d{3,5})\s*$/);
+  return trailing ? parseInt(trailing[1], 10) : null;
 }
 
 type Ev =
