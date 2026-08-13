@@ -1,8 +1,13 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
-import { MerchantsBrowser } from "@/components/editorial/MerchantsBrowser";
+import { MerchantsBrowser, type Merchant } from "@/components/editorial/MerchantsBrowser";
 import { Localized } from "@/components/editorial/Localized";
+import { API } from "@/lib/api";
+
+// Les logos et le portefeuille partenaire évoluent, mais ne justifient pas
+// un appel bloquant au backend à chaque visite.
+export const revalidate = 3600;
 
 export const metadata: Metadata = buildMetadata({
   path: "/marchands",
@@ -17,7 +22,23 @@ function Hero({ eyebrow, title, intro, crumb }: { eyebrow: string; title: React.
   );
 }
 
-export default function MarchandsPage() {
+async function getMerchants(): Promise<Merchant[] | null> {
+  try {
+    const response = await fetch(`${API}/api/catalog/merchants?limit=500`, {
+      next: { revalidate },
+    });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return Array.isArray(data.items) ? data.items as Merchant[] : null;
+  } catch {
+    // Le composant client effectue une seconde tentative sans faire échouer la page.
+    return null;
+  }
+}
+
+export default async function MarchandsPage() {
+  const initialItems = await getMerchants();
+
   return (
     <>
       <Localized
@@ -27,7 +48,7 @@ export default function MarchandsPage() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-wrap">
-          <MerchantsBrowser />
+          <MerchantsBrowser initialItems={initialItems} />
         </div>
       </section>
     </>

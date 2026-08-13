@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useLocale, type Locale } from "@/lib/i18n";
 import { API } from "@/lib/api";
 
-type Merchant = {
+export type Merchant = {
   mid: number;
   name: string;
   slug: string;
@@ -96,15 +96,19 @@ function Card({ m }: { m: Merchant }) {
   );
 }
 
-export function MerchantsBrowser() {
+export function MerchantsBrowser({ initialItems = null }: { initialItems?: Merchant[] | null }) {
   const { locale } = useLocale();
   const t = L[locale];
-  const [items, setItems] = useState<Merchant[] | null>(null);
+  const [items, setItems] = useState<Merchant[] | null>(initialItems);
   const [error, setError] = useState(false);
   const [q, setQ] = useState("");
   const [region, setRegion] = useState<string>("");
 
   useEffect(() => {
+    // Les données SSR sont déjà disponibles lors des navigations normales.
+    // Le client ne contacte Railway qu’en repli si ce préchargement a échoué.
+    if (initialItems !== null) return;
+
     let alive = true;
     (async () => {
       try {
@@ -117,7 +121,7 @@ export function MerchantsBrowser() {
       }
     })();
     return () => { alive = false; };
-  }, []);
+  }, [initialItems]);
 
   const regions = useMemo(() => {
     const set = new Set<string>();
@@ -138,7 +142,16 @@ export function MerchantsBrowser() {
     return <p style={{ color: "var(--ink-3)", fontSize: 14.5 }}>{t.error}</p>;
   }
   if (items === null) {
-    return <p style={{ color: "var(--ink-3)", fontSize: 14.5 }}>{t.loading}</p>;
+    return (
+      <div className="merchant-skeleton" role="status" aria-live="polite">
+        <span className="merchant-skeleton__sr">{t.loading}</span>
+        <div className="merchant-skeleton__toolbar"><i /><i /></div>
+        <div className="merchant-skeleton__filters"><i /><i /><i /><i /></div>
+        <div className="merchant-skeleton__grid" aria-hidden="true">
+          {Array.from({ length: 8 }, (_, index) => <i key={index} />)}
+        </div>
+      </div>
+    );
   }
 
   return (
