@@ -66,10 +66,10 @@ function ArticleFR() {
 
         <h2>La méthode en 4 réflexes</h2>
         <ul>
-          <li><b>Repérez avant.</b> Notez le prix habituel des produits visés une à deux semaines avant.</li>
-          <li><b>Comparez à l&apos;historique</b>, jamais au prix barré.</li>
-          <li><b>Vérifiez le vrai prix final</b>&nbsp;: prix marchand + coupon + cashback, chez tous les vendeurs.</li>
-          <li><b>Ne cédez pas au chrono.</b> Une vraie bonne affaire tient rarement à trois minutes près.</li>
+          <li><b>Repérez avant.</b> Notez le prix affiché et les caractéristiques du produit qui vous intéresse.</li>
+          <li><b>Utilisez l&apos;historique</b> lorsqu&apos;il est disponible, sans le confondre avec une garantie.</li>
+          <li><b>Vérifiez le total applicable</b>&nbsp;: prix, frais, conditions, et coupon ou cashback seulement s&apos;ils sont indiqués.</li>
+          <li><b>Prenez le temps.</b> Vérifiez l&apos;offre et les conditions avant de commander.</li>
         </ul>
 
         <div className="callout">
@@ -113,17 +113,16 @@ function ArticleNL() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-black-friday.webp" alt="" />
         <p>
-          Eind november wordt alles «&nbsp;-50&nbsp;%&nbsp;». Het probleem is dat een doorstreepte prijs niets
-          bewijst&nbsp;: sommige winkels verhogen de prijs enkele weken vooraf om hem op de dag zelf beter te kunnen
-          «&nbsp;verlagen&nbsp;». Het goede nieuws&nbsp;: enkele reflexen volstaan om er niet in te trappen.
+          Eind november nemen de getoonde percentages toe. Een doorstreepte prijs volstaat niet om een aanbod te
+          beoordelen: vergelijk het exacte product, de voorwaarden, eventuele kosten en, wanneer beschikbaar, de
+          prijsontwikkeling. Enkele reflexen helpen om rustiger te beslissen.
         </p>
 
         <h2>De gouden regel : oordeel op de geschiedenis</h2>
         <p>
-          Een korting is alleen iets waard ten opzichte van de <b>gebruikelijke prijs van de laatste maanden</b>,
-          niet van de getoonde doorstreepte prijs. Een product «&nbsp;-40&nbsp;%&nbsp;» waarvan de
-          «&nbsp;promo&nbsp;»-prijs boven zijn gemiddelde van de laatste 90 dagen blijft, is geen koopje. Het enige
-          betrouwbare ijkpunt is de <b>prijscurve</b>.
+          Wanneer een historiek beschikbaar is, kan die nuttige context geven bij de getoonde prijs. Die vervangt niet
+          de controle van model, beschikbaarheid, kosten en retourvoorwaarden. Een <b>prijscurve</b> is één aanwijzing,
+          geen universele garantie.
         </p>
 
         <h2>De meest voorkomende valse promo's</h2>
@@ -154,10 +153,10 @@ function ArticleNL() {
 
         <h2>De methode in 4 reflexen</h2>
         <ul>
-          <li><b>Spot het vooraf.</b> Noteer de gebruikelijke prijs van de gemikte producten één tot twee weken vooraf.</li>
-          <li><b>Vergelijk met de geschiedenis</b>, nooit met de doorstreepte prijs.</li>
-          <li><b>Controleer de echte eindprijs</b>&nbsp;: winkelprijs + coupon + cashback, bij alle verkopers.</li>
-          <li><b>Geef niet toe aan de klok.</b> Een echt koopje hangt zelden af van drie minuten.</li>
+          <li><b>Spot het vooraf.</b> Noteer de getoonde prijs en kenmerken van het product dat je wilt.</li>
+          <li><b>Gebruik de historiek</b> wanneer die beschikbaar is, zonder die met een garantie te verwarren.</li>
+          <li><b>Controleer het toepasselijke totaal</b>&nbsp;: prijs, kosten, voorwaarden en coupon of cashback alleen als die vermeld zijn.</li>
+          <li><b>Neem de tijd.</b> Controleer het aanbod en de voorwaarden vóór je bestelt.</li>
         </ul>
 
         <div className="callout">
@@ -201,16 +200,16 @@ function ArticleEN() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-black-friday.webp" alt="" />
         <p>
-          At the end of November, everything becomes «&nbsp;-50&nbsp;%&nbsp;». The problem is that a struck-through
-          price proves nothing&nbsp;: some merchants raise the price a few weeks before to better «&nbsp;drop&nbsp;»
-          it on the day. The good news&nbsp;: a few reflexes are enough not to fall for it.
+          At the end of November, displayed percentages multiply. A struck-through price is not enough to assess an
+          offer: compare the exact product, terms, possible fees and, when available, its price movement. A few
+          reflexes help you make a more considered decision.
         </p>
 
         <h2>The golden rule: judge on the history</h2>
         <p>
-          A discount is only worth something relative to the <b>usual price of the last few months</b>, not the
-          struck-through price shown. A «&nbsp;-40&nbsp;%&nbsp;» product whose «&nbsp;promo&nbsp;» price stays above
-          its 90-day average is no bargain. The only reliable benchmark is the <b>price curve</b>.
+          When a history is available, it can provide useful context for the displayed price. It does not replace
+          checking the model, availability, fees and return terms. A <b>price curve</b> is one indicator among others,
+          not a universal guarantee.
         </p>
 
         <h2>The most common fake promos</h2>
@@ -241,10 +240,10 @@ function ArticleEN() {
 
         <h2>The method in 4 reflexes</h2>
         <ul>
-          <li><b>Spot it beforehand.</b> Note the usual price of the products you want one to two weeks before.</li>
-          <li><b>Compare to the history</b>, never to the struck-through price.</li>
-          <li><b>Check the real final price</b>&nbsp;: merchant price + coupon + cashback, across all sellers.</li>
-          <li><b>Don&apos;t give in to the clock.</b> A real bargain rarely hangs on three minutes.</li>
+          <li><b>Spot it beforehand.</b> Note the displayed price and features of the product you want.</li>
+          <li><b>Use history</b> when it is available, without mistaking it for a guarantee.</li>
+          <li><b>Check the applicable total</b>&nbsp;: price, fees, terms, and coupon or cashback only when listed.</li>
+          <li><b>Take your time.</b> Check the offer and terms before ordering.</li>
         </ul>
 
         <div className="callout">
