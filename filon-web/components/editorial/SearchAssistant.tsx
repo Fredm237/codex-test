@@ -81,14 +81,17 @@ const money = (n: number, cur = "€", locale: "fr" | "nl" | "en" = "fr") => {
 };
 
 /** Pays couverts par les offres et prix suivis dans le catalogue FILON. */
-const COUNTRIES: Array<{ code: string; label: string }> = [
-  { code: "be", label: "Belgique (FR)" },
-  { code: "be-nl", label: "België (NL)" },
-  { code: "fr", label: "France" },
-  { code: "ch", label: "Suisse" },
-  { code: "lu", label: "Luxembourg" },
-  { code: "nl", label: "Pays-Bas" },
-];
+const COUNTRIES = [
+  { code: "be", labels: { fr: "Belgique (FR)", nl: "België (FR)", en: "Belgium (FR)" } },
+  { code: "be-nl", labels: { fr: "Belgique (NL)", nl: "België (NL)", en: "Belgium (NL)" } },
+  { code: "fr", labels: { fr: "France", nl: "Frankrijk", en: "France" } },
+  { code: "ch", labels: { fr: "Suisse", nl: "Zwitserland", en: "Switzerland" } },
+  { code: "lu", labels: { fr: "Luxembourg", nl: "Luxemburg", en: "Luxembourg" } },
+  { code: "nl", labels: { fr: "Pays-Bas", nl: "Nederland", en: "Netherlands" } },
+] as const;
+
+const countryLabel = (code: string, locale: "fr" | "nl" | "en") =>
+  COUNTRIES.find((country) => country.code === code)?.labels[locale] ?? code;
 
 /* Icônes ligne, nettes et sobres (currentColor) — remplacent les émojis. */
 const IconBase = ({ children }: { children: React.ReactNode }) => (
@@ -425,7 +428,7 @@ export function SearchAssistant() {
           <div className="sa-country">
             <select id="sa-cc" aria-label={S.priceFor} value={country} onChange={(e) => setCountry(e.target.value)}>
               {COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>{c.label}</option>
+                <option key={c.code} value={c.code}>{c.labels[locale]}</option>
               ))}
             </select>
           </div>
@@ -501,7 +504,7 @@ export function SearchAssistant() {
                 >
                   <p className="fa-summary">
                     <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.recos} {result.cards.length} {S.recoTail}{result.cards.length > 1 ? S.nounPl : ""}, {S.classed}{result.cards.length > 1 ? S.adjPl : ""}.
-                    <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{COUNTRIES.find((x) => x.code === (result.country || country))?.label || "Belgique"}.</span>
+                    <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{countryLabel(result.country || country, locale)}.</span>
                   </p>
                   <div className="fa-cards">
                     {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}
