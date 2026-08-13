@@ -66,3 +66,9 @@ La recherche de contrôle est prête. Le prochain contrôle doit confirmer qu’
 ## Validation — commit `cd429ad`
 
 Le test de production confirme le comportement attendu : les réponses estimées ou externes ne sont plus présentées comme des recommandations FILON. L’interface annonce l’absence d’offre vérifiée et dirige vers `/catalogue/?q=<recherche>`, sans lien Google Shopping.
+
+## Vérification responsive — itération performance `bd254fa`
+
+- **iPhone 390×844** : logo, sélecteur de langue et menu respectent les marges de sécurité ; le titre tient sur deux lignes sans coupe ; le champ de recherche reste entièrement visible et son bouton conserve une cible tactile confortable.
+- **Tablette 834×1112** : la scène couvre correctement le viewport ; la hiérarchie logo → promesse → recherche reste équilibrée ; aucun débordement horizontal observé.
+- **Constat** : le préchargement progressif conserve une image immédiate via le poster et la scène reste lisible sur les deux formats contrôlés.
