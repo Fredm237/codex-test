@@ -208,7 +208,7 @@ export function ImmersiveExperience() {
           {chapter.cta && <a href={chapter.cta.href} className="fx-imm-cta">{chapter.cta.label}</a>}
         </div>
         <div className="fx-imm-search"><HeroSearch /></div>
-        {!ready ? <div className="fx-imm-loading">{LOADING_TEXT[locale] || LOADING_TEXT.fr}</div> : <div className="fx-imm-scroll-hint"><span>{SCROLL_HINT[locale] || SCROLL_HINT.fr}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div>}
+        {!ready ? <div className="fx-imm-loading">{LOADING_TEXT[locale] || LOADING_TEXT.fr}</div> : activeChapter === 0 && chapterOpacity > 0.65 ? <div className="fx-imm-scroll-hint"><span>{SCROLL_HINT[locale] || SCROLL_HINT.fr}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div> : null}
       </div>
     </div>
   );
