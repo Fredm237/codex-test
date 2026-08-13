@@ -54,3 +54,7 @@ L’état initial de l’assistant affiche désormais une scène cinématique fi
 ## Contrôle de provenance des résultats — commit `bba88cc`
 
 La page Assistant est rechargée après déploiement du garde-fou. Une requête de test est prête à être envoyée afin de confirmer que les résultats provenant de Google Shopping ne sont plus présentés comme des recommandations FILON.
+
+## Contrôle final des estimations — commit `5a5e58b`
+
+Le garde-fou est déployé. Une requête identique à celle qui retournait auparavant des estimations et des marchands externes est préparée afin de vérifier que l’interface affiche désormais un refus transparent plutôt que des recommandations non vérifiées.

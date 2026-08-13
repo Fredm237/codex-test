@@ -17,8 +17,8 @@ const SL = {
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
     failedTitle: "Je ne peux pas répondre pour le moment.",
     failedBody: "L'analyse s'appuie sur les offres de nos marchands partenaires, et ce service est momentanément injoignable. Plutôt que de vous proposer des produits inventés, je préfère ne rien vous proposer. Réessayez dans un instant.",
-    sourceTitle: "Des offres non vérifiées ont été écartées.",
-    sourceBody: "FILON n’affiche que les offres de son catalogue partenaire. La source reçue ne répondait pas à ce standard, nous ne vous proposerons donc pas de recommandation incertaine.",
+    sourceTitle: "Aucune offre vérifiée n’est disponible pour cette recherche.",
+    sourceBody: "FILON s’appuie uniquement sur les offres de son catalogue partenaire. Cette recherche ne renvoie pas encore de prix vérifiables ; explorez le catalogue ou reformulez votre demande.",
     retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
     at: "chez", cashback: "cashback", coupon: "coupon",
@@ -36,8 +36,8 @@ const SL = {
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
     failedTitle: "Ik kan nu niet antwoorden.",
     failedBody: "De analyse steunt op de aanbiedingen van onze partnerwinkels, en die dienst is tijdelijk onbereikbaar. Liever niets voorstellen dan verzonnen producten. Probeer het zo meteen opnieuw.",
-    sourceTitle: "Niet-geverifieerde aanbiedingen zijn geweerd.",
-    sourceBody: "FILON toont alleen aanbiedingen uit zijn partnercatalogus. De ontvangen bron voldeed niet aan die standaard, daarom tonen we geen onzekere aanbeveling.",
+    sourceTitle: "Geen geverifieerde aanbieding voor deze zoekopdracht.",
+    sourceBody: "FILON gebruikt uitsluitend aanbiedingen uit zijn partnercatalogus. Deze zoekopdracht levert nog geen verifieerbare prijzen op; verken de catalogus of verfijn je vraag.",
     retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
     at: "bij", cashback: "cashback", coupon: "code",
@@ -55,8 +55,8 @@ const SL = {
     analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
     failedTitle: "I can't answer right now.",
     failedBody: "The analysis draws on offers from our partner merchants, and that service is temporarily unreachable. Rather than show you invented products, I would rather show you nothing. Try again in a moment.",
-    sourceTitle: "Unverified offers were withheld.",
-    sourceBody: "FILON only displays offers from its partner catalogue. The returned source did not meet that standard, so we will not show an uncertain recommendation.",
+    sourceTitle: "No verified offer is available for this search.",
+    sourceBody: "FILON relies only on offers from its partner catalogue. This search does not yet return verifiable prices; explore the catalogue or refine your request.",
     retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
     at: "at", cashback: "cashback", coupon: "coupon",
@@ -423,9 +423,15 @@ export function SearchAssistant() {
                 >
                   <p className="sa-failed-title">{blockedExternal ? S.sourceTitle : S.failedTitle}</p>
                   <p className="sa-failed-body">{blockedExternal ? S.sourceBody : S.failedBody}</p>
-                  <button type="button" className="sa-failed-retry" onClick={() => ask(asked)}>
-                    {S.retry}
-                  </button>
+                  {blockedExternal ? (
+                    <a className="sa-failed-retry" href={`/catalogue/?q=${encodeURIComponent(asked)}`}>
+                      {S.catalogue}
+                    </a>
+                  ) : (
+                    <button type="button" className="sa-failed-retry" onClick={() => ask(asked)}>
+                      {S.retry}
+                    </button>
+                  )}
                 </motion.div>
               )}
 
