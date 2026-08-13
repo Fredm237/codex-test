@@ -82,3 +82,11 @@ La page `https://www.filon.be/blog/quelle-app-cashback-paie-le-plus/?deploy=95d3
 Le commit `79c3c9a` transforme le calendrier d’achat en repères de vérification : les saisons, changements de gamme et promotions ne sont plus présentés comme des baisses garanties. L’historique est décrit comme un contexte optionnel et FILON ne donne plus une instruction d’acheter ou d’attendre.
 
 La route `https://www.filon.be/blog/quand-acheter-moins-cher/?deploy=79c3c9a` a été vérifiée dans le navigateur de production. Le tableau « Periods to watch » et l’appel à comparer les offres disponibles sont correctement rendus.
+
+## Validation transversale finale
+
+Les quatorze routes contrôlées — accueil, catalogue, assistant, marchands, FAQ, À propos, Intelligence, index du blog et six guides révisés — ont toutes répondu en HTTP `200`. Le backend Railway a également répondu `200` sur `/health/live`, `/health/ready` et `/api/catalog/merchants?limit=1` pendant le contrôle.
+
+Le cache CDN des images de la séquence immersive sert `cache-control: public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400` : le navigateur revalide les modifications visuelles tandis que le CDN peut conserver les frames un an.
+
+La navigation desktop a été vérifiée après hydratation : « Catalogue » est un lien direct distinct et le bouton adjacent ouvre correctement le méga-menu, avec les catégories et le lien vers le catalogue complet. Cette interaction a été contrôlée dans le navigateur sur une page de production.
