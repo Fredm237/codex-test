@@ -6,6 +6,8 @@ import { useLocale } from "@/lib/i18n";
 
 const TOTAL_FRAMES = 271;
 const SCROLL_HEIGHT = 1400;
+const INITIAL_WINDOW = 24;
+const PREFETCH_WINDOW = 30;
 
 type ChapterTexts = {
   titre: string;
@@ -63,35 +65,66 @@ export function ImmersiveExperience() {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<(HTMLImageElement | null)[]>(Array(TOTAL_FRAMES).fill(null));
+  const requestedRef = useRef(new Set<number>());
+  const prefetchRef = useRef<(frame: number) => void>(() => {});
+  const drawRef = useRef<() => void>(() => {});
+  const readyRef = useRef(false);
   const [ready, setReady] = useState(false);
   const [activeChapter, setActiveChapter] = useState(0);
   const [chapterOpacity, setChapterOpacity] = useState(1);
   const rafRef = useRef<number>(0);
   const lastFrameRef = useRef(0);
 
-  // La première image débloque l'expérience immédiatement. Les autres images
-  // continuent ensuite à se charger en arrière-plan, sans écran noir.
+  // La scène n’ouvre plus 271 téléchargements d’un coup. La première image et
+  // les premières secondes sont prioritaires ; le reste arrive progressivement
+  // et la fenêtre autour du frame visé est priorisée pendant le scroll.
   useEffect(() => {
     let mounted = true;
     const loadFrame = (index: number) => {
+      if (index < 0 || index >= TOTAL_FRAMES || requestedRef.current.has(index)) return;
+      requestedRef.current.add(index);
       const image = new Image();
       image.decoding = "async";
       image.onload = () => {
         imagesRef.current[index] = image;
-        if (index === 0 && mounted) setReady(true);
+        if (index === 0 && mounted) {
+          readyRef.current = true;
+          setReady(true);
+        }
+        if (mounted && readyRef.current) requestAnimationFrame(() => drawRef.current());
       };
-      // Une image manquante ne doit jamais bloquer toute la page.
       image.onerror = () => {
         imagesRef.current[index] = null;
-        if (index === 0 && mounted) setReady(true);
+        if (index === 0 && mounted) {
+          readyRef.current = true;
+          setReady(true);
+        }
       };
       image.src = `/seq/hero/${String(index + 1).padStart(3, "0")}.jpg`;
     };
 
-    // La première frame est prioritaire, puis la suite du film arrive en tâche de fond.
-    loadFrame(0);
-    for (let index = 1; index < TOTAL_FRAMES; index++) loadFrame(index);
-    return () => { mounted = false; };
+    prefetchRef.current = (frame: number) => {
+      const from = Math.max(0, frame - 4);
+      const to = Math.min(TOTAL_FRAMES - 1, frame + PREFETCH_WINDOW);
+      for (let index = from; index <= to; index++) loadFrame(index);
+    };
+
+    for (let index = 0; index < INITIAL_WINDOW; index++) loadFrame(index);
+    let nextFrame = INITIAL_WINDOW;
+    const progressiveLoader = window.setInterval(() => {
+      if (!mounted || nextFrame >= TOTAL_FRAMES) {
+        window.clearInterval(progressiveLoader);
+        return;
+      }
+      const until = Math.min(TOTAL_FRAMES, nextFrame + 6);
+      for (; nextFrame < until; nextFrame++) loadFrame(nextFrame);
+    }, 220);
+
+    return () => {
+      mounted = false;
+      window.clearInterval(progressiveLoader);
+      prefetchRef.current = () => {};
+    };
   }, []);
 
   const draw = useCallback(() => {
@@ -100,9 +133,8 @@ export function ImmersiveExperience() {
     const maxScroll = Math.max(1, rect.height - window.innerHeight);
     const progress = Math.max(0, Math.min(1, -rect.top / maxScroll));
     const targetFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * (TOTAL_FRAMES - 1)));
+    prefetchRef.current(targetFrame);
 
-    // On utilise la frame demandée, sinon la plus proche déjà chargée : le film
-    // reste visible même si une image est encore en téléchargement.
     let frame = targetFrame;
     if (!imagesRef.current[frame]) {
       for (let distance = 1; distance < TOTAL_FRAMES; distance++) {
@@ -112,14 +144,17 @@ export function ImmersiveExperience() {
         if (after < TOTAL_FRAMES && imagesRef.current[after]) { frame = after; break; }
       }
     }
+
     const image = imagesRef.current[frame] || imagesRef.current[lastFrameRef.current];
     const canvas = canvasRef.current;
     const context = canvas.getContext("2d");
     if (context && image) {
       const width = 1280;
       const height = 720;
-      canvas.width = width;
-      canvas.height = height;
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
       context.drawImage(image, 0, 0, width, height);
       lastFrameRef.current = frame;
     }
@@ -130,18 +165,16 @@ export function ImmersiveExperience() {
       if (percent >= range.start && percent < range.end) {
         setActiveChapter(index);
         const chapterProgress = (percent - range.start) / (range.end - range.start);
-        // Le premier message doit déjà être visible dès l'arrivée sur la page.
-        // Les chapitres suivants entrent et sortent avec un fondu court.
         const opacity = index === 0
           ? (chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15 : 1)
-          : (chapterProgress < 0.15 ? chapterProgress / 0.15
-            : chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15
-            : 1);
+          : (chapterProgress < 0.15 ? chapterProgress / 0.15 : chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15 : 1);
         setChapterOpacity(Math.max(0, Math.min(1, opacity)));
         break;
       }
     }
   }, [ready]);
+
+  drawRef.current = draw;
 
   useEffect(() => {
     if (!ready) return;
@@ -166,14 +199,7 @@ export function ImmersiveExperience() {
       <div className="fx-imm-sticky">
         {/* Poster prioritaire : aucune zone noire pendant l’initialisation JavaScript. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          className="fx-imm-poster"
-          src="/seq/hero/001.jpg"
-          alt=""
-          aria-hidden="true"
-          fetchPriority="high"
-          decoding="async"
-        />
+        <img className="fx-imm-poster" src="/seq/hero/001.jpg" alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
         <canvas ref={canvasRef} className="fx-imm-canvas" />
         <div className="fx-imm-overlay" />
         <div className="fx-imm-chapter" style={{ opacity: chapterOpacity }}>
@@ -182,14 +208,7 @@ export function ImmersiveExperience() {
           {chapter.cta && <a href={chapter.cta.href} className="fx-imm-cta">{chapter.cta.label}</a>}
         </div>
         <div className="fx-imm-search"><HeroSearch /></div>
-        {!ready ? (
-          <div className="fx-imm-loading">{LOADING_TEXT[locale] || LOADING_TEXT.fr}</div>
-        ) : (
-          <div className="fx-imm-scroll-hint">
-            <span>{SCROLL_HINT[locale] || SCROLL_HINT.fr}</span>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </div>
-        )}
+        {!ready ? <div className="fx-imm-loading">{LOADING_TEXT[locale] || LOADING_TEXT.fr}</div> : <div className="fx-imm-scroll-hint"><span>{SCROLL_HINT[locale] || SCROLL_HINT.fr}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div>}
       </div>
     </div>
   );
