@@ -132,3 +132,7 @@ Le commit `66c968a` complète les libellés des rayons secondaires. Le contrôle
 ## Catalogue — ergonomie tactile
 
 Le commit `a813f7c` renforce le parcours sous 900 px : les entrées d’arborescence, les pastilles de filtre et les contrôles affichent désormais une hauteur tactile minimale de 44 px. Sous 480 px, le bouton de recherche se place sur une ligne dédiée de 48 px afin que le champ ne soit jamais comprimé. La compilation locale et le chargement de la feuille de styles Vercel ont été contrôlés en production. Le navigateur de validation ne permet pas de fixer un viewport mobile natif ; les règles responsive déployées ont donc été vérifiées dans la feuille de styles et devront aussi être parcourues sur appareil physique lors de la recette mobile finale.
+
+## Assistant — suggestions sur iPhone compact
+
+Le commit `14bd182` remplace les anciennes pastilles de 11 px et 6 px de padding, qui étaient trop serrées sous 375 px, par des cibles de 44 px de haut avec une typographie de 12 px. La page Assistant, son fond immersif, le champ de recherche, le sélecteur de pays et les quatre suggestions ont été rechargés avec succès en production après déploiement.
