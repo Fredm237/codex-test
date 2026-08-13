@@ -58,3 +58,11 @@ La page Assistant est rechargée après déploiement du garde-fou. Une requête 
 ## Contrôle final des estimations — commit `5a5e58b`
 
 Le garde-fou est déployé. Une requête identique à celle qui retournait auparavant des estimations et des marchands externes est préparée afin de vérifier que l’interface affiche désormais un refus transparent plutôt que des recommandations non vérifiées.
+
+## Vérification de l’orientation catalogue — commit `cd429ad`
+
+La recherche de contrôle est prête. Le prochain contrôle doit confirmer qu’en l’absence d’offre partenaire vérifiée, l’assistant propose une exploration du catalogue avec la requête préremplie, et non une relance sans issue.
+
+## Validation — commit `cd429ad`
+
+Le test de production confirme le comportement attendu : les réponses estimées ou externes ne sont plus présentées comme des recommandations FILON. L’interface annonce l’absence d’offre vérifiée et dirige vers `/catalogue/?q=<recherche>`, sans lien Google Shopping.
