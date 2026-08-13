@@ -1,6 +1,6 @@
 """Locale des annotations produites par l'assistant catalogue."""
 
-from app.services.recommend import _response_locale
+from app.services.recommend import _OFFER_NOTICES, _response_locale
 
 
 def test_supported_locales_are_preserved():
@@ -19,3 +19,9 @@ def test_unknown_or_missing_locale_falls_back_to_french():
     assert _response_locale(None) == "fr"
     assert _response_locale("de") == "fr"
     assert _response_locale("") == "fr"
+
+
+def test_offer_notices_are_localised_and_do_not_claim_a_universal_warranty():
+    assert _OFFER_NOTICES["fr"] == {"delivery": "voir marchand", "warranty": "conditions marchand"}
+    assert _OFFER_NOTICES["nl"] == {"delivery": "bekijk verkoper", "warranty": "voorwaarden verkoper"}
+    assert _OFFER_NOTICES["en"] == {"delivery": "see merchant", "warranty": "merchant terms"}

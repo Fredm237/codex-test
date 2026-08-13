@@ -163,7 +163,7 @@ async def search_internal_products(
                     "merchant": offer.merchant.name if offer.merchant else "marchand",
                     "image": _primary_image_url(offer.image_url),
                     "link": offer.deep_link or offer.product_url,
-                    "delivery": "voir marchand",
+                    "delivery": None,
                     "rating": None,
                     "reviews": None,
                     "source": "filon_catalog",

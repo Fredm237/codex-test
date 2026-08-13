@@ -83,6 +83,13 @@ def _response_locale(locale: str | None) -> str:
     return value if value in _VALID_LOCALES else "fr"
 
 
+_OFFER_NOTICES = {
+    "fr": {"delivery": "voir marchand", "warranty": "conditions marchand"},
+    "nl": {"delivery": "bekijk verkoper", "warranty": "voorwaarden verkoper"},
+    "en": {"delivery": "see merchant", "warranty": "merchant terms"},
+}
+
+
 _SYSTEM = (
     "Tu es FILON, un copilote d'achat expert pour la Belgique et l'Europe. "
     "À partir d'un besoin exprimé en langage naturel, tu proposes 5 produits réels "
@@ -194,8 +201,10 @@ _SYSTEM_RANK = (
 )
 
 
-def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji: str) -> dict[str, Any]:
-    """Carte à partir d'un produit RÉEL (SerpApi) + annotation du LLM."""
+def _build_real_card(
+    slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji: str, locale: str | None = None
+) -> dict[str, Any]:
+    """Carte à partir d'une offre réelle du catalogue partenaire + annotation LLM."""
     default_rank, medal = SLOTS[slot]
     rank = str(ann.get("label") or default_rank)
     try:
@@ -205,6 +214,7 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
     alt = ann.get("alt")
     alt = str(alt) if alt not in (None, "", "null") else None
     verdict = str(ann.get("verdict", "acheter")).lower()
+    notices = _OFFER_NOTICES[_response_locale(locale)]
     return {
         "rank": rank,
         "medal": medal,
@@ -214,8 +224,10 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
         "link": awin.affiliate_link(prod.get("link"), prod.get("merchant")),
         "price": int(prod["price"]),
         "merchant": prod["merchant"],
-        "delivery": prod.get("delivery") or "voir marchand",
-        "warranty": "24 mois",
+        "delivery": prod.get("delivery") or notices["delivery"],
+        # Les feeds ne portent pas une garantie comparable : on renvoie vers les
+        # conditions du marchand au lieu d'afficher une durée universelle.
+        "warranty": notices["warranty"],
         "cashback": 0,
         "coupon": None,
         "hist": None,
@@ -294,11 +306,11 @@ async def _rank_real_products(
         if not (isinstance(idx, int) and 0 <= idx < len(products)) or idx in used:
             continue
         used.add(idx)
-        cards.append(_build_real_card(len(cards), products[idx], ann, emoji))
+        cards.append(_build_real_card(len(cards), products[idx], ann, emoji, response_locale))
 
     if not cards:
         for slot in range(min(5, len(products))):
-            cards.append(_build_real_card(slot, products[slot], {}, emoji))
+            cards.append(_build_real_card(slot, products[slot], {}, emoji, response_locale))
 
     return {"usage": usage, "emoji": emoji, "offers": len(products), "cards": cards, "real": True}
 
