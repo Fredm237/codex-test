@@ -96,3 +96,11 @@ La navigation desktop a été vérifiée après hydratation : « Catalogue » es
 Une recherche publique « ordinateur portable étudiant 800 € » a été soumise sur `https://www.filon.be/recherche/`. L’assistant a déroulé son analyse puis a retourné l’état explicite « No verified offer is available for this search ». Il indique qu’il s’appuie « only on offers from its partner catalogue » et propose une redirection vers la catégorie catalogue pertinente (`/catalogue/?dept=high-tech&cat=informatique&sub=Ordinateurs%20portables`). Aucun lien Google Shopping ou résultat externe n’a été servi lors de ce test.
 
 Le résultat confirme que le comportement catalogue-first est actif en production et que l’interface préfère signaler l’absence d’offre vérifiée plutôt que fabriquer une recommandation. La pertinence de la requête libre reste un axe de suivi : cette formulation n’a pas encore retourné d’offre vérifiée malgré le routage correct vers la catégorie correspondante.
+
+## Assistant — pertinence catalogue-only renforcée
+
+Les commits `44821b6` et `6a1fe2a` renforcent le service de recherche interne. Pour les besoins courants — ordinateur portable, smartphone, casque — l’assistant extrait une ancre de produit au lieu d’exiger tous les mots conversationnels dans un titre marchand. Les housses, câbles, supports et autres accessoires sont exclus lorsqu’un produit principal est demandé. Des seuils de plausibilité empêchent aussi d’afficher, par exemple, une machine référencée à 1 € par erreur de flux. Le repli SerpApi/Google Shopping a été retiré du parcours de recommandation : sans offre catalogue, le frontend conserve l’état explicite d’absence d’offre vérifiée.
+
+Le commit `d56e9d9` permet également de reconnaître un budget écrit en fin de requête libre, comme « ordinateur portable étudiant travail 800 », sans exiger le symbole euro. La suite ciblée backend a validé 33 tests (`tests/test_search.py`) et la compilation frontend a réussi.
+
+Après déploiement, une requête de production avec ce budget a analysé sept offres du catalogue et affiché quatre ordinateurs portables Acer à 699 €, 749 € et 849 €, avec images, prix, marchand et liens affiliés Awin. Aucun accessoire, résultat Google Shopping ou prix à 1 € n’a été affiché ; la carte à 849 € est explicitement identifiée comme légèrement au-dessus du budget et reçoit le verdict « Wait ».
