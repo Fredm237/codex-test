@@ -103,7 +103,7 @@ const FR = {
   introC: "Voici exactement ce qu'elle mesure, et ce qu'elle ne mesure pas.",
   idx: "5 critères", h2a: "Le calcul,", h2b: "poids par poids", criteria: CRITERIA_FR,
   neverA: "Ce que le Score ne fait", neverB: "jamais", nevers: NEVERS_FR,
-  note: "Tant que nos partenariats marchands ne sont pas signés, certaines composantes (cashback, historique long) reposent sur des estimations, clairement signalées. Le Score deviendra pleinement chiffré à mesure que les données réelles arrivent.",
+  note: "Toutes les offres n’ont pas le même historique. Lorsqu’une donnée est trop récente ou indisponible, FILON l’indique plutôt que de la présenter comme certaine.",
 };
 
 const NL = {
@@ -113,7 +113,7 @@ const NL = {
   introC: "Dit is precies wat ze meet, en wat niet.",
   idx: "5 criteria", h2a: "De berekening,", h2b: "gewicht per gewicht", criteria: CRITERIA_NL,
   neverA: "Wat de Score", neverB: "nooit", nevers: NEVERS_NL,
-  note: "Zolang onze winkelpartnerships niet getekend zijn, berusten sommige onderdelen (cashback, lange geschiedenis) op schattingen, duidelijk aangegeven. De Score wordt volledig becijferd naarmate de echte data binnenkomt.",
+  note: "Niet elke aanbieding heeft dezelfde prijsgeschiedenis. Wanneer een gegeven te recent of niet beschikbaar is, vermeldt FILON dat in plaats van het als zekerheid te presenteren.",
 };
 
 const EN = {
@@ -123,7 +123,7 @@ const EN = {
   introC: "Here's exactly what it measures, and what it doesn't.",
   idx: "5 criteria", h2a: "The calculation,", h2b: "weight by weight", criteria: CRITERIA_EN,
   neverA: "What the Score", neverB: "never", nevers: NEVERS_EN,
-  note: "Until our merchant partnerships are signed, some components (cashback, long history) rely on estimates, clearly flagged. The Score will become fully quantified as the real data arrives.",
+  note: "Not every offer has the same price history. When a data point is too recent or unavailable, FILON says so rather than presenting it as certain.",
 };
 
 export default function ScorePage() {
