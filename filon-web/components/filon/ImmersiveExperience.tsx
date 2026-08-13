@@ -129,9 +129,13 @@ export function ImmersiveExperience() {
       if (percent >= range.start && percent < range.end) {
         setActiveChapter(index);
         const chapterProgress = (percent - range.start) / (range.end - range.start);
-        const opacity = chapterProgress < 0.15 ? chapterProgress / 0.15
-          : chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15
-          : 1;
+        // Le premier message doit déjà être visible dès l'arrivée sur la page.
+        // Les chapitres suivants entrent et sortent avec un fondu court.
+        const opacity = index === 0
+          ? (chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15 : 1)
+          : (chapterProgress < 0.15 ? chapterProgress / 0.15
+            : chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15
+            : 1);
         setChapterOpacity(Math.max(0, Math.min(1, opacity)));
         break;
       }
