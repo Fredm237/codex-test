@@ -124,3 +124,7 @@ La suggestion « Une machine pour le montage vidéo » était auparavant hors p�
 ## Catalogue — sous-catégories multilingues
 
 Le commit `862d1cc` applique la couche `catalogueLabel` aux sous-catégories, qui étaient auparavant rendues directement depuis le libellé français du flux. Le contrôle de production en anglais confirme la traduction des sous-catégories Fashion et Tech visibles : par exemple `Dresses`, `Skirts`, `Laptops`, `Monitors`, `Headphones`, `Cases & protection` et `Gaming accessories`. Les URL conservent les clés françaises de filtre, donc les liens, compteurs et recherche backend restent inchangés.
+
+## Catalogue — couverture étendue de la taxonomie
+
+Le commit `66c968a` complète les libellés des rayons secondaires. Le contrôle de production anglais confirme notamment `Ties`, `Lighting`, `Tableware & kitchen`, `Air conditioning & heating`, `Make-up`, `Car accessories`, `Team sports`, `Nursery` et les sous-catégories déjà validées dans les rayons Mode et High-Tech. Les noms marchands et produits restent dans leur langue source, car ils proviennent des offres réelles ; la taxonomie et les contrôles de navigation sont, eux, localisés.
