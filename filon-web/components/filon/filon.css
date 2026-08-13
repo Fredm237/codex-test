@@ -3621,3 +3621,23 @@ html, body {
 }
 .fx-imm-canvas { z-index: 1; }
 .fx-imm-overlay { z-index: 2; }
+
+/* Accroche de positionnement : une seule ligne, lisible mais discrète. */
+.fx-imm-eyebrow {
+  margin: 0 0 16px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(11, 10, 8, 0.34);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, 0.84);
+  font-size: clamp(10px, 1.15vw, 12px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+@media (max-width: 480px) {
+  .fx-imm-eyebrow { margin-bottom: 12px; padding: 6px 10px; font-size: 9px; }
+}
