@@ -71,6 +71,17 @@ def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
     return None
 
 
+def _primary_image_url(value: str | None) -> str | None:
+    """Conserve une URL image unique quand le feed en fournit plusieurs séparées par des virgules."""
+    if not value:
+        return None
+    for candidate in value.split(","):
+        url = candidate.strip()
+        if url.startswith(("https://", "http://")):
+            return url
+    return None
+
+
 async def search_internal_products(
     query: str, budget: float | None, *, limit: int = 20, country: str | None = None
 ) -> list[dict[str, Any]]:
@@ -150,7 +161,7 @@ async def search_internal_products(
                     "name": offer.name,
                     "price": int(round(offer.price)),
                     "merchant": offer.merchant.name if offer.merchant else "marchand",
-                    "image": offer.image_url,
+                    "image": _primary_image_url(offer.image_url),
                     "link": offer.deep_link or offer.product_url,
                     "delivery": "voir marchand",
                     "rating": None,

@@ -17,7 +17,7 @@ from app.db.base import Base
 from app.services.search import (
     MAX_TERMS, relevance_order, search_clause, stem, terms_of,
 )
-from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent, _required_name_terms
+from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent, _primary_image_url, _required_name_terms
 
 
 @pytest.fixture
@@ -128,6 +128,11 @@ class TestCatalogueIntent:
 
     def test_generic_headphone_request_does_not_add_unrequested_feature_constraint(self):
         assert _required_name_terms("casque bluetooth", "casque") == ()
+
+    def test_multiple_feed_images_use_the_first_valid_url(self):
+        assert _primary_image_url("https://img.example/one.jpg, https://img.example/two.jpg") == "https://img.example/one.jpg"
+        assert _primary_image_url("invalid, https://img.example/valid.jpg") == "https://img.example/valid.jpg"
+        assert _primary_image_url(None) is None
 
 
 class TestRelevance:
