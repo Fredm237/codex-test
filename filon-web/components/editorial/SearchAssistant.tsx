@@ -423,8 +423,7 @@ export function SearchAssistant() {
             <button type="submit" className="ed-btn wave">{S.ask}</button>
           </div>
           <div className="sa-country">
-            <label htmlFor="sa-cc">{S.priceFor}</label>
-            <select id="sa-cc" value={country} onChange={(e) => setCountry(e.target.value)}>
+            <select id="sa-cc" aria-label={S.priceFor} value={country} onChange={(e) => setCountry(e.target.value)}>
               {COUNTRIES.map((c) => (
                 <option key={c.code} value={c.code}>{c.label}</option>
               ))}
