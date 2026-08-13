@@ -3229,3 +3229,36 @@ html, body {
     top: 40%;
   }
 }
+
+/* Film HQ — le poster reste visible jusqu'au premier dessin réel du canvas. */
+.fx-immersive-poster {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+  transition: opacity 180ms ease-out;
+}
+
+.fx-immersive-poster.is-hidden {
+  opacity: 0;
+}
+
+.fx-immersive-canvas {
+  z-index: 0;
+  opacity: 0;
+  transition: opacity 180ms ease-out;
+}
+
+.fx-immersive-canvas.is-visible {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fx-immersive-poster,
+  .fx-immersive-canvas {
+    transition: none;
+  }
+}
