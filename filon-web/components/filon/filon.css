@@ -542,6 +542,11 @@
   .fx-nav-shell[open] .fx-nav-toggle svg { transform: rotate(180deg); }
   .fx-nav-toggle svg { transition: transform var(--fx-duration) var(--fx-ease-standard); }
   .fx-nav-tree { padding: var(--fx-space-3) var(--fx-space-2); max-height: 60vh; overflow-y: auto; }
+  .fx-nav-all,
+  .fx-nav-link,
+  .fx-nav-dept > summary,
+  .fx-nav-cat > summary,
+  .fx-nav-reset { min-height: 44px; }
 }
 
 /* Arborescence — <details> natif : dépliable sans JavaScript, accessible au
@@ -652,6 +657,7 @@
   .fx-controls-shell > .fx-catalogue-form { display: flex; content-visibility: visible; }
 }
 @media (max-width: 900px) {
+  .fx-filter-pill { min-height: 44px; }
   .fx-controls-shell {
     border: 1px solid var(--fx-border);
     border-radius: var(--fx-radius-md);
@@ -1125,6 +1131,19 @@
   font-weight: 600;
   font-size: var(--fx-text-base);
   cursor: pointer;
+}
+
+/* Champ catalogue : sur les téléphones étroits, l’action passe sous le champ
+   plutôt que de comprimer le texte ou de réduire la cible tactile. */
+@media (max-width: 480px) {
+  .fx-catalogue-search .fx-field {
+    flex-wrap: wrap;
+    gap: var(--fx-space-2);
+    padding: var(--fx-space-2);
+  }
+  .fx-catalogue-search .fx-field-icon { margin-left: var(--fx-space-2); }
+  .fx-catalogue-search .fx-field input { min-height: 44px; }
+  .fx-catalogue-search .fx-field .fx-btn.primary { width: 100%; min-height: 48px; }
 }
 
 /* ── Page produit — Refonte premium ──────────────────────── */
