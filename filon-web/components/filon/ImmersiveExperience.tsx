@@ -1,247 +1,242 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useLocale } from "@/lib/i18n";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { HeroSearch } from "./HeroSearch";
+import { useLocale } from "@/lib/i18n";
 
-const IMAGES = 256;
-const BASE = "/seq/full";
-const HEIGHT_VH = 800;
-const PRELOAD_CONCURRENCY = 8;
-const INITIAL_PRELOAD = 24;
+const TOTAL_FRAMES = 256;
+const FRAME_BASE = "/seq/hero";
+const SCROLL_HEIGHT = 1000;
+const INITIAL_WINDOW = 24;
+const PREFETCH_WINDOW = 30;
 
-type Copy = {
-  fallbackTitle: string;
-  fallbackText: string;
-  scrollHint: string;
-  chapters: Array<{ start: number; end: number; title: string; cta?: { label: string; href: string } }>;
+type ChapterText = {
+  title: string;
+  eyebrow?: string;
+  cta?: { label: string; href: string };
 };
 
-const COPY: Record<"fr" | "nl" | "en", Copy> = {
+const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
   fr: {
-    fallbackTitle: "Est-ce le bon moment pour acheter ?",
-    fallbackText: "FILON vous aide à explorer, comparer et décider avec des offres vérifiables.",
-    scrollHint: "Scrollez pour explorer",
     chapters: [
-      { start: 0, end: 0.22, title: "Prendre le temps de regarder." },
-      { start: 0.25, end: 0.45, title: "Les options deviennent plus claires." },
-      { start: 0.49, end: 0.70, title: "Comparer. Vérifier. Décider." },
-      { start: 0.74, end: 1, title: "FILON.", cta: { label: "Explorer le catalogue", href: "/recherche/" } },
+      { title: "Prendre le temps\nde regarder.", eyebrow: "Votre copilote d’achat." },
+      { title: "Les options deviennent\nplus claires." },
+      { title: "Comparer. Vérifier.\nDécider." },
+      { title: "FILON.", cta: { label: "Explorer le catalogue", href: "/recherche" } },
     ],
+    scrollHint: "Scrollez pour explorer",
+    loading: "Préparation de l’expérience...",
   },
   nl: {
-    fallbackTitle: "Is dit het juiste moment om te kopen?",
-    fallbackText: "FILON helpt je om verifieerbare aanbiedingen te ontdekken, te vergelijken en een keuze te maken.",
-    scrollHint: "Scroll om te ontdekken",
     chapters: [
-      { start: 0, end: 0.22, title: "Neem even de tijd om te kijken." },
-      { start: 0.25, end: 0.45, title: "De opties worden duidelijker." },
-      { start: 0.49, end: 0.70, title: "Vergelijk. Controleer. Beslis." },
-      { start: 0.74, end: 1, title: "FILON.", cta: { label: "Ontdek de catalogus", href: "/recherche/" } },
+      { title: "Neem even de tijd\nom te kijken.", eyebrow: "Je aankoopcopiloot." },
+      { title: "De opties worden\nduidelijker." },
+      { title: "Vergelijk. Controleer.\nBeslis." },
+      { title: "FILON.", cta: { label: "Ontdek de catalogus", href: "/recherche" } },
     ],
+    scrollHint: "Scroll om te ontdekken",
+    loading: "Ervaring voorbereiden...",
   },
   en: {
-    fallbackTitle: "Is this the right time to buy?",
-    fallbackText: "FILON helps you explore, compare and decide with verifiable offers.",
-    scrollHint: "Scroll to explore",
     chapters: [
-      { start: 0, end: 0.22, title: "Take a moment to look." },
-      { start: 0.25, end: 0.45, title: "The options become clearer." },
-      { start: 0.49, end: 0.70, title: "Compare. Verify. Decide." },
-      { start: 0.74, end: 1, title: "FILON.", cta: { label: "Explore the catalogue", href: "/recherche/" } },
+      { title: "Take a moment\nto look.", eyebrow: "Your shopping copilot." },
+      { title: "The options become\nclearer." },
+      { title: "Compare. Verify.\nDecide." },
+      { title: "FILON.", cta: { label: "Explore the catalogue", href: "/recherche" } },
     ],
+    scrollHint: "Scroll to explore",
+    loading: "Preparing the experience...",
   },
 };
 
-function framePath(index: number) {
-  return `${BASE}/${String(index + 1).padStart(3, "0")}.jpg`;
+function frameSource(index: number) {
+  return `${FRAME_BASE}/${String(index + 1).padStart(3, "0")}.jpg`;
 }
 
-function closestLoadedFrame(frames: Array<HTMLImageElement | undefined>, target: number) {
-  if (frames[target]) return frames[target];
-  for (let distance = 1; distance < IMAGES; distance += 1) {
+function closestFrame(images: Array<HTMLImageElement | null>, target: number, previous: number) {
+  if (images[target]) return images[target];
+  for (let distance = 1; distance < TOTAL_FRAMES; distance += 1) {
     const before = target - distance;
     const after = target + distance;
-    if (before >= 0 && frames[before]) return frames[before];
-    if (after < IMAGES && frames[after]) return frames[after];
+    if (before >= 0 && images[before]) return images[before];
+    if (after < TOTAL_FRAMES && images[after]) return images[after];
   }
-  return undefined;
+  return images[previous];
 }
 
 export function ImmersiveExperience() {
   const { locale } = useLocale();
   const copy = COPY[locale] ?? COPY.fr;
-  const host = useRef<HTMLElement>(null);
-  const canvas = useRef<HTMLCanvasElement>(null);
-  const cache = useRef<Array<HTMLImageElement | undefined>>([]);
-  const lastFrame = useRef(-1);
-  const lastProgress = useRef(-1);
-  const [active, setActive] = useState(false);
-  const [firstFrameReady, setFirstFrameReady] = useState(false);
-  const [firstFrameDrawn, setFirstFrameDrawn] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imagesRef = useRef<Array<HTMLImageElement | null>>(Array(TOTAL_FRAMES).fill(null));
+  const requestedRef = useRef(new Set<number>());
+  const prefetchRef = useRef<(frame: number) => void>(() => {});
+  const drawRef = useRef<() => void>(() => {});
+  const readyRef = useRef(false);
+  const paintedRef = useRef(false);
+  const lastFrameRef = useRef(0);
+  const lastChapterRef = useRef(-1);
+  const rafRef = useRef(0);
+  const [ready, setReady] = useState(false);
+  const [canvasPainted, setCanvasPainted] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  const [activeChapter, setActiveChapter] = useState(0);
+  const [chapterOpacity, setChapterOpacity] = useState(1);
 
   useEffect(() => {
-    setActive(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
   }, []);
 
   useEffect(() => {
-    if (!active) return;
+    if (reducedMotion) {
+      readyRef.current = true;
+      setReady(true);
+      return;
+    }
 
-    let alive = true;
-    let cursor = 0;
-    let pending = 0;
-    const order = [
-      ...Array.from({ length: INITIAL_PRELOAD }, (_, index) => index),
-      ...Array.from({ length: IMAGES - INITIAL_PRELOAD }, (_, index) => index + INITIAL_PRELOAD),
-    ];
+    let mounted = true;
+    const loadFrame = (index: number) => {
+      if (index < 0 || index >= TOTAL_FRAMES || requestedRef.current.has(index)) return;
+      requestedRef.current.add(index);
+      const image = new Image();
+      image.decoding = "async";
+      image.onload = () => {
+        if (!mounted) return;
+        imagesRef.current[index] = image;
+        if (index === 0) {
+          readyRef.current = true;
+          setReady(true);
+        }
+        if (readyRef.current) requestAnimationFrame(() => drawRef.current());
+      };
+      image.onerror = () => {
+        if (!mounted) return;
+        if (index === 0) {
+          // Le poster reste visible : l'expérience ne bascule jamais sur un écran noir.
+          readyRef.current = true;
+          setReady(true);
+        }
+      };
+      image.src = frameSource(index);
+    };
 
-    const loadNext = () => {
-      while (alive && pending < PRELOAD_CONCURRENCY && cursor < order.length) {
-        const index = order[cursor++];
-        const image = new Image();
-        pending += 1;
-        image.onload = () => {
-          if (!alive) return;
-          cache.current[index] = image;
-          pending -= 1;
-          if (index === 0) setFirstFrameReady(true);
-          window.dispatchEvent(new Event("filon:immersive-frame"));
-          loadNext();
-        };
-        image.onerror = () => {
-          if (!alive) return;
-          pending -= 1;
-          loadNext();
-        };
-        image.src = framePath(index);
+    prefetchRef.current = (frame: number) => {
+      const from = Math.max(0, frame - 4);
+      const to = Math.min(TOTAL_FRAMES - 1, frame + PREFETCH_WINDOW);
+      for (let index = from; index <= to; index += 1) loadFrame(index);
+    };
+
+    for (let index = 0; index < INITIAL_WINDOW; index += 1) loadFrame(index);
+    let nextFrame = INITIAL_WINDOW;
+    const progressiveLoader = window.setInterval(() => {
+      if (!mounted || nextFrame >= TOTAL_FRAMES) {
+        window.clearInterval(progressiveLoader);
+        return;
       }
-    };
+      const until = Math.min(TOTAL_FRAMES, nextFrame + 6);
+      for (; nextFrame < until; nextFrame += 1) loadFrame(nextFrame);
+    }, 220);
 
-    loadNext();
     return () => {
-      alive = false;
+      mounted = false;
+      window.clearInterval(progressiveLoader);
+      prefetchRef.current = () => {};
     };
-  }, [active]);
+  }, [reducedMotion]);
+
+  const draw = useCallback(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas || !ready) return;
+
+    const rect = container.getBoundingClientRect();
+    const maxScroll = Math.max(1, rect.height - window.innerHeight);
+    const progress = Math.max(0, Math.min(1, -rect.top / maxScroll));
+    const targetFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * (TOTAL_FRAMES - 1)));
+    prefetchRef.current(targetFrame);
+
+    const image = closestFrame(imagesRef.current, targetFrame, lastFrameRef.current);
+    const context = canvas.getContext("2d", { alpha: false });
+    if (context && image) {
+      const density = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.round(window.innerWidth * density);
+      const height = Math.round(window.innerHeight * density);
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+      }
+      const scale = Math.max(width / image.width, height / image.height);
+      const drawWidth = image.width * scale;
+      const drawHeight = image.height * scale;
+      context.fillStyle = "#0e0c0b";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+      lastFrameRef.current = targetFrame;
+      if (!paintedRef.current) {
+        paintedRef.current = true;
+        setCanvasPainted(true);
+      }
+    }
+
+    const chapterIndex = Math.min(copy.chapters.length - 1, Math.floor(progress * copy.chapters.length));
+    const chapterProgress = (progress * copy.chapters.length) % 1;
+    const opacity = chapterIndex === 0
+      ? (chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15 : 1)
+      : chapterProgress < 0.15
+        ? chapterProgress / 0.15
+        : chapterProgress > 0.85
+          ? (1 - chapterProgress) / 0.15
+          : 1;
+    if (chapterIndex !== lastChapterRef.current) {
+      lastChapterRef.current = chapterIndex;
+      setActiveChapter(chapterIndex);
+    }
+    setChapterOpacity(Math.max(0, Math.min(1, opacity)));
+  }, [copy.chapters.length, ready]);
+
+  drawRef.current = draw;
 
   useEffect(() => {
-    if (!active || !firstFrameReady) return;
-
-    const draw = () => {
-      const targetCanvas = canvas.current;
-      const targetHost = host.current;
-      if (!targetCanvas || !targetHost) return;
-
-      const rect = targetHost.getBoundingClientRect();
-      const run = rect.height - window.innerHeight;
-      const nextProgress = run > 0 ? Math.min(Math.max(-rect.top / run, 0), 1) : 0;
-      if (Math.abs(nextProgress - lastProgress.current) >= 0.002) {
-        lastProgress.current = nextProgress;
-        setProgress(nextProgress);
-      }
-
-      const index = Math.round(nextProgress * (IMAGES - 1));
-      const image = closestLoadedFrame(cache.current, index);
-      if (!image || index === lastFrame.current) return;
-
-      const context = targetCanvas.getContext("2d", { alpha: false });
-      if (!context) return;
-      const scale = Math.max(targetCanvas.width / image.width, targetCanvas.height / image.height);
-      const width = image.width * scale;
-      const height = image.height * scale;
-      context.fillStyle = "#0e0c0b";
-      context.fillRect(0, 0, targetCanvas.width, targetCanvas.height);
-      context.drawImage(image, (targetCanvas.width - width) / 2, (targetCanvas.height - height) / 2, width, height);
-      lastFrame.current = index;
-      setFirstFrameDrawn(true);
+    if (!ready) return;
+    const onScrollOrResize = () => {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = requestAnimationFrame(draw);
     };
-
-    const resize = () => {
-      const targetCanvas = canvas.current;
-      if (!targetCanvas) return;
-      const density = Math.min(window.devicePixelRatio || 1, 2);
-      targetCanvas.width = Math.round(window.innerWidth * density);
-      targetCanvas.height = Math.round(window.innerHeight * density);
-      targetCanvas.style.width = `${window.innerWidth}px`;
-      targetCanvas.style.height = `${window.innerHeight}px`;
-      lastFrame.current = -1;
-      draw();
-    };
-
-    let animationFrame = 0;
-    const queueDraw = () => {
-      if (!animationFrame) {
-        animationFrame = requestAnimationFrame(() => {
-          draw();
-          animationFrame = 0;
-        });
-      }
-    };
-
-    window.addEventListener("scroll", queueDraw, { passive: true });
-    window.addEventListener("resize", resize);
-    window.addEventListener("filon:immersive-frame", queueDraw);
-    resize();
+    onScrollOrResize();
+    window.addEventListener("scroll", onScrollOrResize, { passive: true });
+    window.addEventListener("resize", onScrollOrResize);
     return () => {
-      window.removeEventListener("scroll", queueDraw);
-      window.removeEventListener("resize", resize);
-      window.removeEventListener("filon:immersive-frame", queueDraw);
-      if (animationFrame) cancelAnimationFrame(animationFrame);
+      cancelAnimationFrame(rafRef.current);
+      window.removeEventListener("scroll", onScrollOrResize);
+      window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [active, firstFrameReady]);
+  }, [ready, draw]);
 
-  if (!active) {
-    return (
-      <section className="fx-immersive-repli">
-        <img src={framePath(0)} alt="" className="fx-immersive-repli-img" />
-        <div className="fx-immersive-repli-content">
-          <h1>{copy.fallbackTitle}</h1>
-          <p>{copy.fallbackText}</p>
-          <HeroSearch />
-        </div>
-      </section>
-    );
-  }
+  const chapter = copy.chapters[activeChapter];
 
   return (
-    <section ref={host} className="fx-immersive" style={{ height: `${HEIGHT_VH}vh` }}>
-      <div className="fx-immersive-sticky">
-        <img
-          src={framePath(0)}
-          alt=""
-          className={`fx-immersive-poster${firstFrameDrawn ? " is-hidden" : ""}`}
-        />
-        <canvas ref={canvas} className={`fx-immersive-canvas${firstFrameDrawn ? " is-visible" : ""}`} aria-hidden="true" />
-        <div className="fx-immersive-overlay" />
-
-        <div className="fx-immersive-search">
-          <HeroSearch />
+    <div ref={containerRef} className="fx-imm-wrap" style={{ height: `${SCROLL_HEIGHT}vh` }}>
+      <div className="fx-imm-sticky">
+        {/* Poster prioritaire : aucune zone noire avant le premier dessin réel. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img className={`fx-imm-poster${canvasPainted ? " is-hidden" : ""}`} src={frameSource(0)} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
+        <canvas ref={canvasRef} className={`fx-imm-canvas${canvasPainted ? " is-visible" : ""}`} aria-hidden="true" />
+        <div className="fx-imm-overlay" />
+        <div className="fx-imm-chapter" style={{ opacity: chapterOpacity }}>
+          {chapter.eyebrow && <p className="fx-imm-eyebrow">{chapter.eyebrow}</p>}
+          <h2 className="fx-imm-titre" aria-live="polite">{chapter.title}</h2>
+          {chapter.cta && <a href={chapter.cta.href} className="fx-imm-cta">{chapter.cta.label}</a>}
         </div>
-
-        {copy.chapters.map((chapter, index) => {
-          const visible = progress >= chapter.start && progress < chapter.end;
-          const opacity = visible
-            ? Math.min((progress - chapter.start) / 0.04, (chapter.end - progress) / 0.04, 1)
-            : 0;
-          return (
-            <div
-              key={index}
-              className="fx-immersive-chapitre"
-              style={{ opacity, pointerEvents: visible ? "auto" : "none" }}
-            >
-              <h2 className="fx-immersive-titre">{chapter.title}</h2>
-              {chapter.cta && <a href={chapter.cta.href} className="fx-immersive-cta">{chapter.cta.label}</a>}
-            </div>
-          );
-        })}
-
-        <div className="fx-immersive-scroll-hint" style={{ opacity: progress < 0.05 ? 1 : 0 }}>
-          <span>{copy.scrollHint}</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
-        </div>
+        <div className="fx-imm-search"><HeroSearch /></div>
+        {!ready ? <div className="fx-imm-loading">{copy.loading}</div> : activeChapter === 0 && chapterOpacity > 0.65 ? <div className="fx-imm-scroll-hint"><span>{copy.scrollHint}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div> : null}
       </div>
-    </section>
+    </div>
   );
 }

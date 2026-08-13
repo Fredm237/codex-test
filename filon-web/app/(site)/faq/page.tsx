@@ -12,57 +12,57 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const GENERAL_FR = [
-  { q: "C'est quoi FILON, en une phrase ?", a: "Un assistant d'achat. Vous lui dites ce que vous cherchez, il vous dit quoi acheter, où, et si c'est le bon moment." },
-  { q: "En quoi c'est différent d'une simple comparaison ?", a: "Une comparaison vous donne une liste et vous laisse trancher. FILON tranche pour vous : une réponse claire, « voici ce que vous devriez acheter »." },
-  { q: "FILON est-il vraiment gratuit ?", a: "Oui, entièrement, pour tout le monde, sans abonnement ni carte bancaire. Il n'y a pas de version payante." },
+  { q: "C'est quoi FILON, en une phrase ?", a: "Un copilote d'achat qui recherche des offres dans le catalogue FILON et les met en regard pour vous aider à choisir." },
+  { q: "En quoi c'est différent d'une simple comparaison ?", a: "FILON réunit les informations disponibles sur une offre — prix affiché, cashback et codes promo lorsqu'ils sont renseignés — afin de rendre la comparaison plus lisible. Vous gardez toujours le dernier mot." },
+  { q: "FILON est-il vraiment gratuit ?", a: "Oui. L'accès au catalogue et à l'assistant ne demande ni abonnement ni carte bancaire. Il n'existe actuellement pas de formule payante." },
 ];
 
 const CONFIANCE_FR = [
-  { q: "Puis-je faire confiance à la recommandation ?", a: "Elle est calculée sur votre seul intérêt. Aucune marque ne peut acheter sa place. FILON vous indique ce qui est vraiment le mieux pour vous." },
-  { q: "Mes données de navigation sont-elles revendues ?", a: "Jamais. Pas de profil publicitaire, pas de revente à des tiers. FILON en garde le moins possible, conforme RGPD par défaut." },
-  { q: "Le reconditionné proposé est-il fiable ?", a: "Uniquement du reconditionné vérifié, chez des vendeurs certifiés et sous garantie. Vous voyez la garantie et l'économie avant de décider." },
+  { q: "Puis-je faire confiance à la recommandation ?", a: "FILON s'appuie sur les informations présentes dans son catalogue et affiche ce qu'il sait d'une offre. Vérifiez toujours le prix, la disponibilité et les conditions du marchand avant de commander." },
+  { q: "Mes données de navigation sont-elles revendues ?", a: "Non. FILON ne revend pas vos données de navigation. Les détails sur les données traitées et vos droits sont disponibles dans notre politique de confidentialité." },
+  { q: "Le reconditionné proposé est-il fiable ?", a: "Une offre reconditionnée peut apparaître lorsqu'elle est référencée dans le catalogue. L'état, la garantie, le retour et le vendeur varient selon l'offre : vérifiez-les directement avant l'achat." },
 ];
 
 const PRODUIT_FR = [
-  { q: "Le cashback, ça change quoi pour moi ?", a: "FILON trouve la meilleure offre du moment et vous y emmène. Vous n'avez rien à chercher, ni à comparer." },
-  { q: "Quand l'extension et l'application arrivent-elles ?", a: "L'extension d'abord, puis l'application mobile et l'assistant. Ajoutez FILON pour être prévenu à chaque lancement." },
-  { q: "FILON fonctionne-t-il en dehors de la Belgique ?", a: "Nous commençons par la Belgique francophone, puis la France et le reste de la francophonie européenne." },
+  { q: "Le cashback, ça change quoi pour moi ?", a: "Quand une offre indique du cashback, FILON l'affiche avec les autres informations disponibles. Son attribution et ses conditions dépendent du marchand et du lien utilisé." },
+  { q: "Quand l'extension et l'application arrivent-elles ?", a: "Le catalogue et l'assistant sont déjà accessibles sur le site. L'extension Chrome attend sa publication ; toute nouvelle expérience mobile sera annoncée lorsqu'elle sera disponible." },
+  { q: "FILON fonctionne-t-il en dehors de la Belgique ?", a: "Le catalogue rassemble des marchands partenaires actifs dans plusieurs pays. La disponibilité d'une offre dépend toutefois de la zone de livraison et des conditions du marchand." },
 ];
 
 const GENERAL_NL = [
-  { q: "Wat is FILON, in één zin ?", a: "Een koopassistent. Je zegt hem wat je zoekt, hij zegt je wat te kopen, waar, en of het het juiste moment is." },
-  { q: "Waarin verschilt het van een simpele vergelijking ?", a: "Een vergelijking geeft je een lijst en laat je zelf beslissen. FILON beslist voor jou : een duidelijk antwoord, « dit zou je moeten kopen »." },
-  { q: "Is FILON echt gratis ?", a: "Ja, volledig, voor iedereen, zonder abonnement of bankkaart. Er is geen betalende versie." },
+  { q: "Wat is FILON, in één zin ?", a: "Een koopcopiloot die aanbiedingen in de FILON-catalogus opzoekt en naast elkaar zet om je te helpen kiezen." },
+  { q: "Waarin verschilt het van een simpele vergelijking ?", a: "FILON bundelt de beschikbare informatie over een aanbod — getoonde prijs, cashback en kortingscodes wanneer die vermeld zijn — zodat vergelijken duidelijker wordt. Jij houdt altijd het laatste woord." },
+  { q: "Is FILON echt gratis ?", a: "Ja. Voor de catalogus en de assistent heb je geen abonnement of bankkaart nodig. Er is momenteel geen betalende formule." },
 ];
 
 const CONFIANCE_NL = [
-  { q: "Kan ik de aanbeveling vertrouwen ?", a: "Ze wordt berekend op jouw belang alleen. Geen enkel merk kan zijn plaats kopen. FILON toont je wat echt het beste voor je is." },
-  { q: "Worden mijn surfgegevens doorverkocht ?", a: "Nooit. Geen advertentieprofiel, geen doorverkoop aan derden. FILON bewaart zo weinig mogelijk, GDPR-conform standaard." },
-  { q: "Is de aangeboden refurbished betrouwbaar ?", a: "Alleen geverifieerde refurbished, bij gecertificeerde verkopers en onder garantie. Je ziet de garantie en de besparing vóór je beslist." },
+  { q: "Kan ik de aanbeveling vertrouwen ?", a: "FILON gebruikt de informatie die in zijn catalogus aanwezig is en toont wat het over een aanbod weet. Controleer vóór je bestelt altijd de prijs, beschikbaarheid en voorwaarden van de winkel." },
+  { q: "Worden mijn surfgegevens doorverkocht ?", a: "Nee. FILON verkoopt je surfgegevens niet. Details over verwerkte gegevens en je rechten vind je in ons privacybeleid." },
+  { q: "Is de aangeboden refurbished betrouwbaar ?", a: "Een refurbished aanbod kan verschijnen wanneer het in de catalogus is opgenomen. De staat, garantie, retour en verkoper verschillen per aanbod: controleer die rechtstreeks vóór je koopt." },
 ];
 
 const PRODUIT_NL = [
-  { q: "Wat verandert de cashback voor mij ?", a: "FILON vindt het beste aanbod van het moment en brengt je erheen. Je hoeft niets te zoeken, noch te vergelijken." },
-  { q: "Wanneer komen de extensie en de applicatie ?", a: "De extensie eerst, daarna de mobiele app en de assistent. Voeg FILON toe om bij elke lancering verwittigd te worden." },
-  { q: "Werkt FILON buiten België ?", a: "We beginnen met Franstalig België, daarna Frankrijk en de rest van de Europese francofonie." },
+  { q: "Wat verandert de cashback voor mij ?", a: "Wanneer een aanbod cashback vermeldt, toont FILON die naast de andere beschikbare informatie. Toekenning en voorwaarden hangen af van de winkel en de gebruikte link." },
+  { q: "Wanneer komen de extensie en de applicatie ?", a: "De catalogus en de assistent zijn al beschikbaar op de website. De Chrome-extensie wacht op publicatie; een nieuwe mobiele ervaring wordt aangekondigd zodra die beschikbaar is." },
+  { q: "Werkt FILON buiten België ?", a: "De catalogus verzamelt partnerwinkels die actief zijn in verschillende landen. De beschikbaarheid van een aanbod hangt echter af van de leveringszone en voorwaarden van de winkel." },
 ];
 
 const GENERAL_EN = [
-  { q: "What is FILON, in one sentence ?", a: "A shopping assistant. You tell it what you're looking for, it tells you what to buy, where, and whether it's the right time." },
-  { q: "How is it different from a simple comparison ?", a: "A comparison gives you a list and leaves you to decide. FILON decides for you: a clear answer, « here's what you should buy »." },
-  { q: "Is FILON really free ?", a: "Yes, entirely, for everyone, with no subscription or credit card. There is no paid version." },
+  { q: "What is FILON, in one sentence ?", a: "A shopping copilot that searches offers in the FILON catalogue and puts them side by side to help you choose." },
+  { q: "How is it different from a simple comparison ?", a: "FILON brings together the information available for an offer — displayed price, cashback and promo codes when listed — to make comparison clearer. You always keep the final say." },
+  { q: "Is FILON really free ?", a: "Yes. Access to the catalogue and assistant requires no subscription or card. There is currently no paid plan." },
 ];
 
 const CONFIANCE_EN = [
-  { q: "Can I trust the recommendation ?", a: "It's calculated on your interest alone. No brand can buy its place. FILON shows you what's genuinely best for you." },
-  { q: "Is my browsing data resold ?", a: "Never. No advertising profile, no reselling to third parties. FILON keeps as little as possible, GDPR-compliant by default." },
-  { q: "Is the refurbished offered reliable ?", a: "Only verified refurbished, from certified sellers and under warranty. You see the warranty and the saving before you decide." },
+  { q: "Can I trust the recommendation ?", a: "FILON relies on the information available in its catalogue and shows what it knows about an offer. Always check a merchant's price, availability and terms before ordering." },
+  { q: "Is my browsing data resold ?", a: "No. FILON does not resell your browsing data. Our privacy policy explains the data processed and your rights." },
+  { q: "Is the refurbished offered reliable ?", a: "A refurbished offer may appear when it is listed in the catalogue. Its condition, warranty, returns and seller vary by offer, so check them directly before buying." },
 ];
 
 const PRODUIT_EN = [
-  { q: "What does cashback change for me ?", a: "FILON finds the best offer of the moment and takes you there. You have nothing to search for, nor to compare." },
-  { q: "When do the extension and the app arrive ?", a: "The extension first, then the mobile app and the assistant. Add FILON to be notified at each launch." },
-  { q: "Does FILON work outside Belgium ?", a: "We start with French-speaking Belgium, then France and the rest of the European francophonie." },
+  { q: "What does cashback change for me ?", a: "When an offer lists cashback, FILON displays it alongside the other available information. Its attribution and conditions depend on the merchant and the link used." },
+  { q: "When do the extension and the app arrive ?", a: "The catalogue and assistant are already available on the website. The Chrome extension is awaiting publication; a new mobile experience will be announced when it is available." },
+  { q: "Does FILON work outside Belgium ?", a: "The catalogue includes partner merchants active in several countries. An offer's availability still depends on the merchant's delivery area and terms." },
 ];
 
 function FaqFR() {

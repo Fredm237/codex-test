@@ -17,16 +17,17 @@ function IntelligenceFR() {
       <ContentHero
         eyebrow="L'intelligence FILON"
         title={<>Plus loin que le <span className="it">prix</span>.</>}
-        intro="Le prix le plus bas n'est pas toujours le meilleur achat. FILON regarde ce qui compte vraiment, pour vous éviter les mauvaises surprises."
+        intro="Le prix affiché ne suffit pas toujours pour comparer. FILON met en regard les informations disponibles sur une offre, pour vous aider à décider avec plus de contexte."
         breadcrumb={[{ name: "Intelligence", path: "/intelligence" }]}
       />
       <ProseBlock heading={<>Le bon achat, pas juste le bon <span className="it">prix</span>.</>}>
         <p>
-          Un bon achat, c&apos;est le bon produit, au bon moment, qui dure. FILON tient compte de tout ça, à votre place,
-          en quelques secondes.
+          Une offre ne contient pas toujours toutes les informations utiles. FILON organise ce qui est disponible dans
+          son catalogue afin de rendre la comparaison plus lisible.
         </p>
         <p>
-          Vous recevez une réponse simple. Derrière, beaucoup de choses ont été pesées pour vous.
+          Prix affiché, marchand, cashback, codes promo et score peuvent être présentés selon l&apos;offre. La décision et la
+          vérification finale restent entre vos mains.
         </p>
       </ProseBlock>
       <section className="ed-band alt">
@@ -37,17 +38,17 @@ function IntelligenceFR() {
           </div>
           <InfoGrid
             items={[
-              { n: "◷", h: "Le bon moment", p: "Un prix au plancher, dans la moyenne, ou gonflé. Vous savez s'il faut acheter ou attendre." },
-              { n: "★", h: "La fiabilité", p: "Un produit qui tient dans le temps, avec un vrai service derrière." },
-              { n: "⌛", h: "La durée de vie", p: "Combien de temps il va vraiment durer, à l'usage." },
-              { n: "€", h: "Le coût réel", p: "Pas seulement le prix affiché, mais ce qu'il coûte sur la durée." },
-              { n: <IcChat />, h: "Les avis, en clair", p: "Des milliers d'avis résumés en une réponse. Le signal, pas le bruit." },
-              { n: "✓", h: "La meilleure alternative", p: "Neuf, reconditionné, ailleurs : la meilleure option, quand elle existe." },
+              { n: "€", h: "Le prix affiché", p: "Le prix indiqué par le marchand dans le catalogue ; il peut évoluer avant votre commande." },
+              { n: "◷", h: "Le contexte de prix", p: "Lorsqu'un historique ou un score est disponible, FILON l'affiche avec ses limites de données." },
+              { n: "★", h: "Le marchand", p: "Le nom, la région et le secteur du partenaire quand ces informations sont renseignées." },
+              { n: "⌁", h: "Le cashback", p: "Le cashback et ses conditions lorsqu'ils sont transmis pour l'offre concernée." },
+              { n: <IcChat />, h: "Les codes promo", p: "Les codes ou avantages disponibles lorsqu'ils sont indiqués dans les données de l'offre." },
+              { n: "✓", h: "Les alternatives", p: "D'autres offres correspondant à votre recherche, sans promettre un classement universel." },
             ]}
           />
         </div>
       </section>
-      <ClosingCta title={<>L&apos;intelligence au service de <span className="it">votre</span> achat.</>} sub="Une réponse claire, à chaque fois. Et gratuite." />
+      <ClosingCta title={<>L&apos;intelligence au service de <span className="it">votre</span> choix.</>} sub="Un point de départ clair avant votre décision. L'accès est gratuit." />
     </>
   );
 }
@@ -58,16 +59,17 @@ function IntelligenceNL() {
       <ContentHero
         eyebrow="De FILON-intelligentie"
         title={<>Verder dan de <span className="it">prijs</span>.</>}
-        intro="De laagste prijs is niet altijd de beste aankoop. FILON kijkt naar wat echt telt, om je slechte verrassingen te besparen."
+        intro="De getoonde prijs alleen volstaat niet altijd om te vergelijken. FILON zet de beschikbare informatie over een aanbod naast elkaar, zodat je met meer context kunt beslissen."
         breadcrumb={[{ name: "Intelligentie", path: "/intelligence" }]}
       />
       <ProseBlock heading={<>De juiste aankoop, niet alleen de juiste <span className="it">prijs</span>.</>}>
         <p>
-          Een goede aankoop is het juiste product, op het juiste moment, dat meegaat. FILON houdt met dat alles rekening,
-          in jouw plaats, in enkele seconden.
+          Een aanbod bevat niet altijd alle nuttige informatie. FILON ordent wat er in zijn catalogus beschikbaar is om
+          vergelijken duidelijker te maken.
         </p>
         <p>
-          Jij krijgt een eenvoudig antwoord. Daarachter is veel voor je afgewogen.
+          Getoonde prijs, winkel, cashback, kortingscodes en score kunnen per aanbod worden getoond. De uiteindelijke
+          beslissing en controle blijven bij jou.
         </p>
       </ProseBlock>
       <section className="ed-band alt">
@@ -78,17 +80,17 @@ function IntelligenceNL() {
           </div>
           <InfoGrid
             items={[
-              { n: "◷", h: "Het juiste moment", p: "Een bodemprijs, gemiddeld, of opgeblazen. Je weet of je moet kopen of wachten." },
-              { n: "★", h: "Betrouwbaarheid", p: "Een product dat meegaat, met echte service erachter." },
-              { n: "⌛", h: "De levensduur", p: "Hoelang het echt meegaat, in gebruik." },
-              { n: "€", h: "De echte kost", p: "Niet alleen de getoonde prijs, maar wat het op termijn kost." },
-              { n: <IcChat />, h: "Reviews, helder", p: "Duizenden reviews samengevat in één antwoord. Het signaal, niet de ruis." },
-              { n: "✓", h: "Het beste alternatief", p: "Nieuw, refurbished, elders : de beste optie, wanneer die bestaat." },
+              { n: "€", h: "De getoonde prijs", p: "De prijs die de winkel in de catalogus aangeeft; die kan vóór je bestelling veranderen." },
+              { n: "◷", h: "Prijscontext", p: "Wanneer een historiek of score beschikbaar is, toont FILON die met de beperkingen van de gegevens." },
+              { n: "★", h: "De winkel", p: "De naam, regio en sector van de partner wanneer die informatie vermeld is." },
+              { n: "⌁", h: "Cashback", p: "Cashback en voorwaarden wanneer ze voor het betrokken aanbod worden doorgestuurd." },
+              { n: <IcChat />, h: "Kortingscodes", p: "Beschikbare codes of voordelen wanneer ze in de aanbodgegevens staan." },
+              { n: "✓", h: "Alternatieven", p: "Andere aanbiedingen die bij je zoekopdracht passen, zonder een universele rangschikking te beloven." },
             ]}
           />
         </div>
       </section>
-      <ClosingCta title={<>Intelligentie ten dienste van <span className="it">jouw</span> aankoop.</>} sub="Een duidelijk antwoord, elke keer. En gratis." />
+      <ClosingCta title={<>Intelligentie ten dienste van <span className="it">jouw</span> keuze.</>} sub="Een helder vertrekpunt vóór je beslist. De toegang is gratis." />
     </>
   );
 }
@@ -99,15 +101,15 @@ function IntelligenceEN() {
       <ContentHero
         eyebrow="FILON intelligence"
         title={<>Beyond the <span className="it">price</span>.</>}
-        intro="The lowest price isn't always the best purchase. FILON looks at what really matters, to spare you nasty surprises."
+        intro="The displayed price alone is not always enough to compare. FILON puts the available information about an offer side by side, so you can decide with more context."
         breadcrumb={[{ name: "Intelligence", path: "/intelligence" }]}
       />
       <ProseBlock heading={<>The right purchase, not just the right <span className="it">price</span>.</>}>
         <p>
-          A good purchase is the right product, at the right moment, that lasts. FILON takes all of that into
-          account, for you, in a few seconds.
+          An offer does not always include every useful detail. FILON organises what is available in its catalogue to
+          make comparison clearer.
         </p>
-        <p>You receive a simple answer. Behind it, a lot has been weighed up for you.</p>
+        <p>Displayed price, merchant, cashback, promo codes and a score may be shown depending on the offer. The final decision and verification remain yours.</p>
       </ProseBlock>
       <section className="ed-band alt">
         <div className="ed-wrap">
@@ -117,17 +119,17 @@ function IntelligenceEN() {
           </div>
           <InfoGrid
             items={[
-              { n: "◷", h: "The right moment", p: "A rock-bottom price, average, or inflated. You know whether to buy or wait." },
-              { n: "★", h: "Reliability", p: "A product that holds up over time, with real service behind it." },
-              { n: "⌛", h: "The lifespan", p: "How long it will really last, in use." },
-              { n: "€", h: "The real cost", p: "Not just the displayed price, but what it costs over time." },
-              { n: <IcChat />, h: "Reviews, made clear", p: "Thousands of reviews summed up in one answer. The signal, not the noise." },
-              { n: "✓", h: "The best alternative", p: "New, refurbished, elsewhere: the best option, when it exists." },
+              { n: "€", h: "The displayed price", p: "The price listed by the merchant in the catalogue; it can change before you order." },
+              { n: "◷", h: "Price context", p: "When a history or score is available, FILON shows it with its data limitations." },
+              { n: "★", h: "The merchant", p: "The partner's name, region and sector when this information is listed." },
+              { n: "⌁", h: "Cashback", p: "Cashback and its terms when they are supplied for the relevant offer." },
+              { n: <IcChat />, h: "Promo codes", p: "Available codes or benefits when they are listed in the offer data." },
+              { n: "✓", h: "Alternatives", p: "Other offers matching your search, without promising a universal ranking." },
             ]}
           />
         </div>
       </section>
-      <ClosingCta title={<>Intelligence in service of <span className="it">your</span> purchase.</>} sub="A clear answer, every time. And free." />
+      <ClosingCta title={<>Intelligence in service of <span className="it">your</span> choice.</>} sub="A clear starting point before you decide. Access is free." />
     </>
   );
 }

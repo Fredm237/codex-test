@@ -8,15 +8,17 @@ const SL = {
   fr: {
     steps: ["Compréhension du besoin", "Analyse des marchands", "Analyse des prix", "Analyse de l'historique", "Analyse du cashback", "Analyse des avis", "Recherche d'alternatives", "Calcul du Score FILON"],
     eyebrow: "Assistant d'achat",
-    h1Idle: "Que voulez-vous acheter, ou décider ?", h1Again: "Un autre achat à décider ?",
+    h1Idle: "Que cherchez-vous ?", h1Again: "Un autre achat à analyser ?",
     placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
     priceFor: "Prix pour",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
-    why: "Pourquoi", alt: "Alternative", see: "Voir l'offre", good: "Bon moment", wait: "Attendre",
-    real: "Prix réels · Google Shopping", est: "Prix estimés, à titre indicatif",
+    why: "Pourquoi", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", good: "Bon moment", wait: "Attendre",
+    real: "Prix réels · Catalogue FILON", est: "Prix estimés, à titre indicatif",
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
     failedTitle: "Je ne peux pas répondre pour le moment.",
     failedBody: "L'analyse s'appuie sur les offres de nos marchands partenaires, et ce service est momentanément injoignable. Plutôt que de vous proposer des produits inventés, je préfère ne rien vous proposer. Réessayez dans un instant.",
+    sourceTitle: "Aucune offre vérifiée n’est disponible pour cette recherche.",
+    sourceBody: "FILON s’appuie uniquement sur les offres de son catalogue partenaire. Cette recherche ne renvoie pas encore de prix vérifiables ; explorez le catalogue ou reformulez votre demande.",
     retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
     at: "chez", cashback: "cashback", coupon: "coupon",
@@ -25,15 +27,17 @@ const SL = {
   nl: {
     steps: ["Begrip van de behoefte", "Analyse van de winkels", "Prijsanalyse", "Analyse van de geschiedenis", "Analyse van de cashback", "Analyse van de reviews", "Alternatieven zoeken", "Berekening van de FILON-Score"],
     eyebrow: "Koopassistent",
-    h1Idle: "Wat wil je kopen, of beslissen ?", h1Again: "Nog een aankoop om te beslissen ?",
+    h1Idle: "Wat zoek je?", h1Again: "Nog een aankoop om te analyseren?",
     placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
     priceFor: "Prijs voor",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
-    why: "Waarom", alt: "Alternatief", see: "Bekijk de aanbieding", good: "Goed moment", wait: "Wachten",
-    real: "Echte prijzen · Google Shopping", est: "Geschatte prijzen, ter indicatie",
+    why: "Waarom", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", good: "Goed moment", wait: "Wachten",
+    real: "Echte prijzen · FILON Catalogus", est: "Geschatte prijzen, ter indicatie",
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
     failedTitle: "Ik kan nu niet antwoorden.",
     failedBody: "De analyse steunt op de aanbiedingen van onze partnerwinkels, en die dienst is tijdelijk onbereikbaar. Liever niets voorstellen dan verzonnen producten. Probeer het zo meteen opnieuw.",
+    sourceTitle: "Geen geverifieerde aanbieding voor deze zoekopdracht.",
+    sourceBody: "FILON gebruikt uitsluitend aanbiedingen uit zijn partnercatalogus. Deze zoekopdracht levert nog geen verifieerbare prijzen op; verken de catalogus of verfijn je vraag.",
     retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
     at: "bij", cashback: "cashback", coupon: "code",
@@ -42,15 +46,17 @@ const SL = {
   en: {
     steps: ["Understanding the need", "Analysing merchants", "Analysing prices", "Analysing price history", "Analysing cashback", "Analysing reviews", "Searching for alternatives", "Computing the FILON Score"],
     eyebrow: "Shopping assistant",
-    h1Idle: "What do you want to buy, or decide ?", h1Again: "Another purchase to decide ?",
+    h1Idle: "What are you looking for?", h1Again: "Another purchase to analyse?",
     placeholder: "Describe a need, or a product…", ask: "Ask",
     priceFor: "Price for",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
-    why: "Why", alt: "Alternative", see: "See the offer", good: "Good time", wait: "Wait",
-    real: "Real prices · Google Shopping", est: "Estimated prices, for guidance",
+    why: "Why", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", good: "Good time", wait: "Wait",
+    real: "Real prices · FILON Catalogue", est: "Estimated prices, for guidance",
     analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
     failedTitle: "I can't answer right now.",
     failedBody: "The analysis draws on offers from our partner merchants, and that service is temporarily unreachable. Rather than show you invented products, I would rather show you nothing. Try again in a moment.",
+    sourceTitle: "No verified offer is available for this search.",
+    sourceBody: "FILON relies only on offers from its partner catalogue. This search does not yet return verifiable prices; explore the catalogue or refine your request.",
     retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
     at: "at", cashback: "cashback", coupon: "coupon",
@@ -64,17 +70,28 @@ const SL = {
    SSE. There is no second source: when the stream fails, the assistant says so.
    ────────────────────────────────────────────────────────────────────────── */
 
-const money = (n: number, cur = "€") => `${n.toLocaleString("fr-FR")} ${cur}`;
+const money = (n: number, cur = "€", locale: "fr" | "nl" | "en" = "fr") => {
+  const currency = cur === "€" ? "EUR" : cur === "£" ? "GBP" : cur === "$" ? "USD" : cur;
+  const numberLocale = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
+  try {
+    return new Intl.NumberFormat(numberLocale, { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
+  } catch {
+    return `${n.toLocaleString(numberLocale)} ${cur}`;
+  }
+};
 
-/** Pays supportés pour les prix (SerpApi côté backend). */
-const COUNTRIES: Array<{ code: string; label: string }> = [
-  { code: "be", label: "Belgique (FR)" },
-  { code: "be-nl", label: "België (NL)" },
-  { code: "fr", label: "France" },
-  { code: "ch", label: "Suisse" },
-  { code: "lu", label: "Luxembourg" },
-  { code: "nl", label: "Pays-Bas" },
-];
+/** Pays couverts par les offres et prix suivis dans le catalogue FILON. */
+const COUNTRIES = [
+  { code: "be", labels: { fr: "Belgique (FR)", nl: "België (FR)", en: "Belgium (FR)" } },
+  { code: "be-nl", labels: { fr: "Belgique (NL)", nl: "België (NL)", en: "Belgium (NL)" } },
+  { code: "fr", labels: { fr: "France", nl: "Frankrijk", en: "France" } },
+  { code: "ch", labels: { fr: "Suisse", nl: "Zwitserland", en: "Switzerland" } },
+  { code: "lu", labels: { fr: "Luxembourg", nl: "Luxemburg", en: "Luxembourg" } },
+  { code: "nl", labels: { fr: "Pays-Bas", nl: "Nederland", en: "Netherlands" } },
+] as const;
+
+const countryLabel = (code: string, locale: "fr" | "nl" | "en") =>
+  COUNTRIES.find((country) => country.code === code)?.labels[locale] ?? code;
 
 /* Icônes ligne, nettes et sobres (currentColor) — remplacent les émojis. */
 const IconBase = ({ children }: { children: React.ReactNode }) => (
@@ -130,8 +147,17 @@ type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; cu
    maquette. Un assistant qui n'a pas de réponse doit le dire. */
 
 function detectBudget(q: string): number | null {
-  const m = q.replace(/\s/g, "").match(/(\d{2,5})(?:€|eur)/i) || q.match(/(?:moins de|budget|à|max|environ|autour)\D{0,6}(\d{2,5})/i);
-  return m ? parseInt(m[1], 10) : null;
+  const compact = q.replace(/\s/g, "");
+  const explicit = compact.match(/(\d{2,5})(?:€|eur)/i)
+    || q.match(/(?:moins de|budget|à|max|environ|autour|under|budget|about|tot|maximaal|onder)\D{0,6}(\d{2,5})/i);
+  if (explicit) return parseInt(explicit[1], 10);
+
+  // Dans une recherche libre, « ordinateur portable étudiant 800 » est une
+  // formulation fréquente d'un budget. On accepte seulement un montant final
+  // à trois chiffres ou plus pour ne pas confondre un modèle (par ex. iPhone 16)
+  // avec une limite de prix.
+  const trailing = q.trim().match(/\b(\d{3,5})\s*$/);
+  return trailing ? parseInt(trailing[1], 10) : null;
 }
 
 type Ev =
@@ -139,14 +165,66 @@ type Ev =
   | { type: "step-done"; i: number }
   | { type: "results"; data: Result };
 
+const isGoogleShoppingUrl = (value?: string | null) =>
+  Boolean(value && /(^|\.)google\.[^/]+\/search/i.test(value) && /(?:[?&]tbm=shop|[?&]ibp=oshop)/i.test(value));
+
+// Une demande conversationnelle (« un casque sous 300 € ») ne doit pas être
+// envoyée telle quelle au moteur catalogue. Ce dernier cherche des noms de
+// produit ; cette extraction courte préserve l’intention sans promettre de
+// compréhension artificielle.
+function catalogueSearchTerm(input: string) {
+  const normalized = input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  const concepts: Array<[RegExp, string]> = [
+    [/casque|headphone|koptelefoon|noise.?cancell?/, "casque"],
+    [/ecouteur|earbud|oortje/, "ecouteurs"],
+    [/smartphone|telephone|telefoon|iphone|android/, "smartphone"],
+    [/ordinateur|laptop|portable|pc\b|computer/, "ordinateur"],
+    [/montre|watch|horloge/, "montre"],
+    [/television|televiseur|tv\b/, "television"],
+    [/aspirateur|vacuum|stofzuiger/, "aspirateur"],
+    [/sneaker|basket|chaussure|shoe/, "chaussures"],
+  ];
+  const match = concepts.find(([pattern]) => pattern.test(normalized));
+  if (match) return match[1];
+
+  const terms = normalized
+    .replace(/\b(?:un|une|des|le|la|les|de|du|pour|avec|sous|moins|budget|euro|euros|eur|a|au|en|the|a|an|and|with|under|voor|met|onder)\b/g, " ")
+    .replace(/\b\d+[\d\s,.]*\b/g, " ")
+    .split(/[^a-z0-9]+/)
+    .filter((term) => term.length > 2)
+    .slice(0, 3);
+  return terms.join(" ") || input.trim();
+}
+
+function catalogueHref(input: string) {
+  const normalized = input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  const routes: Array<[RegExp, string]> = [
+    [/casque|headphone|koptelefoon|noise.?cancell?/, "/catalogue/?dept=high-tech&cat=tv-son&sub=Casques%20audio"],
+    [/ecouteur|earbud|oortje/, "/catalogue/?dept=high-tech&cat=telephonie&sub=%C3%89couteurs"],
+    [/smartphone|telephone|telefoon|iphone|android/, "/catalogue/?dept=high-tech&cat=telephonie&sub=Smartphones"],
+    [/ordinateur|laptop|portable|pc\b|computer/, "/catalogue/?dept=high-tech&cat=informatique&sub=Ordinateurs%20portables"],
+    [/television|televiseur|tv\b/, "/catalogue/?dept=high-tech&cat=tv-son&sub=T%C3%A9l%C3%A9viseurs"],
+    [/aspirateur|vacuum|stofzuiger/, "/catalogue/?dept=maison&cat=electromenager&sub=Aspirateurs"],
+    [/sneaker|basket|chaussure|shoe/, "/catalogue/?dept=mode-accessoires&cat=chaussures&sub=Baskets%20%26%20Sneakers"],
+  ];
+  return routes.find(([pattern]) => pattern.test(normalized))?.[1]
+    ?? `/catalogue/?q=${encodeURIComponent(catalogueSearchTerm(input))}`;
+}
+
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
 const API = (process.env.NEXT_PUBLIC_FILON_API || "https://web-production-c6842.up.railway.app").replace(/\/$/, "");
 
-async function* streamAnalyze(q: string, country: string): AsyncGenerator<Ev> {
+async function* streamAnalyze(q: string, country: string, locale: "fr" | "nl" | "en"): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
-  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}`;
+  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}&locale=${encodeURIComponent(locale)}`;
   const res = await fetch(url, { headers: { Accept: "text/event-stream" } });
   if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
   const reader = res.body.getReader();
@@ -177,8 +255,14 @@ function ScoreRing({ score }: { score: number }) {
 
 function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
   const [imgOk, setImgOk] = useState(true);
-  const S = SL[useLocale().locale];
-  const offerUrl = c.link || `https://www.google.com/search?tbm=shop&q=${encodeURIComponent(q || c.name)}`;
+  const { locale } = useLocale();
+  const S = SL[locale];
+  // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
+  // Google Shopping : on le laisse explorer le même produit dans FILON.
+  const hasMerchantLink = Boolean(c.link) && !isGoogleShoppingUrl(c.link);
+  const offerUrl = hasMerchantLink
+    ? (c.link as string)
+    : `/catalogue/?q=${encodeURIComponent(q || c.name)}`;
   const showImg = c.image && imgOk;
   return (
     <motion.article 
@@ -199,7 +283,7 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
-          <div className="fa-price"><b>{money(c.price, cur)}</b><span className="mc">{S.at} {c.merchant}</span></div>
+          <div className="fa-price"><b>{money(c.price, cur, locale)}</b><span className="mc">{S.at} {c.merchant}</span></div>
           <div className="fa-specs">
             <span><IcTruck /> {c.delivery}</span>
             <span><IcShield /> {c.warranty}</span>
@@ -213,7 +297,14 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         <div className="fa-aside">
           <ScoreRing score={c.score} />
           <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> {S.good}</> : <><IcClock /> {S.wait}</>}</span>
-          <a className="ed-btn wave" href={offerUrl} target="_blank" rel="noopener noreferrer">{S.see}</a>
+          <a
+            className="ed-btn wave"
+            href={offerUrl}
+            target={hasMerchantLink ? "_blank" : undefined}
+            rel={hasMerchantLink ? "noopener noreferrer" : undefined}
+          >
+            {hasMerchantLink ? S.see : S.catalogue}
+          </a>
         </div>
       </div>
     </motion.article>
@@ -227,6 +318,7 @@ export function SearchAssistant() {
   const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
+  const [blockedExternal, setBlockedExternal] = useState(false);
   // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
   // devise et les marchands disponibles en dépendent, et un visiteur français
   // n'a aucune raison de partir sur la Belgique. Le sélecteur reste maître —
@@ -255,6 +347,7 @@ export function SearchAssistant() {
     const id = ++runId.current;
     setPhase("thinking");
     setResult(null);
+    setBlockedExternal(false);
     setDone([]);
     setActive(0);
 
@@ -263,8 +356,20 @@ export function SearchAssistant() {
       if (ev.type === "step") setActive(ev.i);
       else if (ev.type === "step-done") setDone((d) => [...d, ev.i]);
       else if (ev.type === "results") {
+        // Une recommandation ne peut pas être présentée comme FILON lorsqu’elle
+        // ne contient que des liens Google Shopping. On bloque le résultat au
+        // lieu de brouiller la promesse de catalogue partenaire.
+        const verifiedCards = ev.data.cards.filter((card) => !isGoogleShoppingUrl(card.link));
         setActive(-1);
-        setResult(ev.data);
+        // `real: false` signifie que le backend n’a pas trouvé de réponse dans
+        // le catalogue FILON : ce sont des estimations et non des offres à
+        // recommander. Elles restent donc hors de l’interface de décision.
+        if (!ev.data.real || (ev.data.cards.length > 0 && verifiedCards.length === 0)) {
+          setBlockedExternal(true);
+          setPhase("failed");
+          return true;
+        }
+        setResult({ ...ev.data, cards: verifiedCards });
         setPhase("results");
       }
       return true;
@@ -273,7 +378,7 @@ export function SearchAssistant() {
     // Le backend, ou rien. Un repli qui invente des offres se présente comme une
     // vraie analyse : le visiteur n'a aucun moyen de faire la différence.
     try {
-      for await (const ev of streamAnalyze(q, country)) if (!apply(ev)) return;
+      for await (const ev of streamAnalyze(q, country, locale)) if (!apply(ev)) return;
     } catch {
       if (runId.current !== id) return;
       setDone([]);
@@ -296,12 +401,30 @@ export function SearchAssistant() {
 
   return (
     <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>
-      {/* Vidéo de fond immersive en état idle */}
+      {/* Scène cinématique fiable : aucun média absent, aucun visuel inventé. */}
       {phase === "idle" && (
         <>
-          <video className="sa-bg-video" autoPlay muted loop playsInline>
-            <source src="/video/hf_orb.mp4" type="video/mp4" />
-          </video>
+          {/* Poster immobile par défaut ; la vidéo reste limitée au grand écran
+              et disparaît aussi lorsque le visiteur réduit les animations. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            className="sa-bg-visual sa-bg-poster"
+            src="/immersive/filon-materialized-anchor-16x9.png"
+            alt=""
+            aria-hidden="true"
+            fetchPriority="high"
+          />
+          <video
+            className="sa-bg-visual sa-bg-video"
+            src="/immersive/filon-materialized-1080p.mp4"
+            poster="/immersive/filon-materialized-anchor-16x9.png"
+            aria-hidden="true"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+          />
           <div className="sa-bg-overlay" />
         </>
       )}
@@ -325,10 +448,9 @@ export function SearchAssistant() {
             <button type="submit" className="ed-btn wave">{S.ask}</button>
           </div>
           <div className="sa-country">
-            <label htmlFor="sa-cc">{S.priceFor}</label>
-            <select id="sa-cc" value={country} onChange={(e) => setCountry(e.target.value)}>
+            <select id="sa-cc" aria-label={S.priceFor} value={country} onChange={(e) => setCountry(e.target.value)}>
               {COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>{c.label}</option>
+                <option key={c.code} value={c.code}>{c.labels[locale]}</option>
               ))}
             </select>
           </div>
@@ -381,11 +503,17 @@ export function SearchAssistant() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <p className="sa-failed-title">{S.failedTitle}</p>
-                  <p className="sa-failed-body">{S.failedBody}</p>
-                  <button type="button" className="sa-failed-retry" onClick={() => ask(asked)}>
-                    {S.retry}
-                  </button>
+                  <p className="sa-failed-title">{blockedExternal ? S.sourceTitle : S.failedTitle}</p>
+                  <p className="sa-failed-body">{blockedExternal ? S.sourceBody : S.failedBody}</p>
+                  {blockedExternal ? (
+                    <a className="sa-failed-retry" href={catalogueHref(asked)}>
+                      {S.catalogue}
+                    </a>
+                  ) : (
+                    <button type="button" className="sa-failed-retry" onClick={() => ask(asked)}>
+                      {S.retry}
+                    </button>
+                  )}
                 </motion.div>
               )}
 
@@ -398,7 +526,7 @@ export function SearchAssistant() {
                 >
                   <p className="fa-summary">
                     <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.recos} {result.cards.length} {S.recoTail}{result.cards.length > 1 ? S.nounPl : ""}, {S.classed}{result.cards.length > 1 ? S.adjPl : ""}.
-                    <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{COUNTRIES.find((x) => x.code === (result.country || country))?.label || "Belgique"}.</span>
+                    <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{countryLabel(result.country || country, locale)}.</span>
                   </p>
                   <div className="fa-cards">
                     {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}

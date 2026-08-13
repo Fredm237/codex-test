@@ -14,32 +14,32 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const INCLUS_FR = [
-  "Le meilleur prix réel, trouvé pour vous",
-  "Un verdict clair : acheter maintenant, ou attendre",
-  "Le bon moment pour passer commande",
-  "Des alternatives fiables, quand elles existent",
-  "L'extension, présente au bon moment",
-  "Des alertes quand le prix baisse",
+  "Les offres indexées, réunies au même endroit",
+  "Un verdict lorsque l’historique disponible le permet",
+  "Le contexte utile pour comparer avant d’acheter",
+  "Des alternatives comparables, lorsqu’elles sont disponibles",
+  "La page de présentation de l’extension Chrome",
+  "Une expérience sans abonnement ni carte bancaire",
   "Vos données restent chez vous · RGPD",
 ];
 
 const INCLUS_NL = [
-  "De beste echte prijs, voor jou gevonden",
-  "Een duidelijk oordeel : nu kopen, of wachten",
-  "Het juiste moment om te bestellen",
-  "Betrouwbare alternatieven, wanneer die bestaan",
-  "De extensie, aanwezig op het juiste moment",
-  "Meldingen wanneer de prijs daalt",
+  "Geïndexeerde aanbiedingen, op één plek verzameld",
+  "Een oordeel wanneer de beschikbare geschiedenis dit toelaat",
+  "Nuttige context om te vergelijken vóór je koopt",
+  "Vergelijkbare alternatieven, wanneer ze beschikbaar zijn",
+  "De presentatiepagina van de Chrome-extensie",
+  "Een ervaring zonder abonnement of bankkaart",
   "Je gegevens blijven van jou · AVG",
 ];
 
 const INCLUS_EN = [
-  "The best real price, found for you",
-  "A clear verdict: buy now, or wait",
-  "The right moment to place your order",
-  "Reliable alternatives, when they exist",
-  "The extension, present at the right moment",
-  "Alerts when the price drops",
+  "Indexed offers, gathered in one place",
+  "A verdict when the available history supports it",
+  "Useful context to compare before you buy",
+  "Comparable alternatives, when they are available",
+  "The Chrome extension presentation page",
+  "An experience with no subscription or credit card",
   "Your data stays yours · GDPR",
 ];
 
@@ -101,9 +101,9 @@ function TarifsFR() {
       <Plan
         tag="Le seul plan qui existe"
         price={<>0€ <small>/ pour toujours · sans carte bancaire</small></>}
-        lede="Tout FILON. Décrivez un besoin, obtenez le meilleur prix réel et le verdict « acheter ou attendre », à chaque achat."
+        lede="Tout FILON. Décrivez un besoin, parcourez les offres indexées et consultez le verdict lorsque les données disponibles le permettent."
         items={INCLUS_FR}
-        chromeLabel="Ajouter à Chrome"
+        chromeLabel="Découvrir l’extension"
       />
       <p style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13.5, marginTop: -20 }}>
         Le prix chez le marchand est le même avec ou sans FILON. Vous ne payez jamais.
@@ -135,9 +135,9 @@ function TarifsNL() {
       <Plan
         tag="Het enige plan dat bestaat"
         price={<>0€ <small>/ voor altijd · zonder bankkaart</small></>}
-        lede="Heel FILON. Beschrijf een behoefte, krijg de beste echte prijs en het oordeel « kopen of wachten », bij elke aankoop."
+        lede="Heel FILON. Beschrijf een behoefte, bekijk geïndexeerde aanbiedingen en raadpleeg het oordeel wanneer de beschikbare gegevens dit toelaten."
         items={INCLUS_NL}
-        chromeLabel="Toevoegen aan Chrome"
+        chromeLabel="Ontdek de extensie"
       />
       <p style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13.5, marginTop: -20 }}>
         De prijs bij de winkel is dezelfde met of zonder FILON. Je betaalt nooit.
@@ -169,9 +169,9 @@ function TarifsEN() {
       <Plan
         tag="The only plan there is"
         price={<>€0 <small>/ forever · no credit card</small></>}
-        lede="All of FILON. Describe a need, get the best real price and the « buy or wait » verdict, on every purchase."
+        lede="All of FILON. Describe a need, browse indexed offers and consult the verdict when the available data supports it."
         items={INCLUS_EN}
-        chromeLabel="Add to Chrome"
+        chromeLabel="Discover the extension"
       />
       <p style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13.5, marginTop: -20 }}>
         The price at the merchant is the same with or without FILON. You never pay.

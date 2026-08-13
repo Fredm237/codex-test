@@ -13,7 +13,7 @@ const FL = {
     sending: "Envoi…", send: "Envoyer",
     err: "Une erreur est survenue. Réessayez, ou écrivez-nous directement à ",
     subscribed: "✓ Inscrit·e", subscribe: "M'inscrire",
-    retry: "Réessayez.", newsOk: "Vous serez prévenu·e du lancement.",
+    retry: "Réessayez.", newsOk: "Vous serez prévenu·e du lancement.", contactSubject: "Message depuis FILON", newsletterSubject: "Inscription au brief FILON",
   },
   nl: {
     ok: "✓ Bedankt ! Je bericht is verzonden. We komen snel bij je terug.",
@@ -21,7 +21,7 @@ const FL = {
     sending: "Verzenden…", send: "Verzenden",
     err: "Er is iets misgegaan. Probeer opnieuw, of schrijf ons direct op ",
     subscribed: "✓ Ingeschreven", subscribe: "Inschrijven",
-    retry: "Probeer opnieuw.", newsOk: "Je wordt verwittigd bij de lancering.",
+    retry: "Probeer opnieuw.", newsOk: "Je wordt verwittigd bij de lancering.", contactSubject: "Bericht via FILON", newsletterSubject: "Inschrijving voor de FILON-brief",
   },
   en: {
     ok: "✓ Thank you ! Your message is on its way. We'll get back to you shortly.",
@@ -29,7 +29,7 @@ const FL = {
     sending: "Sending…", send: "Send",
     err: "Something went wrong. Try again, or write to us directly at ",
     subscribed: "✓ Subscribed", subscribe: "Subscribe",
-    retry: "Try again.", newsOk: "You'll be notified at launch.",
+    retry: "Try again.", newsOk: "You'll be notified at launch.", contactSubject: "Message from FILON", newsletterSubject: "FILON brief subscription",
   },
 };
 
@@ -88,7 +88,7 @@ export function ContactForm() {
       nom: String(fd.get("nom") || ""),
       email: String(fd.get("email") || ""),
       message: String(fd.get("message") || ""),
-      _subject: "Nouveau message FILON",
+      _subject: T.contactSubject,
     });
     setState(ok ? "ok" : "error");
     if (ok) e.currentTarget.reset();
@@ -130,7 +130,7 @@ export function Newsletter() {
     const fd = new FormData(e.currentTarget);
     if (fd.get("_gotcha")) return;
     setState("sending");
-    const ok = await postForm({ email: String(fd.get("email") || ""), _subject: "Inscription à la newsletter Le Filon", liste: "le-filon" });
+    const ok = await postForm({ email: String(fd.get("email") || ""), _subject: T.newsletterSubject, liste: "filon-brief" });
     setState(ok ? "ok" : "error");
     if (ok) e.currentTarget.reset();
   };

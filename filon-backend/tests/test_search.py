@@ -17,6 +17,7 @@ from app.db.base import Base
 from app.services.search import (
     MAX_TERMS, relevance_order, search_clause, stem, terms_of,
 )
+from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent, _primary_image_url, _required_name_terms
 
 
 @pytest.fixture
@@ -96,6 +97,47 @@ class TestMultiWordSearch:
         assert (await _search(session, "chemise bleue"))["total"] == 1
         assert (await _search(session, "chemises bleues"))["total"] == 1
         assert (await _search(session, "chemise bleu"))["total"] == 1
+
+
+class TestCatalogueIntent:
+    def test_laptop_request_keeps_product_anchor_and_excludes_accessories(self):
+        intent = _catalogue_intent("un ordinateur portable étudiant sous 800 €")
+        assert intent is not None
+        anchor, excluded = intent
+        assert anchor == "laptop"
+        assert {"housse", "sleeve", "support"}.issubset(excluded)
+
+    def test_video_editing_request_routes_to_catalogue_laptop_intent(self):
+        intent = _catalogue_intent("une machine pour le montage vidéo")
+        assert intent is not None
+        assert intent[0] == "laptop"
+
+    def test_smartphone_request_keeps_product_anchor_and_excludes_cases(self):
+        intent = _catalogue_intent("un smartphone à 500 €")
+        assert intent is not None
+        anchor, excluded = intent
+        assert anchor == "smartphone"
+        assert {"coque", "case", "protection"}.issubset(excluded)
+
+    def test_unrecognised_request_is_not_forced_into_a_category(self):
+        assert _catalogue_intent("lampe de bureau minimaliste") is None
+
+    def test_primary_product_thresholds_only_reject_implausible_feed_prices(self):
+        assert _PRIMARY_MIN_PRICE["laptop"] == 200.0
+        assert _PRIMARY_MIN_PRICE["smartphone"] == 80.0
+        assert _PRIMARY_MIN_PRICE["casque"] == 25.0
+
+    def test_noise_cancelling_request_requires_a_verified_feature_in_title(self):
+        required = _required_name_terms("casque à réduction de bruit", "casque")
+        assert {"noise", "anc", "cancel"}.issubset(required)
+
+    def test_generic_headphone_request_does_not_add_unrequested_feature_constraint(self):
+        assert _required_name_terms("casque bluetooth", "casque") == ()
+
+    def test_multiple_feed_images_use_the_first_valid_url(self):
+        assert _primary_image_url("https://img.example/one.jpg, https://img.example/two.jpg") == "https://img.example/one.jpg"
+        assert _primary_image_url("invalid, https://img.example/valid.jpg") == "https://img.example/valid.jpg"
+        assert _primary_image_url(None) is None
 
 
 class TestRelevance:

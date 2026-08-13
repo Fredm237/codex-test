@@ -91,19 +91,18 @@ function TransparenceFR() {
         </div>
       </section>
 
-      <ProseBlock heading={<>Pendant le lancement, on <span className="it">signale tout</span>.</>} alt>
+      <ProseBlock heading={<>Quand l&apos;information manque, on le <span className="it">dit</span>.</>} alt>
         <p>
-          FILON démarre. Tant que nos partenariats marchands et nos accès aux données (cashback, historique de prix
-          long) ne sont pas tous signés, certaines informations reposent sur des <b>estimations</b>.
+          Les offres et l&apos;historique ne sont pas disponibles avec la même profondeur pour chaque produit. Une
+          garantie, une alternative comparable ou un historique suffisant peuvent manquer.
         </p>
         <p>
-          Nous ne les cachons pas&nbsp;: elles sont <b>clairement signalées</b> comme telles («&nbsp;prix
-          estimés&nbsp;», «&nbsp;exemple&nbsp;», «&nbsp;chiffres réels à venir&nbsp;»). À mesure que les données
-          réelles arrivent, elles remplacent les estimations, sans jamais inventer de chiffre entre-temps.
+          Dans ce cas, FILON ne transforme pas une hypothèse en recommandation&nbsp;: l&apos;information est absente,
+          ou le verdict indique que le suivi est trop récent.
         </p>
         <p>
-          Notre seul actif, c&apos;est votre confiance. La trahir une fois suffirait à tout perdre&nbsp;: nous
-          préférons afficher «&nbsp;on ne sait pas encore&nbsp;» plutôt qu&apos;un beau chiffre faux.
+          Notre seul actif, c&apos;est votre confiance&nbsp;: nous préférons afficher «&nbsp;on ne sait pas encore&nbsp;»
+          plutôt qu&apos;un beau chiffre faux.
         </p>
       </ProseBlock>
 
@@ -195,19 +194,17 @@ function TransparenceNL() {
         </div>
       </section>
 
-      <ProseBlock heading={<>Tijdens de lancering <span className="it">signaleren we alles</span>.</>} alt>
+      <ProseBlock heading={<>Wanneer informatie ontbreekt, <span className="it">zeggen we dat</span>.</>} alt>
         <p>
-          FILON start op. Zolang onze winkelpartnerschappen en onze toegang tot de gegevens (cashback, lange
-          prijsgeschiedenis) niet allemaal getekend zijn, berusten sommige informatie op <b>schattingen</b>.
+          Aanbiedingen en prijsgeschiedenis zijn niet voor elk product even volledig beschikbaar. Een garantie,
+          vergelijkbaar alternatief of voldoende geschiedenis kan ontbreken.
         </p>
         <p>
-          We verbergen ze niet&nbsp;: ze zijn <b>duidelijk gesignaleerd</b> als dusdanig («&nbsp;geschatte
-          prijzen&nbsp;», «&nbsp;voorbeeld&nbsp;», «&nbsp;echte cijfers volgen&nbsp;»). Naarmate de echte gegevens
-          binnenkomen, vervangen ze de schattingen, zonder ondertussen ooit een cijfer te verzinnen.
+          In dat geval maakt FILON van een aanname geen aanbeveling: de informatie ontbreekt, of het oordeel geeft
+          aan dat de opvolging te recent is.
         </p>
         <p>
-          Onze enige troef is je vertrouwen. Het één keer beschamen zou volstaan om alles te verliezen&nbsp;: we tonen
-          liever «&nbsp;dat weten we nog niet&nbsp;» dan een mooi vals cijfer.
+          Onze enige troef is je vertrouwen: we tonen liever «&nbsp;dat weten we nog niet&nbsp;» dan een mooi vals cijfer.
         </p>
       </ProseBlock>
 
@@ -299,19 +296,17 @@ function TransparenceEN() {
         </div>
       </section>
 
-      <ProseBlock heading={<>During launch, we <span className="it">flag everything</span>.</>} alt>
+      <ProseBlock heading={<>When information is missing, we <span className="it">say so</span>.</>} alt>
         <p>
-          FILON is starting up. Until our merchant partnerships and our data access (cashback, long price history)
-          are all signed, some information relies on <b>estimates</b>.
+          Offers and price history are not available with the same depth for every product. A warranty, comparable
+          alternative or sufficient history may be missing.
         </p>
         <p>
-          We don&apos;t hide them&nbsp;: they are <b>clearly flagged</b> as such (« estimated prices », « example »,
-          « real figures coming »). As the real data arrives, it replaces the estimates, without ever inventing a
-          figure in the meantime.
+          In that case, FILON does not turn an assumption into a recommendation: the information is unavailable, or
+          the verdict states that tracking is still too recent.
         </p>
         <p>
-          Our only asset is your trust. Betraying it once would be enough to lose everything&nbsp;: we&apos;d rather
-          show « we don&apos;t know yet » than a nice but false figure.
+          Trust is our only asset: we&apos;d rather show « we don&apos;t know yet » than a nice but false figure.
         </p>
       </ProseBlock>
 

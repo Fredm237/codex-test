@@ -12,27 +12,27 @@ export const metadata: Metadata = buildMetadata({
 });
 
 const VALUES_FR = [
-  { n: "01", h: "De votre côté", p: "Pas de publicité, pas d'intérêt caché. Ce qu'on vous montre sert votre intérêt." },
-  { n: "02", h: "Intelligence", p: "La bonne information, au bon moment, sans effort pour vous." },
-  { n: "03", h: "Simplicité", p: "Une seule expérience à la place de dix onglets." },
-  { n: "04", h: "Exigence", p: "Un produit soigné, jusqu'au dernier détail." },
-  { n: "05", h: "Confiance", p: "Vos données restent les vôtres. Sans exception." },
+  { n: "01", h: "De votre côté", p: "Nous expliquons notre modèle d'affiliation et signalons les liens concernés." },
+  { n: "02", h: "Intelligence", p: "Les informations disponibles, réunies pour vous aider à comparer." },
+  { n: "03", h: "Simplicité", p: "Une même expérience pour rechercher, comprendre et décider." },
+  { n: "04", h: "Exigence", p: "Un produit soigné, jusque dans ses détails." },
+  { n: "05", h: "Confiance", p: "Vos données de navigation ne sont pas revendues. Notre politique précise vos droits." },
 ];
 
 const VALUES_NL = [
-  { n: "01", h: "Aan jouw kant", p: "Geen reclame, geen verborgen belang. Wat we je tonen dient jouw belang." },
-  { n: "02", h: "Intelligentie", p: "De juiste informatie, op het juiste moment, moeiteloos voor jou." },
-  { n: "03", h: "Eenvoud", p: "Eén enkele ervaring in plaats van tien tabbladen." },
-  { n: "04", h: "Veeleisendheid", p: "Een verzorgd product, tot in het laatste detail." },
-  { n: "05", h: "Vertrouwen", p: "Je gegevens blijven van jou. Zonder uitzondering." },
+  { n: "01", h: "Aan jouw kant", p: "We leggen ons affiliatiemodel uit en duiden de betrokken links aan." },
+  { n: "02", h: "Intelligentie", p: "De beschikbare informatie, samengebracht om je te helpen vergelijken." },
+  { n: "03", h: "Eenvoud", p: "Eén ervaring om te zoeken, te begrijpen en te beslissen." },
+  { n: "04", h: "Veeleisendheid", p: "Een verzorgd product, ook in de details." },
+  { n: "05", h: "Vertrouwen", p: "Je surfgegevens worden niet doorverkocht. Ons privacybeleid legt je rechten uit." },
 ];
 
 const VALUES_EN = [
-  { n: "01", h: "On your side", p: "No advertising, no hidden interest. What we show you serves your interest." },
-  { n: "02", h: "Intelligence", p: "The right information, at the right moment, effortlessly for you." },
-  { n: "03", h: "Simplicity", p: "One single experience instead of ten tabs." },
-  { n: "04", h: "Exactingness", p: "A polished product, down to the last detail." },
-  { n: "05", h: "Trust", p: "Your data stays yours. Without exception." },
+  { n: "01", h: "On your side", p: "We explain our affiliate model and identify the links concerned." },
+  { n: "02", h: "Intelligence", p: "The information available, brought together to help you compare." },
+  { n: "03", h: "Simplicity", p: "One experience to search, understand and decide." },
+  { n: "04", h: "Exactingness", p: "A polished product, including the details." },
+  { n: "05", h: "Trust", p: "Your browsing data is not resold. Our privacy policy explains your rights." },
 ];
 
 function Values({ heading, items }: { heading: string; items: typeof VALUES_FR }) {
@@ -61,19 +61,19 @@ function AProposFR() {
     <>
       <ContentHero
         eyebrow="À propos"
-        title={<>Ne jamais payer le <span className="it">prix fort</span>.</>}
-        intro="FILON réunit en une expérience simple ce qui prenait dix onglets. Notre ambition : devenir le premier réflexe avant chaque achat, en commençant par la Belgique."
+        title={<>Mieux choisir, avant d&apos;<span className="it">acheter</span>.</>}
+        intro="FILON réunit dans une expérience claire les informations utiles avant un achat. Notre ambition : devenir un réflexe de comparaison, en commençant par la Belgique."
         breadcrumb={[{ name: "À propos", path: "/a-propos" }]}
         photo="/img/page-apropos.webp"
       />
       <ProseBlock heading={<>Le problème que nous <span className="it">réglons</span>.</>}>
         <p>
-          Bien acheter prend du temps : vérifier, comparer, douter, recommencer. La plupart des gens abandonnent et
-          paient plein tarif.
+          Bien acheter prend du temps : vérifier, comparer, douter, recommencer. Il est facile de se perdre entre les
+          informations, les prix et les conditions.
         </p>
         <p>
-          FILON fait ce travail à votre place. En une seconde, il vous donne une réponse claire et votre vrai prix. Vous
-          ne changez rien à vos habitudes, vous payez simplement moins.
+          FILON rassemble les données disponibles dans une même vue et les organise pour rendre la comparaison plus
+          claire. Prix affiché, cashback et codes promo sont montrés lorsqu'ils sont renseignés ; vous décidez ensuite.
         </p>
       </ProseBlock>
       <Values heading="Nos cinq valeurs." items={VALUES_FR} />
@@ -101,7 +101,7 @@ function AProposFR() {
           La confiance se construit près de chez soi. Ensuite viendront la France, les Pays-Bas et le reste.
         </p>
       </ProseBlock>
-      <ClosingCta title={<>Rejoignez le <span className="it">réflexe</span> malin.</>} sub="Ajoutez FILON et ne payez plus jamais le prix fort." />
+      <ClosingCta title={<>Adoptez le <span className="it">bon réflexe</span>.</>} sub="Consultez FILON avant de décider de votre prochain achat." />
     </>
   );
 }
@@ -111,19 +111,19 @@ function AProposNL() {
     <>
       <ContentHero
         eyebrow="Over ons"
-        title={<>Nooit de <span className="it">hoofdprijs</span> betalen.</>}
-        intro="FILON brengt in één eenvoudige ervaring samen wat vroeger tien tabbladen kostte. Onze ambitie : de eerste reflex worden vóór elke aankoop, te beginnen met België."
+        title={<>Beter kiezen, vóór je <span className="it">koopt</span>.</>}
+        intro="FILON brengt nuttige informatie vóór een aankoop samen in één heldere ervaring. Onze ambitie: een reflex voor vergelijking worden, te beginnen met België."
         breadcrumb={[{ name: "Over ons", path: "/a-propos" }]}
         photo="/img/page-apropos.webp"
       />
       <ProseBlock heading={<>Het probleem dat we <span className="it">oplossen</span>.</>}>
         <p>
-          Goed kopen kost tijd : checken, vergelijken, twijfelen, opnieuw beginnen. De meeste mensen geven op en betalen
-          de volle prijs.
+          Goed kopen kost tijd: checken, vergelijken, twijfelen, opnieuw beginnen. Het is makkelijk om te verdwalen in
+          informatie, prijzen en voorwaarden.
         </p>
         <p>
-          FILON doet dat werk in jouw plaats. In één seconde geeft het je een duidelijk antwoord en je echte prijs. Je
-          verandert niets aan je gewoontes, je betaalt gewoon minder.
+          FILON brengt beschikbare gegevens samen in één overzicht en ordent ze om vergelijken duidelijker te maken.
+          Getoonde prijs, cashback en kortingscodes verschijnen wanneer ze vermeld zijn; daarna beslis jij.
         </p>
       </ProseBlock>
       <Values heading="Onze vijf waarden." items={VALUES_NL} />
@@ -151,7 +151,7 @@ function AProposNL() {
           Vertrouwen bouw je dicht bij huis op. Daarna volgen Frankrijk, Nederland en de rest.
         </p>
       </ProseBlock>
-      <ClosingCta title={<>Sluit je aan bij de slimme <span className="it">reflex</span>.</>} sub="Voeg FILON toe en betaal nooit meer de hoofdprijs." />
+      <ClosingCta title={<>Kies de juiste <span className="it">reflex</span>.</>} sub="Bekijk FILON vóór je over je volgende aankoop beslist." />
     </>
   );
 }
@@ -161,19 +161,19 @@ function AProposEN() {
     <>
       <ContentHero
         eyebrow="About"
-        title={<>Never pay the <span className="it">full price</span>.</>}
-        intro="FILON brings together in one simple experience what used to take ten tabs. Our ambition: to become the first reflex before every purchase, starting with Belgium."
+        title={<>Choose better, before you <span className="it">buy</span>.</>}
+        intro="FILON brings useful information together in one clear experience before a purchase. Our ambition is to become a comparison reflex, starting with Belgium."
         breadcrumb={[{ name: "About", path: "/a-propos" }]}
         photo="/img/page-apropos.webp"
       />
       <ProseBlock heading={<>The problem we <span className="it">solve</span>.</>}>
         <p>
-          Buying well takes time: checking, comparing, doubting, starting over. Most people give up and pay full
-          price.
+          Buying well takes time: checking, comparing, doubting, starting over. It is easy to get lost between
+          information, prices and terms.
         </p>
         <p>
-          FILON does that work for you. In one second, it gives you a clear answer and your real price. You change
-          nothing about your habits, you simply pay less.
+          FILON brings the available data into one view and organises it to make comparison clearer. Displayed price,
+          cashback and promo codes appear when they are listed; you decide what to do next.
         </p>
       </ProseBlock>
       <Values heading="Our five values." items={VALUES_EN} />
@@ -199,7 +199,7 @@ function AProposEN() {
         </p>
         <p>Trust is built close to home. Then come France, the Netherlands and the rest.</p>
       </ProseBlock>
-      <ClosingCta title={<>Join the smart <span className="it">reflex</span>.</>} sub="Add FILON and never pay the full price again." />
+      <ClosingCta title={<>Make it a better <span className="it">reflex</span>.</>} sub="Check FILON before deciding on your next purchase." />
     </>
   );
 }

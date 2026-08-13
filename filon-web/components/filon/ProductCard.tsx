@@ -15,7 +15,7 @@
 // La carte entière est désormais cliquable (lien étiré depuis le titre), et le
 // lien marchand reste distinct, au-dessus, avec sa propre cible.
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
 import { CARD_COPY, money, type CardCopy } from "./product-copy";
 import { useLocale } from "@/lib/i18n";
@@ -53,6 +53,12 @@ export function ProductCard({
   // Les flux marchands livrent régulièrement des URL d'images mortes. Sans ce
   // repli, la carte affichait un cadre vide sans rien expliquer.
   const [imageOk, setImageOk] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  // Si le navigateur a terminé l'image avant l'hydratation, `onLoad` ne se
+  // déclenche plus. Le ref rend alors immédiatement le visuel réel.
+  const imageRef = useCallback((node: HTMLImageElement | null) => {
+    if (node?.complete && node.naturalWidth > 0) setImageLoaded(true);
+  }, []);
 
   return (
     <motion.article
@@ -63,15 +69,17 @@ export function ProductCard({
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 260, damping: 18 }}
     >
-      <div className="fx-product-media">
+      <div className={`fx-product-media${offer.image && imageOk && !imageLoaded ? " is-loading" : ""}`}>
         {offer.image && imageOk ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
+            ref={imageRef}
             src={offer.image}
             alt=""
             loading="lazy"
             decoding="async"
-            onError={() => setImageOk(false)}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => { setImageOk(false); setImageLoaded(false); }}
           />
         ) : (
           <span className="fx-product-noimage">{words.noImage}</span>
@@ -101,8 +109,8 @@ export function ProductCard({
 
         <div className="fx-product-foot">
           <span className="fx-product-price">
-            <b>{money(offer.price, offer.currency)}</b>
-            {drop && offer.price_high != null && <s>{money(offer.price_high, offer.currency)}</s>}
+            <b>{money(offer.price, offer.currency, locale)}</b>
+            {drop && offer.price_high != null && <s>{money(offer.price_high, offer.currency, locale)}</s>}
           </span>
 
           {offer.link && (

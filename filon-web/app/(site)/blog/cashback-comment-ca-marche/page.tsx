@@ -26,9 +26,9 @@ function ArticleFR() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-cashback-explique.webp" alt="" />
         <p>
-          Le cashback, c&apos;est un remboursement d&apos;une partie de votre achat, versé après coup. Vous payez le
-          prix normal chez le marchand, et quelques jours ou semaines plus tard, un pourcentage revient sur votre
-          cagnotte. Rien de magique&nbsp;: juste un partage de commission bien organisé.
+          Le cashback est un avantage qui peut être attribué après un achat éligible. Son montant, son délai et ses
+          conditions varient selon le marchand et l&apos;offre. Il ne s&apos;agit généralement pas d&apos;une réduction appliquée
+          directement au paiement&nbsp;: le suivi doit d&apos;abord être validé.
         </p>
 
         <h2>D&apos;où vient l&apos;argent, exactement</h2>
@@ -38,67 +38,68 @@ function ArticleFR() {
           reste. C&apos;est tout le modèle&nbsp;: une commission partagée entre le site et vous.
         </p>
         <p>
-          Conséquence importante&nbsp;: le cashback <b>ne change pas le prix</b> que vous payez au marchand. Vous
-          payez pareil qu&apos;en direct&nbsp;; simplement, une partie vous revient ensuite.
+          Conséquence importante&nbsp;: regardez séparément le <b>prix affiché au paiement</b> et le cashback éventuel.
+          Ce dernier dépend d&apos;une validation ultérieure par le marchand ou le programme partenaire.
         </p>
 
         <h2>Combien récupère-t-on vraiment ?</h2>
         <p>
-          Les taux varient énormément selon la catégorie et la marque. Voici des ordres de grandeur courants&nbsp;:
+          Les taux, les plafonds et les exclusions changent selon la catégorie, le marchand, le pays et parfois le
+          statut du client. Vérifiez toujours les conditions affichées pour l&apos;offre précise que vous consultez&nbsp;:
         </p>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
-                <th>Catégorie</th>
-                <th>Cashback typique</th>
-                <th>Bon à savoir</th>
+                <th>Élément à vérifier</th>
+                <th>Pourquoi</th>
+                <th>Réflexe utile</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>High-tech</b></td><td className="g">1 – 4 %</td><td>Marges faibles, donc taux modérés</td></tr>
-              <tr><td><b>Mode & habillement</b></td><td className="g">5 – 12 %</td><td>Souvent les meilleurs taux</td></tr>
-              <tr><td><b>Voyage & hôtels</b></td><td className="g">3 – 10 %</td><td>Le montant peut être élevé</td></tr>
-              <tr><td><b>Beauté & maison</b></td><td className="g">4 – 8 %</td><td>Variable selon les marques</td></tr>
-              <tr><td><b>Abonnements & télécom</b></td><td className="g">jusqu&apos;à 100 €</td><td>Souvent un montant fixe à la souscription</td></tr>
+              <tr><td><b>Taux affiché</b></td><td className="g">Il peut évoluer</td><td>Regardez-le juste avant l&apos;achat</td></tr>
+              <tr><td><b>Produits éligibles</b></td><td className="g">Ils peuvent être exclus</td><td>Lisez les conditions de l&apos;offre</td></tr>
+              <tr><td><b>Code promo</b></td><td className="g">Il peut modifier l&apos;éligibilité</td><td>Vérifiez s&apos;il est compatible</td></tr>
+              <tr><td><b>Validation</b></td><td className="g">Elle n&apos;est pas immédiate</td><td>Conservez votre confirmation de commande</td></tr>
+              <tr><td><b>Versement</b></td><td className="g">Les règles diffèrent</td><td>Consultez le seuil et le calendrier du programme</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>Les pièges à connaître</h2>
         <p>
-          <b>Le taux «&nbsp;boosté&nbsp;» temporaire.</b> Un «&nbsp;jusqu&apos;à 16&nbsp;%&nbsp;» affiché un jour peut
-          retomber à 4&nbsp;% le lendemain. Vérifiez le taux <b>au moment de l&apos;achat</b>, pas celui vu la veille.
+          <b>Le taux temporaire.</b> Un taux affiché peut être modifié ou soumis à des conditions. Vérifiez-le
+          <b>au moment de l&apos;achat</b>, avec les exclusions applicables.
         </p>
         <p>
-          <b>Le délai de validation.</b> Le cashback n&apos;est pas immédiat&nbsp;: il est d&apos;abord «&nbsp;en
-          attente&nbsp;» le temps que le marchand confirme (souvent 30 à 90 jours), puis retirable au-delà d&apos;un
-          seuil minimum.
+          <b>Le délai de validation.</b> Le cashback peut apparaître comme «&nbsp;en attente&nbsp;» tant que le
+          marchand ou le programme ne l&apos;a pas validé. Le délai et un éventuel seuil de versement dépendent de
+          chaque programme.
         </p>
         <p>
-          <b>Les conditions qui l&apos;annulent.</b> Utiliser un code promo non autorisé, un bloqueur de pub, ou passer
-          par une autre app juste avant, peut faire sauter le cashback. Terminez toujours l&apos;achat dans la foulée,
-          depuis le lien du service.
+          <b>Les conditions de suivi.</b> Un code promo non éligible, un bloqueur de contenu, des paramètres de
+          confidentialité ou une autre source de trafic peuvent empêcher le suivi. Suivez les consignes du programme
+          avant de valider votre commande.
         </p>
 
         <div className="callout">
-          <b>Le vrai calcul&nbsp;:</b> une bonne affaire, ce n&apos;est pas le plus gros cashback, c&apos;est le
-          <span className="g"> prix final le plus bas</span> une fois tout combiné&nbsp;: prix marchand, coupon et
-          cashback réunis. C&apos;est exactement ce que FILON calcule pour vous.
+          <b>Le bon réflexe&nbsp;:</b> ne regardez pas uniquement le taux de cashback. Comparez le
+          <span className="g"> prix affiché, les conditions et le cashback éventuel</span>. FILON présente ces
+          informations lorsqu&apos;elles sont renseignées dans les données de l&apos;offre.
         </div>
 
         <h2>En résumé</h2>
         <ul>
-          <li>Le cashback = une part de la commission d&apos;affiliation, reversée à vous.</li>
-          <li>Il <b>ne change pas</b> le prix payé au marchand.</li>
-          <li>Les taux vont de <b>1&nbsp;%</b> (high-tech) à <b>12&nbsp;%+</b> (mode).</li>
-          <li>Attention aux <b>taux temporaires</b>, aux <b>délais</b> et aux conditions qui l&apos;annulent.</li>
-          <li>Jugez sur le <b>prix final</b>, pas sur le taux affiché.</li>
+          <li>Le cashback est généralement lié à une commission d&apos;affiliation après une vente éligible.</li>
+          <li>Il est distinct du <b>prix affiché</b> lors du paiement.</li>
+          <li>Le <b>taux</b>, les exclusions et le plafond dépendent de l&apos;offre.</li>
+          <li>Attention aux <b>conditions de suivi</b> et au délai de validation.</li>
+          <li>Comparez le <b>prix affiché</b>, les conditions et le cashback éventuel.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
           <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
-            Voir mon vrai prix, cashback inclus
+            Voir les offres disponibles
           </a>
         </p>
       </div>
@@ -123,9 +124,9 @@ function ArticleNL() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-cashback-explique.webp" alt="" />
         <p>
-          Cashback is een terugbetaling van een deel van je aankoop, achteraf uitgekeerd. Je betaalt de normale prijs
-          bij de winkel, en enkele dagen of weken later komt een percentage terug op je spaarpot. Niets magisch&nbsp;:
-          gewoon een goed georganiseerde commissiedeling.
+          Cashback is een voordeel dat na een in aanmerking komende aankoop kan worden toegekend. Het bedrag, de termijn
+          en de voorwaarden verschillen per winkel en aanbod. Het is doorgaans geen korting die rechtstreeks bij betaling
+          wordt toegepast: de tracking moet eerst worden gevalideerd.
         </p>
 
         <h2>Waar komt het geld precies vandaan</h2>
@@ -135,69 +136,66 @@ function ArticleNL() {
           Dat is het hele model&nbsp;: een commissie gedeeld tussen de site en jou.
         </p>
         <p>
-          Belangrijk gevolg&nbsp;: cashback <b>verandert de prijs niet</b> die je bij de winkel betaalt. Je betaalt
-          hetzelfde als rechtstreeks&nbsp;; alleen komt een deel daarna terug.
+          Belangrijk gevolg&nbsp;: bekijk de <b>getoonde prijs bij betaling</b> en eventuele cashback afzonderlijk.
+          Die laatste hangt af van een latere validatie door de winkel of het partnerprogramma.
         </p>
 
         <h2>Hoeveel krijg je echt terug ?</h2>
         <p>
-          De percentages verschillen enorm naargelang de categorie en het merk. Hier enkele courante ordes van
-          grootte&nbsp;:
+          Percentages, plafonds en uitsluitingen veranderen per categorie, winkel, land en soms klantstatus. Controleer
+          altijd de voorwaarden die bij het specifieke aanbod staan:
         </p>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
-                <th>Categorie</th>
-                <th>Typische cashback</th>
-                <th>Goed om te weten</th>
+                <th>Te controleren</th>
+                <th>Waarom</th>
+                <th>Nuttige reflex</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>High-tech</b></td><td className="g">1 – 4 %</td><td>Lage marges, dus gematigde percentages</td></tr>
-              <tr><td><b>Mode & kleding</b></td><td className="g">5 – 12 %</td><td>Vaak de beste percentages</td></tr>
-              <tr><td><b>Reizen & hotels</b></td><td className="g">3 – 10 %</td><td>Het bedrag kan hoog oplopen</td></tr>
-              <tr><td><b>Beauty & wonen</b></td><td className="g">4 – 8 %</td><td>Variabel naargelang de merken</td></tr>
-              <tr><td><b>Abonnementen & telecom</b></td><td className="g">tot 100 €</td><td>Vaak een vast bedrag bij inschrijving</td></tr>
+              <tr><td><b>Getoond percentage</b></td><td className="g">Het kan veranderen</td><td>Controleer vlak vóór je koopt</td></tr>
+              <tr><td><b>In aanmerking komende producten</b></td><td className="g">Sommige kunnen uitgesloten zijn</td><td>Lees de aanbodvoorwaarden</td></tr>
+              <tr><td><b>Promocode</b></td><td className="g">Die kan de geldigheid beïnvloeden</td><td>Controleer of die compatibel is</td></tr>
+              <tr><td><b>Validatie</b></td><td className="g">Die is niet onmiddellijk</td><td>Bewaar je bestelbevestiging</td></tr>
+              <tr><td><b>Uitbetaling</b></td><td className="g">De regels verschillen</td><td>Controleer drempel en kalender van het programma</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>De valkuilen om te kennen</h2>
         <p>
-          <b>Het tijdelijke «&nbsp;geboosterde&nbsp;» percentage.</b> Een «&nbsp;tot 16&nbsp;%&nbsp;» dat vandaag
-          getoond wordt, kan morgen terugvallen op 4&nbsp;%. Controleer het percentage <b>op het moment van de
-          aankoop</b>, niet dat van de dag ervoor.
+          <b>Het tijdelijke percentage.</b> Een getoond percentage kan worden gewijzigd of aan voorwaarden gebonden zijn.
+          Controleer het <b>op het moment van de aankoop</b>, samen met de toepasselijke uitsluitingen.
         </p>
         <p>
-          <b>De validatietermijn.</b> Cashback is niet onmiddellijk&nbsp;: hij staat eerst «&nbsp;in
-          afwachting&nbsp;» tot de winkel bevestigt (vaak 30 tot 90 dagen), en is dan opneembaar boven een minimum
-          drempel.
+          <b>De validatietermijn.</b> Cashback kan «&nbsp;in afwachting&nbsp;» staan zolang de winkel of het programma
+          die niet heeft gevalideerd. De termijn en eventuele uitbetalingsdrempel hangen af van elk programma.
         </p>
         <p>
-          <b>De voorwaarden die hem annuleren.</b> Een niet-toegestane promocode gebruiken, een adblocker, of vlak
-          ervoor via een andere app passeren, kan de cashback doen wegvallen. Rond de aankoop altijd meteen af,
-          vanaf de link van de dienst.
+          <b>De trackingvoorwaarden.</b> Een niet-geschikte promocode, contentblocker, privacy-instelling of andere
+          verkeersbron kan tracking verhinderen. Volg de instructies van het programma vóór je je bestelling bevestigt.
         </p>
 
         <div className="callout">
-          <b>De echte berekening&nbsp;:</b> een koopje is niet de grootste cashback, het is de
-          <span className="g"> laagste eindprijs</span> zodra alles gecombineerd is&nbsp;: winkelprijs, coupon en
-          cashback samen. Dat is precies wat FILON voor je berekent.
+          <b>De nuttige reflex&nbsp;:</b> kijk niet alleen naar het cashbackpercentage. Vergelijk de
+          <span className="g"> getoonde prijs, voorwaarden en eventuele cashback</span>. FILON toont die gegevens
+          wanneer ze in de aanbodgegevens vermeld zijn.
         </div>
 
         <h2>Samengevat</h2>
         <ul>
-          <li>Cashback = een deel van de affiliatiecommissie, aan jou teruggegeven.</li>
-          <li>Het <b>verandert</b> de bij de winkel betaalde prijs <b>niet</b>.</li>
-          <li>De percentages gaan van <b>1&nbsp;%</b> (high-tech) tot <b>12&nbsp;%+</b> (mode).</li>
-          <li>Let op <b>tijdelijke percentages</b>, <b>termijnen</b> en de voorwaarden die hem annuleren.</li>
-          <li>Beoordeel op de <b>eindprijs</b>, niet op het getoonde percentage.</li>
+          <li>Cashback is doorgaans gekoppeld aan een affiliatiecommissie na een geldige verkoop.</li>
+          <li>Het staat los van de <b>getoonde prijs</b> bij betaling.</li>
+          <li>Het <b>percentage</b>, uitsluitingen en plafond hangen af van het aanbod.</li>
+          <li>Let op de <b>trackingvoorwaarden</b> en de validatietermijn.</li>
+          <li>Vergelijk de <b>getoonde prijs</b>, voorwaarden en eventuele cashback.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
           <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
-            Bekijk mijn echte prijs, cashback inbegrepen
+            Bekijk beschikbare aanbiedingen
           </a>
         </p>
       </div>
@@ -222,9 +220,9 @@ function ArticleEN() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-cashback-explique.webp" alt="" />
         <p>
-          Cashback is a refund of part of your purchase, paid afterwards. You pay the normal price at the merchant,
-          and a few days or weeks later, a percentage comes back to your pot. Nothing magical&nbsp;: just a
-          well-organised commission share.
+          Cashback is a benefit that may be granted after an eligible purchase. Its amount, timing and conditions vary
+          by merchant and offer. It is generally not a discount applied directly at checkout: the tracking must first
+          be validated.
         </p>
 
         <h2>Where the money comes from, exactly</h2>
@@ -234,66 +232,66 @@ function ArticleEN() {
           That&apos;s the whole model&nbsp;: a commission shared between the site and you.
         </p>
         <p>
-          Important consequence&nbsp;: cashback <b>doesn&apos;t change the price</b> you pay at the merchant. You pay
-          the same as direct&nbsp;; a part simply comes back to you afterwards.
+          Important consequence&nbsp;: look separately at the <b>price displayed at checkout</b> and any cashback.
+          The latter depends on a subsequent validation by the merchant or partner programme.
         </p>
 
         <h2>How much do you really get back ?</h2>
         <p>
-          Rates vary hugely by category and brand. Here are some common orders of magnitude&nbsp;:
+          Rates, caps and exclusions change by category, merchant, country and sometimes customer status. Always
+          check the terms displayed for the exact offer you are considering:
         </p>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
-                <th>Category</th>
-                <th>Typical cashback</th>
-                <th>Good to know</th>
+                <th>What to check</th>
+                <th>Why</th>
+                <th>Useful reflex</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Tech</b></td><td className="g">1 – 4 %</td><td>Low margins, so moderate rates</td></tr>
-              <tr><td><b>Fashion & clothing</b></td><td className="g">5 – 12 %</td><td>Often the best rates</td></tr>
-              <tr><td><b>Travel & hotels</b></td><td className="g">3 – 10 %</td><td>The amount can be high</td></tr>
-              <tr><td><b>Beauty & home</b></td><td className="g">4 – 8 %</td><td>Varies by brand</td></tr>
-              <tr><td><b>Subscriptions & telecom</b></td><td className="g">up to €100</td><td>Often a fixed amount on sign-up</td></tr>
+              <tr><td><b>Displayed rate</b></td><td className="g">It can change</td><td>Check it just before purchase</td></tr>
+              <tr><td><b>Eligible products</b></td><td className="g">Some can be excluded</td><td>Read the offer terms</td></tr>
+              <tr><td><b>Promo code</b></td><td className="g">It can affect eligibility</td><td>Check that it is compatible</td></tr>
+              <tr><td><b>Validation</b></td><td className="g">It is not immediate</td><td>Keep your order confirmation</td></tr>
+              <tr><td><b>Payout</b></td><td className="g">Rules differ</td><td>Check the programme threshold and schedule</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>The traps to know</h2>
         <p>
-          <b>The temporary «&nbsp;boosted&nbsp;» rate.</b> An «&nbsp;up to 16&nbsp;%&nbsp;» shown one day can fall
-          back to 4&nbsp;% the next. Check the rate <b>at the moment of purchase</b>, not the one seen the day before.
+          <b>The temporary rate.</b> A displayed rate can change or be subject to conditions. Check it <b>at the
+          moment of purchase</b>, along with any exclusions.
         </p>
         <p>
-          <b>The validation delay.</b> Cashback isn&apos;t immediate&nbsp;: it&apos;s first «&nbsp;pending&nbsp;»
-          until the merchant confirms (often 30 to 90 days), then withdrawable above a minimum threshold.
+          <b>The validation delay.</b> Cashback can remain «&nbsp;pending&nbsp;» until the merchant or programme
+          validates it. The timing and any payout threshold depend on each programme.
         </p>
         <p>
-          <b>The conditions that cancel it.</b> Using an unauthorised promo code, an ad blocker, or going through
-          another app just before, can void the cashback. Always complete the purchase right away, from the
-          service&apos;s link.
+          <b>The tracking conditions.</b> An ineligible promo code, content blocker, privacy setting or another traffic
+          source can prevent tracking. Follow the programme instructions before confirming your order.
         </p>
 
         <div className="callout">
-          <b>The real calculation&nbsp;:</b> a good deal isn&apos;t the biggest cashback, it&apos;s the
-          <span className="g"> lowest final price</span> once everything is combined&nbsp;: merchant price, coupon and
-          cashback together. That&apos;s exactly what FILON calculates for you.
+          <b>The useful reflex&nbsp;:</b> do not look at the cashback rate alone. Compare the
+          <span className="g"> displayed price, conditions and any cashback</span>. FILON presents these details
+          when they are listed in the offer data.
         </div>
 
         <h2>In short</h2>
         <ul>
-          <li>Cashback = a share of the affiliation commission, given back to you.</li>
-          <li>It <b>doesn&apos;t change</b> the price paid at the merchant.</li>
-          <li>Rates go from <b>1&nbsp;%</b> (tech) to <b>12&nbsp;%+</b> (fashion).</li>
-          <li>Beware <b>temporary rates</b>, <b>delays</b> and the conditions that cancel it.</li>
-          <li>Judge on the <b>final price</b>, not the advertised rate.</li>
+          <li>Cashback is generally linked to an affiliate commission after an eligible sale.</li>
+          <li>It is separate from the <b>price displayed</b> at checkout.</li>
+          <li>The <b>rate</b>, exclusions and cap depend on the offer.</li>
+          <li>Watch the <b>tracking conditions</b> and validation timing.</li>
+          <li>Compare the <b>displayed price</b>, terms and any cashback.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
           <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
-            See my real price, cashback included
+            See available offers
           </a>
         </p>
       </div>

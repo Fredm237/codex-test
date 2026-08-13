@@ -9,6 +9,7 @@
 
 import { href, type CatalogueQuery } from "@/lib/catalogue";
 import { useLocale } from "@/lib/i18n";
+import { catalogueLabel } from "@/lib/catalogue-labels";
 
 const TAG = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
 
@@ -38,13 +39,13 @@ export function CatalogueHeader({
         {department && (
           <>
             <span aria-hidden="true">/</span>
-            <a href={href({}, { dept: department.slug })}>{department.name}</a>
+            <a href={href({}, { dept: department.slug })}>{catalogueLabel(department.name, locale)}</a>
           </>
         )}
         {category && (
           <>
             <span aria-hidden="true">/</span>
-            <a href={href({}, { dept: department?.slug, cat: category.slug })}>{category.name}</a>
+            <a href={href({}, { dept: department?.slug, cat: category.slug })}>{catalogueLabel(category.name, locale)}</a>
           </>
         )}
         {subcategory && (
@@ -62,7 +63,7 @@ export function CatalogueHeader({
       </nav>
 
       <h1 className="fx-display fx-catalogue-title">
-        {subcategory || category?.name || department?.name || (
+        {subcategory || (category ? catalogueLabel(category.name, locale) : null) || (department ? catalogueLabel(department.name, locale) : null) || (
           <>
             {t("cat.title1")}
             <br />

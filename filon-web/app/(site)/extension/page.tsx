@@ -11,26 +11,26 @@ export const metadata: Metadata = buildMetadata({
   path: "/extension",
   title: "L'extension",
   description:
-    "L'extension FILON travaille partout où vous achetez. Sur chaque fiche produit, elle affiche le meilleur prix ailleurs, le cashback disponible, l'alternative reconditionnée et l'historique de prix, sans quitter la page.",
+    "L’extension FILON est conçue pour accompagner les fiches produit des marchands pris en charge. Elle aide à comparer les offres, l’historique de prix et les alternatives disponibles sans quitter la page.",
 });
 
 const FAQ_FR = [
-  { q: "Sur quels navigateurs l'extension fonctionne-t-elle ?", a: "Chrome en premier, puis Edge, Firefox et Safari. L'application mobile et l'assistant conversationnel suivront. Rejoignez la liste pour être prévenu·e du lancement de chaque version." },
-  { q: "L'extension ralentit-elle ma navigation ?", a: "Non. Elle ne s'active que sur les pages produit des marchands reconnus, reste invisible le reste du temps, et n'exécute aucune analyse tant que vous ne consultez pas un article." },
+  { q: "Sur quels navigateurs l'extension fonctionne-t-elle ?", a: "Chrome est la première version en cours de publication. Edge, Firefox et Safari feront l’objet d’annonces distinctes après le lancement Chrome." },
+  { q: "L'extension ralentit-elle ma navigation ?", a: "Elle est conçue pour ne se déclencher que sur les fiches produit des marchands pris en charge. Hors de ces pages, elle n’analyse pas votre navigation." },
   { q: "Quelles données l'extension lit-elle ?", a: "Uniquement ce qui est nécessaire à la comparaison : le produit et le marchand de la page consultée. Pas de profil publicitaire, pas de revente. Le détail figure dans notre politique de confidentialité." },
   { q: "Dois-je créer un compte ?", a: "Non pour l'essentiel. Un compte devient utile pour les alertes de baisse de prix, mais la comparaison et le verdict fonctionnent sans inscription, et c'est gratuit." },
 ];
 
 const FAQ_NL = [
-  { q: "Op welke browsers werkt de extensie ?", a: "Chrome eerst, daarna Edge, Firefox en Safari. De mobiele app en de conversationele assistent volgen. Schrijf je in om verwittigd te worden bij elke versie." },
-  { q: "Vertraagt de extensie mijn browsen ?", a: "Nee. Ze activeert alleen op de productpagina's van herkende winkels, blijft de rest van de tijd onzichtbaar, en voert geen analyse uit zolang je geen artikel bekijkt." },
+  { q: "Op welke browsers werkt de extensie ?", a: "Chrome is de eerste versie die wordt gepubliceerd. Edge, Firefox en Safari worden afzonderlijk aangekondigd na de Chrome-lancering." },
+  { q: "Vertraagt de extensie mijn browsen ?", a: "De extensie is ontworpen om alleen te starten op productpagina’s van ondersteunde winkels. Buiten die pagina’s analyseert ze je browsegedrag niet." },
   { q: "Welke gegevens leest de extensie ?", a: "Alleen wat nodig is voor de vergelijking : het product en de winkel van de bekeken pagina. Geen advertentieprofiel, geen doorverkoop. De details staan in ons privacybeleid." },
   { q: "Moet ik een account aanmaken ?", a: "Voor het essentiële niet. Een account wordt nuttig voor prijsdalings-meldingen, maar de vergelijking en het oordeel werken zonder inschrijving, en het is gratis." },
 ];
 
 const FAQ_EN = [
-  { q: "Which browsers does the extension work on ?", a: "Chrome first, then Edge, Firefox and Safari. The mobile app and the conversational assistant will follow. Join the list to be notified of each version's launch." },
-  { q: "Does the extension slow down my browsing ?", a: "No. It only activates on the product pages of recognised merchants, stays invisible the rest of the time, and runs no analysis as long as you're not viewing an item." },
+  { q: "Which browsers does the extension work on ?", a: "Chrome is the first version being published. Edge, Firefox and Safari will be announced separately after the Chrome launch." },
+  { q: "Does the extension slow down my browsing ?", a: "It is designed to activate only on product pages from supported merchants. Away from those pages, it does not analyse your browsing." },
   { q: "What data does the extension read ?", a: "Only what's needed for the comparison : the product and the merchant of the page viewed. No advertising profile, no reselling. The details are in our privacy policy." },
   { q: "Do I need to create an account ?", a: "Not for the essentials. An account becomes useful for price-drop alerts, but the comparison and the verdict work without signing up, and it's free." },
 ];
@@ -68,7 +68,7 @@ function ExtensionFR() {
       <ContentHero
         eyebrow="Extension"
         title={<>Votre copilote d&apos;achat, <span className="it">partout</span>.</>}
-        intro="L'extension FILON est présente sur chaque site marchand. Au moment où vous regardez un produit, elle vous dit s'il est moins cher ailleurs, quel cashback l'accompagne, s'il existe une alternative reconditionnée, et si c'est le bon moment pour acheter."
+        intro="L’extension FILON est conçue pour vous accompagner sur les fiches produit des marchands pris en charge. Lorsqu’elle reconnaît un produit, elle vous aide à vérifier les offres, l’historique de prix et les alternatives disponibles."
         breadcrumb={[{ name: "Extension", path: "/extension" }]}
         photo="/img/video-extension-poster.webp"
         video="/video/phone-scroll.mp4"
@@ -82,15 +82,15 @@ function ExtensionFR() {
       <section className="ed-band alt">
         <div className="ed-wrap">
           <div className="ed-prose" style={{ marginBottom: 28 }}>
-            <h2 style={{ maxWidth: "20ch" }}>Ce qui s&apos;affiche pendant que vous regardez un produit.</h2>
+            <h2 style={{ maxWidth: "20ch" }}>Ce que l&apos;extension peut vous montrer.</h2>
           </div>
           <InfoGrid
             items={[
-              { n: "€", h: "Le prix ailleurs", p: "« Vous regardez ce produit à 899€, il est à 799€ chez un autre marchand. »" },
-              { n: "%", h: "Le cashback disponible", p: "Le taux le plus élevé du moment, activable en un geste avant de payer." },
-              { n: "↻", h: "L'alternative reconditionnée", p: "L'équivalent garanti, souvent 20 à 45 % moins cher, quand il existe." },
-              { n: "↧", h: "L'historique de prix", p: "Prix élevé, normal ou au plancher, pour savoir s'il faut acheter ou attendre." },
-              { n: "★", h: "La fiabilité du vendeur", p: "Réputation et garanties, pour éviter la fausse bonne affaire." },
+              { n: "€", h: "Les offres comparables", p: "Les prix disponibles pour le même produit chez les marchands indexés." },
+              { n: "%", h: "Le cashback éligible", p: "Les avantages applicables lorsqu’ils sont vérifiés pour l’achat." },
+              { n: "↻", h: "L’alternative reconditionnée", p: "Un équivalent garanti lorsqu’une offre comparable est indexée." },
+              { n: "↧", h: "L’historique de prix", p: "Un contexte de prix quand l’historique disponible est suffisant." },
+              { n: "★", h: "La fiabilité du vendeur", p: "Réputation et garanties prises en compte lorsque les données sont disponibles." },
               { n: "✓", h: "Le verdict", p: "Un seul message clair : « acheter maintenant » ou « mieux vaut attendre »." },
             ]}
           />
@@ -108,7 +108,7 @@ function ExtensionNL() {
       <ContentHero
         eyebrow="Extensie"
         title={<>Je koopcopiloot, <span className="it">overal</span>.</>}
-        intro="De FILON-extensie is aanwezig op elke webshop. Op het moment dat je een product bekijkt, zegt hij of het elders goedkoper is, welke cashback erbij hoort, of er een refurbished alternatief bestaat, en of het het juiste moment is om te kopen."
+        intro="De FILON-extensie is ontworpen voor productpagina’s van ondersteunde winkels. Wanneer hij een product herkent, helpt hij je beschikbare aanbiedingen, prijsgeschiedenis en alternatieven te controleren."
         breadcrumb={[{ name: "Extensie", path: "/extension" }]}
         photo="/img/video-extension-poster.webp"
         video="/video/phone-scroll.mp4"
@@ -122,15 +122,15 @@ function ExtensionNL() {
       <section className="ed-band alt">
         <div className="ed-wrap">
           <div className="ed-prose" style={{ marginBottom: 28 }}>
-            <h2 style={{ maxWidth: "20ch" }}>Wat verschijnt terwijl je een product bekijkt.</h2>
+            <h2 style={{ maxWidth: "20ch" }}>Wat de extensie kan tonen.</h2>
           </div>
           <InfoGrid
             items={[
-              { n: "€", h: "De prijs elders", p: "« Je bekijkt dit product aan 899€, het is 799€ bij een andere winkel. »" },
-              { n: "%", h: "De beschikbare cashback", p: "Het hoogste percentage van het moment, met één handeling te activeren vóór je betaalt." },
-              { n: "↻", h: "Het refurbished alternatief", p: "Het gelijkwaardige met garantie, vaak 20 tot 45 % goedkoper, wanneer het bestaat." },
-              { n: "↧", h: "De prijsgeschiedenis", p: "Hoge, normale of bodemprijs, om te weten of je moet kopen of wachten." },
-              { n: "★", h: "De betrouwbaarheid van de verkoper", p: "Reputatie en garanties, om de valse koopjes te vermijden." },
+              { n: "€", h: "Vergelijkbare aanbiedingen", p: "Beschikbare prijzen voor hetzelfde product bij geïndexeerde winkels." },
+              { n: "%", h: "In aanmerking komende cashback", p: "Voordelen die van toepassing zijn wanneer ze voor de aankoop zijn geverifieerd." },
+              { n: "↻", h: "Het refurbished alternatief", p: "Een gelijkwaardig product met garantie wanneer een vergelijkbare aanbieding is geïndexeerd." },
+              { n: "↧", h: "De prijsgeschiedenis", p: "Prijscontext wanneer er voldoende geschiedenis beschikbaar is." },
+              { n: "★", h: "Betrouwbaarheid van de verkoper", p: "Reputatie en garanties worden meegenomen wanneer de gegevens beschikbaar zijn." },
               { n: "✓", h: "Het oordeel", p: "Eén duidelijke boodschap : « nu kopen » of « beter wachten »." },
             ]}
           />
@@ -148,7 +148,7 @@ function ExtensionEN() {
       <ContentHero
         eyebrow="Extension"
         title={<>Your shopping copilot, <span className="it">everywhere</span>.</>}
-        intro="The FILON extension is present on every merchant site. The moment you look at a product, it tells you whether it's cheaper elsewhere, what cashback comes with it, whether a refurbished alternative exists, and whether it's the right time to buy."
+        intro="The FILON extension is designed for product pages from supported merchants. When it recognises a product, it helps you check available offers, price history and alternatives."
         breadcrumb={[{ name: "Extension", path: "/extension" }]}
         photo="/img/video-extension-poster.webp"
         video="/video/phone-scroll.mp4"
@@ -162,15 +162,15 @@ function ExtensionEN() {
       <section className="ed-band alt">
         <div className="ed-wrap">
           <div className="ed-prose" style={{ marginBottom: 28 }}>
-            <h2 style={{ maxWidth: "20ch" }}>What appears while you look at a product.</h2>
+            <h2 style={{ maxWidth: "20ch" }}>What the extension can show.</h2>
           </div>
           <InfoGrid
             items={[
-              { n: "€", h: "The price elsewhere", p: "« You're looking at this product at €899, it's €799 at another merchant. »" },
-              { n: "%", h: "The available cashback", p: "The highest rate of the moment, activatable in one move before you pay." },
-              { n: "↻", h: "The refurbished alternative", p: "The guaranteed equivalent, often 20 to 45% cheaper, when it exists." },
-              { n: "↧", h: "The price history", p: "High, normal or rock-bottom price, to know whether to buy or wait." },
-              { n: "★", h: "The seller's reliability", p: "Reputation and warranties, to avoid the false bargain." },
+              { n: "€", h: "Comparable offers", p: "Available prices for the same product across indexed merchants." },
+              { n: "%", h: "Eligible cashback", p: "Benefits that apply once they have been verified for the purchase." },
+              { n: "↻", h: "The refurbished alternative", p: "A guaranteed equivalent when a comparable offer is indexed." },
+              { n: "↧", h: "Price history", p: "Price context when sufficient history is available." },
+              { n: "★", h: "Merchant reliability", p: "Reputation and warranties are considered when the data is available." },
               { n: "✓", h: "The verdict", p: "One clear message : « buy now » or « better to wait »." },
             ]}
           />

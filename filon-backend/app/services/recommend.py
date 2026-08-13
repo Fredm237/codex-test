@@ -3,7 +3,7 @@
 Améliorations :
 - Cache Redis/LRU pour éviter de rappeler le LLM pour la même requête
 - Timeout explicite sur les appels LLM (pas de requête qui pend indéfiniment)
-- Parallélisme : SerpApi + Awin advertisers en parallèle
+- Parallélisme : classement LLM + annonceurs Awin lorsque des offres catalogue sont disponibles
 - Streaming fidèle : les étapes avancent en fonction du travail réel
 - Annulation propre si le client déconnecte
 - Métriques de latence pour l'observabilité
@@ -73,6 +73,22 @@ SLOTS = [
 ]
 
 _HIST = {"baisse", "hausse", "stable"}
+_VALID_LOCALES = {"fr", "nl", "en"}
+_LANGUAGE_NAMES = {"fr": "français", "nl": "néerlandais", "en": "anglais"}
+
+
+def _response_locale(locale: str | None) -> str:
+    """Normalise la langue d'annotation demandée par l'interface FILON."""
+    value = (locale or "fr").lower().split("-")[0]
+    return value if value in _VALID_LOCALES else "fr"
+
+
+_OFFER_NOTICES = {
+    "fr": {"delivery": "voir marchand", "warranty": "conditions marchand"},
+    "nl": {"delivery": "bekijk verkoper", "warranty": "voorwaarden verkoper"},
+    "en": {"delivery": "see merchant", "warranty": "merchant terms"},
+}
+
 
 _SYSTEM = (
     "Tu es FILON, un copilote d'achat expert pour la Belgique et l'Europe. "
@@ -152,7 +168,7 @@ def _coerce_card(raw: Any, slot: int) -> dict[str, Any]:
 
 _SYSTEM_RANK = (
     "Tu es FILON, copilote d'achat expert (Belgique/Europe). On te donne une liste "
-    "de PRODUITS RÉELS (index, nom, prix, marchand) issus de Google Shopping. "
+    "de PRODUITS RÉELS (index, nom, prix, marchand) issus du catalogue partenaire FILON. "
     "Sélectionne les MEILLEURS (jusqu'à 5), du meilleur au moins bon. "
     "Réponds UNIQUEMENT en JSON.\n\n"
     "Règles STRICTES :\n"
@@ -185,8 +201,10 @@ _SYSTEM_RANK = (
 )
 
 
-def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji: str) -> dict[str, Any]:
-    """Carte à partir d'un produit RÉEL (SerpApi) + annotation du LLM."""
+def _build_real_card(
+    slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji: str, locale: str | None = None
+) -> dict[str, Any]:
+    """Carte à partir d'une offre réelle du catalogue partenaire + annotation LLM."""
     default_rank, medal = SLOTS[slot]
     rank = str(ann.get("label") or default_rank)
     try:
@@ -196,6 +214,7 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
     alt = ann.get("alt")
     alt = str(alt) if alt not in (None, "", "null") else None
     verdict = str(ann.get("verdict", "acheter")).lower()
+    notices = _OFFER_NOTICES[_response_locale(locale)]
     return {
         "rank": rank,
         "medal": medal,
@@ -205,8 +224,10 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
         "link": awin.affiliate_link(prod.get("link"), prod.get("merchant")),
         "price": int(prod["price"]),
         "merchant": prod["merchant"],
-        "delivery": prod.get("delivery") or "voir marchand",
-        "warranty": "24 mois",
+        "delivery": prod.get("delivery") or notices["delivery"],
+        # Les feeds ne portent pas une garantie comparable : on renvoie vers les
+        # conditions du marchand au lieu d'afficher une durée universelle.
+        "warranty": notices["warranty"],
         "cashback": 0,
         "coupon": None,
         "hist": None,
@@ -219,7 +240,7 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
 
 
 async def _rank_real_products(
-    query: str, budget: float | None, products: list[dict[str, Any]]
+    query: str, budget: float | None, products: list[dict[str, Any]], locale: str | None = None
 ) -> dict[str, Any]:
     """Fait classer/annoter par le LLM une liste de produits réels.
 
@@ -236,11 +257,18 @@ async def _rank_real_products(
         for i, p in enumerate(products)
     ]
     budget_txt = f" Budget max : {int(budget)} €." if budget else ""
+    response_locale = _response_locale(locale)
+    language_txt = _LANGUAGE_NAMES[response_locale]
     messages = [
         Message(role="system", content=_SYSTEM_RANK),
         Message(
             role="user",
-            content=f"Besoin : {query}.{budget_txt}\nProduits réels :\n{json.dumps(listing, ensure_ascii=False)}",
+            content=(
+                f"Langue de réponse obligatoire : {language_txt}. "
+                "Traduis l'usage, les étiquettes, les explications et les alternatives dans cette langue. "
+                "Les valeurs techniques de verdict doivent rester exactement `acheter` ou `attendre`.\n"
+                f"Besoin : {query}.{budget_txt}\nProduits réels :\n{json.dumps(listing, ensure_ascii=False)}"
+            ),
         ),
     ]
     emoji = "🛍️"
@@ -278,11 +306,11 @@ async def _rank_real_products(
         if not (isinstance(idx, int) and 0 <= idx < len(products)) or idx in used:
             continue
         used.add(idx)
-        cards.append(_build_real_card(len(cards), products[idx], ann, emoji))
+        cards.append(_build_real_card(len(cards), products[idx], ann, emoji, response_locale))
 
     if not cards:
         for slot in range(min(5, len(products))):
-            cards.append(_build_real_card(slot, products[slot], {}, emoji))
+            cards.append(_build_real_card(slot, products[slot], {}, emoji, response_locale))
 
     return {"usage": usage, "emoji": emoji, "offers": len(products), "cards": cards, "real": True}
 
@@ -323,7 +351,7 @@ def _currency_for(country: str | None) -> str:
 
 
 async def generate_result(
-    query: str, budget: float | None, country: str | None = None
+    query: str, budget: float | None, country: str | None = None, locale: str | None = None
 ) -> dict[str, Any]:
     """Retourne le ``Result`` attendu par le frontend.
 
@@ -334,15 +362,18 @@ async def generate_result(
 
     Ordre de préférence :
       1. Cache (hit) — instantané
-      2. Produits RÉELS (SerpApi) classés/argumentés par le LLM
-      3. LLM seul : produits plausibles, prix estimés
-      4. Synthèse déterministe (aucune clé)
+      2. Produits RÉELS du catalogue partenaire classés/argumentés par le LLM
+      3. Aucune offre vérifiée : résultat non réel, bloqué explicitement par le frontend
+
+    Aucune recherche Google Shopping ou SerpApi n’est autorisée dans ce parcours.
     """
     start = time.time()
     cache = get_cache()
 
-    # Clé de cache basée sur la requête normalisée + budget + pays
-    key = cache_key("recommend", query.strip().lower(), str(budget), str(country))
+    # La locale fait partie du cache : une annotation néerlandaise ne doit jamais
+    # être réutilisée pour un visiteur anglais ou francophone.
+    response_locale = _response_locale(locale)
+    key = cache_key("recommend", query.strip().lower(), str(budget), str(country), response_locale)
 
     # Vérification du cache
     cached = await cache.get_json(key)
@@ -351,7 +382,6 @@ async def generate_result(
         return cached
 
     from app.services.catalog_search import search_internal_products
-    from app.services.serpapi_shopping import search_products
 
     result: dict[str, Any]
 
@@ -364,26 +394,16 @@ async def generate_result(
         if products:
             log.info("Catalogue interne : %d résultats pour '%s'", len(products), query[:40])
     except (asyncio.TimeoutError, Exception) as exc:
-        log.warning("Catalogue interne timeout/erreur (%s) → fallback SerpApi", exc)
+        log.warning("Catalogue interne timeout/erreur (%s)", exc)
         products = []
 
-    # PRIORITÉ 2 (fallback) : SerpApi/Google Shopping si le catalogue interne est vide
-    if not products:
-        try:
-            products = await asyncio.wait_for(
-                search_products(query, budget, country=country),
-                timeout=10.0,
-            )
-            if products:
-                log.info("Fallback SerpApi : %d résultats pour '%s'", len(products), query[:40])
-        except (asyncio.TimeoutError, Exception) as exc:
-            log.warning("SerpApi timeout/erreur (%s) → mode LLM ou synthèse", exc)
-            products = []
+    # Sans offre du catalogue, le frontend affiche un état explicite « aucune
+    # offre vérifiée » plutôt qu'une suggestion issue d'une source externe ou
+    # d'une estimation présentée comme achetable.
 
     if products:
-        source = "catalogue interne" if products[0].get("source") == "filon_catalog" else "SerpApi"
-        log.info("Mode données réelles : %d produits via %s (%s)", len(products), source, country or "be")
-        result = await _rank_real_products(query, budget, products)
+        log.info("Mode données réelles : %d produits via catalogue interne (%s)", len(products), country or "be")
+        result = await _rank_real_products(query, budget, products, response_locale)
     else:
         provider = get_router().for_task("reasoning")
         if provider.name == "mock":
@@ -433,7 +453,7 @@ async def generate_result(
 
 
 async def stream_events(
-    query: str, budget: float | None, country: str | None = None
+    query: str, budget: float | None, country: str | None = None, locale: str | None = None
 ) -> AsyncGenerator[dict[str, Any], None]:
     """Suite d'événements SSE identiques à ceux du frontend (step/step-done/results).
 
@@ -443,7 +463,8 @@ async def stream_events(
     - Annulation propre si le résultat arrive avant la fin des étapes
     """
     cache = get_cache()
-    key = cache_key("recommend", query.strip().lower(), str(budget), str(country))
+    response_locale = _response_locale(locale)
+    key = cache_key("recommend", query.strip().lower(), str(budget), str(country), response_locale)
 
     # Vérification rapide du cache
     cached = await cache.get_json(key)
@@ -457,7 +478,7 @@ async def stream_events(
         return
 
     # Lance le vrai travail en tâche de fond
-    task = asyncio.create_task(generate_result(query, budget, country))
+    task = asyncio.create_task(generate_result(query, budget, country, response_locale))
 
     # Les étapes avancent pendant que le LLM travaille
     for i in range(len(STEPS)):

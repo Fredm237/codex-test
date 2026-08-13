@@ -48,61 +48,61 @@ function ArticleFR() {
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Mémoire (RAM)</b></td><td><b>16 Go</b> pour durer. 8 Go suffisent pour un usage léger, mais vieillissent vite.</td></tr>
-              <tr><td><b>Stockage</b></td><td>Un <b>SSD</b>, jamais un disque mécanique. 512 Go est le bon confort.</td></tr>
-              <tr><td><b>Processeur</b></td><td>Gamme intermédiaire (type Core i5 / Ryzen 5) pour l&apos;équilibre prix-performance.</td></tr>
-              <tr><td><b>Écran</b></td><td>Résolution <b>Full HD</b> minimum, et une bonne luminosité si vous travaillez près d&apos;une fenêtre.</td></tr>
+              <tr><td><b>Mémoire (RAM)</b></td><td>Vérifiez le besoin des logiciels utilisés ; 8 Go et 16 Go ne conviennent pas aux mêmes usages.</td></tr>
+              <tr><td><b>Stockage</b></td><td>Un <b>SSD</b> améliore généralement la réactivité ; choisissez la capacité selon vos fichiers.</td></tr>
+              <tr><td><b>Processeur</b></td><td>Comparez le processeur à la charge prévue et aux exigences de vos logiciels.</td></tr>
+              <tr><td><b>Écran</b></td><td>Choisissez résolution, taille et luminosité selon l&apos;usage et votre environnement.</td></tr>
             </tbody>
           </table>
         </div>
         <p>
-          Le reste (marque, design, détails) vient après. Ces quatre points décident 90&nbsp;% de la satisfaction.
+          La marque, le design, la connectique et la réparabilité peuvent aussi compter selon votre usage.
         </p>
 
-        <h2>3. Combien mettre, selon le besoin</h2>
+        <h2>3. Quel niveau de configuration, selon le besoin</h2>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
-                <th>Budget</th>
-                <th>Ce que vous avez</th>
+                <th>Usage</th>
+                <th>Ce qu&apos;il faut privilégier</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>400 à 600 €</b></td><td>Bureautique et études, sans fioritures. Visez 16 Go et un SSD.</td></tr>
-              <tr><td><b>700 à 900 €</b></td><td>Le vrai point d&apos;équilibre&nbsp;: polyvalent, rapide, durable.</td></tr>
-              <tr><td><b>1000 € et plus</b></td><td>Création ou jeu&nbsp;: écran soigné, carte graphique, autonomie.</td></tr>
+              <tr><td><b>Bureautique & études</b></td><td>Un SSD, une mémoire adaptée à vos logiciels et une bonne autonomie si vous vous déplacez.</td></tr>
+              <tr><td><b>Polyvalent</b></td><td>Un équilibre entre processeur, mémoire, stockage, écran et connectique.</td></tr>
+              <tr><td><b>Création ou jeu</b></td><td>Vérifiez les besoins précis des logiciels, la carte graphique, le refroidissement et l&apos;écran.</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>4. Les pièges classiques</h2>
         <ul>
-          <li><b>Trop peu de RAM</b>&nbsp;: 8 Go aujourd&apos;hui, c&apos;est déjà juste pour les années à venir.</li>
-          <li><b>Un disque mécanique</b> caché derrière un gros chiffre de stockage&nbsp;: fuyez, c&apos;est lent.</li>
-          <li><b>Un écran terne</b>&nbsp;: on l&apos;oublie en magasin, on le regrette tous les jours.</li>
+          <li><b>Une RAM insuffisante</b>&nbsp;: vérifiez les besoins de vos applications et la possibilité d&apos;évoluer.</li>
+          <li><b>Le type de stockage</b>&nbsp;: contrôlez si l&apos;offre mentionne SSD ou disque mécanique.</li>
+          <li><b>L&apos;écran</b>&nbsp;: vérifiez taille, résolution, luminosité et connectique selon votre usage.</li>
           <li><b>La «&nbsp;promo&nbsp;» gonflée</b>&nbsp;: un prix barré n&apos;est pas une preuve de bonne affaire.</li>
         </ul>
 
         <h2>Neuf ou reconditionné ?</h2>
         <p>
-          Sur un portable, le reconditionné garanti fait souvent baisser la facture de 25 à 40&nbsp;% pour une machine
-          identique. On détaille tout dans notre guide{" "}
-          <a href="/blog/neuf-vs-reconditionne-economie-reelle">Neuf vs reconditionné</a>.
+          Une offre reconditionnée peut constituer une alternative, mais le prix, l&apos;état, la batterie, les accessoires,
+          la garantie et le retour varient. Consultez notre guide{" "}
+          <a href="/blog/neuf-vs-reconditionne-economie-reelle">Neuf vs reconditionné</a> pour les vérifier par offre.
         </p>
 
         <div className="callout">
-          <b>Le raccourci :</b> décrivez simplement votre besoin («&nbsp;un portable pour la fac à 800&nbsp;€&nbsp;»)
-          et FILON vous propose les meilleurs choix, avec votre <span className="g">vrai prix</span> et le bon moment
-          pour acheter.
+          <b>Un point de départ :</b> décrivez simplement votre besoin («&nbsp;un portable pour la fac&nbsp;»). FILON
+          peut rechercher des offres dans son catalogue et présenter les informations disponibles. Vérifiez le modèle,
+          la configuration, le prix et les conditions avant de commander.
         </div>
 
         <h2>En résumé</h2>
         <ul>
           <li>Choisissez selon l&apos;<b>usage</b>, pas selon les plus gros chiffres.</li>
-          <li>Visez <b>16 Go de RAM</b> et un <b>SSD</b> pour durer.</li>
-          <li>Le meilleur équilibre se situe autour de <b>700 à 900 €</b>.</li>
-          <li>Pensez au <b>reconditionné garanti</b> pour la même machine, moins chère.</li>
+          <li>Vérifiez la <b>RAM</b>, le stockage, le processeur et l&apos;écran en fonction de vos logiciels.</li>
+          <li>Comparez les <b>configurations</b> plutôt qu&apos;un budget présenté comme universel.</li>
+          <li>Pour le reconditionné, vérifiez l&apos;état, la garantie et les conditions du vendeur.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
@@ -154,61 +154,61 @@ function ArticleNL() {
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Geheugen (RAM)</b></td><td><b>16 GB</b> om lang mee te gaan. 8 GB volstaat voor licht gebruik, maar veroudert snel.</td></tr>
-              <tr><td><b>Opslag</b></td><td>Een <b>SSD</b>, nooit een mechanische schijf. 512 GB is het goede comfort.</td></tr>
-              <tr><td><b>Processor</b></td><td>Middenklasse (type Core i5 / Ryzen 5) voor de balans prijs-prestatie.</td></tr>
-              <tr><td><b>Scherm</b></td><td><b>Full HD</b>-resolutie minimum, en een goede helderheid als je naast een raam werkt.</td></tr>
+              <tr><td><b>Geheugen (RAM)</b></td><td>Controleer de vereisten van je software; 8 GB en 16 GB passen niet bij dezelfde gebruiken.</td></tr>
+              <tr><td><b>Opslag</b></td><td>Een <b>SSD</b> verbetert doorgaans de reactiesnelheid; kies capaciteit volgens je bestanden.</td></tr>
+              <tr><td><b>Processor</b></td><td>Vergelijk de processor met de geplande belasting en vereisten van je software.</td></tr>
+              <tr><td><b>Scherm</b></td><td>Kies resolutie, formaat en helderheid volgens gebruik en omgeving.</td></tr>
             </tbody>
           </table>
         </div>
         <p>
-          De rest (merk, design, details) komt daarna. Deze vier punten bepalen 90&nbsp;% van de tevredenheid.
+          Merk, design, aansluitingen en repareerbaarheid kunnen ook tellen volgens je gebruik.
         </p>
 
-        <h2>3. Hoeveel uitgeven, volgens de behoefte</h2>
+        <h2>3. Welk configuratieniveau, volgens de behoefte</h2>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
-                <th>Budget</th>
-                <th>Wat je krijgt</th>
+                <th>Gebruik</th>
+                <th>Wat je moet voorrang geven</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>400 tot 600 €</b></td><td>Kantoorwerk en studie, zonder franjes. Mik op 16 GB en een SSD.</td></tr>
-              <tr><td><b>700 tot 900 €</b></td><td>Het echte evenwichtspunt&nbsp;: veelzijdig, snel, duurzaam.</td></tr>
-              <tr><td><b>1000 € en meer</b></td><td>Creatie of gaming&nbsp;: verzorgd scherm, grafische kaart, autonomie.</td></tr>
+              <tr><td><b>Kantoorwerk & studie</b></td><td>Een SSD, geheugen aangepast aan je software en goede autonomie als je veel onderweg bent.</td></tr>
+              <tr><td><b>Veelzijdig</b></td><td>Een evenwicht tussen processor, geheugen, opslag, scherm en aansluitingen.</td></tr>
+              <tr><td><b>Creatie of gaming</b></td><td>Controleer de precieze softwarevereisten, grafische kaart, koeling en scherm.</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>4. De klassieke valkuilen</h2>
         <ul>
-          <li><b>Te weinig RAM</b>&nbsp;: 8 GB vandaag is al krap voor de komende jaren.</li>
-          <li><b>Een mechanische schijf</b> verborgen achter een groot opslagcijfer&nbsp;: vlucht ervoor, het is traag.</li>
-          <li><b>Een fletse scherm</b>&nbsp;: je vergeet het in de winkel, je betreurt het elke dag.</li>
+          <li><b>Onvoldoende RAM</b>&nbsp;: controleer de behoeften van je toepassingen en eventuele uitbreidbaarheid.</li>
+          <li><b>Het type opslag</b>&nbsp;: controleer of het aanbod SSD of een mechanische schijf vermeldt.</li>
+          <li><b>Het scherm</b>&nbsp;: controleer formaat, resolutie, helderheid en aansluitingen volgens je gebruik.</li>
           <li><b>De opgeblazen «&nbsp;promo&nbsp;»</b>&nbsp;: een doorstreepte prijs bewijst geen koopje.</li>
         </ul>
 
         <h2>Nieuw of refurbished ?</h2>
         <p>
-          Op een laptop doet gegarandeerd refurbished de factuur vaak met 25 tot 40&nbsp;% dalen voor een identieke
-          machine. We leggen alles uit in onze gids{" "}
-          <a href="/blog/neuf-vs-reconditionne-economie-reelle">Nieuw vs refurbished</a>.
+          Een refurbished aanbod kan een alternatief zijn, maar prijs, staat, batterij, accessoires, garantie en retour
+          verschillen. Lees onze gids{" "}
+          <a href="/blog/neuf-vs-reconditionne-economie-reelle">Nieuw vs refurbished</a> om die per aanbod te controleren.
         </p>
 
         <div className="callout">
-          <b>De shortcut :</b> beschrijf gewoon je behoefte («&nbsp;een laptop voor de unief aan 800&nbsp;€&nbsp;»)
-          en FILON stelt je de beste keuzes voor, met je <span className="g">echte prijs</span> en het juiste moment
-          om te kopen.
+          <b>Een vertrekpunt:</b> beschrijf eenvoudig je behoefte («&nbsp;een laptop voor de unief&nbsp;»). FILON kan
+          aanbiedingen in zijn catalogus zoeken en de beschikbare informatie tonen. Controleer model, configuratie,
+          prijs en voorwaarden vóór je bestelt.
         </div>
 
         <h2>Samengevat</h2>
         <ul>
           <li>Kies volgens het <b>gebruik</b>, niet volgens de grootste cijfers.</li>
-          <li>Mik op <b>16 GB RAM</b> en een <b>SSD</b> om lang mee te gaan.</li>
-          <li>De beste balans ligt rond <b>700 tot 900 €</b>.</li>
-          <li>Denk aan <b>gegarandeerd refurbished</b> voor dezelfde machine, goedkoper.</li>
+          <li>Controleer <b>RAM</b>, opslag, processor en scherm volgens je software.</li>
+          <li>Vergelijk <b>configuraties</b> in plaats van een budget als universeel voor te stellen.</li>
+          <li>Controleer bij refurbished de staat, garantie en voorwaarden van de verkoper.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
@@ -260,60 +260,61 @@ function ArticleEN() {
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Memory (RAM)</b></td><td><b>16 GB</b> to last. 8 GB is enough for light use, but ages fast.</td></tr>
-              <tr><td><b>Storage</b></td><td>An <b>SSD</b>, never a mechanical drive. 512 GB is the sweet spot.</td></tr>
-              <tr><td><b>Processor</b></td><td>Mid-range (like Core i5 / Ryzen 5) for the price-performance balance.</td></tr>
-              <tr><td><b>Screen</b></td><td><b>Full HD</b> resolution minimum, and good brightness if you work near a window.</td></tr>
+              <tr><td><b>Memory (RAM)</b></td><td>Check the needs of your software; 8 GB and 16 GB do not suit the same uses.</td></tr>
+              <tr><td><b>Storage</b></td><td>An <b>SSD</b> generally improves responsiveness; choose capacity for your files.</td></tr>
+              <tr><td><b>Processor</b></td><td>Compare the processor with the workload and requirements of your software.</td></tr>
+              <tr><td><b>Screen</b></td><td>Choose resolution, size and brightness for your use and environment.</td></tr>
             </tbody>
           </table>
         </div>
         <p>
-          The rest (brand, design, details) comes after. These four points decide 90&nbsp;% of satisfaction.
+          Brand, design, ports and repairability can also matter depending on your use.
         </p>
 
-        <h2>3. How much to spend, by need</h2>
+        <h2>3. Which configuration level, by need</h2>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
-                <th>Budget</th>
-                <th>What you get</th>
+                <th>Use</th>
+                <th>What to prioritise</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>€400 to €600</b></td><td>Office work and study, no frills. Aim for 16 GB and an SSD.</td></tr>
-              <tr><td><b>€700 to €900</b></td><td>The real balance point&nbsp;: versatile, fast, durable.</td></tr>
-              <tr><td><b>€1000 and up</b></td><td>Creation or gaming&nbsp;: polished screen, graphics card, battery life.</td></tr>
+              <tr><td><b>Office work & study</b></td><td>An SSD, memory suited to your software and good battery life if you travel.</td></tr>
+              <tr><td><b>Versatile</b></td><td>A balance of processor, memory, storage, screen and ports.</td></tr>
+              <tr><td><b>Creation or gaming</b></td><td>Check precise software requirements, graphics, cooling and screen.</td></tr>
             </tbody>
           </table>
         </div>
 
         <h2>4. The classic traps</h2>
         <ul>
-          <li><b>Too little RAM</b>&nbsp;: 8 GB today is already tight for the years ahead.</li>
-          <li><b>A mechanical drive</b> hidden behind a big storage number&nbsp;: run away, it&apos;s slow.</li>
-          <li><b>A dull screen</b>&nbsp;: you forget it in the shop, you regret it every day.</li>
+          <li><b>Insufficient RAM</b>&nbsp;: check the needs of your applications and upgrade options.</li>
+          <li><b>The storage type</b>&nbsp;: check whether the offer states an SSD or mechanical drive.</li>
+          <li><b>The screen</b>&nbsp;: check size, resolution, brightness and ports for your use.</li>
           <li><b>The inflated «&nbsp;promo&nbsp;»</b>&nbsp;: a struck-through price is no proof of a bargain.</li>
         </ul>
 
         <h2>New or refurbished ?</h2>
         <p>
-          On a laptop, guaranteed refurbished often cuts the bill by 25 to 40&nbsp;% for an identical machine. We
-          detail everything in our guide{" "}
-          <a href="/blog/neuf-vs-reconditionne-economie-reelle">New vs refurbished</a>.
+          A refurbished offer can be an alternative, but price, condition, battery, accessories, warranty and returns
+          vary. Read our guide{" "}
+          <a href="/blog/neuf-vs-reconditionne-economie-reelle">New vs refurbished</a> to check them offer by offer.
         </p>
 
         <div className="callout">
-          <b>The shortcut :</b> simply describe your need («&nbsp;a laptop for uni at €800&nbsp;») and FILON suggests
-          the best choices, with your <span className="g">real price</span> and the right moment to buy.
+          <b>A starting point:</b> simply describe your need («&nbsp;a laptop for university&nbsp;»). FILON can search
+          offers in its catalogue and present available information. Check the model, configuration, price and terms
+          before ordering.
         </div>
 
         <h2>In short</h2>
         <ul>
           <li>Choose by <b>use</b>, not by the biggest numbers.</li>
-          <li>Aim for <b>16 GB of RAM</b> and an <b>SSD</b> to last.</li>
-          <li>The best balance sits around <b>€700 to €900</b>.</li>
-          <li>Think <b>guaranteed refurbished</b> for the same machine, cheaper.</li>
+          <li>Check <b>RAM</b>, storage, processor and screen against your software.</li>
+          <li>Compare <b>configurations</b> rather than treat one budget as universal.</li>
+          <li>For refurbished, check condition, warranty and the seller&apos;s terms.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>

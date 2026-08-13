@@ -63,7 +63,7 @@ const EN_LABELS: Record<string, string> = {
 
 const FOOT = {
   fr: {
-    newsH: <>La newsletter <span className="it">Le Filon</span>.</>,
+    newsH: <>Le brief <span className="it">FILON</span>.</>,
     newsP: "Chaque semaine, les bonnes affaires du moment et les pièges à éviter. Rien de plus. Vous serez aussi prévenu du lancement avant tout le monde.",
     designed: "Conçu à",
     disc1: "FILON est gratuit et le restera. Aucune publicité, aucune revente de vos données. Vous ne payez jamais.",
@@ -71,7 +71,7 @@ const FOOT = {
     more: "en savoir plus",
   },
   nl: {
-    newsH: <>De nieuwsbrief <span className="it">Le Filon</span>.</>,
+    newsH: <>De <span className="it">FILON</span>-brief.</>,
     newsP: "Elke week de beste deals van het moment en de valkuilen om te vermijden. Meer niet. Je hoort ook als eerste over de lancering.",
     designed: "Ontworpen in",
     disc1: "FILON is gratis en blijft dat. Geen reclame, geen doorverkoop van je gegevens. Je betaalt nooit.",
@@ -79,7 +79,7 @@ const FOOT = {
     more: "meer weten",
   },
   en: {
-    newsH: <>The <span className="it">Le Filon</span> newsletter.</>,
+    newsH: <><span className="it">FILON</span> brief.</>,
     newsP: "Every week, the best deals of the moment and the traps to avoid. Nothing more. You'll also hear about the launch before everyone else.",
     designed: "Designed in",
     disc1: "FILON is free and will stay that way. No advertising, no reselling of your data. You never pay.",

@@ -12,6 +12,22 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
+  async headers() {
+    return [
+      {
+        // Le CDN peut conserver les frames longtemps, mais le navigateur les
+        // revalide : une nouvelle séquence déployée ne reste jamais bloquée
+        // dans un cache local obsolète.
+        source: "/seq/hero/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
