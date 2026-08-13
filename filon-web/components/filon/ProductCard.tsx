@@ -101,8 +101,8 @@ export function ProductCard({
 
         <div className="fx-product-foot">
           <span className="fx-product-price">
-            <b>{money(offer.price, offer.currency)}</b>
-            {drop && offer.price_high != null && <s>{money(offer.price_high, offer.currency)}</s>}
+            <b>{money(offer.price, offer.currency, locale)}</b>
+            {drop && offer.price_high != null && <s>{money(offer.price_high, offer.currency, locale)}</s>}
           </span>
 
           {offer.link && (

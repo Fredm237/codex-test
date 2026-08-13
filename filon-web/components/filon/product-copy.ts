@@ -7,6 +7,8 @@
 //
 // Un module neutre s'importe correctement des deux côtés.
 
+export type CardLocale = "fr" | "nl" | "en";
+
 export type CardCopy = {
   see: string;
   at: string;
@@ -14,7 +16,7 @@ export type CardCopy = {
   noImage: string;
 };
 
-export const CARD_COPY: Record<"fr" | "nl" | "en", CardCopy> = {
+export const CARD_COPY: Record<CardLocale, CardCopy> = {
   fr: { see: "Voir l'offre", at: "chez", lowest: "Au plus bas", noImage: "Visuel indisponible" },
   nl: { see: "Bekijk aanbod", at: "bij", lowest: "Laagste ooit", noImage: "Geen afbeelding" },
   en: { see: "See offer", at: "at", lowest: "Lowest ever", noImage: "No image" },
@@ -22,11 +24,13 @@ export const CARD_COPY: Record<"fr" | "nl" | "en", CardCopy> = {
 
 export function money(
   price: number | null | undefined,
-  currency: string | null | undefined
+  currency: string | null | undefined,
+  locale: CardLocale = "fr"
 ): string {
   if (price == null) return "—";
+  const numberLocale = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
   const symbol = currency === "GBP" ? "£" : currency === "USD" ? "$" : "€";
-  return `${price.toLocaleString("fr-BE", {
+  return `${price.toLocaleString(numberLocale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   })} ${symbol}`;
