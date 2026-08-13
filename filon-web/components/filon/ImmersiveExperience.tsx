@@ -15,21 +15,21 @@ type ChapterTexts = {
 
 const CHAPTERS_I18N: Record<string, ChapterTexts[]> = {
   fr: [
-    { titre: "Est-ce vraiment\nle bon prix ?", eyebrow: "Votre copilote d’achat indépendant." },
+    { titre: "Est-ce vraiment\nle bon prix ?", eyebrow: "Votre copilote d’achat." },
     { titre: "1,3 million d'offres.\n207 marchands." },
     { titre: "Le prix que personne\nd'autre ne vous montre." },
     { titre: "Vous venez\nd'économiser 47€." },
     { titre: "FILON.", cta: { label: "Essayer le copilote", href: "/recherche" } },
   ],
   nl: [
-    { titre: "Is dit echt\nde juiste prijs?", eyebrow: "Je onafhankelijke aankoopcopiloot." },
+    { titre: "Is dit echt\nde juiste prijs?", eyebrow: "Je aankoopcopiloot." },
     { titre: "1,3 miljoen aanbiedingen.\n207 winkels." },
     { titre: "De prijs die niemand\nanders je laat zien." },
     { titre: "Je hebt zojuist\n47€ bespaard." },
     { titre: "FILON.", cta: { label: "Probeer de copiloot", href: "/recherche" } },
   ],
   en: [
-    { titre: "Is this really\nthe right price?", eyebrow: "Your independent shopping copilot." },
+    { titre: "Is this really\nthe right price?", eyebrow: "Your shopping copilot." },
     { titre: "1.3 million offers.\n207 merchants." },
     { titre: "The price no one\nelse shows you." },
     { titre: "You just\nsaved €47." },
