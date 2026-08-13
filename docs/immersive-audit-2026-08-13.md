@@ -27,3 +27,14 @@ La capture mobile a confirmé que la première image s’affiche correctement ap
 Un détail a été identifié : le titre du premier chapitre était invisible exactement au chargement car le fondu d’entrée partait d’une opacité nulle à `0 %` du scroll. Le premier chapitre est désormais visible immédiatement ; les chapitres suivants conservent leur fondu d’entrée et de sortie.
 
 Prochaine vérification : déployer ce correctif puis tester l’ouverture et le scroll sur mobile.
+
+## Vérification de production après le commit `66959d7`
+
+Le premier affichage peut rester noir pendant le court instant de téléchargement de la toute première image, mais la seconde vérification, moins de quinze secondes plus tard, confirme que :
+
+- la première scène est rendue correctement sur le canvas ;
+- le premier titre est immédiatement lisible dès que l’image apparaît ;
+- l’indicateur de scroll remplace bien le message de préparation ;
+- la recherche reste visible et dans la zone de clic.
+
+Le prochain axe est de supprimer l’instant noir restant avec une poster image/fallback immédiat et de finaliser le rendu mobile/tablette.

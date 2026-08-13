@@ -3608,3 +3608,16 @@ html, body {
   border-radius: 3px; 
 }
 ::-webkit-scrollbar-thumb:hover { background: #e8c97a; }
+
+/* Poster prioritaire : élimine le flash noir avant que le canvas client soit prêt. */
+.fx-imm-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+.fx-imm-canvas { z-index: 1; }
+.fx-imm-overlay { z-index: 2; }

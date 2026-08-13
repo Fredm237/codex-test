@@ -163,6 +163,16 @@ export function ImmersiveExperience() {
   return (
     <div ref={containerRef} className="fx-imm-wrap" style={{ height: `${SCROLL_HEIGHT}vh` }}>
       <div className="fx-imm-sticky">
+        {/* Poster prioritaire : aucune zone noire pendant l’initialisation JavaScript. */}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          className="fx-imm-poster"
+          src="/seq/hero/001.jpg"
+          alt=""
+          aria-hidden="true"
+          fetchPriority="high"
+          decoding="async"
+        />
         <canvas ref={canvasRef} className="fx-imm-canvas" />
         <div className="fx-imm-overlay" />
         <div className="fx-imm-chapter" style={{ opacity: chapterOpacity }}>
