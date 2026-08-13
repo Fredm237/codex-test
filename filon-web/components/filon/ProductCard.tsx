@@ -53,6 +53,7 @@ export function ProductCard({
   // Les flux marchands livrent régulièrement des URL d'images mortes. Sans ce
   // repli, la carte affichait un cadre vide sans rien expliquer.
   const [imageOk, setImageOk] = useState(true);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   return (
     <motion.article
@@ -63,7 +64,7 @@ export function ProductCard({
       whileHover={{ y: -8, scale: 1.02 }}
       transition={{ type: "spring", stiffness: 260, damping: 18 }}
     >
-      <div className="fx-product-media">
+      <div className={`fx-product-media${offer.image && imageOk && !imageLoaded ? " is-loading" : ""}`}>
         {offer.image && imageOk ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -71,7 +72,8 @@ export function ProductCard({
             alt=""
             loading="lazy"
             decoding="async"
-            onError={() => setImageOk(false)}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => { setImageOk(false); setImageLoaded(false); }}
           />
         ) : (
           <span className="fx-product-noimage">{words.noImage}</span>

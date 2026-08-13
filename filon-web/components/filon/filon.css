@@ -3643,3 +3643,24 @@ html, body {
 @media (max-width: 480px) {
   .fx-imm-eyebrow { margin-bottom: 12px; padding: 6px 10px; font-size: 9px; }
 }
+
+/* Chargement média : une surface intentionnelle au lieu d’un cadre vide. */
+.fx-product-media.is-loading::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(200, 149, 68, 0.16), transparent 28%),
+    linear-gradient(110deg, rgba(255,255,255,0.025) 20%, rgba(255,255,255,0.08) 38%, rgba(255,255,255,0.025) 56%);
+  background-size: auto, 220% 100%;
+  animation: fx-product-shimmer 1.7s ease-in-out infinite;
+}
+.fx-product-media.is-loading img { opacity: 0; }
+.fx-product-media img { position: relative; z-index: 1; opacity: 1; transition: opacity 220ms ease, transform var(--fx-duration-slow) var(--fx-ease-out); }
+@keyframes fx-product-shimmer {
+  from { background-position: center, 160% 0; }
+  to { background-position: center, -60% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .fx-product-media.is-loading::before { animation: none; }
+}
