@@ -70,15 +70,32 @@ export function ImmersiveExperience() {
   const drawRef = useRef<() => void>(() => {});
   const readyRef = useRef(false);
   const [ready, setReady] = useState(false);
+  const [reducedMotion, setReducedMotion] = useState(() =>
+    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
   const [activeChapter, setActiveChapter] = useState(0);
   const [chapterOpacity, setChapterOpacity] = useState(1);
   const rafRef = useRef<number>(0);
   const lastFrameRef = useRef(0);
 
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReducedMotion(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   // La scène n’ouvre plus 271 téléchargements d’un coup. La première image et
   // les premières secondes sont prioritaires ; le reste arrive progressivement
   // et la fenêtre autour du frame visé est priorisée pendant le scroll.
   useEffect(() => {
+    if (reducedMotion) {
+      readyRef.current = true;
+      setReady(true);
+      return;
+    }
+
     let mounted = true;
     const loadFrame = (index: number) => {
       if (index < 0 || index >= TOTAL_FRAMES || requestedRef.current.has(index)) return;
@@ -125,7 +142,7 @@ export function ImmersiveExperience() {
       window.clearInterval(progressiveLoader);
       prefetchRef.current = () => {};
     };
-  }, []);
+  }, [reducedMotion]);
 
   const draw = useCallback(() => {
     if (!containerRef.current || !canvasRef.current || !ready) return;

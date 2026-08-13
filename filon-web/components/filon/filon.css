@@ -3675,3 +3675,12 @@ html, body {
 }
 .fx-skip-link:focus { transform: translate(-50%, 0); outline: 2px solid var(--fx-gold-500); outline-offset: 3px; }
 #main-content:focus { outline: none; }
+
+/* Accessibilité — le film devient une scène statique courte lorsque le système
+   demande de réduire les animations. */
+@media (prefers-reduced-motion: reduce) {
+  .fx-imm-wrap { height: 100svh !important; }
+  .fx-imm-canvas { display: none; }
+  .fx-imm-poster { opacity: 1; }
+  .fx-imm-scroll-hint { display: none; }
+}
