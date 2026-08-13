@@ -136,3 +136,7 @@ Le commit `a813f7c` renforce le parcours sous 900 px : les entrées d’arboresc
 ## Assistant — suggestions sur iPhone compact
 
 Le commit `14bd182` remplace les anciennes pastilles de 11 px et 6 px de padding, qui étaient trop serrées sous 375 px, par des cibles de 44 px de haut avec une typographie de 12 px. La page Assistant, son fond immersif, le champ de recherche, le sélecteur de pays et les quatre suggestions ont été rechargés avec succès en production après déploiement.
+
+## Assistant — média immersif haute définition
+
+Le commit `8aad82d` ajoute un plan vidéo H.264 de 1 920 × 1 080 px et 8 secondes, servi avec un poster PNG 16:9. Les deux assets répondent 200 en production (`video/mp4` et `image/png`) et la page Assistant les référence correctement. Le poster reste affiché sous 900 px et quand `prefers-reduced-motion` est actif, afin de préserver l’accessibilité. La capture visuelle du navigateur de validation était indisponible au moment du contrôle, mais le DOM de production, les URLs média et le chargement de la page ont été confirmés.
