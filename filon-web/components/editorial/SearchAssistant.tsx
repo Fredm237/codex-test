@@ -179,6 +179,24 @@ function catalogueSearchTerm(input: string) {
   return terms.join(" ") || input.trim();
 }
 
+function catalogueHref(input: string) {
+  const normalized = input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+  const routes: Array<[RegExp, string]> = [
+    [/casque|headphone|koptelefoon|noise.?cancell?/, "/catalogue/?dept=high-tech&cat=tv-son&sub=Casques%20audio"],
+    [/ecouteur|earbud|oortje/, "/catalogue/?dept=high-tech&cat=telephonie&sub=%C3%89couteurs"],
+    [/smartphone|telephone|telefoon|iphone|android/, "/catalogue/?dept=high-tech&cat=telephonie&sub=Smartphones"],
+    [/ordinateur|laptop|portable|pc\b|computer/, "/catalogue/?dept=high-tech&cat=informatique&sub=Ordinateurs%20portables"],
+    [/television|televiseur|tv\b/, "/catalogue/?dept=high-tech&cat=tv-son&sub=T%C3%A9l%C3%A9viseurs"],
+    [/aspirateur|vacuum|stofzuiger/, "/catalogue/?dept=maison&cat=electromenager&sub=Aspirateurs"],
+    [/sneaker|basket|chaussure|shoe/, "/catalogue/?dept=mode-accessoires&cat=chaussures&sub=Baskets%20%26%20Sneakers"],
+  ];
+  return routes.find(([pattern]) => pattern.test(normalized))?.[1]
+    ?? `/catalogue/?q=${encodeURIComponent(catalogueSearchTerm(input))}`;
+}
+
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
@@ -455,7 +473,7 @@ export function SearchAssistant() {
                   <p className="sa-failed-title">{blockedExternal ? S.sourceTitle : S.failedTitle}</p>
                   <p className="sa-failed-body">{blockedExternal ? S.sourceBody : S.failedBody}</p>
                   {blockedExternal ? (
-                    <a className="sa-failed-retry" href={`/catalogue/?q=${encodeURIComponent(catalogueSearchTerm(asked))}`}>
+                    <a className="sa-failed-retry" href={catalogueHref(asked)}>
                       {S.catalogue}
                     </a>
                   ) : (
