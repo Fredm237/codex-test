@@ -73,6 +73,15 @@ SLOTS = [
 ]
 
 _HIST = {"baisse", "hausse", "stable"}
+_VALID_LOCALES = {"fr", "nl", "en"}
+_LANGUAGE_NAMES = {"fr": "français", "nl": "néerlandais", "en": "anglais"}
+
+
+def _response_locale(locale: str | None) -> str:
+    """Normalise la langue d'annotation demandée par l'interface FILON."""
+    value = (locale or "fr").lower().split("-")[0]
+    return value if value in _VALID_LOCALES else "fr"
+
 
 _SYSTEM = (
     "Tu es FILON, un copilote d'achat expert pour la Belgique et l'Europe. "
@@ -152,7 +161,7 @@ def _coerce_card(raw: Any, slot: int) -> dict[str, Any]:
 
 _SYSTEM_RANK = (
     "Tu es FILON, copilote d'achat expert (Belgique/Europe). On te donne une liste "
-    "de PRODUITS RÉELS (index, nom, prix, marchand) issus de Google Shopping. "
+    "de PRODUITS RÉELS (index, nom, prix, marchand) issus du catalogue partenaire FILON. "
     "Sélectionne les MEILLEURS (jusqu'à 5), du meilleur au moins bon. "
     "Réponds UNIQUEMENT en JSON.\n\n"
     "Règles STRICTES :\n"
@@ -219,7 +228,7 @@ def _build_real_card(slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji
 
 
 async def _rank_real_products(
-    query: str, budget: float | None, products: list[dict[str, Any]]
+    query: str, budget: float | None, products: list[dict[str, Any]], locale: str | None = None
 ) -> dict[str, Any]:
     """Fait classer/annoter par le LLM une liste de produits réels.
 
@@ -236,11 +245,18 @@ async def _rank_real_products(
         for i, p in enumerate(products)
     ]
     budget_txt = f" Budget max : {int(budget)} €." if budget else ""
+    response_locale = _response_locale(locale)
+    language_txt = _LANGUAGE_NAMES[response_locale]
     messages = [
         Message(role="system", content=_SYSTEM_RANK),
         Message(
             role="user",
-            content=f"Besoin : {query}.{budget_txt}\nProduits réels :\n{json.dumps(listing, ensure_ascii=False)}",
+            content=(
+                f"Langue de réponse obligatoire : {language_txt}. "
+                "Traduis l'usage, les étiquettes, les explications et les alternatives dans cette langue. "
+                "Les valeurs techniques de verdict doivent rester exactement `acheter` ou `attendre`.\n"
+                f"Besoin : {query}.{budget_txt}\nProduits réels :\n{json.dumps(listing, ensure_ascii=False)}"
+            ),
         ),
     ]
     emoji = "🛍️"
@@ -323,7 +339,7 @@ def _currency_for(country: str | None) -> str:
 
 
 async def generate_result(
-    query: str, budget: float | None, country: str | None = None
+    query: str, budget: float | None, country: str | None = None, locale: str | None = None
 ) -> dict[str, Any]:
     """Retourne le ``Result`` attendu par le frontend.
 
@@ -342,8 +358,10 @@ async def generate_result(
     start = time.time()
     cache = get_cache()
 
-    # Clé de cache basée sur la requête normalisée + budget + pays
-    key = cache_key("recommend", query.strip().lower(), str(budget), str(country))
+    # La locale fait partie du cache : une annotation néerlandaise ne doit jamais
+    # être réutilisée pour un visiteur anglais ou francophone.
+    response_locale = _response_locale(locale)
+    key = cache_key("recommend", query.strip().lower(), str(budget), str(country), response_locale)
 
     # Vérification du cache
     cached = await cache.get_json(key)
@@ -373,7 +391,7 @@ async def generate_result(
 
     if products:
         log.info("Mode données réelles : %d produits via catalogue interne (%s)", len(products), country or "be")
-        result = await _rank_real_products(query, budget, products)
+        result = await _rank_real_products(query, budget, products, response_locale)
     else:
         provider = get_router().for_task("reasoning")
         if provider.name == "mock":
@@ -423,7 +441,7 @@ async def generate_result(
 
 
 async def stream_events(
-    query: str, budget: float | None, country: str | None = None
+    query: str, budget: float | None, country: str | None = None, locale: str | None = None
 ) -> AsyncGenerator[dict[str, Any], None]:
     """Suite d'événements SSE identiques à ceux du frontend (step/step-done/results).
 
@@ -433,7 +451,8 @@ async def stream_events(
     - Annulation propre si le résultat arrive avant la fin des étapes
     """
     cache = get_cache()
-    key = cache_key("recommend", query.strip().lower(), str(budget), str(country))
+    response_locale = _response_locale(locale)
+    key = cache_key("recommend", query.strip().lower(), str(budget), str(country), response_locale)
 
     # Vérification rapide du cache
     cached = await cache.get_json(key)
@@ -447,7 +466,7 @@ async def stream_events(
         return
 
     # Lance le vrai travail en tâche de fond
-    task = asyncio.create_task(generate_result(query, budget, country))
+    task = asyncio.create_task(generate_result(query, budget, country, response_locale))
 
     # Les étapes avancent pendant que le LLM travaille
     for i in range(len(STEPS)):

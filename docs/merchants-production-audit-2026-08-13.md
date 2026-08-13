@@ -104,3 +104,9 @@ Les commits `44821b6` et `6a1fe2a` renforcent le service de recherche interne. P
 Le commit `d56e9d9` permet également de reconnaître un budget écrit en fin de requête libre, comme « ordinateur portable étudiant travail 800 », sans exiger le symbole euro. La suite ciblée backend a validé 33 tests (`tests/test_search.py`) et la compilation frontend a réussi.
 
 Après déploiement, une requête de production avec ce budget a analysé sept offres du catalogue et affiché quatre ordinateurs portables Acer à 699 €, 749 € et 849 €, avec images, prix, marchand et liens affiliés Awin. Aucun accessoire, résultat Google Shopping ou prix à 1 € n’a été affiché ; la carte à 849 € est explicitement identifiée comme légèrement au-dessus du budget et reçoit le verdict « Wait ».
+
+## Assistant — contrôle ANC et images
+
+Le commit `b0d5f9f` a été vérifié dans le navigateur avec une recherche de casque à réduction de bruit. La réponse n’affiche qu’un casque dont le titre comporte explicitement `ANC`, accompagné d’une image unique correctement rendue, d’un prix réel de 33 €, du marchand GSMnet FR et d’un lien Awin. La carte ne remplace donc plus un besoin de réduction de bruit par un casque Bluetooth générique.
+
+Le même contrôle a révélé un sujet multilingue à corriger : lorsque l’interface est réglée en anglais, les libellés d’interface sont bien traduits mais l’explication générée du produit peut rester en français. La langue du visiteur doit être transmise au flux backend pour que les annotations de l’assistant suivent la locale FR/NL/EN.

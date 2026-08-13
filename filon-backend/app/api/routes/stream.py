@@ -23,11 +23,12 @@ log = get_logger("stream")
 router = APIRouter(tags=["advise"])
 
 _VALID_COUNTRIES = {"be", "be-nl", "fr", "ch", "lu", "nl", "de", "uk"}
+_VALID_LOCALES = {"fr", "nl", "en"}
 
 
-async def _sse(query: str, budget: float | None, country: str | None) -> AsyncGenerator[str, None]:
+async def _sse(query: str, budget: float | None, country: str | None, locale: str) -> AsyncGenerator[str, None]:
     try:
-        async for event in stream_events(query, budget, country):
+        async for event in stream_events(query, budget, country, locale):
             yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
     except GeneratorExit:
         log.info("Client déconnecté pendant le streaming pour '%s'", query[:30])
@@ -41,15 +42,19 @@ async def advise_stream(
     q: str = Query(..., min_length=1, max_length=500, description="Besoin en langage naturel."),
     budget: float | None = Query(default=None, ge=0, le=100000, description="Budget max en euros."),
     country: str | None = Query(default=None, description="Pays : be, be-nl, fr, ch, lu, nl."),
+    locale: str = Query(default="fr", description="Langue d'interface : fr, nl ou en."),
 ) -> StreamingResponse:
     # Validation du pays
     if country and country.lower() not in _VALID_COUNTRIES:
         raise HTTPException(status_code=400, detail=f"Pays non supporté : {country}")
+    locale = locale.lower().split("-")[0]
+    if locale not in _VALID_LOCALES:
+        raise HTTPException(status_code=400, detail=f"Langue non supportée : {locale}")
 
-    log.info("Stream demandé : q='%s' budget=%s country=%s", q[:40], budget, country)
+    log.info("Stream demandé : q='%s' budget=%s country=%s locale=%s", q[:40], budget, country, locale)
 
     return StreamingResponse(
-        _sse(q, budget, country),
+        _sse(q, budget, country, locale),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache, no-store",

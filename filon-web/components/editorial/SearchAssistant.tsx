@@ -222,9 +222,9 @@ function catalogueHref(input: string) {
    The UI is identical — only the source of the events changes. */
 const API = (process.env.NEXT_PUBLIC_FILON_API || "https://web-production-c6842.up.railway.app").replace(/\/$/, "");
 
-async function* streamAnalyze(q: string, country: string): AsyncGenerator<Ev> {
+async function* streamAnalyze(q: string, country: string, locale: "fr" | "nl" | "en"): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
-  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}`;
+  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}&locale=${encodeURIComponent(locale)}`;
   const res = await fetch(url, { headers: { Accept: "text/event-stream" } });
   if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
   const reader = res.body.getReader();
@@ -378,7 +378,7 @@ export function SearchAssistant() {
     // Le backend, ou rien. Un repli qui invente des offres se présente comme une
     // vraie analyse : le visiteur n'a aucun moyen de faire la différence.
     try {
-      for await (const ev of streamAnalyze(q, country)) if (!apply(ev)) return;
+      for await (const ev of streamAnalyze(q, country, locale)) if (!apply(ev)) return;
     } catch {
       if (runId.current !== id) return;
       setDone([]);
