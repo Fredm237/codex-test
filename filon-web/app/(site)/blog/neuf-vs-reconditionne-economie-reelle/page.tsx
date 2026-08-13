@@ -17,8 +17,8 @@ function ArticleFR() {
           <div className="ed-article-meta">Guide · 5 min · 2026</div>
           <h1>Neuf vs reconditionné&nbsp;: l&apos;économie réelle</h1>
           <p className="lede">
-            « Reconditionné » rime souvent avec « moins cher », mais de combien exactement ? Et à quel compromis ? Voici les
-            chiffres, sans langue de bois, pour décider en connaissance de cause.
+            « Reconditionné » rime souvent avec « moins cher », mais l&apos;écart et les conditions varient. Voici les
+            points à vérifier pour décider avec plus de contexte.
           </p>
         </div>
       </div>
@@ -26,28 +26,28 @@ function ArticleFR() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-neuf-vs-reconditionne.webp" alt="" />
         <p>
-          Un produit reconditionné est un appareil d&apos;occasion testé, remis en état et garanti par un professionnel. Sur
-          le papier, l&apos;économie est évidente. Dans la réalité, elle dépend de trois choses : le <b>type de produit</b>,
-          le <b>grade</b>, et ce que vous <b>cumulez</b> par-dessus.
+          Une offre reconditionnée concerne généralement un appareil déjà utilisé et remis en vente après un processus
+          défini par le vendeur. Les contrôles, accessoires, garanties et conditions de retour varient selon l&apos;offre.
+          Comparez le <b>type de produit</b>, l&apos;état annoncé et les <b>conditions du marchand</b>.
         </p>
 
-        <h2>Combien on économise, catégorie par catégorie</h2>
-        <p>Ordres de grandeur observés sur le marché (écart moyen vs neuf) :</p>
+        <h2>Ce qu&apos;il faut comparer, catégorie par catégorie</h2>
+        <p>Il n&apos;existe pas d&apos;écart universel avec le neuf. Comparez les éléments affichés pour chaque offre :</p>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
                 <th>Catégorie</th>
-                <th>Économie typique</th>
-                <th>Bon à savoir</th>
+                <th>À vérifier</th>
+                <th>Bon réflexe</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>Smartphones haut de gamme</b></td><td className="g">−30 à −45 %</td><td>Le segment roi du reconditionné</td></tr>
-              <tr><td><b>Ordinateurs portables</b></td><td className="g">−25 à −40 %</td><td>Vérifier batterie et état écran</td></tr>
-              <tr><td><b>Consoles & tablettes</b></td><td className="g">−20 à −35 %</td><td>Souvent quasi neuf en grade A+</td></tr>
-              <tr><td><b>Audio (casques, écouteurs)</b></td><td className="g">−15 à −30 %</td><td>Attention aux accessoires inclus</td></tr>
-              <tr><td><b>Électroménager</b></td><td className="g">−20 à −40 %</td><td>Garantie clé sur ces produits</td></tr>
+              <tr><td><b>Smartphones</b></td><td className="g">État, batterie, stockage</td><td>Comparez le modèle exact et la capacité</td></tr>
+              <tr><td><b>Ordinateurs portables</b></td><td className="g">Batterie, écran, clavier</td><td>Contrôlez la configuration annoncée</td></tr>
+              <tr><td><b>Consoles & tablettes</b></td><td className="g">Accessoires et connectique</td><td>Vérifiez ce qui est inclus</td></tr>
+              <tr><td><b>Audio</b></td><td className="g">Hygiène et accessoires</td><td>Lisez les conditions du vendeur</td></tr>
+              <tr><td><b>Électroménager</b></td><td className="g">Installation et garantie</td><td>Vérifiez retour, livraison et prise en charge</td></tr>
             </tbody>
           </table>
         </div>
@@ -59,36 +59,37 @@ function ArticleFR() {
           <li><b>Grade B / « bon état »</b>, marques visibles mais sans impact sur le fonctionnement. Le plus économique.</li>
         </ul>
         <p>
-          Le grade ne change rien au fonctionnement ni à la garantie, seulement l&apos;esthétique. Si l&apos;apparence
-          n&apos;est pas votre priorité, un grade B maximise l&apos;économie.
+          Les appellations de grade ne sont pas standardisées. Elles décrivent souvent l&apos;aspect extérieur, mais il faut
+          vérifier chez le vendeur ce qu&apos;elles couvrent, ainsi que les tests réalisés, l&apos;état de la batterie et les
+          accessoires inclus.
         </p>
 
         <h2>La garantie, le vrai filet de sécurité</h2>
         <p>
-          Un reconditionné sérieux est <b>garanti 12 à 24 mois</b>. C&apos;est ce qui distingue le reconditionné pro de la
-          simple occasion entre particuliers. Ne renoncez jamais à la garantie pour quelques euros : c&apos;est elle qui
-          rend l&apos;achat sans risque.
+          La durée et l&apos;étendue de la garantie diffèrent selon le vendeur, le pays et le produit. Avant d&apos;acheter,
+          vérifiez la <b>garantie proposée</b>, la procédure de retour, les exclusions et l&apos;identité du vendeur. Une
+          garantie ne supprime pas tous les risques, mais elle précise le recours disponible.
         </p>
 
         <div className="callout">
-          <b>Le vrai calcul :</b> l&apos;économie ne s&apos;arrête pas au prix reconditionné. En ajoutant un{" "}
-          <span className="g">cashback</span> (3 à 8 %) et parfois un code promo, l&apos;économie totale vs neuf atteint
-          souvent <span className="g">45 à 50 %</span>. C&apos;est exactement ce que FILON calcule pour vous.
+          <b>Le bon calcul :</b> comparez le <span className="g">prix affiché, l&apos;état, la garantie, le retour et les
+          avantages éventuels</span>. Le cashback et les codes promo ne doivent être pris en compte que lorsqu&apos;ils sont
+          indiqués pour l&apos;offre ; FILON les présente alors avec les autres informations disponibles.
         </div>
 
         <h2>Et l&apos;écologie ?</h2>
         <p>
-          Prolonger la vie d&apos;un appareil évite la fabrication d&apos;un neuf, l&apos;étape de loin la plus polluante du
-          cycle de vie d&apos;un produit électronique. Choisir le reconditionné, c&apos;est donc l&apos;un des gestes les plus
-          efficaces pour réduire l&apos;empreinte de vos achats, sans sacrifier la qualité.
+          Réutiliser un appareil peut prolonger sa durée d&apos;usage et éviter un remplacement immédiat. Son impact dépend
+          toutefois de son état, de la remise en état, de la durée d&apos;utilisation et du transport. Ne déduisez pas une
+          performance environnementale identique pour chaque offre.
         </p>
 
         <h2>En résumé</h2>
         <ul>
-          <li>L&apos;économie va de <b>−15 %</b> (audio) à <b>−45 %</b> (smartphones premium) selon la catégorie.</li>
-          <li>Le <b>grade</b> ne concerne que l&apos;esthétique ; un grade B maximise l&apos;économie.</li>
-          <li>Exigez toujours une <b>garantie de 12 à 24 mois</b>.</li>
-          <li>Avec le cashback, l&apos;économie totale grimpe souvent à <b>45–50 %</b>.</li>
+          <li>Le prix et l&apos;écart avec le neuf dépendent de l&apos;offre précise.</li>
+          <li>Les <b>grades</b> n&apos;ont pas une définition universelle.</li>
+          <li>Vérifiez toujours la <b>garantie</b>, le retour et les exclusions du vendeur.</li>
+          <li>Ajoutez cashback ou code promo uniquement lorsqu&apos;ils sont confirmés pour l&apos;offre.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
@@ -109,8 +110,8 @@ function ArticleNL() {
           <div className="ed-article-meta">Gids · 5 min · 2026</div>
           <h1>Nieuw vs refurbished&nbsp;: de echte besparing</h1>
           <p className="lede">
-            « Refurbished » rijmt vaak met « goedkoper », maar met hoeveel precies ? En met welk compromis ? Hier lees je
-            de cijfers, zonder omwegen, om met kennis van zaken te beslissen.
+            « Refurbished » rijmt vaak met « goedkoper », maar het verschil en de voorwaarden variëren. Dit zijn de
+            punten die je moet controleren om met meer context te beslissen.
           </p>
         </div>
       </div>
@@ -118,28 +119,28 @@ function ArticleNL() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-neuf-vs-reconditionne.webp" alt="" />
         <p>
-          Een refurbished product is een tweedehands toestel dat getest, hersteld en gegarandeerd is door een
-          professional. Op papier is de besparing evident. In werkelijkheid hangt ze af van drie dingen : het{" "}
-          <b>type product</b>, de <b>grade</b>, en wat je er <b>bovenop cumuleert</b>.
+          Een refurbished aanbod betreft doorgaans een eerder gebruikt toestel dat na een door de verkoper bepaald
+          proces opnieuw wordt verkocht. Controles, accessoires, garantie en retourvoorwaarden verschillen per aanbod.
+          Vergelijk het <b>type product</b>, de aangegeven staat en de <b>voorwaarden van de winkel</b>.
         </p>
 
-        <h2>Hoeveel je bespaart, categorie per categorie</h2>
-        <p>Ordes van grootte waargenomen op de markt (gemiddeld verschil vs nieuw) :</p>
+        <h2>Wat je vergelijkt, categorie per categorie</h2>
+        <p>Er bestaat geen universeel verschil met nieuw. Vergelijk de elementen die bij elk aanbod worden getoond:</p>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
                 <th>Categorie</th>
-                <th>Typische besparing</th>
-                <th>Goed om te weten</th>
+                <th>Te controleren</th>
+                <th>Nuttige reflex</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>High-end smartphones</b></td><td className="g">−30 tot −45 %</td><td>Het koningssegment van refurbished</td></tr>
-              <tr><td><b>Laptops</b></td><td className="g">−25 tot −40 %</td><td>Batterij en schermtoestand controleren</td></tr>
-              <tr><td><b>Consoles & tablets</b></td><td className="g">−20 tot −35 %</td><td>Vaak zo goed als nieuw in grade A+</td></tr>
-              <tr><td><b>Audio (hoofdtelefoons, oortjes)</b></td><td className="g">−15 tot −30 %</td><td>Let op de inbegrepen accessoires</td></tr>
-              <tr><td><b>Huishoudtoestellen</b></td><td className="g">−20 tot −40 %</td><td>Garantie is sleutel op deze producten</td></tr>
+              <tr><td><b>Smartphones</b></td><td className="g">Staat, batterij, opslag</td><td>Vergelijk exact model en capaciteit</td></tr>
+              <tr><td><b>Laptops</b></td><td className="g">Batterij, scherm, toetsenbord</td><td>Controleer de aangegeven configuratie</td></tr>
+              <tr><td><b>Consoles & tablets</b></td><td className="g">Accessoires en aansluitingen</td><td>Controleer wat inbegrepen is</td></tr>
+              <tr><td><b>Audio</b></td><td className="g">Hygiëne en accessoires</td><td>Lees de verkopersvoorwaarden</td></tr>
+              <tr><td><b>Huishoudtoestellen</b></td><td className="g">Installatie en garantie</td><td>Controleer retour, levering en ondersteuning</td></tr>
             </tbody>
           </table>
         </div>
@@ -151,36 +152,36 @@ function ArticleNL() {
           <li><b>Grade B / « goede staat »</b>, zichtbare sporen maar zonder impact op de werking. Het goedkoopst.</li>
         </ul>
         <p>
-          De grade verandert niets aan de werking noch aan de garantie, enkel het uiterlijk. Als het voorkomen niet je
-          prioriteit is, maximaliseert een grade B de besparing.
+          Gradebenamingen zijn niet gestandaardiseerd. Ze beschrijven vaak het uiterlijk, maar controleer bij de
+          verkoper wat ze dekken, samen met uitgevoerde tests, batterijtoestand en inbegrepen accessoires.
         </p>
 
         <h2>De garantie, het echte vangnet</h2>
         <p>
-          Een serieus refurbished product is <b>gegarandeerd 12 tot 24 maanden</b>. Dat is wat de professionele
-          refurbished onderscheidt van de gewone tweedehands tussen particulieren. Zie nooit af van de garantie voor
-          enkele euro's : zij maakt de aankoop risicoloos.
+          De duur en reikwijdte van de garantie verschillen per verkoper, land en product. Controleer vóór je koopt de
+          <b>geboden garantie</b>, retourprocedure, uitsluitingen en identiteit van de verkoper. Een garantie neemt niet
+          elk risico weg, maar verduidelijkt wel het mogelijke verhaal.
         </p>
 
         <div className="callout">
-          <b>De echte berekening :</b> de besparing stopt niet bij de refurbished-prijs. Door een{" "}
-          <span className="g">cashback</span> (3 tot 8 %) en soms een promocode toe te voegen, bereikt de totale
-          besparing vs nieuw vaak <span className="g">45 tot 50 %</span>. Dat is precies wat FILON voor je berekent.
+          <b>De juiste berekening:</b> vergelijk de <span className="g">getoonde prijs, staat, garantie, retour en
+          eventuele voordelen</span>. Cashback en promotiecodes tel je alleen mee wanneer ze voor het aanbod vermeld zijn;
+          FILON toont ze dan met de andere beschikbare gegevens.
         </div>
 
         <h2>En de ecologie ?</h2>
         <p>
-          Het leven van een toestel verlengen vermijdt de fabricage van een nieuw exemplaar, veruit de meest
-          vervuilende stap in de levenscyclus van een elektronisch product. Refurbished kiezen is dus een van de meest
-          doeltreffende gebaren om de voetafdruk van je aankopen te verkleinen, zonder kwaliteit op te offeren.
+          Een toestel opnieuw gebruiken kan de gebruiksduur verlengen en een onmiddellijke vervanging vermijden. De
+          impact hangt echter af van de staat, opknapbeurt, gebruiksduur en het transport. Leid geen gelijke
+          milieuprestatie af voor elk aanbod.
         </p>
 
         <h2>Samengevat</h2>
         <ul>
-          <li>De besparing gaat van <b>−15 %</b> (audio) tot <b>−45 %</b> (premium smartphones) naargelang de categorie.</li>
-          <li>De <b>grade</b> betreft enkel het uiterlijk ; een grade B maximaliseert de besparing.</li>
-          <li>Eis altijd een <b>garantie van 12 tot 24 maanden</b>.</li>
-          <li>Met de cashback klimt de totale besparing vaak tot <b>45–50 %</b>.</li>
+          <li>Prijs en verschil met nieuw hangen af van het concrete aanbod.</li>
+          <li><b>Grades</b> hebben geen universele definitie.</li>
+          <li>Controleer altijd <b>garantie</b>, retour en uitsluitingen van de verkoper.</li>
+          <li>Voeg cashback of promocode alleen toe wanneer die voor het aanbod bevestigd zijn.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
@@ -201,8 +202,8 @@ function ArticleEN() {
           <div className="ed-article-meta">Guide · 5 min · 2026</div>
           <h1>New vs refurbished&nbsp;: the real saving</h1>
           <p className="lede">
-            « Refurbished » often rhymes with « cheaper », but by how much exactly ? And at what compromise ? Here are
-            the figures, no spin, to decide with full knowledge.
+            « Refurbished » often rhymes with « cheaper », but the difference and conditions vary. Here are the points
+            to check so you can decide with more context.
           </p>
         </div>
       </div>
@@ -210,28 +211,28 @@ function ArticleEN() {
       <div className="ed-article" style={{ paddingBottom: 60 }}>
         <img className="ed-article-cover" src="/img/blog-neuf-vs-reconditionne.webp" alt="" />
         <p>
-          A refurbished product is a second-hand device tested, restored and guaranteed by a professional. On paper,
-          the saving is obvious. In reality, it depends on three things: the <b>type of product</b>, the
-          <b> grade</b>, and what you <b>stack</b> on top.
+          A refurbished offer generally concerns a previously used device resold after a process defined by the seller.
+          Checks, accessories, warranty and return terms vary by offer. Compare the <b>type of product</b>, stated
+          condition and the <b>merchant&apos;s terms</b>.
         </p>
 
-        <h2>How much you save, category by category</h2>
-        <p>Orders of magnitude observed on the market (average gap vs new):</p>
+        <h2>What to compare, category by category</h2>
+        <p>There is no universal gap with new. Compare the elements shown for each offer:</p>
         <div className="ed-tablewrap">
           <table>
             <thead>
               <tr>
                 <th>Category</th>
-                <th>Typical saving</th>
-                <th>Good to know</th>
+                <th>What to check</th>
+                <th>Useful reflex</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><b>High-end smartphones</b></td><td className="g">−30 to −45 %</td><td>The flagship segment of refurbished</td></tr>
-              <tr><td><b>Laptops</b></td><td className="g">−25 to −40 %</td><td>Check battery and screen condition</td></tr>
-              <tr><td><b>Consoles & tablets</b></td><td className="g">−20 to −35 %</td><td>Often near-new in grade A+</td></tr>
-              <tr><td><b>Audio (headphones, earbuds)</b></td><td className="g">−15 to −30 %</td><td>Watch the included accessories</td></tr>
-              <tr><td><b>Home appliances</b></td><td className="g">−20 to −40 %</td><td>Warranty is key on these products</td></tr>
+              <tr><td><b>Smartphones</b></td><td className="g">Condition, battery, storage</td><td>Compare the exact model and capacity</td></tr>
+              <tr><td><b>Laptops</b></td><td className="g">Battery, screen, keyboard</td><td>Check the stated configuration</td></tr>
+              <tr><td><b>Consoles & tablets</b></td><td className="g">Accessories and ports</td><td>Check what is included</td></tr>
+              <tr><td><b>Audio</b></td><td className="g">Hygiene and accessories</td><td>Read the seller&apos;s terms</td></tr>
+              <tr><td><b>Home appliances</b></td><td className="g">Installation and warranty</td><td>Check returns, delivery and support</td></tr>
             </tbody>
           </table>
         </div>
@@ -243,36 +244,36 @@ function ArticleEN() {
           <li><b>Grade B / « good condition »</b>, visible marks but no impact on functioning. The most economical.</li>
         </ul>
         <p>
-          The grade changes nothing about functioning or warranty, only the looks. If appearance isn&apos;t your
-          priority, a grade B maximises the saving.
+          Grade labels are not standardised. They often describe appearance, but check with the seller what they cover,
+          along with tests performed, battery condition and included accessories.
         </p>
 
         <h2>The warranty, the real safety net</h2>
         <p>
-          A serious refurbished product is <b>guaranteed 12 to 24 months</b>. That&apos;s what distinguishes
-          professional refurbished from plain second-hand between private individuals. Never give up the warranty for
-          a few euros: it&apos;s what makes the purchase risk-free.
+          Warranty length and scope differ by seller, country and product. Before buying, check the <b>warranty offered</b>,
+          return process, exclusions and seller identity. A warranty does not remove every risk, but clarifies the
+          recourse available.
         </p>
 
         <div className="callout">
-          <b>The real calculation:</b> the saving doesn&apos;t stop at the refurbished price. Adding a{" "}
-          <span className="g">cashback</span> (3 to 8%) and sometimes a promo code, the total saving vs new often
-          reaches <span className="g">45 to 50%</span>. That&apos;s exactly what FILON calculates for you.
+          <b>The useful calculation:</b> compare the <span className="g">displayed price, condition, warranty, returns
+          and any benefits</span>. Only include cashback and promo codes when they are listed for the offer; FILON then
+          presents them with the other available details.
         </div>
 
         <h2>And the ecology ?</h2>
         <p>
-          Extending a device&apos;s life avoids manufacturing a new one, by far the most polluting step in an
-          electronic product&apos;s life cycle. Choosing refurbished is therefore one of the most effective moves to
-          reduce your purchases&apos; footprint, without sacrificing quality.
+          Reusing a device can extend its period of use and avoid an immediate replacement. Its impact nevertheless
+          depends on condition, refurbishment, length of use and transport. Do not infer an identical environmental
+          performance for every offer.
         </p>
 
         <h2>In short</h2>
         <ul>
-          <li>The saving runs from <b>−15%</b> (audio) to <b>−45%</b> (premium smartphones) by category.</li>
-          <li>The <b>grade</b> concerns only looks; a grade B maximises the saving.</li>
-          <li>Always demand a <b>12 to 24-month warranty</b>.</li>
-          <li>With cashback, the total saving often climbs to <b>45–50%</b>.</li>
+          <li>The price and gap with new depend on the exact offer.</li>
+          <li><b>Grades</b> do not have a universal definition.</li>
+          <li>Always check the seller&apos;s <b>warranty</b>, returns and exclusions.</li>
+          <li>Only add cashback or promo codes when they are confirmed for the offer.</li>
         </ul>
 
         <p style={{ marginTop: 30 }}>
