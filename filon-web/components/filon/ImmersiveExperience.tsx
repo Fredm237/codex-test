@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from "react";
 import { HeroSearch } from "./HeroSearch";
 
 const IMAGES = 264;
-const BASE = "/seq/hero";
+const BASE = "/seq/full";
 const HEIGHT_VH = 1200; // 12x l'écran pour un scroll long et fluide
 
 type Chapitre = {
