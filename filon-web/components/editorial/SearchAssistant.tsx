@@ -70,7 +70,15 @@ const SL = {
    SSE. There is no second source: when the stream fails, the assistant says so.
    ────────────────────────────────────────────────────────────────────────── */
 
-const money = (n: number, cur = "€") => `${n.toLocaleString("fr-FR")} ${cur}`;
+const money = (n: number, cur = "€", locale: "fr" | "nl" | "en" = "fr") => {
+  const currency = cur === "€" ? "EUR" : cur === "£" ? "GBP" : cur === "$" ? "USD" : cur;
+  const numberLocale = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
+  try {
+    return new Intl.NumberFormat(numberLocale, { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
+  } catch {
+    return `${n.toLocaleString(numberLocale)} ${cur}`;
+  }
+};
 
 /** Pays couverts par les offres et prix suivis dans le catalogue FILON. */
 const COUNTRIES: Array<{ code: string; label: string }> = [
@@ -235,7 +243,8 @@ function ScoreRing({ score }: { score: number }) {
 
 function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
   const [imgOk, setImgOk] = useState(true);
-  const S = SL[useLocale().locale];
+  const { locale } = useLocale();
+  const S = SL[locale];
   // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
   // Google Shopping : on le laisse explorer le même produit dans FILON.
   const hasMerchantLink = Boolean(c.link) && !isGoogleShoppingUrl(c.link);
@@ -262,7 +271,7 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
-          <div className="fa-price"><b>{money(c.price, cur)}</b><span className="mc">{S.at} {c.merchant}</span></div>
+          <div className="fa-price"><b>{money(c.price, cur, locale)}</b><span className="mc">{S.at} {c.merchant}</span></div>
           <div className="fa-specs">
             <span><IcTruck /> {c.delivery}</span>
             <span><IcShield /> {c.warranty}</span>
