@@ -2,6 +2,7 @@
 
 import { ProductCard } from "@/components/filon/ProductCard";
 import { useLocale, type Locale } from "@/lib/i18n";
+import { catalogueLabel } from "@/lib/catalogue-labels";
 
 type Subcategory = { name: string; count: number };
 type Category = { name: string; slug: string; count: number; subcategories?: Subcategory[] };
@@ -77,7 +78,7 @@ export function CategoryDetails({
     <section className="ed-band" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
       <div className="ed-wrap">
         <p style={{ marginBottom: 18 }}><a href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>{copy.back}</a></p>
-        <h1 className="cat-rail-title" style={{ fontSize: "clamp(26px, 4vw, 36px)" }}>{category.name}</h1>
+        <h1 className="cat-rail-title" style={{ fontSize: "clamp(26px, 4vw, 36px)" }}>{catalogueLabel(category.name, locale)}</h1>
         <p className="cat-rail-sub" style={{ marginBottom: 24 }}>{copy.compared(formatNumber(total))}</p>
 
         {subs.length > 0 && (
@@ -93,7 +94,7 @@ export function CategoryDetails({
 
         {others.length > 0 && (
           <nav className="cat-chips" aria-label={copy.other}>
-            {others.map((other) => <a key={other.slug} className="cat-chip" href={`/categorie/${other.slug}/`}>{other.name} <span>{formatNumber(other.count)}</span></a>)}
+            {others.map((other) => <a key={other.slug} className="cat-chip" href={`/categorie/${other.slug}/`}>{catalogueLabel(other.name, locale)} <span>{formatNumber(other.count)}</span></a>)}
           </nav>
         )}
 

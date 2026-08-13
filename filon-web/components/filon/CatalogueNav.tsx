@@ -15,6 +15,7 @@
 
 import { href, type CatalogueQuery, type Department } from "@/lib/catalogue";
 import { useLocale } from "@/lib/i18n";
+import { catalogueLabel } from "@/lib/catalogue-labels";
 
 const TAG = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
 
@@ -50,7 +51,7 @@ export function CatalogueNav({
         return (
           <details className="fx-nav-dept" key={d.slug} open={openDepartment}>
             <summary>
-              <span className="fx-nav-label">{d.name}</span>
+              <span className="fx-nav-label">{catalogueLabel(d.name, locale)}</span>
               <span className="fx-nav-count">{count(d.count)}</span>
               <svg className="fx-nav-caret" viewBox="0 0 16 16" aria-hidden="true" width="14" height="14">
                 <path
@@ -71,7 +72,7 @@ export function CatalogueNav({
                   aria-current={openDepartment && !activeCategory ? "true" : undefined}
                   href={href({}, { dept: d.slug })}
                 >
-                  {t("cat.allOf")} {d.name}
+                  {t("cat.allOf")} {catalogueLabel(d.name, locale)}
                 </a>
               </li>
 
@@ -86,7 +87,7 @@ export function CatalogueNav({
                         aria-current={openCategory ? "true" : undefined}
                         href={href({}, { dept: d.slug, cat: c.slug })}
                       >
-                        <span>{c.name}</span>
+                        <span>{catalogueLabel(c.name, locale)}</span>
                         <span className="fx-nav-count">{count(c.count)}</span>
                       </a>
                     </li>
@@ -96,7 +97,7 @@ export function CatalogueNav({
                   <li key={c.slug}>
                     <details className="fx-nav-cat" open={openCategory}>
                       <summary>
-                        <span className="fx-nav-label">{c.name}</span>
+                        <span className="fx-nav-label">{catalogueLabel(c.name, locale)}</span>
                         <span className="fx-nav-count">{count(c.count)}</span>
                         <svg className="fx-nav-caret" viewBox="0 0 16 16" aria-hidden="true" width="12" height="12">
                           <path
@@ -116,7 +117,7 @@ export function CatalogueNav({
                             aria-current={openCategory && !activeSubcategory ? "true" : undefined}
                             href={href({}, { dept: d.slug, cat: c.slug })}
                           >
-                            {t("cat.allOf")} {c.name}
+                            {t("cat.allOf")} {catalogueLabel(c.name, locale)}
                           </a>
                         </li>
                         {subs.map((s) => (
