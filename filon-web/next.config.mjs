@@ -12,6 +12,21 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
+  async headers() {
+    return [
+      {
+        // Les frames sont versionnées avec le build et ne changent pas entre
+        // deux déploiements : le navigateur peut les réutiliser immédiatement.
+        source: "/seq/hero/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;
