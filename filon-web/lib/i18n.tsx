@@ -84,7 +84,7 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
 
   "cat.title1": { fr: "Le catalogue,", nl: "De catalogus,", en: "The catalogue," },
   "cat.title2": { fr: "rayon par rayon.", nl: "afdeling per afdeling.", en: "aisle by aisle." },
-  "cat.count": { fr: "produits comparés chez nos marchands partenaires.", nl: "producten vergeleken bij onze partnerwinkels.", en: "products compared across our partner merchants." },
+  "cat.count": { fr: "offres indexées chez nos marchands partenaires.", nl: "aanbiedingen van onze partnerwinkels geïndexeerd.", en: "offers indexed from our partner merchants." },
   "cat.down": { fr: "Le catalogue est momentanément indisponible. Réessayez dans un instant.", nl: "De catalogus is even niet beschikbaar. Probeer het zo opnieuw.", en: "The catalogue is momentarily unavailable. Try again in a moment." },
   "cat.search": { fr: "Rechercher dans le catalogue", nl: "Zoeken in de catalogus", en: "Search the catalogue" },
   "cat.searchBtn": { fr: "Chercher", nl: "Zoeken", en: "Search" },
