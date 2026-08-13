@@ -28,7 +28,7 @@ const STEP_ICONS = [
 const L = {
   fr: {
     mIdx: "3 étapes",
-    mH1: "Trois secondes entre vous et ", mH2: "le meilleur prix",
+    mH1: "Une réponse, en ", mH2: "trois gestes",
     steps: [
       ["Il reconnaît le produit", "Sur n'importe quelle page, il comprend ce que vous regardez."],
       ["Il regarde partout", "En une seconde, tout le marché passé au crible."],
@@ -49,7 +49,7 @@ const L = {
   },
   nl: {
     mIdx: "3 stappen",
-    mH1: "Drie seconden tussen jou en ", mH2: "de beste prijs",
+    mH1: "Eén antwoord, in ", mH2: "drie stappen",
     steps: [
       ["Hij herkent het product", "Op elke pagina begrijpt hij wat je bekijkt."],
       ["Hij kijkt overal", "In één seconde de hele markt doorzocht."],
@@ -70,7 +70,7 @@ const L = {
   },
   en: {
     mIdx: "3 steps",
-    mH1: "Three seconds between you and ", mH2: "the best price",
+    mH1: "One answer, in ", mH2: "three moves",
     steps: [
       ["It recognises the product", "On any page, it understands what you're looking at."],
       ["It looks everywhere", "In one second, the whole market scanned."],
