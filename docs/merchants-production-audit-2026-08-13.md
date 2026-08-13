@@ -120,3 +120,7 @@ Les contrôles de production ont confirmé les trois rendus. En anglais, les ran
 ## Assistant — intention montage vidéo
 
 La suggestion « Une machine pour le montage vidéo » était auparavant hors périmètre du routage catalogue et basculait vers une synthèse non vérifiée, bloquée par l’interface. Le commit `24c3be9` la route désormais vers les ordinateurs portables du catalogue partenaire. La vérification web de production a affiché cinq machines Acer réelles, avec images, prix, liens Awin et explications adaptées au montage vidéo. Aucun produit synthétique ni lien externe non vérifié n’a été rendu.
+
+## Catalogue — sous-catégories multilingues
+
+Le commit `862d1cc` applique la couche `catalogueLabel` aux sous-catégories, qui étaient auparavant rendues directement depuis le libellé français du flux. Le contrôle de production en anglais confirme la traduction des sous-catégories Fashion et Tech visibles : par exemple `Dresses`, `Skirts`, `Laptops`, `Monitors`, `Headphones`, `Cases & protection` et `Gaming accessories`. Les URL conservent les clés françaises de filtre, donc les liens, compteurs et recherche backend restent inchangés.
