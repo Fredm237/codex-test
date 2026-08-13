@@ -3229,3 +3229,117 @@ html, body {
     top: 40%;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   IMMERSIVE v4 — Seedance 2.5 "Internet se matérialise"
+   ═══════════════════════════════════════════════════════════════════ */
+.fx-imm-wrap { position: relative; }
+.fx-imm-sticky {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+.fx-imm-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.fx-imm-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+}
+.fx-imm-chapter {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px;
+  z-index: 5;
+  pointer-events: none;
+  transition: opacity 0.1s linear;
+}
+.fx-imm-titre {
+  font-size: clamp(32px, 6vw, 72px);
+  font-weight: 200;
+  color: #fff;
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-shadow: 0 4px 60px rgba(0,0,0,0.9), 0 2px 10px rgba(0,0,0,0.8);
+  white-space: pre-line;
+  max-width: 700px;
+}
+.fx-imm-sous {
+  margin-top: 16px;
+  font-size: clamp(14px, 2.5vw, 20px);
+  color: rgba(255, 255, 255, 0.7);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.8);
+}
+.fx-imm-cta {
+  display: inline-block;
+  margin-top: 32px;
+  padding: 16px 40px;
+  background: var(--fx-gold-500, #c89544);
+  color: #000;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 100px;
+  text-decoration: none;
+  pointer-events: all;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.fx-imm-cta:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 30px rgba(200, 149, 68, 0.3);
+}
+.fx-imm-search {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  width: 90%;
+  max-width: 560px;
+}
+.fx-imm-scroll-hint {
+  position: absolute;
+  bottom: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255,255,255,0.5);
+  font-size: 13px;
+  animation: fx-bounce 2s infinite;
+}
+.fx-imm-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255,255,255,0.5);
+  font-size: 14px;
+  z-index: 6;
+}
+@keyframes fx-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(8px); }
+}
+@media (max-width: 768px) {
+  .fx-imm-titre { font-size: clamp(24px, 8vw, 44px); }
+  .fx-imm-search { bottom: 20px; width: 94%; }
+  .fx-imm-scroll-hint { bottom: 80px; }
+}

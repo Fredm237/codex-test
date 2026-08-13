@@ -1,205 +1,133 @@
 "use client";
 
-// ImmersiveExperience — Le site entier est un film piloté au scroll.
-//
-// 264 images, 5 chapitres. Chaque chapitre est un moment du film :
-// 1. Entrée dans l'appartement (0-20%) — "Est-ce le bon moment pour acheter ?"
-// 2. On s'approche de l'écran (20-40%) — "FILON compare les prix pour vous"
-// 3. L'interface en plein écran (40-60%) — "Le meilleur prix, trouvé en secondes"
-// 4. La personne satisfaite (60-80%) — "Économisez sans effort"
-// 5. Retour large (80-100%) — CTA "Essayez maintenant"
-//
-// Le texte apparaît et disparaît à chaque chapitre.
-// Le fond est TOUJOURS le film. Pas de sections blanches. Pas de rupture.
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { HeroSearch } from "./HeroSearch";
 
-const IMAGES = 264;
-const BASE = "/seq/full";
-const HEIGHT_VH = 1200; // 12x l'écran pour un scroll long et fluide
+const TOTAL_FRAMES = 271;
+const SCROLL_HEIGHT = 1400; // vh — hauteur totale du scroll
 
-type Chapitre = {
-  debut: number;
-  fin: number;
+type Chapter = {
+  start: number; // % du scroll
+  end: number;
   titre: string;
   sousTitre?: string;
   cta?: { label: string; href: string };
 };
 
-const CHAPITRES: Chapitre[] = [
-  {
-    debut: 0.0,
-    fin: 0.2,
-    titre: "Est-ce vraiment le bon prix ?",
-  },
-  {
-    debut: 0.22,
-    fin: 0.4,
-    titre: "1,3 million d'offres. 207 marchands. Un seul verdict.",
-  },
-  {
-    debut: 0.42,
-    fin: 0.6,
-    titre: "Le prix que personne d'autre ne vous montre.",
-  },
-  {
-    debut: 0.62,
-    fin: 0.8,
-    titre: "Vous venez d'économiser 47€.",
-  },
-  {
-    debut: 0.82,
-    fin: 1.0,
-    titre: "FILON.",
-    cta: { label: "Essayer le copilote", href: "/recherche/" },
-  },
+const CHAPTERS: Chapter[] = [
+  { start: 0, end: 20, titre: "Est-ce vraiment\nle bon prix ?" },
+  { start: 20, end: 40, titre: "1,3 million d'offres.\n207 marchands." },
+  { start: 40, end: 60, titre: "Le prix que personne\nd'autre ne vous montre." },
+  { start: 60, end: 80, titre: "Vous venez\nd'économiser 47€." },
+  { start: 80, end: 100, titre: "FILON.", cta: { label: "Essayer le copilote", href: "/recherche" } },
 ];
 
 export function ImmersiveExperience() {
-  const hote = useRef<HTMLDivElement>(null);
-  const toile = useRef<HTMLCanvasElement>(null);
-  const cache = useRef<HTMLImageElement[]>([]);
-  const dernier = useRef(-1);
-  const [pret, setPret] = useState(false);
-  const [actif, setActif] = useState(false);
-  const [progression, setProgression] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imagesRef = useRef<HTMLImageElement[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const [activeChapter, setActiveChapter] = useState(0);
+  const [chapterOpacity, setChapterOpacity] = useState(1);
+  const rafRef = useRef<number>(0);
 
+  // Précharger toutes les images
   useEffect(() => {
-    setActif(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    let loadedCount = 0;
+    const images: HTMLImageElement[] = [];
+    for (let i = 1; i <= TOTAL_FRAMES; i++) {
+      const img = new Image();
+      img.src = `/seq/hero/${String(i).padStart(3, "0")}.jpg`;
+      img.onload = () => {
+        loadedCount++;
+        if (loadedCount === TOTAL_FRAMES) setLoaded(true);
+      };
+      images.push(img);
+    }
+    imagesRef.current = images;
   }, []);
 
-  // Préchargement progressif
-  useEffect(() => {
-    if (!actif) return;
-    let vivant = true;
-    let charges = 0;
-    const tab: HTMLImageElement[] = new Array(IMAGES);
-    for (let i = 0; i < IMAGES; i++) {
-      const im = new Image();
-      im.onload = () => {
-        if (!vivant) return;
-        tab[i] = im;
-        if (++charges === IMAGES) {
-          cache.current = tab;
-          setPret(true);
-        }
-      };
-      im.src = `${BASE}/${String(i).padStart(3, "0")}.jpg`;
+  // Dessiner le frame correspondant au scroll
+  const draw = useCallback(() => {
+    if (!containerRef.current || !canvasRef.current || !loaded) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const scrolled = -rect.top;
+    const maxScroll = rect.height - window.innerHeight;
+    const progress = Math.max(0, Math.min(1, scrolled / maxScroll));
+
+    // Frame index
+    const frameIndex = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * TOTAL_FRAMES));
+    const ctx = canvasRef.current.getContext("2d");
+    if (ctx && imagesRef.current[frameIndex]) {
+      canvasRef.current.width = 1280;
+      canvasRef.current.height = 720;
+      ctx.drawImage(imagesRef.current[frameIndex], 0, 0, 1280, 720);
     }
-    return () => { vivant = false; };
-  }, [actif]);
+
+    // Chapitre actif
+    const pct = progress * 100;
+    for (let i = 0; i < CHAPTERS.length; i++) {
+      if (pct >= CHAPTERS[i].start && pct < CHAPTERS[i].end) {
+        setActiveChapter(i);
+        // Fade in/out aux bords du chapitre
+        const chapterProgress = (pct - CHAPTERS[i].start) / (CHAPTERS[i].end - CHAPTERS[i].start);
+        const fade = chapterProgress < 0.15 ? chapterProgress / 0.15
+          : chapterProgress > 0.85 ? (1 - chapterProgress) / 0.15
+          : 1;
+        setChapterOpacity(Math.max(0, Math.min(1, fade)));
+        break;
+      }
+    }
+
+    rafRef.current = requestAnimationFrame(draw);
+  }, [loaded]);
 
   useEffect(() => {
-    if (!pret) return;
+    if (loaded) {
+      rafRef.current = requestAnimationFrame(draw);
+      window.addEventListener("scroll", () => {
+        cancelAnimationFrame(rafRef.current);
+        rafRef.current = requestAnimationFrame(draw);
+      });
+    }
+    return () => cancelAnimationFrame(rafRef.current);
+  }, [loaded, draw]);
 
-    const dessiner = () => {
-      const cv = toile.current;
-      const el = hote.current;
-      if (!cv || !el) return;
-      const r = el.getBoundingClientRect();
-      const course = r.height - window.innerHeight;
-      const p = course > 0 ? Math.min(Math.max(-r.top / course, 0), 1) : 0;
-      setProgression(p);
-      const i = Math.round(p * (IMAGES - 1));
-      const im = cache.current[i];
-      if (!im || i === dernier.current) return;
-      dernier.current = i;
-      const ctx = cv.getContext("2d", { alpha: false });
-      if (!ctx) return;
-      const e = Math.max(cv.width / im.width, cv.height / im.height);
-      const w = im.width * e;
-      const h = im.height * e;
-      ctx.drawImage(im, (cv.width - w) / 2, (cv.height - h) / 2, w, h);
-    };
-
-    const dimensionner = () => {
-      const cv = toile.current;
-      if (!cv) return;
-      const d = Math.min(window.devicePixelRatio || 1, 2);
-      cv.width = window.innerWidth * d;
-      cv.height = window.innerHeight * d;
-      cv.style.width = `${window.innerWidth}px`;
-      cv.style.height = `${window.innerHeight}px`;
-      dernier.current = -1;
-      dessiner();
-    };
-
-    let raf = 0;
-    const file = () => {
-      if (!raf) raf = requestAnimationFrame(() => { dessiner(); raf = 0; });
-    };
-    window.addEventListener("scroll", file, { passive: true });
-    window.addEventListener("resize", dimensionner);
-    dimensionner();
-    return () => {
-      window.removeEventListener("scroll", file);
-      window.removeEventListener("resize", dimensionner);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [pret]);
-
-  // Repli sans animation
-  if (!actif) {
-    return (
-      <section className="fx-immersive-repli">
-        <img src={`${BASE}/000.jpg`} alt="" className="fx-immersive-repli-img" />
-        <div className="fx-immersive-repli-content">
-          <h1>Est-ce vraiment le bon moment pour acheter ?</h1>
-          <p>FILON compare les prix de vos produits préférés chez tous les marchands et vous dit quand acheter.</p>
-          <HeroSearch />
-        </div>
-      </section>
-    );
-  }
+  const chapter = CHAPTERS[activeChapter];
 
   return (
-    <section ref={hote} className="fx-immersive" style={{ height: `${HEIGHT_VH}vh` }}>
-      <div className="fx-immersive-sticky">
-        <canvas ref={toile} className="fx-immersive-canvas" aria-hidden="true" />
-        <div className="fx-immersive-overlay" />
+    <div ref={containerRef} className="fx-imm-wrap" style={{ height: `${SCROLL_HEIGHT}vh` }}>
+      <div className="fx-imm-sticky">
+        {/* Canvas plein écran */}
+        <canvas ref={canvasRef} className="fx-imm-canvas" />
 
-        {/* Barre de recherche toujours visible en haut */}
-        <div className="fx-immersive-search">
+        {/* Overlay sombre */}
+        <div className="fx-imm-overlay" />
+
+        {/* Texte du chapitre */}
+        <div className="fx-imm-chapter" style={{ opacity: chapterOpacity }}>
+          <h2 className="fx-imm-titre">{chapter.titre}</h2>
+          {chapter.sousTitre && <p className="fx-imm-sous">{chapter.sousTitre}</p>}
+          {chapter.cta && (
+            <a href={chapter.cta.href} className="fx-imm-cta">{chapter.cta.label}</a>
+          )}
+        </div>
+
+        {/* Barre de recherche fixe en bas */}
+        <div className="fx-imm-search">
           <HeroSearch />
         </div>
 
-        {/* Chapitres — textes qui apparaissent/disparaissent */}
-        {CHAPITRES.map((ch, idx) => {
-          const visible = progression >= ch.debut && progression < ch.fin;
-          const opacite = visible
-            ? Math.min(
-                (progression - ch.debut) / 0.04,
-                (ch.fin - progression) / 0.04,
-                1
-              )
-            : 0;
-
-          return (
-            <div
-              key={idx}
-              className="fx-immersive-chapitre"
-              style={{ opacity: opacite, pointerEvents: visible ? "auto" : "none" }}
-            >
-              <h2 className="fx-immersive-titre">{ch.titre}</h2>
-              {ch.sousTitre && <p className="fx-immersive-sous">{ch.sousTitre}</p>}
-              {ch.cta && (
-                <a href={ch.cta.href} className="fx-immersive-cta">
-                  {ch.cta.label}
-                </a>
-              )}
-            </div>
-          );
-        })}
-
         {/* Indicateur de scroll */}
-        <div className="fx-immersive-scroll-hint" style={{ opacity: progression < 0.05 ? 1 : 0 }}>
-          <span>Scrollez pour explorer</span>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 5v14M5 12l7 7 7-7" />
-          </svg>
-        </div>
+        {!loaded ? (
+          <div className="fx-imm-loading">Chargement de l&apos;expérience...</div>
+        ) : (
+          <div className="fx-imm-scroll-hint">
+            <span>Scrollez pour explorer</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+        )}
       </div>
-    </section>
+    </div>
   );
 }
