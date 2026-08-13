@@ -17,7 +17,7 @@ from app.db.base import Base
 from app.services.search import (
     MAX_TERMS, relevance_order, search_clause, stem, terms_of,
 )
-from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent
+from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent, _required_name_terms
 
 
 @pytest.fixture
@@ -121,6 +121,13 @@ class TestCatalogueIntent:
         assert _PRIMARY_MIN_PRICE["laptop"] == 200.0
         assert _PRIMARY_MIN_PRICE["smartphone"] == 80.0
         assert _PRIMARY_MIN_PRICE["casque"] == 25.0
+
+    def test_noise_cancelling_request_requires_a_verified_feature_in_title(self):
+        required = _required_name_terms("casque à réduction de bruit", "casque")
+        assert {"noise", "anc", "cancel"}.issubset(required)
+
+    def test_generic_headphone_request_does_not_add_unrequested_feature_constraint(self):
+        assert _required_name_terms("casque bluetooth", "casque") == ()
 
 
 class TestRelevance:

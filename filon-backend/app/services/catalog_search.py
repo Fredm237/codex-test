@@ -49,6 +49,19 @@ _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
 _PRIMARY_MIN_PRICE = {"laptop": 200.0, "smartphone": 80.0, "casque": 25.0}
 
 
+def _required_name_terms(query: str, anchor: str) -> tuple[str, ...]:
+    """Contraintes explicites que le titre du produit doit confirmer.
+
+    Une demande « réduction de bruit » ne peut pas être satisfaite par un casque
+    Bluetooth ordinaire. Si le feed ne porte pas cette caractéristique, l'absence
+    d'offre vérifiée est plus honnête qu'une recommandation hors besoin.
+    """
+    normalized = " ".join(terms_of(query))
+    if anchor == "casque" and any(token in normalized for token in ("bruit", "noise", "cancellation", "cancelling", "anc")):
+        return ("reduction de bruit", "noise", "anc", "cancel")
+    return ()
+
+
 def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
     """Retourne une ancre catalogue et les accessoires à exclure pour un besoin courant."""
     normalized = " ".join(terms_of(query))
@@ -117,6 +130,9 @@ async def search_internal_products(
                 min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
                 if min_primary_price is not None:
                     stmt = stmt.where(Offer.price >= min_primary_price)
+                required = _required_name_terms(query, anchor)
+                if required:
+                    stmt = stmt.where(or_(*[lowered_name.contains(term) for term in required]))
 
             # Filtre budget si spécifié
             if budget:
