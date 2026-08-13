@@ -3343,3 +3343,268 @@ html, body {
   .fx-imm-search { bottom: 20px; width: 94%; }
   .fx-imm-scroll-hint { bottom: 80px; }
 }
+
+/* ═══════════════════════════════════════════════════════════════════
+   CATALOGUE v2 — Premium, vivant, immersif
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Header avec titre en gradient ambre */
+.fx-catalogue-title {
+  background: linear-gradient(135deg, var(--fx-gold-500, #c89544) 0%, #e8c97a 50%, var(--fx-gold-500, #c89544) 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fx-gradient-shift 4s ease infinite;
+}
+@keyframes fx-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Grille avec stagger d'apparition */
+.fx-catalogue-grid .fx-product:nth-child(1) { animation-delay: 0ms; }
+.fx-catalogue-grid .fx-product:nth-child(2) { animation-delay: 60ms; }
+.fx-catalogue-grid .fx-product:nth-child(3) { animation-delay: 120ms; }
+.fx-catalogue-grid .fx-product:nth-child(4) { animation-delay: 180ms; }
+.fx-catalogue-grid .fx-product:nth-child(5) { animation-delay: 240ms; }
+.fx-catalogue-grid .fx-product:nth-child(6) { animation-delay: 300ms; }
+.fx-catalogue-grid .fx-product:nth-child(7) { animation-delay: 360ms; }
+.fx-catalogue-grid .fx-product:nth-child(8) { animation-delay: 420ms; }
+
+/* Hover plus dramatique sur les cartes */
+.fx-product {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.3s ease;
+}
+.fx-product:hover {
+  border-color: var(--fx-gold-500, #c89544) !important;
+  box-shadow: 0 8px 30px rgba(200, 149, 68, 0.15), 0 2px 8px rgba(0,0,0,0.3) !important;
+}
+.fx-product:hover .fx-product-media img {
+  transform: scale(1.08) !important;
+}
+
+/* Badge "lowest" en ambre */
+.fx-badge.brand {
+  background: var(--fx-gold-500, #c89544) !important;
+  color: #000 !important;
+}
+
+/* CTA "See offer" en ambre */
+.fx-product-cta {
+  background: transparent !important;
+  border: 1px solid var(--fx-gold-500, #c89544) !important;
+  color: var(--fx-gold-500, #c89544) !important;
+}
+.fx-product-cta:hover {
+  background: var(--fx-gold-500, #c89544) !important;
+  color: #000 !important;
+}
+
+/* Pagination ambre */
+.fx-page[aria-current="page"] {
+  background: var(--fx-gold-500, #c89544) !important;
+  color: #000 !important;
+  border-color: var(--fx-gold-500, #c89544) !important;
+}
+.fx-page:hover {
+  border-color: var(--fx-gold-500, #c89544) !important;
+  color: var(--fx-gold-500, #c89544) !important;
+}
+
+/* Navigation latérale — hover ambre */
+.fx-nav-shell a:hover,
+.fx-nav-shell [aria-current] {
+  color: var(--fx-gold-500, #c89544) !important;
+}
+
+/* Breadcrumb ambre */
+.fx-crumb a:hover { color: var(--fx-gold-500, #c89544) !important; }
+
+/* Recherche catalogue — focus ambre */
+.fx-catalogue-search input:focus {
+  border-color: var(--fx-gold-500, #c89544) !important;
+  box-shadow: 0 0 0 3px rgba(200, 149, 68, 0.2) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   ASSISTANT v2 — Premium, futuriste
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* État idle — centré, immersif */
+.sa-idle {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.sa-idle h1 {
+  background: linear-gradient(135deg, var(--fx-gold-500, #c89544) 0%, #e8c97a 50%, var(--fx-gold-500, #c89544) 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fx-gradient-shift 4s ease infinite;
+}
+
+/* Spinner de réflexion — ambre */
+.sa-step-icon svg,
+.sa-step-check {
+  color: var(--fx-gold-500, #c89544) !important;
+}
+.sa-step.done .sa-step-icon {
+  background: rgba(200, 149, 68, 0.15) !important;
+}
+
+/* Barre de recherche assistant — focus ambre */
+.sa-input:focus-within {
+  border-color: var(--fx-gold-500, #c89544) !important;
+  box-shadow: 0 0 0 4px rgba(200, 149, 68, 0.15), 0 4px 20px rgba(200, 149, 68, 0.1) !important;
+}
+
+/* Bouton "Demander" — ambre */
+.sa-submit,
+.sa-btn-primary {
+  background: var(--fx-gold-500, #c89544) !important;
+  color: #000 !important;
+  border: none !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.sa-submit:hover,
+.sa-btn-primary:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 20px rgba(200, 149, 68, 0.3) !important;
+}
+
+/* Carte gagnante — bordure ambre + glow */
+.fa-card.winner,
+.fa-card:first-child {
+  border-color: var(--fx-gold-500, #c89544) !important;
+  box-shadow: 0 0 20px rgba(200, 149, 68, 0.15) !important;
+}
+
+/* Score badge — ambre */
+.fa-score {
+  background: var(--fx-gold-500, #c89544) !important;
+  color: #000 !important;
+}
+
+/* Chips de suggestion — hover ambre */
+.sa-chip:hover {
+  border-color: var(--fx-gold-500, #c89544) !important;
+  color: var(--fx-gold-500, #c89544) !important;
+}
+
+/* Animation pulse sur le spinner pendant la réflexion */
+.sa-thinking .sa-step-icon {
+  animation: fx-pulse-amber 1.5s ease-in-out infinite;
+}
+@keyframes fx-pulse-amber {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(200, 149, 68, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(200, 149, 68, 0); }
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGE PRODUIT v2 — Cinématique, premium
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Image produit — hover zoom + ombre dramatique */
+.fx-product-hero-img {
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  border-radius: 12px;
+}
+.fx-product-hero-img:hover {
+  transform: scale(1.05);
+}
+
+/* Verdict — bordure ambre pour le meilleur */
+.fx-verdict-best {
+  border: 2px solid var(--fx-gold-500, #c89544) !important;
+  box-shadow: 0 0 30px rgba(200, 149, 68, 0.1);
+}
+
+/* Offres — hover ambre */
+.fx-offer-row:hover {
+  background: rgba(200, 149, 68, 0.05) !important;
+  border-color: var(--fx-gold-500, #c89544) !important;
+}
+.fx-offer-row .fx-offer-cta {
+  background: transparent;
+  border: 1px solid var(--fx-gold-500, #c89544);
+  color: var(--fx-gold-500, #c89544);
+  transition: all 0.2s ease;
+}
+.fx-offer-row .fx-offer-cta:hover {
+  background: var(--fx-gold-500, #c89544);
+  color: #000;
+}
+
+/* Prix historique — graphique avec accent ambre */
+.fx-price-chart path {
+  stroke: var(--fx-gold-500, #c89544) !important;
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   PAGES ÉDITORIALES v2 — Vivantes
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Titres des pages éditoriales en gradient */
+.content-hero h1,
+.fx-display {
+  background: linear-gradient(135deg, var(--fx-gold-500, #c89544) 0%, #e8c97a 50%, var(--fx-gold-500, #c89544) 100%);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fx-gradient-shift 4s ease infinite;
+}
+
+/* Sections avec bordure ambre au hover */
+.ed-section:hover {
+  border-color: var(--fx-gold-500, #c89544);
+}
+
+/* Boutons CTA globaux en ambre */
+.ed-btn.dark,
+.ed-btn.wave {
+  background: var(--fx-gold-500, #c89544) !important;
+  color: #000 !important;
+  border-color: var(--fx-gold-500, #c89544) !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.ed-btn.dark:hover,
+.ed-btn.wave:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 20px rgba(200, 149, 68, 0.3) !important;
+}
+
+/* FAQ — hover ambre */
+.ed-faq summary:hover {
+  color: var(--fx-gold-500, #c89544) !important;
+}
+.ed-faq[open] summary {
+  color: var(--fx-gold-500, #c89544) !important;
+}
+
+/* Footer — liens hover ambre */
+.ed-footer a:hover {
+  color: var(--fx-gold-500, #c89544) !important;
+}
+
+/* Scroll selection — ambre */
+::selection {
+  background: rgba(200, 149, 68, 0.3);
+  color: inherit;
+}
+
+/* Scrollbar custom — ambre */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { 
+  background: var(--fx-gold-500, #c89544); 
+  border-radius: 3px; 
+}
+::-webkit-scrollbar-thumb:hover { background: #e8c97a; }
