@@ -110,3 +110,9 @@ Après déploiement, une requête de production avec ce budget a analysé sept o
 Le commit `b0d5f9f` a été vérifié dans le navigateur avec une recherche de casque à réduction de bruit. La réponse n’affiche qu’un casque dont le titre comporte explicitement `ANC`, accompagné d’une image unique correctement rendue, d’un prix réel de 33 €, du marchand GSMnet FR et d’un lien Awin. La carte ne remplace donc plus un besoin de réduction de bruit par un casque Bluetooth générique.
 
 Le même contrôle a révélé un sujet multilingue à corriger : lorsque l’interface est réglée en anglais, les libellés d’interface sont bien traduits mais l’explication générée du produit peut rester en français. La langue du visiteur doit être transmise au flux backend pour que les annotations de l’assistant suivent la locale FR/NL/EN.
+
+## Assistant — validation multilingue des annotations
+
+Après les commits `eeda1da` et `b75ce46`, le flux SSE accepte désormais une locale `fr`, `nl` ou `en`, l’intègre à la clé de cache et l’impose aux annotations LLM. Les termes fixes ne promettent plus une garantie « 24 mois » : ils indiquent factuellement les conditions du marchand dans la langue correspondante.
+
+Les contrôles de production ont confirmé les trois rendus. En anglais, les rangs (`Best value`), explications, alternatives, livraison (`see merchant`) et conditions (`merchant terms`) sont en anglais. En néerlandais, la réponse contient notamment `Beste prijs-kwaliteit`, une explication néerlandaise, `bekijk verkoper` et `voorwaarden verkoper`. Le parcours web complet a aussi été vérifié en anglais après relance sur cache : les cartes catalogue, leurs visuels, prix, liens Awin et annotations s’affichent correctement sans résidu français.
