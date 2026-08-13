@@ -55,7 +55,10 @@ async function getCategories(): Promise<Category[]> {
   if (!res.ok) throw new CatalogueIndisponible(`HTTP ${res.status}`);
   try {
     const data = await res.json();
-    // On lit l'arborescence : elle porte les sous-rayons, pas la liste plate.
+    // Le backend actuel expose une liste plate dans `items`. Les anciennes
+    // réponses exposaient une arborescence `departments` : accepter les deux
+    // formats évite de transformer chaque rayon réel en 404 lors d'une évolution d'API.
+    if (Array.isArray(data.items)) return data.items as Category[];
     return (data.departments || []).flatMap(
       (d: { categories: Category[] }) => d.categories
     ) as Category[];
