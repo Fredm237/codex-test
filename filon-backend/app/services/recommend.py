@@ -3,7 +3,7 @@
 Améliorations :
 - Cache Redis/LRU pour éviter de rappeler le LLM pour la même requête
 - Timeout explicite sur les appels LLM (pas de requête qui pend indéfiniment)
-- Parallélisme : SerpApi + Awin advertisers en parallèle
+- Parallélisme : classement LLM + annonceurs Awin lorsque des offres catalogue sont disponibles
 - Streaming fidèle : les étapes avancent en fonction du travail réel
 - Annulation propre si le client déconnecte
 - Métriques de latence pour l'observabilité
@@ -334,9 +334,10 @@ async def generate_result(
 
     Ordre de préférence :
       1. Cache (hit) — instantané
-      2. Produits RÉELS (SerpApi) classés/argumentés par le LLM
-      3. LLM seul : produits plausibles, prix estimés
-      4. Synthèse déterministe (aucune clé)
+      2. Produits RÉELS du catalogue partenaire classés/argumentés par le LLM
+      3. Aucune offre vérifiée : résultat non réel, bloqué explicitement par le frontend
+
+    Aucune recherche Google Shopping ou SerpApi n’est autorisée dans ce parcours.
     """
     start = time.time()
     cache = get_cache()
@@ -351,7 +352,6 @@ async def generate_result(
         return cached
 
     from app.services.catalog_search import search_internal_products
-    from app.services.serpapi_shopping import search_products
 
     result: dict[str, Any]
 
@@ -364,25 +364,15 @@ async def generate_result(
         if products:
             log.info("Catalogue interne : %d résultats pour '%s'", len(products), query[:40])
     except (asyncio.TimeoutError, Exception) as exc:
-        log.warning("Catalogue interne timeout/erreur (%s) → fallback SerpApi", exc)
+        log.warning("Catalogue interne timeout/erreur (%s)", exc)
         products = []
 
-    # PRIORITÉ 2 (fallback) : SerpApi/Google Shopping si le catalogue interne est vide
-    if not products:
-        try:
-            products = await asyncio.wait_for(
-                search_products(query, budget, country=country),
-                timeout=10.0,
-            )
-            if products:
-                log.info("Fallback SerpApi : %d résultats pour '%s'", len(products), query[:40])
-        except (asyncio.TimeoutError, Exception) as exc:
-            log.warning("SerpApi timeout/erreur (%s) → mode LLM ou synthèse", exc)
-            products = []
+    # Sans offre du catalogue, le frontend affiche un état explicite « aucune
+    # offre vérifiée » plutôt qu'une suggestion issue d'une source externe ou
+    # d'une estimation présentée comme achetable.
 
     if products:
-        source = "catalogue interne" if products[0].get("source") == "filon_catalog" else "SerpApi"
-        log.info("Mode données réelles : %d produits via %s (%s)", len(products), source, country or "be")
+        log.info("Mode données réelles : %d produits via catalogue interne (%s)", len(products), country or "be")
         result = await _rank_real_products(query, budget, products)
     else:
         provider = get_router().for_task("reasoning")

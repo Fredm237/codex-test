@@ -90,3 +90,9 @@ Les quatorze routes contrôlées — accueil, catalogue, assistant, marchands, F
 Le cache CDN des images de la séquence immersive sert `cache-control: public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400` : le navigateur revalide les modifications visuelles tandis que le CDN peut conserver les frames un an.
 
 La navigation desktop a été vérifiée après hydratation : « Catalogue » est un lien direct distinct et le bouton adjacent ouvre correctement le méga-menu, avec les catégories et le lien vers le catalogue complet. Cette interaction a été contrôlée dans le navigateur sur une page de production.
+
+## Assistant — test catalogue-only en production
+
+Une recherche publique « ordinateur portable étudiant 800 € » a été soumise sur `https://www.filon.be/recherche/`. L’assistant a déroulé son analyse puis a retourné l’état explicite « No verified offer is available for this search ». Il indique qu’il s’appuie « only on offers from its partner catalogue » et propose une redirection vers la catégorie catalogue pertinente (`/catalogue/?dept=high-tech&cat=informatique&sub=Ordinateurs%20portables`). Aucun lien Google Shopping ou résultat externe n’a été servi lors de ce test.
+
+Le résultat confirme que le comportement catalogue-first est actif en production et que l’interface préfère signaler l’absence d’offre vérifiée plutôt que fabriquer une recommandation. La pertinence de la requête libre reste un axe de suivi : cette formulation n’a pas encore retourné d’offre vérifiée malgré le routage correct vers la catégorie correspondante.

@@ -17,6 +17,7 @@ from app.db.base import Base
 from app.services.search import (
     MAX_TERMS, relevance_order, search_clause, stem, terms_of,
 )
+from app.services.catalog_search import _catalogue_intent
 
 
 @pytest.fixture
@@ -96,6 +97,25 @@ class TestMultiWordSearch:
         assert (await _search(session, "chemise bleue"))["total"] == 1
         assert (await _search(session, "chemises bleues"))["total"] == 1
         assert (await _search(session, "chemise bleu"))["total"] == 1
+
+
+class TestCatalogueIntent:
+    def test_laptop_request_keeps_product_anchor_and_excludes_accessories(self):
+        intent = _catalogue_intent("un ordinateur portable étudiant sous 800 €")
+        assert intent is not None
+        anchor, excluded = intent
+        assert anchor == "laptop"
+        assert {"housse", "sleeve", "support"}.issubset(excluded)
+
+    def test_smartphone_request_keeps_product_anchor_and_excludes_cases(self):
+        intent = _catalogue_intent("un smartphone à 500 €")
+        assert intent is not None
+        anchor, excluded = intent
+        assert anchor == "smartphone"
+        assert {"coque", "case", "protection"}.issubset(excluded)
+
+    def test_unrecognised_request_is_not_forced_into_a_category(self):
+        assert _catalogue_intent("lampe de bureau minimaliste") is None
 
 
 class TestRelevance:

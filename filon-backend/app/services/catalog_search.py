@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from sqlalchemy import and_
+from sqlalchemy import and_, func, not_, or_
 
 from app.core.logging import get_logger
 from app.db.session import session_scope
@@ -17,6 +17,39 @@ from app.db.models import Merchant, Offer
 from app.services.search import search_clause, terms_of
 
 log = get_logger("catalog_search")
+
+
+# Une requête d'assistant est rarement un titre de produit : « un ordinateur
+# portable étudiant sous 800 € » contient une intention, un budget et des mots
+# qui ne figurent jamais dans un feed. Les ancres ci-dessous servent uniquement
+# à resserrer une recherche vers le rayon demandé ; elles ne fabriquent aucun
+# résultat et ne font appel à aucune source externe.
+_INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
+    (
+        ("ordinateur", "laptop", "notebook", "macbook", "computer", "pc portable"),
+        "laptop",
+        ("housse", "hoes", "sleeve", "pochette", "sac", "support", "stand", "chargeur", "charger", "cable", "adaptateur", "keyboard", "clavier", "souris", "mouse"),
+    ),
+    (
+        ("smartphone", "telephone", "telefoon", "iphone", "android"),
+        "smartphone",
+        ("coque", "case", "cover", "hoes", "protection", "protector", "verre", "glass", "chargeur", "charger", "cable", "adaptateur", "support"),
+    ),
+    (
+        ("casque", "headphone", "koptelefoon", "noise cancelling", "noise-cancelling"),
+        "casque",
+        ("housse", "hoes", "case", "cable", "adaptateur", "support", "earpad", "coussin"),
+    ),
+)
+
+
+def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
+    """Retourne une ancre catalogue et les accessoires à exclure pour un besoin courant."""
+    normalized = " ".join(terms_of(query))
+    for triggers, anchor, excluded in _INTENT_ANCHORS:
+        if any(trigger in normalized for trigger in triggers):
+            return anchor, excluded
+    return None
 
 
 async def search_internal_products(
@@ -37,8 +70,12 @@ async def search_internal_products(
                 log.warning("Base de données non disponible")
                 return []
 
-            # Construire la clause de recherche
-            clause = search_clause(query)
+            # Une demande en langage naturel est ancrée sur son produit principal.
+            # Sans cela, la conjonction « ordinateur + étudiant + 800 » ne peut
+            # jamais correspondre à un titre de feed et masque les vraies offres.
+            intent = _catalogue_intent(query)
+            search_query = intent[0] if intent else query
+            clause = search_clause(search_query)
             if clause is None:
                 return []
 
@@ -61,6 +98,16 @@ async def search_internal_products(
                 .options(jl(Offer.merchant))
                 .order_by(Offer.price.asc())
             )
+
+            # Les feeds classent parfois housses et supports dans le même
+            # sous-rayon qu'un ordinateur ou un téléphone. Pour un besoin explicite
+            # de produit principal, on les exclut avant de classer les résultats.
+            if intent:
+                _, excluded = intent
+                lowered_name = func.lower(Offer.name)
+                stmt = stmt.where(
+                    not_(or_(*[lowered_name.contains(term) for term in excluded]))
+                )
 
             # Filtre budget si spécifié
             if budget:
