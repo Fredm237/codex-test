@@ -234,10 +234,14 @@ export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Dep
 
   return (
     <div className="mm" ref={wrap}>
+      <a className="mm-catalogue-link" href="/catalogue/">
+        {t.label}
+      </a>
       <button
         type="button"
         ref={trigger}
         className={`mm-trigger${open ? " open" : ""}`}
+        aria-label={`${t.label} — menu`}
         aria-expanded={open}
         aria-controls={panelId}
         onClick={() => setOpen((v) => !v)}
@@ -252,7 +256,6 @@ export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Dep
           }
         }}
       >
-        {t.label}
         <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true">
           <path d="M2 4l3 3 3-3" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
