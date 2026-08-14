@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "./Brand";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { MegaMenu } from "./MegaMenu";
+import { ThemeToggle } from "./ThemeToggle";
 import { NAV_KEYS, useLocale } from "@/lib/i18n";
 import type { Department } from "@/lib/catalogue";
 
@@ -54,6 +55,7 @@ export function EditorialNav({ departments = [] }: { departments?: Department[] 
             ))}
           </div>
           <div className="ed-nav-right">
+            <ThemeToggle />
             <LanguageSwitcher />
             <a className="ed-nav-cta" href="/recherche">
               {t("cta.try")}
@@ -82,7 +84,10 @@ export function EditorialNav({ departments = [] }: { departments?: Department[] 
           <a className="ed-btn wave" href="/recherche" onClick={() => setOpen(false)} style={{ marginTop: 12 }}>
             {t("cta.try")}
           </a>
-          <div style={{ marginTop: 16 }}><LanguageSwitcher /></div>
+          <div className="ed-mobile-preferences">
+            <ThemeToggle compact />
+            <LanguageSwitcher />
+          </div>
         </nav>
       </div>
     </>
