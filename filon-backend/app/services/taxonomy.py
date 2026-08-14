@@ -676,9 +676,10 @@ _USAGE_SPORTIF = (
 _VETEMENT = (
     r"\b(v[êe]tements?|clothing|kleding|apparel|robes?|dress(es)?|jupes?|pantalons?|"
     r"trousers?|pants?|trackpants?|joggers?|jeans?|chemises?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|sweats?|sweaters?|hood(?:y|ies)?|"
-    r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|cuissards?|doudounes?|parkas?|boxers?|lingerie|underwear|"
-    r"sleepwears?|pyjamas?|maillots?|chaussettes?|socks?|polos?|overhemd|broek|jas|blazers?|"
-    r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|"
+    r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|bermudas?|leggings?|cuissards?|doudounes?|parkas?|boxers?|lingerie|underwear|"
+    r"soutiens?[-\s]?gorges?|brassi[èe]res?|bras?|culottes?|slips?|strings?|bodies?|collants?|"
+    r"sleepwears?|pyjamas?|pyjamashirts?|maillots?|chaussettes?|socks?|polos?|poloshirts?|overhemd|broek|jas|blazers?|sakko|"
+    r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|b[ée]rets?|tabliers?|polaires?|fleece|"
     # « Débardeur Proact Sport », catégorisé « Multisports > Débardeur », n'était
     # rangé nulle part : le mot manquait à la liste, donc la branche vêtement
     # n'était jamais atteinte et l'usage sportif ne pouvait pas s'exprimer.

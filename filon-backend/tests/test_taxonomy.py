@@ -363,6 +363,17 @@ class TestOfferKinds:
     def test_observed_martial_arts_fishing_and_cycling_categories_are_sport(self, merchant_category, name):
         assert t.classify(merchant_category, name) == t.SPORT
 
+    @pytest.mark.parametrize("name", [
+        "TRIUMPH Soutien-gorge à armatures BODY MAKE-UP ILLUSION LACE",
+        "CHANTELLE Culotte PLAY noir",
+        "WOLFORD Collant NEON 40 lot de 2",
+        "SKINY Slip lot de 2 COTTON RIB",
+        "SELECTED Sakko SLHSLIM-NEIL BLZ",
+        "BOSS Poloshirt Slim Fit PASSENGER",
+    ])
+    def test_observed_multilingual_apparel_forms_are_generic_fashion(self, name):
+        assert t.classify("", name) == t.MODE
+
     def test_model_without_verified_brand_stays_unclassified(self):
         assert t.classify("", "SAMBA OG", "Marchand généraliste") is None
 
