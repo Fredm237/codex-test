@@ -242,7 +242,7 @@ _SUPPORTS: list[tuple[str, str]] = [
      r"molletons?|cr[ée]pons?|bourrettes?|piqu[ée]s?\s+\d*\s*%?\s*coton|"
      r"sweat\s+molletonn[ée]|polaire\s+double\s+face|viscose\s+unie|"
      r"coupons?\s+de\s+\d|au\s+m[èe]tre|mercerie|toiles?\s+[àa]\s+patrons?|"
-     r"kits?\s+(?:de\s+)?couture|"
+     r"kits?\s+(?:de\s+)?couture|patrons?\b|"
      r"patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
      r"patrons?\s+(?:de|pour)\s+(?:couture|robes?|jupes?|pantalons?|manteaux?|vestes?|"
      r"chemises?|hauts?|tops?|combinaisons?|ensembles?|peluches?|enfants?)|"
@@ -693,7 +693,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                        r"radiateurs?|purificateurs?|humidificateurs?)\b"),
     ],
     LOISIRS: [
-        ("Patrons & Kits de couture", r"\b(patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
+        ("Patrons & Kits de couture", r"\b(patrons?\b|patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
                                       r"patrons?\s+(?:de|pour)\s+(?:couture|robes?|jupes?|pantalons?|manteaux?|vestes?|"
                                       r"chemises?|hauts?|tops?|combinaisons?|ensembles?|peluches?|enfants?)|"
                                       r"kits?\s+(?:de\s+)?couture|sewing\s+patterns?|schnittmuster|n[äa]hmuster)\b"),
