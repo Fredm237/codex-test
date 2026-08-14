@@ -394,41 +394,11 @@ async def generate_result(
         log.info("Mode données réelles : %d produits via catalogue interne (%s)", len(products), country or "be")
         result = await _rank_real_products(query, budget, products, response_locale)
     else:
-        provider = get_router().for_task("reasoning")
-        if provider.name == "mock":
-            log.info("Pas de LLM configuré → synthèse de repli")
-            result = _synth(query, budget)
-        else:
-            settings = get_settings()
-            budget_txt = f" Budget maximum : {int(budget)} €." if budget else ""
-            messages = [
-                Message(role="system", content=_SYSTEM),
-                Message(role="user", content=f"Besoin : {query}.{budget_txt}"),
-            ]
-            try:
-                raw = await asyncio.wait_for(
-                    provider.complete_json(messages, temperature=0.4),
-                    timeout=settings.llm_timeout_seconds,
-                )
-                data = _parse_json(raw)
-                cards_raw = data.get("cards") or []
-                emoji = str(data.get("emoji") or "🛍️")[:4]
-                cards = [_coerce_card(cards_raw[i] if i < len(cards_raw) else {}, i) for i in range(5)]
-                for c in cards:
-                    c["emoji"] = emoji
-                result = {
-                    "usage": str(data.get("usage") or query.strip().lower() or "votre besoin"),
-                    "emoji": emoji,
-                    "offers": 24 + abs(hash(query)) % 26,
-                    "cards": cards,
-                    "real": False,
-                }
-            except asyncio.TimeoutError:
-                log.warning("LLM timeout (%ss) → repli déterministe", settings.llm_timeout_seconds)
-                result = _synth(query, budget)
-            except Exception as exc:
-                log.warning("LLM indisponible ou réponse invalide (%s) → repli", exc)
-                result = _synth(query, budget)
+        # Ne pas appeler le LLM pour remplir cinq cartes fictives que le frontend
+        # devra ensuite bloquer. Cela évite un coût inutile et garantit que tout
+        # client de l'API reçoit la même absence honnête d'offre vérifiée.
+        log.info("Aucune offre catalogue vérifiée pour '%s'", query[:40])
+        result = _synth(query, budget)
 
     result["country"] = (country or "be").lower()
     result["currency"] = _currency_for(country)
