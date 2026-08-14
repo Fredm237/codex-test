@@ -85,6 +85,15 @@ def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
     return None
 
 
+def _search_query_for(query: str, intent: tuple[str, tuple[str, ...]] | None) -> tuple[str, tuple[str, ...]]:
+    """Choisit une recherche compatible avec l'intention, sans diluer un modèle cité."""
+    anchor = intent[0] if intent else ""
+    required = _required_name_terms(query, anchor) if intent else ()
+    # Une demande de modèle précis (par ex. iPhone) doit d'abord chercher ce
+    # modèle. L'ancre « smartphone » ne sert que lorsque la demande est générique.
+    return (" ".join(required) if required else (anchor if intent else query), required)
+
+
 def _primary_image_url(value: str | None) -> str | None:
     """Conserve une URL image unique quand le feed en fournit plusieurs séparées par des virgules."""
     if not value:
@@ -162,7 +171,7 @@ async def search_internal_products(
             # Sans cela, la conjonction « ordinateur + étudiant + 800 » ne peut
             # jamais correspondre à un titre de feed et masque les vraies offres.
             intent = _catalogue_intent(query)
-            search_query = intent[0] if intent else query
+            search_query, required = _search_query_for(query, intent)
             clause = search_clause(search_query)
             if clause is None:
                 return []
@@ -198,7 +207,6 @@ async def search_internal_products(
                 min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
                 if min_primary_price is not None:
                     stmt = stmt.where(Offer.price >= min_primary_price)
-                required = _required_name_terms(query, anchor)
                 if required:
                     stmt = stmt.where(or_(*[lowered_name.contains(term) for term in required]))
 
