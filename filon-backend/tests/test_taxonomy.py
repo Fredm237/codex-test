@@ -148,6 +148,14 @@ class TestEnrichedFromRealFeedLabels:
             ("Wonen & Koken > Wonen > Kasten", t.MAISON),
             ("Furniture > Office Furniture > Office & Desk Chairs", t.MAISON),
             ("Wonen & Koken > Klimaatbeheersing > Verwarming", t.MAISON),
+            ("Animaux", t.ANIMALERIE),
+            ("Peintures Citadel GW", t.LOISIRS),
+            ("Creme, gel & olie", t.BEAUTE),
+            ("Sonnebrandcreme & aftersun", t.BEAUTE),
+            ("Carrelage Sol Intérieur", t.JARDIN),
+            ("Hobby & Sport > Reizen & vrije tijd > Kampeerartikelen", t.SPORT),
+            ("Lifestyle > Sabots > Junior > Mixte", t.CHAUSSURES),
+            ("KoRo New > c > Petit-déj’ protéiné", t.ALIMENTATION),
         ],
     )
     def test_top_unclassified_labels_are_now_recognised(self, label, expected):
