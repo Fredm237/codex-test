@@ -4,8 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { HeroSearch } from "./HeroSearch";
 import { useLocale } from "@/lib/i18n";
 
-const TOTAL_FRAMES = 320;
-const FRAME_BASE = "/seq/hero";
+const DESKTOP_TOTAL_FRAMES = 320;
+const MOBILE_TOTAL_FRAMES = 192;
+const DESKTOP_FRAME_BASE = "/seq/hero";
+const MOBILE_FRAME_BASE = "/seq-mobile/frames";
 const DESKTOP_SCROLL_HEIGHT = 1000;
 const MOBILE_SCROLL_HEIGHT = 640;
 
@@ -58,17 +60,18 @@ const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: st
   },
 };
 
-function frameSource(index: number) {
-  return `${FRAME_BASE}/${String(index + 1).padStart(3, "0")}.jpg`;
+function frameSource(index: number, mobile = false) {
+  const base = mobile ? MOBILE_FRAME_BASE : DESKTOP_FRAME_BASE;
+  return `${base}/${String(index + 1).padStart(3, "0")}.jpg`;
 }
 
-function closestFrame(images: Array<HTMLImageElement | null>, target: number, previous: number) {
+function closestFrame(images: Array<HTMLImageElement | null>, target: number, previous: number, totalFrames: number) {
   if (images[target]) return images[target];
-  for (let distance = 1; distance < TOTAL_FRAMES; distance += 1) {
+  for (let distance = 1; distance < totalFrames; distance += 1) {
     const before = target - distance;
     const after = target + distance;
     if (before >= 0 && images[before]) return images[before];
-    if (after < TOTAL_FRAMES && images[after]) return images[after];
+    if (after < totalFrames && images[after]) return images[after];
   }
   return images[previous];
 }
@@ -88,7 +91,7 @@ export function ImmersiveExperience() {
   const copy = COPY[locale] ?? COPY.fr;
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const imagesRef = useRef<Array<HTMLImageElement | null>>(Array(TOTAL_FRAMES).fill(null));
+  const imagesRef = useRef<Array<HTMLImageElement | null>>(Array(DESKTOP_TOTAL_FRAMES).fill(null));
   const requestedRef = useRef(new Set<number>());
   const prefetchRef = useRef<(frame: number) => void>(() => {});
   const drawRef = useRef<() => void>(() => {});
@@ -128,9 +131,23 @@ export function ImmersiveExperience() {
     };
   }, []);
 
-  const frameStride = isMobile ? (saveData ? 8 : 4) : 1;
-  const initialFrameCount = isMobile ? 3 : 12;
-  const prefetchWindow = isMobile ? (saveData ? 12 : 24) : 30;
+  const totalFrames = isMobile ? MOBILE_TOTAL_FRAMES : DESKTOP_TOTAL_FRAMES;
+  const sequenceKey = isMobile ? "mobile" : "desktop";
+  const frameStride = isMobile ? (saveData ? 6 : 2) : 1;
+  const initialFrameCount = isMobile ? 4 : 12;
+  const prefetchWindow = isMobile ? (saveData ? 12 : 20) : 30;
+
+  // Au changement de format, repartir d’un cache de frames cohérent avec la séquence active.
+  useEffect(() => {
+    if (!deviceReady) return;
+    imagesRef.current = Array(totalFrames).fill(null);
+    requestedRef.current.clear();
+    readyRef.current = false;
+    paintedRef.current = false;
+    lastFrameRef.current = 0;
+    setReady(false);
+    setCanvasPainted(false);
+  }, [deviceReady, sequenceKey, totalFrames]);
 
   useEffect(() => {
     if (!deviceReady) return;
@@ -143,7 +160,7 @@ export function ImmersiveExperience() {
 
     let mounted = true;
     const loadFrame = (index: number) => {
-      if (index < 0 || index >= TOTAL_FRAMES || requestedRef.current.has(index)) return;
+      if (index < 0 || index >= totalFrames || requestedRef.current.has(index)) return;
       requestedRef.current.add(index);
       const image = new Image();
       image.decoding = "async";
@@ -162,12 +179,12 @@ export function ImmersiveExperience() {
         readyRef.current = true;
         setReady(true);
       };
-      image.src = frameSource(index);
+      image.src = frameSource(index, isMobile);
     };
 
     prefetchRef.current = (frame: number) => {
       const from = Math.max(0, frame - frameStride * 2);
-      const to = Math.min(TOTAL_FRAMES - 1, frame + prefetchWindow);
+      const to = Math.min(totalFrames - 1, frame + prefetchWindow);
       for (let index = from; index <= to; index += frameStride) loadFrame(index);
     };
 
@@ -177,7 +194,7 @@ export function ImmersiveExperience() {
       mounted = false;
       prefetchRef.current = () => {};
     };
-  }, [deviceReady, frameStride, initialFrameCount, prefetchWindow, reducedMotion, saveData]);
+  }, [deviceReady, frameStride, initialFrameCount, isMobile, prefetchWindow, reducedMotion, saveData, totalFrames]);
 
   const draw = useCallback(() => {
     const container = containerRef.current;
@@ -187,13 +204,13 @@ export function ImmersiveExperience() {
     const rect = container.getBoundingClientRect();
     const maxScroll = Math.max(1, rect.height - window.innerHeight);
     const progress = Math.max(0, Math.min(1, -rect.top / maxScroll));
-    const rawFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * (TOTAL_FRAMES - 1)));
+    const rawFrame = Math.min(totalFrames - 1, Math.floor(progress * (totalFrames - 1)));
     const targetFrame = isMobile
-      ? Math.min(TOTAL_FRAMES - 1, Math.round(rawFrame / frameStride) * frameStride)
+      ? Math.min(totalFrames - 1, Math.round(rawFrame / frameStride) * frameStride)
       : rawFrame;
     prefetchRef.current(targetFrame);
 
-    const image = closestFrame(imagesRef.current, targetFrame, lastFrameRef.current);
+    const image = closestFrame(imagesRef.current, targetFrame, lastFrameRef.current, totalFrames);
     const context = canvas.getContext("2d", { alpha: false });
     if (context && image) {
       const density = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
@@ -203,10 +220,9 @@ export function ImmersiveExperience() {
         canvas.width = width;
         canvas.height = height;
       }
-      // Bureau : cadre cinéma plein écran. Mobile : montrer toute la scène, jamais la couper.
-      const scale = isMobile
-        ? Math.min(width / image.width, height / image.height)
-        : Math.max(width / image.width, height / image.height);
+      // Chaque séquence est composée pour son format : le mobile portrait remplit
+      // réellement l’écran, sans les bandes d’un média paysage contenu.
+      const scale = Math.max(width / image.width, height / image.height);
       const drawWidth = image.width * scale;
       const drawHeight = image.height * scale;
       context.fillStyle = "#0e0c0b";
@@ -237,7 +253,7 @@ export function ImmersiveExperience() {
       lastOpacityRef.current = clampedOpacity;
       setChapterOpacity(clampedOpacity);
     }
-  }, [copy.chapters.length, frameStride, isMobile, ready, reducedMotion, saveData]);
+  }, [copy.chapters.length, frameStride, isMobile, ready, reducedMotion, saveData, totalFrames]);
 
   drawRef.current = draw;
 
@@ -265,9 +281,12 @@ export function ImmersiveExperience() {
   return (
     <div ref={containerRef} className={`fx-imm-wrap${isMobile ? " is-mobile" : ""}`} style={{ height: `${scrollHeight}vh` }}>
       <div className="fx-imm-sticky">
-        {/* Poster prioritaire : aucune zone noire avant le premier dessin réel. */}
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img className={`fx-imm-poster${canvasPainted ? " is-hidden" : ""}`} src={frameSource(0)} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
+        {/* Poster prioritaire : la première image est déjà adaptée au format du visiteur. */}
+        <picture>
+          <source media="(max-width: 768px)" srcSet={frameSource(0, true)} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img className={`fx-imm-poster${canvasPainted ? " is-hidden" : ""}`} src={frameSource(0)} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
+        </picture>
         <canvas ref={canvasRef} className={`fx-imm-canvas${canvasPainted ? " is-visible" : ""}`} aria-hidden="true" />
         <div className="fx-imm-overlay" />
         <div className="fx-imm-chapter" style={{ opacity: chapterOpacity }}>
