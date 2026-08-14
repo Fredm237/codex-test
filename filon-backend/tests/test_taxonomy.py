@@ -326,6 +326,12 @@ class TestOfferKinds:
             ("Bobshop FR", "Référence vélo 123", t.SPORT),
             ("tapis.fr", "Référence tapis 123", t.MAISON),
             ("Didrikson FR", "Tiril", t.MODE),
+            ("TISSUS DE REVE FR", "Réf. 3812", t.LOISIRS),
+            ("Smartphonehoesjes NL - BE", "Réf. 3812", t.TELEPHONIE),
+            ("PrintAbout FR", "Réf. 3812", t.INFORMATIQUE),
+            ("Horloge NL-BE", "Réf. 3812", t.BIJOUX),
+            ("Maxi Zoo BE", "Réf. 3812", t.ANIMALERIE),
+            ("Foot Store FR", "Réf. 3812", t.CHAUSSURES),
         ],
     )
     def test_verified_specialist_contexts_classify_minimal_references(self, merchant, name, expected):
@@ -334,6 +340,7 @@ class TestOfferKinds:
     def test_specialist_reference_without_context_stays_unclassified(self):
         assert t.classify("", "Référence modèle 123", merchant_name="Marchand généraliste") is None
         assert t.classify("", "Tiril", merchant_name="Marchand généraliste") is None
+        assert t.classify("", "Réf. 3812", merchant_name="Marchand généraliste") is None
 
     def test_tyre_dimension_overrides_camping_model_name(self):
         category = "Les pneus industriels, pneus camion et les pneus utilitaire"

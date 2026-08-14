@@ -148,6 +148,14 @@ _SPECIALIST_MERCHANT_CONTEXTS: tuple[tuple[str, str], ...] = (
     # Flux vérifié d’habillement d’extérieur : les modèles courts sans type
     # (« Tiril », « Luna ») rejoignent Mode générique, sans inférer un public.
     (r"\bdidriksons?\b", MODE),
+    # Marchands mono-famille vérifiés par échantillons de production. Une règle
+    # produit explicite garde toujours la priorité sur ce filet de dernier recours.
+    (r"\btissus\s+de\s+r[eê]ve\b", LOISIRS),
+    (r"\bsmartphonehoesjes\b", TELEPHONIE),
+    (r"\bprintabout\b", INFORMATIQUE),
+    (r"\bhorloge\b", BIJOUX),
+    (r"\bmaxi\s+zoo\b", ANIMALERIE),
+    (r"\bfoot\s+store\b", CHAUSSURES),
     (r"\bisotiger\b", AUTO),
     (r"\bgsmnet\b", TELEPHONIE),
     (r"\boverhemden\b", MODE_HOMME),
