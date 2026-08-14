@@ -232,6 +232,9 @@ class TestOfferKinds:
             ("Appartement de vacances", "Appartement de vacances à Lac Balaton à partir de 154€ par nuit", t.ACCOMMODATION),
             ("Vakantieparken", "HH Hertenkamp Mobile Home", t.ACCOMMODATION),
             ("Hôtel", "Chambre d'hôtel à Bruges", t.ACCOMMODATION),
+            ("Wonen & Koken > Wonen > Beddengoed", "Hotel Kussen en microvezel", t.PHYSICAL_PRODUCT),
+            ("Heimwerker-Zubehör", "Coffre-fort pour hôtel Häfele", t.PHYSICAL_PRODUCT),
+            ("", "Bidon ELITE Fly Teams Arkéa B&B Hotels", t.PHYSICAL_PRODUCT),
             ("", "Code Steam Game Key EU", t.DIGITAL_CONTENT),
             ("Services", "Installation de borne électrique à domicile", t.SERVICE),
             ("", "Service de montage professionnel", t.SERVICE),
@@ -270,6 +273,9 @@ class TestOfferKinds:
     def test_an_ambiguous_studio_without_booking_context_stays_unclassified(self):
         assert t.classify_offer_kind("Studios", "Ref. 123", merchant_name="Atelier photo") == t.PHYSICAL_PRODUCT
         assert t.classify("Studios", "Ref. 123", merchant_name="Atelier photo") is None
+
+    def test_verified_gites_merchant_keeps_short_booking_titles_as_accommodation(self):
+        assert t.classify_offer_kind("", "Ref. séjour 123", merchant_name="Gites FR") == t.ACCOMMODATION
 
     @pytest.mark.parametrize("reference", ["PKW", "MO", "OFF", "LLKW"])
     def test_tyre_specialist_context_classifies_minimal_vehicle_codes(self, reference):

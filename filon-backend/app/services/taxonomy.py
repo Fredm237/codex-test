@@ -87,11 +87,14 @@ DEPARTMENTS: list[tuple[str, list[str]]] = [
 _DEPARTMENT_OF = {c: d for d, cats in DEPARTMENTS for c in cats}
 
 
+# Seules les formulations qui vendent explicitement un séjour sont globales.
+# « Hôtel », « camping », « villa » ou « bungalow » seuls peuvent désigner un
+# coussin, un coffre, un maillot, un meuble ou une gamme de produit.
 _ACCOMMODATION = (
-    r"\b(appartements? de vacances|maison(?:s)? de vacances|g[îi]tes?|h[ôo]tels?|"
+    r"\b(appartements? de vacances|maison(?:s)? de vacances|g[îi]tes?|"
     r"chambres? d['’ ]h[ôo]tel|hotel kamers?|vakantiehuis(?:jes)?|vakantieparken?|"
     r"ferienwohnungen?|ferienh[aä]user?|ferienparks?|holiday homes?|holiday parks?|"
-    r"villas?|bungalows?|mobile homes?|campings?|wohnungen?|woningen?)\b"
+    r"mobile homes?)\b"
 )
 _DIGITAL_CONTENT = r"\b(licen[cs]e keys?|cd keys?|game keys?|activation keys?|gift cards?|cartes? cadeaux?|software download|t[ée]l[ée]chargement|download|abonnements?|subscriptions?)\b"
 # Les mots « montage », « installation » et « réparation » figurent souvent dans
@@ -112,6 +115,9 @@ _TECH_ACCESSORY = r"\b(coques?|backcovers?|bookcases?|screen ?protectors?|charge
 # réservation permet de les comprendre sans étendre aveuglément une règle à tout
 # le catalogue.
 _ACCOMMODATION_MERCHANT = r"\bbungalow\.net\b"
+# Gites.fr est un flux de réservations vérifié. Le contexte permet de classer
+# ses intitulés réduits sans transformer le mot « hôtel » en règle globale.
+_ACCOMMODATION_BOOKING_MERCHANT = r"\bgites\b"
 _ACCOMMODATION_MERCHANT_CATEGORY = (
     r"\b(appartement(?:en)?s?|villas?|villen|studios?|studio's|"
     r"parcs?\s+de\s+vacances|ferienparks?|holiday parks?|bungalows?)\b"
@@ -182,7 +188,7 @@ def classify_offer_kind(
     # explicite dans une catégorie pneu décrit un bien physique, pas un séjour.
     if _has(_TYRE_CATEGORY, merchant_category) and _has(_TYRE_DIMENSION, name):
         return PHYSICAL_PRODUCT
-    if _has(_ACCOMMODATION, text) or (
+    if _has(_ACCOMMODATION, text) or _has(_ACCOMMODATION_BOOKING_MERCHANT, merchant_name) or (
         _has(_ACCOMMODATION_MERCHANT, merchant_name)
         and _has(_ACCOMMODATION_MERCHANT_CATEGORY, merchant_category)
     ):
