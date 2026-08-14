@@ -268,6 +268,13 @@ class TestOfferKinds:
     def test_vehicle_code_without_tyre_specialist_context_stays_unclassified(self):
         assert t.classify("250", "PKW", "MICHELIN", "Marchand généraliste") is None
 
+    def test_tyre_dimension_overrides_camping_model_name(self):
+        category = "Les pneus industriels, pneus camion et les pneus utilitaire"
+        name = "Michelin CrossClimate Camping ( 195/75 R16CP 107/105R 8PR EV Suitable )"
+        assert t.classify_offer_kind(category, name, "MICHELIN") == t.PHYSICAL_PRODUCT
+        assert t.classify(category, name, "MICHELIN") == t.AUTO
+        assert t.classify_subcategory(t.AUTO, name, category) == "Pneus"
+
     def test_travel_subcategories_are_multilingual(self):
         assert t.classify("Appartement de vacances", "Appartement de vacances à Hévíz") == t.VOYAGES
         assert t.classify_subcategory(t.VOYAGES, "Appartement de vacances à Hévíz") == "Locations de vacances"
