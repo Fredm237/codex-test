@@ -129,6 +129,16 @@ class TestEnrichedFromRealFeedLabels:
             ("Nails", t.BEAUTE),
             ("Patrons", t.LOISIRS),
             ("Hygiëne", t.SANTE),                     # tréma, pas accent grave
+            ("Tandheelkunde", t.SANTE),
+            ("Health Products", t.SANTE),
+            ("Computer & Office", t.INFORMATIQUE),
+            ("Équipement > Équipement militaire > Sacs > Sacs", t.BAGAGERIE),
+            ("Peintures AK Interactive - 3Gen.", t.LOISIRS),
+            ("Figuren & actiehelden", t.JOUETS),
+            ("Polshorloges", t.BIJOUX),
+            ("Reinigingsmiddel", t.MAISON),
+            ("Carrelage Mur Intérieur", t.JARDIN),
+            ("Habillement > Couvre-chef > Bérets", t.MODE),
         ],
     )
     def test_top_unclassified_labels_are_now_recognised(self, label, expected):
