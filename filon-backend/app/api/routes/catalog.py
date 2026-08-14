@@ -25,7 +25,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
-from app.services import search, taxonomy
+from app.services import decision, search, taxonomy
 from app.services.verdict import compute_verdict
 
 log = get_logger("catalog")
@@ -822,6 +822,17 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
             cheapest_elsewhere=grouped["price_min"] if grouped else None,
             merchants_count=grouped["merchants_count"] if grouped else 1,
         ),
+        "decision": decision.compute_decision(
+            price=o.price,
+            currency=o.currency,
+            history=hist,
+            cheapest_elsewhere=grouped["price_min"] if grouped else None,
+            comparison_currency=grouped["currency"] if grouped else o.currency,
+            merchants_count=grouped["merchants_count"] if grouped else 1,
+            offers_count=grouped["offers_count"] if grouped else 1,
+            in_stock=o.in_stock,
+            updated_at=o.updated_at,
+        ),
     }
 
 
@@ -956,6 +967,17 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
             .order_by(models.Offer.price.asc().nullslast())
         )
     ).all()
+    best_offer = rows[0][0] if rows else None
+    best_history = []
+    if best_offer is not None:
+        best_history = (
+            await session.execute(
+                select(models.PriceSnapshot.price, models.PriceSnapshot.captured_at)
+                .where(models.PriceSnapshot.offer_id == best_offer.id)
+                .order_by(models.PriceSnapshot.captured_at)
+            )
+        ).all()
+
     return {
         "ean": product.ean,
         "name": product.name,
@@ -984,9 +1006,20 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
         "verdict": compute_verdict(
             price=product.price_min,
             currency=product.currency,
-            history=[],
+            history=best_history,
             cheapest_elsewhere=None,
             merchants_count=product.merchants_count or 1,
+        ),
+        "decision": decision.compute_decision(
+            price=product.price_min,
+            currency=product.currency,
+            history=best_history,
+            cheapest_elsewhere=product.price_min,
+            comparison_currency=product.currency,
+            merchants_count=product.merchants_count or 1,
+            offers_count=product.offers_count or 1,
+            in_stock=best_offer.in_stock if best_offer else None,
+            updated_at=best_offer.updated_at if best_offer else product.updated_at,
         ),
     }
 

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import type { VerdictData } from "@/components/editorial/Verdict";
+import type { DecisionData } from "@/components/filon/DecisionPanel";
 import { OfferBackLink, OfferProductDetails } from "@/components/filon/OfferProductDetails";
 import { API } from "@/lib/api";
 
@@ -27,6 +28,7 @@ type Offer = {
   price_min: number | null;
   price_max: number | null;
   verdict: VerdictData | null;
+  decision: DecisionData | null;
   product: {
     ean: string;
     merchants_count: number;

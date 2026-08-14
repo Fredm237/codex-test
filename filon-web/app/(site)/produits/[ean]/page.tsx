@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { buildMetadata, JsonLd } from "@/lib/seo";
 import { API } from "@/lib/api";
 import type { VerdictData } from "@/components/editorial/Verdict";
+import type { DecisionData } from "@/components/filon/DecisionPanel";
 import { ProductDetails } from "@/components/filon/ProductDetails";
 import { site } from "@/lib/site";
 
@@ -33,6 +34,7 @@ type Product = {
   merchants_count: number;
   offers: ProductOffer[];
   verdict: VerdictData | null;
+  decision: DecisionData | null;
 };
 
 /** Signale une indisponibilité passagère, à ne surtout pas confondre avec une

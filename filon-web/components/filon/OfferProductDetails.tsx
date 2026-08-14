@@ -1,6 +1,7 @@
 "use client";
 
 import { Verdict, type VerdictData } from "@/components/editorial/Verdict";
+import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
 import { useLocale } from "@/lib/i18n";
 
 type Hist = { price: number | null; at: string | null };
@@ -18,6 +19,7 @@ type Offer = {
   price_min: number | null;
   price_max: number | null;
   verdict: VerdictData | null;
+  decision: DecisionData | null;
   product: { ean: string; merchants_count: number; price_min: number | null; currency: string | null } | null;
 };
 
@@ -84,6 +86,7 @@ export function OfferProductDetails({ offer }: { offer: Offer }) {
       <p style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6 }}>{C.at} <b>{offer.merchant.name}</b></p>
       {offer.link && <a className="ed-btn wave" href={offer.link} target="_blank" rel="noopener noreferrer sponsored" style={{ marginTop: 18, textDecoration: "none" }}>{C.offer}</a>}
       {offer.verdict && <Verdict v={offer.verdict} />}
+      <DecisionPanel decision={offer.decision} />
       {offer.product && <a className="pd-compare" href={`/produits/${offer.product.ean}/`}><b>{C.available} {offer.product.merchants_count} {C.merchants}{offer.product.price_min != null && offer.price != null && offer.product.price_min < offer.price ? ` — ${C.from} ${money(offer.product.price_min, offer.product.currency ?? offer.currency, locale)}` : ""}</b><span>{C.compare}</span></a>}
       <div style={{ marginTop: 30, background: "var(--card)", border: "1px solid var(--line-2)", borderRadius: 16, padding: 18 }}>
         <span style={{ fontSize: 12.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--ink-3)" }}>{C.history}</span>
