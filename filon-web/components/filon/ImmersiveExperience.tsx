@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { HeroSearch } from "./HeroSearch";
 import { useLocale } from "@/lib/i18n";
 
-const TOTAL_FRAMES = 256;
+const TOTAL_FRAMES = 320;
 const FRAME_BASE = "/seq/hero";
 const SCROLL_HEIGHT = 1000;
 const INITIAL_WINDOW = 24;
@@ -19,30 +19,33 @@ type ChapterText = {
 const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
   fr: {
     chapters: [
-      { title: "Prendre le temps\nde regarder.", eyebrow: "Votre copilote d’achat." },
-      { title: "Les options deviennent\nplus claires." },
-      { title: "Comparer. Vérifier.\nDécider." },
-      { title: "FILON.", cta: { label: "Explorer le catalogue", href: "/recherche" } },
+      { title: "Est-ce vraiment le bon moment\npour acheter ?", eyebrow: "FILON vous donne la réponse." },
+      { title: "On compare les prix\npour vous." },
+      { title: "Le meilleur prix,\ntrouvé en secondes." },
+      { title: "Décidez avec\nle contexte." },
+      { title: "Prêt à trouver\nle bon prix ?", cta: { label: "Explorer le catalogue", href: "/recherche" } },
     ],
     scrollHint: "Scrollez pour explorer",
     loading: "Préparation de l’expérience...",
   },
   nl: {
     chapters: [
-      { title: "Neem even de tijd\nom te kijken.", eyebrow: "Je aankoopcopiloot." },
-      { title: "De opties worden\nduidelijker." },
-      { title: "Vergelijk. Controleer.\nBeslis." },
-      { title: "FILON.", cta: { label: "Ontdek de catalogus", href: "/recherche" } },
+      { title: "Is dit echt het juiste moment\nom te kopen?", eyebrow: "FILON geeft je het antwoord." },
+      { title: "Wij vergelijken de prijzen\nvoor jou." },
+      { title: "De beste prijs,\ngevonden in seconden." },
+      { title: "Beslis met\nde juiste context." },
+      { title: "Klaar om de juiste prijs\nte vinden?", cta: { label: "Ontdek de catalogus", href: "/recherche" } },
     ],
     scrollHint: "Scroll om te ontdekken",
     loading: "Ervaring voorbereiden...",
   },
   en: {
     chapters: [
-      { title: "Take a moment\nto look.", eyebrow: "Your shopping copilot." },
-      { title: "The options become\nclearer." },
-      { title: "Compare. Verify.\nDecide." },
-      { title: "FILON.", cta: { label: "Explore the catalogue", href: "/recherche" } },
+      { title: "Is this really the right time\nto buy?", eyebrow: "FILON gives you the answer." },
+      { title: "We compare prices\nfor you." },
+      { title: "The best price,\nfound in seconds." },
+      { title: "Decide with\ncontext." },
+      { title: "Ready to find\nthe right price?", cta: { label: "Explore the catalogue", href: "/recherche" } },
     ],
     scrollHint: "Scroll to explore",
     loading: "Preparing the experience...",
