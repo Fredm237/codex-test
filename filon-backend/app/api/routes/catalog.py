@@ -261,6 +261,16 @@ async def offers(
             # Département inconnu : on ne renvoie rien plutôt que tout, sans
             # quoi une URL erronée ressemble à un filtre qui ne marche pas.
             stmt = stmt.where(models.Offer.id < 0)
+        # Le premier aperçu d'un univers doit aider à choisir, non recycler les
+        # accessoires des feeds. Dès que l'utilisateur sélectionne un rayon ou
+        # formule une recherche, la navigation redevient exhaustive.
+        if not q and not category and not subcategory:
+            excluded = search.department_browse_exclusions(department)
+            if excluded:
+                lowered_name = func.lower(models.Offer.name)
+                stmt = stmt.where(
+                    not_(or_(*[lowered_name.contains(term) for term in excluded]))
+                )
     if category:
         # Catégorie FILON en priorité : c'est la seule cohérente entre marchands.
         # Repli sur le libellé brut pour les offres pas encore reclassées.

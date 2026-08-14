@@ -15,7 +15,7 @@ from tests.endpoint_call import call
 from app.db import models
 from app.db.base import Base
 from app.services.search import (
-    MAX_TERMS, primary_product_filter, relevance_order, search_clause, stem, terms_of,
+    MAX_TERMS, department_browse_exclusions, primary_product_filter, relevance_order, search_clause, stem, terms_of,
 )
 from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent, _primary_image_url, _required_name_terms
 
@@ -108,6 +108,14 @@ class TestMultiWordSearch:
 
 
 class TestCatalogueIntent:
+    def test_high_tech_browse_excludes_gift_cards_and_phone_covers(self):
+        excluded = department_browse_exclusions("high-tech")
+        assert excluded is not None
+        assert {"gift card", "backcover", "phone cover"}.issubset(excluded)
+
+    def test_other_department_browse_does_not_hide_unrelated_products(self):
+        assert department_browse_exclusions("maison") is None
+
     def test_laptop_request_keeps_product_anchor_and_excludes_accessories(self):
         intent = _catalogue_intent("un ordinateur portable étudiant sous 800 €")
         assert intent is not None

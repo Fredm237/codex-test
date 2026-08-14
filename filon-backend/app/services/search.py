@@ -62,6 +62,19 @@ _PRIMARY_PRODUCT_INTENTS: tuple[tuple[tuple[str, ...], tuple[str, ...], float], 
     ),
 )
 
+# Un département sert d’abord à choisir un univers. Avant qu’un rayon précis ne
+# soit choisi, il doit donc présenter des produits représentatifs, pas les
+# cartes-cadeaux et accessoires qui gonflent artificiellement les feeds. Ces
+# exclusions ne s’appliquent ni à une recherche, ni à une catégorie précise :
+# « Phone Cover » et « Cartes cadeaux » restent explorables où ils ont du sens.
+_DEPARTMENT_BROWSE_EXCLUSIONS: dict[str, tuple[str, ...]] = {
+    "high tech": (
+        "gift card", "giftcard", "amazon ₺", "backcover", "phone cover",
+        "coque", "hoesje", "case for", "screen protector", "protective glass",
+        "cable", "charger", "charging cable", "replacement part", "spare part",
+    ),
+}
+
 
 def normalize(text: str) -> str:
     """Supprime les accents et normalise en minuscules."""
@@ -100,6 +113,14 @@ def terms_of(query: str | None) -> list[str]:
         if len(w) >= MIN_TERM_LENGTH and w not in seen:
             seen.append(w)
     return seen[:MAX_TERMS]
+
+
+def department_browse_exclusions(department: str | None) -> tuple[str, ...] | None:
+    """Termes à écarter seulement dans l’aperçu large d’un département."""
+    if not department:
+        return None
+    key = normalize(department).replace("-", " ").strip()
+    return _DEPARTMENT_BROWSE_EXCLUSIONS.get(key)
 
 
 def primary_product_filter(query: str | None) -> tuple[tuple[str, ...], float] | None:
