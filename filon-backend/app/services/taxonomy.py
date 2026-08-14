@@ -616,23 +616,28 @@ _RULES: list[tuple[str, str]] = [
     # Catégories sources explicites observées dans les reliquats : elles
     # décrivent l'objet vendu, sans nécessiter de contexte marchand global.
     (INFORMATIQUE, r"\b(?:computer\s*&\s*office|computer\s+office|kabels?)\b"),
+    (ANIMALERIE, r"\b(?:animaux|animals?)\b"),
     (BAGAGERIE, r"\b(?:[ée]quipement\s+militaire\s*>\s*sacs?|military\s+(?:equipment|gear)\s*>\s*bags?)\b"),
-    (LOISIRS, r"\b(?:peintures?\s+ak\s+interactive|mod[ée]lisme\s+ak\s+interactive)\b"),
+    (LOISIRS, r"\b(?:peintures?\s+ak\s+interactive|mod[ée]lisme\s+ak\s+interactive|peintures?\s+citadel\s+gw)\b"),
     (JOUETS, r"\b(?:figuren\s*&\s*actiehelden|figures?\s*(?:&|and)\s*action\s*heroes?)\b"),
     (BIJOUX, r"\b(?:polshorloges?|wristwatches?)\b"),
     (SANTE, r"\b(?:tandheelkunde|health\s+(?:products?|wellness)|health\s*(?:&|and)\s*wellness|"
             r"hygi(?:è|Ã«)ne|mondwater|floss|massage\s*(?:&|and)\s*welzijn)\b"),
-    (BEAUTE, r"\b(?:hand-?\s*&\s*voetverzorging|hand\s*(?:&|and)\s*foot\s+care)\b"),
+    (BEAUTE, r"\b(?:hand-?\s*&\s*voetverzorging|hand\s*(?:&|and)\s*foot\s+care|"
+             r"cr[eè]me,\s*gel\s*(?:&|and)\s*olie|sonnebrandcreme\s*(?:&|and)\s*aftersun)\b"),
     (MAISON, r"\b(?:reinigingsmiddel|keuken|wonen\s*&\s*koken\s*>\s*wonen\s*>\s*(?:kasten|beddengoed)|"
              r"furniture\s*>\s*office\s+furniture\s*>\s*office\s*(?:&|and)\s*desk\s+chairs|"
              r"wonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*verwarming)\b"),
-    (JARDIN, r"\b(?:carrelage\s+mur\s+int[ée]rieur|wall\s+tiles?)\b"),
+    (JARDIN, r"\b(?:carrelage\s+(?:mur|sol)\s+int[ée]rieur|wall\s+tiles?)\b"),
     (MODE, r"\b(?:habillement\s*>\s*couvre-chef|intiem)\b"),
-    (SPORT, r"\b(?:sports?\s*(?:&|and)\s*outdoor|multisports?\s*>\s*doudoune|training\s*>\s*[ée]lastique)\b"),
+    (SPORT, r"\b(?:sports?\s*(?:&|and)\s*outdoor|multisports?\s*>\s*doudoune|training\s*>\s*[ée]lastique|"
+            r"hobby\s*(?:&|and)\s*sport\s*>\s*reizen\s*(?:&|and)\s*vrije\s*tijd\s*>\s*kampeerartikelen)\b"),
+    (CHAUSSURES, r"\b(?:lifestyle\s*>\s*sabots)\b"),
     (JOUETS, r"\b(?:jeux?\s+pour\s+famille\s*/\s*amis|family\s*(?:&|and)\s*friends?\s+games?)\b"),
     (CULTURE, r"\b(livres?|romans?|manga|dvd|blu-ray|vinyles?|boek|books?|librairie|magazines?)\b"),
     (ALIMENTATION, r"\b(alimentation|[ée]picerie|caf[ée]|th[ée]|vins?|bi[èe]res?|chocolats?|"
-                   r"snacks?|boissons?|voeding|wijn|eten\s*(?:&|and)\s*drinken)\b"),
+                   r"snacks?|boissons?|voeding|wijn|eten\s*(?:&|and)\s*drinken|"
+                   r"koro\s+new\s*>\s*c\s*>\s*petit-d[ée]j['’]?\s+prot[ée]in[ée])\b"),
 ]
 
 
