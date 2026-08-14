@@ -242,6 +242,7 @@ class TestOfferKinds:
             ("Appartements", "Villas & Appartements"),
             ("Appartementen", "Villas & Appartements"),
             ("Villas", "Villas & Appartements"),
+            ("Villen", "Villas & Appartements"),
             ("Studios", "Villas & Appartements"),
             ("Parcs de vacances", "Campings & Parcs"),
             ("Ferienparks", "Campings & Parcs"),

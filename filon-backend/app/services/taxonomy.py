@@ -727,7 +727,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     VOYAGES: [
         ("Locations de vacances", r"\b(appartements? de vacances|maison(?:s)? de vacances|g[îi]tes?|vakantiehuis(?:jes)?|ferienwohnungen?|ferienh[aä]user?|holiday homes?)\b"),
         ("Hôtels", r"\b(h[ôo]tels?|chambres? d['’ ]h[ôo]tel|hotel kamers?)\b"),
-        ("Villas & Appartements", r"\b(villas?|appartements?|appartementen|studios?|wohnungen?|woningen?)\b"),
+        ("Villas & Appartements", r"\b(villas?|villen|appartements?|appartementen|studios?|wohnungen?|woningen?)\b"),
         ("Campings & Parcs", r"\b(campings?|bungalows?|mobile homes?|parcs?\s+de\s+vacances|vakantieparken?|ferienparks?|holiday parks?)\b"),
     ],
     AUTO: [
