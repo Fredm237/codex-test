@@ -47,12 +47,12 @@ _MIN_STEM = 4
 _PRIMARY_PRODUCT_INTENTS: tuple[tuple[tuple[str, ...], tuple[str, ...], float], ...] = (
     (
         ("ordinateur", "laptop", "notebook", "macbook", "pc portable"),
-        ("housse", "hoes", "sleeve", "pochette", "sac", "support", "stand", "chargeur", "charger", "cable", "adaptateur", "clavier", "keyboard", "souris", "mouse"),
+        ("housse", "hoes", "sleeve", "pochette", "sac", "support", "stand", "chargeur", "charger", "cable", "adaptateur", "clavier", "keyboard", "souris", "mouse", "valise", "suitcase", "trolley", "moniteur portable", "monitor portable", "extension d'ecran", "extension d'écran"),
         200.0,
     ),
     (
         ("smartphone", "telephone", "telefoon", "iphone", "android"),
-        ("coque", "case", "cover", "hoes", "protection", "protector", "verre", "glass", "chargeur", "charger", "cable", "adaptateur", "support", "ecran", "écran", "screen", "batterie", "battery", "adhesif", "adhésif", "kit", "piece", "pièce", "repair", "reparation", "réparation"),
+        ("coque", "case", "cover", "hoes", "protection", "protector", "verre", "glass", "chargeur", "charger", "cable", "adaptateur", "support", "ecran", "écran", "screen", "batterie", "battery", "adhesif", "adhésif", "kit", "piece", "pièce", "repair", "reparation", "réparation", "plaque", "pcb", "swap", "echange", "échange", "service pack", "cadre", "frame"),
         80.0,
     ),
     (

@@ -49,6 +49,8 @@ async def session():
         s.add(offer("8", "Lenovo IdeaPad ordinateur portable 15 pouces", "Lenovo", 649.0))
         s.add(offer("9", "Support pour ordinateur portable 15 pouces", "Marque", 25.0))
         s.add(offer("10", "Siphon de cuisine inox", "Marque", 99.0))
+        s.add(offer("11", "Plaque PCB iPhone 15", "Marque", 90.0))
+        s.add(offer("12", "Valise avec compartiment ordinateur portable", "Marque", 220.0))
         await s.commit()
         yield s
     await engine.dispose()
@@ -174,6 +176,7 @@ class TestRelevance:
     async def test_iphone_query_does_not_match_a_siphon_after_stemming(self, session):
         res = await _search(session, "iphone")
         assert all("siphon" not in item["name"].lower() for item in res["items"])
+        assert all("plaque pcb" not in item["name"].lower() for item in res["items"])
 
     async def test_explicit_iphone_accessory_query_remains_searchable(self, session):
         res = await _search(session, "coque iphone")
@@ -184,6 +187,10 @@ class TestRelevance:
         res = await _search(session, "ordinateur portable")
         assert res["total"] == 1
         assert res["items"][0]["name"].startswith("Lenovo IdeaPad")
+
+    async def test_generic_laptop_query_does_not_present_a_suitcase_as_a_computer(self, session):
+        res = await _search(session, "ordinateur portable")
+        assert all("valise" not in item["name"].lower() for item in res["items"])
 
 
 class TestStem:
