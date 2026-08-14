@@ -145,6 +145,9 @@ _SPECIALIST_MERCHANT_CONTEXTS: tuple[tuple[str, str], ...] = (
     # Spécialiste beauté vérifié : les bougies et diffuseurs conservent leurs
     # règles Maison explicites, évaluées avant ce dernier recours.
     (r"\bici\s+paris\s+xl\b", BEAUTE),
+    # Flux vérifié d’habillement d’extérieur : les modèles courts sans type
+    # (« Tiril », « Luna ») rejoignent Mode générique, sans inférer un public.
+    (r"\bdidriksons?\b", MODE),
     (r"\bisotiger\b", AUTO),
     (r"\bgsmnet\b", TELEPHONIE),
     (r"\boverhemden\b", MODE_HOMME),
