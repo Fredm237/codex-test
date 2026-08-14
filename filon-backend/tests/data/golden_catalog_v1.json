@@ -1,0 +1,151 @@
+{
+  "version": "1.0.0",
+  "purpose": "Jeu de référence minimal pour empêcher les confusions entre objet vendu, objet mentionné, offre contextuelle et produit comparable.",
+  "policy": {
+    "unknown_first": true,
+    "false_merge_is_worse_than_false_split": true,
+    "languages": ["fr", "nl", "en"]
+  },
+  "cases": [
+    {
+      "id": "phone-case-fr-compatible",
+      "language": "fr",
+      "merchant_category": "Téléphones et accessoires",
+      "name": "Coque antichoc compatible iPhone 16 Pro Max",
+      "brand": "Techsuit",
+      "merchant_name": "Coquedetelephone.fr",
+      "expected_current": {"category": "Téléphonie", "offer_kind": "tech_accessory"},
+      "semantic_target": {"product_role": "protective_case", "mentioned_product": "Apple iPhone 16 Pro Max", "relation": "compatible_with"}
+    },
+    {
+      "id": "screen-protector-en",
+      "language": "en",
+      "merchant_category": "Phone accessories",
+      "name": "Tempered glass screen protector for Samsung Galaxy S25",
+      "brand": "Techsuit",
+      "merchant_name": "GSMnet FR",
+      "expected_current": {"category": "Téléphonie", "offer_kind": "tech_accessory"},
+      "semantic_target": {"product_role": "screen_protector", "mentioned_product": "Samsung Galaxy S25", "relation": "compatible_with"}
+    },
+    {
+      "id": "phone-replacement-part-nl",
+      "language": "nl",
+      "merchant_category": "Onderdelen voor smartphones",
+      "name": "Vervangend OLED-scherm voor iPhone 15 Pro",
+      "brand": "Techsuit",
+      "merchant_name": "GSMnet FR",
+      "expected_current": {"category": "Téléphonie", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "replacement_part", "mentioned_product": "Apple iPhone 15 Pro", "relation": "replacement_for"}
+    },
+    {
+      "id": "phone-main-product-storage",
+      "language": "en",
+      "merchant_category": "Smartphones",
+      "name": "Samsung Galaxy S25 256GB Refurbished",
+      "brand": "Samsung",
+      "merchant_name": "2dekansje NL-BE",
+      "expected_current": {"category": "Téléphonie", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "main_product", "model": "Galaxy S25", "attributes": {"storage": "256GB", "condition": "refurbished"}}
+    },
+    {
+      "id": "gaming-bundle-en",
+      "language": "en",
+      "merchant_category": "Video games",
+      "name": "PlayStation 5 bundle with 2 controllers",
+      "brand": "Sony",
+      "merchant_name": "Geekbuying FR",
+      "expected_current": {"category": "Gaming", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "bundle", "included_product": "controller", "included_quantity": 2}
+    },
+    {
+      "id": "printer-ink-compatible-en",
+      "language": "en",
+      "merchant_category": "Computer & Office > Ink cartridges",
+      "name": "Compatible ink cartridge for HP DeskJet 4120e",
+      "brand": "OfficeCity",
+      "merchant_name": "OfficeCity BE",
+      "expected_current": {"category": "Informatique", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "consumable", "mentioned_product": "HP DeskJet 4120e", "relation": "compatible_with"}
+    },
+    {
+      "id": "dyson-battery-replacement-en",
+      "language": "en",
+      "merchant_category": "Vacuum cleaner parts",
+      "name": "Battery replacement compatible with Dyson V15",
+      "brand": "Generic",
+      "merchant_name": "Vevor FR",
+      "expected_current": {"offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "replacement_part", "mentioned_product": "Dyson V15", "relation": "compatible_with"}
+    },
+    {
+      "id": "sewing-pattern-fr",
+      "language": "fr",
+      "merchant_category": "Patrons de couture",
+      "name": "Patron de couture robe femme Maison Fauve",
+      "brand": "Maison Fauve",
+      "merchant_name": "PRM Coupons Couture FR",
+      "expected_current": {"category": "Loisirs créatifs", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "consumable", "not_product_identity": "robe finie"}
+    },
+    {
+      "id": "shoe-model-brand",
+      "language": "en",
+      "merchant_category": "Online Shop",
+      "name": "BONDI 9",
+      "brand": "Hoka One One",
+      "merchant_name": "BSTN FR",
+      "expected_current": {"category": "Chaussures", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "main_product", "product_type": "running_shoe"}
+    },
+    {
+      "id": "shoe-gender-de",
+      "language": "de",
+      "merchant_category": "Laufschuhe Herren",
+      "name": "Chaussures de running Herren",
+      "brand": "Generic",
+      "merchant_name": "Sport Is Good FR",
+      "expected_current": {"category": "Chaussures", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "main_product", "audience": "men", "use_case": "running"}
+    },
+    {
+      "id": "accommodation-fr",
+      "language": "fr",
+      "merchant_category": "Gîtes et locations de vacances",
+      "name": "Gîte avec piscine en Ardenne pour 4 personnes",
+      "brand": null,
+      "merchant_name": "Gites.fr",
+      "expected_current": {"category": "Voyages & Séjours", "offer_kind": "accommodation"},
+      "semantic_target": {"product_role": "service", "price_semantics": "indicative_stay_rate", "must_not_be_compared_as": "physical_product"}
+    },
+    {
+      "id": "hotel-named-physical-object",
+      "language": "fr",
+      "merchant_category": null,
+      "name": "ARKEA B&B HOTELS Casquette 2025",
+      "brand": "Rosti",
+      "merchant_name": "Marchand cyclisme FR",
+      "expected_current": {"category": "Accessoires", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "accessory", "must_not_be": "accommodation"}
+    },
+    {
+      "id": "tactical-bag-fr",
+      "language": "fr",
+      "merchant_category": "Équipement militaire > Sacs",
+      "name": "Sac à dos tactique Modular Pack 30 L",
+      "brand": "Tasmanian Tiger",
+      "merchant_name": "ASMC FR",
+      "expected_current": {"category": "Bagagerie", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "bag", "use_case": "outdoor"}
+    },
+    {
+      "id": "personalised-glass-fr",
+      "language": "fr",
+      "merchant_category": "Cadeaux personnalisés",
+      "name": "6 verres à whisky avec gravure anniversaire",
+      "brand": "Murrano",
+      "merchant_name": "Maverton FR",
+      "expected_current": {"category": "Maison & Déco", "offer_kind": "physical_product"},
+      "semantic_target": {"product_role": "main_product", "attributes": {"quantity": 6, "personalisation": "engraving"}}
+    }
+  ]
+}
