@@ -35,7 +35,10 @@ _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
     (
         ("smartphone", "telephone", "telefoon", "iphone", "android"),
         "smartphone",
-        ("coque", "case", "cover", "hoes", "protection", "protector", "verre", "glass", "chargeur", "charger", "cable", "adaptateur", "support"),
+        # Les flux mélangent les pièces et l'appareil complet. Ces termes sont
+        # exclus pour une demande de téléphone, sauf si l'utilisateur demande
+        # explicitement une pièce dans sa requête (voir `_catalogue_intent`).
+        ("coque", "case", "cover", "hoes", "protection", "protector", "verre", "glass", "chargeur", "charger", "cable", "adaptateur", "support", "ecran", "écran", "screen", "batterie", "battery", "adhesif", "adhésif", "kit", "piece", "pièce", "repair", "reparation", "réparation", "plaque", "pcb", "swap", "echange", "échange", "service pack", "cadre", "frame"),
     ),
     (
         ("casque", "headphone", "koptelefoon", "noise cancelling", "noise-cancelling"),
@@ -70,6 +73,18 @@ def _required_name_terms(query: str, anchor: str) -> tuple[str, ...]:
     normalized = " ".join(terms_of(query))
     exact = tuple(term for term in _EXACT_PRODUCT_TERMS if term in normalized)
     if exact:
+        # « iPhone 15 » ne désigne pas n'importe quel iPhone. Le numéro ne doit
+        # devenir une contrainte que lorsqu'il suit directement la gamme, pour
+        # ne pas confondre un budget ou un nombre de stockage avec un modèle.
+        if "iphone" in exact:
+            tokens = terms_of(query)
+            try:
+                iphone_index = tokens.index("iphone")
+                next_token = tokens[iphone_index + 1]
+            except (ValueError, IndexError):
+                next_token = ""
+            if next_token.isdigit() and 1 <= int(next_token) <= 30:
+                return ("iphone", next_token)
         return exact
     if anchor == "casque" and any(token in normalized for token in ("bruit", "noise", "cancellation", "cancelling", "anc")):
         return ("reduction de bruit", "noise", "anc", "cancel")
@@ -79,8 +94,13 @@ def _required_name_terms(query: str, anchor: str) -> tuple[str, ...]:
 def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
     """Retourne une ancre catalogue et les accessoires à exclure pour un besoin courant."""
     normalized = " ".join(terms_of(query))
+    terms = terms_of(query)
     for triggers, anchor, excluded in _INTENT_ANCHORS:
         if any(trigger in normalized for trigger in triggers):
+            # Demander explicitement une pièce doit rester possible ; les
+            # exclusions concernent uniquement la recherche d'un produit complet.
+            if any(term in excluded for term in terms):
+                return None
             return anchor, excluded
     return None
 
