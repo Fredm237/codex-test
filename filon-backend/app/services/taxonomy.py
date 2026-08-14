@@ -142,6 +142,9 @@ _ANDLIGHT_MERCHANT = r"\bandlight\b"
 # pas déjà un classement plus précis. Chaque entrée reste donc réversible et
 # ne transforme jamais ces noms en mots-clés globaux.
 _SPECIALIST_MERCHANT_CONTEXTS: tuple[tuple[str, str], ...] = (
+    # Spécialiste beauté vérifié : les bougies et diffuseurs conservent leurs
+    # règles Maison explicites, évaluées avant ce dernier recours.
+    (r"\bici\s+paris\s+xl\b", BEAUTE),
     (r"\bisotiger\b", AUTO),
     (r"\bgsmnet\b", TELEPHONIE),
     (r"\boverhemden\b", MODE_HOMME),
@@ -407,8 +410,12 @@ _RULES: list[tuple[str, str]] = [
      r"combo|molette)\b)"),
     (INFORMATIQUE, r"\btapis de souris\b"),
     (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
-                   r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|usb|"
-                   r"tablettes?|software|cartouches? d['’ ]encre|ink cartridges?|toner)\b"),
+                   r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|switch(?:es)?|"
+                   r"r[ée]p[ée]teurs?\s+wifi|wifi\s+mesh|adaptateurs?\s+cpl|cartes?\s+r[ée]seau|"
+                   r"points? d['’ ]acc[èe]s|usb|tablettes?|software|cartouches? d['’ ]encre|"
+                   r"ink cartridges?|toner|"
+                   r"webcams?|processeurs?|cpu|cartes? m[èe]res?|motherboards?|watercooling|"
+                   r"m[ée]moire ram|domotique|prises? connect[ée]es?)\b"),
     # Stations d'alimentation et batteries nomades : famille absente de toute
     # règle jusqu'ici. « Station d'alimentation » exige un contexte électrique :
     # sans cela on capturait « Station d'alimentation pour oiseaux », qui est un
@@ -458,7 +465,9 @@ _RULES: list[tuple[str, str]] = [
              r"scheren|ontharing|zonnebrand|sunscreens?|cr[èe]me & lotion|"
              r"coiffant|styling|brow\s+(?:pen|definer)|eyebrow|sourcils?|"
              r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|body\s+mist|"
-             r"face\s+masks?|mask\s+sheet|lips?)\b"),
+             r"face\s+masks?|mask\s+sheet|lips?|cleanser|nettoyant|cleansing\s+balm|"
+             r"toners?|oogserum|eye\s+care|hair\s+(?:masks?|treatments?)|"
+             r"setting\s+poeder|losse?\s+poeder|bronzer|pinceau(?:x)?\s+(?:poudre|blush))\b"),
     # « blush » est aussi un nom de couleur (robe blush, sneakers blush, coussin
     # blush) : mesuré comme régression sur trois rayons. Il n'est retenu que
     # qualifié ou seul en tête de libellé marchand.
@@ -580,6 +589,7 @@ _RULES: list[tuple[str, str]] = [
              r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
              r"cuisine|meubel|verlichting|schoonmaak|nettoyage|serviettes?|textile|"
              r"bougies?|duftkerzen?|geurkaarsen?|scented\s+candles?|"
+             r"diffuseurs?\s+d['’ ]ambiance|b[âa]tonnets?\s+parfum[ée]s?|geurstokjes|"
              r"home\s*&\s*garden|huishouden|wandklokken?|wandklok|pendules?|"
              r"wandlampen?|wandlamp|appliques?|suspensions?|dekbedovertrekken?|"
              r"dekbedovertrek|hoeslakens?|kussenslopen?|kussensloop|handdoeken?|"
@@ -592,7 +602,7 @@ _RULES: list[tuple[str, str]] = [
     # vêtement, et « pyjama sans couture » atterrissait ici.
     (LOISIRS, r"\b(patrons? de couture|patrons?|tricot|laine [àa] tricoter|mercerie|"
               r"loisirs? cr[ée]atifs?|scrapbooking)\b"),
-    (CULTURE, r"\b(livres?|romans?|manga|dvd|blu-ray|vinyles?|boek|books?)\b"),
+    (CULTURE, r"\b(livres?|romans?|manga|dvd|blu-ray|vinyles?|boek|books?|librairie|magazines?)\b"),
     (ALIMENTATION, r"\b(alimentation|[ée]picerie|caf[ée]|th[ée]|vins?|bi[èe]res?|chocolats?|"
                    r"snacks?|boissons?|voeding|wijn)\b"),
 ]
@@ -628,7 +638,7 @@ _USAGE_SPORTIF = (
 _VETEMENT = (
     r"\b(v[êe]tements?|clothing|kleding|apparel|robes?|dress(es)?|jupes?|pantalons?|"
     r"trousers?|pants?|trackpants?|joggers?|jeans?|chemises?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|sweats?|sweaters?|hood(?:y|ies)?|"
-    r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|cuissards?|doudounes?|boxers?|lingerie|underwear|"
+    r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|cuissards?|doudounes?|parkas?|boxers?|lingerie|underwear|"
     r"sleepwears?|pyjamas?|maillots?|chaussettes?|socks?|polos?|overhemd|broek|jas|blazers?|"
     r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|"
     # « Débardeur Proact Sport », catégorisé « Multisports > Débardeur », n'était
