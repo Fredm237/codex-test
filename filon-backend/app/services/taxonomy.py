@@ -112,6 +112,8 @@ _ACCOMMODATION_MERCHANT_CATEGORY = (
 # que chez ce spécialiste de pneus ; ils ne deviennent jamais une règle globale.
 _TYRE_MERCHANT = r"\b(?:autobandenmarkt|123pneus)\b"
 _TYRE_REFERENCE = r"\b(?:pkw|mo|off|llkw)\b"
+_TYRE_CATEGORY = r"\b(pneus?|tyres?|banden|reifen|pneumatici)\b"
+_TYRE_DIMENSION = r"\b\d{3}/\d{2}\s*r\d{2}(?:[a-z]{0,4})?\b"
 
 
 def _is_tyre_specialist_reference(name: str | None, merchant_name: str | None) -> bool:
@@ -140,6 +142,10 @@ def classify_offer_kind(
     text = " ".join(part for part in (name, merchant_category) if part)
     if not text:
         return UNKNOWN
+    # « Camping » peut être le nom d’un modèle de pneu. Une dimension de pneu
+    # explicite dans une catégorie pneu décrit un bien physique, pas un séjour.
+    if _has(_TYRE_CATEGORY, merchant_category) and _has(_TYRE_DIMENSION, name):
+        return PHYSICAL_PRODUCT
     if _has(_ACCOMMODATION, text) or (
         _has(_ACCOMMODATION_MERCHANT, merchant_name)
         and _has(_ACCOMMODATION_MERCHANT_CATEGORY, merchant_category)
@@ -866,6 +872,9 @@ def classify(
     # ne doit jamais être aspiré par Maison, Sport ou Téléphonie sur un mot isolé.
     if classify_offer_kind(merchant_category, name, brand, merchant_name) == ACCOMMODATION:
         return VOYAGES
+
+    if _has(_TYRE_CATEGORY, merchant_category) and _has(_TYRE_DIMENSION, name):
+        return AUTO
 
     if _is_tyre_specialist_reference(name, merchant_name):
         return AUTO
