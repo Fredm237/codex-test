@@ -180,8 +180,12 @@ _FOOTWEAR_MODELS_BY_BRAND: tuple[tuple[str, str], ...] = (
     (r"\badidas\b", r"\b(adilette(?:\s+22)?(?:\s+slides?)?|gazelle(?:\s+(?:indoor|bold))?|"
                   r"samba(?:\s+og)?|stan\s+smith|nmd\s+s1|climacool|sl\s*72|"
                   r"centennial\s+85|campus|superstar|handball\s+spezial|country\s+og)\b"),
-    (r"\basics\b", r"\bgel[-\s]?(?:1130|kayano|nimbus|lyte|venture|quantum)\b"),
-    (r"\bnew\s+balance\b", r"\b(?:1000|1300|2002r?|327|530|550|574|9060|990v?\d*)\b"),
+    (r"\basics\b", r"\b(?:gel[-\s]?(?:1130|kayano|nimbus|lyte|venture|quantum|cumulus|nyc)|gt[-\s]?2160)\b"),
+    (r"\bnew\s+balance\b", r"\b(?:[umwgc]{0,2})?(?:1000|1300|1906|2002r?|327|530|550|574|740|9060|990v?\d*|992)[a-z0-9]*\b"),
+    (r"\bsalomon\b", r"\b(?:xa\s+pro\s+3d|xt[-\s]?(?:whisper|quest)|neuva\s+advanced)\b"),
+    (r"\bbirkenstock\b", r"\b(?:arizona|boston|tokio)\b"),
+    (r"\bugg\b", r"\b(?:tasman(?:\s+ii)?|classic\s+(?:micro|ultra\s+mini)|metropeak|peakmod|goldenglow)\b"),
+    (r"\bjordan\b", r"\b(?:tatum|zion)\s*\d+\b"),
     (r"\bvans\b", r"\b(authentic(?:\s+reissue\s+44)?|old\s+skool|sk8[-\s]?hi|era|slip[-\s]?on|k\s*nu\s*skool)\b"),
     (r"\bnike\b", r"\b(acg\s+(?:air\s+exploraid|izy)|air\s+(?:max|force)|dunk|"
                 r"air\s+jordan|pegasus|vomero|zoomx?)\b"),
@@ -649,9 +653,10 @@ _RULES: list[tuple[str, str]] = [
 # absents, sans quoi tout survêtement de ville y passerait.
 _USAGE_SPORTIF = (
     r"\b(football|voetbal|basket-?ball|handball|rugby|volley(?:-?ball)?|tennis|"
-    r"natation|swimming|zwemmen|cyclisme|v[ée]lo|wielrennen|running|jogging|"
+    r"natation|swimming|zwemmen|cyclisme|v[ée]lo|wielrennen|vtt|bmx|running|jogging|"
     r"trail|marathon|fitness|musculation|yoga|pilates|ski|snowboard|escalade|"
-    r"randonn[ée]e|trekking|boxe|judo|karat[ée]|athl[ée]tisme|gymnastique|"
+    r"randonn[ée]e|trekking|boxe|judo|karat[ée]|taekwondo|jiu[-\s]?jitsu|bud[ōo]|kung[-\s]?fu|mma|kickboxing|"
+    r"p[êe]che|fishing|athl[ée]tisme|gymnastique|"
     r"[ée]quitation|golf|hockey|badminton|padel|kayak|aviron|"
     r"maillots? de bain|zwembroek|badpak)\b"
     # « surf » n'est pas repris nu ici non plus : marque de lessive.
@@ -1029,6 +1034,14 @@ def classify(
     # commercialise aussi une chaussure du même nom.
     if not any(_has(_VETEMENT, text) for text in (name, merchant_category) if text) and _brand_footwear(brand, name):
         return CHAUSSURES
+
+    # Certaines catégories sources décrivent directement une pratique : VTT,
+    # taekwondo, jiu-jitsu ou pêche. Elles doivent classer même lorsqu’aucun mot
+    # de vêtement n’est présent dans le nom (cassette, plastron, leurre). Le motif
+    # exclut volontairement « sport » nu afin de ne pas aspirer les collections
+    # de ville qui emploient seulement l’adjectif sportif.
+    if merchant_category and _has(_USAGE_SPORTIF, merchant_category):
+        return SPORT
 
     # Un signal peut n'exister qu'en croisant les deux sources. Les flux
     # horlogers listent « Calvin Klein 459300030 Gauge Sport band » sous la
