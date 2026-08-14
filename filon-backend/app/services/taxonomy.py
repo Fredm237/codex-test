@@ -613,6 +613,17 @@ _RULES: list[tuple[str, str]] = [
     # vêtement, et « pyjama sans couture » atterrissait ici.
     (LOISIRS, r"\b(patrons? de couture|patrons?|tricot|laine [àa] tricoter|mercerie|"
               r"loisirs? cr[ée]atifs?|scrapbooking)\b"),
+    # Catégories sources explicites observées dans les reliquats : elles
+    # décrivent l'objet vendu, sans nécessiter de contexte marchand global.
+    (INFORMATIQUE, r"\b(?:computer\s*&\s*office|computer\s+office|kabels?)\b"),
+    (BAGAGERIE, r"\b(?:[ée]quipement\s+militaire\s*>\s*sacs?|military\s+(?:equipment|gear)\s*>\s*bags?)\b"),
+    (LOISIRS, r"\b(?:peintures?\s+ak\s+interactive|mod[ée]lisme\s+ak\s+interactive)\b"),
+    (JOUETS, r"\b(?:figuren\s*&\s*actiehelden|figures?\s*(?:&|and)\s*action\s*heroes?)\b"),
+    (BIJOUX, r"\b(?:polshorloges?|wristwatches?)\b"),
+    (SANTE, r"\b(?:tandheelkunde|health\s+(?:products?|wellness)|hygi(?:è|Ã«)ne)\b"),
+    (MAISON, r"\b(?:reinigingsmiddel|keuken)\b"),
+    (JARDIN, r"\b(?:carrelage\s+mur\s+int[ée]rieur|wall\s+tiles?)\b"),
+    (MODE, r"\b(?:habillement\s*>\s*couvre-chef|intiem)\b"),
     (CULTURE, r"\b(livres?|romans?|manga|dvd|blu-ray|vinyles?|boek|books?|librairie|magazines?)\b"),
     (ALIMENTATION, r"\b(alimentation|[ée]picerie|caf[ée]|th[ée]|vins?|bi[èe]res?|chocolats?|"
                    r"snacks?|boissons?|voeding|wijn)\b"),
