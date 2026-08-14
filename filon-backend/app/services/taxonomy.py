@@ -495,6 +495,10 @@ _RULES: list[tuple[str, str]] = [
              r"tron[çc]onneuses?|kettingzagen?|kettingzaag|panneaux? solaires?|"
              r"zonnepane(?:el|len)|barbecues?|salons? de jardin|tuinsets?|"
              r"tuinschermen?|tuinscherm|polyrattan)\b"),
+    # Une arborescence marchand est une preuve plus forte qu’un titre minimal :
+    # `Mobilier > …` et `Déco > …` décrivent explicitement la maison. Le motif
+    # exige le séparateur hiérarchique pour ne pas absorber un mot isolé.
+    (MAISON, r"\b(?:mobilier|d[ée]co)\s*>") ,
     # « tissus » est retiré de cette règle : il désigne la mercerie, traitée
     # plus haut par les supports. Le laisser ici renvoyait tous les coupons au
     # rayon Maison. Le linge de maison, lui, manquait entièrement.
