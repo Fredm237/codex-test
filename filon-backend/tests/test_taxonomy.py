@@ -236,6 +236,28 @@ class TestOfferKinds:
         assert t.classify("Vakantieparken", "HH Hertenkamp Mobile Home") == t.VOYAGES
         assert t.classify_subcategory(t.VOYAGES, "HH Hertenkamp Mobile Home") == "Campings & Parcs"
 
+    @pytest.mark.parametrize(
+        "merchant_category,expected_subcategory",
+        [
+            ("Appartements", "Villas & Appartements"),
+            ("Appartementen", "Villas & Appartements"),
+            ("Villas", "Villas & Appartements"),
+            ("Studios", "Villas & Appartements"),
+            ("Parcs de vacances", "Campings & Parcs"),
+            ("Ferienparks", "Campings & Parcs"),
+        ],
+    )
+    def test_bungalow_net_contextualizes_ambiguous_accommodation_categories(
+        self, merchant_category, expected_subcategory
+    ):
+        assert t.classify_offer_kind(merchant_category, "Ref. 123", merchant_name="Bungalow.net NL BE") == t.ACCOMMODATION
+        assert t.classify(merchant_category, "Ref. 123", merchant_name="Bungalow.net NL BE") == t.VOYAGES
+        assert t.classify_subcategory(t.VOYAGES, "Ref. 123", merchant_category) == expected_subcategory
+
+    def test_an_ambiguous_studio_without_booking_context_stays_unclassified(self):
+        assert t.classify_offer_kind("Studios", "Ref. 123", merchant_name="Atelier photo") == t.PHYSICAL_PRODUCT
+        assert t.classify("Studios", "Ref. 123", merchant_name="Atelier photo") is None
+
     def test_travel_subcategories_are_multilingual(self):
         assert t.classify("Appartement de vacances", "Appartement de vacances à Hévíz") == t.VOYAGES
         assert t.classify_subcategory(t.VOYAGES, "Appartement de vacances à Hévíz") == "Locations de vacances"
