@@ -3822,3 +3822,31 @@ html, body {
 :root[data-tone="light"] .ed-burger span::before,
 :root[data-tone="light"] .ed-burger span::after { background: var(--fx-text-strong); }
 :root[data-tone="light"] .ed-burger span.open { background: transparent; }
+
+/* Décision FILON : preuves observées et inconnues visibles, jamais une note opaque. */
+.filon-decision {
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--line-2);
+  border-left: 3px solid var(--accent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 94%, var(--accent) 6%);
+}
+.filon-decision-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: var(--ink-3); font-size: 11px; letter-spacing: .07em; text-transform: uppercase; }
+.filon-decision-confidence { flex: 0 0 auto; padding: 4px 7px; border: 1px solid var(--line-2); border-radius: 999px; font-size: 10px; letter-spacing: .04em; }
+.filon-decision-confidence.confidence-elevee { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line-2)); }
+.filon-decision-confidence.confidence-faible,
+.filon-decision-confidence.confidence-insuffisante { color: var(--ink-3); }
+.filon-decision-title { display: block; margin-top: 10px; color: var(--ink); font-size: 16px; line-height: 1.25; }
+.filon-decision-title.scope-non_recommandee { color: #b84737; }
+.filon-decision-evidence { margin-top: 12px; }
+.filon-decision-evidence > span { color: var(--ink-3); font-size: 12px; }
+.filon-decision-evidence ul { display: grid; gap: 6px; margin: 7px 0 0; padding: 0; list-style: none; }
+.filon-decision-evidence li { position: relative; padding-left: 14px; color: var(--ink-2); font-size: 13px; line-height: 1.4; }
+.filon-decision-evidence li::before { content: ""; position: absolute; top: .52em; left: 0; width: 6px; height: 6px; border-radius: 50%; background: var(--ink-3); }
+.filon-decision-evidence li.positive::before { background: var(--accent); }
+.filon-decision-evidence li.warning::before { background: #c0872b; }
+.filon-decision-missing { margin-top: 13px; border-top: 1px solid var(--line-2); padding-top: 10px; }
+.filon-decision-missing summary { cursor: pointer; color: var(--ink-2); font-size: 13px; font-weight: 600; }
+.filon-decision-missing p { margin: 8px 0 0; color: var(--ink-3); font-size: 12px; line-height: 1.5; }
+@media (max-width: 600px) { .filon-decision { padding: 14px; } .filon-decision-head { align-items: flex-start; } }

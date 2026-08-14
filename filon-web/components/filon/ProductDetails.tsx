@@ -1,6 +1,7 @@
 "use client";
 
 import { Verdict, type VerdictData } from "@/components/editorial/Verdict";
+import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
 import { useLocale } from "@/lib/i18n";
 
 type Offer = {
@@ -23,25 +24,26 @@ type Product = {
   merchants_count: number;
   offers: Offer[];
   verdict: VerdictData | null;
+  decision: DecisionData | null;
 };
 
 const COPY = {
   fr: {
     from: "à partir de", at: "chez", merchant: "marchand", merchants: "marchands",
-    save: "Vous économisez", saveTail: "en choisissant le moins cher plutôt que le plus cher.",
-    best: "Voir la meilleure offre chez", all: "Toutes les offres", bestPrice: "Meilleur prix",
+    save: "Écart de prix observé", saveTail: "entre l’offre la moins chère et la plus chère comparées.",
+    best: "Vérifier le prix chez", all: "Toutes les offres", bestPrice: "Prix le plus bas observé",
     stock: "En stock", unavailable: "Indisponible", see: "Voir", note: "Prix indicatifs, susceptibles d’évoluer chez les marchands. Les offres sont regroupées par code-barres", commission: "En achetant via ces liens, FILON peut percevoir une commission, sans surcoût pour vous.",
   },
   nl: {
     from: "vanaf", at: "bij", merchant: "winkel", merchants: "winkels",
-    save: "Je bespaart", saveTail: "door de goedkoopste in plaats van de duurste te kiezen.",
-    best: "Bekijk de beste aanbieding bij", all: "Alle aanbiedingen", bestPrice: "Beste prijs",
+    save: "Waargenomen prijsverschil", saveTail: "tussen de goedkoopste en duurste vergeleken aanbieding.",
+    best: "Controleer de prijs bij", all: "Alle aanbiedingen", bestPrice: "Laagste waargenomen prijs",
     stock: "Op voorraad", unavailable: "Niet beschikbaar", see: "Bekijk", note: "Prijzen zijn indicatief en kunnen veranderen bij de winkels. Aanbiedingen zijn gegroepeerd per barcode", commission: "Via deze links kan FILON een commissie ontvangen, zonder extra kost voor jou.",
   },
   en: {
     from: "from", at: "at", merchant: "merchant", merchants: "merchants",
-    save: "You save", saveTail: "by choosing the lowest-priced offer over the highest.",
-    best: "See the best offer at", all: "All offers", bestPrice: "Best price",
+    save: "Observed price spread", saveTail: "between the lowest and highest compared offer.",
+    best: "Check the price at", all: "All offers", bestPrice: "Lowest observed price",
     stock: "In stock", unavailable: "Unavailable", see: "View", note: "Prices are indicative and may change at merchants. Offers are grouped by barcode", commission: "FILON may earn a commission through these links, at no additional cost to you.",
   },
 } as const;
@@ -73,6 +75,7 @@ export function ProductDetails({ p, best, saving }: { p: Product; best: Offer | 
       </div>
 
       {p.verdict && <Verdict v={p.verdict} />}
+      <DecisionPanel decision={p.decision} />
 
       {saving != null && (
         <p className="pg-saving">{C.save} <b>{money(saving, p.currency, locale)}</b> {C.saveTail}</p>
