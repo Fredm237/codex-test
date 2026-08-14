@@ -3777,7 +3777,8 @@ html, body {
    fenêtre cinématique assumée, plutôt qu'un visuel 16:9 coupé en portrait. */
 @media (max-width: 768px) {
   .fx-imm-poster {
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center;
     background: var(--fx-bg-sunken);
   }
   .fx-imm-wrap.is-mobile .fx-imm-overlay {
