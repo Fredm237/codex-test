@@ -1127,6 +1127,10 @@ async def reclassify_offers(
         default=False,
         description="Ne parcourir que les offres encore sans rayon FILON.",
     ),
+    merchant_category: str | None = Query(
+        default=None, max_length=255,
+        description="Limiter le rattrapage à une catégorie déclarée par le marchand.",
+    ),
     x_admin_token: str | None = Header(default=None),
 ) -> dict:
     """Recalcule la catégorie FILON des offres déjà en base.
@@ -1147,8 +1151,9 @@ async def reclassify_offers(
 
     `filon_category` limite optionnellement la passe aux offres actuellement
     rangées dans un rayon précis. `only_unclassified` traite au contraire les
-    lignes encore sans rayon : c’est le chemin sûr pour enrichir le système
-    sans réécrire les catégories déjà vérifiées.
+    lignes encore sans rayon ; `merchant_category` cible une famille brute du
+    flux (par exemple « Appartement de vacances »). Ces filtres permettent un
+    rattrapage sûr sans réécrire les catégories déjà vérifiées.
 
     La réponse renvoie `next_after_id` et `done` : l'appelant boucle jusqu'à
     `done`, ce qui laisse Postgres recycler son journal entre deux passes.
@@ -1160,6 +1165,7 @@ async def reclassify_offers(
     # d’outil interne, la valeur par défaut reste un objet Query : il ne doit pas
     # activer accidentellement le filtre des offres non classées.
     only_unclassified = only_unclassified is True
+    merchant_category = merchant_category if isinstance(merchant_category, str) else None
     if not db.is_enabled():
         raise HTTPException(status_code=503, detail="base de données absente")
 
@@ -1186,6 +1192,8 @@ async def reclassify_offers(
                 stmt = stmt.where(models.Offer.filon_category == filon_category)
             if only_unclassified:
                 stmt = stmt.where(models.Offer.filon_category.is_(None))
+            if merchant_category:
+                stmt = stmt.where(models.Offer.category == merchant_category)
             rows = (
                 await session.execute(
                     stmt.order_by(models.Offer.id).limit(remaining)
@@ -1225,6 +1233,7 @@ async def reclassify_offers(
         "elapsed_seconds": round(time.monotonic() - started, 1),
         "filon_category": filon_category,
         "only_unclassified": only_unclassified,
+        "merchant_category": merchant_category,
         "offer_kinds": kind_counts,
     }
 
