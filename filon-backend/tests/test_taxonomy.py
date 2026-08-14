@@ -139,6 +139,10 @@ class TestEnrichedFromRealFeedLabels:
         assert t.classify("Underwear & Sleepwears", "") == t.MODE
         assert t.classify("", "Pyjama flanelle sans couture") == t.MODE
 
+    @pytest.mark.parametrize("name", ["3 STRIPE FLEECE HOODY", "ADIBREAK CLASSIC TRACKPANT", "ACG Dri-FIT Tee"])
+    def test_short_apparel_forms_land_in_generic_fashion(self, name):
+        assert t.classify("", name) == t.MODE
+
     def test_the_generic_aisle_never_overrides_an_identified_audience(self):
         assert t.classify("Underwear & Sleepwears", "Pyjama pour femme") == t.MODE_FEMME
         assert t.classify("Men's Tops", "Polo ERREA Team") == t.MODE_HOMME

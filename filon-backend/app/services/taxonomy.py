@@ -623,7 +623,7 @@ _USAGE_SPORTIF = (
 # Vêtements : le rayon dépend du public, déterminé plus haut.
 _VETEMENT = (
     r"\b(v[êe]tements?|clothing|kleding|apparel|robes?|dress(es)?|jupes?|pantalons?|"
-    r"trousers?|jeans?|chemises?|shirts?|t-shirts?|tops?|pulls?|sweats?|sweaters?|hoodies?|"
+    r"trousers?|trackpants?|joggers?|jeans?|chemises?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|sweats?|sweaters?|hood(?:y|ies)?|"
     r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|lingerie|underwear|"
     r"sleepwears?|pyjamas?|maillots?|chaussettes?|socks?|polos?|overhemd|broek|jas|blazers?|"
     r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|"
