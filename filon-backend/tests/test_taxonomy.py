@@ -193,6 +193,9 @@ class TestSubcategories:
             (t.TELEPHONIE, "iPhone 15 Pro 128 Go", "Smartphones"),
             (t.TELEPHONIE, "Burga Tough Backcover MagSafe pour Apple iPhone 15 Pro", "Coques & Protections"),
             (t.TELEPHONIE, "Phone Case for iPhone 15", "Coques & Protections"),
+            # Libellé réel du catalogue Smartphonehoesjes NL-BE : le composé
+            # néerlandais ne contient pas de séparation avant « hoes ».
+            (t.TELEPHONIE, "Selencia Nova Telefoonhoes met Koord voor Samsung Galaxy S24", "Coques & Protections"),
             (t.TELEPHONIE, "Screen Protector for iPhone 15", "Coques & Protections"),
             (t.TELEPHONIE, "Écran tactile Samsung Galaxy S23+ avec cadre", "Pièces détachées"),
             (t.TELEPHONIE, "Support PCB Oppo Reno16 F", "Pièces détachées"),
