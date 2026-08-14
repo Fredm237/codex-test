@@ -7,6 +7,7 @@ Ils dégradent proprement si la base est absente (listes vides).
 from __future__ import annotations
 
 import time
+from collections import Counter
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Header, HTTPException, Query
 from sqlalchemy import (
@@ -454,6 +455,69 @@ async def unclassified(
             {"category": c, "count": int(n)} for (c, n) in cats
         ],
         "sample_names": list(samples),
+    }
+
+
+@router.get("/admin/taxonomy-quality")
+async def taxonomy_quality(
+    limit: int = Query(default=50, ge=1, le=200),
+    scan: int = Query(default=2000, ge=1, le=5000),
+    x_admin_token: str | None = Header(default=None),
+    session=Depends(db.get_session),
+) -> dict:
+    """Contradictions de taxonomie connues, en lecture seule.
+
+    Le scan est borné et ordonné sur les offres récemment mises à jour : il sert
+    de radar de régression après ingestion, pas de remplacement à une campagne
+    d'audit SQL complète. Les signaux sont volontairement conservateurs.
+    """
+    _require_admin(x_admin_token)
+    if session is None:
+        raise HTTPException(status_code=503, detail="base de données absente")
+
+    rows = (
+        await session.execute(
+            select(models.Offer, models.Merchant)
+            .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
+            .order_by(models.Offer.updated_at.desc().nullslast(), models.Offer.id.desc())
+            .limit(scan)
+        )
+    ).all()
+
+    counts: Counter[str] = Counter()
+    items: list[dict] = []
+    for offer, merchant in rows:
+        signals = taxonomy.quality_signals(
+            offer.filon_category,
+            offer.filon_subcategory,
+            offer.offer_kind,
+            offer.name,
+        )
+        if not signals:
+            continue
+        counts.update(signals)
+        if len(items) < limit:
+            items.append(
+                {
+                    "id": offer.id,
+                    "name": offer.name,
+                    "brand": offer.brand,
+                    "merchant": merchant.name,
+                    "category": offer.filon_category,
+                    "subcategory": offer.filon_subcategory,
+                    "offer_kind": offer.offer_kind,
+                    "signals": signals,
+                }
+            )
+
+    return {
+        "scanned": len(rows),
+        "flagged": sum(counts.values()),
+        "by_signal": [
+            {"signal": signal, "count": count}
+            for signal, count in counts.most_common()
+        ],
+        "items": items,
     }
 
 
