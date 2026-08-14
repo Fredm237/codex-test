@@ -1,5 +1,4 @@
 import localFont from "next/font/local";
-import { Outfit, Inter } from "next/font/google";
 
 // Fraunces — conservée pour les rares usages éditoriaux en italique.
 // Elle n'habille plus les titres : la refonte tient sur une seule grotesque.
@@ -13,21 +12,27 @@ export const fraunces = localFont({
   weight: "100 900",
 });
 
-// Outfit — grotesque géométrique pour les titres.
-// C'est la lettre du mot-signe « wearebrand. » : bas de casse, tracé
-// régulier, aucune fioriture. Tenue en graisses légères, l'échelle fait
-// tout le travail — comme dans les plans du compte, où c'est le cadrage
-// qui impose, pas l'ornement.
-export const outfit = Outfit({
-  subsets: ["latin"],
+// Les fontes sont embarquées avec l'application : next/font/google téléchargeait
+// Outfit et Inter pendant chaque build Vercel. Une indisponibilité temporaire de
+// Google Fonts faisait alors échouer une prévisualisation pourtant saine.
+export const outfit = localFont({
+  src: [
+    { path: "./fonts/Outfit-200.ttf", weight: "200", style: "normal" },
+    { path: "./fonts/Outfit-300.ttf", weight: "300", style: "normal" },
+    { path: "./fonts/Outfit-400.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/Outfit-500.ttf", weight: "500", style: "normal" },
+  ],
   variable: "--font-display",
   display: "swap",
-  weight: ["200", "300", "400", "500"],
 });
 
-// Inter — sans-serif pour le corps de texte.
-export const inter = Inter({
-  subsets: ["latin"],
+export const inter = localFont({
+  src: [
+    { path: "./fonts/Inter-400.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/Inter-500.ttf", weight: "500", style: "normal" },
+    { path: "./fonts/Inter-600.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/Inter-700.ttf", weight: "700", style: "normal" },
+  ],
   variable: "--font-sans",
   display: "swap",
 });
