@@ -115,6 +115,12 @@ _TYRE_REFERENCE = r"\b(?:pkw|mo|off|llkw)\b"
 _TYRE_CATEGORY = r"\b(pneus?|tyres?|banden|reifen|pneumatici)\b"
 _TYRE_DIMENSION = r"\b\d{3}/\d{2}\s*r\d{2}(?:[a-z]{0,4})?\b"
 
+# Andlight est un marchand spécialisé en luminaires, mobilier et décoration.
+# Son flux néerlandais peut omettre la catégorie brute et ne donner qu’un nom
+# de collection (« Paletti », « Componibili ») : ce contexte est donc un dernier
+# recours, après tous les signaux produits et rayons explicites.
+_ANDLIGHT_MERCHANT = r"\bandlight\b"
+
 
 def _is_tyre_specialist_reference(name: str | None, merchant_name: str | None) -> bool:
     return bool(
@@ -942,4 +948,11 @@ def classify(
             if _has(pattern, text):
                 return category
 
-    return MODE if clothing else None
+    if clothing:
+        return MODE
+    if (
+        _has(_ANDLIGHT_MERCHANT, merchant_name or "")
+        and classify_offer_kind(merchant_category, name, brand, merchant_name) == PHYSICAL_PRODUCT
+    ):
+        return MAISON
+    return None
