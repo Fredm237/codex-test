@@ -510,7 +510,8 @@ _RULES: list[tuple[str, str]] = [
              r"home\s*&\s*garden|huishouden|wandklokken?|wandklok|pendules?|"
              r"wandlampen?|wandlamp|appliques?|suspensions?|dekbedovertrekken?|"
              r"dekbedovertrek|hoeslakens?|kussenslopen?|kussensloop|handdoeken?|"
-             r"paravents?|tuinkussens?)\b"),
+             r"paravents?|tuinkussens?|eetkamerstoel(?:en)?|eettafelstoel(?:en)?|salontafels?|"
+             r"eettafels?|tafelspiegels?|tapijt(?:en)?|lampenvoet(?:en)?|armleuningen?)\b"),
     (MAISON, r"\bpendant\s+(?:lamps?|lights?|lighting)\b"),
     (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
              r"toys?)\b"),
