@@ -55,6 +55,8 @@ class TestMainCategories:
             ("Heimwerker-Zubehör", "Patte de fixation pour étagère", t.JARDIN),
             ("Cartouches d'encre", "Cartouche d'encre noire Canon", t.INFORMATIQUE),
             ("Color Lenses", "Color Lenses Ocean Blue", t.BEAUTE),
+            ("Mobilier > Armoires et étagères > Rayonnage", "Bibliothèque Mini 1004 Anthracite", t.MAISON),
+            ("Déco > Textiles > Tapis", "Varjo Tapis 170x240 Bleu", t.MAISON),
         ],
     )
     def test_classifies_from_the_product_name(self, category, name, expected):
