@@ -323,7 +323,7 @@ async def _upsert_offer(
             row.get("merchant_category"), name, row.get("brand_name"), merchant_name
         )),
         "filon_subcategory": taxonomy.classify_subcategory(
-            _cat, name, row.get("merchant_category")
+            _cat, name, row.get("merchant_category"), merchant_name
         ),
         "offer_kind": offer_kind,
         # Le rattachement au produit EAN se fait plus tard : la clé se contente

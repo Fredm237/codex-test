@@ -259,6 +259,15 @@ class TestOfferKinds:
         assert t.classify_offer_kind("Studios", "Ref. 123", merchant_name="Atelier photo") == t.PHYSICAL_PRODUCT
         assert t.classify("Studios", "Ref. 123", merchant_name="Atelier photo") is None
 
+    @pytest.mark.parametrize("reference", ["PKW", "MO", "OFF", "LLKW"])
+    def test_tyre_specialist_context_classifies_minimal_vehicle_codes(self, reference):
+        merchant = "autobandenmarkt / 123pneus BE"
+        assert t.classify("250", reference, "MICHELIN", merchant) == t.AUTO
+        assert t.classify_subcategory(t.AUTO, reference, "250", merchant) == "Pneus"
+
+    def test_vehicle_code_without_tyre_specialist_context_stays_unclassified(self):
+        assert t.classify("250", "PKW", "MICHELIN", "Marchand généraliste") is None
+
     def test_travel_subcategories_are_multilingual(self):
         assert t.classify("Appartement de vacances", "Appartement de vacances à Hévíz") == t.VOYAGES
         assert t.classify_subcategory(t.VOYAGES, "Appartement de vacances à Hévíz") == "Locations de vacances"

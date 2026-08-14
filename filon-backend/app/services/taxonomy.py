@@ -107,6 +107,20 @@ _ACCOMMODATION_MERCHANT_CATEGORY = (
     r"parcs?\s+de\s+vacances|ferienparks?|holiday parks?|bungalows?)\b"
 )
 
+# Le flux autobandenmarkt expose seulement les codes de véhicule (PKW, MO,
+# OFF, LLKW) et un identifiant numérique de gamme. Ces codes ne sont fiables
+# que chez ce spécialiste de pneus ; ils ne deviennent jamais une règle globale.
+_TYRE_MERCHANT = r"\b(?:autobandenmarkt|123pneus)\b"
+_TYRE_REFERENCE = r"\b(?:pkw|mo|off|llkw)\b"
+
+
+def _is_tyre_specialist_reference(name: str | None, merchant_name: str | None) -> bool:
+    return bool(
+        name and merchant_name
+        and _has(_TYRE_MERCHANT, merchant_name)
+        and _has(_TYRE_REFERENCE, name)
+    )
+
 
 def classify_offer_kind(
     merchant_category: str | None,
@@ -765,7 +779,10 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
 
 
 def classify_subcategory(
-    category: str | None, name: str | None = None, merchant_category: str | None = None
+    category: str | None,
+    name: str | None = None,
+    merchant_category: str | None = None,
+    merchant_name: str | None = None,
 ) -> str | None:
     """Sous-rayon d'une offre à l'intérieur de son rayon, ou None.
 
@@ -773,6 +790,11 @@ def classify_subcategory(
     niveau : « bottes » ne peut plus être confondu avec autre chose une fois
     qu'on sait qu'on est dans les chaussures.
     """
+    # Les références réduites du spécialiste de pneus ne portent pas le mot
+    # « pneu ». Le contexte marchand explicite leur donne un sous-rayon sans
+    # faire classer tout « PKW » ou « MO » observé ailleurs.
+    if category == AUTO and _is_tyre_specialist_reference(name, merchant_name):
+        return "Pneus"
     rules = SUBCATEGORIES.get(category or "")
     if not rules:
         return None
@@ -844,6 +866,9 @@ def classify(
     # ne doit jamais être aspiré par Maison, Sport ou Téléphonie sur un mot isolé.
     if classify_offer_kind(merchant_category, name, brand, merchant_name) == ACCOMMODATION:
         return VOYAGES
+
+    if _is_tyre_specialist_reference(name, merchant_name):
+        return AUTO
 
     # Le support d'abord : un tissu imprimé de souris reste un tissu. Sans ce
     # passage préalable, le motif l'emportait et éparpillait la mercerie dans

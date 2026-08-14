@@ -1225,7 +1225,7 @@ async def reclassify_offers(
                     "id": r.id,
                     "filon_category": value,
                     "filon_subcategory": taxonomy.classify_subcategory(
-                        value, r.name, r.category
+                        value, r.name, r.category, r.merchant_name
                     ),
                     "offer_kind": kind,
                 })
