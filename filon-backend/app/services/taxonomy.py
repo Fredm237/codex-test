@@ -706,6 +706,12 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                  r"phone\s+(?:cases?|covers?)|hoe(?:s|sjes)?|"
                                  r"prot[èe]ge-[ée]crans?|screen\s*protectors?|"
                                  r"screenprotectors?|verre\s+tremp[ée]|tempered\s+glass)\b"),
+        # Un écran de remplacement, un support SIM ou une nappe cite presque
+        # toujours le téléphone compatible. Il s'agit d'une pièce, pas du mobile.
+        ("Pièces détachées", r"\b([ée]crans?(?:\s+tactiles?)?|displays?|lcd|oled|"
+                              r"buzzers?|connecteurs?|connectors?|nappes?|flex(?:\s+cables?)?|"
+                              r"pcb|supports?\s+(?:sim|pcb)|tiroirs?\s+sim|lecteurs?\s+sim|"
+                              r"ch[âa]ssis|cadres?|vibreurs?|microphones?|cam[ée]ras?)\b"),
         ("Chargeurs & Batteries", r"\b(chargeurs?|chargers?|power\s*banks?|powerbanks?|"
                                   r"batteries?|c[âa]bles? de charge|charging\s+cables?)\b"),
         ("Smartphones", r"\b(smartphones?|iphone|galaxy|t[ée]l[ée]phones? mobiles?)\b"),
