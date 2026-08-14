@@ -1031,3 +1031,55 @@ def classify(
             return MAISON
         return _specialist_aisle(merchant_name)
     return None
+
+
+# ── Contrôle de cohérence des classements publiés ─────────────────────────────
+#
+# La taxonomie classe les nouvelles offres ; ce détecteur relit les décisions
+# déjà publiées et signale uniquement des contradictions à forte certitude. Il
+# n'essaie jamais de « corriger » une offre : la correction reste une campagne
+# explicite, testée et reprenable.
+QUALITY_SEWING_SUPPORT_IN_FASHION = "sewing_support_in_fashion"
+QUALITY_PHONE_PART_AS_SMARTPHONE = "phone_part_as_smartphone"
+QUALITY_PHYSICAL_ITEM_AS_ACCOMMODATION = "physical_item_as_accommodation"
+QUALITY_PHYSICAL_ITEM_AS_SERVICE = "physical_item_as_service"
+
+_QUALITY_SEWING_HEAD = r"\b(?:patron(?:\s|$)|sewing\s+pattern|schnittmuster|n[äa]hmuster)"
+_QUALITY_PHONE_PART = r"\b(?:[ée]cran|display|lcd|oled|connecteur|connector|nappe|flex\s+cable|buzzer|support\s+(?:pcb|sim)|frame|chassis|camera\s+module)\b"
+_QUALITY_PHYSICAL_HOTEL = r"\b(?:coussin|coffre-fort|bidon|bouteille|pneu|tyre|reifen)\b"
+_QUALITY_PHYSICAL_SERVICE = r"\b(?:glissi[èe]re|rail|support|fixation|kit|composant|hardware|accessor(?:y|ies))\b"
+
+
+def quality_signals(
+    category: str | None,
+    subcategory: str | None,
+    offer_kind: str | None,
+    name: str | None,
+) -> list[str]:
+    """Signale les contradictions certaines entre l'objet vendu et son classement.
+
+    Les motifs représentent des erreurs réellement rencontrées en production.
+    Une liste vide ne signifie pas « parfait » : uniquement qu'aucun des garde-
+    fous connus ne s'applique à cette offre.
+    """
+    text = strip_colour_compounds(name or "")
+    signals: list[str] = []
+    if category in {MODE, MODE_FEMME, MODE_HOMME, MODE_ENFANT} and _has(_QUALITY_SEWING_HEAD, text):
+        signals.append(QUALITY_SEWING_SUPPORT_IN_FASHION)
+    if category == TELEPHONIE and subcategory == "Smartphones" and _has(_QUALITY_PHONE_PART, text):
+        signals.append(QUALITY_PHONE_PART_AS_SMARTPHONE)
+    if offer_kind == ACCOMMODATION and _has(_QUALITY_PHYSICAL_HOTEL, text):
+        signals.append(QUALITY_PHYSICAL_ITEM_AS_ACCOMMODATION)
+    if offer_kind == SERVICE and _has(_QUALITY_PHYSICAL_SERVICE, text):
+        signals.append(QUALITY_PHYSICAL_ITEM_AS_SERVICE)
+    return signals
+
+
+def has_quality_signal(
+    category: str | None,
+    subcategory: str | None,
+    offer_kind: str | None,
+    name: str | None,
+) -> bool:
+    """Raccourci pour les audits qui n'ont besoin que du statut de contradiction."""
+    return bool(quality_signals(category, subcategory, offer_kind, name))

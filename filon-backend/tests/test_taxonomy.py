@@ -351,3 +351,21 @@ class TestOfferKinds:
         assert t.is_ean_comparable(t.ACCOMMODATION) is False
         assert t.is_ean_comparable(t.SERVICE) is False
         assert t.is_ean_comparable(t.DIGITAL_CONTENT) is False
+
+
+class TestTaxonomyQualitySignals:
+    @pytest.mark.parametrize(
+        "category,subcategory,kind,name,expected",
+        [
+            (t.MODE_FEMME, "Robes", t.PHYSICAL_PRODUCT, "Patron KnowMe Robe", t.QUALITY_SEWING_SUPPORT_IN_FASHION),
+            (t.TELEPHONIE, "Smartphones", t.PHYSICAL_PRODUCT, "Écran OLED Samsung Galaxy", t.QUALITY_PHONE_PART_AS_SMARTPHONE),
+            (t.VOYAGES, "Hôtels", t.ACCOMMODATION, "Coussin Hotel en microfibre", t.QUALITY_PHYSICAL_ITEM_AS_ACCOMMODATION),
+            (t.JARDIN, "Quincaillerie", t.SERVICE, "Glissière à montage latéral", t.QUALITY_PHYSICAL_ITEM_AS_SERVICE),
+        ],
+    )
+    def test_detects_known_high_certainty_contradictions(self, category, subcategory, kind, name, expected):
+        assert t.quality_signals(category, subcategory, kind, name) == [expected]
+
+    def test_does_not_flag_a_valid_phone_or_stay(self):
+        assert t.quality_signals(t.TELEPHONIE, "Smartphones", t.PHYSICAL_PRODUCT, "iPhone 15 128 Go") == []
+        assert t.quality_signals(t.VOYAGES, "Hôtels", t.ACCOMMODATION, "Chambre d'hôtel à Bruges") == []
