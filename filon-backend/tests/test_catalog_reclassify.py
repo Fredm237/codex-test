@@ -178,3 +178,29 @@ async def test_reclassify_can_target_one_merchant_without_touching_another(monke
     assert pattern.filon_subcategory == "Patrons & Kits de couture"
     assert dress.filon_category == taxonomy.MODE_FEMME
     assert dress.filon_subcategory == "Robes"
+
+
+@pytest.mark.anyio
+async def test_taxonomy_quality_reports_known_contradictions_without_writing(monkeypatch, scoped_catalogue):
+    monkeypatch.setattr(catalog, "_require_admin", lambda token: None)
+
+    async with db.session_scope() as session:
+        before = (await session.execute(select(models.Offer))).scalars().all()
+        result = await catalog.taxonomy_quality(
+            limit=10,
+            scan=100,
+            x_admin_token="test",
+            session=session,
+        )
+        after = (await session.execute(select(models.Offer))).scalars().all()
+
+    assert result["scanned"] == 3
+    assert result["flagged"] == 1
+    assert result["by_signal"] == [
+        {"signal": taxonomy.QUALITY_PHONE_PART_AS_SMARTPHONE, "count": 1}
+    ]
+    assert result["items"][0]["name"] == "Backcover pour iPhone 15"
+    assert result["items"][0]["signals"] == [taxonomy.QUALITY_PHONE_PART_AS_SMARTPHONE]
+    assert [(offer.id, offer.filon_category, offer.filon_subcategory) for offer in after] == [
+        (offer.id, offer.filon_category, offer.filon_subcategory) for offer in before
+    ]

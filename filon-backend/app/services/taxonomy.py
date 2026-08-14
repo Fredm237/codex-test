@@ -1045,7 +1045,7 @@ QUALITY_PHYSICAL_ITEM_AS_ACCOMMODATION = "physical_item_as_accommodation"
 QUALITY_PHYSICAL_ITEM_AS_SERVICE = "physical_item_as_service"
 
 _QUALITY_SEWING_HEAD = r"\b(?:patron(?:\s|$)|sewing\s+pattern|schnittmuster|n[äa]hmuster)"
-_QUALITY_PHONE_PART = r"\b(?:[ée]cran|display|lcd|oled|connecteur|connector|nappe|flex\s+cable|buzzer|support\s+(?:pcb|sim)|frame|chassis|camera\s+module)\b"
+_QUALITY_PHONE_PART = r"\b(?:coques?|backcovers?|screen\s+protectors?|[ée]cran|display|lcd|oled|connecteur|connector|nappe|flex\s+cable|buzzer|support\s+(?:pcb|sim)|frame|chassis|camera\s+module|batter(?:ie|y)|chargeurs?|chargers?)\b"
 _QUALITY_PHYSICAL_HOTEL = r"\b(?:coussin|coffre-fort|bidon|bouteille|pneu|tyre|reifen)\b"
 _QUALITY_PHYSICAL_SERVICE = r"\b(?:glissi[èe]re|rail|support|fixation|kit|composant|hardware|accessor(?:y|ies))\b"
 
