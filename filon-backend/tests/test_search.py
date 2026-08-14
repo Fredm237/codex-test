@@ -15,7 +15,7 @@ from tests.endpoint_call import call
 from app.db import models
 from app.db.base import Base
 from app.services.search import (
-    MAX_TERMS, relevance_order, search_clause, stem, terms_of,
+    MAX_TERMS, primary_product_filter, relevance_order, search_clause, stem, terms_of,
 )
 from app.services.catalog_search import _PRIMARY_MIN_PRICE, _catalogue_intent, _primary_image_url, _required_name_terms
 
@@ -43,6 +43,11 @@ async def session():
         s.add(offer("2", "Chemise Slim Fit verte", "GANT", 79.0))
         s.add(offer("3", "Pantalon chino beige", "GANT", 99.0))
         s.add(offer("4", "Casque audio sans fil Bluetooth", "Sony", 299.0))
+        s.add(offer("5", "Apple iPhone 15 128 Go", "Apple", 899.0))
+        s.add(offer("6", "Coque souple Apple iPhone 15", "Apple", 19.0))
+        s.add(offer("7", "Support de bureau pour iPhone 15", "Marque", 12.0))
+        s.add(offer("8", "Lenovo IdeaPad ordinateur portable 15 pouces", "Lenovo", 649.0))
+        s.add(offer("9", "Support pour ordinateur portable 15 pouces", "Marque", 25.0))
         await s.commit()
         yield s
     await engine.dispose()
@@ -127,6 +132,16 @@ class TestCatalogueIntent:
         assert _PRIMARY_MIN_PRICE["smartphone"] == 80.0
         assert _PRIMARY_MIN_PRICE["casque"] == 25.0
 
+    def test_public_search_primary_product_filter_keeps_explicit_accessories(self):
+        assert primary_product_filter("coque iphone 15") is None
+
+    def test_public_search_primary_product_filter_protects_generic_phone_queries(self):
+        result = primary_product_filter("iphone 15")
+        assert result is not None
+        excluded, minimum_price = result
+        assert "coque" in excluded
+        assert minimum_price == 80.0
+
     def test_noise_cancelling_request_requires_a_verified_feature_in_title(self):
         required = _required_name_terms("casque à réduction de bruit", "casque")
         assert {"noise", "anc", "cancel"}.issubset(required)
@@ -149,6 +164,21 @@ class TestRelevance:
         res = await _search(session, "chemise")
         # Les deux commencent par « Chemise » : le moins cher départage.
         assert [i["price"] for i in res["items"]] == [79.0, 89.0]
+
+    async def test_generic_iphone_query_does_not_present_parts_as_phones(self, session):
+        res = await _search(session, "iphone")
+        assert res["total"] == 1
+        assert res["items"][0]["name"] == "Apple iPhone 15 128 Go"
+
+    async def test_explicit_iphone_accessory_query_remains_searchable(self, session):
+        res = await _search(session, "coque iphone")
+        assert res["total"] == 1
+        assert "Coque" in res["items"][0]["name"]
+
+    async def test_generic_laptop_query_does_not_present_a_stand_as_a_computer(self, session):
+        res = await _search(session, "ordinateur portable")
+        assert res["total"] == 1
+        assert res["items"][0]["name"].startswith("Lenovo IdeaPad")
 
 
 class TestStem:

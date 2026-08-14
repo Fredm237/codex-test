@@ -316,34 +316,14 @@ async def _rank_real_products(
 
 
 def _synth(query: str, budget: float | None) -> dict[str, Any]:
-    """Repli déterministe quand le LLM n'est pas disponible."""
-    seed = abs(hash(query)) % (10**8)
-    base = int(budget) if budget else 200 + seed % 700
-    name = " ".join(query.split())[:60] or "Votre besoin"
-    name = name[:1].upper() + name[1:]
-    merchants = ["Amazon", "Fnac", "Coolblue", "Boulanger", "MediaMarkt"]
-    defs = [
-        (0.98, 93, True, "Le meilleur équilibre global pour votre besoin.", "−20 €", "baisse", "sous la moyenne"),
-        (0.80, 86, True, "Presque aussi bon, sensiblement moins cher.", None, "stable", "prix habituel"),
-        (1.05, 88, False, "L'endurance en plus, si c'est votre priorité.", None, "stable", "proche moyenne"),
-        (1.18, 85, False, "Le plus puissant de la sélection.", None, "hausse", "mieux vaut attendre"),
-        (0.72, 87, True, "L'équivalent reconditionné, garanti, au meilleur prix.", None, "baisse", "−28 % vs neuf"),
-    ]
-    delivery = ["24 h", "48 h", "2-3 j", "3-4 j"]
-    cards = []
-    for i, (mult, score, buy, why, coupon, hist, note) in enumerate(defs):
-        rank, medal = SLOTS[i]
-        cards.append({
-            "rank": rank, "medal": medal, "name": name, "emoji": "🛍️",
-            "image": None, "link": None,
-            "price": int(base * mult),
-            "merchant": "Back Market" if i == 4 else merchants[(seed >> i) % 5],
-            "delivery": delivery[i % 4], "warranty": "24 mois",
-            "cashback": 3 + ((seed >> i) % 4), "coupon": coupon, "hist": hist,
-            "histNote": note, "score": score, "why": why, "alt": None, "buy": buy,
-        })
-    usage = query.strip().lower() or "votre besoin"
-    return {"usage": usage, "emoji": "🛍️", "offers": 24 + seed % 26, "cards": cards, "real": False}
+    """Repli sûr : ne jamais fabriquer prix, marchands ou scores sans offre réelle."""
+    return {
+        "usage": query.strip().lower() or "votre besoin",
+        "emoji": "🛍️",
+        "offers": 0,
+        "cards": [],
+        "real": False,
+    }
 
 
 def _currency_for(country: str | None) -> str:

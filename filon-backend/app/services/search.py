@@ -39,6 +39,29 @@ _SUFFIXES = ("es", "en", "x", "s", "e")
 # sans rapport.
 _MIN_STEM = 4
 
+# Une requête courte comme « iPhone » ou « ordinateur portable » vise le produit
+# principal, pas son écosystème. Les flux marchands mélangent pourtant coques,
+# pièces détachées et supports avec les produits qu'ils accompagnent. Ces listes
+# ne sont appliquées que si l'utilisateur ne demande pas explicitement un
+# accessoire (« coque iPhone », « support laptop »).
+_PRIMARY_PRODUCT_INTENTS: tuple[tuple[tuple[str, ...], tuple[str, ...], float], ...] = (
+    (
+        ("ordinateur", "laptop", "notebook", "macbook", "pc portable"),
+        ("housse", "hoes", "sleeve", "pochette", "sac", "support", "stand", "chargeur", "charger", "cable", "adaptateur", "clavier", "keyboard", "souris", "mouse"),
+        200.0,
+    ),
+    (
+        ("smartphone", "telephone", "telefoon", "iphone", "android"),
+        ("coque", "case", "cover", "hoes", "protection", "protector", "verre", "glass", "chargeur", "charger", "cable", "adaptateur", "support", "ecran", "écran", "screen", "batterie", "battery", "adhesif", "adhésif", "kit", "piece", "pièce", "repair", "reparation", "réparation"),
+        80.0,
+    ),
+    (
+        ("casque", "headphone", "koptelefoon"),
+        ("housse", "hoes", "case", "cable", "adaptateur", "support", "earpad", "coussin"),
+        25.0,
+    ),
+)
+
 
 def normalize(text: str) -> str:
     """Supprime les accents et normalise en minuscules."""
@@ -72,6 +95,26 @@ def terms_of(query: str | None) -> list[str]:
         if len(w) >= MIN_TERM_LENGTH and w not in seen:
             seen.append(w)
     return seen[:MAX_TERMS]
+
+
+def primary_product_filter(query: str | None) -> tuple[tuple[str, ...], float] | None:
+    """Retourne les accessoires à écarter pour une demande de produit principal.
+
+    La recherche textuelle reste exhaustive lorsque l'utilisateur nomme lui-même
+    un accessoire. Pour une requête générique, l'absence de produit principal est
+    plus honnête qu'une pièce détachée présentée comme un téléphone ou un PC.
+    """
+    terms = terms_of(query)
+    if not terms:
+        return None
+    normalized = " ".join(terms)
+    for triggers, excluded, minimum_price in _PRIMARY_PRODUCT_INTENTS:
+        if not any(trigger in normalized for trigger in triggers):
+            continue
+        if any(term in excluded for term in terms):
+            return None
+        return excluded, minimum_price
+    return None
 
 
 def search_clause(query: str | None):

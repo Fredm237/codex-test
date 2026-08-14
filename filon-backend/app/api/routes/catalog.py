@@ -16,6 +16,7 @@ from sqlalchemy import (
     cast,
     delete,
     func,
+    not_,
     or_,
     select,
     update,
@@ -234,6 +235,14 @@ async def offers(
         clause = search.search_clause(q)
         if clause is not None:
             stmt = stmt.where(clause)
+        primary_filter = search.primary_product_filter(q)
+        if primary_filter is not None:
+            excluded, minimum_price = primary_filter
+            lowered_name = func.lower(models.Offer.name)
+            stmt = stmt.where(
+                not_(or_(*[lowered_name.contains(term) for term in excluded])),
+                models.Offer.price >= minimum_price,
+            )
     if merchant:
         stmt = stmt.where(models.Merchant.slug == merchant)
     if department:
