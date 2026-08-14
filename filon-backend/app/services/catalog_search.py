@@ -208,6 +208,9 @@ async def search_internal_products(
                     "product_ean": offer.ean,
                     "name": offer.name,
                     "price": int(round(offer.price)),
+                    # La devise est celle de l'offre relevée. Le pays de contexte
+                    # choisi par l’utilisateur ne permet pas d'en déduire une autre.
+                    "currency": offer.currency or "EUR",
                     "merchant": offer.merchant.name if offer.merchant else "marchand",
                     "image": _primary_image_url(offer.image_url),
                     "link": offer.deep_link or offer.product_url,

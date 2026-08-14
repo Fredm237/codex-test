@@ -228,6 +228,7 @@ def _build_real_card(
         "image": prod.get("image"),
         "link": awin.affiliate_link(prod.get("link"), prod.get("merchant")),
         "price": int(prod["price"]),
+        "currency": str(prod.get("currency") or "EUR"),
         "merchant": prod["merchant"],
         "delivery": prod.get("delivery") or notices["delivery"],
         # Les feeds ne portent pas une garantie comparable : on renvoie vers les

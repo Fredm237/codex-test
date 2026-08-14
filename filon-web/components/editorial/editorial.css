@@ -584,6 +584,7 @@
 .fa-summary { font-size: 15.5px; color: var(--ink-2); margin: 4px 0 18px; }
 .fa-summary b { color: var(--ink); font-weight: 600; }
 .fa-est { color: var(--ink-3); font-size: 13.5px; }
+.fa-country-note { display: block; max-width: 760px; margin-top: 7px; color: var(--ink-3); font-size: 12.5px; line-height: 1.45; }
 
 /* ── ranked recommendation cards — image-forward, desire-driven ── */
 .fa-cards { display: flex; flex-direction: column; gap: 18px; }

@@ -48,6 +48,7 @@ def test_real_card_exposes_the_same_decision_and_does_not_make_a_premature_buy_c
         "product_ean": "1234567890123",
         "name": "Produit vérifié",
         "price": 99,
+        "currency": "GBP",
         "merchant": "Marchand test",
         "link": None,
         "decision": _decision("meilleur_prix_observe", "insuffisant"),
@@ -56,6 +57,7 @@ def test_real_card_exposes_the_same_decision_and_does_not_make_a_premature_buy_c
 
     assert card["offer_id"] == 17
     assert card["product_ean"] == "1234567890123"
+    assert card["currency"] == "GBP"
     assert card["decision"] == product["decision"]
     assert card["evidence_score"] == 67
     assert card["buy"] is False

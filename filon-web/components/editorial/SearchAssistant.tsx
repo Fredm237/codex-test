@@ -11,7 +11,8 @@ const SL = {
     eyebrow: "Assistant d'achat",
     h1Idle: "Que cherchez-vous ?", h1Again: "Un autre achat à analyser ?",
     placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
-    priceFor: "Prix pour",
+    priceFor: "Votre région",
+    countryHelp: "Ce contexte ne masque pas les offres européennes comparables. Les frais et la livraison à votre adresse restent à vérifier chez le marchand.",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
     why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", good: "Bon moment", wait: "Attendre",
     real: "Prix réels · Catalogue FILON", est: "Prix estimés, à titre indicatif",
@@ -30,7 +31,8 @@ const SL = {
     eyebrow: "Koopassistent",
     h1Idle: "Wat zoek je?", h1Again: "Nog een aankoop om te analyseren?",
     placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
-    priceFor: "Prijs voor",
+    priceFor: "Jouw regio",
+    countryHelp: "Deze context verbergt geen vergelijkbare Europese aanbiedingen. Verzendkosten en levering op jouw adres controleer je bij de winkel.",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
     why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", good: "Goed moment", wait: "Wachten",
     real: "Echte prijzen · FILON Catalogus", est: "Geschatte prijzen, ter indicatie",
@@ -49,7 +51,8 @@ const SL = {
     eyebrow: "Shopping assistant",
     h1Idle: "What are you looking for?", h1Again: "Another purchase to analyse?",
     placeholder: "Describe a need, or a product…", ask: "Ask",
-    priceFor: "Price for",
+    priceFor: "Your region",
+    countryHelp: "This context does not hide comparable European offers. Delivery cost and delivery to your address must still be checked with the merchant.",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
     why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", good: "Good time", wait: "Wait",
     real: "Real prices · FILON Catalogue", est: "Estimated prices, for guidance",
@@ -129,7 +132,7 @@ type Hist = "baisse" | "hausse" | "stable";
 type Card = {
   rank: string; medal: string; name: string; emoji: string;
   image?: string | null; link?: string | null;
-  price: number; merchant: string; delivery: string; warranty: string;
+  price: number; currency?: string; merchant: string; delivery: string; warranty: string;
   cashback: number; coupon: string | null; hist: Hist | null; histNote: string;
   score?: number; evidence_score?: number; decision?: DecisionData | null;
   why: string; alt: string | null; buy: boolean;
@@ -276,7 +279,7 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
-          <div className="fa-price"><b>{money(c.price, cur, locale)}</b><span className="mc">{S.at} {c.merchant}</span></div>
+          <div className="fa-price"><b>{money(c.price, c.currency || cur, locale)}</b><span className="mc">{S.at} {c.merchant}</span></div>
           <div className="fa-specs">
             <span><IcTruck /> {c.delivery}</span>
             <span><IcShield /> {c.warranty}</span>
@@ -525,6 +528,7 @@ export function SearchAssistant() {
                   <p className="fa-summary">
                     <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.recos} {result.cards.length} {S.recoTail}{result.cards.length > 1 ? S.nounPl : ""}, {S.classed}{result.cards.length > 1 ? S.adjPl : ""}.
                     <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{countryLabel(result.country || country, locale)}.</span>
+                    <span className="fa-country-note">{S.countryHelp}</span>
                   </p>
                   <div className="fa-cards">
                     {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}
