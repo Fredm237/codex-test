@@ -6,14 +6,20 @@ import { useLocale } from "@/lib/i18n";
 
 const TOTAL_FRAMES = 320;
 const FRAME_BASE = "/seq/hero";
-const SCROLL_HEIGHT = 1000;
-const INITIAL_WINDOW = 24;
-const PREFETCH_WINDOW = 30;
+const DESKTOP_SCROLL_HEIGHT = 1000;
+const MOBILE_SCROLL_HEIGHT = 640;
 
 type ChapterText = {
   title: string;
   eyebrow?: string;
   cta?: { label: string; href: string };
+};
+
+type NetworkConnection = {
+  saveData?: boolean;
+  effectiveType?: string;
+  addEventListener?: (type: "change", listener: () => void) => void;
+  removeEventListener?: (type: "change", listener: () => void) => void;
 };
 
 const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
@@ -67,6 +73,16 @@ function closestFrame(images: Array<HTMLImageElement | null>, target: number, pr
   return images[previous];
 }
 
+function deviceConnection() {
+  if (typeof navigator === "undefined") return null;
+  return (navigator as Navigator & { connection?: NetworkConnection }).connection ?? null;
+}
+
+/**
+ * La même séquence existe sur tous les écrans, mais mobile ne doit jamais
+ * être un film desktop rogné et préchargé à 40 Mo. Le portrait lit les
+ * frames par échantillonnage, sans couper les côtés, autour du scroll réel.
+ */
 export function ImmersiveExperience() {
   const { locale } = useLocale();
   const copy = COPY[locale] ?? COPY.fr;
@@ -80,25 +96,46 @@ export function ImmersiveExperience() {
   const paintedRef = useRef(false);
   const lastFrameRef = useRef(0);
   const lastChapterRef = useRef(-1);
+  const lastOpacityRef = useRef(-1);
   const rafRef = useRef(0);
   const [ready, setReady] = useState(false);
   const [canvasPainted, setCanvasPainted] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(() =>
-    typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches,
-  );
+  const [reducedMotion, setReducedMotion] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [saveData, setSaveData] = useState(false);
+  const [deviceReady, setDeviceReady] = useState(false);
   const [activeChapter, setActiveChapter] = useState(0);
   const [chapterOpacity, setChapterOpacity] = useState(1);
 
   useEffect(() => {
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setReducedMotion(media.matches);
+    const compact = window.matchMedia("(max-width: 768px)");
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const connection = deviceConnection();
+    const update = () => {
+      setIsMobile(compact.matches);
+      setReducedMotion(motion.matches);
+      setSaveData(Boolean(connection?.saveData) || connection?.effectiveType === "slow-2g" || connection?.effectiveType === "2g");
+      setDeviceReady(true);
+    };
     update();
-    media.addEventListener("change", update);
-    return () => media.removeEventListener("change", update);
+    compact.addEventListener("change", update);
+    motion.addEventListener("change", update);
+    connection?.addEventListener?.("change", update);
+    return () => {
+      compact.removeEventListener("change", update);
+      motion.removeEventListener("change", update);
+      connection?.removeEventListener?.("change", update);
+    };
   }, []);
 
+  const frameStride = isMobile ? (saveData ? 8 : 4) : 1;
+  const initialFrameCount = isMobile ? 3 : 12;
+  const prefetchWindow = isMobile ? (saveData ? 12 : 24) : 30;
+
   useEffect(() => {
-    if (reducedMotion) {
+    if (!deviceReady) return;
+    if (reducedMotion || saveData) {
+      // Le poster reste le rendu intentionnel sur connexion lente ou mouvement réduit.
       readyRef.current = true;
       setReady(true);
       return;
@@ -120,62 +157,56 @@ export function ImmersiveExperience() {
         if (readyRef.current) requestAnimationFrame(() => drawRef.current());
       };
       image.onerror = () => {
-        if (!mounted) return;
-        if (index === 0) {
-          // Le poster reste visible : l'expérience ne bascule jamais sur un écran noir.
-          readyRef.current = true;
-          setReady(true);
-        }
+        if (!mounted || index !== 0) return;
+        // Le poster reste visible : l'expérience ne bascule jamais sur un écran noir.
+        readyRef.current = true;
+        setReady(true);
       };
       image.src = frameSource(index);
     };
 
     prefetchRef.current = (frame: number) => {
-      const from = Math.max(0, frame - 4);
-      const to = Math.min(TOTAL_FRAMES - 1, frame + PREFETCH_WINDOW);
-      for (let index = from; index <= to; index += 1) loadFrame(index);
+      const from = Math.max(0, frame - frameStride * 2);
+      const to = Math.min(TOTAL_FRAMES - 1, frame + prefetchWindow);
+      for (let index = from; index <= to; index += frameStride) loadFrame(index);
     };
 
-    for (let index = 0; index < INITIAL_WINDOW; index += 1) loadFrame(index);
-    let nextFrame = INITIAL_WINDOW;
-    const progressiveLoader = window.setInterval(() => {
-      if (!mounted || nextFrame >= TOTAL_FRAMES) {
-        window.clearInterval(progressiveLoader);
-        return;
-      }
-      const until = Math.min(TOTAL_FRAMES, nextFrame + 6);
-      for (; nextFrame < until; nextFrame += 1) loadFrame(nextFrame);
-    }, 220);
+    for (let index = 0; index < initialFrameCount * frameStride; index += frameStride) loadFrame(index);
 
     return () => {
       mounted = false;
-      window.clearInterval(progressiveLoader);
       prefetchRef.current = () => {};
     };
-  }, [reducedMotion]);
+  }, [deviceReady, frameStride, initialFrameCount, prefetchWindow, reducedMotion, saveData]);
 
   const draw = useCallback(() => {
     const container = containerRef.current;
     const canvas = canvasRef.current;
-    if (!container || !canvas || !ready) return;
+    if (!container || !canvas || !ready || reducedMotion || saveData) return;
 
     const rect = container.getBoundingClientRect();
     const maxScroll = Math.max(1, rect.height - window.innerHeight);
     const progress = Math.max(0, Math.min(1, -rect.top / maxScroll));
-    const targetFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * (TOTAL_FRAMES - 1)));
+    const rawFrame = Math.min(TOTAL_FRAMES - 1, Math.floor(progress * (TOTAL_FRAMES - 1)));
+    const targetFrame = isMobile
+      ? Math.min(TOTAL_FRAMES - 1, Math.round(rawFrame / frameStride) * frameStride)
+      : rawFrame;
     prefetchRef.current(targetFrame);
 
     const image = closestFrame(imagesRef.current, targetFrame, lastFrameRef.current);
     const context = canvas.getContext("2d", { alpha: false });
     if (context && image) {
-      const density = Math.min(window.devicePixelRatio || 1, 2);
+      const density = isMobile ? 1 : Math.min(window.devicePixelRatio || 1, 2);
       const width = Math.round(window.innerWidth * density);
       const height = Math.round(window.innerHeight * density);
       if (canvas.width !== width || canvas.height !== height) {
         canvas.width = width;
         canvas.height = height;
       }
-      const scale = Math.max(width / image.width, height / image.height);
+      // Bureau : cadre cinéma plein écran. Mobile : montrer toute la scène, jamais la couper.
+      const scale = isMobile
+        ? Math.min(width / image.width, height / image.height)
+        : Math.max(width / image.width, height / image.height);
       const drawWidth = image.width * scale;
       const drawHeight = image.height * scale;
       context.fillStyle = "#0e0c0b";
@@ -201,13 +232,17 @@ export function ImmersiveExperience() {
       lastChapterRef.current = chapterIndex;
       setActiveChapter(chapterIndex);
     }
-    setChapterOpacity(Math.max(0, Math.min(1, opacity)));
-  }, [copy.chapters.length, ready]);
+    const clampedOpacity = Math.max(0, Math.min(1, opacity));
+    if (Math.abs(clampedOpacity - lastOpacityRef.current) > 0.025) {
+      lastOpacityRef.current = clampedOpacity;
+      setChapterOpacity(clampedOpacity);
+    }
+  }, [copy.chapters.length, frameStride, isMobile, ready, reducedMotion, saveData]);
 
   drawRef.current = draw;
 
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || reducedMotion || saveData) return;
     const onScrollOrResize = () => {
       cancelAnimationFrame(rafRef.current);
       rafRef.current = requestAnimationFrame(draw);
@@ -220,12 +255,15 @@ export function ImmersiveExperience() {
       window.removeEventListener("scroll", onScrollOrResize);
       window.removeEventListener("resize", onScrollOrResize);
     };
-  }, [ready, draw]);
+  }, [draw, ready, reducedMotion, saveData]);
 
   const chapter = copy.chapters[activeChapter];
+  const scrollHeight = isMobile
+    ? (saveData || reducedMotion ? 100 : MOBILE_SCROLL_HEIGHT)
+    : DESKTOP_SCROLL_HEIGHT;
 
   return (
-    <div ref={containerRef} className="fx-imm-wrap" style={{ height: `${SCROLL_HEIGHT}vh` }}>
+    <div ref={containerRef} className={`fx-imm-wrap${isMobile ? " is-mobile" : ""}`} style={{ height: `${scrollHeight}vh` }}>
       <div className="fx-imm-sticky">
         {/* Poster prioritaire : aucune zone noire avant le premier dessin réel. */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -238,7 +276,7 @@ export function ImmersiveExperience() {
           {chapter.cta && <a href={chapter.cta.href} className="fx-imm-cta">{chapter.cta.label}</a>}
         </div>
         <div className="fx-imm-search"><HeroSearch /></div>
-        {!ready ? <div className="fx-imm-loading">{copy.loading}</div> : activeChapter === 0 && chapterOpacity > 0.65 ? <div className="fx-imm-scroll-hint"><span>{copy.scrollHint}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div> : null}
+        {!ready && !saveData ? <div className="fx-imm-loading">{copy.loading}</div> : !saveData && !reducedMotion && activeChapter === 0 && chapterOpacity > 0.65 ? <div className="fx-imm-scroll-hint"><span>{copy.scrollHint}</span><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 3v10M4 9l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /></svg></div> : null}
       </div>
     </div>
   );
