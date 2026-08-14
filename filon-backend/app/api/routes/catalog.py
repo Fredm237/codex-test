@@ -276,18 +276,32 @@ async def offers(
                         for term in excluded
                     ]))
                 )
+    resolved_category: str | None = None
     if category:
-        # Catégorie FILON en priorité : c'est la seule cohérente entre marchands.
-        # Repli sur le libellé brut pour les offres pas encore reclassées.
-        if category in taxonomy.ALL_CATEGORIES:
-            stmt = stmt.where(models.Offer.filon_category == category)
+        # `category` est un contrat public FILON. Un repli silencieux vers la
+        # catégorie libre du marchand rendait les filtres imprévisibles, surtout
+        # lorsque cette donnée brute était absente. Les noms et slugs FILON sont
+        # les seules valeurs acceptées ici.
+        wanted = category.strip().casefold()
+        resolved_category = next(
+            (
+                name for name in taxonomy.ALL_CATEGORIES
+                if wanted in (name.casefold(), taxonomy.slug_of(name))
+            ),
+            None,
+        )
+        if resolved_category:
+            stmt = stmt.where(models.Offer.filon_category == resolved_category)
         else:
-            stmt = stmt.where(models.Offer.category.ilike(f"%{category}%"))
-            conflict = _gender_conflict_clause(category)
-            if conflict is not None:
-                stmt = stmt.where(conflict)
+            # Une URL invalide doit retourner zéro, jamais déclencher un filtre
+            # opaque sur des catégories source hétérogènes.
+            stmt = stmt.where(models.Offer.id < 0)
     if subcategory:
         stmt = stmt.where(models.Offer.filon_subcategory == subcategory)
+        # Une sous-catégorie est toujours interprétée à l'intérieur du rayon
+        # demandé : cela bloque les couples historiques incohérents.
+        if resolved_category:
+            stmt = stmt.where(models.Offer.filon_category == resolved_category)
     if brand:
         stmt = stmt.where(models.Offer.brand.ilike(f"%{brand}%"))
     if price_min is not None:
@@ -312,7 +326,12 @@ async def offers(
                 "id": o.id,
                 "name": o.name,
                 "brand": o.brand,
-                "category": o.category,
+                # La catégorie publique est FILON. La valeur du marchand reste
+                # disponible séparément pour l’audit, sans piloter la navigation.
+                "category": o.filon_category,
+                "subcategory": o.filon_subcategory,
+                "source_category": o.category,
+                "offer_kind": o.offer_kind,
                 "price": o.price,
                 "currency": o.currency,
                 "in_stock": o.in_stock,
