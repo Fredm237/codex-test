@@ -620,13 +620,19 @@ _RULES: list[tuple[str, str]] = [
     (LOISIRS, r"\b(?:peintures?\s+ak\s+interactive|mod[ée]lisme\s+ak\s+interactive)\b"),
     (JOUETS, r"\b(?:figuren\s*&\s*actiehelden|figures?\s*(?:&|and)\s*action\s*heroes?)\b"),
     (BIJOUX, r"\b(?:polshorloges?|wristwatches?)\b"),
-    (SANTE, r"\b(?:tandheelkunde|health\s+(?:products?|wellness)|hygi(?:è|Ã«)ne)\b"),
-    (MAISON, r"\b(?:reinigingsmiddel|keuken)\b"),
+    (SANTE, r"\b(?:tandheelkunde|health\s+(?:products?|wellness)|health\s*(?:&|and)\s*wellness|"
+            r"hygi(?:è|Ã«)ne|mondwater|floss|massage\s*(?:&|and)\s*welzijn)\b"),
+    (BEAUTE, r"\b(?:hand-?\s*&\s*voetverzorging|hand\s*(?:&|and)\s*foot\s+care)\b"),
+    (MAISON, r"\b(?:reinigingsmiddel|keuken|wonen\s*&\s*koken\s*>\s*wonen\s*>\s*(?:kasten|beddengoed)|"
+             r"furniture\s*>\s*office\s+furniture\s*>\s*office\s*(?:&|and)\s*desk\s+chairs|"
+             r"wonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*verwarming)\b"),
     (JARDIN, r"\b(?:carrelage\s+mur\s+int[ée]rieur|wall\s+tiles?)\b"),
     (MODE, r"\b(?:habillement\s*>\s*couvre-chef|intiem)\b"),
+    (SPORT, r"\b(?:sports?\s*(?:&|and)\s*outdoor|multisports?\s*>\s*doudoune|training\s*>\s*[ée]lastique)\b"),
+    (JOUETS, r"\b(?:jeux?\s+pour\s+famille\s*/\s*amis|family\s*(?:&|and)\s*friends?\s+games?)\b"),
     (CULTURE, r"\b(livres?|romans?|manga|dvd|blu-ray|vinyles?|boek|books?|librairie|magazines?)\b"),
     (ALIMENTATION, r"\b(alimentation|[ée]picerie|caf[ée]|th[ée]|vins?|bi[èe]res?|chocolats?|"
-                   r"snacks?|boissons?|voeding|wijn)\b"),
+                   r"snacks?|boissons?|voeding|wijn|eten\s*(?:&|and)\s*drinken)\b"),
 ]
 
 

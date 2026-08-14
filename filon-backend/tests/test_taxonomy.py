@@ -139,6 +139,15 @@ class TestEnrichedFromRealFeedLabels:
             ("Reinigingsmiddel", t.MAISON),
             ("Carrelage Mur Intérieur", t.JARDIN),
             ("Habillement > Couvre-chef > Bérets", t.MODE),
+            ("Health & Wellness", t.SANTE),
+            ("Mondwater & floss", t.SANTE),
+            ("Hand- & voetverzorging", t.BEAUTE),
+            ("Sports & Outdoor", t.SPORT),
+            ("Jeux pour Famille / Amis", t.JOUETS),
+            ("Eten & drinken", t.ALIMENTATION),
+            ("Wonen & Koken > Wonen > Kasten", t.MAISON),
+            ("Furniture > Office Furniture > Office & Desk Chairs", t.MAISON),
+            ("Wonen & Koken > Klimaatbeheersing > Verwarming", t.MAISON),
         ],
     )
     def test_top_unclassified_labels_are_now_recognised(self, label, expected):
