@@ -1098,6 +1098,10 @@ async def reclassify_offers(
     after_id: int = Query(default=0, ge=0),
     max_offers: int = Query(default=0, ge=0),
     max_seconds: float = Query(default=120.0, gt=0, le=600),
+    filon_category: str | None = Query(
+        default=None, max_length=64,
+        description="Limiter le rattrapage à un rayon FILON existant.",
+    ),
     x_admin_token: str | None = Header(default=None),
 ) -> dict:
     """Recalcule la catégorie FILON des offres déjà en base.
@@ -1115,6 +1119,10 @@ async def reclassify_offers(
     - `max_seconds` arrête la passe avant que la requête n'expire ;
     - `max_offers` plafonne le nombre d'offres touchées par appel ;
     - `after_id` reprend là où la passe précédente s'est arrêtée.
+
+    `filon_category` limite optionnellement la passe aux offres actuellement
+    rangées dans un rayon précis. Cela permet de rattraper une règle corrigée
+    sans déclencher une réécriture complète de la base.
 
     La réponse renvoie `next_after_id` et `done` : l'appelant boucle jusqu'à
     `done`, ce qui laisse Postgres recycler son journal entre deux passes.
@@ -1139,15 +1147,15 @@ async def reclassify_offers(
                 remaining = min(remaining, max_offers - updated)
                 if remaining <= 0:
                     break
+            stmt = select(
+                models.Offer.id, models.Offer.category,
+                models.Offer.name, models.Offer.brand,
+            ).where(models.Offer.id > last_id)
+            if filon_category:
+                stmt = stmt.where(models.Offer.filon_category == filon_category)
             rows = (
                 await session.execute(
-                    select(
-                        models.Offer.id, models.Offer.category,
-                        models.Offer.name, models.Offer.brand,
-                    )
-                    .where(models.Offer.id > last_id)
-                    .order_by(models.Offer.id)
-                    .limit(remaining)
+                    stmt.order_by(models.Offer.id).limit(remaining)
                 )
             ).all()
             if not rows:
@@ -1179,6 +1187,7 @@ async def reclassify_offers(
         "next_after_id": last_id,
         "done": done,
         "elapsed_seconds": round(time.monotonic() - started, 1),
+        "filon_category": filon_category,
     }
 
 
