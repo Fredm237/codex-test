@@ -274,6 +274,13 @@ class TestOfferKinds:
     def test_vehicle_code_without_tyre_specialist_context_stays_unclassified(self):
         assert t.classify("250", "PKW", "MICHELIN", "Marchand généraliste") is None
 
+    @pytest.mark.parametrize("name", ["Paletti Sofa Middenmodule Mist", "Componibili 3-delige Kast Bio Groen"])
+    def test_andlight_context_classifies_collection_names_as_home(self, name):
+        assert t.classify("", name, merchant_name="Andlight BE") == t.MAISON
+
+    def test_collection_name_without_andlight_context_stays_unclassified(self):
+        assert t.classify("", "Paletti Sofa Middenmodule Mist", merchant_name="Marchand généraliste") is None
+
     def test_tyre_dimension_overrides_camping_model_name(self):
         category = "Les pneus industriels, pneus camion et les pneus utilitaire"
         name = "Michelin CrossClimate Camping ( 195/75 R16CP 107/105R 8PR EV Suitable )"
