@@ -1,8 +1,9 @@
-"""Cron interne : rafraîchit le catalogue Awin toutes les N heures.
+"""Planification résiliente de la synchronisation Awin.
 
-Activé par AWIN_AUTO_SYNC_HOURS (> 0) + AWIN_FEED_API_KEY + base de données.
-Tourne dans le process web (une seule réplique), en tâche de fond asyncio.
-Aucun service Railway supplémentaire à configurer : il suffit d'une variable.
+Le planificateur reste volontairement dans l'unique processus web Railway, mais
+ne suppose plus qu'un conteneur survivra six heures. À chaque démarrage et à
+chaque intervalle, il consulte le journal persistant puis ne déclenche une
+synchronisation que lorsque les données sont réellement devenues périmées.
 """
 
 from __future__ import annotations
@@ -12,37 +13,42 @@ import asyncio
 from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import session as db
-from app.services import awin_catalog, catalog_grouping
+from app.services import catalog_sync
 
 log = get_logger("scheduler")
+
+
+async def _run_if_due(hours: int) -> None:
+    async with db.session_scope() as session:
+        if session is None:
+            log.warning("Auto-sync ignoré : base de données indisponible")
+            return
+        state = await catalog_sync.health(session, interval_hours=hours)
+        if state["status"] in {"fresh", "syncing"}:
+            log.info("Auto-sync non nécessaire : état=%s âge=%s h", state["status"], state.get("age_hours"))
+            return
+        try:
+            result = await catalog_sync.run_catalog_sync(session, trigger="scheduler")
+            log.info("Auto-sync terminé : %s", result)
+        except asyncio.CancelledError:
+            raise
+        except Exception as exc:  # pragma: no cover - réseau ou compte réel
+            # Le détail reste dans les logs internes ; le journal garde un code
+            # neutre, sans risque de persister un secret Awin.
+            log.warning("Auto-sync échoué (%s)", type(exc).__name__)
 
 
 async def _loop(hours: int) -> None:
     interval = hours * 3600
     while True:
-        # On attend d'abord l'intervalle : évite de relancer une grosse ingestion
-        # à chaque redéploiement.
+        await _run_if_due(hours)
         await asyncio.sleep(interval)
-        try:
-            async with db.session_scope() as session:
-                if session is None:
-                    continue
-                await awin_catalog.sync_merchants(session)
-                summary = await awin_catalog.ingest_feeds(session)
-                # Les offres viennent de changer : les produits regroupés
-                # doivent suivre, sinon les fiches multi-marchands se périment.
-                grouping = await catalog_grouping.rebuild_products(session)
-            log.info("Auto-sync terminé : %s | regroupement : %s", summary, grouping)
-        except asyncio.CancelledError:
-            raise
-        except Exception as exc:  # pragma: no cover - réseau/compte
-            log.warning("Auto-sync échoué (%s)", exc)
 
 
 def maybe_start() -> asyncio.Task | None:
-    """Démarre le cron si activé et configuré. Retourne la tâche (ou None)."""
+    """Démarre la surveillance si Awin, la base et l’intervalle sont configurés."""
     s = get_settings()
     if s.awin_auto_sync_hours and s.awin_auto_sync_hours > 0 and s.awin_feed_api_key and db.is_enabled():
-        log.info("Cron catalogue activé : synchro toutes les %d h", s.awin_auto_sync_hours)
+        log.info("Surveillance catalogue activée : vérification toutes les %d h", s.awin_auto_sync_hours)
         return asyncio.create_task(_loop(s.awin_auto_sync_hours))
     return None

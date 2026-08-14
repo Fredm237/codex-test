@@ -26,7 +26,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
-from app.services import decision, search, taxonomy
+from app.services import catalog_sync, decision, search, taxonomy
 from app.services.verdict import compute_verdict
 
 log = get_logger("catalog")
@@ -124,12 +124,17 @@ async def pulse(session=Depends(db.get_session)) -> dict:
         )
     )
     drops = await session.scalar(drops_stmt)
+    sync = await catalog_sync.health(
+        session,
+        interval_hours=max(1, get_settings().awin_auto_sync_hours or 6),
+    )
 
     return {
         "live": True,
         "last_reading": last.isoformat() if last else None,
         "readings_24h": int(readings or 0),
         "drops_24h": int(drops or 0),
+        "sync": sync,
     }
 
 
@@ -1430,18 +1435,20 @@ async def sync_merchants_endpoint(
 
 
 async def _run_feed_ingest(limit: int | None) -> None:
-    """Ingestion des feeds en tâche de fond (session dédiée hors requête)."""
-    from app.services import awin_catalog
-
+    """Synchronisation complète en arrière-plan, journalisée comme le cron."""
     async with db.session_scope() as session:
         if session is None:
             log.warning("Ingestion feeds : base absente")
             return
         try:
-            summary = await awin_catalog.ingest_feeds(session, limit_override=limit)
+            summary = await catalog_sync.run_catalog_sync(
+                session,
+                trigger="manual",
+                limit_override=limit,
+            )
             log.info("Ingestion feeds terminée : %s", summary)
         except Exception as exc:  # pragma: no cover - réseau/compte
-            log.warning("Ingestion feeds échouée : %s", exc)
+            log.warning("Ingestion feeds échouée (%s)", type(exc).__name__)
 
 
 @router.get("/debug/feeds")
