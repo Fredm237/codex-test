@@ -300,7 +300,7 @@ _RULES: list[tuple[str, str]] = [
     (INFORMATIQUE, r"\btapis de souris\b"),
     (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
                    r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|usb|"
-                   r"tablettes?|software)\b"),
+                   r"tablettes?|software|cartouches? d['’ ]encre|ink cartridges?|toner)\b"),
     # Stations d'alimentation et batteries nomades : famille absente de toute
     # règle jusqu'ici. « Station d'alimentation » exige un contexte électrique :
     # sans cela on capturait « Station d'alimentation pour oiseaux », qui est un
@@ -325,7 +325,8 @@ _RULES: list[tuple[str, str]] = [
              r"cosm[ée]tiques?|cosmetics?|beauty|s[ée]rums?|shampooings?|shampoo|"
              r"conditioner|soins? visage|skincare|haircare|hair care|haarverzorging|"
              r"verzorgingsproducten|gezicht|huidverzorging|toner|lipstick|eyeliner|nails?|"
-             r"ongles?|perruques?|wigs?|hair extensions?|vernis)\b"),
+             r"ongles?|perruques?|wigs?|hair extensions?|vernis|lentilles? color[ée]es?|"
+             r"color(?:ed)? lenses?|contact lenses?)\b"),
     # Les crèmes qualifiées, elles, sont bien des soins. Le qualificatif peut
     # précéder (handcrème) ou suivre (crème hydratante) le mot.
     (BEAUTE, r"\bcr[èe]mes?\s+(?:hydratantes?|nourrissantes?|solaires?|de\s+jour|"
@@ -451,7 +452,7 @@ _RULES: list[tuple[str, str]] = [
             r"floating\s+(?:chairs?|loungers?|mats?)|pool\s+(?:floats?|loungers?)|"
             r"inflatable\s+(?:pool|lounge|float|floating)|brassards? de natation)\b"),
     (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
-             r"tuingereedschap|gereedschap|parquet|peinture murale|garden tools?|"
+             r"tuingereedschap|gereedschap|heimwerker[-\s]?zubeh[öo]r|parquet|peinture murale|garden tools?|"
              r"tron[çc]onneuses?|kettingzagen?|kettingzaag|panneaux? solaires?|"
              r"zonnepane(?:el|len)|barbecues?|salons? de jardin|tuinsets?|"
              r"tuinschermen?|tuinscherm|polyrattan)\b"),
@@ -610,7 +611,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
          r"(?=.*\bsouris\b)(?=.*\b(?:sans[-\s]?fil|optique|gamer|gaming|"
          r"ergonomiques?|bluetooth|filaires?|verticales?|usb|dpi|laser|combo)\b)"),
         ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire)\b"),
-        ("Imprimantes", r"\b(imprimantes?|scanners?|cartouches?|toner)\b"),
+        ("Imprimantes & Consommables", r"\b(imprimantes?|scanners?|cartouches?|toner|ink cartridges?)\b"),
         ("Réseau", r"\b(routeurs?|switch|wifi|r[ée]p[ée]teurs?|modems?)\b"),
         ("Câbles & Adaptateurs", r"\b(c[âa]bles?|adaptateurs?|hubs?|docking)\b"),
     ],
@@ -666,6 +667,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
                      r"haarverzorging|colorations?|perruques?|wigs?|extensions?)\b"),
         ("Ongles", r"\b(ongles?|nails?|vernis|manucure)\b"),
+        ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
     ],
     MAISON: [
         ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|"

@@ -52,6 +52,9 @@ class TestMainCategories:
             ("", "Nike Air Max sneakers", t.CHAUSSURES),
             ("", "Montre automatique acier", t.BIJOUX),
             ("", "Parquet en Chêne Premium Chevron", t.JARDIN),
+            ("Heimwerker-Zubehör", "Patte de fixation pour étagère", t.JARDIN),
+            ("Cartouches d'encre", "Cartouche d'encre noire Canon", t.INFORMATIQUE),
+            ("Color Lenses", "Color Lenses Ocean Blue", t.BEAUTE),
         ],
     )
     def test_classifies_from_the_product_name(self, category, name, expected):
@@ -158,6 +161,8 @@ class TestSubcategories:
             (t.AUTO, "Pneu Michelin 205/55 R16", "Pneus"),
             (t.BEAUTE, "Rasasi Fattan Eau De Parfum", "Parfums"),
             (t.ELECTROMENAGER, "Aspirateur balai sans fil", "Aspirateurs"),
+            (t.INFORMATIQUE, "Cartouche d'encre noire Canon", "Imprimantes & Consommables"),
+            (t.BEAUTE, "Color Lenses Ocean Blue", "Lentilles & Regard"),
         ],
     )
     def test_classifies_within_its_aisle(self, category, name, expected):
