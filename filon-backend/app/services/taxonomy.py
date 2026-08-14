@@ -810,8 +810,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         # Ces règles doivent donc précéder « Smartphones » : une coque iPhone 15
         # n'est pas un iPhone 15, même si le modèle est son mot le plus visible.
         ("Coques & Protections", r"\b(coques?|[ée]tuis?|backcovers?|bookcases?|"
-                                 r"phone\s+(?:cases?|covers?)|hoe(?:s|sjes)?|"
-                                 r"prot[èe]ge-[ée]crans?|screen\s*protectors?|"
+                                 r"phone\s+(?:cases?|covers?)|(?:smartphone|telefoon)hoes(?:je|jes)?|"
+                                 r"hoe(?:s|sjes)?|prot[èe]ge-[ée]crans?|screen\s*protectors?|"
                                  r"screenprotectors?|verre\s+tremp[ée]|tempered\s+glass)\b"),
         # Un écran de remplacement, un support SIM ou une nappe cite presque
         # toujours le téléphone compatible. Il s'agit d'une pièce, pas du mobile.
