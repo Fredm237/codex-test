@@ -97,11 +97,22 @@ _DIGITAL_CONTENT = r"\b(licen[cs]e keys?|cd keys?|game keys?|activation keys?|gi
 _SERVICE = r"\b(installation|montage|r[ée]paration|repair service|service de|garantie [ée]tendue|extended warranty|assurance|insurance|cours de|training)\b"
 _TECH_ACCESSORY = r"\b(coques?|backcovers?|bookcases?|screen ?protectors?|chargeurs?|chargers?|c[âa]bles? de charge|charging cables?|power ?banks?|[ée]tuis?)\b"
 
+# Certains mots sont intrinsèquement ambigus : un studio peut être un logement,
+# un espace de création ou un produit. Le contexte explicite d’un marchand de
+# réservation permet de les comprendre sans étendre aveuglément une règle à tout
+# le catalogue.
+_ACCOMMODATION_MERCHANT = r"\bbungalow\.net\b"
+_ACCOMMODATION_MERCHANT_CATEGORY = (
+    r"\b(appartement(?:en)?s?|villas?|villen|studios?|studio's|"
+    r"parcs?\s+de\s+vacances|ferienparks?|holiday parks?|bungalows?)\b"
+)
+
 
 def classify_offer_kind(
     merchant_category: str | None,
     name: str | None = None,
     brand: str | None = None,
+    merchant_name: str | None = None,
 ) -> str:
     """Nature transactionnelle observée, sans inférer un contexte d'achat.
 
@@ -111,10 +122,14 @@ def classify_offer_kind(
     del brand  # Réservé au contrat stable de la fonction.
     name = strip_colour_compounds((name or "").strip())
     merchant_category = strip_colour_compounds((merchant_category or "").strip())
+    merchant_name = (merchant_name or "").strip()
     text = " ".join(part for part in (name, merchant_category) if part)
     if not text:
         return UNKNOWN
-    if _has(_ACCOMMODATION, text):
+    if _has(_ACCOMMODATION, text) or (
+        _has(_ACCOMMODATION_MERCHANT, merchant_name)
+        and _has(_ACCOMMODATION_MERCHANT_CATEGORY, merchant_category)
+    ):
         return ACCOMMODATION
     if _has(_DIGITAL_CONTENT, text):
         return DIGITAL_CONTENT
@@ -712,8 +727,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     VOYAGES: [
         ("Locations de vacances", r"\b(appartements? de vacances|maison(?:s)? de vacances|g[îi]tes?|vakantiehuis(?:jes)?|ferienwohnungen?|ferienh[aä]user?|holiday homes?)\b"),
         ("Hôtels", r"\b(h[ôo]tels?|chambres? d['’ ]h[ôo]tel|hotel kamers?)\b"),
-        ("Villas & Appartements", r"\b(villas?|appartements?|studios?|wohnungen?|woningen?)\b"),
-        ("Campings & Parcs", r"\b(campings?|bungalows?|mobile homes?|vakantieparken?|ferienparks?|holiday parks?)\b"),
+        ("Villas & Appartements", r"\b(villas?|appartements?|appartementen|studios?|wohnungen?|woningen?)\b"),
+        ("Campings & Parcs", r"\b(campings?|bungalows?|mobile homes?|parcs?\s+de\s+vacances|vakantieparken?|ferienparks?|holiday parks?)\b"),
     ],
     AUTO: [
         ("Pneus", r"\b(pneus?|tyres?|banden)\b"),
@@ -809,6 +824,7 @@ def classify(
     merchant_category: str | None,
     name: str | None = None,
     brand: str | None = None,
+    merchant_name: str | None = None,
 ) -> str | None:
     """Rend la catégorie FILON d'une offre, ou None si rien n'est reconnu.
 
@@ -826,7 +842,7 @@ def classify(
 
     # La nature transactionnelle est plus structurante que le rayon : un séjour
     # ne doit jamais être aspiré par Maison, Sport ou Téléphonie sur un mot isolé.
-    if classify_offer_kind(merchant_category, name, brand) == ACCOMMODATION:
+    if classify_offer_kind(merchant_category, name, brand, merchant_name) == ACCOMMODATION:
         return VOYAGES
 
     # Le support d'abord : un tissu imprimé de souris reste un tissu. Sans ce

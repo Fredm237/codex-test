@@ -1193,6 +1193,9 @@ async def reclassify_offers(
             stmt = select(
                 models.Offer.id, models.Offer.category,
                 models.Offer.name, models.Offer.brand,
+                models.Merchant.name.label("merchant_name"),
+            ).join(
+                models.Merchant, models.Merchant.id == models.Offer.merchant_id
             ).where(models.Offer.id > last_id)
             if filon_category:
                 stmt = stmt.where(models.Offer.filon_category == filon_category)
@@ -1212,8 +1215,12 @@ async def reclassify_offers(
                 break
             payload = []
             for r in rows:
-                kind = taxonomy.classify_offer_kind(r.category, r.name, r.brand)
-                value = taxonomy.classify(r.category, r.name, r.brand)
+                kind = taxonomy.classify_offer_kind(
+                    r.category, r.name, r.brand, r.merchant_name
+                )
+                value = taxonomy.classify(
+                    r.category, r.name, r.brand, r.merchant_name
+                )
                 payload.append({
                     "id": r.id,
                     "filon_category": value,

@@ -300,6 +300,7 @@ async def _upsert_offer(
     merchant_id: int,
     row: dict,
     *,
+    merchant_name: str | None = None,
     snapshot_cache: set[tuple[int, str, float, bool | None]] | None = None,
 ) -> None:
     pid = (row.get("aw_product_id") or "").strip()
@@ -309,7 +310,7 @@ async def _upsert_offer(
     price = _to_float(row.get("search_price"))
     in_stock = _to_bool(row.get("in_stock"))
     offer_kind = taxonomy.classify_offer_kind(
-        row.get("merchant_category"), name, row.get("brand_name")
+        row.get("merchant_category"), name, row.get("brand_name"), merchant_name
     )
     values = {
         "merchant_id": merchant_id,
@@ -319,7 +320,7 @@ async def _upsert_offer(
         "brand": (row.get("brand_name") or "").strip()[:191] or None,
         "category": (row.get("merchant_category") or "").strip()[:255] or None,
         "filon_category": (_cat := taxonomy.classify(
-            row.get("merchant_category"), name, row.get("brand_name")
+            row.get("merchant_category"), name, row.get("brand_name"), merchant_name
         )),
         "filon_subcategory": taxonomy.classify_subcategory(
             _cat, name, row.get("merchant_category")
@@ -387,17 +388,20 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
     regions = set(s.awin_regions_list)
     max_rows = s.awin_max_rows_per_feed
 
-    # Marchands inscrits connus en base : awin_mid -> merchant_id
-    rows = (await session.execute(select(models.Merchant.id, models.Merchant.awin_mid))).all()
-    mid_to_id = {mid: pk for (pk, mid) in rows}
-    if not mid_to_id:
+    # Marchands inscrits connus en base : le nom est aussi un signal sémantique
+    # borné, utilisé uniquement par les règles qui l’exigent explicitement.
+    rows = (await session.execute(
+        select(models.Merchant.id, models.Merchant.awin_mid, models.Merchant.name)
+    )).all()
+    mid_to_merchant = {mid: (pk, name) for (pk, mid, name) in rows}
+    if not mid_to_merchant:
         log.warning("Aucun marchand en base → lancer sync_merchants d'abord")
         return {"feeds": 0, "offers": 0, "skipped": 0}
 
     feeds = await list_feeds()
     selected = [
         f for f in feeds
-        if f.advertiser_id in mid_to_id and (not regions or not f.region or f.region in regions)
+        if f.advertiser_id in mid_to_merchant and (not regions or not f.region or f.region in regions)
     ]
     limit = limit_override if limit_override is not None else s.awin_feed_limit
     if limit and limit > 0:
@@ -417,10 +421,14 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
             log.warning("Feed %s (%s) indisponible (%s)", f.feed_id, f.advertiser_name, exc)
             skipped += 1
             continue
-        merchant_id = mid_to_id[f.advertiser_id]
+        merchant_id, merchant_name = mid_to_merchant[f.advertiser_id]
         n = 0
         for row in frows:
-            await _upsert_offer(session, merchant_id, row, snapshot_cache=snapshot_cache)
+            await _upsert_offer(
+                session, merchant_id, row,
+                merchant_name=merchant_name,
+                snapshot_cache=snapshot_cache,
+            )
             n += 1
             if n % 200 == 0:  # commit périodique → progression visible dans /stats
                 await session.commit()
