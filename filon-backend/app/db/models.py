@@ -22,6 +22,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
     func,
+    text,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -103,6 +104,36 @@ class Merchant(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
 
     offers: Mapped[list["Offer"]] = relationship(back_populates="merchant")
+
+
+class CatalogSyncRun(Base):
+    """Un cycle de synchronisation catalogue, persistant et sans contenu secret."""
+
+    __tablename__ = "catalog_sync_runs"
+    __table_args__ = (
+        Index("ix_catalog_sync_runs_started", "started_at"),
+        # Un seul cycle actif, quel que soit le point d'entrée. La clause est
+        # explicitement fournie pour PostgreSQL et SQLite, utilisés respectivement
+        # en production et dans les tests.
+        Index(
+            "uq_catalog_sync_runs_running",
+            "status",
+            unique=True,
+            postgresql_where=text("status = 'running'"),
+            sqlite_where=text("status = 'running'"),
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    trigger: Mapped[str] = mapped_column(String(32), default="manual")
+    status: Mapped[str] = mapped_column(String(16), default="running", index=True)
+    started_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    merchants_count: Mapped[int] = mapped_column(Integer, default=0)
+    feeds_count: Mapped[int] = mapped_column(Integer, default=0)
+    offers_count: Mapped[int] = mapped_column(Integer, default=0)
+    skipped_feeds: Mapped[int] = mapped_column(Integer, default=0)
+    failure_reason: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
 class CatalogProduct(Base):

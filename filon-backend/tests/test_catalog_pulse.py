@@ -60,6 +60,10 @@ async def test_compte_les_releves_des_dernieres_24h(session):
     assert res["live"] is True
     # Trois relevés dans la fenêtre ; celui d'il y a quatre jours est exclu.
     assert res["readings_24h"] == 3
+    # Avant le premier cycle journalisé, le pulse s'appuie explicitement sur les
+    # relevés existants au lieu de déclarer le catalogue inconnu ou périmé.
+    assert res["sync"]["status"] == "fresh"
+    assert res["sync"]["source"] == "price_readings"
 
 
 async def test_compte_les_baisses_pas_les_stables(session):
