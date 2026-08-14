@@ -16,9 +16,14 @@ def test_generic_smartphone_request_remains_open_to_the_catalogue_category():
     assert _required_name_terms("un smartphone sous 400 €", "smartphone") == ()
 
 
+def test_explicit_smartphone_part_is_not_misrepresented_as_a_complete_phone():
+    assert _catalogue_intent("batterie iphone 15") is None
+    assert _catalogue_intent("écran iphone 15") is None
+
+
 def test_named_model_searches_the_model_before_the_generic_category_anchor():
     iphone_intent = _catalogue_intent("iphone 15")
     generic_intent = _catalogue_intent("smartphone sous 400 €")
 
-    assert _search_query_for("iphone 15", iphone_intent) == ("iphone", ("iphone",))
+    assert _search_query_for("iphone 15", iphone_intent) == ("iphone 15", ("iphone", "15"))
     assert _search_query_for("smartphone sous 400 €", generic_intent) == ("smartphone", ())
