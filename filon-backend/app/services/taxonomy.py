@@ -131,6 +131,26 @@ _TYRE_DIMENSION = r"\b\d{3}/\d{2}\s*r\d{2}(?:[a-z]{0,4})?\b"
 # recours, après tous les signaux produits et rayons explicites.
 _ANDLIGHT_MERCHANT = r"\bandlight\b"
 
+# Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
+# qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
+# pas déjà un classement plus précis. Chaque entrée reste donc réversible et
+# ne transforme jamais ces noms en mots-clés globaux.
+_SPECIALIST_MERCHANT_CONTEXTS: tuple[tuple[str, str], ...] = (
+    (r"\bisotiger\b", AUTO),
+    (r"\bgsmnet\b", TELEPHONIE),
+    (r"\boverhemden\b", MODE_HOMME),
+    (r"\bmilk\s+bar\s+babystore\b", BEBE),
+    (r"\bbobshop\b", SPORT),
+    (r"\btapis\.fr\b", MAISON),
+)
+
+
+def _specialist_aisle(merchant_name: str | None) -> str | None:
+    for pattern, category in _SPECIALIST_MERCHANT_CONTEXTS:
+        if _has(pattern, merchant_name or ""):
+            return category
+    return None
+
 
 def _is_tyre_specialist_reference(name: str | None, merchant_name: str | None) -> bool:
     return bool(
@@ -963,9 +983,8 @@ def classify(
 
     if clothing:
         return MODE
-    if (
-        _has(_ANDLIGHT_MERCHANT, merchant_name or "")
-        and classify_offer_kind(merchant_category, name, brand, merchant_name) == PHYSICAL_PRODUCT
-    ):
-        return MAISON
+    if classify_offer_kind(merchant_category, name, brand, merchant_name) == PHYSICAL_PRODUCT:
+        if _has(_ANDLIGHT_MERCHANT, merchant_name or ""):
+            return MAISON
+        return _specialist_aisle(merchant_name)
     return None
