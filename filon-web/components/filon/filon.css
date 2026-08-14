@@ -2426,6 +2426,22 @@
     padding: 48px 0 !important;
   }
 
+  /* Catalogue : l'en-tête fixe mesure 80 px, auxquels s'ajoutent ses
+     marges verticales et l'encoche iPhone. Le padding générique de section
+     plaçait le <summary> sous ce calque : il restait visible mais ses taps
+     étaient interceptés par la barre. On réserve ici la hauteur réelle de
+     la barre plus un espace de respiration. */
+  .fx-catalogue.page-top {
+    padding-top: calc(116px + env(safe-area-inset-top)) !important;
+  }
+  .fx-nav-shell { position: relative; z-index: 1; }
+  .fx-nav-toggle {
+    width: 100%;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
   /* Method steps — colonne sur mobile */
   .fx-method-steps {
     flex-direction: column !important;
