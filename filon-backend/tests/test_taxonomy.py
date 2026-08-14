@@ -332,6 +332,12 @@ class TestOfferKinds:
             ("New Balance", "1000"),
             ("Vans", "Authentic Reissue 44"),
             ("Nike", "ACG AIR EXPLORAID"),
+            ("ASICS", "GT-2160"),
+            ("New Balance", "U2002RV1"),
+            ("Salomon", "XT-QUEST"),
+            ("Birkenstock", "Arizona Suede Leather"),
+            ("UGG", "WMNS TASMAN II"),
+            ("Jordan", "TATUM 4"),
         ],
     )
     def test_verified_brand_models_classify_as_shoes(self, brand, name):
@@ -339,6 +345,23 @@ class TestOfferKinds:
 
     def test_brand_model_does_not_override_an_explicit_garment(self):
         assert t.classify("", "Nike Air Max T-shirt", "Nike") == t.MODE
+
+    @pytest.mark.parametrize("name,brand", [
+        ("Swoosh Series Oversize Down Vest", "Nike"),
+        ("JUMPMAN AIR EMB", "Jordan"),
+        ("Newel Pant", "Carhartt WIP"),
+    ])
+    def test_brand_model_never_turns_an_ambiguous_or_explicit_garment_into_shoes(self, name, brand):
+        assert t.classify("", name, brand) != t.CHAUSSURES
+
+    @pytest.mark.parametrize("merchant_category,name", [
+        ("Taekwondo > Plastron > Adulte > Homme", "Plastron reconnu WT Kwon"),
+        ("Jiu-Jitsu brésilien > Kimono", "Kimono Mizuno Gis"),
+        ("Pêche du carnassier > Leurre souple", "Leurres Fox Rage Zander Pro Shad"),
+        ("VTT > Cassette", "Cassette Shimano Deore CS-HG50 10V"),
+    ])
+    def test_observed_martial_arts_fishing_and_cycling_categories_are_sport(self, merchant_category, name):
+        assert t.classify(merchant_category, name) == t.SPORT
 
     def test_model_without_verified_brand_stays_unclassified(self):
         assert t.classify("", "SAMBA OG", "Marchand généraliste") is None
