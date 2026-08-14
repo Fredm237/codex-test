@@ -57,6 +57,10 @@ class TestMainCategories:
             ("Color Lenses", "Color Lenses Ocean Blue", t.BEAUTE),
             ("Mobilier > Armoires et étagères > Rayonnage", "Bibliothèque Mini 1004 Anthracite", t.MAISON),
             ("Déco > Textiles > Tapis", "Varjo Tapis 170x240 Bleu", t.MAISON),
+            ("", "Timb Eetkamerstoel Gestoffeerd Bruin/Hallingdal 368", t.MAISON),
+            ("", "Epic Ronde Salontafel Ø60 cm Wit Travertijn", t.MAISON),
+            ("", "Houkime Tapijt 170x240 Middernacht", t.MAISON),
+            ("", "FABRIC Nagel Glazen Lampenvoet Vierkant 27x27", t.MAISON),
         ],
     )
     def test_classifies_from_the_product_name(self, category, name, expected):
