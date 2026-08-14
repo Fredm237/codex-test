@@ -223,6 +223,7 @@ def _build_real_card(
         "medal": medal,
         "offer_id": prod.get("offer_id"),
         "product_ean": prod.get("product_ean"),
+        "offer_kind": prod.get("offer_kind") or "physical_product",
         "name": prod["name"],
         "emoji": emoji,
         "image": prod.get("image"),
@@ -262,7 +263,7 @@ async def _rank_real_products(
 
     provider = get_router().for_task("reasoning")
     listing = [
-        {"index": i, "name": p["name"], "price": p["price"], "merchant": p["merchant"]}
+        {"index": i, "name": p["name"], "price": p["price"], "merchant": p["merchant"], "offer_kind": p.get("offer_kind", "physical_product")}
         for i, p in enumerate(products)
     ]
     budget_txt = f" Budget max : {int(budget)} €." if budget else ""

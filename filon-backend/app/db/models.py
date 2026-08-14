@@ -194,6 +194,10 @@ class Offer(Base):
     filon_category: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
     # Sous-rayon, à l'intérieur du rayon. Nullable : tous les rayons n'en ont pas.
     filon_subcategory: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+    # Nature transactionnelle : elle précède tout regroupement EAN. Un séjour,
+    # un service ou une licence ne se compare pas comme un produit physique.
+    # Nullable durant la migration ; l’ingestion et le rattrapage la remplissent.
+    offer_kind: Mapped[str | None] = mapped_column(String(32), nullable=True, index=True)
     # Clé de regroupement des doublons (déclinaisons de taille, mêmes articles
     # relistés). Calculée à l'ingestion plutôt qu'à la requête : dédupliquer
     # 795 000 lignes par fenêtrage à chaque affichage était trop coûteux.

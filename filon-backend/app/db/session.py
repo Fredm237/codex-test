@@ -83,6 +83,8 @@ async def _migrate() -> None:
         "CREATE INDEX IF NOT EXISTS ix_offers_filon_category ON offers (filon_category)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS filon_subcategory VARCHAR(64)",
         "CREATE INDEX IF NOT EXISTS ix_offers_filon_subcategory ON offers (filon_subcategory)",
+        "ALTER TABLE offers ADD COLUMN IF NOT EXISTS offer_kind VARCHAR(32)",
+        "CREATE INDEX IF NOT EXISTS ix_offers_offer_kind ON offers (offer_kind)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS dedup_key VARCHAR(191)",
         "CREATE INDEX IF NOT EXISTS ix_offers_dedup_key ON offers (dedup_key)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS is_canonical BOOLEAN DEFAULT TRUE",

@@ -15,7 +15,7 @@ from sqlalchemy import and_, func, not_, or_, select
 from app.core.logging import get_logger
 from app.db.session import session_scope
 from app.db.models import CatalogProduct, Merchant, Offer, PriceSnapshot
-from app.services import decision
+from app.services import decision, taxonomy
 from app.services.search import search_clause, terms_of
 
 log = get_logger("catalog_search")
@@ -165,6 +165,7 @@ async def _decisions_for_offers(session, offers: list[Offer]) -> dict[int, dict[
             offers_count=grouped.offers_count if grouped else 1,
             in_stock=offer.in_stock,
             updated_at=offer.updated_at,
+            offer_kind=offer.offer_kind or taxonomy.classify_offer_kind(offer.category, offer.name, offer.brand),
         )
     return decisions
 
@@ -245,7 +246,8 @@ async def search_internal_products(
             for offer in offers:
                 products.append({
                     "offer_id": offer.id,
-                    "product_ean": offer.ean,
+                    "product_ean": offer.ean if taxonomy.is_ean_comparable(offer.offer_kind) else None,
+                    "offer_kind": offer.offer_kind or taxonomy.classify_offer_kind(offer.category, offer.name, offer.brand),
                     "name": offer.name,
                     "price": int(round(offer.price)),
                     # La devise est celle de l'offre relevée. Le pays de contexte

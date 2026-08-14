@@ -46,12 +46,24 @@ ACCESSOIRES = "Accessoires"
 # ici que dans un rayon genré au hasard, ou nulle part.
 MODE = "Mode"
 LOISIRS = "Loisirs créatifs"
+VOYAGES = "Voyages & Séjours"
+
+# Nature transactionnelle : elle dicte si un prix peut être comparé comme celui
+# d'un produit physique. Cette dimension complète les rayons, elle ne s'y
+# substitue pas.
+PHYSICAL_PRODUCT = "physical_product"
+TECH_ACCESSORY = "tech_accessory"
+ACCOMMODATION = "accommodation"
+SERVICE = "service"
+DIGITAL_CONTENT = "digital_content"
+UNKNOWN = "unknown"
+EAN_COMPARABLE_KINDS = frozenset({PHYSICAL_PRODUCT, TECH_ACCESSORY})
 
 ALL_CATEGORIES = [
     INFORMATIQUE, TELEPHONIE, PHOTO, GAMING, TV_SON, ELECTROMENAGER, MAISON,
     JARDIN, MODE_FEMME, MODE_HOMME, MODE_ENFANT, CHAUSSURES, BIJOUX, BEAUTE,
     SANTE, SPORT, AUTO, BEBE, ANIMALERIE, BAGAGERIE, CULTURE, ALIMENTATION,
-    JOUETS, ACCESSOIRES, LOISIRS, MODE,
+    JOUETS, ACCESSOIRES, LOISIRS, MODE, VOYAGES,
 ]
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -69,9 +81,55 @@ DEPARTMENTS: list[tuple[str, list[str]]] = [
     ("Beauté & Santé", [BEAUTE, SANTE]),
     ("Sport & Loisirs", [SPORT, JOUETS, CULTURE, LOISIRS]),
     ("Famille & Quotidien", [BEBE, ANIMALERIE, AUTO, ALIMENTATION]),
+    ("Voyages", [VOYAGES]),
 ]
 
 _DEPARTMENT_OF = {c: d for d, cats in DEPARTMENTS for c in cats}
+
+
+_ACCOMMODATION = (
+    r"\b(appartements? de vacances|maison(?:s)? de vacances|g[îi]tes?|h[ôo]tels?|"
+    r"chambres? d['’ ]h[ôo]tel|hotel kamers?|vakantiehuis(?:jes)?|vakantieparken?|"
+    r"ferienwohnungen?|ferienh[aä]user?|ferienparks?|holiday homes?|holiday parks?|"
+    r"villas?|bungalows?|mobile homes?|campings?|wohnungen?|woningen?)\b"
+)
+_DIGITAL_CONTENT = r"\b(licen[cs]e keys?|cd keys?|game keys?|activation keys?|gift cards?|cartes? cadeaux?|software download|t[ée]l[ée]chargement|download|abonnements?|subscriptions?)\b"
+_SERVICE = r"\b(installation|montage|r[ée]paration|repair service|service de|garantie [ée]tendue|extended warranty|assurance|insurance|cours de|training)\b"
+_TECH_ACCESSORY = r"\b(coques?|backcovers?|bookcases?|screen ?protectors?|chargeurs?|chargers?|c[âa]bles? de charge|charging cables?|power ?banks?|[ée]tuis?)\b"
+
+
+def classify_offer_kind(
+    merchant_category: str | None,
+    name: str | None = None,
+    brand: str | None = None,
+) -> str:
+    """Nature transactionnelle observée, sans inférer un contexte d'achat.
+
+    Les séjours sont volontairement reconnus avant les mots ambigus du commerce
+    physique : « mobile home » doit devenir une réservation, pas un téléphone.
+    """
+    del brand  # Réservé au contrat stable de la fonction.
+    name = strip_colour_compounds((name or "").strip())
+    merchant_category = strip_colour_compounds((merchant_category or "").strip())
+    text = " ".join(part for part in (name, merchant_category) if part)
+    if not text:
+        return UNKNOWN
+    if _has(_ACCOMMODATION, text):
+        return ACCOMMODATION
+    if _has(_DIGITAL_CONTENT, text):
+        return DIGITAL_CONTENT
+    if _has(_SERVICE, text):
+        return SERVICE
+    if _has(_TECH_ACCESSORY, text):
+        return TECH_ACCESSORY
+    return PHYSICAL_PRODUCT
+
+
+def is_ean_comparable(offer_kind: str | None) -> bool:
+    """Un EAN ne rend comparable que les biens physiques du même produit."""
+    # Les anciennes offres NULL sont traitées comme physiques jusqu'au rattrapage
+    # pour ne pas faire disparaître brusquement le catalogue existant.
+    return offer_kind is None or offer_kind in EAN_COMPARABLE_KINDS
 
 
 def categories_of_department(department: str) -> list[str]:
@@ -636,6 +694,12 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Camping & Randonnée", r"\b(camping|randonn[ée]e|tentes?|sacs? de couchage)\b"),
         ("Sports d'hiver", r"\b(ski|snowboard|luges?)\b"),
     ],
+    VOYAGES: [
+        ("Locations de vacances", r"\b(appartements? de vacances|maison(?:s)? de vacances|g[îi]tes?|vakantiehuis(?:jes)?|ferienwohnungen?|ferienh[aä]user?|holiday homes?)\b"),
+        ("Hôtels", r"\b(h[ôo]tels?|chambres? d['’ ]h[ôo]tel|hotel kamers?)\b"),
+        ("Villas & Appartements", r"\b(villas?|appartements?|studios?|wohnungen?|woningen?)\b"),
+        ("Campings & Parcs", r"\b(campings?|bungalows?|mobile homes?|vakantieparken?|ferienparks?|holiday parks?)\b"),
+    ],
     AUTO: [
         ("Pneus", r"\b(pneus?|tyres?|banden)\b"),
         ("Jantes & Roues", r"\b(jantes?|wheels?|enjoliveurs?)\b"),
@@ -744,6 +808,11 @@ def classify(
     if not name and not merchant_category:
         return None
     clothing = False
+
+    # La nature transactionnelle est plus structurante que le rayon : un séjour
+    # ne doit jamais être aspiré par Maison, Sport ou Téléphonie sur un mot isolé.
+    if classify_offer_kind(merchant_category, name, brand) == ACCOMMODATION:
+        return VOYAGES
 
     # Le support d'abord : un tissu imprimé de souris reste un tissu. Sans ce
     # passage préalable, le motif l'emportait et éparpillait la mercerie dans

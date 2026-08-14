@@ -96,3 +96,41 @@ def test_stale_price_has_a_visible_warning_not_a_hidden_penalty():
     freshness = next(s for s in d["signals"] if s["key"] == "freshness")
     assert freshness["status"] == "warning"
     assert freshness["age_hours"] == 45 * 24
+
+
+def test_accommodation_is_an_indicative_rate_not_a_best_price():
+    d = compute_decision(
+        price=154.0,
+        currency="EUR",
+        history=_history([180, 154]),
+        cheapest_elsewhere=120.0,
+        comparison_currency="EUR",
+        merchants_count=4,
+        in_stock=True,
+        updated_at=BASE,
+        offer_kind="accommodation",
+        now=BASE + timedelta(hours=2),
+    )
+    assert d["offer_kind"] == "accommodation"
+    assert d["recommendation_scope"] == "tarif_a_verifier"
+    assert d["facts"]["price_semantics"] == "indicative_stay_rate"
+    assert d["facts"]["merchants_compared"] == 0
+    assert {"stay_dates", "travellers", "booking_total", "mandatory_fees", "availability_for_dates", "cancellation_policy"}.issubset(d["missing"])
+    assert all(signal["key"] != "comparison" for signal in d["signals"])
+
+
+def test_service_and_digital_content_require_conditions_instead_of_product_verdict():
+    for kind, expected_missing in (("service", "service_scope"), ("digital_content", "digital_region")):
+        d = compute_decision(
+            price=29.99,
+            currency="EUR",
+            history=_history([32, 29.99]),
+            merchants_count=3,
+            in_stock=True,
+            updated_at=BASE,
+            offer_kind=kind,
+            now=BASE + timedelta(hours=1),
+        )
+        assert d["recommendation_scope"] == "conditions_a_verifier"
+        assert expected_missing in d["missing"]
+        assert d["price_verdict"]["level"] == "insuffisant"

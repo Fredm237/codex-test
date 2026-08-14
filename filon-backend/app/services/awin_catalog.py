@@ -308,6 +308,9 @@ async def _upsert_offer(
         return
     price = _to_float(row.get("search_price"))
     in_stock = _to_bool(row.get("in_stock"))
+    offer_kind = taxonomy.classify_offer_kind(
+        row.get("merchant_category"), name, row.get("brand_name")
+    )
     values = {
         "merchant_id": merchant_id,
         "awin_product_id": pid[:191],
@@ -321,6 +324,7 @@ async def _upsert_offer(
         "filon_subcategory": taxonomy.classify_subcategory(
             _cat, name, row.get("merchant_category")
         ),
+        "offer_kind": offer_kind,
         # Le rattachement au produit EAN se fait plus tard : la clé se contente
         # ici du libellé, et le rattrapage la recalcule ensuite.
         "dedup_key": dedup_key(product_id=None, brand=row.get("brand_name"), name=name),
@@ -345,7 +349,11 @@ async def _upsert_offer(
             # `is_adult` fait partie de la mise à jour : un marchand qui renomme
             # une référence ne doit pas conserver un drapeau devenu faux, ni le
             # perdre quand il le devient.
-            set_={k: values[k] for k in ("name", "brand", "category", "price", "currency", "in_stock", "image_url", "deep_link", "ean", "is_adult")},
+            set_={k: values[k] for k in (
+                "name", "brand", "category", "filon_category", "filon_subcategory",
+                "offer_kind", "dedup_key", "price", "currency", "in_stock", "image_url",
+                "deep_link", "ean", "is_adult",
+            )},
         )
         .returning(models.Offer.id)
     )

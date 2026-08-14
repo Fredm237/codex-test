@@ -688,6 +688,13 @@ async def highlights(
         models.Offer.price.isnot(None),
         models.Offer.price > 0,
         models.Offer.image_url.isnot(None),
+        # Les anciennes lignes NULL restent visibles pendant le rattrapage ; dès
+        # que leur nature est connue, un séjour/service/numérique sort des rails
+        # promotionnels conçus exclusivement pour des biens comparables.
+        or_(
+            models.Offer.offer_kind.is_(None),
+            models.Offer.offer_kind.in_([taxonomy.PHYSICAL_PRODUCT, taxonomy.TECH_ACCESSORY]),
+        ),
     ]
     blocked = _visible_merchant_clause()
     if blocked is not None:
@@ -800,6 +807,10 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
     if not row:
         raise HTTPException(status_code=404, detail="offre introuvable")
     o, m = row
+    # Les offres antérieures à la migration sont classées à la lecture jusqu’au
+    # rattrapage. Ainsi, un séjour ne peut pas recevoir un verdict produit entre
+    # le déploiement du schéma et son reclassement par lots.
+    offer_kind = o.offer_kind or taxonomy.classify_offer_kind(o.category, o.name, o.brand)
     hist = (
         await session.execute(
             select(models.PriceSnapshot.price, models.PriceSnapshot.captured_at)
@@ -808,12 +819,17 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         )
     ).all()
     prices = [p for (p, _) in hist if p is not None]
-    grouped = await _grouped_product_summary(session, o.product_id)
+    grouped = (
+        await _grouped_product_summary(session, o.product_id)
+        if taxonomy.is_ean_comparable(offer_kind)
+        else None
+    )
     return {
         "id": o.id,
         "name": o.name,
         "brand": o.brand,
         "category": o.category,
+        "offer_kind": offer_kind,
         "ean": o.ean,
         "price": o.price,
         "currency": o.currency,
@@ -829,12 +845,16 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         # Le produit regroupé, s'il est vendu ailleurs : c'est ce qui permet à la
         # fiche d'une offre de renvoyer vers la comparaison multi-marchands.
         "product": grouped,
-        "verdict": compute_verdict(
-            price=o.price,
-            currency=o.currency,
-            history=hist,
-            cheapest_elsewhere=grouped["price_min"] if grouped else None,
-            merchants_count=grouped["merchants_count"] if grouped else 1,
+        "verdict": (
+            compute_verdict(
+                price=o.price,
+                currency=o.currency,
+                history=hist,
+                cheapest_elsewhere=grouped["price_min"] if grouped else None,
+                merchants_count=grouped["merchants_count"] if grouped else 1,
+            )
+            if taxonomy.is_ean_comparable(offer_kind)
+            else None
         ),
         "decision": decision.compute_decision(
             price=o.price,
@@ -846,6 +866,7 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
             offers_count=grouped["offers_count"] if grouped else 1,
             in_stock=o.in_stock,
             updated_at=o.updated_at,
+            offer_kind=offer_kind,
         ),
     }
 
@@ -1102,6 +1123,10 @@ async def reclassify_offers(
         default=None, max_length=64,
         description="Limiter le rattrapage à un rayon FILON existant.",
     ),
+    only_unclassified: bool = Query(
+        default=False,
+        description="Ne parcourir que les offres encore sans rayon FILON.",
+    ),
     x_admin_token: str | None = Header(default=None),
 ) -> dict:
     """Recalcule la catégorie FILON des offres déjà en base.
@@ -1121,8 +1146,9 @@ async def reclassify_offers(
     - `after_id` reprend là où la passe précédente s'est arrêtée.
 
     `filon_category` limite optionnellement la passe aux offres actuellement
-    rangées dans un rayon précis. Cela permet de rattraper une règle corrigée
-    sans déclencher une réécriture complète de la base.
+    rangées dans un rayon précis. `only_unclassified` traite au contraire les
+    lignes encore sans rayon : c’est le chemin sûr pour enrichir le système
+    sans réécrire les catégories déjà vérifiées.
 
     La réponse renvoie `next_after_id` et `done` : l'appelant boucle jusqu'à
     `done`, ce qui laisse Postgres recycler son journal entre deux passes.
@@ -1130,12 +1156,17 @@ async def reclassify_offers(
     en cours.
     """
     _require_admin(x_admin_token)
+    # En appel HTTP, FastAPI résout Query en booléen. En appel direct de test ou
+    # d’outil interne, la valeur par défaut reste un objet Query : il ne doit pas
+    # activer accidentellement le filtre des offres non classées.
+    only_unclassified = only_unclassified is True
     if not db.is_enabled():
         raise HTTPException(status_code=503, detail="base de données absente")
 
     started = time.monotonic()
     updated = 0
     classified = 0
+    kind_counts: dict[str, int] = {}
     last_id = after_id
     done = False
     async with db.session_scope() as session:
@@ -1153,6 +1184,8 @@ async def reclassify_offers(
             ).where(models.Offer.id > last_id)
             if filon_category:
                 stmt = stmt.where(models.Offer.filon_category == filon_category)
+            if only_unclassified:
+                stmt = stmt.where(models.Offer.filon_category.is_(None))
             rows = (
                 await session.execute(
                     stmt.order_by(models.Offer.id).limit(remaining)
@@ -1163,6 +1196,7 @@ async def reclassify_offers(
                 break
             payload = []
             for r in rows:
+                kind = taxonomy.classify_offer_kind(r.category, r.name, r.brand)
                 value = taxonomy.classify(r.category, r.name, r.brand)
                 payload.append({
                     "id": r.id,
@@ -1170,7 +1204,9 @@ async def reclassify_offers(
                     "filon_subcategory": taxonomy.classify_subcategory(
                         value, r.name, r.category
                     ),
+                    "offer_kind": kind,
                 })
+                kind_counts[kind] = kind_counts.get(kind, 0) + 1
                 if value:
                     classified += 1
             await session.execute(update(models.Offer), payload)
@@ -1188,6 +1224,8 @@ async def reclassify_offers(
         "done": done,
         "elapsed_seconds": round(time.monotonic() - started, 1),
         "filon_category": filon_category,
+        "only_unclassified": only_unclassified,
+        "offer_kinds": kind_counts,
     }
 
 
