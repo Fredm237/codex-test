@@ -158,6 +158,30 @@ def _specialist_aisle(merchant_name: str | None) -> str | None:
     return None
 
 
+# Les grands flux mode affichent souvent seulement le nom de modèle. Une marque
+# ne suffit jamais : Nike, Adidas et Vans vendent aussi des vêtements. Ces motifs
+# ne s'appliquent donc que quand la marque ET un modèle de chaussure observé dans
+# le catalogue sont présents, et un vêtement explicite garde toujours la priorité.
+_FOOTWEAR_MODELS_BY_BRAND: tuple[tuple[str, str], ...] = (
+    (r"\badidas\b", r"\b(adilette(?:\s+22)?(?:\s+slides?)?|gazelle(?:\s+(?:indoor|bold))?|"
+                  r"samba(?:\s+og)?|stan\s+smith|nmd\s+s1|climacool|sl\s*72|"
+                  r"centennial\s+85|campus|superstar|handball\s+spezial|country\s+og)\b"),
+    (r"\basics\b", r"\bgel[-\s]?(?:1130|kayano|nimbus|lyte|venture|quantum)\b"),
+    (r"\bnew\s+balance\b", r"\b(?:1000|1300|2002r?|327|530|550|574|9060|990v?\d*)\b"),
+    (r"\bvans\b", r"\b(authentic(?:\s+reissue\s+44)?|old\s+skool|sk8[-\s]?hi|era|slip[-\s]?on|k\s*nu\s*skool)\b"),
+    (r"\bnike\b", r"\b(acg\s+(?:air\s+exploraid|izy)|air\s+(?:max|force)|dunk|"
+                r"air\s+jordan|pegasus|vomero|zoomx?)\b"),
+)
+
+
+def _brand_footwear(brand: str | None, name: str | None) -> bool:
+    """Vrai seulement pour une marque et un modèle de chaussure explicitement vérifiés."""
+    if not brand or not name:
+        return False
+    return any(_has(brand_pattern, brand) and _has(model_pattern, name)
+               for brand_pattern, model_pattern in _FOOTWEAR_MODELS_BY_BRAND)
+
+
 def _is_tyre_specialist_reference(name: str | None, merchant_name: str | None) -> bool:
     return bool(
         name and merchant_name
@@ -944,6 +968,13 @@ def classify(
         support = _support_de_tete(text)
         if support:
             return support
+
+    # Les modèles de chaussures vérifiés suivent les supports, mais précèdent les
+    # règles génériques : un « Gazelle Indoor » n'est pas un article inconnu.
+    # Un vêtement explicite doit toutefois rester un vêtement, même si sa marque
+    # commercialise aussi une chaussure du même nom.
+    if not any(_has(_VETEMENT, text) for text in (name, merchant_category) if text) and _brand_footwear(brand, name):
+        return CHAUSSURES
 
     # Un signal peut n'exister qu'en croisant les deux sources. Les flux
     # horlogers listent « Calvin Klein 459300030 Gauge Sport band » sous la

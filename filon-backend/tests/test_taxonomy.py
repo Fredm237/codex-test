@@ -294,6 +294,25 @@ class TestOfferKinds:
         assert t.classify("", "Paletti Sofa Middenmodule Mist", merchant_name="Marchand généraliste") is None
 
     @pytest.mark.parametrize(
+        "brand,name",
+        [
+            ("Adidas", "SAMBA OG"),
+            ("ASICS", "GEL-1130"),
+            ("New Balance", "1000"),
+            ("Vans", "Authentic Reissue 44"),
+            ("Nike", "ACG AIR EXPLORAID"),
+        ],
+    )
+    def test_verified_brand_models_classify_as_shoes(self, brand, name):
+        assert t.classify("", name, brand) == t.CHAUSSURES
+
+    def test_brand_model_does_not_override_an_explicit_garment(self):
+        assert t.classify("", "Nike Air Max T-shirt", "Nike") == t.MODE
+
+    def test_model_without_verified_brand_stays_unclassified(self):
+        assert t.classify("", "SAMBA OG", "Marchand généraliste") is None
+
+    @pytest.mark.parametrize(
         "merchant,name,expected",
         [
             ("ISOTIGER (FR)", "Joint de portes pour Renault Scenic", t.AUTO),
