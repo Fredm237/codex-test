@@ -369,3 +369,37 @@ class TestTaxonomyQualitySignals:
     def test_does_not_flag_a_valid_phone_or_stay(self):
         assert t.quality_signals(t.TELEPHONIE, "Smartphones", t.PHYSICAL_PRODUCT, "iPhone 15 128 Go") == []
         assert t.quality_signals(t.VOYAGES, "Hôtels", t.ACCOMMODATION, "Chambre d'hôtel à Bruges") == []
+
+
+class TestProvenResidualFamilies:
+    """Familles mesurées dans les reliquats de production avant correction."""
+
+    @pytest.mark.parametrize(
+        "merchant_category,name,expected",
+        [
+            ("VTT > Manivelle > Adulte > Mixte", "Manivelle type 2 en alliage Praxis", t.SPORT),
+            ("BMX > Casque BMX > Junior > Mixte", "Casque enfant Fly Racing Rayce Repeat", t.SPORT),
+            ("Warhammer 40.000", "Warhammer 40k - Kill Team : Exodites", t.JOUETS),
+            ("Crayon sourcils", "Anastasia Beverly Hills - Brow Definer Brow Pen", t.BEAUTE),
+            ("Styling", "Color Wow - One Minute Transformation Crème Coiffante", t.BEAUTE),
+            ("Multisports > Boxer > Adulte > Homme", "Boxers Erima (x2)", t.SPORT),
+            ("Athlétisme > Cuissard > Adulte > Femme", "Cuissard femme Erima Racing", t.SPORT),
+        ],
+    )
+    def test_classifies_measured_residual_families(self, merchant_category, name, expected):
+        assert t.classify(merchant_category, name) == expected
+
+    @pytest.mark.parametrize(
+        "category,name,merchant_category,expected",
+        [
+            (t.SPORT, "Manivelle type 2 en alliage Praxis", "VTT > Manivelle > Adulte > Mixte", "Cyclisme"),
+            (t.BEAUTE, "Anastasia Beverly Hills - Brow Definer Brow Pen", "Crayon sourcils", "Maquillage"),
+            (t.BEAUTE, "Color Wow - One Minute Transformation Crème Coiffante", "Styling", "Cheveux"),
+        ],
+    )
+    def test_assigns_measured_residual_subcategories(self, category, name, merchant_category, expected):
+        assert t.classify_subcategory(category, name, merchant_category) == expected
+
+    def test_generic_merchandise_is_not_promoted_from_a_brand_alone(self):
+        assert t.classify("", "Fusion 2.0", brand="Karhu") is None
+        assert t.classify("", "ROCC Duftkerze Flint", brand="Alessi") == t.MAISON

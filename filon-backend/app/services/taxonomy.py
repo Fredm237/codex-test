@@ -455,7 +455,10 @@ _RULES: list[tuple[str, str]] = [
              r"eyeshadows?|wimpers|wenkbrauwen|nagels|nagellak|"
              r"gezichtsverzorging|lichaamsverzorging|huidverzorging|"
              r"bodywash|douchegel|face cleansers?|moisturi[sz]ers?|"
-             r"scheren|ontharing|zonnebrand|sunscreens?|cr[èe]me & lotion)\b"),
+             r"scheren|ontharing|zonnebrand|sunscreens?|cr[èe]me & lotion|"
+             r"coiffant|styling|brow\s+(?:pen|definer)|eyebrow|sourcils?|"
+             r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|body\s+mist|"
+             r"face\s+masks?|mask\s+sheet|lips?)\b"),
     # « blush » est aussi un nom de couleur (robe blush, sneakers blush, coussin
     # blush) : mesuré comme régression sur trois rayons. Il n'est retenu que
     # qualifié ou seul en tête de libellé marchand.
@@ -537,7 +540,7 @@ _RULES: list[tuple[str, str]] = [
     (SPORT, r"\b(sportswear|sportartikelen|sportkleding|deportivo|deporte|"
             r"[ée]quipements? sportifs?)\b"),
     (SPORT, r"\b(fitness|musculation|halt[èe]res?|yoga|pilates|jogging|v[ée]los?|"
-            r"cyclisme|running|course [àa] pied|randonn[ée]e|camping|ski|snowboard|"
+            r"cyclisme|vtt|bmx|running|course [àa] pied|randonn[ée]e|camping|ski|snowboard|"
             r"natation|fietsen|football|basket-?ball|handball|rugby|volley|tennis|"
             r"golf|boxe|escalade|kayak|p[ée]che|piscines?|spas? gonflables?|"
             r"zwembaden?)\b"),
@@ -576,6 +579,7 @@ _RULES: list[tuple[str, str]] = [
              r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
              r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
              r"cuisine|meubel|verlichting|schoonmaak|nettoyage|serviettes?|textile|"
+             r"bougies?|duftkerzen?|geurkaarsen?|scented\s+candles?|"
              r"home\s*&\s*garden|huishouden|wandklokken?|wandklok|pendules?|"
              r"wandlampen?|wandlamp|appliques?|suspensions?|dekbedovertrekken?|"
              r"dekbedovertrek|hoeslakens?|kussenslopen?|kussensloop|handdoeken?|"
@@ -583,7 +587,7 @@ _RULES: list[tuple[str, str]] = [
              r"eettafels?|tafelspiegels?|tapijt(?:en)?|lampenvoet(?:en)?|armleuningen?)\b"),
     (MAISON, r"\bpendant\s+(?:lamps?|lights?|lighting)\b"),
     (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
-             r"toys?)\b"),
+             r"toys?|warhammer|games\s+workshop|age\s+of\s+sigmar)\b"),
     # « couture » est écarté : en français il désigne aussi une piqûre de
     # vêtement, et « pyjama sans couture » atterrissait ici.
     (LOISIRS, r"\b(patrons? de couture|patrons?|tricot|laine [àa] tricoter|mercerie|"
@@ -623,8 +627,8 @@ _USAGE_SPORTIF = (
 # Vêtements : le rayon dépend du public, déterminé plus haut.
 _VETEMENT = (
     r"\b(v[êe]tements?|clothing|kleding|apparel|robes?|dress(es)?|jupes?|pantalons?|"
-    r"trousers?|trackpants?|joggers?|jeans?|chemises?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|sweats?|sweaters?|hood(?:y|ies)?|"
-    r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|lingerie|underwear|"
+    r"trousers?|pants?|trackpants?|joggers?|jeans?|chemises?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|sweats?|sweaters?|hood(?:y|ies)?|"
+    r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|leggings?|cuissards?|doudounes?|boxers?|lingerie|underwear|"
     r"sleepwears?|pyjamas?|maillots?|chaussettes?|socks?|polos?|overhemd|broek|jas|blazers?|"
     r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|"
     # « Débardeur Proact Sport », catégorisé « Multisports > Débardeur », n'était
@@ -780,11 +784,12 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     BEAUTE: [
         ("Parfums", r"\b(parfums?|eaux? de parfum|eaux? de toilette|fragrances?)\b"),
         ("Maquillage", r"\b(maquillage|make\s?up|rouges? [àa] l[èe]vres|lipstick|mascaras?|"
-                       r"fonds? de teint|eyeliner|fards?)\b"),
+                       r"fonds? de teint|eyeliner|fards?|sourcils?|eyebrow|brow\s+(?:pen|definer)|"
+                       r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?)\b"),
         ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
                          r"gezicht|toner|masques?)\b"),
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
-                     r"haarverzorging|colorations?|perruques?|wigs?|extensions?)\b"),
+                     r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling)\b"),
         ("Ongles", r"\b(ongles?|nails?|vernis|manucure)\b"),
         ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
     ],
@@ -818,7 +823,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     ],
     SPORT: [
         ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
-        ("Cyclisme", r"\b(v[ée]los?|cyclisme|fietsen|casques? v[ée]lo)\b"),
+        ("Cyclisme", r"\b(v[ée]los?|cyclisme|fietsen|vtt|bmx|casques? v[ée]lo|manivelles?)\b"),
         ("Running", r"\b(running|course [àa] pied|jogging)\b"),
         ("Sports collectifs", r"\b(football|basket-?ball|handball|rugby|volley)\b"),
         ("Camping & Randonnée", r"\b(camping|randonn[ée]e|tentes?|sacs? de couchage)\b"),
@@ -876,6 +881,12 @@ def classify_subcategory(
     niveau : « bottes » ne peut plus être confondu avec autre chose une fois
     qu'on sait qu'on est dans les chaussures.
     """
+    # Dans les flux beauté, « Styling » est une catégorie marchande plus forte
+    # que le mot « crème » du nom : une crème coiffante reste un soin capillaire,
+    # non un soin du visage. Cette exception reste bornée au rayon Beauté.
+    if category == BEAUTE and _has(r"\b(?:coiffant|styling|hair\s*styling)\b", merchant_category or ""):
+        return "Cheveux"
+
     # Les références réduites du spécialiste de pneus ne portent pas le mot
     # « pneu ». Le contexte marchand explicite leur donne un sous-rayon sans
     # faire classer tout « PKW » ou « MO » observé ailleurs.
