@@ -231,6 +231,7 @@ class TestOfferKinds:
             ("Hôtel", "Chambre d'hôtel à Bruges", t.ACCOMMODATION),
             ("", "Code Steam Game Key EU", t.DIGITAL_CONTENT),
             ("Services", "Installation de borne électrique à domicile", t.SERVICE),
+            ("Heimwerker-Zubehör", "Häfele Glissière à extension partielle Acier Montage latéral, 600 mm", t.PHYSICAL_PRODUCT),
             ("Telefoon accessoires", "Coque iPhone 15 Pro MagSafe", t.TECH_ACCESSORY),
             ("", "iPhone 15 smartphone 128 Go", t.PHYSICAL_PRODUCT),
         ],
