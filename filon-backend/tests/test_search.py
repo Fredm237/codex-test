@@ -111,7 +111,7 @@ class TestCatalogueIntent:
     def test_high_tech_browse_excludes_gift_cards_and_phone_covers(self):
         excluded = department_browse_exclusions("high-tech")
         assert excluded is not None
-        assert {"gift card", "backcover", "phone cover"}.issubset(excluded)
+        assert {"gift card", "backcover", "phone cover", "telefoonhoes", "service pack"}.issubset(excluded)
 
     def test_other_department_browse_does_not_hide_unrelated_products(self):
         assert department_browse_exclusions("maison") is None

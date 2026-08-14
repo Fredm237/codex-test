@@ -70,8 +70,10 @@ _PRIMARY_PRODUCT_INTENTS: tuple[tuple[tuple[str, ...], tuple[str, ...], float], 
 _DEPARTMENT_BROWSE_EXCLUSIONS: dict[str, tuple[str, ...]] = {
     "high tech": (
         "gift card", "giftcard", "amazon ₺", "backcover", "phone cover",
-        "coque", "hoesje", "case for", "screen protector", "protective glass",
-        "cable", "charger", "charging cable", "replacement part", "spare part",
+        "coque", "hoesje", "telefoonhoes", "phone case", "protective case",
+        "cover", "screen protector", "protective glass", "cable", "charger",
+        "charging cable", "replacement part", "spare part", "service pack",
+        "accessory", "makeup accessory",
     ),
 }
 

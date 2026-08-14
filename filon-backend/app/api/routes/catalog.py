@@ -268,8 +268,12 @@ async def offers(
             excluded = search.department_browse_exclusions(department)
             if excluded:
                 lowered_name = func.lower(models.Offer.name)
+                lowered_category = func.lower(func.coalesce(models.Offer.category, ""))
                 stmt = stmt.where(
-                    not_(or_(*[lowered_name.contains(term) for term in excluded]))
+                    not_(or_(*[
+                        or_(lowered_name.contains(term), lowered_category.contains(term))
+                        for term in excluded
+                    ]))
                 )
     if category:
         # Catégorie FILON en priorité : c'est la seule cohérente entre marchands.
