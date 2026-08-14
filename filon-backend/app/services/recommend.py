@@ -192,9 +192,7 @@ _SYSTEM_RANK = (
     "Chaque pick : {\n"
     '  "index": entier = index du produit dans la liste,\n'
     '  "label": "étiquette courte adaptée, max 4 mots",\n'
-    '  "score": entier 80-96 (Score FILON),\n'
-    '  "why": "une phrase : pourquoi ce produit pour ce besoin",\n'
-    '  "verdict": "acheter" ou "attendre",\n'
+    '  "why": "une phrase prudente expliquant la pertinence du nom et du prix pour ce besoin, sans inventer de caractéristique",\n'
     '  "alt": "nom d\'une alternative" ou null\n'
     "}\n"
     "Ne renvoie que du JSON."
@@ -207,17 +205,24 @@ def _build_real_card(
     """Carte à partir d'une offre réelle du catalogue partenaire + annotation LLM."""
     default_rank, medal = SLOTS[slot]
     rank = str(ann.get("label") or default_rank)
-    try:
-        score = max(0, min(100, int(ann.get("score", 88))))
-    except (TypeError, ValueError):
-        score = 88
+    decision_data = prod.get("decision") if isinstance(prod.get("decision"), dict) else None
+    observed_score = decision_data.get("score_observed", 0) if decision_data else 0
+    possible_score = decision_data.get("score_possible", 0) if decision_data else 0
+    evidence_score = round((observed_score / possible_score) * 100) if possible_score else 0
     alt = ann.get("alt")
     alt = str(alt) if alt not in (None, "", "null") else None
-    verdict = str(ann.get("verdict", "acheter")).lower()
+    scope = decision_data.get("recommendation_scope") if decision_data else None
+    price_level = (decision_data or {}).get("price_verdict", {}).get("level")
+    # « Bon moment » demande à la fois le meilleur prix observé et un historique
+    # favorable. Tout autre cas reste une offre à vérifier, jamais un achat
+    # recommandé par le seul classement conversationnel.
+    buy = scope == "meilleur_prix_observe" and price_level in {"excellent", "bon"}
     notices = _OFFER_NOTICES[_response_locale(locale)]
     return {
         "rank": rank,
         "medal": medal,
+        "offer_id": prod.get("offer_id"),
+        "product_ean": prod.get("product_ean"),
         "name": prod["name"],
         "emoji": emoji,
         "image": prod.get("image"),
@@ -232,10 +237,13 @@ def _build_real_card(
         "coupon": None,
         "hist": None,
         "histNote": "",
-        "score": score,
+        # Il s'agit d'un ratio de données observées, pas d'une note produit
+        # calculée par le LLM. La décision détaillée reste exposée séparément.
+        "evidence_score": evidence_score,
+        "decision": decision_data,
         "why": str(ann.get("why") or "Un bon choix pour votre besoin."),
         "alt": alt,
-        "buy": verdict != "attendre",
+        "buy": buy,
     }
 
 

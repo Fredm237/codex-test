@@ -7,13 +7,15 @@ Priorité : base interne > SerpApi (fallback).
 """
 from __future__ import annotations
 
+from collections import defaultdict
 from typing import Any
 
-from sqlalchemy import and_, func, not_, or_
+from sqlalchemy import and_, func, not_, or_, select
 
 from app.core.logging import get_logger
 from app.db.session import session_scope
-from app.db.models import Merchant, Offer
+from app.db.models import CatalogProduct, Merchant, Offer, PriceSnapshot
+from app.services import decision
 from app.services.search import search_clause, terms_of
 
 log = get_logger("catalog_search")
@@ -82,6 +84,50 @@ def _primary_image_url(value: str | None) -> str | None:
     return None
 
 
+async def _decisions_for_offers(session, offers: list[Offer]) -> dict[int, dict[str, Any]]:
+    """Calcule les décisions des offres assistant à partir des mêmes preuves que les fiches.
+
+    Les historiques et produits regroupés sont lus par lots : l'assistant ne doit
+    pas déclencher une requête par carte ni posséder ses propres règles de score.
+    """
+    offer_ids = [offer.id for offer in offers]
+    if not offer_ids:
+        return {}
+
+    product_ids = {offer.product_id for offer in offers if offer.product_id is not None}
+    grouped_by_id: dict[int, CatalogProduct] = {}
+    if product_ids:
+        grouped = (
+            await session.execute(select(CatalogProduct).where(CatalogProduct.id.in_(product_ids)))
+        ).scalars().all()
+        grouped_by_id = {product.id: product for product in grouped}
+
+    histories: dict[int, list[tuple[float | None, Any]]] = defaultdict(list)
+    history_rows = await session.execute(
+        select(PriceSnapshot.offer_id, PriceSnapshot.price, PriceSnapshot.captured_at)
+        .where(PriceSnapshot.offer_id.in_(offer_ids))
+        .order_by(PriceSnapshot.offer_id, PriceSnapshot.captured_at)
+    )
+    for offer_id, price, captured_at in history_rows.all():
+        histories[offer_id].append((price, captured_at))
+
+    decisions: dict[int, dict[str, Any]] = {}
+    for offer in offers:
+        grouped = grouped_by_id.get(offer.product_id)
+        decisions[offer.id] = decision.compute_decision(
+            price=offer.price,
+            currency=offer.currency,
+            history=histories[offer.id],
+            cheapest_elsewhere=grouped.price_min if grouped else None,
+            comparison_currency=grouped.currency if grouped else offer.currency,
+            merchants_count=grouped.merchants_count if grouped else 1,
+            offers_count=grouped.offers_count if grouped else 1,
+            in_stock=offer.in_stock,
+            updated_at=offer.updated_at,
+        )
+    return decisions
+
+
 async def search_internal_products(
     query: str, budget: float | None, *, limit: int = 20, country: str | None = None
 ) -> list[dict[str, Any]]:
@@ -109,7 +155,6 @@ async def search_internal_products(
             if clause is None:
                 return []
 
-            from sqlalchemy import select
             from sqlalchemy.orm import joinedload as jl
 
             # Requête : offres canoniques (dédupliquées), pas adultes, avec prix
@@ -155,9 +200,12 @@ async def search_internal_products(
             result = await session.execute(stmt)
             offers = result.scalars().all()
 
+            decisions = await _decisions_for_offers(session, offers)
             products: list[dict[str, Any]] = []
             for offer in offers:
                 products.append({
+                    "offer_id": offer.id,
+                    "product_ean": offer.ean,
                     "name": offer.name,
                     "price": int(round(offer.price)),
                     "merchant": offer.merchant.name if offer.merchant else "marchand",
@@ -166,6 +214,7 @@ async def search_internal_products(
                     "delivery": None,
                     "rating": None,
                     "reviews": None,
+                    "decision": decisions.get(offer.id),
                     "source": "filon_catalog",
                 })
 
