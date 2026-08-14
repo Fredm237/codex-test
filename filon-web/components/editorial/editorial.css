@@ -626,6 +626,14 @@
 .fa-specs .hist.baisse { color: var(--save); font-weight: 600; }
 .fa-why { font-size: 14px; color: var(--ink-2); margin: 13px 0 0; line-height: 1.5; }
 .fa-why b { color: var(--ink); font-weight: 600; }
+/* Les preuves restent à portée de main sans transformer cinq résultats en cinq
+   fiches longues. Le panneau détaillé s'ouvre uniquement à la demande. */
+.fa-decision { margin-top: 12px; }
+.fa-decision > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; color: var(--ink-2); font-size: 13px; font-weight: 650; list-style: none; }
+.fa-decision > summary::-webkit-details-marker { display: none; }
+.fa-decision > summary::before { content: "+"; width: 18px; height: 18px; display: grid; place-items: center; border: 1px solid var(--line-2); border-radius: 50%; color: var(--accent); font-size: 15px; font-weight: 500; }
+.fa-decision[open] > summary::before { content: "−"; }
+.fa-decision > .filon-decision { margin: 10px 0 0; }
 .fa-alt { font-size: 12.5px; color: var(--ink-3); margin: 5px 0 0; }
 .fa-aside { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 128px; }
 

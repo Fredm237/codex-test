@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
+import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
 
 const SL = {
   fr: {
@@ -12,7 +13,7 @@ const SL = {
     placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
     priceFor: "Prix pour",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
-    why: "Pourquoi", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", good: "Bon moment", wait: "Attendre",
+    why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", good: "Bon moment", wait: "Attendre",
     real: "Prix réels · Catalogue FILON", est: "Prix estimés, à titre indicatif",
     analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
     failedTitle: "Je ne peux pas répondre pour le moment.",
@@ -31,7 +32,7 @@ const SL = {
     placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
     priceFor: "Prijs voor",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
-    why: "Waarom", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", good: "Goed moment", wait: "Wachten",
+    why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", good: "Goed moment", wait: "Wachten",
     real: "Echte prijzen · FILON Catalogus", est: "Geschatte prijzen, ter indicatie",
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
     failedTitle: "Ik kan nu niet antwoorden.",
@@ -50,7 +51,7 @@ const SL = {
     placeholder: "Describe a need, or a product…", ask: "Ask",
     priceFor: "Price for",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
-    why: "Why", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", good: "Good time", wait: "Wait",
+    why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", good: "Good time", wait: "Wait",
     real: "Real prices · FILON Catalogue", est: "Estimated prices, for guidance",
     analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
     failedTitle: "I can't answer right now.",
@@ -130,7 +131,8 @@ type Card = {
   image?: string | null; link?: string | null;
   price: number; merchant: string; delivery: string; warranty: string;
   cashback: number; coupon: string | null; hist: Hist | null; histNote: string;
-  score: number; why: string; alt: string | null; buy: boolean;
+  score?: number; evidence_score?: number; decision?: DecisionData | null;
+  why: string; alt: string | null; buy: boolean;
 };
 type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; currency?: string; country?: string };
 
@@ -244,15 +246,6 @@ async function* streamAnalyze(q: string, country: string, locale: "fr" | "nl" | 
   }
 }
 
-function ScoreRing({ score }: { score: number }) {
-  return (
-    <div className="fa-score" style={{ ["--v" as string]: score }}>
-      <div className="ring"><span>{score}</span></div>
-      <span className="lab">Score FILON</span>
-    </div>
-  );
-}
-
 function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
   const [imgOk, setImgOk] = useState(true);
   const { locale } = useLocale();
@@ -292,10 +285,15 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
             {c.hist && c.histNote ? (() => { const Ic = HIST_ICON[c.hist as Hist]; return <span className={`hist ${c.hist}`}><Ic /> {S.hist[c.hist]} · {c.histNote}</span>; })() : null}
           </div>
           <p className="fa-why"><b>{S.why}&nbsp;:</b> {c.why}</p>
+          {c.decision && (
+            <details className="fa-decision">
+              <summary>{S.decision}</summary>
+              <DecisionPanel decision={c.decision} />
+            </details>
+          )}
           {c.alt && <p className="fa-alt">{S.alt}&nbsp;: {c.alt}</p>}
         </div>
         <div className="fa-aside">
-          <ScoreRing score={c.score} />
           <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> {S.good}</> : <><IcClock /> {S.wait}</>}</span>
           <a
             className="ed-btn wave"
