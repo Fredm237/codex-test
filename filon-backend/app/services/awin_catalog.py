@@ -278,7 +278,30 @@ async def _download_feed_rows(feed_ids: list[str], *, max_rows: int = 0) -> list
     return rows
 
 
-async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
+def _should_record_snapshot(
+    snapshot_cache: set[tuple[int, str, float, bool | None]] | None,
+    merchant_id: int,
+    product_id: str,
+    price: float,
+    in_stock: bool | None,
+) -> bool:
+    """Retourne si un relevé est inédit dans le cycle Awin courant."""
+    if snapshot_cache is None:
+        return True
+    key = (merchant_id, product_id[:191], price, in_stock)
+    if key in snapshot_cache:
+        return False
+    snapshot_cache.add(key)
+    return True
+
+
+async def _upsert_offer(
+    session,
+    merchant_id: int,
+    row: dict,
+    *,
+    snapshot_cache: set[tuple[int, str, float, bool | None]] | None = None,
+) -> None:
     pid = (row.get("aw_product_id") or "").strip()
     name = (row.get("product_name") or "").strip()
     if not pid or not name:
@@ -329,7 +352,16 @@ async def _upsert_offer(session, merchant_id: int, row: dict) -> None:
     result = await session.execute(stmt)
     offer_id = result.scalar_one_or_none()
     if offer_id is not None and price is not None:
-        session.add(models.PriceSnapshot(offer_id=offer_id, price=price, in_stock=in_stock))
+        # Plusieurs feeds Awin d’un même marchand existent souvent pour les
+        # langues FR/NL/EN. Ils peuvent porter le même article dans le même run.
+        # Sans garde, chaque variante ajoutait un relevé identique et gonflait
+        # artificiellement l’historique, donc la confiance du Score FILON.
+        #
+        # Le cache ne vit que le temps d’un cycle : un même prix est toujours
+        # relevé au prochain cycle, mais jamais deux fois pour le même article,
+        # prix et stock pendant ce cycle.
+        if _should_record_snapshot(snapshot_cache, merchant_id, pid, price, in_stock):
+            session.add(models.PriceSnapshot(offer_id=offer_id, price=price, in_stock=in_stock))
 
 
 async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
@@ -366,6 +398,10 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
 
     total_offers = 0
     skipped = 0
+    # Déduplique uniquement les relevés identiques d'un même cycle. Les offres
+    # elles-mêmes restent toutes lues : une variante linguistique peut enrichir
+    # le libellé, mais elle ne doit pas compter comme une nouvelle observation.
+    snapshot_cache: set[tuple[int, str, float, bool | None]] = set()
     for f in selected:
         try:
             frows = await _download_feed_rows([f.feed_id], max_rows=max_rows)
@@ -376,7 +412,7 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
         merchant_id = mid_to_id[f.advertiser_id]
         n = 0
         for row in frows:
-            await _upsert_offer(session, merchant_id, row)
+            await _upsert_offer(session, merchant_id, row, snapshot_cache=snapshot_cache)
             n += 1
             if n % 200 == 0:  # commit périodique → progression visible dans /stats
                 await session.commit()
