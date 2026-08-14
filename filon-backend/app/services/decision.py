@@ -42,6 +42,46 @@ def _freshness(updated_at: datetime | None, *, now: datetime) -> tuple[int | Non
     return age_hours, 0, 15, "warning"
 
 
+def _evidence(
+    key: str,
+    state: str,
+    source: str,
+    scope: str,
+    *,
+    observed_at: datetime | None = None,
+    value: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Une preuve FILON : fait, origine, périmètre et date, jamais une inférence.
+
+    `state` vaut `observed`, `missing` ou `not_applicable`. Une valeur présente
+    n'est pas nécessairement fraîche : cet aspect reste visible dans la preuve
+    `freshness` plutôt que d'être caché dans un score.
+    """
+    item: dict[str, Any] = {
+        "key": key,
+        "state": state,
+        "source": source,
+        "scope": scope,
+        "observed_at": observed_at.isoformat() if observed_at else None,
+    }
+    if value is not None:
+        item["value"] = value
+    return item
+
+
+def _evidence_summary(evidence: list[dict[str, Any]]) -> dict[str, int]:
+    """Couverture documentaire, explicitement distincte d'une probabilité."""
+    assessable = [item for item in evidence if item["state"] != "not_applicable"]
+    documented = sum(item["state"] == "observed" for item in assessable)
+    missing = sum(item["state"] == "missing" for item in assessable)
+    return {
+        "assessable_dimensions": len(assessable),
+        "documented_dimensions": documented,
+        "missing_dimensions": missing,
+        "coverage_pct": round(documented / len(assessable) * 100) if assessable else 0,
+    }
+
+
 def _confidence(*, active_signals: int, history_confidence: str, merchants_count: int,
                 in_stock: bool | None, freshness_hours: int | None) -> str:
     """Niveau de confiance, jamais confondu avec une probabilité de livraison."""
@@ -98,8 +138,41 @@ def _contextual_decision(
         missing.append("data_freshness")
     signals.append({"key": "freshness", "status": freshness_status, "age_hours": freshness_hours})
     active = 1 if freshness_hours is not None else 0
+    evidence = [
+        _evidence(
+            "price",
+            "observed" if price is not None else "missing",
+            "merchant_feed",
+            "tarif observé, hors total contextuel" if price is not None else "tarif absent du dernier flux",
+            observed_at=updated_at if price is not None else None,
+            value={"amount": price, "currency": currency, "semantics": price_semantics} if price is not None else None,
+        ),
+        _evidence(
+            "comparison",
+            "not_applicable",
+            "system_policy",
+            "les tarifs contextuels ne sont pas comparés comme un même produit",
+        ),
+        _evidence(
+            "availability",
+            "missing",
+            "merchant_feed",
+            "la disponibilité contextuelle n’est pas présente dans le flux",
+        ),
+        _evidence(
+            "freshness",
+            "observed" if freshness_hours is not None else "missing",
+            "merchant_feed",
+            "âge du dernier flux disponible" if freshness_hours is not None else "date du flux absente",
+            observed_at=updated_at if freshness_hours is not None else None,
+            value={"age_hours": freshness_hours, "status": freshness_status} if freshness_hours is not None else None,
+        ),
+    ]
+    for key in dict.fromkeys(missing):
+        if key not in {"item_price", "data_freshness", "availability"}:
+            evidence.append(_evidence(key, "missing", "not_collected", "information non documentée par FILON"))
     return {
-        "version": 2,
+        "version": 3,
         "offer_kind": offer_kind,
         "recommendation_scope": scope,
         "score_observed": freshness_points if freshness_hours is not None else 0,
@@ -112,6 +185,8 @@ def _contextual_decision(
             freshness_hours=freshness_hours,
         ),
         "signals": signals,
+        "evidence": evidence,
+        "evidence_summary": _evidence_summary(evidence),
         "missing": list(dict.fromkeys(missing)),
         "facts": {
             "item_price": price,
@@ -277,6 +352,49 @@ def compute_decision(
         observed += strength
         signals.append({"key": "comparison_strength", "status": "positive", "merchants_count": merchants_count})
 
+    evidence = [
+        _evidence(
+            "price",
+            "observed" if price is not None else "missing",
+            "merchant_feed",
+            "prix affiché dans le dernier flux" if price is not None else "prix absent du dernier flux",
+            observed_at=updated_at if price is not None else None,
+            value={"amount": price, "currency": currency} if price is not None else None,
+        ),
+        _evidence(
+            "comparison",
+            "observed" if merchants_count >= 2 else "missing",
+            "catalog_grouping",
+            "même produit regroupé par EAN" if merchants_count >= 2 else "aucun autre marchand comparable observé",
+            value={"merchants_count": merchants_count, "offers_count": offers_count, "is_best_observed": is_best_observed} if merchants_count >= 2 else None,
+        ),
+        _evidence(
+            "price_history",
+            "observed" if verdict["level"] in moment_points else "missing",
+            "price_history",
+            "historique de prix suffisant pour un verdict" if verdict["level"] in moment_points else "historique insuffisant pour conclure",
+            value={"level": verdict["level"], "samples": verdict["samples"], "tracked_days": verdict["tracked_days"]},
+        ),
+        _evidence(
+            "availability",
+            "observed" if in_stock is not None else "missing",
+            "merchant_feed",
+            "stock du dernier flux marchand" if in_stock is not None else "stock absent du dernier flux",
+            observed_at=updated_at if in_stock is not None else None,
+            value={"in_stock": in_stock} if in_stock is not None else None,
+        ),
+        _evidence(
+            "freshness",
+            "observed" if freshness_hours is not None else "missing",
+            "merchant_feed",
+            "âge du dernier flux disponible" if freshness_hours is not None else "date du flux absente",
+            observed_at=updated_at if freshness_hours is not None else None,
+            value={"age_hours": freshness_hours, "status": freshness_status} if freshness_hours is not None else None,
+        ),
+    ]
+    for key in _ALWAYS_UNKNOWN:
+        evidence.append(_evidence(key, "missing", "not_collected", "information non documentée par FILON"))
+
     if price is None or in_stock is False:
         scope = "non_recommandee"
     elif is_best_observed:
@@ -287,7 +405,7 @@ def compute_decision(
         scope = "a_verifier"
 
     return {
-        "version": 1,
+        "version": 3,
         "offer_kind": offer_kind or "physical_product",
         "recommendation_scope": scope,
         "score_observed": observed,
@@ -300,6 +418,8 @@ def compute_decision(
             freshness_hours=freshness_hours,
         ),
         "signals": signals,
+        "evidence": evidence,
+        "evidence_summary": _evidence_summary(evidence),
         "missing": list(dict.fromkeys(missing)),
         "facts": {
             "item_price": price,

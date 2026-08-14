@@ -24,6 +24,7 @@ export type DecisionData = {
   signals: DecisionSignal[];
   missing: string[];
   facts: { currency: string | null; merchants_compared: number; offers_compared: number };
+  evidence_summary?: { assessable_dimensions: number; documented_dimensions: number; missing_dimensions: number; coverage_pct: number };
 };
 
 const COPY = {
@@ -40,6 +41,7 @@ const COPY = {
     confidence: { elevee: "Données solides", moyenne: "Données partielles", faible: "Peu de données", insuffisante: "Données insuffisantes" },
     check: "À vérifier chez le marchand",
     evidence: "Ce que FILON a observé",
+    coverage: (documented: number, assessable: number) => `FILON documente ${documented} des ${assessable} dimensions qu’il peut évaluer.`,
     best: (n: number) => `Meilleur prix parmi ${n} marchand${n > 1 ? "s" : ""} comparé${n > 1 ? "s" : ""}.`,
     compared: (n: number) => `Comparé chez ${n} marchand${n > 1 ? "s" : ""}.`,
     lowest: "Prix au plus bas observé par FILON.",
@@ -73,6 +75,7 @@ const COPY = {
     confidence: { elevee: "Sterke gegevens", moyenne: "Gedeeltelijke gegevens", faible: "Weinig gegevens", insuffisante: "Onvoldoende gegevens" },
     check: "Te controleren bij de winkel",
     evidence: "Wat FILON heeft waargenomen",
+    coverage: (documented: number, assessable: number) => `FILON documenteert ${documented} van de ${assessable} dimensies die het kan beoordelen.`,
     best: (n: number) => `Laagste prijs bij ${n} vergeleken winkel${n > 1 ? "s" : ""}.`,
     compared: (n: number) => `Vergeleken bij ${n} winkel${n > 1 ? "s" : ""}.`,
     lowest: "Laagste prijs waargenomen door FILON.",
@@ -106,6 +109,7 @@ const COPY = {
     confidence: { elevee: "Strong data", moyenne: "Partial data", faible: "Limited data", insuffisante: "Insufficient data" },
     check: "Check with the merchant",
     evidence: "What FILON observed",
+    coverage: (documented: number, assessable: number) => `FILON documents ${documented} of the ${assessable} dimensions it can assess.`,
     best: (n: number) => `Lowest price among ${n} compared merchant${n > 1 ? "s" : ""}.`,
     compared: (n: number) => `Compared across ${n} merchant${n > 1 ? "s" : ""}.`,
     lowest: "Lowest price observed by FILON.",
@@ -164,6 +168,11 @@ export function DecisionPanel({ decision }: { decision: DecisionData | null | un
         <span className={`filon-decision-confidence confidence-${decision.confidence}`}>{C.confidence[decision.confidence]}</span>
       </div>
       <strong className={`filon-decision-title scope-${decision.recommendation_scope}`}>{C.scope[decision.recommendation_scope]}</strong>
+      {decision.evidence_summary && decision.evidence_summary.assessable_dimensions > 0 && (
+        <p className="filon-decision-coverage">
+          {C.coverage(decision.evidence_summary.documented_dimensions, decision.evidence_summary.assessable_dimensions)}
+        </p>
+      )}
       {visible.length > 0 && (
         <div className="filon-decision-evidence">
           <span>{C.evidence}</span>

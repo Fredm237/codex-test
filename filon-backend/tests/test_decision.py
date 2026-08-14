@@ -36,6 +36,17 @@ def test_best_observed_price_keeps_delivery_unknown_visible():
     assert d["confidence"] == "moyenne"
     assert {"shipping_cost", "delivery_destination", "return_policy"}.issubset(d["missing"])
     assert any(s["key"] == "comparison" and s["is_best_observed"] for s in d["signals"])
+    evidence = {item["key"]: item for item in d["evidence"]}
+    assert d["version"] == 3
+    assert evidence["price"]["state"] == "observed"
+    assert evidence["comparison"]["source"] == "catalog_grouping"
+    assert evidence["shipping_cost"]["state"] == "missing"
+    assert d["evidence_summary"] == {
+        "assessable_dimensions": 8,
+        "documented_dimensions": 5,
+        "missing_dimensions": 3,
+        "coverage_pct": 62,
+    }
 
 
 def test_stock_absent_is_not_presented_as_in_stock():
@@ -117,6 +128,9 @@ def test_accommodation_is_an_indicative_rate_not_a_best_price():
     assert d["facts"]["merchants_compared"] == 0
     assert {"stay_dates", "travellers", "booking_total", "mandatory_fees", "availability_for_dates", "cancellation_policy"}.issubset(d["missing"])
     assert all(signal["key"] != "comparison" for signal in d["signals"])
+    comparison = next(item for item in d["evidence"] if item["key"] == "comparison")
+    assert comparison["state"] == "not_applicable"
+    assert d["evidence_summary"]["coverage_pct"] < 100
 
 
 def test_service_and_digital_content_require_conditions_instead_of_product_verdict():

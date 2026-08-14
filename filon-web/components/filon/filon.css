@@ -3839,6 +3839,7 @@ html, body {
 .filon-decision-confidence.confidence-insuffisante { color: var(--ink-3); }
 .filon-decision-title { display: block; margin-top: 10px; color: var(--ink); font-size: 16px; line-height: 1.25; }
 .filon-decision-title.scope-non_recommandee { color: #b84737; }
+.filon-decision-coverage { margin: 7px 0 0; color: var(--ink-3); font-size: 12px; line-height: 1.45; }
 .filon-decision-evidence { margin-top: 12px; }
 .filon-decision-evidence > span { color: var(--ink-3); font-size: 12px; }
 .filon-decision-evidence ul { display: grid; gap: 6px; margin: 7px 0 0; padding: 0; list-style: none; }
