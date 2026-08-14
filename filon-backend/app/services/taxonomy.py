@@ -94,7 +94,11 @@ _ACCOMMODATION = (
     r"villas?|bungalows?|mobile homes?|campings?|wohnungen?|woningen?)\b"
 )
 _DIGITAL_CONTENT = r"\b(licen[cs]e keys?|cd keys?|game keys?|activation keys?|gift cards?|cartes? cadeaux?|software download|t[ée]l[ée]chargement|download|abonnements?|subscriptions?)\b"
-_SERVICE = r"\b(installation|montage|r[ée]paration|repair service|service de|garantie [ée]tendue|extended warranty|assurance|insurance|cours de|training)\b"
+_SERVICE = (
+    r"\b(installation|montage\s+(?:à domicile|sur place|professionnel)|"
+    r"r[ée]paration|repair service|service de|garantie [ée]tendue|"
+    r"extended warranty|assurance|insurance|cours de|training)\b"
+)
 _TECH_ACCESSORY = r"\b(coques?|backcovers?|bookcases?|screen ?protectors?|chargeurs?|chargers?|c[âa]bles? de charge|charging cables?|power ?banks?|[ée]tuis?)\b"
 
 # Certains mots sont intrinsèquement ambigus : un studio peut être un logement,
