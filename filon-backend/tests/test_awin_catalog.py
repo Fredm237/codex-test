@@ -80,3 +80,26 @@ def test_download_url_has_columns_and_key():
     assert "/fid/111,222/" in url
     assert "aw_deep_link" in url and "search_price" in url
     assert "compression/gzip" in url
+
+
+def test_snapshot_cache_keeps_one_identical_observation_per_cycle():
+    cache: set[tuple[int, str, float, bool | None]] = set()
+
+    assert a._should_record_snapshot(cache, 42, "same-product", 29.99, True) is True
+    assert a._should_record_snapshot(cache, 42, "same-product", 29.99, True) is False
+    assert len(cache) == 1
+
+
+def test_snapshot_cache_keeps_real_price_or_stock_changes():
+    cache: set[tuple[int, str, float, bool | None]] = set()
+
+    assert a._should_record_snapshot(cache, 42, "same-product", 29.99, True) is True
+    assert a._should_record_snapshot(cache, 42, "same-product", 27.99, True) is True
+    assert a._should_record_snapshot(cache, 42, "same-product", 27.99, False) is True
+    assert a._should_record_snapshot(cache, 43, "same-product", 27.99, False) is True
+    assert len(cache) == 4
+
+
+def test_snapshot_without_cycle_cache_still_records_normally():
+    assert a._should_record_snapshot(None, 42, "product", 29.99, True) is True
+    assert a._should_record_snapshot(None, 42, "product", 29.99, True) is True
