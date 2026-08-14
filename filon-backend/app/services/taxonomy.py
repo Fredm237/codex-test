@@ -557,9 +557,16 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Câbles & Adaptateurs", r"\b(c[âa]bles?|adaptateurs?|hubs?|docking)\b"),
     ],
     TELEPHONIE: [
+        # Les accessoires portent très souvent le nom du téléphone compatible.
+        # Ces règles doivent donc précéder « Smartphones » : une coque iPhone 15
+        # n'est pas un iPhone 15, même si le modèle est son mot le plus visible.
+        ("Coques & Protections", r"\b(coques?|[ée]tuis?|backcovers?|bookcases?|"
+                                 r"phone\s+(?:cases?|covers?)|hoe(?:s|sjes)?|"
+                                 r"prot[èe]ge-[ée]crans?|screen\s*protectors?|"
+                                 r"screenprotectors?|verre\s+tremp[ée]|tempered\s+glass)\b"),
+        ("Chargeurs & Batteries", r"\b(chargeurs?|chargers?|power\s*banks?|powerbanks?|"
+                                  r"batteries?|c[âa]bles? de charge|charging\s+cables?)\b"),
         ("Smartphones", r"\b(smartphones?|iphone|galaxy|t[ée]l[ée]phones? mobiles?)\b"),
-        ("Coques & Protections", r"\b(coques?|[ée]tuis?|prot[èe]ge-[ée]crans?|verre tremp[ée])\b"),
-        ("Chargeurs & Batteries", r"\b(chargeurs?|powerbanks?|batteries?|c[âa]bles? de charge)\b"),
         ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds|oreillettes?)\b"),
         ("Montres connectées", r"\b(montres? connect[ée]es?|smartwatch|bracelets? connect[ée]s?)\b"),
     ],
