@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { API } from "@/lib/api";
 import { useLocale, type Locale } from "@/lib/i18n";
 
@@ -229,14 +230,14 @@ export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Dep
   // Sans données, le lien simple fait le travail : mieux vaut une navigation
   // qui marche qu'un menu vide.
   if (departments.length === 0) {
-    return <a href="/catalogue/">{t.label}</a>;
+    return <Link href="/catalogue/" prefetch>{t.label}</Link>;
   }
 
   return (
     <div className="mm" ref={wrap}>
-      <a className="mm-catalogue-link" href="/catalogue/">
+      <Link className="mm-catalogue-link" href="/catalogue/" prefetch>
         {t.label}
-      </a>
+      </Link>
       <button
         type="button"
         ref={trigger}
@@ -309,9 +310,9 @@ export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Dep
             </div>
           ))}
         </div>
-        <a className="mm-all" href="/catalogue/" onClick={() => close()}>
+        <Link className="mm-all" href="/catalogue/" prefetch onClick={() => close()}>
           {t.all} →
-        </a>
+        </Link>
       </div>
     </div>
   );

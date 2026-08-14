@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { buildMetadata } from "@/lib/seo";
 import { ProductCard } from "@/components/filon/ProductCard";
 import { CatalogueSearch, CatalogueControls } from "@/components/filon/CatalogueControls";
@@ -22,11 +23,20 @@ import {
   type CatalogueQuery,
 } from "@/lib/catalogue";
 
-// Rendu serveur + ISR. La grille était chargée depuis le navigateur : elle
-// dépendait du réseau du visiteur, n'était pas indexable, et tombait sur une
-// phrase sans issue (« Impossible de charger le catalogue »). Ici la page
-// arrive peuplée, ou le dit clairement avec un moyen de repartir.
+// La grille et les filtres doivent être disponibles dès que les données
+// essentielles arrivent. Le pouls et les rangées sont utiles, mais jamais au
+// prix d'un clic qui semble inerte : ils sont diffusés après le HTML principal.
 export const revalidate = 300;
+
+async function CataloguePulse() {
+  const pulse = await getPulse();
+  return <Pulse data={pulse} />;
+}
+
+async function CatalogueRails() {
+  const rails = await getRails();
+  return rails.length > 0 ? <Rails sections={rails} /> : null;
+}
 
 export async function generateMetadata({
   searchParams,
@@ -58,15 +68,11 @@ export default async function CataloguePage({
   const departments = await getDepartments();
   const resolved = resolve(departments, query);
   const { department, category, subcategory } = resolved;
-  // Le pouls et les rangées sont demandés en parallèle du reste : c'est ce qui
-  // rend la page vivante, pas ce qui doit la ralentir.
   const browsing = !department && !category && !query.q;
-  const [result, pulse, rails] = await Promise.all([
-    getOffers(query, resolved),
-    getPulse(),
-    browsing ? getRails() : Promise.resolve([]),
-  ]);
 
+  // Chemin critique : uniquement les offres affichées et la taxonomie déjà
+  // requise par la navigation. Le reste est diffusé ensuite sous Suspense.
+  const result = await getOffers(query, resolved);
   const per = pageSize(query);
   const page = pageNumber(query);
   const total = result?.total ?? 0;
@@ -75,9 +81,6 @@ export default async function CataloguePage({
   return (
     <section className="fx-section page-top fx-catalogue">
       <div className="fx-container fx-catalogue-layout">
-        {/* Pas d'attribut `open` : replié par défaut, donc les produits
-            viennent en premier sur mobile. Au-dessus de 900 px, le CSS force
-            l'arborescence visible — la colonne y est permanente. */}
         <details className="fx-nav-shell">
           <CatalogueNavToggle />
           <CatalogueNav
@@ -99,26 +102,20 @@ export default async function CataloguePage({
             unavailable={result === null}
           />
 
-          <Pulse data={pulse} />
+          <Suspense fallback={null}>
+            <CataloguePulse />
+          </Suspense>
 
           <CatalogueSearch query={query} />
-
-          {/* Les rangées ne s'affichent que sur la racine : sous un filtre,
-              elles parleraient d'autre chose que ce qui est demandé. */}
-          {rails.length > 0 && <Rails sections={rails} />}
 
           {result !== null && total > 0 && (
             <>
               <CatalogueControls query={query} sort={sortValue(query)} per={per} />
-
-              {/* La grille reste rendue côté serveur : c'est elle que Google
-                  lit, et elle arrive peuplée quel que soit le réseau. */}
               <div className="fx-product-grid fx-catalogue-grid">
                 {result.items.map((o) => (
                   <ProductCard key={o.id} offer={o} />
                 ))}
               </div>
-
               <CataloguePager
                 query={query}
                 page={page}
@@ -129,6 +126,14 @@ export default async function CataloguePage({
           )}
 
           {result !== null && total === 0 && <CatalogueEmpty />}
+
+          {/* Les rangées éditoriales viennent après la grille : leur lenteur ne
+              bloque ni la navigation, ni le premier produit consultable. */}
+          {browsing && (
+            <Suspense fallback={null}>
+              <CatalogueRails />
+            </Suspense>
+          )}
         </div>
       </div>
     </section>
