@@ -48,6 +48,7 @@ async def session():
         s.add(offer("7", "Support de bureau pour iPhone 15", "Marque", 12.0))
         s.add(offer("8", "Lenovo IdeaPad ordinateur portable 15 pouces", "Lenovo", 649.0))
         s.add(offer("9", "Support pour ordinateur portable 15 pouces", "Marque", 25.0))
+        s.add(offer("10", "Siphon de cuisine inox", "Marque", 99.0))
         await s.commit()
         yield s
     await engine.dispose()
@@ -170,6 +171,10 @@ class TestRelevance:
         assert res["total"] == 1
         assert res["items"][0]["name"] == "Apple iPhone 15 128 Go"
 
+    async def test_iphone_query_does_not_match_a_siphon_after_stemming(self, session):
+        res = await _search(session, "iphone")
+        assert all("siphon" not in item["name"].lower() for item in res["items"])
+
     async def test_explicit_iphone_accessory_query_remains_searchable(self, session):
         res = await _search(session, "coque iphone")
         assert res["total"] == 1
@@ -204,6 +209,9 @@ class TestStem:
         """Un radical trop court ramenerait n'importe quoi."""
         for term in ("manteaux", "chemises", "bleues", "sacs"):
             assert len(stem(term)) >= 3
+
+    def test_brand_words_keep_their_significant_final_e(self):
+        assert stem("iphone") == "iphone"
 
     @pytest.mark.parametrize(
         "terme,intrus",

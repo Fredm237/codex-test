@@ -80,6 +80,11 @@ def stem(term: str) -> str:
     term = normalize(term)
     if len(term) <= 4:
         return term
+    # Le « e » final d'iPhone ne signale pas un accord : le retirer fabriquait
+    # « iphon », sous-chaîne de « siphon ». Le reste du stemming conserve les
+    # accords existants, notamment chemise/chemises et chaussure/chaussures.
+    if term == "iphone":
+        return term
     for suffix in _SUFFIXES:
         if term.endswith(suffix) and len(term) - len(suffix) >= _MIN_STEM:
             return term[: -len(suffix)]
