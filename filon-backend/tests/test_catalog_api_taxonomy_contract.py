@@ -17,6 +17,7 @@ from tests.endpoint_call import call
 
 TELEPHONIE = "Téléphonie"
 SPORT = "Sport & Plein air"
+MODE_HOMME = "Mode homme"
 
 
 @pytest.fixture
@@ -56,6 +57,34 @@ async def session():
                 image_url="https://example.test/case.jpg",
                 is_canonical=True,
             ),
+            # Simule une ligne historique qui n'a pas encore été rattrapée :
+            # elle doit être invisible sous Smartphones dès maintenant.
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="legacy-case-in-phone",
+                name="Selencia Telefoonhoes voor Samsung Galaxy S24",
+                category="Phone Cover",
+                filon_category=TELEPHONIE,
+                filon_subcategory="Smartphones",
+                offer_kind="tech_accessory",
+                price=24.0,
+                currency="EUR",
+                image_url="https://example.test/legacy-case.jpg",
+                is_canonical=True,
+            ),
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="wrong-gender",
+                name="Robe femme longue",
+                category="Women's clothing",
+                filon_category=MODE_HOMME,
+                filon_subcategory="Chemises",
+                offer_kind="physical_product",
+                price=69.0,
+                currency="EUR",
+                image_url="https://example.test/wrong-gender.jpg",
+                is_canonical=True,
+            ),
             models.Offer(
                 merchant_id=merchant.id,
                 awin_product_id="bike-1",
@@ -77,7 +106,7 @@ async def session():
 
 async def test_la_carte_expose_la_categorie_filon_et_la_source_separement(session):
     result = await call(offers_endpoint, category=TELEPHONIE, session=session)
-    assert result["total"] == 2
+    assert result["total"] == 3
     phone = next(item for item in result["items"] if item["id"])
     assert all(item["category"] == TELEPHONIE for item in result["items"])
     assert {item["subcategory"] for item in result["items"]} == {"Smartphones", "Coques & Protections"}
@@ -97,6 +126,22 @@ async def test_le_filtre_par_slug_filon_trouve_les_offres_meme_sans_categorie_so
     assert result["items"][0]["name"] == "Samsung Galaxy S25"
     assert result["items"][0]["category"] == TELEPHONIE
     assert result["items"][0]["source_category"] is None
+
+
+async def test_le_sous_rayon_smartphones_masque_les_coques_historiques_non_encore_rattrapees(session):
+    result = await call(
+        offers_endpoint,
+        category=TELEPHONIE,
+        subcategory="Smartphones",
+        session=session,
+    )
+    assert result["total"] == 1
+    assert [item["name"] for item in result["items"]] == ["Samsung Galaxy S25"]
+
+
+async def test_mode_homme_masque_un_vetement_explicitement_feminin(session):
+    result = await call(offers_endpoint, category=MODE_HOMME, session=session)
+    assert result == {"total": 0, "items": []}
 
 
 async def test_un_filtre_categorie_invalide_ne_retombe_pas_sur_les_categories_source(session):

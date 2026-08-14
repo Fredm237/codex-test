@@ -71,6 +71,32 @@ MIN_HIGH_SHARE = 0.15
 _WOMEN_MARKERS = ("women", "woman", "femme", "dames", "girl", "fille", "robe")
 _MEN_MARKERS = ("men's", "mens ", " men ", "homme", "heren", "garçon", "boy")
 
+# Ces marqueurs décrivent l'objet vendu, et non le smartphone mentionné pour
+# compatibilité. Ils ont été mesurés dans le sous-rayon public Smartphones, où
+# 7 955 accessoires manifestes figuraient parmi 15 082 résultats avant le
+# rattrapage historique. La garde est volontairement limitée à ce sous-rayon.
+_PHONE_ACCESSORY_MARKERS = (
+    "coque", "phone cover", "telefoonhoes", "smartphonehoes", "backcover",
+    "bookcase", "screen protector", "screenprotector", "tempered glass",
+    "verre trempé", "verre trempe", "protege-ecran", "protège-écran",
+)
+
+
+def _smartphone_primary_product_clause():
+    """Exclut des Smartphones les accessoires que leur titre/source identifie.
+
+    Il s'agit d'un filet de visibilité temporaire et explicable. La correction
+    durable reste le reclassement en ``Coques & Protections`` ; on ne cache
+    aucun résultat d'un autre sous-rayon ni une référence ambiguë.
+    """
+    name = func.lower(func.coalesce(models.Offer.name, ""))
+    source_category = func.lower(func.coalesce(models.Offer.category, ""))
+    accessory = or_(*[
+        or_(name.contains(marker), source_category.contains(marker))
+        for marker in _PHONE_ACCESSORY_MARKERS
+    ])
+    return not_(accessory)
+
 
 def _gender_conflict_clause(category: str):
     """Écarte les produits dont le nom contredit la catégorie demandée.
@@ -292,6 +318,11 @@ async def offers(
         )
         if resolved_category:
             stmt = stmt.where(models.Offer.filon_category == resolved_category)
+            # Le contrôle était auparavant réservé au repli de catégorie brute.
+            # Il doit aussi protéger les vrais rayons FILON Mode homme/femme.
+            conflict = _gender_conflict_clause(resolved_category)
+            if conflict is not None:
+                stmt = stmt.where(conflict)
         else:
             # Une URL invalide doit retourner zéro, jamais déclencher un filtre
             # opaque sur des catégories source hétérogènes.
@@ -302,6 +333,8 @@ async def offers(
         # demandé : cela bloque les couples historiques incohérents.
         if resolved_category:
             stmt = stmt.where(models.Offer.filon_category == resolved_category)
+        if resolved_category == taxonomy.TELEPHONIE and subcategory == "Smartphones":
+            stmt = stmt.where(_smartphone_primary_product_clause())
     if brand:
         stmt = stmt.where(models.Offer.brand.ilike(f"%{brand}%"))
     if price_min is not None:
