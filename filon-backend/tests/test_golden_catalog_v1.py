@@ -57,7 +57,7 @@ class TestGoldenCatalogContract:
     def test_mention_and_product_are_distinct_in_the_phone_case_reference(self):
         case = next(c for c in _CASES if c["id"] == "phone-case-fr-compatible")
         assert case["semantic_target"]["product_role"] == "protective_case"
-        assert case["semantic_target"]["mentioned_product"] == "Apple iPhone 16 Pro Max"
+        assert case["semantic_target"]["mentioned_product"] == "iPhone 16 Pro Max"
         assert case["semantic_target"]["mentioned_product"] not in case["semantic_target"]["product_role"]
 
     def test_accommodation_reference_cannot_be_evaluated_as_a_physical_product(self):
