@@ -15,7 +15,7 @@
       "brand": "Techsuit",
       "merchant_name": "Coquedetelephone.fr",
       "expected_current": {"category": "Téléphonie", "offer_kind": "tech_accessory"},
-      "semantic_target": {"product_role": "protective_case", "mentioned_product": "Apple iPhone 16 Pro Max", "relation": "compatible_with"}
+      "semantic_target": {"product_role": "protective_case", "mentioned_product": "iPhone 16 Pro Max", "relation": "compatible_with"}
     },
     {
       "id": "screen-protector-en",
