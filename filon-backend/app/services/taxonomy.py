@@ -94,11 +94,17 @@ _ACCOMMODATION = (
     r"villas?|bungalows?|mobile homes?|campings?|wohnungen?|woningen?)\b"
 )
 _DIGITAL_CONTENT = r"\b(licen[cs]e keys?|cd keys?|game keys?|activation keys?|gift cards?|cartes? cadeaux?|software download|t[ée]l[ée]chargement|download|abonnements?|subscriptions?)\b"
-_SERVICE = (
-    r"\b(installation|montage\s+(?:à domicile|sur place|professionnel)|"
-    r"r[ée]paration|repair service|service de|garantie [ée]tendue|"
-    r"extended warranty|assurance|insurance|cours de|training)\b"
+# Les mots « montage », « installation » et « réparation » figurent souvent dans
+# la description d'un composant (kit, support, glissière, outil). Ils ne décrivent
+# une prestation que si le texte ou la catégorie l'affirme explicitement.
+_SERVICE_DIRECT = (
+    r"\b(repair service|garantie [ée]tendue|extended warranty|assurance|"
+    r"insurance|cours de|training|service\s+(?:de|d['’])\s*"
+    r"(?:montage|installation|r[ée]paration|maintenance))\b"
 )
+_SERVICE_ACTION = r"\b(installation|montage|r[ée]paration)\b"
+_SERVICE_CONTEXT = r"\b([àa]\s+domicile|sur\s+(?:site|place)|professionnel(?:le)?|intervention)\b"
+_SERVICE_CATEGORY = r"\b(services?|prestations?)\b"
 _TECH_ACCESSORY = r"\b(coques?|backcovers?|bookcases?|screen ?protectors?|chargeurs?|chargers?|c[âa]bles? de charge|charging cables?|power ?banks?|[ée]tuis?)\b"
 
 # Certains mots sont intrinsèquement ambigus : un studio peut être un logement,
@@ -163,7 +169,10 @@ def classify_offer_kind(
         return ACCOMMODATION
     if _has(_DIGITAL_CONTENT, text):
         return DIGITAL_CONTENT
-    if _has(_SERVICE, text):
+    if _has(_SERVICE_DIRECT, text) or (
+        _has(_SERVICE_ACTION, name)
+        and (_has(_SERVICE_CONTEXT, name) or _has(_SERVICE_CATEGORY, merchant_category))
+    ):
         return SERVICE
     if _has(_TECH_ACCESSORY, text):
         return TECH_ACCESSORY
