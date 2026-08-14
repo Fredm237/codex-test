@@ -63,6 +63,8 @@ class TestLeMotifNeDecidePas:
             "Patron Know Me n°2106 – Pantalon pour hommes",
             "Patron de veste pour femme – modèle n°42",
             "Schnittmuster Kleid Damen 42-50",
+            "Patron KnowMe 2129.K5 (36-44) - Bodysuit & Robe",
+            "Patron Maison Fauve - Robe et Blouse Pétula",
         )
         for nom in patrons:
             assert _rayon(nom) == LOISIRS, nom
@@ -70,6 +72,9 @@ class TestLeMotifNeDecidePas:
     def test_les_kits_et_toiles_a_patron_restent_des_supports_de_couture(self):
         assert _rayon("Kit de couture pour robe enfant") == LOISIRS
         assert _rayon("Toile à patron 100% coton écru") == LOISIRS
+
+    def test_patronymique_ne_declenche_pas_la_regle_de_couture(self):
+        assert _rayon("Bande patronymique lot de 5 simple orange") != LOISIRS
 
 
 class TestLObjetFiniLemporteSurLaMatiere:
