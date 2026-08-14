@@ -140,3 +140,41 @@ async def test_reclassify_can_target_a_raw_merchant_category(monkeypatch, scoped
     assert targeted.offer_kind == taxonomy.ACCOMMODATION
     assert untouched.filon_category is None
     assert untouched.offer_kind is None
+
+
+@pytest.mark.anyio
+async def test_reclassify_can_target_one_merchant_without_touching_another(monkeypatch, scoped_catalogue):
+    monkeypatch.setattr(catalog, "_require_admin", lambda token: None)
+    async with db.session_scope() as session:
+        original_merchant = (await session.execute(select(models.Merchant))).scalar_one()
+        specialist = models.Merchant(awin_mid=78, name="Atelier patrons", slug="atelier-patrons")
+        session.add(specialist)
+        await session.flush()
+        session.add_all([
+            models.Offer(
+                merchant_id=specialist.id, awin_product_id="sewing-pattern", price=12.0,
+                currency="EUR", name="Patron Butterick n°7019 – Robe vintage", category=None,
+                filon_category=taxonomy.MODE_FEMME, filon_subcategory="Robes",
+            ),
+            models.Offer(
+                merchant_id=original_merchant.id, awin_product_id="finished-dress", price=80.0,
+                currency="EUR", name="Robe en coton bio femme", category=None,
+                filon_category=taxonomy.MODE_FEMME, filon_subcategory="Robes",
+            ),
+        ])
+        await session.commit()
+
+    result = await catalog.reclassify_offers(
+        batch=100, after_id=0, max_offers=0, max_seconds=30,
+        filon_category=None, merchant_id=specialist.id, x_admin_token="test",
+    )
+
+    assert result["offers_processed"] == 1
+    assert result["merchant_id"] == specialist.id
+    async with db.session_scope() as session:
+        pattern = (await session.execute(select(models.Offer).where(models.Offer.awin_product_id == "sewing-pattern"))).scalar_one()
+        dress = (await session.execute(select(models.Offer).where(models.Offer.awin_product_id == "finished-dress"))).scalar_one()
+    assert pattern.filon_category == taxonomy.LOISIRS
+    assert pattern.filon_subcategory == "Patrons & Kits de couture"
+    assert dress.filon_category == taxonomy.MODE_FEMME
+    assert dress.filon_subcategory == "Robes"

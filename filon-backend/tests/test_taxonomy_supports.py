@@ -54,6 +54,23 @@ class TestLeMotifNeDecidePas:
         assert _rayon("Patron McCall's 8422.OS - Peluches Ours, Lapin") == LOISIRS
         assert _rayon("Patron Burda Carnaval 2791 - Déguisement enfant") == LOISIRS
 
+    def test_un_patron_de_robe_ou_pantalon_n_est_pas_le_vetement_fini(self):
+        # Offres observées en production : elles avaient été publiées dans Robes
+        # ou Pantalons parce que le libellé nomme le résultat à coudre.
+        patrons = (
+            "Patron Know Me n°2098 – Robe en tricot avec encolure croisée",
+            "Patron Butterick n°7019 – Robe vintage des années 1950",
+            "Patron Know Me n°2106 – Pantalon pour hommes",
+            "Patron de veste pour femme – modèle n°42",
+            "Schnittmuster Kleid Damen 42-50",
+        )
+        for nom in patrons:
+            assert _rayon(nom) == LOISIRS, nom
+
+    def test_les_kits_et_toiles_a_patron_restent_des_supports_de_couture(self):
+        assert _rayon("Kit de couture pour robe enfant") == LOISIRS
+        assert _rayon("Toile à patron 100% coton écru") == LOISIRS
+
 
 class TestLObjetFiniLemporteSurLaMatiere:
     """Le garde-fou inverse : sans lui, la règle du support aspirait tout
@@ -72,6 +89,9 @@ class TestLObjetFiniLemporteSurLaMatiere:
         assert _rayon("Chemise en lin homme manches longues") == "Mode homme"
         assert _rayon("Robe en coton bio femme") == "Mode femme"
         assert _rayon("Pyjama en jersey de coton enfant") == "Mode enfant"
+        # « pattern » décrit ici le dessin d’une chemise finie en anglais ; il
+        # ne doit jamais être assimilé à un patron de couture.
+        assert _rayon("OLYMP Luxor shirt ecru, jacquard pattern") == "Mode"
 
 
 class TestCestLaTeteQuiDecide:

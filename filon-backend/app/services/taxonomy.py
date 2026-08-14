@@ -241,9 +241,13 @@ _SUPPORTS: list[tuple[str, str]] = [
      r"serg[ée]s?|mousselines?|batistes?|percales?|bord\s+c[ôo]tes?|"
      r"molletons?|cr[ée]pons?|bourrettes?|piqu[ée]s?\s+\d*\s*%?\s*coton|"
      r"sweat\s+molletonn[ée]|polaire\s+double\s+face|viscose\s+unie|"
-     r"coupons?\s+de\s+\d|au\s+m[èe]tre|mercerie|"
-     r"patrons?\s+(?:burda|mccall|simplicity|vogue|new\s+look)|"
-     r"patrons?\s+de\s+couture|fermetures?\s+[ée]clair|fil\s+[àa]\s+coudre)\b"),
+     r"coupons?\s+de\s+\d|au\s+m[èe]tre|mercerie|toiles?\s+[àa]\s+patrons?|"
+     r"kits?\s+(?:de\s+)?couture|"
+     r"patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
+     r"patrons?\s+(?:de|pour)\s+(?:couture|robes?|jupes?|pantalons?|manteaux?|vestes?|"
+     r"chemises?|hauts?|tops?|combinaisons?|ensembles?|peluches?|enfants?)|"
+     r"patrons?\s+(?:n[°ºo]|\d)|sewing\s+patterns?|schnittmuster|n[äa]hmuster|"
+     r"fermetures?\s+[ée]clair|fil\s+[àa]\s+coudre|boutons?\s+(?:de\s+couture|mercerie))\b"),
     # Livres et affiches : le sujet ne détermine pas le rayon.
     (CULTURE,
      r"\b(livres?\s+sur|guides?\s+de|romans?|beaux?[-\s]livres?|"
@@ -687,6 +691,15 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
                                        r"radiateurs?|purificateurs?|humidificateurs?)\b"),
+    ],
+    LOISIRS: [
+        ("Patrons & Kits de couture", r"\b(patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
+                                      r"patrons?\s+(?:de|pour)\s+(?:couture|robes?|jupes?|pantalons?|manteaux?|vestes?|"
+                                      r"chemises?|hauts?|tops?|combinaisons?|ensembles?|peluches?|enfants?)|"
+                                      r"kits?\s+(?:de\s+)?couture|sewing\s+patterns?|schnittmuster|n[äa]hmuster)\b"),
+        ("Tissus & Mercerie", r"\b(tissus?|jerseys?|popelines?|cretonnes?|gabardines?|mousselines?|"
+                                r"toiles?\s+[àa]\s+patrons?|coupons?\s+de\s+\d|fil\s+[àa]\s+coudre|"
+                                r"fermetures?\s+[ée]clair|boutons?\s+(?:de\s+couture|mercerie))\b"),
     ],
     SPORT: [
         ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
