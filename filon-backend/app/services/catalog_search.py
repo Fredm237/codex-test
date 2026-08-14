@@ -50,6 +50,15 @@ _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
 # seulement qu'un produit principal soit présenté à un prix invraisemblable.
 _PRIMARY_MIN_PRICE = {"laptop": 200.0, "smartphone": 80.0, "casque": 25.0}
 
+# Lorsqu’un visiteur cite une gamme ou une marque non ambiguë, l’ancre de rayon
+# ne suffit pas. Retourner un autre smartphone que l’iPhone demandé est pire
+# qu’un état « aucune offre vérifiée » : la contrainte doit donc être présente
+# dans le titre que le marchand a effectivement fourni.
+_EXACT_PRODUCT_TERMS = (
+    "iphone", "ipad", "macbook", "airpods", "galaxy", "playstation",
+    "xbox", "nintendo", "dyson",
+)
+
 
 def _required_name_terms(query: str, anchor: str) -> tuple[str, ...]:
     """Contraintes explicites que le titre du produit doit confirmer.
@@ -59,6 +68,9 @@ def _required_name_terms(query: str, anchor: str) -> tuple[str, ...]:
     d'offre vérifiée est plus honnête qu'une recommandation hors besoin.
     """
     normalized = " ".join(terms_of(query))
+    exact = tuple(term for term in _EXACT_PRODUCT_TERMS if term in normalized)
+    if exact:
+        return exact
     if anchor == "casque" and any(token in normalized for token in ("bruit", "noise", "cancellation", "cancelling", "anc")):
         return ("reduction de bruit", "noise", "anc", "cancel")
     return ()
