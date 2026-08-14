@@ -206,3 +206,30 @@ async def test_sitemap_only_lists_products_worth_indexing(session):
     page_two = await sitemap_products(limit=1, offset=1, min_merchants=1, session=session)
     assert len(page_two["items"]) == 1
     assert page_two["items"][0]["ean"] != everything["items"][0]["ean"]
+
+
+async def test_contextual_offers_are_never_grouped_by_ean(session):
+    await _seed(session)
+    merchant = (await session.execute(select(models.Merchant).where(models.Merchant.slug == "a"))).scalar_one()
+    stay = models.Offer(
+        merchant_id=merchant.id,
+        awin_product_id="stay-a",
+        name="Appartement de vacances à Bruges",
+        category="Appartement de vacances",
+        offer_kind="accommodation",
+        price=154.0,
+        currency="EUR",
+        ean=EAN_A,
+        image_url="https://example.test/stay.jpg",
+        deep_link="https://example.test/stay",
+    )
+    session.add(stay)
+    await session.commit()
+
+    summary = await rebuild_products(session)
+    await session.refresh(stay)
+
+    assert stay.product_id is None
+    assert summary["offers_total"] == 6  # seuls les produits physiques sont éligibles
+    detail = await product_detail(ean=EAN_A, session=session)
+    assert detail["offers_count"] == 3

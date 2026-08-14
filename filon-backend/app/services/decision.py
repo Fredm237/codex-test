@@ -17,6 +17,11 @@ from app.services.verdict import compute_verdict
 # donnée en promesse d'achat.
 _ALWAYS_UNKNOWN = ("shipping_cost", "delivery_destination", "return_policy")
 
+# Ces offres portent un prix observé, mais leur montant final dépend d’un
+# contexte que les feeds ne fournissent pas. Elles ne passent jamais par le
+# verdict « meilleur prix » des produits physiques.
+_NON_COMPARABLE_KINDS = {"accommodation", "service", "digital_content", "unknown"}
+
 
 def _freshness(updated_at: datetime | None, *, now: datetime) -> tuple[int | None, int, int, str]:
     """Renvoie âge, points, poids actif et statut de fraîcheur.
@@ -55,6 +60,74 @@ def _confidence(*, active_signals: int, history_confidence: str, merchants_count
     return "insuffisante"
 
 
+def _contextual_decision(
+    *,
+    offer_kind: str,
+    price: float | None,
+    currency: str | None,
+    updated_at: datetime | None,
+    now: datetime,
+) -> dict[str, Any]:
+    """Décision pour un tarif dépendant d’un contexte non observé par FILON."""
+    kind_missing = {
+        "accommodation": (
+            "stay_dates", "travellers", "booking_total", "mandatory_fees",
+            "availability_for_dates", "cancellation_policy",
+        ),
+        "service": ("service_scope", "service_conditions", "appointment_availability"),
+        "digital_content": ("digital_compatibility", "digital_region", "digital_terms"),
+        "unknown": ("offer_nature", "purchase_conditions"),
+    }
+    price_semantics = {
+        "accommodation": "indicative_stay_rate",
+        "service": "indicative_service_rate",
+        "digital_content": "observed_digital_price",
+        "unknown": "unclassified_price",
+    }.get(offer_kind, "contextual_price")
+    scope = "tarif_a_verifier" if offer_kind == "accommodation" else "conditions_a_verifier"
+    missing = list(_ALWAYS_UNKNOWN) + list(kind_missing.get(offer_kind, kind_missing["unknown"]))
+    signals: list[dict[str, Any]] = []
+    if price is None:
+        missing.append("item_price")
+        signals.append({"key": "price", "status": "unknown"})
+    else:
+        signals.append({"key": "contextual_price", "status": "neutral", "price_semantics": price_semantics})
+
+    freshness_hours, freshness_points, freshness_weight, freshness_status = _freshness(updated_at, now=now)
+    if freshness_hours is None:
+        missing.append("data_freshness")
+    signals.append({"key": "freshness", "status": freshness_status, "age_hours": freshness_hours})
+    active = 1 if freshness_hours is not None else 0
+    return {
+        "version": 2,
+        "offer_kind": offer_kind,
+        "recommendation_scope": scope,
+        "score_observed": freshness_points if freshness_hours is not None else 0,
+        "score_possible": freshness_weight if freshness_hours is not None else 0,
+        "confidence": _confidence(
+            active_signals=active,
+            history_confidence="insuffisante",
+            merchants_count=1,
+            in_stock=None,
+            freshness_hours=freshness_hours,
+        ),
+        "signals": signals,
+        "missing": list(dict.fromkeys(missing)),
+        "facts": {
+            "item_price": price,
+            "currency": currency,
+            "offer_kind": offer_kind,
+            "price_semantics": price_semantics,
+            "merchants_compared": 0,
+            "offers_compared": 0,
+            "updated_at": updated_at.isoformat() if updated_at else None,
+            "history_samples": 0,
+            "history_tracked_days": 0,
+        },
+        "price_verdict": {"level": "insuffisant", "samples": 0, "tracked_days": 0, "confidence": "insuffisante"},
+    }
+
+
 def compute_decision(
     *,
     price: float | None,
@@ -66,6 +139,7 @@ def compute_decision(
     offers_count: int = 1,
     in_stock: bool | None = None,
     updated_at: datetime | None = None,
+    offer_kind: str | None = None,
     now: datetime | None = None,
 ) -> dict[str, Any]:
     """Construit une décision explicable à partir des seules données observées.
@@ -77,6 +151,14 @@ def compute_decision(
     # Les timestamps existants de la base sont naïfs mais exprimés en UTC.
     # On conserve ce contrat tout en évitant datetime.utcnow(), désormais obsolète.
     now = now or datetime.now(UTC).replace(tzinfo=None)
+    if offer_kind in _NON_COMPARABLE_KINDS:
+        return _contextual_decision(
+            offer_kind=offer_kind,
+            price=price,
+            currency=currency,
+            updated_at=updated_at,
+            now=now,
+        )
     if comparison_currency and currency and comparison_currency != currency:
         cheapest_elsewhere = None
         merchants_count = 1
@@ -206,6 +288,7 @@ def compute_decision(
 
     return {
         "version": 1,
+        "offer_kind": offer_kind or "physical_product",
         "recommendation_scope": scope,
         "score_observed": observed,
         "score_possible": possible,
@@ -221,6 +304,8 @@ def compute_decision(
         "facts": {
             "item_price": price,
             "currency": currency,
+            "offer_kind": offer_kind or "physical_product",
+            "price_semantics": "comparable_product_price",
             "merchants_compared": merchants_count,
             "offers_compared": offers_count,
             "updated_at": updated_at.isoformat() if updated_at else None,

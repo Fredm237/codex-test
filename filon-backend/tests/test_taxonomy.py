@@ -209,3 +209,36 @@ class TestDepartements:
 
         for label, categories in DEPARTMENTS:
             assert categories_of_department(slug_of(label)) == list(categories)
+
+
+class TestOfferKinds:
+    @pytest.mark.parametrize(
+        "merchant_category,name,expected",
+        [
+            ("Appartement de vacances", "Appartement de vacances à Lac Balaton à partir de 154€ par nuit", t.ACCOMMODATION),
+            ("Vakantieparken", "HH Hertenkamp Mobile Home", t.ACCOMMODATION),
+            ("Hôtel", "Chambre d'hôtel à Bruges", t.ACCOMMODATION),
+            ("", "Code Steam Game Key EU", t.DIGITAL_CONTENT),
+            ("Services", "Installation de borne électrique à domicile", t.SERVICE),
+            ("Telefoon accessoires", "Coque iPhone 15 Pro MagSafe", t.TECH_ACCESSORY),
+            ("", "iPhone 15 smartphone 128 Go", t.PHYSICAL_PRODUCT),
+        ],
+    )
+    def test_detects_transactional_kind(self, merchant_category, name, expected):
+        assert t.classify_offer_kind(merchant_category, name) == expected
+
+    def test_stays_override_ambiguous_physical_words(self):
+        assert t.classify("Vakantieparken", "HH Hertenkamp Mobile Home") == t.VOYAGES
+        assert t.classify_subcategory(t.VOYAGES, "HH Hertenkamp Mobile Home") == "Campings & Parcs"
+
+    def test_travel_subcategories_are_multilingual(self):
+        assert t.classify("Appartement de vacances", "Appartement de vacances à Hévíz") == t.VOYAGES
+        assert t.classify_subcategory(t.VOYAGES, "Appartement de vacances à Hévíz") == "Locations de vacances"
+        assert t.classify_subcategory(t.VOYAGES, "Hotel kamers in Gent") == "Hôtels"
+
+    def test_only_physical_kinds_are_ean_comparable(self):
+        assert t.is_ean_comparable(t.PHYSICAL_PRODUCT) is True
+        assert t.is_ean_comparable(t.TECH_ACCESSORY) is True
+        assert t.is_ean_comparable(t.ACCOMMODATION) is False
+        assert t.is_ean_comparable(t.SERVICE) is False
+        assert t.is_ean_comparable(t.DIGITAL_CONTENT) is False

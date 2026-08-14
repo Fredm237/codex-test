@@ -75,3 +75,34 @@ async def test_reclassify_can_target_one_existing_filon_category(monkeypatch, sc
     assert by_id["case"].filon_subcategory == "Coques & Protections"
     assert by_id["phone"].filon_subcategory == "Smartphones"
     assert by_id["outside"].filon_subcategory == "À conserver"
+
+
+@pytest.mark.anyio
+async def test_reclassify_unclassified_assigns_stay_kind_and_aisle(monkeypatch, scoped_catalogue):
+    monkeypatch.setattr(catalog, "_require_admin", lambda token: None)
+    async with db.session_scope() as session:
+        merchant_id = (await session.execute(select(models.Merchant.id))).scalar_one()
+        session.add(models.Offer(
+            merchant_id=merchant_id, awin_product_id="stay", price=154.0,
+            currency="EUR", name="Appartement de vacances à Lac Balaton", category="Appartement de vacances",
+        ))
+        await session.commit()
+
+    result = await catalog.reclassify_offers(
+        batch=100,
+        after_id=0,
+        max_offers=0,
+        max_seconds=30,
+        filon_category=None,
+        only_unclassified=True,
+        x_admin_token="test",
+    )
+
+    assert result["done"] is True
+    assert result["offers_processed"] == 1
+    assert result["offer_kinds"] == {taxonomy.ACCOMMODATION: 1}
+    async with db.session_scope() as session:
+        stay = (await session.execute(select(models.Offer).where(models.Offer.awin_product_id == "stay"))).scalar_one()
+    assert stay.filon_category == taxonomy.VOYAGES
+    assert stay.filon_subcategory == "Locations de vacances"
+    assert stay.offer_kind == taxonomy.ACCOMMODATION

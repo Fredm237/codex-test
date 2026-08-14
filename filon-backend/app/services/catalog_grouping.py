@@ -20,6 +20,7 @@ from sqlalchemy import bindparam, func, select, update
 
 from app.core.logging import get_logger
 from app.db import models
+from app.services import taxonomy
 
 log = get_logger("grouping")
 
@@ -228,6 +229,7 @@ async def _rebuild_products(
         models.Offer.price,
         models.Offer.currency,
         models.Offer.merchant_id,
+        models.Offer.offer_kind,
     )
     existing = {
         ean: pid
@@ -245,9 +247,13 @@ async def _rebuild_products(
     for shard in range(shards):
         aggregates: dict[str, _Aggregate] = {}
         async for rows in _iter_offer_pages(session, columns, page=page):
-            if shard == 0:
-                total_offers += len(rows)
             for r in rows:
+                # Les natures contextuelles ne représentent pas un produit EAN
+                # comparable, même si un marchand leur attribue un code.
+                if not taxonomy.is_ean_comparable(r.offer_kind):
+                    continue
+                if shard == 0:
+                    total_offers += 1
                 ean = normalize_ean(r.ean)
                 if not ean or _shard_of(ean, shards) != shard:
                     continue
@@ -318,10 +324,17 @@ async def _rebuild_products(
     # ── Passe 2 : rattachement, en flux également ─────────────────────────────
     linked = 0
     async for rows in _iter_offer_pages(
-        session, (models.Offer.id, models.Offer.ean), page=page
+        session, (models.Offer.id, models.Offer.ean, models.Offer.offer_kind, models.Offer.product_id), page=page
     ):
         mapping = []
         for r in rows:
+            if not taxonomy.is_ean_comparable(r.offer_kind):
+                # Détache uniquement les liens résiduels d’une nature désormais
+                # reconnue comme non comparable ; aucune comparaison fantôme ne
+                # survit au prochain regroupement.
+                if r.product_id is not None:
+                    mapping.append({"id": r.id, "product_id": None})
+                continue
             ean = normalize_ean(r.ean)
             pid = existing.get(ean) if ean else None
             if pid is not None:

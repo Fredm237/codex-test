@@ -23,7 +23,7 @@ const SL = {
     sourceBody: "FILON s’appuie uniquement sur les offres de son catalogue partenaire. Cette recherche ne renvoie pas encore de prix vérifiables ; explorez le catalogue ou reformulez votre demande.",
     retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
-    at: "chez", cashback: "cashback", coupon: "coupon",
+    at: "chez", cashback: "cashback", coupon: "coupon", observedRate: "Tarif observé", contextualOffer: "À confirmer pour vos dates et conditions",
     hist: { baisse: "En baisse", hausse: "En hausse", stable: "Stable" } as Record<Hist, string>,
   },
   nl: {
@@ -43,7 +43,7 @@ const SL = {
     sourceBody: "FILON gebruikt uitsluitend aanbiedingen uit zijn partnercatalogus. Deze zoekopdracht levert nog geen verifieerbare prijzen op; verken de catalogus of verfijn je vraag.",
     retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
-    at: "bij", cashback: "cashback", coupon: "code",
+    at: "bij", cashback: "cashback", coupon: "code", observedRate: "Waargenomen tarief", contextualOffer: "Bevestig data en voorwaarden",
     hist: { baisse: "Dalend", hausse: "Stijgend", stable: "Stabiel" } as Record<Hist, string>,
   },
   en: {
@@ -63,7 +63,7 @@ const SL = {
     sourceBody: "FILON relies only on offers from its partner catalogue. This search does not yet return verifiable prices; explore the catalogue or refine your request.",
     retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
-    at: "at", cashback: "cashback", coupon: "coupon",
+    at: "at", cashback: "cashback", coupon: "coupon", observedRate: "Observed rate", contextualOffer: "Confirm dates and terms",
     hist: { baisse: "Falling", hausse: "Rising", stable: "Stable" } as Record<Hist, string>,
   },
 };
@@ -131,7 +131,7 @@ const STEPS = [
 type Hist = "baisse" | "hausse" | "stable";
 type Card = {
   rank: string; medal: string; name: string; emoji: string;
-  image?: string | null; link?: string | null;
+  offer_kind?: string; image?: string | null; link?: string | null;
   price: number; currency?: string; merchant: string; delivery: string; warranty: string;
   cashback: number; coupon: string | null; hist: Hist | null; histNote: string;
   score?: number; evidence_score?: number; decision?: DecisionData | null;
@@ -253,6 +253,7 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
   const [imgOk, setImgOk] = useState(true);
   const { locale } = useLocale();
   const S = SL[locale];
+  const isContextualOffer = Boolean(c.offer_kind && !["physical_product", "tech_accessory"].includes(c.offer_kind));
   // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
   // Google Shopping : on le laisse explorer le même produit dans FILON.
   const hasMerchantLink = Boolean(c.link) && !isGoogleShoppingUrl(c.link);
@@ -279,10 +280,9 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
-          <div className="fa-price"><b>{money(c.price, c.currency || cur, locale)}</b><span className="mc">{S.at} {c.merchant}</span></div>
+          <div className="fa-price">{isContextualOffer && <span className="mc">{S.observedRate}</span>}<b>{money(c.price, c.currency || cur, locale)}</b><span className="mc">{S.at} {c.merchant}</span></div>
           <div className="fa-specs">
-            <span><IcTruck /> {c.delivery}</span>
-            <span><IcShield /> {c.warranty}</span>
+            {!isContextualOffer && <><span><IcTruck /> {c.delivery}</span><span><IcShield /> {c.warranty}</span></>}
             {c.cashback ? <span className="g"><IcCashback /> {S.cashback} {c.cashback} %</span> : null}
             {c.coupon && <span className="g"><IcCoupon /> {S.coupon} {c.coupon}</span>}
             {c.hist && c.histNote ? (() => { const Ic = HIST_ICON[c.hist as Hist]; return <span className={`hist ${c.hist}`}><Ic /> {S.hist[c.hist]} · {c.histNote}</span>; })() : null}
@@ -297,7 +297,7 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
           {c.alt && <p className="fa-alt">{S.alt}&nbsp;: {c.alt}</p>}
         </div>
         <div className="fa-aside">
-          <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> {S.good}</> : <><IcClock /> {S.wait}</>}</span>
+          <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> {S.good}</> : <><IcClock /> {isContextualOffer ? S.contextualOffer : S.wait}</>}</span>
           <a
             className="ed-btn wave"
             href={offerUrl}
