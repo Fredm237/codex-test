@@ -501,3 +501,52 @@ class TestPostCampaignDepthRules:
     def test_assigns_subcategories_for_explicit_post_campaign_terms(self):
         assert t.classify_subcategory(t.BEAUTE, "CHANEL Brow Definer", "Crayon sourcils") == "Maquillage"
         assert t.classify_subcategory(t.BEAUTE, "Color Wow crème coiffante", "Styling") == "Cheveux"
+
+
+class TestSecondWaveFootwearModels:
+    """Modèles relevés dans les reliquats BSTN, toujours croisés avec la marque."""
+
+    @pytest.mark.parametrize(
+        "brand,name",
+        [
+            ("Salomon", "ACS PRO LTR"),
+            ("Salomon", "RX SLIDE 3.0"),
+            ("Salomon", "GENESIS ADVANCED"),
+            ("Hoka One One", "BONDI 9"),
+            ("Hoka", "CLIFTON ONE9"),
+            ("Converse", "Chuck 70 GORE-TEX"),
+            ("Puma", "Deviate NITRO 4"),
+            ("Puma", "Arizona Python Wns"),
+            ("On", "Cloudflow 5"),
+            ("Autry Action Shoes", "MEDALIST LOW WOM"),
+            ("Autry", "REELWIND LOW"),
+            ("Axel Arigato", "DICE T-TOE"),
+            ("Birkenstock", "Naples Wrapped"),
+            ("Ugg", "NEUMEL WEATHER HYBRID"),
+            ("Nike", "AIR FOAMPOSITE ONE"),
+        ],
+    )
+    def test_verified_brand_model_pairs_are_shoes(self, brand, name):
+        assert t.classify(None, name, brand) == t.CHAUSSURES
+
+    def test_a_clothing_signal_beats_a_footwear_model_pair(self):
+        assert t.classify(None, "Chuck 70 T-shirt", "Converse") == t.MODE
+
+    def test_cloud_model_does_not_classify_without_the_on_brand(self):
+        assert t.classify(None, "Cloud 6", "Une autre marque") is None
+
+
+class TestBoundedMerchantFallbacks:
+    """Un contexte marchand ne s'applique qu'après tous les signaux produit."""
+
+    def test_asmc_short_tactical_reference_uses_verified_outdoor_context(self):
+        assert t.classify(None, "2SGL Mag Pouch BEL HK417 MKIII", "Tasmanian Tiger", "ASMC FR") == t.SPORT
+
+    def test_maverton_short_personalised_gift_uses_verified_home_context(self):
+        assert t.classify(None, "Cadeau personnalisé avec gravure", "Murrano", "Maverton FR") == t.MAISON
+
+    def test_explicit_bag_beats_asmc_context(self):
+        assert t.classify(None, "Sac à dos tactique", "Tasmanian Tiger", "ASMC FR") == t.BAGAGERIE
+
+    def test_explicit_jewellery_beats_maverton_context(self):
+        assert t.classify(None, "Bague personnalisée", "Murrano", "Maverton FR") == t.BIJOUX

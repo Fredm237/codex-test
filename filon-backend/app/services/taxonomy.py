@@ -162,6 +162,14 @@ _SPECIALIST_MERCHANT_CONTEXTS: tuple[tuple[str, str], ...] = (
     (r"\bmilk\s+bar\s+babystore\b", BEBE),
     (r"\bbobshop\b", SPORT),
     (r"\btapis\.fr\b", MAISON),
+    # ASMC est un spécialiste militaire, tactique et outdoor vérifié. Les sacs,
+    # vêtements et équipements ayant un signal explicite sont déjà classés plus
+    # haut ; ce filet ne traite que les références très courtes restantes.
+    (r"\basmc\b", SPORT),
+    # Les reliquats de Maverton sont des cadeaux personnalisés Murrano (verres,
+    # ardoises et objets décoratifs). Bijoux et vaisselle explicites conservent
+    # leur priorité ; cette règle ne couvre que les titres réduits du flux.
+    (r"\bmaverton\b", MAISON),
 )
 
 
@@ -182,13 +190,29 @@ _FOOTWEAR_MODELS_BY_BRAND: tuple[tuple[str, str], ...] = (
                   r"centennial\s+85|campus|superstar|handball\s+spezial|country\s+og)\b"),
     (r"\basics\b", r"\b(?:gel[-\s]?(?:1130|kayano|nimbus|lyte|venture|quantum|cumulus|nyc)|gt[-\s]?2160)\b"),
     (r"\bnew\s+balance\b", r"\b(?:[umwgc]{0,2})?(?:1000|1300|1906|2002r?|327|530|550|574|740|9060|990v?\d*|992)[a-z0-9]*\b"),
-    (r"\bsalomon\b", r"\b(?:xa\s+pro\s+3d|xt[-\s]?(?:whisper|quest)|neuva\s+advanced)\b"),
-    (r"\bbirkenstock\b", r"\b(?:arizona|boston|tokio)\b"),
-    (r"\bugg\b", r"\b(?:tasman(?:\s+ii)?|classic\s+(?:micro|ultra\s+mini)|metropeak|peakmod|goldenglow)\b"),
+    (r"\bsalomon\b", r"\b(?:xa\s+pro\s+3d|xt[-\s]?(?:whisper|quest)|neuva\s+advanced|"
+                    r"acs\s*(?:pro|ltr)?|rx\s+(?:slide|moc|marie[-\s]?jeanne)|"
+                    r"genesis\s+advanced|orava\s+advanced|snowclog\s+advanced)\b"),
+    (r"\bhoka(?:\s+one\s+one)?\b", r"\b(?:bondi\s*\d+|clifton\s*(?:\d+|one9)|mafate|"
+                                  r"speedgoat|hopara|ora\s+primo)\b"),
+    (r"\bconverse\b", r"\b(?:chuck\s*70|all\s+star\s+bb|as[-\s]?1\s+pro)\b"),
+    (r"\bpuma\b", r"\b(?:deviate\s+nitro|brasil|arizona\s+(?:doelette|python|retro|venus)|"
+                 r"all[-\s]?pro\s+nitro)\b"),
+    # La marque On est un mot courant : on ne la reconnaît que dans le champ
+    # marque et seulement avec un modèle Cloud vérifié dans le nom.
+    (r"\bon\b", r"\bcloud\s*(?:6|away|boom|flow|surfer|tilt|vista)\b"),
+    (r"\bautry(?:\s+action\s+shoes)?\b", r"\b(?:medalist|reelwind|malga|clc\s+low|"
+                                             r"(?:0?1|1)\s+low)\b"),
+    (r"\baxel\s+arigato\b", r"\b(?:clean\s+90|area\s+lo|dice\s+(?:lo|t[-\s]?toe|patchwork)|"
+                              r"daze\s+runner)\b"),
+    (r"\bbirkenstock\b", r"\b(?:arizona|boston|tokio|highwood|kyoto|loma|london|mantova|"
+                          r"naples|oita|prescott)\b"),
+    (r"\bugg\b", r"\b(?:tasman(?:\s+ii)?|classic\s+(?:micro|ultra\s+mini)|metropeak|peakmod|"
+                 r"goldenglow|anders|ascot(?:\s+lug)?|neumel(?:\s+(?:moc|weather\s+hybrid))?)\b"),
     (r"\bjordan\b", r"\b(?:tatum|zion)\s*\d+\b"),
     (r"\bvans\b", r"\b(authentic(?:\s+reissue\s+44)?|old\s+skool|sk8[-\s]?hi|era|slip[-\s]?on|k\s*nu\s*skool)\b"),
-    (r"\bnike\b", r"\b(acg\s+(?:air\s+exploraid|izy)|air\s+(?:max|force)|dunk|"
-                r"air\s+jordan|pegasus|vomero|zoomx?)\b"),
+    (r"\bnike\b", r"\b(acg\s+(?:air\s+exploraid|izy)|air\s+(?:max|force|180|foamposite|trainer\s+huarache)|"
+                r"dunk|air\s+jordan|pegasus|vomero|zoomx?|astrograbber)\b"),
 )
 
 
