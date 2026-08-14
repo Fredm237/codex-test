@@ -284,6 +284,23 @@ class TestOfferKinds:
     def test_collection_name_without_andlight_context_stays_unclassified(self):
         assert t.classify("", "Paletti Sofa Middenmodule Mist", merchant_name="Marchand généraliste") is None
 
+    @pytest.mark.parametrize(
+        "merchant,name,expected",
+        [
+            ("ISOTIGER (FR)", "Joint de portes pour Renault Scenic", t.AUTO),
+            ("GSMnet FR", "Support PCB Oppo Reno16 F", t.TELEPHONIE),
+            ("Overhemden - NL", "John Miller Tailored Fit", t.MODE_HOMME),
+            ("Milk Bar Babystore", "Référence bébé 123", t.BEBE),
+            ("Bobshop FR", "Référence vélo 123", t.SPORT),
+            ("tapis.fr", "Référence tapis 123", t.MAISON),
+        ],
+    )
+    def test_verified_specialist_contexts_classify_minimal_references(self, merchant, name, expected):
+        assert t.classify("", name, merchant_name=merchant) == expected
+
+    def test_specialist_reference_without_context_stays_unclassified(self):
+        assert t.classify("", "Référence modèle 123", merchant_name="Marchand généraliste") is None
+
     def test_tyre_dimension_overrides_camping_model_name(self):
         category = "Les pneus industriels, pneus camion et les pneus utilitaire"
         name = "Michelin CrossClimate Camping ( 195/75 R16CP 107/105R 8PR EV Suitable )"
