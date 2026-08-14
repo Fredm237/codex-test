@@ -63,11 +63,11 @@ export const PER_PAGE = [24, 48, 96] as const;
 
 const TIMEOUT = 8000;
 
-async function getJson(path: string, revalidate: number): Promise<any | null> {
+async function getJson(path: string, revalidate: number, timeout = TIMEOUT): Promise<any | null> {
   try {
     const res = await fetch(`${API}${path}`, {
       next: { revalidate },
-      signal: AbortSignal.timeout(TIMEOUT),
+      signal: AbortSignal.timeout(timeout),
     });
     if (!res.ok) return null;
     return await res.json();
@@ -98,7 +98,10 @@ export async function getPulse(): Promise<PulsePayload> {
 
 /** Rangées thématiques — le contenu qui change tout seul d'un jour à l'autre. */
 export async function getRails(): Promise<Array<{ key: string; items: any[] }>> {
-  const data = await getJson("/api/catalog/highlights?limit=12", 300);
+  // Les rangées enrichissent la page, mais une requête lente ne doit jamais
+  // retenir le premier produit ni la navigation. Elles sont diffusées sous
+  // Suspense et abandonnées rapidement si le service n'est pas disponible.
+  const data = await getJson("/api/catalog/highlights?limit=12", 300, 2500);
   return (data?.sections || []).filter(
     (s: { items?: unknown[] }) => (s.items || []).length > 0
   );
