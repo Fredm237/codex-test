@@ -403,3 +403,31 @@ class TestProvenResidualFamilies:
     def test_generic_merchandise_is_not_promoted_from_a_brand_alone(self):
         assert t.classify("", "Fusion 2.0", brand="Karhu") is None
         assert t.classify("", "ROCC Duftkerze Flint", brand="Alessi") == t.MAISON
+
+
+class TestPostCampaignDepthRules:
+    """Cas observés après la première campagne de reliquats."""
+
+    @pytest.mark.parametrize(
+        "merchant_category,name,brand,merchant_name,expected",
+        [
+            (None, "Elina Parka", "Didriksons", "Didrikson FR", t.MODE),
+            ("Coffrets", "Sisley - Rose Noire Kit", "Sisley", "ICI PARIS XL BE", t.BEAUTE),
+            ("Bâtonnets parfumés", "SCENTO - Diffuseur D'ambiance Vanille", "SCENTO", "ICI PARIS XL BE", t.MAISON),
+            ("Produits Wi-Fi", "Point d'Accès Répéteur WiFi Mercusys ME30", "Mercusys", "1FoTeam FR", t.INFORMATIQUE),
+            ("Carte Mère", "Carte Mère Gigabyte B760 DS3H Gen5", "Gigabyte", "1FoTeam FR", t.INFORMATIQUE),
+            ("Watercooling", "Kit Watercooling AIO Lian Li HydroShift II", "Lian-Li", "1FoTeam FR", t.INFORMATIQUE),
+            ("Librairie", "Magazine - White Dwarf n°524", "Games Workshop", "1FoTeam FR", t.CULTURE),
+            ("Nettoyant", "CHANEL - La Mousse Crème Nettoyante Au Camélia", "Chanel", "ICI PARIS XL BE", t.BEAUTE),
+        ],
+    )
+    def test_classifies_post_campaign_residuals(self, merchant_category, name, brand, merchant_name, expected):
+        assert t.classify(merchant_category, name, brand, merchant_name) == expected
+
+    def test_keeps_beauty_context_as_a_last_resort(self):
+        assert t.classify("", "Collection Ambre Noire", "Maison X", "ICI PARIS XL BE") == t.BEAUTE
+        assert t.classify("", "Collection Ambre Noire", "Maison X", "Marchand généraliste") is None
+
+    def test_assigns_subcategories_for_explicit_post_campaign_terms(self):
+        assert t.classify_subcategory(t.BEAUTE, "CHANEL Brow Definer", "Crayon sourcils") == "Maquillage"
+        assert t.classify_subcategory(t.BEAUTE, "Color Wow crème coiffante", "Styling") == "Cheveux"
