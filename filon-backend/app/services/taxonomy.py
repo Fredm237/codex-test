@@ -577,7 +577,9 @@ _RULES: list[tuple[str, str]] = [
     # précis est nécessaire pour prouver qu'il s'agit bien d'un produit de beauté.
     (BEAUTE, r"\b(?:apr[èe]s[-\s]?rasage|after\s+shave|soins?\s+(?:pour|des)\s+yeux|"
              r"laits?\s+corporels?|beurres?\s+corporels?|baumes?\s+corps|gels?\s+douche|"
-             r"blushing\s+blush|fards?\s+[àa]\s+joues|artliner|stay[-\s]?matte\s+powder)\b"),
+             r"blushing\s+blush|fards?\s+[àa]\s+joues|artliner|stay[-\s]?matte\s+powder|"
+             r"super[-\s]?poudre|poudre\s+double\s+face|cr[èe]mes?\s+pour\s+le\s+visage|"
+             r"eye\s+essence|lotion\s+clarifiante)\b"),
     # Familles de maquillage mesurées sur les offres réellement non classées en
     # base (`admin/unclassified`) : ~10 000 offres portaient un libellé marchand
     # de maquillage courant qu'aucune règle ne couvrait, en français comme en
@@ -610,7 +612,9 @@ _RULES: list[tuple[str, str]] = [
              r"couverts?|cutlery|bestek)\b"),
     (MAISON, r"\b(?:marmites?|faitouts?|po[êe]les?|autocuiseurs?|casseroles?|bouilloires?|"
              r"carafes?|saladiers?|sucriers?|pots?\s+[àa]\s+lait|tire[-\s]?bouchons?|"
-             r"presse[-\s]?agrumes)\b"),
+             r"presse[-\s]?agrumes|presse[-\s]?pur[ée]e|blocs?\s+[àa]\s+couteaux|"
+             r"hachoirs?\s+[àa]\s+herbes|moulins?\s+[àa]\s+poivre|"
+             r"machines?\s+[àa]\s+expresso|espressokocher|tapis\s+de\s+bain|badetuch|badteppich)\b"),
     # Un luminaire décoré d'un ballon reste un luminaire : même principe que le
     # support qui l'emporte sur le motif. Placé avant Sport, sinon
     # « Lampe LED 3D avec impression ballon de football » partait en Sport.
@@ -866,7 +870,8 @@ _VETEMENT = (
     r"trousers?|pants?|trackpants?|joggers?|jeans?|chemises?|chemisiers?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|gilets?|cardigans?|sweats?|sweaters?|hood(?:y|ies)?|hoodies?|crewnecks?|longsleeves?|"
     r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|bermudas?|leggings?|cuissards?|doudounes?|parkas?|boxers?|cale[çc]ons?|lingerie|underwear|"
     r"soutiens?[-\s]?gorges?|brassi[èe]res?|bras?|culottes?|slips?|strings?|bodies?|collants?|"
-    r"sleepwears?|pyjamas?|pyjamashirts?|maillots?|chaussettes?|socks?|polos?|poloshirts?|overhemd|broek|jas|blazers?|sakko|"
+         r"sleepwears?|pyjamas?|pyjamashirts?|maillots?|chaussettes?|socks?|str[üu]mpfe|strumpfhose|kniestr[üu]mpfe|socquettes|polos?|poloshirts?|overhemd|broek|jas|blazers?|sakko|"
+
     r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|b[ée]rets?|tabliers?|polaires?|fleece|"
     # « Débardeur Proact Sport », catégorisé « Multisports > Débardeur », n'était
     # rangé nulle part : le mot manquait à la liste, donc la branche vêtement
@@ -1058,10 +1063,12 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Maquillage", r"\b(maquillage|make\s?up|rouges? [àa] l[èe]vres|lipstick|mascaras?|"
                        r"fonds? de teint|eyeliner|fards?|sourcils?|eyebrow|brow\s+(?:pen|definer)|"
                        r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?|"
-                       r"blushing\s+blush|fards?\s+[àa]\s+joues|artliner|stay[-\s]?matte\s+powder)\b"),
+                       r"blushing\s+blush|fards?\s+[àa]\s+joues|artliner|stay[-\s]?matte\s+powder|"
+                       r"super[-\s]?poudre|poudre\s+double\s+face)\b"),
         ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
                          r"gezicht|toner|masques?|cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?|"
-                         r"papier\s+matifiant|apr[èe]s[-\s]?rasage|after\s+shave|soins?\s+(?:pour|des)\s+yeux)\b"),
+                         r"papier\s+matifiant|apr[èe]s[-\s]?rasage|after\s+shave|soins?\s+(?:pour|des)\s+yeux|"
+                         r"cr[èe]mes?\s+pour\s+le\s+visage|eye\s+essence|lotion\s+clarifiante)\b"),
         ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen|"
                            r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me|"
                            r"fleurs?\s+de\s+douche|brosses?\s+de\s+douche|disques?\s+de\s+coton|"
@@ -1092,7 +1099,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
                                   r"bols?|mugs?|th[ée]i[èe]res?|kurkentrekker|mandoline|marmites?|faitouts?|"
                                   r"autocuiseurs?|bouilloires?|carafes?|saladiers?|sucriers?|pots?\s+[àa]\s+lait|"
-                                  r"tire[-\s]?bouchons?|presse[-\s]?agrumes)\b"),
+                                  r"tire[-\s]?bouchons?|presse[-\s]?agrumes|presse[-\s]?pur[ée]e|"
+                                  r"blocs?\s+[àa]\s+couteaux|hachoirs?\s+[àa]\s+herbes|moulins?\s+[àa]\s+poivre|"
+                                  r"machines?\s+[àa]\s+expresso|espressokocher)\b"),
         ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
                          r"waxinelichtjes?|kerstbal(?:len)?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
                          r"decoratielint|kerstpapier|aroma\s+diffuseurs?|vases?|miroirs?)\b"),
