@@ -65,6 +65,8 @@ class TestMainCategories:
             ("Ordinateurs tablettes & accessoires", "MINIX C1 Clé USB-C vers HDMI sans fil compatible avec iPhone 15", t.INFORMATIQUE),
             ("Ordinateurs tablettes & accessoires", "ZIKE Z806 Rallonge USB-C pour iPhone 16", t.INFORMATIQUE),
             ("Ordinateurs tablettes & accessoires", "ZIKE Z850 SSD NVMe M2 2230 magnétique USB-C pour iPhone 16", t.INFORMATIQUE),
+            # Cas public : « LIP » n’est pas du maquillage lorsque la source est Watch.
+            ("Watch", "LIP Himalaya Horloge", t.BIJOUX),
         ],
     )
     def test_classifies_from_the_product_name(self, category, name, expected):
