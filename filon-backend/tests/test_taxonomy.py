@@ -197,6 +197,12 @@ class TestSubcategories:
             # néerlandais ne contient pas de séparation avant « hoes ».
             (t.TELEPHONIE, "Selencia Nova Telefoonhoes met Koord voor Samsung Galaxy S24", "Coques & Protections"),
             (t.TELEPHONIE, "Screen Protector for iPhone 15", "Coques & Protections"),
+            # Échantillons réellement visibles sous Smartphones avant cette vague.
+            (t.TELEPHONIE, "imoshion 2 Pack Camera lens protector voor Apple iPhone 16 Pro", "Coques & Protections"),
+            (t.TELEPHONIE, "Accezz Classic Tablet Case voor Samsung Galaxy Tab A11", "Coques & Protections"),
+            (t.TELEPHONIE, "Support de téléphone SP Connect Universal Bike Mount", "Coques & Protections"),
+            (t.TELEPHONIE, "Samsung Galaxy Watch8 44 Horloge", "Montres connectées"),
+            (t.TELEPHONIE, "imoshion Oplaadkabel voor Samsung Galaxy Watch USB-C", "Chargeurs & Batteries"),
             (t.TELEPHONIE, "Écran tactile Samsung Galaxy S23+ avec cadre", "Pièces détachées"),
             (t.TELEPHONIE, "Support PCB Oppo Reno16 F", "Pièces détachées"),
             (t.TELEPHONIE, "Batterie Xiaomi Redmi Note 11 Pro", "Chargeurs & Batteries"),
