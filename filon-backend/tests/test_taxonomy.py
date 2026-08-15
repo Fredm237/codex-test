@@ -73,6 +73,9 @@ class TestMainCategories:
             # Cas public : une poignée de porte de garde-robe est de la quincaillerie, pas une robe.
             ("", "VEVOR Poignée de Porte pour Meuble Placard Garde-Robe", t.JARDIN),
             ("", "Robe femme longue plissée", t.MODE_FEMME),
+            # Cas public : la jupe amovible d’un comptoir de stand est du mobilier.
+            ("", "VEVOR Comptoir de Stand Table de Bar avec Jupe Amovible", t.MAISON),
+            ("", "Jupe femme longue en lin", t.MODE_FEMME),
         ],
     )
     def test_classifies_from_the_product_name(self, category, name, expected):

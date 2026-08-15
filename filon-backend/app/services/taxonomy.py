@@ -1109,6 +1109,16 @@ def classify(
     ):
         return JARDIN
 
+    # La « jupe » d'un comptoir de stand ou d'une housse de chaise est un élément
+    # de mobilier événementiel, pas un vêtement. Les objets hôtes explicites sont
+    # exigés pour ne pas élargir la règle au mot jupe seul.
+    if _has(
+        r"\b(?:comptoirs?\s+(?:de\s+)?(?:stand|bar)|tables?\s+de\s+bar|"
+        r"housses?\s+de\s+chaise|chaises?\s+pliantes?)\b",
+        name,
+    ):
+        return MAISON
+
     # Les modèles de chaussures vérifiés suivent les supports, mais précèdent les
     # règles génériques : un « Gazelle Indoor » n'est pas un article inconnu.
     # Un vêtement explicite doit toutefois rester un vêtement, même si sa marque
