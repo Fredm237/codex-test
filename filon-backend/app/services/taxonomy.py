@@ -432,6 +432,9 @@ _RULES: list[tuple[str, str]] = [
            r"draagzak|maternit[ée]|kinderstoel|kinderwagen|babyfoon|wieg|wiegjes?|"
            r"slaapzakken?|zomerslaapzak|winterslaapzak|gigoteuses?|"
            r"si[èe]ges? auto|chaises? hautes?|tables? [àa] langer|st[ée]rilisateurs?)\b"),
+    # Les composés néerlandais ne créent pas de frontière après « baby ».
+    # Chacun désigne explicitement un soin ou une toilette pour nourrisson.
+    (BEBE, r"\b(?:babydoekjes?|babyolie|babybad|babyshampoo|babyverzorging)\b"),
     (ANIMALERIE, r"\b(chiens?|chats?|dogs?|cats?|hond|kat|hondenvoer|kattenvoer|animal|"
                  r"animalerie|croquettes?|aquarium|liti[èe]re|dierenvoeding|"
                  r"chiots?|puppy|puppies|chatons?|kittens?|niches?\s+pour|"
@@ -505,6 +508,9 @@ _RULES: list[tuple[str, str]] = [
     # Signaux échappés à la première passe : huiles de massage et parapharmacie.
     (BEAUTE, r"\b(?:huiles? de massage|massageolie|massage oils?|parapharmacie|"
              r"gommages?|scrubs?|d[ée]odorants?|deodorants?|savons?|zeep)\b"),
+    # Produits de bain corporels observés dans le flux néerlandais. Les jouets de
+    # bain sont exclus : ils sont traités plus bas dans Jeux & Jouets.
+    (BEAUTE, r"\b(?:badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen)\b"),
     # Familles de maquillage mesurées sur les offres réellement non classées en
     # base (`admin/unclassified`) : ~10 000 offres portaient un libellé marchand
     # de maquillage courant qu'aucune règle ne couvrait, en français comme en
@@ -557,6 +563,9 @@ _RULES: list[tuple[str, str]] = [
             r"cam[ée]ras? pour la faune|trail cameras?|wildcameras?)\b"),
     (SANTE, r"\b(compl[ée]ments? alimentaires?|vitamines?|pharmacie|m[ée]dical|orthop[ée]dique|"
             r"tensiom[èe]tre|hygi[èeë]ne|huiles? essentielles?)\b"),
+    # Hygiène bucco-dentaire multilingue : brosse, tête de brosse et dentifrice
+    # sont des signaux de santé explicites, y compris pour enfant.
+    (SANTE, r"\b(?:kindertandenborstel|tandenborstel(?:koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     # « ketting » et « pendant » sont retirés comme mots nus : en néerlandais
     # « kettingzaag » est une tronçonneuse et « fietsketting » une chaîne de vélo ;
     # en anglais « pendant lamp » est une suspension. Tous deux peuplaient le
@@ -654,6 +663,9 @@ _RULES: list[tuple[str, str]] = [
     (MAISON, r"\bpendant\s+(?:lamps?|lights?|lighting)\b"),
     (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
              r"toys?|warhammer|games\s+workshop|age\s+of\s+sigmar)\b"),
+    # Les composés « badspeelgoed » et « badspeeltje » décrivent un jouet de bain,
+    # pas un produit de soin ou un savon.
+    (JOUETS, r"\b(?:badspeelgoed|badspeeltjes?|bath\s+squirters?|bad\s+squirters?)\b"),
     # « couture » est écarté : en français il désigne aussi une piqûre de
     # vêtement, et « pyjama sans couture » atterrissait ici.
     (LOISIRS, r"\b(patrons? de couture|patrons?|tricot|laine [àa] tricoter|mercerie|"
@@ -902,10 +914,14 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                        r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?)\b"),
         ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
                          r"gezicht|toner|masques?)\b"),
+        ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen)\b"),
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
                      r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling)\b"),
         ("Ongles", r"\b(ongles?|nails?|vernis|manucure)\b"),
         ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
+    ],
+    SANTE: [
+        ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     ],
     MAISON: [
         ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|cabinets?|"
@@ -960,7 +976,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Poussettes & Sièges auto", r"\b(poussettes?|strollers?|si[èe]ges? auto|maxi-cosi)\b"),
         ("Repas & Biberons", r"\b(biberons?|bavoirs?|slabbetjes?|chaises? hautes?|"
                               r"st[ée]rilisateurs?)\b"),
-        ("Couches & Toilette", r"\b(couches?|luiers?|lingettes?|tables? [àa] langer)\b"),
+        ("Couches & Toilette", r"\b(couches?|luiers?|lingettes?|tables? [àa] langer|"
+                              r"babydoekjes?|babyolie|babybad|babyshampoo|babyverzorging)\b"),
         ("Chambre bébé", r"\b(lits? b[ée]b[ée]|berceaux?|matelas b[ée]b[ée]|tours? de lit)\b"),
     ],
     ANIMALERIE: [
@@ -973,6 +990,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Jeux vidéo", r"\b(jeux? vid[ée]o|video\s?games?|cd keys?|steam)\b"),
         ("Accessoires gaming", r"\b(manettes?|controllers?|casques? gaming|si[èe]ges? gamer|"
                                 r"tapis de souris)\b"),
+    ],
+    JOUETS: [
+        ("Jeux de bain", r"\b(?:badspeelgoed|badspeeltjes?|bath\s+squirters?|bad\s+squirters?)\b"),
     ],
     JARDIN: [
         ("Outillage", r"\b(perceuses?|visseuses?|scies?|outillages?|gereedschap|tournevis)\b"),
