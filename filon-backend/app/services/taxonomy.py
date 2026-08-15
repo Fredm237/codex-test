@@ -500,7 +500,7 @@ _RULES: list[tuple[str, str]] = [
              r"home\s+cinema|home\s+theater|led)\b)"),
     (ELECTROMENAGER, r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                      r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|broodroosters?|"
-                     r"milk\s+frothers?|coffee\s+frothers?|humidifiers?|"
+                     r"milk\s+frothers?|coffee\s+frothers?|humidifiers?|cuiseurs?\s+[àa]\s+riz|"
                      r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
                      r"huishoudelijke|ventilateurs?|vacuum cleaners?|wassen, strijken)\b"),
     # « crème » n'y figure plus comme mot nu : en néerlandais c'est une teinte,
@@ -527,7 +527,8 @@ _RULES: list[tuple[str, str]] = [
     # Produits de bain corporels observés dans le flux néerlandais. Les jouets de
     # bain sont exclus : ils sont traités plus bas dans Jeux & Jouets.
     (BEAUTE, r"\b(?:badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen|"
-                 r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me|nagelknippers?)\b"),
+                 r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me|nagelknippers?|"
+                 r"fleurs?\s+de\s+douche|brosses?\s+de\s+douche|disques?\s+de\s+coton|papier\s+matifiant)\b"),
     # Soins anglais observés sans catégorie source fiable. Les expressions
     # qualifiées évitent de considérer « treatment » seul comme une preuve.
     (BEAUTE, r"\b(?:cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?|"
@@ -619,9 +620,9 @@ _RULES: list[tuple[str, str]] = [
     (CHAUSSURES, r"\b(chaussures?|shoes?|baskets?|sneakers?|bottes?|bottines?|boots?|escarpins?|heels?|"
                  r"mules?|sandales?|sandals?|schoenen|mocassins?|semelles?|insoles?|"
                  r"pantoufles?|slippers?)\b"),
-    (BAGAGERIE, r"\b(sacs? [àa] main|sacs? [àa] dos|handbags?|backpacks?|valises?|suitcases?|"
-                r"bagages?|luggage|trolleys?|portefeuilles?|wallets?|maroquinerie|handtas|"
-                r"rugzak|bags?)\b"),
+    (BAGAGERIE, r"\b(sacs? [àa] main|sacs? [àa] dos|sacs? boston|trousses? de toilette|"
+                r"handbags?|backpacks?|valises?|suitcases?|bagages?|luggage|trolleys?|"
+                r"portefeuilles?|wallets?|maroquinerie|handtas|rugzak|bags?)\b"),
     # Les titres de maroquinerie peuvent n'indiquer que la forme du sac. Les
     # qualificatifs sont exigés : « sac de couchage » et les usages techniques
     # restent hors de cette règle.
@@ -678,7 +679,10 @@ _RULES: list[tuple[str, str]] = [
     # « tissus » est retiré de cette règle : il désigne la mercerie, traitée
     # plus haut par les supports. Le laisser ici renvoyait tous les coupons au
     # rayon Maison. Le linge de maison, lui, manquait entièrement.
-    (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|lampes?|luminaires?|cabinet\s+lights?|"
+    (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|"
+               r"lits?\s+(?:plateforme|double|simple|super\s+king|king|en\s+(?:bois|ch[êe]ne|noyer))|"
+               r"(?:[ée]tag[èe]res?|shelves?)\s+(?:en\s+(?:acier|bois|ch[êe]ne|noyer)|\d+\s+niveaux)|"
+               r"tiroirs?\s+de\s+rangement|coussins?|aroma\s+diffuseurs?|lampes?|luminaires?|cabinet\s+lights?|"
                r"wardrobe\s+lamps?|closet\s+lighting|matelas|"
              r"linge de (?:lit|maison)|housses? de (?:couette|coussin)|couettes?|"
              r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
@@ -737,7 +741,8 @@ _RULES: list[tuple[str, str]] = [
     (JOUETS, r"\b(?:jeux?\s+pour\s+famille\s*/\s*amis|family\s*(?:&|and)\s*friends?\s+games?)\b"),
     (CULTURE, r"\b(livres?|romans?|manga|dvd|blu-ray|vinyles?|boek|books?|librairie|magazines?)\b"),
     (ALIMENTATION, r"\b(alimentation|[ée]picerie|caf[ée]|th[ée]|vins?|bi[èe]res?|chocolats?|"
-                   r"snacks?|boissons?|voeding|wijn|eten\s*(?:&|and)\s*drinken|"
+                   r"snacks?|boissons?|soupes?|chips?|croustilles|currys?|guimauves?|craquants?\s+au\s+fromage|"
+                   r"voeding|wijn|eten\s*(?:&|and)\s*drinken|"
                    r"koro\s+new\s*>\s*c\s*>\s*petit-d[ée]j['’]?\s+prot[ée]in[ée])\b"),
 ]
 
@@ -945,13 +950,13 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Montres", r"\b(montres?|watch(es)?|horloges?)\b"),
     ],
     BAGAGERIE: [
-        ("Sacs à main", r"\b(sacs? [àa] main|handbags?|handtas|cabas|besaces?|bandouli[èe]res?|"
+        ("Sacs à main", r"\b(sacs? [àa] main|sacs? boston|handbags?|handtas|cabas|besaces?|bandouli[èe]res?|"
                          r"(?:mini|petits?)\s+sacs?|sacs?\s+(?:bandouli[eè]res?|shopping|hobo|panier|"
                          r"seau|cabas|fourre[-\s]tout|d['’][ée]paule))\b"),
         ("Sacs à dos", r"\b(sacs? [àa] dos|backpacks?|rugzak)\b"),
         ("Valises & Bagages", r"\b(valises?|suitcases?|bagages?|luggage|trolleys?)\b"),
         ("Portefeuilles", r"\b(portefeuilles?|wallets?|porte-cartes?|porte-monnaie)\b"),
-        ("Sacs banane & Pochettes", r"\b(sacs? banane|bananes?|pochettes?|sacoches?)\b"),
+        ("Sacs banane & Pochettes", r"\b(sacs? banane|bananes?|pochettes?|sacoches?|trousses? de toilette)\b"),
     ],
     ACCESSOIRES: [
         ("Lunettes de soleil", r"\b(lunettes? de soleil|sunglasses|solaires?)\b"),
@@ -968,9 +973,10 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                        r"fonds? de teint|eyeliner|fards?|sourcils?|eyebrow|brow\s+(?:pen|definer)|"
                        r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?)\b"),
         ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
-                         r"gezicht|toner|masques?|cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?)\b"),
+                         r"gezicht|toner|masques?|cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?|papier\s+matifiant)\b"),
         ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen|"
-                           r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me)\b"),
+                           r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me|"
+                           r"fleurs?\s+de\s+douche|brosses?\s+de\s+douche|disques?\s+de\s+coton)\b"),
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
                      r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling|"
                      r"hair\s+(?:milk|ampoules?|treatments?)|scalp\s+(?:therapy|ampoules?)|color\s+charge)\b"),
@@ -981,25 +987,28 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:s|koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     ],
     MAISON: [
-        ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
-                     r"[ée]tag[èe]res?|meubel|(?:locker|garderobe|draaideur|roldeur|hangmappen|postvakken)kasten?)\b"),
+        ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|"
+                     r"lits?\s+(?:plateforme|double|simple|super\s+king|king|en\s+(?:bois|ch[êe]ne|noyer))|"
+                     r"tiroirs?\s+de\s+rangement|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
+                     r"(?:[ée]tag[èe]res?|shelves?)\s+(?:en\s+(?:acier|bois|ch[êe]ne|noyer)|\d+\s+niveaux)|meubel|"
+                     r"(?:locker|garderobe|draaideur|roldeur|hangmappen|postvakken)kasten?)\b"),
         ("Luminaires", r"\b(lampes?|luminaires?|cabinet\s+lights?|wardrobe\s+lamps?|closet\s+lighting|"
                          r"lichtketting(?:en)?|kettinglamp(?:en)?|sterrengordijn(?:en)?|"
                          r"suspensions?|appliques?|verlichting|ampoules?)\b"),
         ("Linge de maison", r"\b(linge de lit|draps?|couettes?|serviettes?|rideaux?|"
                              r"coussins?|plaids?|tapis)\b"),
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
-                                  r"kurkentrekker|mandoline)\b"),
+                                  r"bols?|mugs?|th[ée]i[èe]res?|kurkentrekker|mandoline)\b"),
         ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
                          r"waxinelichtjes?|kerstbal(?:len)?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
-                         r"decoratielint|kerstpapier|vases?|miroirs?)\b"),
+                         r"decoratielint|kerstpapier|aroma\s+diffuseurs?|vases?|miroirs?)\b"),
         ("Entretien", r"\b(schoonmaak|nettoyage|entretien|lessives?|d[ée]tergents?)\b"),
     ],
     ELECTROMENAGER: [
         ("Gros électroménager", r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                                  r"cong[ée]lateurs?|fours?|wasmachines?|koelkast)\b"),
         ("Petit électroménager", r"\b(cafeti[èe]res?|bouilloires?|grille-pains?|broodroosters?|blenders?|"
-                                  r"milk\s+frothers?|coffee\s+frothers?|robots? cuiseur|friteuses?|micro-ondes)\b"),
+                                  r"milk\s+frothers?|coffee\s+frothers?|cuiseurs?\s+[àa]\s+riz|robots? cuiseur|friteuses?|micro-ondes)\b"),
         ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
                                        r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?)\b"),
