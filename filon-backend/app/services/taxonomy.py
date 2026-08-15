@@ -448,8 +448,8 @@ _RULES: list[tuple[str, str]] = [
     # dont le nom ne dit que la gamme (« Sport Maxx Race 2 »).
     (AUTO, r"\b\d{3}/\d{2}\s*(?:z)?r\s?\d{2}\b"),
     (TELEPHONIE, r"\b(smartphones?|t[ée]l[ée]phones?|iphone|samsung galaxy|mobiles?|gsm|"
-                 r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|earbuds?|earphones?|headsets?|"
-                 r"smartwatch(?:es)?|fitnesstrackers?|cellphones?|telecommunications?)\b"),
+                 r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|earbuds?|airbuds?|"
+                 r"ear\s*phones?|inpods?|headsets?|smartwatch(?:es)?|fitnesstrackers?|cellphones?|telecommunications?)\b"),
     (GAMING, r"\b(gaming|jeux? vid[ée]o|video\s?games?|consoles?|playstation|ps5|ps4|xbox|"
              r"nintendo|steam|manettes?|gamer|videogames?)\b"),
     # « souris » exige un contexte informatique : seul, il désigne bien plus
@@ -466,7 +466,8 @@ _RULES: list[tuple[str, str]] = [
     # « Câble » seul reste volontairement insuffisant.
     (INFORMATIQUE, r"(?=.*\b(?:c[âa]bles?|cables?|kabels?)\b)(?=.*\b(?:rj(?:12|45)|ethernet|thunderbolt|hdmi|ps/2|null\s+modem|db(?:9|25)|oculus|meta\s+quest)\b)"),
     (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
-                   r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|switch(?:es)?|"
+                   r"[ée]crans?|monitors?|ssd|disques? durs?|memory\s+cards?|micro\s*sd|microsd|"
+                   r"tf\s+(?:flash\s+)?(?:memory\s+)?cards?|imprimantes?|routeurs?|switch(?:es)?|"
                    r"r[ée]p[ée]teurs?\s+wifi|wifi\s+mesh|adaptateurs?\s+cpl|cartes?\s+r[ée]seau|"
                    r"points? d['’ ]acc[èe]s|usb|tablettes?|software|cartouches? d['’ ]encre|"
                    r"ink cartridges?|toner|"
@@ -481,7 +482,7 @@ _RULES: list[tuple[str, str]] = [
     (INFORMATIQUE, r"\bstations? d'alimentation\b(?=.*\b(?:portables?|solaires?|"
                    r"[ée]lectriques?|batteries?|\d+\s*wh|\d+\s*w\b))"),
     (PHOTO, r"\b(appareils? photo|cameras?|caméras?|objectifs?|reflex|drones?|gopro|"
-            r"tr[ée]pieds?|photographie)\b"),
+            r"tr[ée]pieds?|selfie\s+sticks?|phone\s+tripods?|photographie)\b"),
     (TV_SON, r"\b(t[ée]l[ée]viseurs?|\btv\b|home cinema|barres? de son|soundbars?|enceintes?|"
              r"speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?|casques? audio|hifi|hi-fi|platines?|headphones?)\b"),
     # Un câble ne rejoint TV & Son que si un connecteur audiovisuel ET sa nature
@@ -492,9 +493,11 @@ _RULES: list[tuple[str, str]] = [
     (TV_SON, r"\b(?:universele?|universal)\s+(?:afstandsbediening|t[ée]l[ée]commande)\b"),
     # Un projecteur devient audiovisuel seulement si un signal vidéo est aussi
     # explicite. Cette double preuve évite de capter un projecteur de chantier.
-    (TV_SON, r"(?=.*\bprojecteurs?\b)(?=.*\b(?:1080p|720p|netflix|dolby|lcd|ansi|wifi|home\s+cinema)\b)"),
+    (TV_SON, r"(?=.*\bproject(?:eurs?|ors?)\b)(?=.*\b(?:1080p|720p|netflix|dolby|lcd|ansi|wifi|"
+             r"home\s+cinema|home\s+theater|led)\b)"),
     (ELECTROMENAGER, r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                      r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|"
+                     r"milk\s+frothers?|coffee\s+frothers?|humidifiers?|"
                      r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
                      r"huishoudelijke|ventilateurs?|vacuum cleaners?|wassen, strijken)\b"),
     # « crème » n'y figure plus comme mot nu : en néerlandais c'est une teinte,
@@ -670,7 +673,8 @@ _RULES: list[tuple[str, str]] = [
     # « tissus » est retiré de cette règle : il désigne la mercerie, traitée
     # plus haut par les supports. Le laisser ici renvoyait tous les coupons au
     # rayon Maison. Le linge de maison, lui, manquait entièrement.
-    (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|lampes?|luminaires?|matelas|"
+    (MAISON, r"\b(canap[ée]s?|fauteuils?|tables?|chaises?|lampes?|luminaires?|cabinet\s+lights?|"
+               r"wardrobe\s+lamps?|closet\s+lighting|matelas|"
              r"linge de (?:lit|maison)|housses? de (?:couette|coussin)|couettes?|"
              r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
              r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
@@ -856,7 +860,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
          r"\b(claviers?|keyboards?|mice)\b|"
          r"(?=.*\bsouris\b)(?=.*\b(?:sans[-\s]?fil|optique|gamer|gaming|"
          r"ergonomiques?|bluetooth|filaires?|verticales?|usb|dpi|laser|combo)\b)"),
-        ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire)\b"),
+        ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire|"
+                      r"memory\s+cards?|micro\s*sd|microsd|tf\s+(?:flash\s+)?(?:memory\s+)?cards?)\b"),
         ("Imprimantes & Consommables", r"\b(imprimantes?|scanners?|cartouches?|toner|ink cartridges?)\b"),
         ("Réseau", r"\b(routeurs?|switch|wifi|r[ée]p[ée]teurs?|modems?)\b"),
         ("Composants PC", r"\b(?:ventilateurs?\s+(?:de\s+)?(?:bo[iî]tier|processeur|cpu)|(?:cpu|case)\s+fans?)\b"),
@@ -883,7 +888,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                  r"(?:mobile|cell)\s+phone\s+(?:brackets?|holders?|mounts?))\b"),
         # Un headset peut contenir un microphone sans être une pièce de téléphone.
         # Il doit donc gagner sur « microphone » mais reste avant Smartphones.
-        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds?|earphones?|headsets?|headphones?|oreillettes?|oordopjes|koptelefoon)\b"),
+        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds?|airbuds?|ear\s*phones?|inpods?|"
+                         r"headsets?|headphones?|oreillettes?|oordopjes|koptelefoon)\b"),
         # Un écran de remplacement, un support SIM ou une nappe cite presque
         # toujours le téléphone compatible. Il s'agit d'une pièce, pas du mobile.
         ("Pièces détachées", r"\b([ée]crans?(?:\s+tactiles?)?|displays?|lcd|oled|"
@@ -901,7 +907,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Smartphones", r"\b(smartphones?|iphone|galaxy|t[ée]l[ée]phones? mobiles?)\b"),
     ],
     TV_SON: [
-        ("Vidéoprojecteurs", r"\bprojecteurs?\b"),
+        ("Vidéoprojecteurs", r"\bproject(?:eurs?|ors?)\b"),
         ("Téléviseurs", r"\b(t[ée]l[ée]viseurs?|\btv\b|oled|qled)\b"),
         ("Casques audio", r"\b(casques?|headphones?|koptelefoon)\b"),
         ("Enceintes", r"\b(enceintes?|speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?)\b"),
@@ -953,9 +959,10 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     ],
     MAISON: [
-        ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|cabinets?|"
+        ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
                      r"[ée]tag[èe]res?|meubel|(?:locker|garderobe|draaideur|roldeur|hangmappen|postvakken)kasten?)\b"),
-        ("Luminaires", r"\b(lampes?|luminaires?|suspensions?|appliques?|verlichting|ampoules?)\b"),
+        ("Luminaires", r"\b(lampes?|luminaires?|cabinet\s+lights?|wardrobe\s+lamps?|closet\s+lighting|"
+                         r"suspensions?|appliques?|verlichting|ampoules?)\b"),
         ("Linge de maison", r"\b(linge de lit|draps?|couettes?|serviettes?|rideaux?|"
                              r"coussins?|plaids?|tapis)\b"),
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?)\b"),
@@ -966,10 +973,10 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Gros électroménager", r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                                  r"cong[ée]lateurs?|fours?|wasmachines?|koelkast)\b"),
         ("Petit électroménager", r"\b(cafeti[èe]res?|bouilloires?|grille-pains?|blenders?|"
-                                  r"robots? cuiseur|friteuses?|micro-ondes)\b"),
+                                  r"milk\s+frothers?|coffee\s+frothers?|robots? cuiseur|friteuses?|micro-ondes)\b"),
         ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
-                                       r"radiateurs?|purificateurs?|humidificateurs?)\b"),
+                                       r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?)\b"),
     ],
     LOISIRS: [
         ("Patrons & Kits de couture", r"\b(patrons?\b|patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
