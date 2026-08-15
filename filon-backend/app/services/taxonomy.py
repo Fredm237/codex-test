@@ -809,29 +809,32 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         # Les accessoires portent très souvent le nom du téléphone compatible.
         # Ces règles doivent donc précéder « Smartphones » : une coque iPhone 15
         # n'est pas un iPhone 15, même si le modèle est son mot le plus visible.
-        ("Coques & Protections", r"\b(coques?|[ée]tuis?|backcovers?|book\s*covers?|cases?|"
+        ("Coques & Protections", r"\b(coques?|[ée]tuis?|housses?(?:\s+de\s+protection)?|"
+                                 r"backcovers?|book\s*covers?|covers?|cases?|"
                                  r"(?:hard|bumper\s+hard)cases?|phone\s+(?:cases?|covers?)|"
                                  r"(?:tablet|tablette)(?:hoes(?:je|jes)?|\s*(?:covers?|cases?))|"
                                  r"(?:smartwatch|watch)\s+(?:covers?|cases?)|"
-                                 r"(?:smartphone|telefoon)hoes(?:je|jes)?|hoe(?:s|sjes)?|"
+                                 r"(?:smartphone|telefoon)hoes(?:je|jes)?|hoes(?:je|jes)?|"
                                  r"(?:camera|lens)\s+protectors?|camera\s+protector|"
-                                 r"films?\s+de\s+protection|protection\s+film|"
+                                 r"protections?\s+d['’]objectif|films?\s+de\s+protection|protection\s+film|"
                                  r"prot[èe]ge-[ée]crans?|screen\s*protectors?|screenprotectors?|"
                                  r"verre\s+tremp[ée]|tempered\s+glass|"
-                                 r"supports?\s+(?:(?:de|pour)\s+)?(?:smartphones?|t[ée]l[ée]phones?))\b"),
+                                 r"(?:supports?(?:\s+universels?)?|brackets?|holders?|mounts?)\s+"
+                                 r"(?:(?:de|pour)\s+)?(?:smartphones?|t[ée]l[ée]phones?))\b"),
         # Un écran de remplacement, un support SIM ou une nappe cite presque
         # toujours le téléphone compatible. Il s'agit d'une pièce, pas du mobile.
         ("Pièces détachées", r"\b([ée]crans?(?:\s+tactiles?)?|displays?|lcd|oled|"
                               r"buzzers?|connecteurs?|connectors?|nappes?|flex(?:\s+cables?)?|"
                               r"pcb|supports?\s+(?:sim|pcb)|tiroirs?\s+sim|lecteurs?\s+sim|"
-                              r"ch[âa]ssis|cadres?|vibreurs?|microphones?|cam[ée]ras?)\b"),
+                              r"ch[âa]ssis|cadres?|vibreurs?|microphones?|cam[ée]ras?|oca)\b"),
         ("Chargeurs & Batteries", r"\b(chargeurs?|chargers?|power\s*banks?|powerbanks?|"
                                   r"batteries?|c[âa]bles? de charge|charging(?:\s+cables?)?|"
                                   r"wireless\s+charging|oplaad(?:kabels?|adapter[s]?)|"
                                   r"(?:usb[-\s]?[ac])?\s*adapters?)\b"),
         # Avant Smartphones : « Galaxy Watch » cite Galaxy mais désigne une montre.
         ("Montres connectées", r"\b(montres? connect[ée]es?|smartwatch|watch(?:es)?|galaxy\s+watch\d*|"
-                               r"bracelets? connect[ée]s?)\b"),
+                               r"bracelets? connect[ée]s?|horloges?)\b"),
+        ("Tablettes", r"\b(tablettes?|ipad|galaxy\s+tab)\b"),
         ("Smartphones", r"\b(smartphones?|iphone|galaxy|t[ée]l[ée]phones? mobiles?)\b"),
         ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds|oreillettes?)\b"),
     ],
