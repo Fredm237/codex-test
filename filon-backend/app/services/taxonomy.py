@@ -580,6 +580,13 @@ _RULES: list[tuple[str, str]] = [
              r"blushing\s+blush|fards?\s+[àa]\s+joues|artliner|stay[-\s]?matte\s+powder|"
              r"super[-\s]?poudre|poudre\s+double\s+face|cr[èe]mes?\s+pour\s+le\s+visage|"
              r"eye\s+essence|lotion\s+clarifiante)\b"),
+    # Expressions complètes observées dans les offres MUJI. « Lait », « gel »
+    # ou « lotion » nus restent exclus : ils peuvent décrire l'alimentation,
+    # l'entretien ou une texture, pas nécessairement un soin du visage.
+    (BEAUTE, r"\b(?:eaux?\s+toniques?\s+pour\s+peaux?\s+sensibles?|"
+             r"laits?\s+hydratants?\s+pour\s+peaux?\s+sensibles?|"
+             r"gels?\s+hydratants?\s+tout[-\s]?en[-\s]?un\s+pour\s+peaux?\s+sensibles?|"
+             r"lotion\s+essence\s+booster\s+ferment[ée]e?)\b"),
     # Familles de maquillage mesurées sur les offres réellement non classées en
     # base (`admin/unclassified`) : ~10 000 offres portaient un libellé marchand
     # de maquillage courant qu'aucune règle ne couvrait, en français comme en
@@ -615,6 +622,16 @@ _RULES: list[tuple[str, str]] = [
              r"presse[-\s]?agrumes|presse[-\s]?pur[ée]e|blocs?\s+[àa]\s+couteaux|"
              r"hachoirs?\s+[àa]\s+herbes|moulins?\s+[àa]\s+poivre|"
              r"machines?\s+[àa]\s+expresso|espressokocher|tapis\s+de\s+bain|badetuch|badteppich)\b"),
+    # Familles MUJI observées en lecture seule : chaque expression désigne un
+    # objet domestique fini, ce qui exclut les matières et les mots ambigus.
+    (MAISON, r"\b(?:tasses?\s+en\s+(?:gr[èe]s|acier\s+inoxydable|porcelaine)|"
+             r"bols?\s+[àa]\s+riz|tasses?\s+[àa]\s+sak[ée]|"
+             r"r[ée]cipients?\s+alimentaires?\s+en\s+verre|bacs?\s+[àa]\s+gla[çc]ons|"
+             r"bo[iî]tes?\s+de\s+rangement\s+transparentes?|"
+             r"paniers?\s+de\s+rangement\s+tress[ée]s?|corbeilles?\s+[àa]\s+linge|"
+             r"[ée]tag[èe]res?\s+en\s+(?:pin|ch[êe]ne|noyer|bambou)|"
+             r"lits?\s+(?:super\s+king|large\s+double|simple)\s+en\s+(?:pin|h[ée]v[ée]a|noyer)|"
+             r"t[êe]tes?\s+de\s+lit\s+plateforme)\b"),
     # Un luminaire décoré d'un ballon reste un luminaire : même principe que le
     # support qui l'emporte sur le motif. Placé avant Sport, sinon
     # « Lampe LED 3D avec impression ballon de football » partait en Sport.
@@ -815,6 +832,12 @@ _RULES: list[tuple[str, str]] = [
     (BAGAGERIE, r"\b(?:[ée]quipement\s+militaire\s*>\s*sacs?|military\s+(?:equipment|gear)\s*>\s*bags?)\b"),
     (LOISIRS, r"\b(?:peintures?\s+ak\s+interactive|mod[ée]lisme\s+ak\s+interactive|peintures?\s+citadel\s+gw)\b"),
     (JOUETS, r"\b(?:figuren\s*&\s*actiehelden|figures?\s*(?:&|and)\s*action\s*heroes?)\b"),
+    # Papeterie : les objets sont nommés dans leur forme fonctionnelle. Un
+    # « stylo plume » ou « pen » nu reste non classé, conformément au garde-fou
+    # déjà en place pour les fournitures trop générales.
+    (CULTURE, r"\b(?:stylos?\s+(?:[àa]\s+bille|[àa]\s+encre)|blocs?[-\s]?notes?|"
+              r"classeurs?|carnets?|feuilles?\s+volantes?|pochettes?\s+perfor[ée]es?|"
+              r"enveloppes?|papier\s+[àa]\s+lettres)\b"),
     (BIJOUX, r"\b(?:polshorloges?|wristwatches?)\b"),
     (SANTE, r"\b(?:tandheelkunde|health\s+(?:products?|wellness)|health\s*(?:&|and)\s*wellness|"
             r"hygi(?:è|Ã«)ne|mondwater|floss|massage\s*(?:&|and)\s*welzijn)\b"),
@@ -1068,7 +1091,11 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
                          r"gezicht|toner|masques?|cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?|"
                          r"papier\s+matifiant|apr[èe]s[-\s]?rasage|after\s+shave|soins?\s+(?:pour|des)\s+yeux|"
-                         r"cr[èe]mes?\s+pour\s+le\s+visage|eye\s+essence|lotion\s+clarifiante)\b"),
+                         r"cr[èe]mes?\s+pour\s+le\s+visage|eye\s+essence|lotion\s+clarifiante|"
+                         r"eaux?\s+toniques?\s+pour\s+peaux?\s+sensibles?|"
+                         r"laits?\s+hydratants?\s+pour\s+peaux?\s+sensibles?|"
+                         r"gels?\s+hydratants?\s+tout[-\s]?en[-\s]?un\s+pour\s+peaux?\s+sensibles?|"
+                         r"lotion\s+essence\s+booster\s+ferment[ée]e?)\b"),
         ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen|"
                            r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me|"
                            r"fleurs?\s+de\s+douche|brosses?\s+de\s+douche|disques?\s+de\s+coton|"
@@ -1082,14 +1109,19 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     SANTE: [
         ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:s|koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     ],
+    CULTURE: [
+        ("Papeterie & Bureau", r"\b(?:stylos?\s+(?:[àa]\s+bille|[àa]\s+encre)|blocs?[-\s]?notes?|"
+                               r"classeurs?|carnets?|feuilles?\s+volantes?|pochettes?\s+perfor[ée]es?|"
+                               r"enveloppes?|papier\s+[àa]\s+lettres)\b"),
+    ],
     MAISON: [
         # Les armoires à clés sont des équipements de sécurité, non du mobilier générique.
         ("Sécurité & Quincaillerie", r"\b(?:armoires?\s+[àa]\s+cl[ée]s|coffres?[-\s]?forts?|serrures?\s+anti[-\s]?panique)\b"),
         ("Auvents & Rampes", r"\b(?:mains?\s+courantes?|rampes?\s+d['’]escalier|auvents?\s+de\s+porte)\b"),
         ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|"
-                     r"lits?\s+(?:plateforme|double|simple|super\s+king|king|en\s+(?:bois|ch[êe]ne|noyer))|"
-                     r"tiroirs?\s+de\s+rangement|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
-                     r"(?:[ée]tag[èe]res?|shelves?)\s+(?:en\s+(?:acier|bois|ch[êe]ne|noyer)|\d+\s+niveaux)|meubel|"
+                     r"lits?\s+(?:plateforme|double|simple|super\s+king|king|en\s+(?:bois|pin|ch[êe]ne|noyer|bambou))|"
+                     r"t[êe]tes?\s+de\s+lit\s+plateforme|tiroirs?\s+de\s+rangement|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
+                     r"(?:[ée]tag[èe]res?|shelves?)\s+(?:en\s+(?:acier|bois|pin|ch[êe]ne|noyer|bambou)|\d+\s+niveaux)|meubel|"
                      r"(?:locker|garderobe|draaideur|roldeur|hangmappen|postvakken)kasten?)\b"),
         ("Luminaires", r"\b(lampes?|luminaires?|cabinet\s+lights?|wardrobe\s+lamps?|closet\s+lighting|"
                          r"lichtketting(?:en)?|kettinglamp(?:en)?|sterrengordijn(?:en)?|"
@@ -1097,7 +1129,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Linge de maison", r"\b(linge de lit|draps?|couettes?|serviettes?|rideaux?|"
                              r"coussins?|plaids?|tapis)\b"),
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
-                                  r"bols?|mugs?|th[ée]i[èe]res?|kurkentrekker|mandoline|marmites?|faitouts?|"
+                                  r"tasses?|bols?|mugs?|th[ée]i[èe]res?|tasses?\s+[àa]\s+sak[ée]|bols?\s+[àa]\s+riz|"
+                                  r"r[ée]cipients?\s+alimentaires?|bacs?\s+[àa]\s+gla[çc]ons|kurkentrekker|mandoline|marmites?|faitouts?|"
                                   r"autocuiseurs?|bouilloires?|carafes?|saladiers?|sucriers?|pots?\s+[àa]\s+lait|"
                                   r"tire[-\s]?bouchons?|presse[-\s]?agrumes|presse[-\s]?pur[ée]e|"
                                   r"blocs?\s+[àa]\s+couteaux|hachoirs?\s+[àa]\s+herbes|moulins?\s+[àa]\s+poivre|"
@@ -1105,7 +1138,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
                          r"waxinelichtjes?|kerstbal(?:len)?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
                          r"decoratielint|kerstpapier|aroma\s+diffuseurs?|vases?|miroirs?)\b"),
-        ("Rangement & Boîtes aux lettres", r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres)\b"),
+        ("Rangement & Boîtes aux lettres", r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres|"
+                                           r"bo[iî]tes?\s+de\s+rangement\s+transparentes?|"
+                                           r"paniers?\s+de\s+rangement\s+tress[ée]s?|corbeilles?\s+[àa]\s+linge)\b"),
         ("Entretien", r"\b(schoonmaak|nettoyage|entretien|lessives?|d[ée]tergents?)\b"),
     ],
     ELECTROMENAGER: [
