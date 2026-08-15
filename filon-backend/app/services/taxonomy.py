@@ -468,6 +468,7 @@ _RULES: list[tuple[str, str]] = [
     # « Câble » seul reste volontairement insuffisant.
     (INFORMATIQUE, r"(?=.*\b(?:c[âa]bles?|cables?|kabels?)\b)(?=.*\b(?:rj(?:12|45)|ethernet|thunderbolt|hdmi|ps/2|null\s+modem|db(?:9|25)|oculus|meta\s+quest)\b)"),
     (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
+                   r"scanners?\s+3d|(?:pla|petg|abs|tpu)\s+filaments?|filaments?\s+(?:pla|petg|abs|tpu)|"
                    r"[ée]crans?|monitors?|ssd|disques? durs?|memory\s+cards?|micro\s*sd|microsd|"
                    r"tf\s+(?:flash\s+)?(?:memory\s+)?cards?|imprimantes?|routeurs?|switch(?:es)?|"
                    r"r[ée]p[ée]teurs?\s+wifi|wifi\s+mesh|adaptateurs?\s+cpl|cartes?\s+r[ée]seau|"
@@ -708,6 +709,11 @@ _RULES: list[tuple[str, str]] = [
     # peuvent désigner une fourniture de bureau générale.
     (LOISIRS, r"\b(?:watercolou?r|acrylic|oil\s+painting|painting\s+brush(?:es)?|"
               r"art\s+brush(?:es)?|graffiti\s+painting|crayon(?:s)?\s+(?:oil\s+)?painting)\b"),
+    # Les équipements de fabrication créative exigent leur nature explicite :
+    # un mot « laser » isolé peut encore décrire une mesure ou une lumière.
+    (LOISIRS, r"\b(?:graveurs?|graveuses?|d[ée]coupeuses?|machines?\s+de\s+gravure)\s+laser\b|"
+              r"\b(?:gravure\s+laser|lit\s+laser|rouleau\s+rotatif|presse\s+[àa]\s+chaud|"
+              r"papier\s+de\s+sublimation)\b"),
     # Catégories sources explicites observées dans les reliquats : elles
     # décrivent l'objet vendu, sans nécessiter de contexte marchand global.
     (INFORMATIQUE, r"\b(?:computer\s*&\s*office|computer\s+office|kabels?)\b"),
@@ -874,6 +880,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
          r"ergonomiques?|bluetooth|filaires?|verticales?|usb|dpi|laser|combo)\b)"),
         ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire|"
                       r"memory\s+cards?|micro\s*sd|microsd|tf\s+(?:flash\s+)?(?:memory\s+)?cards?)\b"),
+        ("Impression 3D & Scan", r"\b(?:scanners?\s+3d|(?:pla|petg|abs|tpu)\s+filaments?|"
+                                  r"filaments?\s+(?:pla|petg|abs|tpu))\b"),
         ("Imprimantes & Consommables", r"\b(imprimantes?|scanners?|cartouches?|toner|ink cartridges?)\b"),
         ("Réseau", r"\b(routeurs?|switch|wifi|r[ée]p[ée]teurs?|modems?)\b"),
         ("Composants PC", r"\b(?:ventilateurs?\s+(?:de\s+)?(?:bo[iî]tier|processeur|cpu)|(?:cpu|case)\s+fans?)\b"),
@@ -1006,6 +1014,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                 r"fermetures?\s+[ée]clair|boutons?\s+(?:de\s+couture|mercerie)|handnaaimachine)\b"),
         ("Dessin & Peinture", r"\b(?:watercolou?r|acrylic|oil\s+painting|painting\s+brush(?:es)?|"
                                r"art\s+brush(?:es)?|graffiti\s+painting|crayon(?:s)?\s+(?:oil\s+)?painting)\b"),
+        ("Gravure & Sublimation", r"\b(?:graveurs?|graveuses?|d[ée]coupeuses?|machines?\s+de\s+gravure)\s+laser\b|"
+                                  r"\b(?:gravure\s+laser|lit\s+laser|rouleau\s+rotatif|presse\s+[àa]\s+chaud|"
+                                  r"papier\s+de\s+sublimation)\b"),
     ],
     SPORT: [
         ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
