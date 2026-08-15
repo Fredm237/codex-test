@@ -444,7 +444,7 @@ _RULES: list[tuple[str, str]] = [
     (AUTO, r"\b(pneus?|tyres?|banden|wheels?|jantes?|voitures?|autos?|automotive|motos?|"
            r"scooters?|v[ée]hicules?|car\s?parts?|huile moteur|car\b|autoteile|"
            r"zomerbanden?|winterbanden?|allseasonbanden?|vierseizoenenbanden?|"
-           r"pneus? (?:[ée]t[ée]|hiver|4 saisons))\b"),
+           r"pneus? (?:[ée]t[ée]|hiver|4 saisons)|crics? (?:hydrauliques?|de plancher))\b"),
     # Dimension de pneu : « 225/60 R17 99H ». C'est le signal le plus fiable du
     # catalogue, et il ne peut désigner rien d'autre. Il rattrape les références
     # dont le nom ne dit que la gamme (« Sport Maxx Race 2 »).
@@ -502,7 +502,8 @@ _RULES: list[tuple[str, str]] = [
                      r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|broodroosters?|"
                      r"milk\s+frothers?|coffee\s+frothers?|humidifiers?|cuiseurs?\s+[àa]\s+riz|"
                      r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
-                     r"huishoudelijke|ventilateurs?|vacuum cleaners?|wassen, strijken)\b"),
+                     r"huishoudelijke|ventilateurs?|vacuum cleaners?|wassen, strijken|gaufriers?|"
+                     r"hachoirs?\s+[àa]\s+viande|distillateurs?\s+d['’]eau|chauffe-plats?)\b"),
     # « crème » n'y figure plus comme mot nu : en néerlandais c'est une teinte,
     # et le rayon affichait un salon de jardin « Bruin Crème », un paravent
     # « Uitschuifbaar – Crème » et une applique murale « wandlamp – crème ».
@@ -666,6 +667,15 @@ _RULES: list[tuple[str, str]] = [
             r"inflatable\s+(?:pool|lounge|float|floating)|brassards? de natation)\b"),
     # Le niveau laser est un outil de mesure de chantier, pas un produit photo.
     (JARDIN, r"\bniveaux?\s+laser\b"),
+    # Les outils de chantier et de manutention VEVOR sont décrits sans ambiguïté
+    # dans leurs titres : ils relèvent du bricolage, pas de l'électronique.
+    (JARDIN, r"\b(?:marteaux?(?:-piqueurs?|\s+de\s+d[ée]molition)|scies?\s+cloches?|"
+             r"[ée]taux?(?:\s+d['’]?[ée]tabli|\s+atelier)?|raboteuses?|meuleuses?|"
+             r"poin[çc]onneuses?|kits?\s+de\s+perforation\s+hydraulique|treuils?|palans?)\b"),
+    # Une pompe de puits ou un extracteur de miel décrit un équipement de jardinage
+    # et d'apiculture ; « pompe » nu reste volontairement hors de la règle.
+    (JARDIN, r"\b(?:pompes?\s+(?:immerg[ée]es?|de\s+puits|[àa]\s+eau\s+pour\s+puits)|"
+             r"extracteurs?\s+de\s+miel)\b"),
     (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
              r"tuingereedschap|gereedschap|heimwerker[-\s]?zubeh[öo]r|parquet|peinture murale|garden tools?|"
              r"tron[çc]onneuses?|kettingzagen?|kettingzaag|panneaux? solaires?|"
@@ -718,6 +728,7 @@ _RULES: list[tuple[str, str]] = [
     (LOISIRS, r"\b(?:graveurs?|graveuses?|d[ée]coupeuses?|machines?\s+de\s+gravure)\s+laser\b|"
               r"\b(?:gravure\s+laser|lit\s+laser|rouleau\s+rotatif|presse\s+[àa]\s+chaud|"
               r"papier\s+de\s+sublimation)\b"),
+    (LOISIRS, r"\b(?:tours?\s+de\s+potier|roues?\s+de\s+poterie)\b"),
     # Catégories sources explicites observées dans les reliquats : elles
     # décrivent l'objet vendu, sans nécessiter de contexte marchand global.
     (INFORMATIQUE, r"\b(?:computer\s*&\s*office|computer\s+office|kabels?)\b"),
@@ -1008,7 +1019,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Gros électroménager", r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                                  r"cong[ée]lateurs?|fours?|wasmachines?|koelkast)\b"),
         ("Petit électroménager", r"\b(cafeti[èe]res?|bouilloires?|grille-pains?|broodroosters?|blenders?|"
-                                  r"milk\s+frothers?|coffee\s+frothers?|cuiseurs?\s+[àa]\s+riz|robots? cuiseur|friteuses?|micro-ondes)\b"),
+                                  r"milk\s+frothers?|coffee\s+frothers?|cuiseurs?\s+[àa]\s+riz|robots? cuiseur|friteuses?|micro-ondes|"
+                                  r"gaufriers?|hachoirs?\s+[àa]\s+viande|distillateurs?\s+d['’]eau|chauffe-plats?)\b"),
         ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
                                        r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?)\b"),
@@ -1026,6 +1038,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Gravure & Sublimation", r"\b(?:graveurs?|graveuses?|d[ée]coupeuses?|machines?\s+de\s+gravure)\s+laser\b|"
                                   r"\b(?:gravure\s+laser|lit\s+laser|rouleau\s+rotatif|presse\s+[àa]\s+chaud|"
                                   r"papier\s+de\s+sublimation)\b"),
+        ("Poterie & Céramique", r"\b(?:tours?\s+de\s+potier|roues?\s+de\s+poterie)\b"),
     ],
     SPORT: [
         ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
@@ -1046,6 +1059,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Jantes & Roues", r"\b(jantes?|wheels?|enjoliveurs?)\b"),
         ("Éclairage", r"\b([ée]clairages?|phares?|ampoules?|led|fog lights?|headlights?)\b"),
         ("Entretien", r"\b(huiles? moteur|filtres?|batteries?|essuie-glaces?)\b"),
+        ("Outils & Levage", r"\b(crics?\s+(?:hydrauliques?|de\s+plancher)|treuils?|palans?)\b"),
         ("Accessoires auto", r"\b(tapis de sol|housses?|supports? t[ée]l[ée]phone|chargeurs? allume-cigare)\b"),
     ],
     BEBE: [
@@ -1073,8 +1087,11 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Jeux de bain", r"\b(?:badspeelgoed|badspeeltjes?|bath\s+squirters?|bad\s+squirters?)\b"),
     ],
     JARDIN: [
-        ("Outillage", r"\b(perceuses?|visseuses?|scies?|outillages?|gereedschap|tournevis|niveaux?\s+laser)\b"),
-        ("Jardinage", r"\b(tondeuses?|taille-haies?|arrosages?|tuingereedschap|s[ée]cateurs?)\b"),
+        ("Outillage", r"\b(perceuses?|visseuses?|scies?|outillages?|gereedschap|tournevis|niveaux?\s+laser|"
+                       r"marteaux?(?:-piqueurs?|\s+de\s+d[ée]molition)|scies?\s+cloches?|[ée]taux?(?:\s+d['’]?[ée]tabli|\s+atelier)?|"
+                       r"raboteuses?|meuleuses?|poin[çc]onneuses?|kits?\s+de\s+perforation\s+hydraulique|treuils?|palans?)\b"),
+        ("Pompes & Arrosage", r"\b(pompes?\s+(?:immerg[ée]es?|de\s+puits|[àa]\s+eau\s+pour\s+puits))\b"),
+        ("Jardinage & Apiculture", r"\b(extracteurs?\s+de\s+miel|tondeuses?|taille-haies?|arrosages?|tuingereedschap|s[ée]cateurs?)\b"),
         ("Mobilier de jardin", r"\b(salons? de jardin|parasols?|barbecues?|transats?)\b"),
         ("Revêtements", r"\b(parquets?|carrelages?|peintures?|papiers? peints?)\b"),
     ],
