@@ -26,13 +26,22 @@ export function Hero({ proof }: { proof: Proof | null }) {
   const dernier = useRef(-1);
   const [pret, setPret] = useState(false);
   const [actif, setActif] = useState(false);
+  const [mobile, setMobile] = useState(false);
 
   useEffect(() => {
     setActif(!window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   }, []);
 
   useEffect(() => {
-    if (!actif) return;
+    const query = window.matchMedia("(max-width: 767px)");
+    const synchroniser = () => setMobile(query.matches);
+    synchroniser();
+    query.addEventListener("change", synchroniser);
+    return () => query.removeEventListener("change", synchroniser);
+  }, []);
+
+  useEffect(() => {
+    if (!actif || mobile) return;
     let vivant = true;
     let charges = 0;
     const tab: HTMLImageElement[] = new Array(HERO_IMAGES);
@@ -49,10 +58,10 @@ export function Hero({ proof }: { proof: Proof | null }) {
       im.src = `${HERO_BASE}/${String(i).padStart(3, "0")}.jpg`;
     }
     return () => { vivant = false; };
-  }, [actif]);
+  }, [actif, mobile]);
 
   useEffect(() => {
-    if (!pret) return;
+    if (!pret || mobile) return;
 
     const dessiner = () => {
       const cv = toile.current;
@@ -97,7 +106,53 @@ export function Hero({ proof }: { proof: Proof | null }) {
       window.removeEventListener("resize", dimensionner);
       if (raf) cancelAnimationFrame(raf);
     };
-  }, [pret]);
+  }, [pret, mobile]);
+
+  // Le mobile lit un film vertical léger, sans télécharger les 60 frames du scrub desktop.
+  if (mobile) {
+    return (
+      <section className="fx-hero fx-hero--mobile-film">
+        {actif ? (
+          <video
+            className="fx-hero-mobile-video"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            poster="/img/filon-mobile-portrait-poster.jpg"
+            aria-hidden="true"
+          >
+            <source src="/video/filon-mobile-portrait.mp4" type="video/mp4" />
+          </video>
+        ) : (
+          <img
+            src="/img/filon-mobile-portrait-poster.jpg"
+            alt=""
+            aria-hidden="true"
+            className="fx-hero-bg-img"
+          />
+        )}
+        <div className="fx-hero-overlay" aria-hidden="true" />
+        <div className="fx-hero-content">
+          <h1 className="fx-hero-title">
+            {t("hero.l1")} {t("hero.l2")} <em>{t("hero.l3")}</em>
+          </h1>
+          <p className="fx-hero-subtitle">
+            FILON compare les prix de vos produits préférés chez tous les marchands et vous dit quand acheter.
+          </p>
+          <HeroSearch />
+          {proof?.stats && (
+            <div className="fx-hero-stats">
+              <span><b>{new Intl.NumberFormat("fr-BE").format(proof.stats.offers)}</b> offres suivies</span>
+              <span className="fx-hero-stats-sep" />
+              <span><b>{proof.stats.merchants}</b> marchands</span>
+            </div>
+          )}
+        </div>
+      </section>
+    );
+  }
 
   // Repli sans animation
   if (!actif) {
