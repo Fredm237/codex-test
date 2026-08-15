@@ -50,6 +50,14 @@ def test_filing_cabinet_tree_is_home_furniture():
     ) == t.MAISON
 
 
+def test_dutch_locker_is_exposed_in_home_furniture_subcategory():
+    assert t.classify_subcategory(
+        t.MAISON,
+        "Bisley lockerkast Basic BS4",
+        "Furniture > Cabinets & Storage > Storage Cabinets & Lockers",
+    ) == "Meubles"
+
+
 def test_generic_office_tree_is_not_assumed_to_be_home_furniture():
     assert t.classify(
         "Furniture > Office Furniture",
