@@ -505,7 +505,8 @@ _RULES: list[tuple[str, str]] = [
     # « Uitschuifbaar – Crème » et une applique murale « wandlamp – crème ».
     # Constaté en production. Seules les crèmes qualifiées classent désormais.
     (BEAUTE, r"\b(parfums?|eaux? de parfum|eaux? de toilette|fragrances?|maquillage|make\s?up|"
-             r"cosm[ée]tiques?|cosmetics?|beauty|s[ée]rums?|shampooings?|shampoo|"
+             r"cosm[ée]tiques?|cosmetics?|beauty|schoonheidsavontagenda|"
+             r"toiletartikelen\s+adventskalender|s[ée]rums?|shampooings?|shampoo|"
              r"conditioner|soins? visage|skincare|haircare|hair care|haarverzorging|"
              r"verzorgingsproducten|gezicht|huidverzorging|toner|lipstick|eyeliner|nails?|"
              r"ongles?|perruques?|wigs?|hair extensions?|vernis|lentilles? color[ée]es?|"
@@ -679,7 +680,9 @@ _RULES: list[tuple[str, str]] = [
              r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
              r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
              r"cuisine|meubel|verlichting|schoonmaak|nettoyage|serviettes?|textile|"
-             r"bougies?|duftkerzen?|geurkaars(?:en)?|theelichtjes?|waxinelichtjes?|scented\s+candles?|"
+             r"bougies?|duftkerzen?|geurkaars(?:en)?|theelichtjes?|waxinelichtjes?|"
+             r"lichtketting(?:en)?|kettinglamp(?:en)?|sterrengordijn(?:en)?|kerstbal(?:len)?|"
+             r"topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|decoratielint|kerstpapier|scented\s+candles?|"
              r"diffuseurs?\s+d['’ ]ambiance|b[âa]tonnets?\s+parfum[ée]s?|geurstokjes|"
              r"home\s*&\s*garden|huishouden|wandklokken?|wandklok|pendules?|"
              r"wandlampen?|wandlamp|appliques?|suspensions?|dekbedovertrekken?|"
@@ -949,6 +952,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     ],
     BEAUTE: [
         ("Parfums", r"\b(parfums?|eaux? de parfum|eaux? de toilette|fragrances?)\b"),
+        ("Coffrets & Calendriers", r"\b(?:schoonheidsavontagenda|toiletartikelen\s+adventskalender)\b"),
         ("Maquillage", r"\b(maquillage|make\s?up|rouges? [àa] l[èe]vres|lipstick|mascaras?|"
                        r"fonds? de teint|eyeliner|fards?|sourcils?|eyebrow|brow\s+(?:pen|definer)|"
                        r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?)\b"),
@@ -968,13 +972,15 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
                      r"[ée]tag[èe]res?|meubel|(?:locker|garderobe|draaideur|roldeur|hangmappen|postvakken)kasten?)\b"),
         ("Luminaires", r"\b(lampes?|luminaires?|cabinet\s+lights?|wardrobe\s+lamps?|closet\s+lighting|"
+                         r"lichtketting(?:en)?|kettinglamp(?:en)?|sterrengordijn(?:en)?|"
                          r"suspensions?|appliques?|verlichting|ampoules?)\b"),
         ("Linge de maison", r"\b(linge de lit|draps?|couettes?|serviettes?|rideaux?|"
                              r"coussins?|plaids?|tapis)\b"),
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
                                   r"kurkentrekker|mandoline)\b"),
         ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
-                         r"waxinelichtjes?|vases?|miroirs?)\b"),
+                         r"waxinelichtjes?|kerstbal(?:len)?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
+                         r"decoratielint|kerstpapier|vases?|miroirs?)\b"),
         ("Entretien", r"\b(schoonmaak|nettoyage|entretien|lessives?|d[ée]tergents?)\b"),
     ],
     ELECTROMENAGER: [
