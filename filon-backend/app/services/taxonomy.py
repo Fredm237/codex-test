@@ -484,6 +484,9 @@ _RULES: list[tuple[str, str]] = [
             r"tr[ée]pieds?|photographie)\b"),
     (TV_SON, r"\b(t[ée]l[ée]viseurs?|\btv\b|home cinema|barres? de son|soundbars?|enceintes?|"
              r"speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?|casques? audio|hifi|hi-fi|platines?|headphones?)\b"),
+    # Un projecteur devient audiovisuel seulement si un signal vidéo est aussi
+    # explicite. Cette double preuve évite de capter un projecteur de chantier.
+    (TV_SON, r"(?=.*\bprojecteurs?\b)(?=.*\b(?:1080p|720p|netflix|dolby|lcd|ansi|wifi|home\s+cinema)\b)"),
     (ELECTROMENAGER, r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                      r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|"
                      r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
@@ -635,6 +638,8 @@ _RULES: list[tuple[str, str]] = [
     (SPORT, r"\b(?:bou[ée]es?|zwembanden?|luchtbedden?|luchtbed|matelas gonflables?|"
             r"floating\s+(?:chairs?|loungers?|mats?)|pool\s+(?:floats?|loungers?)|"
             r"inflatable\s+(?:pool|lounge|float|floating)|brassards? de natation)\b"),
+    # Le niveau laser est un outil de mesure de chantier, pas un produit photo.
+    (JARDIN, r"\bniveaux?\s+laser\b"),
     (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
              r"tuingereedschap|gereedschap|heimwerker[-\s]?zubeh[öo]r|parquet|peinture murale|garden tools?|"
              r"tron[çc]onneuses?|kettingzagen?|kettingzaag|panneaux? solaires?|"
@@ -879,6 +884,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Smartphones", r"\b(smartphones?|iphone|galaxy|t[ée]l[ée]phones? mobiles?)\b"),
     ],
     TV_SON: [
+        ("Vidéoprojecteurs", r"\bprojecteurs?\b"),
         ("Téléviseurs", r"\b(t[ée]l[ée]viseurs?|\btv\b|oled|qled)\b"),
         ("Casques audio", r"\b(casques?|headphones?|koptelefoon)\b"),
         ("Enceintes", r"\b(enceintes?|speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?)\b"),
@@ -995,7 +1001,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Jeux de bain", r"\b(?:badspeelgoed|badspeeltjes?|bath\s+squirters?|bad\s+squirters?)\b"),
     ],
     JARDIN: [
-        ("Outillage", r"\b(perceuses?|visseuses?|scies?|outillages?|gereedschap|tournevis)\b"),
+        ("Outillage", r"\b(perceuses?|visseuses?|scies?|outillages?|gereedschap|tournevis|niveaux?\s+laser)\b"),
         ("Jardinage", r"\b(tondeuses?|taille-haies?|arrosages?|tuingereedschap|s[ée]cateurs?)\b"),
         ("Mobilier de jardin", r"\b(salons? de jardin|parasols?|barbecues?|transats?)\b"),
         ("Revêtements", r"\b(parquets?|carrelages?|peintures?|papiers? peints?)\b"),
