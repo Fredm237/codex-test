@@ -1104,6 +1104,15 @@ def classify(
     if merchant_category and _has(_USAGE_SPORTIF, merchant_category):
         return SPORT
 
+    # « LIP » est aussi un mot de maquillage. Sur les offres horlogères dont le
+    # titre dit « Horloge » et la source dit « Watch », cette coïncidence les
+    # faisait entrer en Beauté avant la règle Bijoux. Les deux signaux combinés
+    # identifient ici une montre commerciale, pas un produit cosmétique.
+    if _has(r"\b(?:montres?|horloges?|watches?)\b", name) and _has(
+        r"\b(?:watch(?:es)?|montres?|horloges?)\b", merchant_category
+    ):
+        return BIJOUX
+
     # Un signal peut n'exister qu'en croisant les deux sources. Les flux
     # horlogers listent « Calvin Klein 459300030 Gauge Sport band » sous la
     # catégorie « Strap » : ni le nom ni la catégorie ne suffisent seuls, mais
