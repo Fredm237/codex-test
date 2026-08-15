@@ -631,7 +631,7 @@ _RULES: list[tuple[str, str]] = [
                 r"fourre[-\s]tout|d['’][ée]paule)\b"),
     (ACCESSOIRES, r"\b(accessoires?|accessories|lunettes? de soleil|sunglasses|ceintures?|"
                   r"belts?|[ée]charpes?|foulards?|scarf|scarves|chapeaux?|hats?|casquettes?|caps?|"
-                  r"gants?|gloves|bonnets?|cravates?|ties?|riemen)\b"),
+                  r"snapbacks?|beanies?|gants?|gloves?|bonnets?|cravates?|ties?|riemen)\b"),
     # « sport » seul ne classe plus : c'est un adjectif de gamme omniprésent dans
     # les noms commerciaux. « Potenza Sport » et « Cross Sport SP-9 » sont des
     # pneus Bridgestone, rangés en Sport & Loisirs en production. Un contexte
@@ -777,7 +777,7 @@ _USAGE_SPORTIF = (
 # Vêtements : le rayon dépend du public, déterminé plus haut.
 _VETEMENT = (
     r"\b(v[êe]tements?|clothing|kleding|apparel|robes?|dress(es)?|jupes?|pantalons?|"
-    r"trousers?|pants?|trackpants?|joggers?|jeans?|chemises?|chemisiers?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|gilets?|cardigans?|sweats?|sweaters?|hood(?:y|ies)?|"
+    r"trousers?|pants?|trackpants?|joggers?|jeans?|chemises?|chemisiers?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|gilets?|cardigans?|sweats?|sweaters?|hood(?:y|ies)?|hoodies?|crewnecks?|longsleeves?|"
     r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|bermudas?|leggings?|cuissards?|doudounes?|parkas?|boxers?|lingerie|underwear|"
     r"soutiens?[-\s]?gorges?|brassi[èe]res?|bras?|culottes?|slips?|strings?|bodies?|collants?|"
     r"sleepwears?|pyjamas?|pyjamashirts?|maillots?|chaussettes?|socks?|polos?|poloshirts?|overhemd|broek|jas|blazers?|sakko|"
@@ -961,9 +961,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     ACCESSOIRES: [
         ("Lunettes de soleil", r"\b(lunettes? de soleil|sunglasses|solaires?)\b"),
         ("Ceintures", r"\b(ceintures?|belts?|riemen)\b"),
-        ("Chapeaux & Casquettes", r"\b(chapeaux?|casquettes?|bonnets?|b[ée]rets?|hats?|caps?|bobs?)\b"),
+        ("Chapeaux & Casquettes", r"\b(chapeaux?|casquettes?|bonnets?|b[ée]rets?|hats?|caps?|bobs?|snapbacks?|beanies?)\b"),
         ("Écharpes & Foulards", r"\b([ée]charpes?|foulards?|ch[èa]les?|scarf|scarves)\b"),
-        ("Gants", r"\b(gants?|gloves|moufles?)\b"),
+        ("Gants", r"\b(gants?|gloves?|moufles?)\b"),
         ("Cravates", r"\b(cravates?|ties?|n[oœ]uds? papillon)\b"),
     ],
     BEAUTE: [
