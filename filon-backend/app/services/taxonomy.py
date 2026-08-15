@@ -455,6 +455,11 @@ _RULES: list[tuple[str, str]] = [
            r"kits?\s+d['’]arrimage\s+(?:pour\s+)?camions?|bo[iî]tes?\s+de\s+rangement\s+pour\s+lit\s+de\s+camion|"
            r"d[ée]bosselage\s+(?:sans\s+peinture|carrosserie)|catalyseurs?\s+d['’][ée]chappement|"
            r"cl[ée]s?\s+[àa]\s+choc.*(?:automobile|m[ée]canicien))\b"),
+    # Équipements de véhicule VEVOR : les deux dimensions de la preuve sont
+    # exigées (fonction et contexte camion/remorque/bateau), jamais le véhicule nu.
+    (AUTO, r"(?=.*\b(?:e-track|rails?\s+d['’]arrimage|kits?\s+d['’]arrimage)\b)(?=.*\b(?:camions?|remorques?)\b)"),
+    (AUTO, r"(?=.*\b(?:chauffages?|r[ée]chauffeurs?\s+d['’]air)\s+diesel\b)(?=.*\b(?:camions?|bateaux?|rv)\b)"),
+    (AUTO, r"(?=.*\bpompes?\s+hydrauliques?\b)(?=.*\b(?:camions?\s+[àa]\s+benne|remorques?|nacelles?|bennage)\b)"),
     (TELEPHONIE, r"\b(smartphones?|t[ée]l[ée]phones?|iphone|samsung galaxy|mobiles?|gsm|"
                  r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|earbuds?|airbuds?|"
                  r"ear\s*phones?|inpods?|headsets?|smartwatch(?:es)?|fitnesstrackers?|cellphones?|telecommunications?)\b"),
@@ -708,6 +713,14 @@ _RULES: list[tuple[str, str]] = [
              r"bo[iî]tes?\s+de\s+distribution\s+[ée]lectrique|coffrets?\s+[ée]lectriques?|"
              r"kits?\s+de\s+recharge\s+de\s+r[ée]frig[ée]rant|pompes?\s+[àa]\s+vide\s+frigoriste|"
              r"rubans?\s+[àa]\s+poisson|extenseurs?\s+de\s+tubes?|coupleurs?\s+hydrauliques?)\b"),
+    (JARDIN, r"\b(?:[ée]chasses?\s+(?:plaquiste|pour\s+cloison\s+s[èe]che)|gabarits?\s+de\s+trou\s+de\s+poche|"
+             r"coupe[-\s]?c[âa]bles?\s+[àa]\s+cliquet|serre[-\s]?joints?|kit\s+de\s+filetage\s+de\s+tuyau|"
+             r"fil\s+de\s+soudage|pinces?\s+de\s+forge|tenailles?\s+de\s+forge|mandrins?\s+de\s+tour\s+[àa]\s+bois|"
+             r"ventouses?\s+de\s+carrelage|fraises?\s+annulaires?|pistolets?\s+[àa]\s+graisse)\b"),
+    (JARDIN, r"\b(?:toiles?\s+de\s+paillage|tentes?\s+de\s+culture|chambres?\s+de\s+culture)\b"),
+    (MAISON, r"\b(?:armoires?\s+[àa]\s+cl[ée]s|coffres?[-\s]?forts?|serrures?\s+anti[-\s]?panique)\b"),
+    (MAISON, r"\b(?:mains?\s+courantes?|rampes?\s+d['’]escalier|auvents?\s+de\s+porte)\b"),
+    (LOISIRS, r"\b(?:pyrogravure|pyrograveurs?)\b"),
     # Boîtes aux lettres et boîtes à colis sont des éléments de maison, distincts
     # des simples boîtes de rangement ou de matériel industriel.
     (MAISON, r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres)\b"),
@@ -1039,6 +1052,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:s|koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     ],
     MAISON: [
+        # Les armoires à clés sont des équipements de sécurité, non du mobilier générique.
+        ("Sécurité & Quincaillerie", r"\b(?:armoires?\s+[àa]\s+cl[ée]s|coffres?[-\s]?forts?|serrures?\s+anti[-\s]?panique)\b"),
+        ("Auvents & Rampes", r"\b(?:mains?\s+courantes?|rampes?\s+d['’]escalier|auvents?\s+de\s+porte)\b"),
         ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|"
                      r"lits?\s+(?:plateforme|double|simple|super\s+king|king|en\s+(?:bois|ch[êe]ne|noyer))|"
                      r"tiroirs?\s+de\s+rangement|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
@@ -1086,6 +1102,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                   r"papier\s+de\s+sublimation)\b"),
         ("Poterie & Céramique", r"\b(?:tours?\s+de\s+potier|roues?\s+de\s+poterie)\b"),
         ("Création de badges", r"\b(?:badges?\s+personnalis[ée]s?|machines?\s+[àa]\s+badges?)\b"),
+        ("Pyrogravure & Travail du bois", r"\b(?:pyrogravure|pyrograveurs?)\b"),
     ],
     SPORT: [
         ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
@@ -1111,6 +1128,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                       r"kits?\s+d['’]arrimage\s+(?:pour\s+)?camions?|bo[iî]tes?\s+de\s+rangement\s+pour\s+lit\s+de\s+camion|"
                                       r"d[ée]bosselage\s+(?:sans\s+peinture|carrosserie)|catalyseurs?\s+d['’][ée]chappement|"
                                       r"cl[ée]s?\s+[àa]\s+choc.*(?:automobile|m[ée]canicien))\b"),
+        ("Arrimage & Hydraulique", r"(?=.*\b(?:e-track|rails?\s+d['’]arrimage|kits?\s+d['’]arrimage|pompes?\s+hydrauliques?)\b)(?=.*\b(?:camions?|remorques?|nacelles?|bennage)\b)"),
+        ("Chauffage véhicule", r"(?=.*\b(?:chauffages?|r[ée]chauffeurs?\s+d['’]air)\s+diesel\b)(?=.*\b(?:camions?|bateaux?|rv)\b)"),
         ("Accessoires auto", r"\b(tapis de sol|housses?|supports? t[ée]l[ée]phone|chargeurs? allume-cigare)\b"),
     ],
     BEBE: [
@@ -1148,10 +1167,15 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                        r"porte[-\s]?f[ûu]ts?|balais?\s+magn[ée]tiques?|pinces?\s+amp[èe]rem[ée]triques?|"
                        r"bo[iî]tes?\s+de\s+distribution\s+[ée]lectrique|coffrets?\s+[ée]lectriques?|"
                        r"kits?\s+de\s+recharge\s+de\s+r[ée]frig[ée]rant|pompes?\s+[àa]\s+vide\s+frigoriste|"
-                       r"rubans?\s+[àa]\s+poisson|extenseurs?\s+de\s+tubes?|coupleurs?\s+hydrauliques?)\b"),
+                       r"rubans?\s+[àa]\s+poisson|extenseurs?\s+de\s+tubes?|coupleurs?\s+hydrauliques?|"
+                       r"[ée]chasses?\s+(?:plaquiste|pour\s+cloison\s+s[èe]che)|gabarits?\s+de\s+trou\s+de\s+poche|"
+                       r"coupe[-\s]?c[âa]bles?\s+[àa]\s+cliquet|serre[-\s]?joints?|kit\s+de\s+filetage\s+de\s+tuyau|"
+                       r"fil\s+de\s+soudage|pinces?\s+de\s+forge|tenailles?\s+de\s+forge|mandrins?\s+de\s+tour\s+[àa]\s+bois|"
+                       r"ventouses?\s+de\s+carrelage|fraises?\s+annulaires?|pistolets?\s+[àa]\s+graisse)\b"),
         ("Pompes & Arrosage", r"\b(pompes?\s+(?:immerg[ée]es?|de\s+puits|[àa]\s+eau\s+pour\s+puits))\b"),
         ("Jardinage & Apiculture", r"\b(extracteurs?\s+de\s+miel|tondeuses?|taille-haies?|arrosages?|tuingereedschap|s[ée]cateurs?|"
-                                    r"films?\s+[àa]\s+effet\s+de\s+serre|scies?\s+[àa]\s+[ée]laguer|range[-\s]?b[ûu]ches?|effeuilleuses?)\b"),
+                                    r"films?\s+[àa]\s+effet\s+de\s+serre|scies?\s+[àa]\s+[ée]laguer|range[-\s]?b[ûu]ches?|effeuilleuses?|"
+                                    r"toiles?\s+de\s+paillage|tentes?\s+de\s+culture|chambres?\s+de\s+culture)\b"),
         ("Mobilier de jardin", r"\b(salons? de jardin|parasols?|barbecues?|transats?)\b"),
         ("Revêtements", r"\b(parquets?|carrelages?|peintures?|papiers? peints?)\b"),
     ],
