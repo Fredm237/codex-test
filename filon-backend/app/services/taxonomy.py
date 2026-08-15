@@ -460,6 +460,10 @@ _RULES: list[tuple[str, str]] = [
     (AUTO, r"(?=.*\b(?:e-track|rails?\s+d['’]arrimage|kits?\s+d['’]arrimage)\b)(?=.*\b(?:camions?|remorques?)\b)"),
     (AUTO, r"(?=.*\b(?:chauffages?|r[ée]chauffeurs?\s+d['’]air)\s+diesel\b)(?=.*\b(?:camions?|bateaux?|rv)\b)"),
     (AUTO, r"(?=.*\bpompes?\s+hydrauliques?\b)(?=.*\b(?:camions?\s+[àa]\s+benne|remorques?|nacelles?|bennage)\b)"),
+    # Un étui devient un accessoire mobile seulement quand le modèle compatible
+    # est explicite. Cela exclut les étuis à lunettes ou à instrument.
+    (TELEPHONIE, r"\b[ée]tuis?\s+(?:magsafe\s+)?(?:pour\s+)?(?:apple\s+)?"
+                  r"(?:iphone|ipad|samsung(?:\s+galaxy)?|xiaomi|redmi|poco|honor|huawei|oppo|oneplus|realme|google\s+pixel|motorola)\b"),
     (TELEPHONIE, r"\b(smartphones?|t[ée]l[ée]phones?|iphone|samsung galaxy|mobiles?|gsm|"
                  r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|earbuds?|airbuds?|"
                  r"ear\s*phones?|inpods?|headsets?|smartwatch(?:es)?|fitnesstrackers?|cellphones?|telecommunications?)\b"),
