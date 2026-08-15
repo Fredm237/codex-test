@@ -22,6 +22,14 @@ def test_kastner_body_butter_is_bath_and_body():
     )
 
 
+def test_kastner_body_balm_is_bath_and_body():
+    assert_destination(
+        "BIOTHERM Oil Therapie - Baume Corps 400ml",
+        t.BEAUTE,
+        "Bain & Corps",
+    )
+
+
 def test_kastner_blush_is_makeup_not_colour_word():
     assert_destination(
         "CLINIQUE Rouge - Blushing Blush Powder Blush 6mg",
@@ -56,6 +64,10 @@ def test_kastner_long_johns_are_mens_underwear():
 
 def test_generic_lotion_stays_unclassified():
     assert t.classify(None, "Lotion de collection édition limitée", "Kastner & Öhler", "kastner-hler-fr") is None
+
+
+def test_balm_without_body_context_stays_unclassified():
+    assert t.classify(None, "Baume de collection édition limitée", "Kastner & Öhler", "kastner-hler-fr") is None
 
 
 def test_matte_sneaker_is_not_makeup():

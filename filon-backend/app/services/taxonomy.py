@@ -539,7 +539,7 @@ _RULES: list[tuple[str, str]] = [
     # « Lotion » et « crème » seuls restent trop ambigus : une zone ou un usage
     # précis est nécessaire pour prouver qu'il s'agit bien d'un produit de beauté.
     (BEAUTE, r"\b(?:apr[èe]s[-\s]?rasage|after\s+shave|soins?\s+(?:pour|des)\s+yeux|"
-             r"laits?\s+corporels?|beurres?\s+corporels?|gels?\s+douche|"
+             r"laits?\s+corporels?|beurres?\s+corporels?|baumes?\s+corps|gels?\s+douche|"
              r"blushing\s+blush|fards?\s+[àa]\s+joues|artliner|stay[-\s]?matte\s+powder)\b"),
     # Familles de maquillage mesurées sur les offres réellement non classées en
     # base (`admin/unclassified`) : ~10 000 offres portaient un libellé marchand
@@ -999,7 +999,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen|"
                            r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me|"
                            r"fleurs?\s+de\s+douche|brosses?\s+de\s+douche|disques?\s+de\s+coton|"
-                           r"laits?\s+corporels?|beurres?\s+corporels?|gels?\s+douche)\b"),
+                           r"laits?\s+corporels?|beurres?\s+corporels?|baumes?\s+corps|gels?\s+douche)\b"),
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
                      r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling|"
                      r"hair\s+(?:milk|ampoules?|treatments?)|scalp\s+(?:therapy|ampoules?)|color\s+charge)\b"),
