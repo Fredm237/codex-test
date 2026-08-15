@@ -458,6 +458,10 @@ _RULES: list[tuple[str, str]] = [
      r"bluetooth|filaires?|verticales?|usb|dpi|laser|rechargeables?|claviers?|"
      r"combo|molette)\b)"),
     (INFORMATIQUE, r"\btapis de souris\b"),
+    # Les câbles techniques sont classés seulement avec un protocole ou une
+    # interface informatique explicite : RJ45, Thunderbolt, HDMI, PS/2 ou DB9.
+    # « Câble » seul reste volontairement insuffisant.
+    (INFORMATIQUE, r"(?=.*\b(?:c[âa]bles?|cables?|kabels?)\b)(?=.*\b(?:rj(?:12|45)|ethernet|thunderbolt|hdmi|ps/2|null\s+modem|db(?:9|25)|oculus|meta\s+quest)\b)"),
     (INFORMATIQUE, r"\b(ordinateurs?|laptops?|pc\b|macbook|notebooks?|claviers?|"
                    r"[ée]crans?|monitors?|ssd|disques? durs?|imprimantes?|routeurs?|switch(?:es)?|"
                    r"r[ée]p[ée]teurs?\s+wifi|wifi\s+mesh|adaptateurs?\s+cpl|cartes?\s+r[ée]seau|"
@@ -579,7 +583,9 @@ _RULES: list[tuple[str, str]] = [
     # contexte horloger apporté par « strap ».
     (BIJOUX, r"(?=.*\bstraps?\b)(?=.*\b(?:bandjes?|band|bands|horloge|watch|"
              r"smartwatch|fitbit|garmin)\b)"),
-    (CHAUSSURES, r"\b(chaussures?|shoes?|baskets?|sneakers?|bottes?|boots?|escarpins?|heels?|"
+    # « Bottines » est une chaussure autonome, distincte de « bottes » : son
+    # absence empêchait de classer les familles Junior et Femme réellement vues.
+    (CHAUSSURES, r"\b(chaussures?|shoes?|baskets?|sneakers?|bottes?|bottines?|boots?|escarpins?|heels?|"
                  r"mules?|sandales?|sandals?|schoenen|mocassins?|semelles?|insoles?|"
                  r"pantoufles?|slippers?)\b"),
     (BAGAGERIE, r"\b(sacs? [àa] main|sacs? [àa] dos|handbags?|backpacks?|valises?|suitcases?|"
@@ -626,9 +632,10 @@ _RULES: list[tuple[str, str]] = [
              r"zonnepane(?:el|len)|barbecues?|salons? de jardin|tuinsets?|"
              r"tuinschermen?|tuinscherm|polyrattan)\b"),
     # Une arborescence marchand est une preuve plus forte qu’un titre minimal :
-    # `Mobilier > …` et `Déco > …` décrivent explicitement la maison. Le motif
-    # exige le séparateur hiérarchique pour ne pas absorber un mot isolé.
+    # `Mobilier > …`, `Déco > …` et `Furniture > Cabinets` décrivent
+    # explicitement un meuble. Le séparateur hiérarchique évite les mots isolés.
     (MAISON, r"\b(?:mobilier|d[ée]co)\s*>") ,
+    (MAISON, r"\bfurniture\s*>\s*cabinets?\b"),
     # « tissus » est retiré de cette règle : il désigne la mercerie, traitée
     # plus haut par les supports. Le laisser ici renvoyait tous les coupons au
     # rayon Maison. Le linge de maison, lui, manquait entièrement.
