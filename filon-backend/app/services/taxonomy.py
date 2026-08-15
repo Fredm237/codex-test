@@ -786,8 +786,10 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Maillots de bain", r"\b(maillots? de bain|bikinis?|swimwear)\b"),
     ],
     MODE_HOMME: [
-        ("Chemises", r"\b(chemises?|overhemd|shirts?)\b"),
-        ("T-shirts & Polos", r"\b(t-shirts?|polos?|d[ée]bardeurs?|maillots?|tops?)\b"),
+        # Un « polo shirt » contient aussi le mot shirt : le polo doit donc être
+        # reconnu avant la chemise générique pour conserver le bon sous-rayon.
+        ("T-shirts & Polos", r"\b(t-shirts?|polos?|polo\s+shirts?|d[ée]bardeurs?|maillots?|tops?)\b"),
+        ("Chemises", r"\b(chemises?|overhemd|(?<!polo\s)shirts?)\b"),
         ("Pulls & Sweats", r"\b(pulls?|sweats?|sweaters?|hoodies?|gilets?|cardigans?)\b"),
         ("Pantalons & Jeans", r"\b(pantalons?|jeans?|chinos?|shorts?|trousers?|broek)\b"),
         ("Manteaux & Vestes", r"\b(manteaux?|vestes?|jackets?|blousons?|parkas?|jas)\b"),
