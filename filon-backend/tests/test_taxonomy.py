@@ -222,6 +222,13 @@ class TestSubcategories:
             (t.TELEPHONIE, "Protection avant tactile OCA pour Apple iPhone 11", "Pièces détachées"),
             (t.TELEPHONIE, "Tablette Samsung Galaxy Tab A11 11 pouces", "Tablettes"),
             (t.TELEPHONIE, "Casio Edifice Bluetooth Smartphone Link Horloge", "Montres connectées"),
+            # Quatrième mesure publique : les sept derniers accessoires observés.
+            (t.TELEPHONIE, "Leren polsband met iPhone-oplader", "Coques & Protections"),
+            (t.TELEPHONIE, "BasicPlus Schermbeschermer iPhone 11 Pro Max", "Coques & Protections"),
+            (t.TELEPHONIE, "Amitec USB-oplader voor Smartphone en Tablet", "Chargeurs & Batteries"),
+            (t.TELEPHONIE, "BeHello Schermprotector Glas iPhone 15 Plus", "Coques & Protections"),
+            (t.TELEPHONIE, "Bicycle mobile phone bracket for Samsung iPhone", "Coques & Protections"),
+            (t.TELEPHONIE, "KSIX ExtremeGlass Screen Protection iPhone 12", "Coques & Protections"),
             (t.TELEPHONIE, "Écran tactile Samsung Galaxy S23+ avec cadre", "Pièces détachées"),
             (t.TELEPHONIE, "Support PCB Oppo Reno16 F", "Pièces détachées"),
             (t.TELEPHONIE, "Batterie Xiaomi Redmi Note 11 Pro", "Chargeurs & Batteries"),
