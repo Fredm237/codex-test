@@ -77,8 +77,10 @@ _MEN_MARKERS = ("men's", "mens ", " men ", "homme", "heren", "garçon", "boy")
 # rattrapage historique. La garde est volontairement limitée à ce sous-rayon.
 _PHONE_ACCESSORY_MARKERS = (
     "coque", "phone cover", "telefoonhoes", "smartphonehoes", "backcover",
-    "bookcase", "screen protector", "screenprotector", "tempered glass",
-    "verre trempé", "verre trempe", "protege-ecran", "protège-écran",
+    "bookcase", "screen protector", "screenprotector", "schermprotector",
+    "schermbeschermer", "tempered glass", "verre trempé", "verre trempe",
+    "verre de protection", "protege-ecran", "protège-écran", "kit protection",
+    "mobile phone bracket", "support de table", "support de travail", "usb-oplader",
 )
 
 
