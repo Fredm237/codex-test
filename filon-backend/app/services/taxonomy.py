@@ -839,12 +839,13 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         # toujours le téléphone compatible. Il s'agit d'une pièce, pas du mobile.
         ("Pièces détachées", r"\b([ée]crans?(?:\s+tactiles?)?|displays?|lcd|oled|"
                               r"buzzers?|connecteurs?|connectors?|nappes?|flex(?:\s+cables?)?|"
-                              r"pcb|supports?\s+(?:sim|pcb)|tiroirs?\s+sim|lecteurs?\s+sim|"
-                              r"ch[âa]ssis|cadres?|vibreurs?|microphones?|cam[ée]ras?|oca)\b"),
+                              r"pcb|supports?\s+(?:sim|pcb|de\s+travail(?:\s+reballing)?)|"
+                              r"tiroirs?\s+sim|lecteurs?\s+sim|ch[âa]ssis|cadres?|vibreurs?|"
+                              r"microphones?|cam[ée]ras?|oca)\b"),
         ("Chargeurs & Batteries", r"\b(chargeurs?|chargers?|opladers?|power\s*banks?|powerbanks?|"
                                   r"batteries?|c[âa]bles? de charge|charging(?:\s+cables?)?|"
-                                  r"wireless\s+charging|oplaad(?:kabels?|adapter[s]?)|"
-                                  r"lightning\s+docks?|docks?|(?:usb[-\s]?[ac])?\s*adapters?)\b"),
+                                  r"wireless\s+charging|oplaad(?:kabels?|adapter[s]?)|snelladers?|"
+                                  r"home\s+chargers?|lightning\s+docks?|docks?|(?:usb[-\s]?[ac])?\s*adapters?)\b"),
         # Avant Smartphones : un casque, des écouteurs ou une montre peuvent citer
         # le modèle compatible sans être eux-mêmes un smartphone.
         ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds|oreillettes?|oordopjes|koptelefoon)\b"),
