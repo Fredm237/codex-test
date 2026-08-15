@@ -445,8 +445,8 @@ _RULES: list[tuple[str, str]] = [
     # dont le nom ne dit que la gamme (« Sport Maxx Race 2 »).
     (AUTO, r"\b\d{3}/\d{2}\s*(?:z)?r\s?\d{2}\b"),
     (TELEPHONIE, r"\b(smartphones?|t[ée]l[ée]phones?|iphone|samsung galaxy|mobiles?|gsm|"
-                 r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|cellphones?|"
-                 r"telecommunications?)\b"),
+                 r"coques?|chargeurs?|powerbanks?|[ée]couteurs? sans fil|airpods|earbuds?|earphones?|headsets?|"
+                 r"smartwatch(?:es)?|fitnesstrackers?|cellphones?|telecommunications?)\b"),
     (GAMING, r"\b(gaming|jeux? vid[ée]o|video\s?games?|consoles?|playstation|ps5|ps4|xbox|"
              r"nintendo|steam|manettes?|gamer|videogames?)\b"),
     # « souris » exige un contexte informatique : seul, il désigne bien plus
@@ -480,7 +480,7 @@ _RULES: list[tuple[str, str]] = [
     (PHOTO, r"\b(appareils? photo|cameras?|caméras?|objectifs?|reflex|drones?|gopro|"
             r"tr[ée]pieds?|photographie)\b"),
     (TV_SON, r"\b(t[ée]l[ée]viseurs?|\btv\b|home cinema|barres? de son|soundbars?|enceintes?|"
-             r"casques? audio|hifi|hi-fi|platines?|headphones?)\b"),
+             r"speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?|casques? audio|hifi|hi-fi|platines?|headphones?)\b"),
     (ELECTROMENAGER, r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                      r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|"
                      r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
@@ -847,6 +847,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                  r"(?:supports?(?:\s+universels?)?|brackets?|holders?|mounts?)\s+"
                                  r"(?:(?:de|pour)\s+)?(?:smartphones?|t[ée]l[ée]phones?)|"
                                  r"(?:mobile|cell)\s+phone\s+(?:brackets?|holders?|mounts?))\b"),
+        # Un headset peut contenir un microphone sans être une pièce de téléphone.
+        # Il doit donc gagner sur « microphone » mais reste avant Smartphones.
+        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds?|earphones?|headsets?|headphones?|oreillettes?|oordopjes|koptelefoon)\b"),
         # Un écran de remplacement, un support SIM ou une nappe cite presque
         # toujours le téléphone compatible. Il s'agit d'une pièce, pas du mobile.
         ("Pièces détachées", r"\b([ée]crans?(?:\s+tactiles?)?|displays?|lcd|oled|"
@@ -858,9 +861,6 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                   r"batteries?|c[âa]bles? de charge|charging(?:\s+cables?)?|"
                                   r"wireless\s+charging|oplaad(?:kabels?|adapter[s]?)|snelladers?|"
                                   r"home\s+chargers?|lightning\s+docks?|docks?|(?:usb[-\s]?[ac])?\s*adapters?)\b"),
-        # Avant Smartphones : un casque, des écouteurs ou une montre peuvent citer
-        # le modèle compatible sans être eux-mêmes un smartphone.
-        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds?|earphones?|headsets?|headphones?|oreillettes?|oordopjes|koptelefoon)\b"),
         ("Montres connectées", r"\b(montres? connect[ée]es?|smartwatch|watch(?:es)?|galaxy\s+watch\d*|"
                                r"bracelets? connect[ée]s?|horloges?|polsband(?:en)?)\b"),
         ("Tablettes", r"\b(tablettes?|ipad|galaxy\s+tab)\b"),
@@ -869,7 +869,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     TV_SON: [
         ("Téléviseurs", r"\b(t[ée]l[ée]viseurs?|\btv\b|oled|qled)\b"),
         ("Casques audio", r"\b(casques?|headphones?|koptelefoon)\b"),
-        ("Enceintes", r"\b(enceintes?|speakers?|haut-parleurs?)\b"),
+        ("Enceintes", r"\b(enceintes?|speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?)\b"),
         ("Barres de son", r"\b(barres? de son|soundbars?|home cinema)\b"),
         ("Platines & Hi-Fi", r"\b(platines?|amplis?|hifi|hi-fi|vinyles?)\b"),
     ],
