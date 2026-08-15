@@ -67,6 +67,9 @@ class TestMainCategories:
             ("Ordinateurs tablettes & accessoires", "ZIKE Z850 SSD NVMe M2 2230 magnétique USB-C pour iPhone 16", t.INFORMATIQUE),
             # Cas public : « LIP » n’est pas du maquillage lorsque la source est Watch.
             ("Watch", "LIP Himalaya Horloge", t.BIJOUX),
+            # Cas public : un ventilateur de boîtier ne relève pas de la climatisation.
+            ("Ventilateur de Boîtier", "Ventilateur boitier 1stPlayer FS7 RGB - 12cm", t.INFORMATIQUE),
+            ("", "Ventilateur de salon silencieux 45W", t.ELECTROMENAGER),
         ],
     )
     def test_classifies_from_the_product_name(self, category, name, expected):
