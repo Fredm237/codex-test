@@ -157,6 +157,11 @@ _ANDLIGHT_MERCHANT = r"\bandlight\b"
 # pas inférés.
 _BOLLYWOLLY_MERCHANT = r"\bbollywolly\b"
 _BOLLYWOLLY_FEMME_FORM = r"\b(?:jurk|rok|tuniek|corset)\b"
+# Lilo's Nature est un spécialiste animalier vérifié. Le contexte ne s'active
+# qu'avec une mention explicite du chien ou du chat : les noms de gamme seuls et
+# les valeurs manquantes restent non classés.
+_LILOS_NATURE_MERCHANT = r"\blilo['’]?s\s+nature\b"
+_LILOS_NATURE_ANIMAL = r"\b(?:katten|honden)\b"
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
@@ -449,10 +454,13 @@ _RULES: list[tuple[str, str]] = [
     (BEBE, r"\b(?:babydoekjes?|babyolie|babybad|babyshampoo|babyverzorging|"
              r"babyverzorgings(?:olie|balsem)|babyborstel|badsteun|badstoel|badthermometer|"
              r"toilettrainer|verschoningsmat|luierzakjes?|badjesset\s+voor\s+pasgeborenen)\b"),
-    (ANIMALERIE, r"\b(chiens?|chats?|dogs?|cats?|hond|kat|hondenvoer|kattenvoer|animal|"
-                 r"animalerie|croquettes?|aquarium|liti[èe]re|dierenvoeding|"
-                 r"chiots?|puppy|puppies|chatons?|kittens?|niches?\s+pour|"
-                 r"paniers?\s+pour\s+(?:chien|chat)|laisses?|colliers?\s+pour\s+(?:chien|chat))\b"),
+        (ANIMALERIE, r"\b(chiens?|chats?|dogs?|cats?|hond|kat|hondenvoer|kattenvoer|animal|"
+                  r"animalerie|croquettes?|aquarium|liti[èe]re|dierenvoeding|"
+                  r"chiots?|puppy|puppies|chatons?|kittens?|niches?\s+pour|"
+                  r"paniers?\s+pour\s+(?:chien|chat)|laisses?|colliers?\s+pour\s+(?:chien|chat)|"
+                  r"honden(?:mand|riem|tuig)|kattenmand|kattengrot|looplijn|jachtlijn|"
+                  r"halsband|tekenband)\b"),
+
     (AUTO, r"\b(pneus?|tyres?|banden|wheels?|jantes?|voitures?|autos?|automotive|motos?|"
            r"scooters?|v[ée]hicules?|car\s?parts?|huile moteur|car\b|autoteile|"
            r"zomerbanden?|winterbanden?|allseasonbanden?|vierseizoenenbanden?|"
@@ -1166,8 +1174,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Chambre bébé", r"\b(lits? b[ée]b[ée]|berceaux?|matelas b[ée]b[ée]|tours? de lit)\b"),
     ],
     ANIMALERIE: [
-        ("Chien", r"\b(chiens?|dogs?|hond|hondenvoer)\b"),
-        ("Chat", r"\b(chats?|cats?|\bkat\b|kattenvoer|liti[èe]res?)\b"),
+        ("Chien", r"\b(chiens?|dogs?|hond|hondenvoer|honden(?:mand|riem|tuig)|looplijn|jachtlijn)\b"),
+        ("Chat", r"\b(chats?|cats?|\bkat\b|kattenvoer|liti[èe]res?|kattenmand|kattengrot)\b"),
         ("Petits animaux", r"\b(rongeurs?|lapins?|hamsters?|oiseaux?|aquarium|poissons?)\b"),
     ],
     GAMING: [
@@ -1335,6 +1343,12 @@ def classify(
         )
     ):
         return LOISIRS
+
+    # Lilo's Nature est un spécialiste animalier vérifié. Les mentions isolées
+    # « katten » ou « honden » ne deviennent Animalerie que dans ce contexte,
+    # afin de ne jamais détourner ailleurs un livre ou un motif animalier.
+    if _has(_LILOS_NATURE_MERCHANT, brand or "") and _has(_LILOS_NATURE_ANIMAL, name):
+        return ANIMALERIE
 
     # Bollywolly est un flux féminin vérifié ; le contexte marchand ne suffit
     # jamais seul, il s'ajoute obligatoirement à une forme vêtement féminine
