@@ -131,6 +131,15 @@ _TYRE_REFERENCE = r"\b(?:pkw|mo|off|llkw)\b"
 _TYRE_CATEGORY = r"\b(pneus?|tyres?|banden|reifen|pneumatici)\b"
 _TYRE_DIMENSION = r"\b\d{3}/\d{2}\s*r\d{2}(?:[a-z]{0,4})?\b"
 
+# Un accessoire informatique peut mentionner l'iPhone compatible sans être un
+# téléphone. Les trois signaux sont nécessaires : source informatique explicite,
+# objet informatique nommé, puis formulation de compatibilité. Cette règle ne
+# transforme donc ni une coque ni un câble de recharge en périphérique PC.
+_COMPUTING_SOURCE = r"\b(?:ordinateurs?|computers?|informatique|computer\s*&\s*office|pc\s*&\s*office)\b"
+_COMPUTING_OBJECT = r"\b(?:usb(?:[-\s]?c)?|hdmi|ssd|nvme|rallonges?|extensions?|hubs?|docking|adapters?)\b"
+_COMPUTING_COMPATIBILITY = r"\b(?:compatible\s+(?:avec|with)|pour|for)\s+(?:l['’])?(?:iphone|ipad|samsung\s+galaxy)\b"
+_COMPUTING_PHONE_ACCESSORY = r"\b(?:coques?|cases?|covers?|protectors?|chargeurs?|chargers?|charging|c[âa]bles?)\b"
+
 # Andlight est un marchand spécialisé en luminaires, mobilier et décoration.
 # Son flux néerlandais peut omettre la catégorie brute et ne donner qu’un nom
 # de collection (« Paletti », « Componibili ») : ce contexte est donc un dernier
@@ -1065,6 +1074,19 @@ def classify(
         support = _support_de_tete(text)
         if support:
             return support
+
+    # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
+    # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie
+    # informatique ne devient pas un smartphone parce que son titre mentionne
+    # « compatible avec iPhone ». La règle exige trois preuves complémentaires.
+    if (
+        merchant_category
+        and _has(_COMPUTING_SOURCE, merchant_category)
+        and _has(_COMPUTING_OBJECT, name)
+        and _has(_COMPUTING_COMPATIBILITY, name)
+        and not _has(_COMPUTING_PHONE_ACCESSORY, name)
+    ):
+        return INFORMATIQUE
 
     # Les modèles de chaussures vérifiés suivent les supports, mais précèdent les
     # règles génériques : un « Gazelle Indoor » n'est pas un article inconnu.
