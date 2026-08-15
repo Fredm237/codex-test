@@ -201,6 +201,7 @@ class TestSubcategories:
             (t.CHAUSSURES, "Closed Toe Platform Mules Chunky Heels", "Escarpins & Talons"),
             (t.MODE_HOMME, "Stenströms Regular Fit Chemise bleu", "Chemises"),
             (t.MODE_HOMME, "Polo ERREA Team", "T-shirts & Polos"),
+            (t.MODE_HOMME, "OLYMP Casual Regular Fit Polo shirt Korte mouw roze", "T-shirts & Polos"),
             (t.MODE_FEMME, "Robe de soirée longue", "Robes"),
             (t.BIJOUX, "Hip Hop Diamond Necklace Pendant", "Colliers & Pendentifs"),
             (t.BAGAGERIE, "Sac à dos randonnée 30L", "Sacs à dos"),
