@@ -514,6 +514,11 @@ _RULES: list[tuple[str, str]] = [
     # Produits de bain corporels observés dans le flux néerlandais. Les jouets de
     # bain sont exclus : ils sont traités plus bas dans Jeux & Jouets.
     (BEAUTE, r"\b(?:badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen)\b"),
+    # Soins anglais observés sans catégorie source fiable. Les expressions
+    # qualifiées évitent de considérer « treatment » seul comme une preuve.
+    (BEAUTE, r"\b(?:cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?|"
+             r"hair\s+(?:milk|ampoules?|treatments?)|scalp\s+(?:therapy|ampoules?)|"
+             r"color\s+charge|cuticle\s+oil)\b"),
     # Familles de maquillage mesurées sur les offres réellement non classées en
     # base (`admin/unclassified`) : ~10 000 offres portaient un libellé marchand
     # de maquillage courant qu'aucune règle ne couvrait, en français comme en
@@ -927,11 +932,12 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                        r"fonds? de teint|eyeliner|fards?|sourcils?|eyebrow|brow\s+(?:pen|definer)|"
                        r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?)\b"),
         ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
-                         r"gezicht|toner|masques?)\b"),
+                         r"gezicht|toner|masques?|cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?)\b"),
         ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen)\b"),
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
-                     r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling)\b"),
-        ("Ongles", r"\b(ongles?|nails?|vernis|manucure)\b"),
+                     r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling|"
+                     r"hair\s+(?:milk|ampoules?|treatments?)|scalp\s+(?:therapy|ampoules?)|color\s+charge)\b"),
+        ("Ongles", r"\b(ongles?|nails?|vernis|manucure|cuticle\s+oil)\b"),
         ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
     ],
     SANTE: [
