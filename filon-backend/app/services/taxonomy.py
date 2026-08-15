@@ -696,6 +696,11 @@ _RULES: list[tuple[str, str]] = [
     # vêtement, et « pyjama sans couture » atterrissait ici.
     (LOISIRS, r"\b(patrons? de couture|patrons?|tricot|laine [àa] tricoter|mercerie|"
               r"loisirs? cr[ée]atifs?|scrapbooking)\b"),
+    # Les outils de dessin et peinture exigent une preuve de pratique créative :
+    # « pen » ou « marker » seuls restent volontairement non classés car ils
+    # peuvent désigner une fourniture de bureau générale.
+    (LOISIRS, r"\b(?:watercolou?r|acrylic|oil\s+painting|painting\s+brush(?:es)?|"
+              r"art\s+brush(?:es)?|graffiti\s+painting|crayon(?:s)?\s+(?:oil\s+)?painting)\b"),
     # Catégories sources explicites observées dans les reliquats : elles
     # décrivent l'objet vendu, sans nécessiter de contexte marchand global.
     (INFORMATIQUE, r"\b(?:computer\s*&\s*office|computer\s+office|kabels?)\b"),
@@ -986,6 +991,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Tissus & Mercerie", r"\b(tissus?|jerseys?|popelines?|cretonnes?|gabardines?|mousselines?|"
                                 r"toiles?\s+[àa]\s+patrons?|coupons?\s+de\s+\d|fil\s+[àa]\s+coudre|"
                                 r"fermetures?\s+[ée]clair|boutons?\s+(?:de\s+couture|mercerie))\b"),
+        ("Dessin & Peinture", r"\b(?:watercolou?r|acrylic|oil\s+painting|painting\s+brush(?:es)?|"
+                               r"art\s+brush(?:es)?|graffiti\s+painting|crayon(?:s)?\s+(?:oil\s+)?painting)\b"),
     ],
     SPORT: [
         ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
