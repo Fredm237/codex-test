@@ -203,6 +203,13 @@ class TestSubcategories:
             (t.TELEPHONIE, "Support de téléphone SP Connect Universal Bike Mount", "Coques & Protections"),
             (t.TELEPHONIE, "Samsung Galaxy Watch8 44 Horloge", "Montres connectées"),
             (t.TELEPHONIE, "imoshion Oplaadkabel voor Samsung Galaxy Watch USB-C", "Chargeurs & Batteries"),
+            # Seconde mesure publique post-campagne : variantes issues d'autres flux.
+            (t.TELEPHONIE, "Shockproof Case voor Samsung Galaxy Tab A11", "Coques & Protections"),
+            (t.TELEPHONIE, "Selencia Vivid tablethoes voor Samsung Galaxy Tab A11 Plus", "Coques & Protections"),
+            (t.TELEPHONIE, "Film de protection antimicrobien 3MK Samsung Galaxy A52", "Coques & Protections"),
+            (t.TELEPHONIE, "Support pour smartphone Omni Ridecase II", "Coques & Protections"),
+            (t.TELEPHONIE, "Luxury Wireless Charging Phone Adapter USB-C", "Chargeurs & Batteries"),
+            (t.TELEPHONIE, "No Gaps Strap for Samsung Galaxy Classic Watch", "Montres connectées"),
             (t.TELEPHONIE, "Écran tactile Samsung Galaxy S23+ avec cadre", "Pièces détachées"),
             (t.TELEPHONIE, "Support PCB Oppo Reno16 F", "Pièces détachées"),
             (t.TELEPHONIE, "Batterie Xiaomi Redmi Note 11 Pro", "Chargeurs & Batteries"),
