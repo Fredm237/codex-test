@@ -250,6 +250,9 @@ class TestSubcategories:
             (t.TELEPHONIE, "Apple iPhone Lightning Dock - Dorée", "Chargeurs & Batteries"),
             (t.TELEPHONIE, "F9 TWS In-Ear Wireless Earbuds for iPhone Android", "Écouteurs"),
             (t.TELEPHONIE, "Kit protection de smartphone Tigra MtCase fit-clic", "Coques & Protections"),
+            # Audit final public : les trois derniers accessoires résiduels.
+            (t.TELEPHONIE, "Support de Travail Reballing Mijing Z20 pour Apple iPhone 16", "Pièces détachées"),
+            (t.TELEPHONIE, "Samsung Galaxy Snellader met twee USB-C poorten", "Chargeurs & Batteries"),
             (t.AUTO, "Pneu Michelin 205/55 R16", "Pneus"),
             (t.BEAUTE, "Rasasi Fattan Eau De Parfum", "Parfums"),
             (t.ELECTROMENAGER, "Aspirateur balai sans fil", "Aspirateurs"),
