@@ -832,7 +832,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                  r"protections?\s+d['’]objectif|(?:kits?|packs?)\s+(?:de\s+)?protections?|"
                                  r"kits?\s+protecteurs?|films?\s+de\s+protection|protection\s+film|"
                                  r"scherm(?:beschermers?|protectors?)|prot[èe]ge-[ée]crans?|screen\s*(?:protectors?|protection)|screenprotectors?|"
-                                 r"verre\s+tremp[ée]|tempered\s+glass|"
+                                 r"verre(?:\s+de)?\s+protection(?:\s+tremp[ée])?|verre\s+tremp[ée]|tempered\s+glass|"
+                                 r"supports?\s+de\s+table(?:\s+[\w-]+){0,8}\s+(?:pour\s+)?(?:smartphones?|t[ée]l[ée]phones?)|"
                                  r"(?:supports?(?:\s+universels?)?|brackets?|holders?|mounts?)\s+"
                                  r"(?:(?:de|pour)\s+)?(?:smartphones?|t[ée]l[ée]phones?)|"
                                  r"(?:mobile|cell)\s+phone\s+(?:brackets?|holders?|mounts?))\b"),
@@ -849,7 +850,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                   r"home\s+chargers?|lightning\s+docks?|docks?|(?:usb[-\s]?[ac])?\s*adapters?)\b"),
         # Avant Smartphones : un casque, des écouteurs ou une montre peuvent citer
         # le modèle compatible sans être eux-mêmes un smartphone.
-        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds|oreillettes?|oordopjes|koptelefoon)\b"),
+        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds?|earphones?|headsets?|headphones?|oreillettes?|oordopjes|koptelefoon)\b"),
         ("Montres connectées", r"\b(montres? connect[ée]es?|smartwatch|watch(?:es)?|galaxy\s+watch\d*|"
                                r"bracelets? connect[ée]s?|horloges?|polsband(?:en)?)\b"),
         ("Tablettes", r"\b(tablettes?|ipad|galaxy\s+tab)\b"),

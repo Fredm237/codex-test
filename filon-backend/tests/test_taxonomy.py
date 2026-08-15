@@ -253,6 +253,12 @@ class TestSubcategories:
             # Audit final public : les trois derniers accessoires résiduels.
             (t.TELEPHONIE, "Support de Travail Reballing Mijing Z20 pour Apple iPhone 16", "Pièces détachées"),
             (t.TELEPHONIE, "Samsung Galaxy Snellader met twee USB-C poorten", "Chargeurs & Batteries"),
+            # Audit public suivant : ces quatre objets restaient absorbés par le
+            # mot de compatibilité Smartphone/iPhone.
+            (t.TELEPHONIE, "Verre de protection trempé Quad Lock iPhone 12/12 Pro", "Coques & Protections"),
+            (t.TELEPHONIE, "Support de table universel Mars Gaming MA-RSS pour smartphones (Gris)", "Coques & Protections"),
+            (t.TELEPHONIE, "New Wireless Headset Touch Earphones Clip-Ear Headphones Xiaomi Earphone For IPhone Earbud", "Écouteurs"),
+            (t.TELEPHONIE, "Support de table universel Mars Gaming MA-RSS pour smartphones (Argent)", "Coques & Protections"),
             (t.AUTO, "Pneu Michelin 205/55 R16", "Pneus"),
             (t.BEAUTE, "Rasasi Fattan Eau De Parfum", "Parfums"),
             (t.ELECTROMENAGER, "Aspirateur balai sans fil", "Aspirateurs"),
