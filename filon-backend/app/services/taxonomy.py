@@ -1093,7 +1093,14 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                       r"chemises?|hauts?|tops?|combinaisons?|ensembles?|peluches?|enfants?)|"
                                       r"kits?\s+(?:de\s+)?couture|sewing\s+patterns?|schnittmuster|n[äa]hmuster)\b"),
         ("Tissus & Mercerie", r"\b(tissus?|jerseys?|popelines?|cretonnes?|gabardines?|mousselines?|"
-                                r"toiles?\s+[àa]\s+patrons?|coupons?\s+de\s+\d|fil\s+[àa]\s+coudre|"
+                                r"flanelles?|ottoman(?:\s+de\s+coton)?|whipcord|[ée]tamine|twill|tweed|jacquard|"
+                                r"maille\s+milano|double\s+gaze|double\s+cr[êe]pe|velours(?:\s+(?:lisse|c[oô]tel[ée]))?|"
+                                r"cr[êe]pe(?:\s+(?:satin|envers\s+satin|lourd))?|satin\s+(?:cuir|de\s+coton)|[ée]toffe|"
+                                r"ouate\s+de\s+cachemire|toiles?\s+[àa]\s+patrons?|coupons?\s+de\s+\d|"
+                                r"fil\s+(?:[àa]\s+coudre|pour\s+tout\s+coudre)|canettes?\s+(?:universelles?|en\s+(?:plastique|acier)|plates?|bomb[ée]es?)|"
+                                r"pied[-\s]?de[-\s]?biche|bo[iî]tier\s+de\s+canette|m[èe]tre\s+ruban|[ée]pingles?|d[ée]couseur|"
+                                r"craie\s+tailleur|r[èe]gle\s+(?:de\s+couture|pour\s+ourlet)|enfile[-\s]?aiguilles?|coupe[-\s]?fils?|"
+                                r"thermocollant|boutons?\s+[àa]\s+coudre|[ée]lastique\s+(?:fronceur\s+de\s+)?couture|retourne[-\s]?biais|"
                                 r"fermetures?\s+[ée]clair|boutons?\s+(?:de\s+couture|mercerie)|handnaaimachine)\b"),
         ("Dessin & Peinture", r"\b(?:watercolou?r|acrylic|oil\s+painting|painting\s+brush(?:es)?|"
                                r"art\s+brush(?:es)?|graffiti\s+painting|crayon(?:s)?\s+(?:oil\s+)?painting)\b"),
@@ -1292,6 +1299,26 @@ def classify(
         support = _support_de_tete(text)
         if support:
             return support
+
+    # PRM Coupons Couture, BOHIN et Gütermann fournissent des matières et outils
+    # de mercerie. La marque seule ne suffit pas : elle doit s’ajouter à un nom
+    # de support concret, et un vêtement fini garde toujours sa propre catégorie.
+    if (
+        _has(r"\b(?:coupons\s+couture|bohin|g[üu]termann)\b", brand or "")
+        and not _OBJET_FINI.search(name or "")
+        and _has(
+            r"\b(?:flanelle|ottoman(?:\s+de\s+coton)?|whipcord|[ée]tamine|"
+            r"twill|tweed|jacquard|maille\s+milano|double\s+gaze|double\s+cr[êe]pe|"
+            r"velours(?:\s+(?:lisse|c[oô]tel[ée]))?|cr[êe]pe(?:\s+(?:satin|envers\s+satin|lourd))?|"
+            r"satin\s+(?:cuir|de\s+coton)|[ée]toffe|ouate\s+de\s+cachemire|"
+            r"fil\s+pour\s+tout\s+coudre|fil\s+[àa]\s+coudre|canettes?\s+(?:universelles?|en\s+(?:plastique|acier)|plates?|bomb[ée]es?)|"
+            r"(?:pied[-\s]?de[-\s]?biche|bo[iî]tier\s+de\s+canette|m[èe]tre\s+ruban|[ée]pingles?|d[ée]couseur|"
+            r"craie\s+tailleur|r[èe]gle\s+(?:de\s+couture|pour\s+ourlet)|enfile[-\s]?aiguilles?|coupe[-\s]?fils?|"
+            r"thermocollant|boutons?\s+[àa]\s+coudre|[ée]lastique\s+(?:fronceur\s+de\s+)?couture|retourne[-\s]?biais))\b",
+            name,
+        )
+    ):
+        return LOISIRS
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
     # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie
