@@ -396,7 +396,7 @@ _SUPPORTS: list[tuple[str, str]] = [
      r"serg[ée]s?|mousselines?|batistes?|percales?|bord\s+c[ôo]tes?|"
      r"molletons?|cr[ée]pons?|bourrettes?|piqu[ée]s?\s+\d*\s*%?\s*coton|"
      r"sweat\s+molletonn[ée]|polaire\s+double\s+face|viscose\s+unie|"
-     r"(?:satin|r[ée]sille)\s+(?:pour|[àa])\s+lingerie|"
+     r"(?:satin|r[ée]sille)\b(?:\s+[^\s]+){0,4}\s+(?:pour|[àa])\s+lingerie|"
      r"coupons?\s+de\s+\d|au\s+m[èe]tre|mercerie|toiles?\s+[àa]\s+patrons?|"
      r"kits?\s+(?:de\s+)?couture|patrons?\b|"
      r"patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
