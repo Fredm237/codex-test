@@ -119,8 +119,14 @@ _ACCOMMODATION_MERCHANT = r"\bbungalow\.net\b"
 # ses intitulés réduits sans transformer le mot « hôtel » en règle globale.
 _ACCOMMODATION_BOOKING_MERCHANT = r"\bgites\b"
 _ACCOMMODATION_MERCHANT_CATEGORY = (
-    r"\b(appartement(?:en)?s?|villas?|villen|studios?|studio's|"
-    r"parcs?\s+de\s+vacances|ferienparks?|holiday parks?|bungalows?)\b"
+    # Ces formes sont interprétées comme réservables uniquement avec le marchand
+    # Bungalow.net : hors de ce contexte, un chalet ou un cottage peut être un
+    # meuble, un produit de décoration ou un modèle commercial.
+    r"\b(appartement(?:en)?s?|villas?|villen|woningen?|wohnungen?|studios?|studio's|"
+    r"chalets?|cottages?|groepsaccommodaties?|group\s+(?:accommodations?|villas?)|"
+    r"parcs?\s+de\s+vacances|ferienparks?|holiday parks?|bungalows?|"
+    r"stacaravans?|mobilhomes?|mobile\s+homes?|mobilheime?|campings?|"
+    r"chambres?\s+d['’ ]h[oô]tes|bed\s*(?:and|&)\s*breakfasts?|landgoederen)\b"
 )
 
 # Le flux autobandenmarkt expose seulement les codes de véhicule (PKW, MO,
