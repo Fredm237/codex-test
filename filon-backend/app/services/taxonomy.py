@@ -777,6 +777,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Semelles & Entretien", r"\b(semelles?|insoles?|lacets?|cirage)\b"),
     ],
     MODE_FEMME: [
+        # Les costumes nomment fréquemment une « robe », mais leur usage de fête
+        # explicite mérite un sous-rayon distinct plutôt qu'un mélange avec la ville.
+        ("Déguisements & Costumes", r"\b(?:d[ée]guisements?|halloween|carnaval|verkleed(?:kleding)?)\b"),
         ("Robes", r"\b(robes?|dress(es)?|jurk)\b"),
         ("Jupes", r"\b(jupes?|skirts?|rok)\b"),
         ("Hauts & T-shirts", r"\b(tops?|t-shirts?|blouses?|chemisiers?|d[ée]bardeurs?)\b"),
@@ -1147,6 +1150,12 @@ def classify(
         r"\b(?:rasage|[ée]pilation|epilation)\b", merchant_category
     ):
         return BEAUTE
+    # « Nettoyant robe cheval » concerne le pelage d'un cheval, pas un vêtement.
+    # Les deux preuves évitent de déplacer un soin capillaire humain vers Animalerie.
+    if _has(r"\banimal\s+cheval\b", merchant_category) and _has(
+        r"\b(?:conditionneur|coat\s+shine|shampooing|nettoyant)\b", name
+    ):
+        return ANIMALERIE
     if _has(r"\bcrochets? de garde[- ]robe\b", name):
         return JARDIN
     if _has(r"\btoiture en chaume artificielle\b", name) and _has(r"\bjupe de toit\b", name):
