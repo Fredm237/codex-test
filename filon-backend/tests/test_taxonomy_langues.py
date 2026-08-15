@@ -501,3 +501,43 @@ class TestBlushNestPasQuUnFard:
     )
     def test_le_fard_blush_va_bien_en_beaute(self, cat, nom):
         assert t.classify(cat, nom) == t.BEAUTE, nom
+
+
+class TestNomsCommerciauxVestimentairesAmbigus:
+    """Les mots « robe », « jupe » et « lingerie » ne décident pas seuls.
+
+    Ces libellés sont tous observés dans les sous-rayons publics FILON. Les
+    signaux d’objet, de marque ou de catégorie source doivent l’emporter sur le
+    mot vestimentaire inclus dans une gamme commerciale.
+    """
+
+    @pytest.mark.parametrize(
+        "source,nom,marque,attendu",
+        [
+            ("Parfum", "Guerlain - La Petite Robe Noire Eau De Parfum Intense - 50 ML", "Guerlain", t.BEAUTE),
+            ("Lotion corporelle", "Guerlain La Petite Robe Noire LAIT CORPS 200 ML", "Guerlain", t.BEAUTE),
+            ("Jeux et jouets > Déguisement", "Déguisement robe de sorcier Cinereplicas Harry Potter Ravenclaw", "Cinereplicas", t.JOUETS),
+            ("Lego", "LEGO 43262 Disney Classic Les robes de Maléfique et Cruella D'Enfer", "Lego", t.JOUETS),
+            ("Heimwerker-Zubehör", "Mital crochet de garde-robe GAIA en métal, chrome poli", "Mital", t.JARDIN),
+            (None, "VEVOR Toiture en Chaume Artificielle, Jupe de Toit de Bar en Cabane", "Vevor", t.JARDIN),
+            ("Make up", "NYX Lingerie Glans Helder", "NYX", t.BEAUTE),
+            (None, "YVES SAINT LAURENT Loveshine Rouge à Lèvres (150 Nude Lingerie)", "Yves Saint Laurent", t.BEAUTE),
+            ("Hus & tuin", "Classic Lingerie Fijnwasmiddel – 300 ml", "Classic Clothing Care", t.MAISON),
+            ("Skincare", "Kao - Laurier Kirei Style Super Absorption Lingerie Liner Romantic Rose 62 pcs", "Kao", t.SANTE),
+            ("Beauté & Santé > Hygiène corporelle > Rasage & Épilation", "Tondeuse bikini 6 en 1 - Sansbeauté - Epilateur électrique", "Sansbeauté", t.BEAUTE),
+            ("Lingerie", "Satin pour lingerie - Noir", "TDR", t.LOISIRS),
+        ],
+    )
+    def test_les_objets_reels_ne_sont_pas_absorbes_par_le_nom_de_gamme(self, source, nom, marque, attendu):
+        assert t.classify(source, nom, marque) == attendu, nom
+
+    @pytest.mark.parametrize(
+        "source,nom",
+        [
+            ("Vêtements > Robes", "Robe de soirée bleue femme"),
+            ("Vêtements > Jupes", "Jupe plissée beige femme"),
+            ("Lingerie", "Soutien-gorge femme en dentelle"),
+        ],
+    )
+    def test_les_vrais_vetements_restent_en_mode_femme(self, source, nom):
+        assert t.classify(source, nom) == t.MODE_FEMME, nom

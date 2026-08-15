@@ -396,6 +396,7 @@ _SUPPORTS: list[tuple[str, str]] = [
      r"serg[ée]s?|mousselines?|batistes?|percales?|bord\s+c[ôo]tes?|"
      r"molletons?|cr[ée]pons?|bourrettes?|piqu[ée]s?\s+\d*\s*%?\s*coton|"
      r"sweat\s+molletonn[ée]|polaire\s+double\s+face|viscose\s+unie|"
+     r"(?:satin|r[ée]sille)\s+(?:pour|[àa])\s+lingerie|"
      r"coupons?\s+de\s+\d|au\s+m[èe]tre|mercerie|toiles?\s+[àa]\s+patrons?|"
      r"kits?\s+(?:de\s+)?couture|patrons?\b|"
      r"patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
@@ -1123,6 +1124,36 @@ def classify(
         name,
     ):
         return MAISON
+
+    # Un nom de gamme peut contenir « robe » ou « lingerie » sans désigner un
+    # vêtement. Les motifs ci-dessous sont volontairement étroits : chaque famille
+    # a été reproduite dans l’API publique avec un objet ou une source explicite.
+    if _has(r"\bguerlain\b", name) and _has(r"\bla petite robe noire\b", name) and _has(
+        r"\b(?:eau de parfum|eau de toilette|parfum|body milk|lait corps|flacon)\b", name
+    ):
+        return BEAUTE
+    if _has(r"\b(?:rouges? [àa] l[èe]vres|lip\s?gloss|lipglos+e?s?|make\s?up|maquillage)\b", name):
+        return BEAUTE
+    if _has(r"\bnyx\b", brand or "") and _has(r"\bmake\s?up\b", merchant_category):
+        return BEAUTE
+    if _has(r"\b(?:fijnwasmiddel|delicate wash|lingerie soap|lessive|d[ée]tergent)\b", name):
+        return MAISON
+    if _has(r"\b(?:liner|super absorption|sanitary)\b", name) and _has(
+        r"\b(?:skincare|hygiene|hygi[èe]ne)\b", merchant_category
+    ):
+        return SANTE
+    if _has(r"\b(?:tondeuse|rasoir|rasage|[ée]pilation|epilation|ladyshave|shaver)\b", name) and _has(
+        r"\b(?:rasage|[ée]pilation|epilation)\b", merchant_category
+    ):
+        return BEAUTE
+    if _has(r"\bcrochets? de garde[- ]robe\b", name):
+        return JARDIN
+    if _has(r"\btoiture en chaume artificielle\b", name) and _has(r"\bjupe de toit\b", name):
+        return JARDIN
+    if _has(r"\blego\b", name):
+        return JOUETS
+    if _has(r"\bd[ée]guisement\b", name) and _has(r"\bjeux? et jouets?\b", merchant_category):
+        return JOUETS
 
     # Les modèles de chaussures vérifiés suivent les supports, mais précèdent les
     # règles génériques : un « Gazelle Indoor » n'est pas un article inconnu.
