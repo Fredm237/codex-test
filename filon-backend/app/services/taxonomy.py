@@ -700,6 +700,20 @@ _RULES: list[tuple[str, str]] = [
     (JARDIN, r"\b(?:outils?\s+oscillant(?:s)?|machines?\s+de\s+pulv[ée]risation|"
              r"postes?\s+[àa]\s+souder|coupe[-\s]?carreaux|cintreuses?|tours?\s+[àa]\s+m[ée]taux|"
              r"pinces?\s+[àa]\s+sertir|machines?\s+[àa]\s+d[ée]nuder|trappes?\s+de\s+visite)\b"),
+    # Équipements d'atelier et d'électricité VEVOR : chaque motif désigne une
+    # fonction professionnelle précise, jamais une « machine » ou une pompe nue.
+    (JARDIN, r"\b(?:presses?\s+hydrauliques?\s+d['’]atelier|levage\s+magn[ée]tique|"
+             r"chariots?\s+de\s+soudage|cages?\s+de\s+s[ée]curit[ée]\s+chariots?\s+[ée]l[ée]vateurs?|"
+             r"porte[-\s]?f[ûu]ts?|balais?\s+magn[ée]tiques?|pinces?\s+amp[èe]rem[ée]triques?|"
+             r"bo[iî]tes?\s+de\s+distribution\s+[ée]lectrique|coffrets?\s+[ée]lectriques?|"
+             r"kits?\s+de\s+recharge\s+de\s+r[ée]frig[ée]rant|pompes?\s+[àa]\s+vide\s+frigoriste|"
+             r"rubans?\s+[àa]\s+poisson|extenseurs?\s+de\s+tubes?|coupleurs?\s+hydrauliques?)\b"),
+    # Boîtes aux lettres et boîtes à colis sont des éléments de maison, distincts
+    # des simples boîtes de rangement ou de matériel industriel.
+    (MAISON, r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres)\b"),
+    # Les kits et machines à badges explicitement nommés relèvent du loisir
+    # créatif ; « badge » isolé reste insuffisant, car il peut désigner une carte.
+    (LOISIRS, r"\b(?:badges?\s+personnalis[ée]s?|machines?\s+[àa]\s+badges?)\b"),
     (JARDIN, r"\b(jardins?|jardinage|tondeuses?|bricolage|perceuses?|outillage|tuin|"
              r"tuingereedschap|gereedschap|heimwerker[-\s]?zubeh[öo]r|parquet|peinture murale|garden tools?|"
              r"tron[çc]onneuses?|kettingzagen?|kettingzaag|panneaux? solaires?|"
@@ -1042,6 +1056,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
                          r"waxinelichtjes?|kerstbal(?:len)?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
                          r"decoratielint|kerstpapier|aroma\s+diffuseurs?|vases?|miroirs?)\b"),
+        ("Rangement & Boîtes aux lettres", r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres)\b"),
         ("Entretien", r"\b(schoonmaak|nettoyage|entretien|lessives?|d[ée]tergents?)\b"),
     ],
     ELECTROMENAGER: [
@@ -1070,6 +1085,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                   r"\b(?:gravure\s+laser|lit\s+laser|rouleau\s+rotatif|presse\s+[àa]\s+chaud|"
                                   r"papier\s+de\s+sublimation)\b"),
         ("Poterie & Céramique", r"\b(?:tours?\s+de\s+potier|roues?\s+de\s+poterie)\b"),
+        ("Création de badges", r"\b(?:badges?\s+personnalis[ée]s?|machines?\s+[àa]\s+badges?)\b"),
     ],
     SPORT: [
         ("Fitness & Musculation", r"\b(fitness|musculation|halt[èe]res?|tapis de course|yoga)\b"),
@@ -1127,7 +1143,12 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                        r"raboteuses?|meuleuses?|poin[çc]onneuses?|kits?\s+de\s+perforation\s+hydraulique|treuils?|palans?|"
                        r"outils?\s+oscillant(?:s)?|machines?\s+de\s+pulv[ée]risation|postes?\s+[àa]\s+souder|"
                        r"coupe[-\s]?carreaux|cintreuses?|tours?\s+[àa]\s+m[ée]taux|pinces?\s+[àa]\s+sertir|"
-                       r"machines?\s+[àa]\s+d[ée]nuder|trappes?\s+de\s+visite)\b"),
+                       r"machines?\s+[àa]\s+d[ée]nuder|trappes?\s+de\s+visite|presses?\s+hydrauliques?\s+d['’]atelier|"
+                       r"levage\s+magn[ée]tique|chariots?\s+de\s+soudage|cages?\s+de\s+s[ée]curit[ée]\s+chariots?\s+[ée]l[ée]vateurs?|"
+                       r"porte[-\s]?f[ûu]ts?|balais?\s+magn[ée]tiques?|pinces?\s+amp[èe]rem[ée]triques?|"
+                       r"bo[iî]tes?\s+de\s+distribution\s+[ée]lectrique|coffrets?\s+[ée]lectriques?|"
+                       r"kits?\s+de\s+recharge\s+de\s+r[ée]frig[ée]rant|pompes?\s+[àa]\s+vide\s+frigoriste|"
+                       r"rubans?\s+[àa]\s+poisson|extenseurs?\s+de\s+tubes?|coupleurs?\s+hydrauliques?)\b"),
         ("Pompes & Arrosage", r"\b(pompes?\s+(?:immerg[ée]es?|de\s+puits|[àa]\s+eau\s+pour\s+puits))\b"),
         ("Jardinage & Apiculture", r"\b(extracteurs?\s+de\s+miel|tondeuses?|taille-haies?|arrosages?|tuingereedschap|s[ée]cateurs?|"
                                     r"films?\s+[àa]\s+effet\s+de\s+serre|scies?\s+[àa]\s+[ée]laguer|range[-\s]?b[ûu]ches?|effeuilleuses?)\b"),
