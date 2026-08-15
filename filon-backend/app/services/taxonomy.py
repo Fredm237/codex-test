@@ -496,7 +496,7 @@ _RULES: list[tuple[str, str]] = [
     (TV_SON, r"(?=.*\bproject(?:eurs?|ors?)\b)(?=.*\b(?:1080p|720p|netflix|dolby|lcd|ansi|wifi|"
              r"home\s+cinema|home\s+theater|led)\b)"),
     (ELECTROMENAGER, r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
-                     r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|"
+                     r"cong[ée]lateurs?|fours?|micro-ondes|aspirateurs?|cafeti[èe]res?|broodroosters?|"
                      r"milk\s+frothers?|coffee\s+frothers?|humidifiers?|"
                      r"robots? cuiseur|wasmachines?|koelkast|home appliances?|"
                      r"huishoudelijke|ventilateurs?|vacuum cleaners?|wassen, strijken)\b"),
@@ -679,13 +679,14 @@ _RULES: list[tuple[str, str]] = [
              r"draps?(?:[-\s]housses?)?|taies? d'oreiller|oreillers?|plaids?|"
              r"rideaux?|voilages?|nappes?|d[ée]coration|meubles?|vaisselle|assiettes?|"
              r"cuisine|meubel|verlichting|schoonmaak|nettoyage|serviettes?|textile|"
-             r"bougies?|duftkerzen?|geurkaarsen?|scented\s+candles?|"
+             r"bougies?|duftkerzen?|geurkaars(?:en)?|theelichtjes?|waxinelichtjes?|scented\s+candles?|"
              r"diffuseurs?\s+d['’ ]ambiance|b[âa]tonnets?\s+parfum[ée]s?|geurstokjes|"
              r"home\s*&\s*garden|huishouden|wandklokken?|wandklok|pendules?|"
              r"wandlampen?|wandlamp|appliques?|suspensions?|dekbedovertrekken?|"
              r"dekbedovertrek|hoeslakens?|kussenslopen?|kussensloop|handdoeken?|"
              r"paravents?|tuinkussens?|eetkamerstoel(?:en)?|eettafelstoel(?:en)?|salontafels?|"
-             r"eettafels?|tafelspiegels?|tapijt(?:en)?|lampenvoet(?:en)?|armleuningen?)\b"),
+             r"eettafels?|tafelspiegels?|tapijt(?:en)?|lampenvoet(?:en)?|armleuningen?|"
+             r"kurkentrekker|mandoline)\b"),
     (MAISON, r"\bpendant\s+(?:lamps?|lights?|lighting)\b"),
     (JOUETS, r"\b(jouets?|lego|playmobil|peluches?|puzzles?|jeux? de soci[ée]t[ée]|speelgoed|"
              r"toys?|warhammer|games\s+workshop|age\s+of\s+sigmar)\b"),
@@ -695,7 +696,7 @@ _RULES: list[tuple[str, str]] = [
     # « couture » est écarté : en français il désigne aussi une piqûre de
     # vêtement, et « pyjama sans couture » atterrissait ici.
     (LOISIRS, r"\b(patrons? de couture|patrons?|tricot|laine [àa] tricoter|mercerie|"
-              r"loisirs? cr[ée]atifs?|scrapbooking)\b"),
+              r"handnaaimachine|loisirs? cr[ée]atifs?|scrapbooking)\b"),
     # Les outils de dessin et peinture exigent une preuve de pratique créative :
     # « pen » ou « marker » seuls restent volontairement non classés car ils
     # peuvent désigner une fourniture de bureau générale.
@@ -970,14 +971,16 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                          r"suspensions?|appliques?|verlichting|ampoules?)\b"),
         ("Linge de maison", r"\b(linge de lit|draps?|couettes?|serviettes?|rideaux?|"
                              r"coussins?|plaids?|tapis)\b"),
-        ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?)\b"),
-        ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|vases?|miroirs?)\b"),
+        ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
+                                  r"kurkentrekker|mandoline)\b"),
+        ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
+                         r"waxinelichtjes?|vases?|miroirs?)\b"),
         ("Entretien", r"\b(schoonmaak|nettoyage|entretien|lessives?|d[ée]tergents?)\b"),
     ],
     ELECTROMENAGER: [
         ("Gros électroménager", r"\b(lave-linge|lave-vaisselle|r[ée]frig[ée]rateurs?|frigos?|"
                                  r"cong[ée]lateurs?|fours?|wasmachines?|koelkast)\b"),
-        ("Petit électroménager", r"\b(cafeti[èe]res?|bouilloires?|grille-pains?|blenders?|"
+        ("Petit électroménager", r"\b(cafeti[èe]res?|bouilloires?|grille-pains?|broodroosters?|blenders?|"
                                   r"milk\s+frothers?|coffee\s+frothers?|robots? cuiseur|friteuses?|micro-ondes)\b"),
         ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
@@ -990,7 +993,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                       r"kits?\s+(?:de\s+)?couture|sewing\s+patterns?|schnittmuster|n[äa]hmuster)\b"),
         ("Tissus & Mercerie", r"\b(tissus?|jerseys?|popelines?|cretonnes?|gabardines?|mousselines?|"
                                 r"toiles?\s+[àa]\s+patrons?|coupons?\s+de\s+\d|fil\s+[àa]\s+coudre|"
-                                r"fermetures?\s+[ée]clair|boutons?\s+(?:de\s+couture|mercerie))\b"),
+                                r"fermetures?\s+[ée]clair|boutons?\s+(?:de\s+couture|mercerie)|handnaaimachine)\b"),
         ("Dessin & Peinture", r"\b(?:watercolou?r|acrylic|oil\s+painting|painting\s+brush(?:es)?|"
                                r"art\s+brush(?:es)?|graffiti\s+painting|crayon(?:s)?\s+(?:oil\s+)?painting)\b"),
     ],
