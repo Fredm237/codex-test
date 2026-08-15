@@ -145,6 +145,12 @@ _COMPUTING_PHONE_ACCESSORY = r"\b(?:coques?|cases?|covers?|protectors?|chargeurs
 # de collection (« Paletti », « Componibili ») : ce contexte est donc un dernier
 # recours, après tous les signaux produits et rayons explicites.
 _ANDLIGHT_MERCHANT = r"\bandlight\b"
+# Bollywolly est un flux de mode féminine d'occasion vérifié par échantillon.
+# Il faut toutefois la forme vestimentaire explicite : un nom de modèle seul
+# reste non classé, et les vêtements génériques sans marqueur féminin ne sont
+# pas inférés.
+_BOLLYWOLLY_MERCHANT = r"\bbollywolly\b"
+_BOLLYWOLLY_FEMME_FORM = r"\b(?:jurk|rok|tuniek|corset)\b"
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
@@ -916,7 +922,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Déguisements & Costumes", r"\b(?:d[ée]guisements?|halloween|carnaval|verkleed(?:kleding)?)\b"),
         ("Robes", r"\b(robes?|dress(es)?|jurk)\b"),
         ("Jupes", r"\b(jupes?|skirts?|rok)\b"),
-        ("Hauts & T-shirts", r"\b(tops?|t-shirts?|blouses?|chemisiers?|d[ée]bardeurs?)\b"),
+        ("Hauts & T-shirts", r"\b(tops?|t-shirts?|blouses?|chemisiers?|d[ée]bardeurs?|tuniques?|tuniek|corsets?)\b"),
         ("Pulls & Sweats", r"\b(pulls?|sweats?|sweaters?|hoodies?|gilets?|cardigans?)\b"),
         ("Pantalons & Jeans", r"\b(pantalons?|jeans?|leggings?|shorts?|trousers?)\b"),
         ("Manteaux & Vestes", r"\b(manteaux?|vestes?|jackets?|blousons?|parkas?|trench)\b"),
@@ -1323,6 +1329,13 @@ def classify(
         )
     ):
         return LOISIRS
+
+    # Bollywolly est un flux féminin vérifié ; le contexte marchand ne suffit
+    # jamais seul, il s'ajoute obligatoirement à une forme vêtement féminine
+    # explicite. Les noms de modèles et les sweats non genrés restent donc hors
+    # de cette règle.
+    if _has(_BOLLYWOLLY_MERCHANT, merchant_name or "") and _has(_BOLLYWOLLY_FEMME_FORM, name):
+        return MODE_FEMME
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
     # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie
