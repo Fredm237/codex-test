@@ -908,8 +908,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
     ],
     MAISON: [
-        ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|"
-                     r"[ée]tag[èe]res?|meubel)\b"),
+        ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|cabinets?|"
+                     r"[ée]tag[èe]res?|meubel|(?:locker|garderobe|draaideur|roldeur|hangmappen|postvakken)kasten?)\b"),
         ("Luminaires", r"\b(lampes?|luminaires?|suspensions?|appliques?|verlichting|ampoules?)\b"),
         ("Linge de maison", r"\b(linge de lit|draps?|couettes?|serviettes?|rideaux?|"
                              r"coussins?|plaids?|tapis)\b"),
