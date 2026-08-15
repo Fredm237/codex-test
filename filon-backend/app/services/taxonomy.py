@@ -484,6 +484,12 @@ _RULES: list[tuple[str, str]] = [
             r"tr[ée]pieds?|photographie)\b"),
     (TV_SON, r"\b(t[ée]l[ée]viseurs?|\btv\b|home cinema|barres? de son|soundbars?|enceintes?|"
              r"speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?|casques? audio|hifi|hi-fi|platines?|headphones?)\b"),
+    # Un câble ne rejoint TV & Son que si un connecteur audiovisuel ET sa nature
+    # de câble/adaptateur sont explicites. Un simple « jack » textile ou câble
+    # technique générique reste donc hors de ce rayon.
+    (TV_SON, r"(?=.*\b(?:audio|aux|stereo|rca|toslink|optische|antenne|hdmi|minijack|jack)\b)"
+             r"(?=.*(?:kabel|cable|adapter|splitter|verleng(?:kabel|snoer)|omvormer)\b)"),
+    (TV_SON, r"\b(?:universele?|universal)\s+(?:afstandsbediening|t[ée]l[ée]commande)\b"),
     # Un projecteur devient audiovisuel seulement si un signal vidéo est aussi
     # explicite. Cette double preuve évite de capter un projecteur de chantier.
     (TV_SON, r"(?=.*\bprojecteurs?\b)(?=.*\b(?:1080p|720p|netflix|dolby|lcd|ansi|wifi|home\s+cinema)\b)"),
@@ -901,6 +907,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Enceintes", r"\b(enceintes?|speakers?|loudspeakers?|luidsprekers?|haut[- ]?parleurs?)\b"),
         ("Barres de son", r"\b(barres? de son|soundbars?|home cinema)\b"),
         ("Platines & Hi-Fi", r"\b(platines?|amplis?|hifi|hi-fi|vinyles?)\b"),
+        ("Câbles audio & vidéo", r"(?=.*\b(?:audio|aux|stereo|rca|toslink|optische|antenne|hdmi|minijack|jack)\b)"
+                               r"(?=.*(?:kabel|cable|adapter|splitter|verleng(?:kabel|snoer)|omvormer)\b)"),
+        ("Télécommandes", r"\b(?:universele?|universal)\s+(?:afstandsbediening|t[ée]l[ée]commande)\b"),
     ],
     BIJOUX: [
         ("Colliers & Pendentifs", r"\b(colliers?|necklaces?|pendentifs?|pendants?|cha[îi]nes?|ketting)\b"),
