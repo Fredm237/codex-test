@@ -162,6 +162,15 @@ _BOLLYWOLLY_FEMME_FORM = r"\b(?:jurk|rok|tuniek|corset)\b"
 # les valeurs manquantes restent non classés.
 _LILOS_NATURE_MERCHANT = r"\blilo['’]?s\s+nature\b"
 _LILOS_NATURE_ANIMAL = r"\b(?:katten|honden)\b"
+# Les variantes de rangement, vaisselle et mobilier ci-dessous ont été vérifiées
+# dans le flux MUJI. Elles restent scellées à ce marchand : « tasses » ou
+# « boîte de rangement » peuvent autrement décrire un outil ou une pièce VEVOR.
+_MUJI_MERCHANT = r"\bmuji(?:\s+france)?\b"
+_MUJI_HOUSEHOLD_VARIANT = (
+    r"\b(?:tasses?|bo[iî]tes?\s+de\s+rangement|paniers?\s+de\s+rangement|"
+    r"cintres?|bancs?\s+en\s+bois\s+massif|[ée]tag[èe]res?)\b"
+)
+_MUJI_STATIONERY_SOURCE = r"\b(?:papeterie|stylos?\s+et\s+crayons)\b"
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
@@ -838,6 +847,9 @@ _RULES: list[tuple[str, str]] = [
     (CULTURE, r"\b(?:stylos?\s+(?:[àa]\s+bille|[àa]\s+encre)|blocs?[-\s]?notes?|"
               r"classeurs?|carnets?|feuilles?\s+volantes?|pochettes?\s+perfor[ée]es?|"
               r"enveloppes?|papier\s+[àa]\s+lettres)\b"),
+    # Les catégories « Papeterie » et « Stylos et crayons » décrivent un produit
+    # de bureau explicite. Hors de cette source, un stylo plume nu reste exclu.
+    (CULTURE, r"\b(?:papeterie|stylos?\s+et\s+crayons)\b"),
     (BIJOUX, r"\b(?:polshorloges?|wristwatches?)\b"),
     (SANTE, r"\b(?:tandheelkunde|health\s+(?:products?|wellness)|health\s*(?:&|and)\s*wellness|"
             r"hygi(?:è|Ã«)ne|mondwater|floss|massage\s*(?:&|and)\s*welzijn)\b"),
@@ -893,7 +905,7 @@ _VETEMENT = (
     r"trousers?|pants?|trackpants?|joggers?|jeans?|chemises?|chemisiers?|shirts?|t[-\s]?shirts?|tees?|tops?|pulls?|gilets?|cardigans?|sweats?|sweaters?|hood(?:y|ies)?|hoodies?|crewnecks?|longsleeves?|"
     r"manteaux?|vestes?|jackets?|blouses?|costumes?|shorts?|bermudas?|leggings?|cuissards?|doudounes?|parkas?|boxers?|cale[çc]ons?|lingerie|underwear|"
     r"soutiens?[-\s]?gorges?|brassi[èe]res?|bras?|culottes?|slips?|strings?|bodies?|collants?|"
-         r"sleepwears?|pyjamas?|pyjamashirts?|maillots?|chaussettes?|socks?|str[üu]mpfe|strumpfhose|kniestr[üu]mpfe|socquettes|polos?|poloshirts?|overhemd|broek|jas|blazers?|sakko|"
+         r"sleepwears?|pyjamas?|pyjamashirts?|maillots?|chaussettes?|socks?|str[üu]mpfe|strumpfhose|kniestr[üu]mpfe|so[c]?quettes?|polos?|poloshirts?|overhemd|broek|jas|blazers?|sakko|"
 
     r"combinaisons?|jumpsuits?|nachtkleding|ondergoed|b[ée]rets?|tabliers?|polaires?|fleece|"
     # « Débardeur Proact Sport », catégorisé « Multisports > Débardeur », n'était
@@ -1112,7 +1124,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     CULTURE: [
         ("Papeterie & Bureau", r"\b(?:stylos?\s+(?:[àa]\s+bille|[àa]\s+encre)|blocs?[-\s]?notes?|"
                                r"classeurs?|carnets?|feuilles?\s+volantes?|pochettes?\s+perfor[ée]es?|"
-                               r"enveloppes?|papier\s+[àa]\s+lettres)\b"),
+                               r"enveloppes?|papier\s+[àa]\s+lettres|papeterie|stylos?\s+et\s+crayons)\b"),
     ],
     MAISON: [
         # Les armoires à clés sont des équipements de sécurité, non du mobilier générique.
@@ -1121,7 +1133,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|"
                      r"lits?\s+(?:plateforme|double|simple|super\s+king|king|en\s+(?:bois|pin|ch[êe]ne|noyer|bambou))|"
                      r"t[êe]tes?\s+de\s+lit\s+plateforme|tiroirs?\s+de\s+rangement|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
-                     r"(?:[ée]tag[èe]res?|shelves?)\s+(?:en\s+(?:acier|bois|pin|ch[êe]ne|noyer|bambou)|\d+\s+niveaux)|meubel|"
+                     r"(?:[ée]tag[èe]res?|shelves?)\s+(?:en\s+(?:acier|bois|pin|ch[êe]ne|noyer|bambou)|\d+\s+niveaux)|"
+                     r"(?=.*\b[ée]tag[èe]res?\b)(?=.*\b(?:bambou|ch[êe]ne|noyer)\b)|"
+                     r"[ée]tag[èe]res?\s+de\s+(?:bureau|rangement)|bancs?\s+en\s+bois\s+massif|meubel|"
                      r"(?:locker|garderobe|draaideur|roldeur|hangmappen|postvakken)kasten?)\b"),
         ("Luminaires", r"\b(lampes?|luminaires?|cabinet\s+lights?|wardrobe\s+lamps?|closet\s+lighting|"
                          r"lichtketting(?:en)?|kettinglamp(?:en)?|sterrengordijn(?:en)?|"
@@ -1139,8 +1153,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                          r"waxinelichtjes?|kerstbal(?:len)?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
                          r"decoratielint|kerstpapier|aroma\s+diffuseurs?|vases?|miroirs?)\b"),
         ("Rangement & Boîtes aux lettres", r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres|"
-                                           r"bo[iî]tes?\s+de\s+rangement\s+transparentes?|"
-                                           r"paniers?\s+de\s+rangement\s+tress[ée]s?|corbeilles?\s+[àa]\s+linge)\b"),
+                                           r"bo[iî]tes?\s+de\s+rangement|paniers?\s+de\s+rangement|"
+                                           r"cintres?|corbeilles?\s+[àa]\s+linge)\b"),
         ("Entretien", r"\b(schoonmaak|nettoyage|entretien|lessives?|d[ée]tergents?)\b"),
     ],
     ELECTROMENAGER: [
@@ -1400,6 +1414,15 @@ def classify(
     # de cette règle.
     if _has(_BOLLYWOLLY_MERCHANT, merchant_name or "") and _has(_BOLLYWOLLY_FEMME_FORM, name):
         return MODE_FEMME
+
+    # MUJI France : seconde vague lue dans les résidus produits. Le contexte
+    # marchand est obligatoire afin de ne pas classer une presse à tasses ou une
+    # boîte technique d'un autre flux comme article de maison.
+    if _has(_MUJI_MERCHANT, merchant_name or ""):
+        if _has(_MUJI_HOUSEHOLD_VARIANT, name):
+            return MAISON
+        if _has(_MUJI_STATIONERY_SOURCE, merchant_category):
+            return CULTURE
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
     # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie
