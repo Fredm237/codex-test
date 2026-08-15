@@ -812,6 +812,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Stockage", r"\b(ssd|disques? durs?|cl[ée]s? usb|hdd|nvme|cartes? m[ée]moire)\b"),
         ("Imprimantes & Consommables", r"\b(imprimantes?|scanners?|cartouches?|toner|ink cartridges?)\b"),
         ("Réseau", r"\b(routeurs?|switch|wifi|r[ée]p[ée]teurs?|modems?)\b"),
+        ("Composants PC", r"\b(?:ventilateurs?\s+(?:de\s+)?(?:bo[iî]tier|processeur|cpu)|(?:cpu|case)\s+fans?)\b"),
         ("Câbles & Adaptateurs", r"\b(c[âa]bles?|adaptateurs?|hubs?|docking)\b"),
     ],
     TELEPHONIE: [
@@ -1087,6 +1088,15 @@ def classify(
         and _has(_COMPUTING_COMPATIBILITY, name)
         and not _has(_COMPUTING_PHONE_ACCESSORY, name)
     ):
+        return INFORMATIQUE
+
+    # Un ventilateur de boîtier ou de processeur est un composant PC, pas un
+    # appareil de climatisation. Le contexte matériel est obligatoire : le mot
+    # « ventilateur » seul conserve donc son classement électroménager.
+    if any(_has(
+        r"\b(?:ventilateurs?\s+(?:de\s+)?(?:bo[iî]tier|processeur|cpu)|"
+        r"(?:cpu|case)\s+fans?)\b", text
+    ) for text in (name, merchant_category) if text):
         return INFORMATIQUE
 
     # Les modèles de chaussures vérifiés suivent les supports, mais précèdent les
