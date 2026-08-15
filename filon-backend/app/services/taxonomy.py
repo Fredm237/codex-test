@@ -171,6 +171,17 @@ _MUJI_HOUSEHOLD_VARIANT = (
     r"cintres?|bancs?\s+en\s+bois\s+massif|[ée]tag[èe]res?)\b"
 )
 _MUJI_STATIONERY_SOURCE = r"\b(?:papeterie|stylos?\s+et\s+crayons)\b"
+# 2dekansje fournit une arborescence néerlandaise détaillée. Ces six routes ont
+# été recoupées sur douze libellés réels chacune ; elles restent scellées au
+# marchand car un chemin source n'est jamais un signal universel.
+_2DEKANSJE_MERCHANT = r"\b2dekansje\b"
+_2DEKANSJE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
+    (MAISON, r"\bkerst\s*>\s*kerst(?:bomen|verlichting)\b"),
+    (BAGAGERIE, r"\breizen\s*&\s*vrije\s*tijd\s*>\s*koffers?\s*&\s*reistassen\b"),
+    (ANIMALERIE, r"\bwonen\s*&\s*koken\s*>\s*alles\s+voor\s+huisdieren\b"),
+    (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*tafelen\b"),
+    (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*luchtbevochtigers\b"),
+)
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
@@ -1080,7 +1091,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                          r"(?:mini|petits?)\s+sacs?|sacs?\s+(?:bandouli[eè]res?|shopping|hobo|panier|"
                          r"seau|cabas|fourre[-\s]tout|d['’][ée]paule))\b"),
         ("Sacs à dos", r"\b(sacs? [àa] dos|backpacks?|rugzak)\b"),
-        ("Valises & Bagages", r"\b(valises?|suitcases?|bagages?|luggage|trolleys?)\b"),
+        ("Valises & Bagages", r"\b(valises?|suitcases?|bagages?|luggage|trolleys?|koffers?|reistassen?)\b"),
         ("Portefeuilles", r"\b(portefeuilles?|wallets?|porte-cartes?|porte-monnaie)\b"),
         ("Sacs banane & Pochettes", r"\b(sacs? banane|bananes?|pochettes?|sacoches?|trousses? de toilette)\b"),
     ],
@@ -1144,13 +1155,14 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                              r"coussins?|plaids?|tapis)\b"),
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
                                   r"tasses?|bols?|mugs?|th[ée]i[èe]res?|tasses?\s+[àa]\s+sak[ée]|bols?\s+[àa]\s+riz|"
-                                  r"r[ée]cipients?\s+alimentaires?|bacs?\s+[àa]\s+gla[çc]ons|kurkentrekker|mandoline|marmites?|faitouts?|"
+                                  r"r[ée]cipients?\s+alimentaires?|bacs?\s+[àa]\s+gla[çc]ons|onderzetters?|placemats?|"
+                                  r"serveerplank(?:en)?|saladeschalen?|kurkentrekker|mandoline|marmites?|faitouts?|"
                                   r"autocuiseurs?|bouilloires?|carafes?|saladiers?|sucriers?|pots?\s+[àa]\s+lait|"
                                   r"tire[-\s]?bouchons?|presse[-\s]?agrumes|presse[-\s]?pur[ée]e|"
                                   r"blocs?\s+[àa]\s+couteaux|hachoirs?\s+[àa]\s+herbes|moulins?\s+[àa]\s+poivre|"
                                   r"machines?\s+[àa]\s+expresso|espressokocher)\b"),
         ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
-                         r"waxinelichtjes?|kerstbal(?:len)?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
+                         r"waxinelichtjes?|kerstbal(?:len)?|(?:kunst)?kerstbo(?:om|men)|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
                          r"decoratielint|kerstpapier|aroma\s+diffuseurs?|vases?|miroirs?)\b"),
         ("Rangement & Boîtes aux lettres", r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres|"
                                            r"bo[iî]tes?\s+de\s+rangement|paniers?\s+de\s+rangement|"
@@ -1167,7 +1179,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                   r"machines?\s+[àa]\s+barbe\s+[àa]\s+papa|scies?\s+[àa]\s+os\s+de\s+boucher)\b"),
         ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
-                                       r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?)\b"),
+                                       r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?|"
+                                       r"lucht(?:bevochtigers?|ontvochtigers?|zuiveraars?))\b"),
     ],
     LOISIRS: [
         ("Patrons & Kits de couture", r"\b(patrons?\b|patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
@@ -1233,7 +1246,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     ],
     ANIMALERIE: [
         ("Chien", r"\b(chiens?|dogs?|hond|hondenvoer|honden(?:mand|riem|tuig)|looplijn|jachtlijn)\b"),
-        ("Chat", r"\b(chats?|cats?|\bkat\b|kattenvoer|liti[èe]res?|kattenmand|kattengrot)\b"),
+        ("Chat", r"\b(chats?|cats?|\bkat\b|kattenvoer|liti[èe]res?|kattenmand|kattengrot|kattenboom|krabpaal)\b"),
         ("Petits animaux", r"\b(rongeurs?|lapins?|hamsters?|oiseaux?|aquarium|poissons?)\b"),
     ],
     GAMING: [
@@ -1423,6 +1436,14 @@ def classify(
             return MAISON
         if _has(_MUJI_STATIONERY_SOURCE, merchant_category):
             return CULTURE
+
+    # 2dekansje : la catégorie source détaillée et le marchand sont exigés
+    # ensemble. Les libellés de produit peuvent donc rester courts ou contenir
+    # une marque sans sacrifier la traçabilité de la destination FILON.
+    if _has(_2DEKANSJE_MERCHANT, merchant_name or ""):
+        for category, source_pattern in _2DEKANSJE_SOURCE_ROUTES:
+            if _has(source_pattern, merchant_category):
+                return category
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
     # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie
