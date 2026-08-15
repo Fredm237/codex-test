@@ -245,6 +245,11 @@ class TestSubcategories:
             (t.TELEPHONIE, "Support PCB Oppo Reno16 F", "Pièces détachées"),
             (t.TELEPHONIE, "Batterie Xiaomi Redmi Note 11 Pro", "Chargeurs & Batteries"),
             (t.TELEPHONIE, "Chargeur rapide USB-C pour iPhone 15", "Chargeurs & Batteries"),
+            # Audit global public : objets explicites encore absorbés par « iPhone ».
+            (t.TELEPHONIE, "Draadloze Bluetooth Oordopjes Sport Earbuds voor Smartphone", "Écouteurs"),
+            (t.TELEPHONIE, "Apple iPhone Lightning Dock - Dorée", "Chargeurs & Batteries"),
+            (t.TELEPHONIE, "F9 TWS In-Ear Wireless Earbuds for iPhone Android", "Écouteurs"),
+            (t.TELEPHONIE, "Kit protection de smartphone Tigra MtCase fit-clic", "Coques & Protections"),
             (t.AUTO, "Pneu Michelin 205/55 R16", "Pneus"),
             (t.BEAUTE, "Rasasi Fattan Eau De Parfum", "Parfums"),
             (t.ELECTROMENAGER, "Aspirateur balai sans fil", "Aspirateurs"),

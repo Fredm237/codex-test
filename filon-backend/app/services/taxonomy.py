@@ -828,7 +828,8 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                  r"(?:smartwatch|watch)\s+(?:covers?|cases?)|"
                                  r"(?:smartphone|telefoon)hoes(?:je|jes)?|hoes(?:je|jes)?|"
                                  r"(?:camera|lens)\s+protectors?|camera\s+protector|"
-                                 r"protections?\s+d['’]objectif|films?\s+de\s+protection|protection\s+film|"
+                                 r"protections?\s+d['’]objectif|(?:kits?|packs?)\s+(?:de\s+)?protections?|"
+                                 r"kits?\s+protecteurs?|films?\s+de\s+protection|protection\s+film|"
                                  r"scherm(?:beschermers?|protectors?)|prot[èe]ge-[ée]crans?|screen\s*(?:protectors?|protection)|screenprotectors?|"
                                  r"verre\s+tremp[ée]|tempered\s+glass|"
                                  r"(?:supports?(?:\s+universels?)?|brackets?|holders?|mounts?)\s+"
@@ -843,13 +844,14 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Chargeurs & Batteries", r"\b(chargeurs?|chargers?|opladers?|power\s*banks?|powerbanks?|"
                                   r"batteries?|c[âa]bles? de charge|charging(?:\s+cables?)?|"
                                   r"wireless\s+charging|oplaad(?:kabels?|adapter[s]?)|"
-                                  r"(?:usb[-\s]?[ac])?\s*adapters?)\b"),
-        # Avant Smartphones : « Galaxy Watch » cite Galaxy mais désigne une montre.
+                                  r"lightning\s+docks?|docks?|(?:usb[-\s]?[ac])?\s*adapters?)\b"),
+        # Avant Smartphones : un casque, des écouteurs ou une montre peuvent citer
+        # le modèle compatible sans être eux-mêmes un smartphone.
+        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds|oreillettes?|oordopjes|koptelefoon)\b"),
         ("Montres connectées", r"\b(montres? connect[ée]es?|smartwatch|watch(?:es)?|galaxy\s+watch\d*|"
                                r"bracelets? connect[ée]s?|horloges?|polsband(?:en)?)\b"),
         ("Tablettes", r"\b(tablettes?|ipad|galaxy\s+tab)\b"),
         ("Smartphones", r"\b(smartphones?|iphone|galaxy|t[ée]l[ée]phones? mobiles?)\b"),
-        ("Écouteurs", r"\b([ée]couteurs?|airpods|earbuds|oreillettes?)\b"),
     ],
     TV_SON: [
         ("Téléviseurs", r"\b(t[ée]l[ée]viseurs?|\btv\b|oled|qled)\b"),
