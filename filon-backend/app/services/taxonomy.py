@@ -1129,6 +1129,30 @@ def classify(
     ):
         return MAISON
 
+    # Une étagère d'armoire ou de garde-robe reste un meuble, même si le mot
+    # « robe » fait partie de l'expression. Les deux preuves — le meuble et son
+    # contexte de rangement — évitent de détourner une robe sur étagère.
+    if _has(r"\b(?:[ée]tag[èe]res?|shelves?)\b", name) and _has(
+        r"\b(?:armoire|placard|garde[- ]robe)\b", name
+    ):
+        return MAISON
+
+    # « Red Robe » peut être un nom de gamme de maquillage. Une palette
+    # d'ombres à paupières est explicite et doit gagner avant le mot « robe ».
+    if _has(r"\b(?:eye\s?shadows?|oogschaduw|fards?\s+[àa]\s+paupi[èe]res?)\b", name) and _has(
+        r"\b(?:palette|make\s?up|maquillage)\b", name
+    ):
+        return BEAUTE
+
+    # « Lady » peut décrire un motif ou une collection (« Space Lady »), et ne
+    # suffit pas à contredire une catégorie marchande explicitement masculine.
+    # Les marqueurs forts (women, femme, dames…) du titre gardent naturellement
+    # priorité : ils ne passent pas par ce garde-fou.
+    if _has(_HOMME, merchant_category) and _has(_VETEMENT, name) and _has(r"\blady\b", name) and not _has(
+        r"\b(?:femme|femmes|women|women's|woman|dames|dame|ladies|feminin|f[ée]minin)\b", name
+    ):
+        return MODE_HOMME
+
     # Un nom de gamme peut contenir « robe » ou « lingerie » sans désigner un
     # vêtement. Les motifs ci-dessous sont volontairement étroits : chaque famille
     # a été reproduite dans l’API publique avec un objet ou une source explicite.
