@@ -1099,6 +1099,16 @@ def classify(
     ) for text in (name, merchant_category) if text):
         return INFORMATIQUE
 
+    # « Garde-robe » et « robe » peuvent décrire un meuble, une porte ou une
+    # poignée. Les constructions de quincaillerie explicites l'emportent sur ce
+    # faux signal vestimentaire, sans transformer le mot « robe » seul.
+    if _has(
+        r"\b(?:poign[ée]es?\s+de\s+porte|portes?\s+coulissantes?(?:\s+de\s+placard)?|"
+        r"poign[ée]es?\s+(?:de\s+)?(?:tirage|pouss[ée]e)|meubles?\s+(?:de\s+)?placard)\b",
+        name,
+    ):
+        return JARDIN
+
     # Les modèles de chaussures vérifiés suivent les supports, mais précèdent les
     # règles génériques : un « Gazelle Indoor » n'est pas un article inconnu.
     # Un vêtement explicite doit toutefois rester un vêtement, même si sa marque

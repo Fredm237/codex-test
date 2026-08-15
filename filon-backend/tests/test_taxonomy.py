@@ -70,6 +70,9 @@ class TestMainCategories:
             # Cas public : un ventilateur de boîtier ne relève pas de la climatisation.
             ("Ventilateur de Boîtier", "Ventilateur boitier 1stPlayer FS7 RGB - 12cm", t.INFORMATIQUE),
             ("", "Ventilateur de salon silencieux 45W", t.ELECTROMENAGER),
+            # Cas public : une poignée de porte de garde-robe est de la quincaillerie, pas une robe.
+            ("", "VEVOR Poignée de Porte pour Meuble Placard Garde-Robe", t.JARDIN),
+            ("", "Robe femme longue plissée", t.MODE_FEMME),
         ],
     )
     def test_classifies_from_the_product_name(self, category, name, expected):
