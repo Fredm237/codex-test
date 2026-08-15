@@ -581,7 +581,7 @@ _RULES: list[tuple[str, str]] = [
     # Déco sur un simple échantillon. Les pendules murales sont captées en amont
     # par une règle dédiée (« horloge murale », « wandklok »).
     (BIJOUX, r"\b(bijoux?|jewelry|jewellery|bagues?|rings?|colliers?|necklaces?|"
-             r"pendentifs?|bracelets?|boucles? d'oreille|earrings?|montres?|"
+             r"pendentifs?|bracelets?|boucles? d['’]oreilles?|earrings?|montres?|"
              r"watch(es)?|horloges?|sieraden|halsketting|schakelketting)\b"),
     (BIJOUX, r"\bpendant\s+(?:necklaces?|charms?|earrings?)\b"),
     # Bracelets de montre : les flux les listent en catégorie « Strap », avec des
@@ -603,8 +603,14 @@ _RULES: list[tuple[str, str]] = [
     (BAGAGERIE, r"\b(sacs? [àa] main|sacs? [àa] dos|handbags?|backpacks?|valises?|suitcases?|"
                 r"bagages?|luggage|trolleys?|portefeuilles?|wallets?|maroquinerie|handtas|"
                 r"rugzak|bags?)\b"),
+    # Les titres de maroquinerie peuvent n'indiquer que la forme du sac. Les
+    # qualificatifs sont exigés : « sac de couchage » et les usages techniques
+    # restent hors de cette règle.
+    (BAGAGERIE, r"\b(?:mini|petits?)\s+sacs?(?!\s+de\s+couchage)\b|"
+                r"\bsacs?\s+(?:bandouli[eè]res?|shopping|hobo|panier|seau|cabas|"
+                r"fourre[-\s]tout|d['’][ée]paule)\b"),
     (ACCESSOIRES, r"\b(accessoires?|accessories|lunettes? de soleil|sunglasses|ceintures?|"
-                  r"belts?|[ée]charpes?|scarf|scarves|chapeaux?|hats?|casquettes?|caps?|"
+                  r"belts?|[ée]charpes?|foulards?|scarf|scarves|chapeaux?|hats?|casquettes?|caps?|"
                   r"gants?|gloves|bonnets?|cravates?|ties?|riemen)\b"),
     # « sport » seul ne classe plus : c'est un adjectif de gamme omniprésent dans
     # les noms commerciaux. « Potenza Sport » et « Cross Sport SP-9 » sont des
@@ -895,11 +901,13 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Colliers & Pendentifs", r"\b(colliers?|necklaces?|pendentifs?|pendants?|cha[îi]nes?|ketting)\b"),
         ("Bracelets", r"\b(bracelets?|joncs?|gourmettes?)\b"),
         ("Bagues", r"\b(bagues?|rings?|alliances?|chevali[èe]res?)\b"),
-        ("Boucles d'oreilles", r"\b(boucles? d'oreilles?|earrings?|cr[ée]oles?|puces?)\b"),
+        ("Boucles d'oreilles", r"\b(boucles? d['’]oreilles?|earrings?|cr[ée]oles?|puces?)\b"),
         ("Montres", r"\b(montres?|watch(es)?|horloges?)\b"),
     ],
     BAGAGERIE: [
-        ("Sacs à main", r"\b(sacs? [àa] main|handbags?|handtas|cabas|besaces?|bandouli[èe]res?)\b"),
+        ("Sacs à main", r"\b(sacs? [àa] main|handbags?|handtas|cabas|besaces?|bandouli[èe]res?|"
+                         r"(?:mini|petits?)\s+sacs?|sacs?\s+(?:bandouli[eè]res?|shopping|hobo|panier|"
+                         r"seau|cabas|fourre[-\s]tout|d['’][ée]paule))\b"),
         ("Sacs à dos", r"\b(sacs? [àa] dos|backpacks?|rugzak)\b"),
         ("Valises & Bagages", r"\b(valises?|suitcases?|bagages?|luggage|trolleys?)\b"),
         ("Portefeuilles", r"\b(portefeuilles?|wallets?|porte-cartes?|porte-monnaie)\b"),
