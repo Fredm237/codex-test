@@ -6,9 +6,10 @@ faire disparaître sa catégorie FILON de l'API ni empêcher sa navigation.
 from __future__ import annotations
 
 import pytest
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.api.routes.catalog import offers as offers_endpoint
+from app.api.routes.catalog import offer_detail, offers as offers_endpoint
 from app.db import models
 from app.db.base import Base
 from app.services import taxonomy
@@ -113,6 +114,16 @@ async def test_la_carte_expose_la_categorie_filon_et_la_source_separement(sessio
     assert any(item["source_category"] is None for item in result["items"])
     assert all("offer_kind" in item for item in result["items"])
     assert phone["category"] != phone["source_category"]
+
+
+async def test_la_fiche_offre_expose_la_taxonomie_filon_et_la_source_separement(session):
+    phone = await session.scalar(
+        select(models.Offer).where(models.Offer.awin_product_id == "phone-1")
+    )
+    result = await call(offer_detail, offer_id=phone.id, session=session)
+    assert result["category"] == TELEPHONIE
+    assert result["subcategory"] == "Smartphones"
+    assert result["source_category"] is None
 
 
 async def test_le_filtre_par_slug_filon_trouve_les_offres_meme_sans_categorie_source(session):

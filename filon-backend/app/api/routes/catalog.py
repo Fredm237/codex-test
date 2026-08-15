@@ -958,7 +958,11 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         "id": o.id,
         "name": o.name,
         "brand": o.brand,
-        "category": o.category,
+        # Contrat identique à /offers : la navigation consomme la taxonomie
+        # FILON, jamais une catégorie marchande éventuellement absente.
+        "category": o.filon_category,
+        "subcategory": o.filon_subcategory,
+        "source_category": o.category,
         "offer_kind": offer_kind,
         "ean": o.ean,
         "price": o.price,
