@@ -434,7 +434,9 @@ _RULES: list[tuple[str, str]] = [
            r"si[èe]ges? auto|chaises? hautes?|tables? [àa] langer|st[ée]rilisateurs?)\b"),
     # Les composés néerlandais ne créent pas de frontière après « baby ».
     # Chacun désigne explicitement un soin ou une toilette pour nourrisson.
-    (BEBE, r"\b(?:babydoekjes?|babyolie|babybad|babyshampoo|babyverzorging)\b"),
+    (BEBE, r"\b(?:babydoekjes?|babyolie|babybad|babyshampoo|babyverzorging|"
+             r"babyverzorgings(?:olie|balsem)|babyborstel|badsteun|badstoel|badthermometer|"
+             r"toilettrainer|verschoningsmat|luierzakjes?|badjesset\s+voor\s+pasgeborenen)\b"),
     (ANIMALERIE, r"\b(chiens?|chats?|dogs?|cats?|hond|kat|hondenvoer|kattenvoer|animal|"
                  r"animalerie|croquettes?|aquarium|liti[èe]re|dierenvoeding|"
                  r"chiots?|puppy|puppies|chatons?|kittens?|niches?\s+pour|"
@@ -523,7 +525,8 @@ _RULES: list[tuple[str, str]] = [
              r"gommages?|scrubs?|d[ée]odorants?|deodorants?|savons?|zeep)\b"),
     # Produits de bain corporels observés dans le flux néerlandais. Les jouets de
     # bain sont exclus : ils sont traités plus bas dans Jeux & Jouets.
-    (BEAUTE, r"\b(?:badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen)\b"),
+    (BEAUTE, r"\b(?:badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen|"
+                 r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me|nagelknippers?)\b"),
     # Soins anglais observés sans catégorie source fiable. Les expressions
     # qualifiées évitent de considérer « treatment » seul comme une preuve.
     (BEAUTE, r"\b(?:cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?|"
@@ -583,7 +586,7 @@ _RULES: list[tuple[str, str]] = [
             r"tensiom[èe]tre|hygi[èeë]ne|huiles? essentielles?)\b"),
     # Hygiène bucco-dentaire multilingue : brosse, tête de brosse et dentifrice
     # sont des signaux de santé explicites, y compris pour enfant.
-    (SANTE, r"\b(?:kindertandenborstel|tandenborstel(?:koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
+    (SANTE, r"\b(?:kindertandenborstel|tandenborstel(?:s|koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     # « ketting » et « pendant » sont retirés comme mots nus : en néerlandais
     # « kettingzaag » est une tronçonneuse et « fietsketting » une chaîne de vélo ;
     # en anglais « pendant lamp » est une suspension. Tous deux peuplaient le
@@ -958,15 +961,16 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                        r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?)\b"),
         ("Soins visage", r"\b(soins? visage|cr[èe]mes?|s[ée]rums?|skincare|huidverzorging|"
                          r"gezicht|toner|masques?|cleansing\s+(?:oil|water|foam|bar)|acne\s+patch(?:es)?)\b"),
-        ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen)\b"),
+        ("Bain & Corps", r"\b(badzeep|bath salts?|bath\s*&\s*shower bubbles|douchebellen|"
+                           r"badsponzen?|bath\s+sponge(?:s)?|bubble\s+bath|kinderzonnebrandcr[eè]me)\b"),
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
                      r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling|"
                      r"hair\s+(?:milk|ampoules?|treatments?)|scalp\s+(?:therapy|ampoules?)|color\s+charge)\b"),
-        ("Ongles", r"\b(ongles?|nails?|vernis|manucure|cuticle\s+oil)\b"),
+        ("Ongles", r"\b(ongles?|nails?|vernis|manucure|cuticle\s+oil|nagelknippers?)\b"),
         ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
     ],
     SANTE: [
-        ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
+        ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:s|koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
     ],
     MAISON: [
         ("Meubles", r"\b(meubles?|canap[ée]s?|fauteuils?|tables?|chaises?|armoires?|cabinets?(?!\s+(?:lights?|lamps?))|"
@@ -1029,7 +1033,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Repas & Biberons", r"\b(biberons?|bavoirs?|slabbetjes?|chaises? hautes?|"
                               r"st[ée]rilisateurs?)\b"),
         ("Couches & Toilette", r"\b(couches?|luiers?|lingettes?|tables? [àa] langer|"
-                              r"babydoekjes?|babyolie|babybad|babyshampoo|babyverzorging)\b"),
+                              r"babydoekjes?|babyolie|babybad|babyshampoo|babyverzorging|"
+                              r"babyverzorgings(?:olie|balsem)|babyborstel|badsteun|badstoel|badthermometer|"
+                              r"toilettrainer|verschoningsmat|luierzakjes?|badjesset\s+voor\s+pasgeborenen)\b"),
         ("Chambre bébé", r"\b(lits? b[ée]b[ée]|berceaux?|matelas b[ée]b[ée]|tours? de lit)\b"),
     ],
     ANIMALERIE: [
