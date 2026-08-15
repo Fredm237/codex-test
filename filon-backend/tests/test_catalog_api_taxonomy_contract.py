@@ -6,6 +6,7 @@ faire disparaître sa catégorie FILON de l'API ni empêcher sa navigation.
 from __future__ import annotations
 
 import pytest
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.api.routes.catalog import offers as offers_endpoint
@@ -129,6 +130,45 @@ async def test_le_filtre_par_slug_filon_trouve_les_offres_meme_sans_categorie_so
 
 
 async def test_le_sous_rayon_smartphones_masque_les_coques_historiques_non_encore_rattrapees(session):
+    result = await call(
+        offers_endpoint,
+        category=TELEPHONIE,
+        subcategory="Smartphones",
+        session=session,
+    )
+    assert result["total"] == 1
+    assert [item["name"] for item in result["items"]] == ["Samsung Galaxy S25"]
+
+
+@pytest.mark.parametrize(
+    "name,source_category",
+    [
+        ("BasicPlus Schermbeschermer iPhone 11 Pro Max", "Telefoon- & tablet accessoires"),
+        ("BeHello Schermprotector Glas iPhone 15 Plus", "Phone accessories"),
+        ("Verre de protection trempé Quad Lock iPhone 12", "Cyclisme urbain"),
+        ("Kit protection de smartphone Tigra MtCase", "Étui smartphone"),
+        ("Bicycle mobile phone bracket for Samsung iPhone", "Cellphones & Telecommunications"),
+        ("Support de table universel pour smartphones", "Accessoires Tablettes / Smartphones"),
+        ("Support de Travail Reballing pour Apple iPhone", None),
+        ("Amitec USB-oplader voor Smartphone en Tablet", "Opladers"),
+    ],
+)
+async def test_le_sous_rayon_smartphones_masque_les_accessoires_residuels(session, name, source_category):
+    merchant = await session.scalar(select(models.Merchant))
+    session.add(models.Offer(
+        merchant_id=merchant.id,
+        awin_product_id=f"legacy-{name[:18]}",
+        name=name,
+        category=source_category,
+        filon_category=TELEPHONIE,
+        filon_subcategory="Smartphones",
+        offer_kind="tech_accessory",
+        price=9.0,
+        currency="EUR",
+        image_url="https://example.test/legacy-residual.jpg",
+        is_canonical=True,
+    ))
+    await session.commit()
     result = await call(
         offers_endpoint,
         category=TELEPHONIE,
