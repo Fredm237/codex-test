@@ -1158,6 +1158,9 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     BEAUTE: [
         ("Parfums", r"\b(parfums?|eaux? de parfum|eaux? de toilette|fragrances?)\b"),
         ("Coffrets & Calendriers", r"\b(?:schoonheidsavontagenda|toiletartikelen\s+adventskalender)\b"),
+        # Une tondeuse corporelle peut inclure un accessoire à sourcils : l'appareil
+        # principal reste du rasage/épilation, pas un produit de maquillage.
+        ("Rasage & Épilation", r"\b(tondeuses?|rasoirs?|[ée]pilation|epilation|ladyshaves?|shavers?)\b"),
         ("Maquillage", r"\b(maquillage|make\s?up|rouges? [àa] l[èe]vres|lipstick|mascaras?|"
                        r"fonds? de teint|eyeliner|fards?|sourcils?|eyebrow|brow\s+(?:pen|definer)|"
                        r"poudre\s+(?:libre|fixatrice)|base\s+de\s+teint|primer|lips?|"
@@ -1178,7 +1181,6 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
                      r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling|"
                      r"hair\s+(?:milk|ampoules?|treatments?)|scalp\s+(?:therapy|ampoules?)|color\s+charge)\b"),
-        ("Rasage & Épilation", r"\b(tondeuses?|rasoirs?|rasage|[ée]pilation|epilation|ladyshaves?|shavers?)\b"),
         ("Ongles", r"\b(ongles?|nails?|vernis|manucure|cuticle\s+oil|nagelknippers?)\b"),
         ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
     ],
