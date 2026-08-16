@@ -190,6 +190,11 @@ _2DEKANSJE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*borden\b"),
     (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*aircoolers\s*&\s*luchtkoelers\b"),
     (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*waterkokers\b"),
+    # Troisième vague : ces routes restent toutes dans Maison & Déco, même
+    # lorsque le sous-rayon dépend du libellé produit plutôt que de la source.
+    (MAISON, r"\bwonen\s*&\s*koken\s*>\s*badkamer\s*&\s*sanitair\s*>\s*badkamermeubels\b"),
+    (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*keukengerei\b"),
+    (MAISON, r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*prullenbakken\s*&\s*vuilnisbakken\b"),
 )
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
