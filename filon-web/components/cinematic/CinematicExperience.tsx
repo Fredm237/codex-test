@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocale } from "@/lib/i18n";
 import { CinematicOverlay } from "./CinematicOverlay";
-import { CinematicProductActors } from "./CinematicProductActors";
 import { CinematicSequenceRenderer } from "./CinematicSequenceRenderer";
 import { resolveTimeline } from "./engine/timeline";
 import { filonHomeScene } from "./scenes/filon-home";
@@ -69,8 +68,10 @@ export function CinematicExperience() {
 
   const sequence = mobile ? filonHomeScene.mobile : filonHomeScene.desktop;
   const timeline = useMemo(() => resolveTimeline(filonHomeScene, progress), [progress]);
-  const fallback = reducedMotion || saveData;
-  const height = fallback ? 100 : sequence.scrollHeightVh;
+  // Stabilisation publique : la scène reste visible, mais aucun scroll narratif
+  // incomplet ne peut consommer l’accueil avant la reconstruction frame-par-frame.
+  const fallback = true;
+  const height = 100;
 
   const skip = () => {
     const element = containerRef.current;
@@ -83,7 +84,6 @@ export function CinematicExperience() {
       <div className="ce-sticky">
         <CinematicSequenceRenderer sequence={sequence} frameProgress={timeline.frameProgress} cameraProgress={timeline.progress} reducedMotion={fallback} className="ce-renderer" />
         <div className="ce-atmosphere" aria-hidden="true" />
-        {!fallback && <CinematicProductActors progress={timeline.progress} />}
         <CinematicOverlay locale={locale} timeline={timeline} onSkip={skip} />
       </div>
     </section>
