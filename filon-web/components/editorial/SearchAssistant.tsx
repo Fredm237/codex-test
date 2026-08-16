@@ -23,6 +23,7 @@ const SL = {
     sourceBody: "FILON s’appuie uniquement sur les offres de son catalogue partenaire. Cette recherche ne renvoie pas encore de prix vérifiables ; explorez le catalogue ou reformulez votre demande.",
     retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
+    film: "Voir le film", closeFilm: "Fermer le film",
     at: "chez", cashback: "cashback", coupon: "coupon", observedRate: "Tarif observé", contextualOffer: "À confirmer pour vos dates et conditions",
     hist: { baisse: "En baisse", hausse: "En hausse", stable: "Stable" } as Record<Hist, string>,
   },
@@ -43,6 +44,7 @@ const SL = {
     sourceBody: "FILON gebruikt uitsluitend aanbiedingen uit zijn partnercatalogus. Deze zoekopdracht levert nog geen verifieerbare prijzen op; verken de catalogus of verfijn je vraag.",
     retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
+    film: "Bekijk de film", closeFilm: "Film sluiten",
     at: "bij", cashback: "cashback", coupon: "code", observedRate: "Waargenomen tarief", contextualOffer: "Bevestig data en voorwaarden",
     hist: { baisse: "Dalend", hausse: "Stijgend", stable: "Stabiel" } as Record<Hist, string>,
   },
@@ -63,6 +65,7 @@ const SL = {
     sourceBody: "FILON relies only on offers from its partner catalogue. This search does not yet return verifiable prices; explore the catalogue or refine your request.",
     retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
+    film: "Watch the film", closeFilm: "Close film",
     at: "at", cashback: "cashback", coupon: "coupon", observedRate: "Observed rate", contextualOffer: "Confirm dates and terms",
     hist: { baisse: "Falling", hausse: "Rising", stable: "Stable" } as Record<Hist, string>,
   },
@@ -320,6 +323,7 @@ export function SearchAssistant() {
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
   const [blockedExternal, setBlockedExternal] = useState(false);
+  const [filmOpen, setFilmOpen] = useState(false);
   // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
   // devise et les marchands disponibles en dépendent, et un visiteur français
   // n'a aucune raison de partir sur la Belgique. Le sélecteur reste maître —
@@ -392,7 +396,9 @@ export function SearchAssistant() {
   // Lue depuis window plutôt qu'avec useSearchParams : ce dernier force le
   // rendu dynamique de la page, qui est statique et doit le rester.
   useEffect(() => {
-    const q = new URLSearchParams(window.location.search).get("q");
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("film") === "1") setFilmOpen(true);
+    const q = params.get("q");
     if (!q) return;
     setQuery(q);
     ask(q);
@@ -405,26 +411,15 @@ export function SearchAssistant() {
       {/* Scène cinématique fiable : aucun média absent, aucun visuel inventé. */}
       {phase === "idle" && (
         <>
-          {/* Poster immobile par défaut ; la vidéo reste limitée au grand écran
-              et disparaît aussi lorsque le visiteur réduit les animations. */}
+          {/* L’assistant conserve une affiche légère. Le film complet est lu
+              explicitement à la demande, avec son propre son et ses contrôles. */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             className="sa-bg-visual sa-bg-poster"
-            src="/immersive/filon-materialized-anchor-16x9.png"
+            src="/film/filon-est-ce-vraiment-le-bon-prix-poster.jpg"
             alt=""
             aria-hidden="true"
             fetchPriority="high"
-          />
-          <video
-            className="sa-bg-visual sa-bg-video"
-            src="/immersive/filon-materialized-1080p.mp4"
-            poster="/immersive/filon-materialized-anchor-16x9.png"
-            aria-hidden="true"
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
           />
           <div className="sa-bg-overlay" />
         </>
@@ -432,6 +427,11 @@ export function SearchAssistant() {
       <div className="ed-wrap sa-content">
         {phase === "idle" && <span className="eyebrow sa-eyebrow-light">{S.eyebrow}</span>}
         <h1 className={phase === "idle" ? "sa-title-light" : ""}>{phase === "idle" ? S.h1Idle : S.h1Again}</h1>
+        {phase === "idle" && (
+          <button type="button" className="sa-film-launch" onClick={() => setFilmOpen(true)}>
+            <span aria-hidden="true">▶</span>{S.film}
+          </button>
+        )}
 
         <form className="sa-search" onSubmit={(e) => { e.preventDefault(); ask(query || S.chips[0]); }}>
           <div className="sa-box">
@@ -540,6 +540,16 @@ export function SearchAssistant() {
           )}
         </AnimatePresence>
       </div>
+      {filmOpen && (
+        <div className="sa-film-modal" role="dialog" aria-modal="true" aria-label={S.film}>
+          <button type="button" className="sa-film-close" onClick={() => setFilmOpen(false)} aria-label={S.closeFilm}>
+            <span aria-hidden="true">×</span>{S.closeFilm}
+          </button>
+          <video className="sa-film-player" controls autoPlay playsInline preload="metadata" poster="/film/filon-est-ce-vraiment-le-bon-prix-poster.jpg">
+            <source src="/film/filon-est-ce-vraiment-le-bon-prix.mp4" type="video/mp4" />
+          </video>
+        </div>
+      )}
     </section>
   );
 }

@@ -139,7 +139,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
             {t("hero.l1")} {t("hero.l2")} <em>{t("hero.l3")}</em>
           </h1>
           <p className="fx-hero-subtitle">
-            FILON compare les prix de vos produits préférés chez tous les marchands et vous dit quand acheter.
+            {t("hero.subtitle")}
           </p>
           <HeroSearch />
           {proof?.stats && (
@@ -170,7 +170,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
             {t("hero.l1")} {t("hero.l2")} <em>{t("hero.l3")}</em>
           </h1>
           <p className="fx-hero-subtitle">
-            FILON compare les prix de vos produits préférés chez tous les marchands et vous dit quand acheter.
+            {t("hero.subtitle")}
           </p>
           <HeroSearch />
         </div>
@@ -199,7 +199,7 @@ export function Hero({ proof }: { proof: Proof | null }) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
-            FILON compare les prix de vos produits préférés chez tous les marchands et vous dit quand acheter.
+            {t("hero.subtitle")}
           </motion.p>
 
           <motion.div

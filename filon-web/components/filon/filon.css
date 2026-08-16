@@ -2036,7 +2036,7 @@
 .sa-bg-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: linear-gradient(90deg, rgba(255, 250, 240, 0.74), rgba(255, 250, 240, 0.34));
   z-index: 1;
 }
 
@@ -2046,11 +2046,12 @@
 }
 
 .sa-title-light {
-  color: #ffffff !important;
+  color: #3d3125 !important;
+  text-shadow: none;
 }
 
 .sa-eyebrow-light {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(72, 59, 45, 0.78) !important;
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -4342,3 +4343,310 @@ body:has(.fx-catalogue) .ed-nav .ed-btn.dark {
 .fx-catalogue .fx-product-evidence.is-available { color: var(--catalogue-leaf); }
 .fx-catalogue .fx-product-evidence.is-unavailable { color: #d78f81; }
 .fx-catalogue .fx-product-evidence.is-unknown { color: var(--catalogue-muted); }
+
+
+/* Thème clair du catalogue : même hiérarchie de décision, béton chaud éclairé. */
+:root[data-tone="light"] body:has(.fx-catalogue) {
+  background: var(--fx-bg);
+}
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-header,
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-header:not(.stuck) {
+  background: rgba(245, 240, 231, 0.94) !important;
+  border-bottom-color: rgba(50, 39, 27, 0.14) !important;
+}
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-header .ed-nav a,
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-header .ed-nav button,
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-header .ed-brand-word {
+  color: var(--fx-text-strong) !important;
+}
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-header .ed-nav a:hover,
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-header .ed-nav button:hover {
+  color: var(--fx-brand) !important;
+}
+:root[data-tone="light"] body:has(.fx-catalogue) .ed-nav .ed-btn.dark {
+  background: var(--fx-action) !important;
+  color: var(--fx-on-action) !important;
+}
+:root[data-tone="light"] .fx-catalogue {
+  --catalogue-ink: #e8e2d7;
+  --catalogue-surface: #f5f0e7;
+  --catalogue-surface-raised: #fffaf1;
+  --catalogue-panel: #eee6d9;
+  --catalogue-paper: #fffaf1;
+  --catalogue-text: #262018;
+  --catalogue-muted: #716759;
+  --catalogue-line: rgba(50, 39, 27, 0.15);
+  --catalogue-line-lit: rgba(50, 39, 27, 0.25);
+  --catalogue-amber: #846021;
+  --catalogue-amber-wash: rgba(132, 96, 33, 0.11);
+  --catalogue-leaf: #4f7339;
+  background:
+    radial-gradient(900px 460px at 87% -6%, rgba(162, 119, 44, 0.17), transparent 62%),
+    radial-gradient(720px 540px at 4% 68%, rgba(99, 124, 74, 0.09), transparent 72%),
+    var(--catalogue-ink);
+}
+:root[data-tone="light"] .fx-catalogue::before { opacity: 0.08; background-image: linear-gradient(rgba(57,43,29,0.22) 1px, transparent 1px), linear-gradient(90deg, rgba(57,43,29,0.22) 1px, transparent 1px); }
+:root[data-tone="light"] .fx-catalogue .fx-catalogue-intro { background: linear-gradient(120deg, rgba(255, 250, 241, 0.97), rgba(238, 230, 217, 0.92)); box-shadow: 0 26px 66px rgba(54, 42, 29, 0.12); }
+:root[data-tone="light"] .fx-catalogue .fx-pulse { background: rgba(255,250,241,0.62); }
+:root[data-tone="light"] .fx-catalogue .fx-field { background: #fffaf1; box-shadow: inset 0 1px 0 rgba(255,255,255,0.9); }
+:root[data-tone="light"] .fx-catalogue .fx-field input { color: var(--catalogue-text); }
+:root[data-tone="light"] .fx-catalogue .fx-field input::placeholder { color: #84796a; }
+:root[data-tone="light"] .fx-catalogue .fx-nav-shell { background: rgba(245, 240, 231, 0.88) !important; box-shadow: 0 20px 48px rgba(54,42,29,0.10); }
+:root[data-tone="light"] .fx-catalogue .fx-nav-all,
+:root[data-tone="light"] .fx-catalogue .fx-nav-link,
+:root[data-tone="light"] .fx-catalogue .fx-nav-dept > summary,
+:root[data-tone="light"] .fx-catalogue .fx-nav-cat > summary { color: #4d4439; }
+:root[data-tone="light"] .fx-catalogue .fx-nav-dept > summary { color: var(--catalogue-text); }
+:root[data-tone="light"] .fx-catalogue .fx-nav-count,
+:root[data-tone="light"] .fx-catalogue .fx-nav-caret { color: #827668; }
+:root[data-tone="light"] .fx-catalogue .fx-filter-pill { color: #614811; }
+:root[data-tone="light"] .fx-catalogue .fx-inline-field > span { color: #766a5b; }
+:root[data-tone="light"] .fx-catalogue .fx-inline-field input,
+:root[data-tone="light"] .fx-catalogue .fx-inline-field select { background: #fffaf1; }
+:root[data-tone="light"] .fx-catalogue .fx-product { box-shadow: 0 8px 22px rgba(54,42,29,0.08) !important; }
+:root[data-tone="light"] .fx-catalogue .fx-product:hover,
+:root[data-tone="light"] .fx-catalogue .fx-product:focus-within { box-shadow: 0 18px 40px rgba(54,42,29,0.15) !important; }
+:root[data-tone="light"] .fx-catalogue .fx-product-cta:hover { color: #fffaf1 !important; }
+:root[data-tone="light"] .fx-catalogue .fx-product-price s { color: #976656; }
+:root[data-tone="light"] .fx-catalogue .fx-controls-shell { background: var(--catalogue-surface); }
+
+
+/* Accueil : le thème clair éclaire la scène cinématique au lieu de ne changer
+   que le libellé du bouton. La même image conserve son ambiance, mais devient
+   un intérieur de jour chaud avec une typographie sombre lisible. */
+:root[data-tone="light"] .fx-imm-sticky { background: #e8e2d7; }
+:root[data-tone="light"] .fx-imm-canvas { filter: brightness(1.38) saturate(0.78) contrast(0.88); }
+:root[data-tone="light"] .fx-imm-overlay {
+  background: linear-gradient(115deg, rgba(255, 250, 240, 0.62), rgba(245, 235, 216, 0.26) 48%, rgba(223, 201, 163, 0.18));
+}
+:root[data-tone="light"] .fx-imm-titre {
+  color: #1f1912;
+  text-shadow: 0 2px 26px rgba(255, 251, 242, 0.94), 0 1px 4px rgba(255, 251, 242, 0.88);
+}
+:root[data-tone="light"] .fx-imm-sous {
+  color: rgba(42, 33, 24, 0.82);
+  text-shadow: 0 1px 12px rgba(255, 251, 242, 0.88);
+}
+:root[data-tone="light"] .fx-imm-scroll-hint { color: rgba(42, 33, 24, 0.72); }
+
+/* FILM FILON — lecture volontaire, lumineuse et sans coût de chargement sur l’accueil */
+.sa-film-launch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 1.1rem 0 1.25rem;
+  padding: 0.72rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--fx-accent) 52%, transparent);
+  border-radius: 0.25rem;
+  background: color-mix(in srgb, var(--fx-surface) 88%, white);
+  color: var(--fx-ink);
+  font: 700 0.78rem/1 var(--font-outfit), sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-shadow: 0 10px 22px rgba(109, 75, 24, 0.11);
+  transition: transform 180ms ease, background 180ms ease, box-shadow 180ms ease;
+}
+
+.sa-film-launch:hover,
+.sa-film-launch:focus-visible {
+  transform: translateY(-2px);
+  background: #fffaf0;
+  box-shadow: 0 14px 28px rgba(109, 75, 24, 0.18);
+}
+
+.sa-film-launch span {
+  display: grid;
+  width: 1.6rem;
+  height: 1.6rem;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--fx-accent);
+  color: #fffaf0;
+  font-size: 0.62rem;
+  text-indent: 0.08rem;
+}
+
+.sa-film-modal {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: clamp(1rem, 4vw, 3rem);
+  background: rgba(245, 235, 216, 0.93);
+  backdrop-filter: blur(12px);
+}
+
+.sa-film-player {
+  display: block;
+  width: min(100%, 1120px);
+  max-height: min(74vh, 720px);
+  border: 1px solid rgba(109, 75, 24, 0.25);
+  border-radius: 0.45rem;
+  background: #f9f3e8;
+  box-shadow: 0 28px 70px rgba(109, 75, 24, 0.22);
+}
+
+.sa-film-close {
+  position: fixed;
+  z-index: 1;
+  top: clamp(0.75rem, 2vw, 1.6rem);
+  right: clamp(0.75rem, 2vw, 1.6rem);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgba(109, 75, 24, 0.28);
+  border-radius: 0.25rem;
+  background: #fffaf0;
+  color: #483b2d;
+  font: 700 0.75rem/1 var(--font-outfit), sans-serif;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(109, 75, 24, 0.14);
+}
+
+.sa-film-close span { font-size: 1.35rem; font-weight: 400; line-height: 0.75; }
+
+@media (max-width: 640px) {
+  .sa-film-modal { padding: 0.75rem; align-items: end; }
+  .sa-film-player { width: 100%; max-height: none; border-radius: 0.3rem; }
+  .sa-film-close { top: 0.7rem; right: 0.7rem; }
+}
+
+/* ACCUEIL FILON — scène lumineuse, rapide et réellement composée pour mobile */
+.fx-light-home {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-items: center;
+  min-height: 100svh;
+  overflow: hidden;
+  background: #f8efe0;
+}
+
+.fx-light-home picture,
+.fx-light-home-image,
+.fx-light-home-wash {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.fx-light-home-image {
+  object-fit: cover;
+  object-position: center;
+  z-index: -3;
+}
+
+.fx-light-home-wash {
+  z-index: -2;
+  background:
+    linear-gradient(90deg, rgba(255, 250, 240, 0.88) 0%, rgba(255, 250, 240, 0.62) 34%, rgba(255, 250, 240, 0.12) 68%),
+    linear-gradient(0deg, rgba(255, 250, 240, 0.36), transparent 45%);
+}
+
+.fx-light-home-content {
+  width: min(100% - 3rem, 39rem);
+  margin-left: clamp(1.5rem, 8vw, 10rem);
+  padding: 7.5rem 0 4.5rem;
+  color: #403226;
+}
+
+.fx-light-home-eyebrow {
+  margin: 0 0 1rem;
+  color: #806136;
+  font: 700 clamp(0.68rem, 0.8vw, 0.78rem)/1 var(--font-outfit), sans-serif;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.fx-light-home h1 {
+  max-width: 11ch;
+  margin: 0;
+  white-space: pre-line;
+  color: #382a20;
+  font: 300 clamp(3rem, 6.4vw, 6.4rem)/0.98 var(--font-outfit), sans-serif;
+  letter-spacing: -0.065em;
+}
+
+.fx-light-home-body {
+  max-width: 31rem;
+  margin: 1.35rem 0 1.25rem;
+  color: #5f4a39;
+  font: 400 clamp(1rem, 1.25vw, 1.15rem)/1.55 var(--font-outfit), sans-serif;
+}
+
+.fx-light-home-actions { margin-bottom: 1.2rem; }
+
+.fx-light-home-film {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.9rem;
+  padding: 0.72rem 0.95rem;
+  border: 1px solid rgba(109, 75, 24, 0.36);
+  border-radius: 0.25rem;
+  background: rgba(255, 250, 240, 0.78);
+  color: #513b20;
+  font: 700 0.78rem/1 var(--font-outfit), sans-serif;
+  letter-spacing: 0.04em;
+  box-shadow: 0 12px 26px rgba(99, 71, 37, 0.11);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+.fx-light-home-film:hover,
+.fx-light-home-film:focus-visible { transform: translateY(-2px); background: #fffaf0; }
+
+.fx-light-home-film span {
+  display: grid;
+  width: 1.45rem;
+  height: 1.45rem;
+  place-items: center;
+  border-radius: 50%;
+  background: #8c641f;
+  color: #fffaf0;
+  font-size: 0.58rem;
+  text-indent: 0.08rem;
+}
+
+.fx-light-home-search { width: min(100%, 35rem); }
+.fx-light-home-signal {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0;
+  color: #715c47;
+  font: 500 0.76rem/1.35 var(--font-outfit), sans-serif;
+}
+.fx-light-home-signal span { width: 0.5rem; height: 0.5rem; border-radius: 50%; background: #5a8b60; box-shadow: 0 0 0 4px rgba(90, 139, 96, 0.14); }
+
+@media (max-width: 768px) {
+  .fx-light-home { align-items: start; min-height: 100svh; }
+  .fx-light-home-image { object-position: center; }
+  .fx-light-home-wash {
+    background: linear-gradient(180deg, rgba(255, 250, 240, 0.7) 0%, rgba(255, 250, 240, 0.32) 45%, rgba(255, 250, 240, 0.52) 100%);
+  }
+  .fx-light-home-content {
+    width: min(100% - 2.5rem, 33rem);
+    margin: 0 auto;
+    padding: max(7.5rem, env(safe-area-inset-top)) 0 2.25rem;
+  }
+  .fx-light-home h1 { max-width: 9.4ch; font-size: clamp(2.9rem, 13vw, 4.3rem); }
+  .fx-light-home-body { max-width: 28rem; margin-top: 1rem; }
+  .fx-light-home-search { width: 100%; margin-top: 0.35rem; }
+  .fx-light-home-signal { max-width: 22rem; }
+}
+
+/* L’ancien système éditorial impose une taille globale sur les h1 : le hero conserve explicitement sa hiérarchie. */
+.fx-light-home h1 {
+  font-family: var(--font-outfit), sans-serif !important;
+  font-size: clamp(3rem, 6.4vw, 6.4rem) !important;
+  font-weight: 300 !important;
+  line-height: 0.98 !important;
+  letter-spacing: -0.065em !important;
+}
+@media (max-width: 768px) {
+  .fx-light-home h1 { font-size: clamp(2.9rem, 13vw, 4.3rem) !important; }
+}

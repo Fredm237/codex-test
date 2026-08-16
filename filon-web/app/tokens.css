@@ -376,3 +376,44 @@
   --vein: var(--fx-border-strong);
   --vein-soft: var(--fx-brand-wash);
 }
+
+
+/* Thème clair — le même béton chaud sous une lumière diffuse, pas un blanc clinique.
+   Les variables sémantiques basculent à la racine afin que chaque composant qui
+   respecte le design system change réellement de surface et de contraste. */
+:root[data-tone="light"] {
+  --fx-bg: #e8e2d7;
+  --fx-bg-sunken: #ded6ca;
+  --fx-surface: #f5f0e7;
+  --fx-surface-raised: #fffaf1;
+  --fx-surface-overlay: #ece5d9;
+
+  --fx-text: #262018;
+  --fx-text-strong: #17120d;
+  --fx-text-secondary: #5e5448;
+  --fx-text-muted: #786d60;
+  --fx-text-on-dark: #f7f1e8;
+  --fx-text-on-action: #fffaf1;
+
+  --fx-border: rgba(50, 39, 27, 0.14);
+  --fx-border-strong: rgba(50, 39, 27, 0.26);
+  --fx-edge: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  --fx-edge-strong: inset 0 1px 0 rgba(255, 255, 255, 0.94);
+  --fx-elevation-1: var(--fx-edge), 0 2px 8px rgba(54, 42, 29, 0.10);
+  --fx-elevation-2: var(--fx-edge), 0 12px 32px rgba(54, 42, 29, 0.14);
+  --fx-elevation-3: var(--fx-edge-strong), 0 28px 72px rgba(54, 42, 29, 0.18);
+
+  --fx-action: #72521a;
+  --fx-action-hover: #5d4214;
+  --fx-brand: #8a6425;
+  --fx-brand-strong: #6d4c16;
+  --fx-brand-subtle: #d9c39c;
+  --fx-brand-wash: #efe3c9;
+  --fx-gain: #4d7138;
+  --fx-gain-strong: #365727;
+  --fx-gain-subtle: #dce8d2;
+  --fx-alert: #a74937;
+  --fx-alert-subtle: #f2dbd4;
+  --fx-focus: #7e5b1d;
+  --fx-field-bg: #fffaf1;
+}
