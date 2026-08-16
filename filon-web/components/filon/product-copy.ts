@@ -14,12 +14,24 @@ export type CardCopy = {
   at: string;
   lowest: string;
   noImage: string;
+  available: string;
+  unavailable: string;
+  availabilityUnknown: string;
 };
 
 export const CARD_COPY: Record<CardLocale, CardCopy> = {
-  fr: { see: "Voir l'offre", at: "chez", lowest: "Au plus bas", noImage: "Visuel indisponible" },
-  nl: { see: "Bekijk aanbod", at: "bij", lowest: "Laagste ooit", noImage: "Geen afbeelding" },
-  en: { see: "See offer", at: "at", lowest: "Lowest ever", noImage: "No image" },
+  fr: {
+    see: "Voir l'offre", at: "chez", lowest: "Au plus bas", noImage: "Visuel indisponible",
+    available: "En stock dans le dernier flux", unavailable: "Indisponible dans le dernier flux", availabilityUnknown: "Disponibilité non renseignée",
+  },
+  nl: {
+    see: "Bekijk aanbod", at: "bij", lowest: "Laagste ooit", noImage: "Geen afbeelding",
+    available: "Op voorraad in de laatste feed", unavailable: "Niet beschikbaar in de laatste feed", availabilityUnknown: "Beschikbaarheid niet vermeld",
+  },
+  en: {
+    see: "See offer", at: "at", lowest: "Lowest ever", noImage: "No image",
+    available: "In stock in the latest feed", unavailable: "Unavailable in the latest feed", availabilityUnknown: "Availability not provided",
+  },
 };
 
 export function money(

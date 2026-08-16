@@ -116,7 +116,7 @@ export default async function CataloguePage({
               <CatalogueControls query={query} sort={sortValue(query)} per={per} />
               <div className="fx-product-grid fx-catalogue-grid">
                 {result.items.map((o) => (
-                  <ProductCard key={o.id} offer={o} />
+                  <ProductCard key={o.id} offer={o} showEvidence />
                 ))}
               </div>
               <CataloguePager

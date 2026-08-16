@@ -4320,3 +4320,25 @@ body:has(.fx-catalogue) .ed-nav .ed-btn.dark {
   .fx-catalogue .fx-nav-tree::-webkit-scrollbar { width: 5px; }
   .fx-catalogue .fx-nav-tree::-webkit-scrollbar-thumb { background: rgba(224,173,89,0.42); }
 }
+
+
+/* Preuves de carte : une observation de flux, jamais une promesse de livraison. */
+.fx-product-evidence {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  min-height: 20px;
+  color: var(--catalogue-muted, var(--fx-text-muted));
+  font-size: 11px;
+  line-height: 1.25;
+}
+.fx-product-evidence-dot {
+  width: 6px;
+  height: 6px;
+  flex: none;
+  border-radius: 50%;
+  background: currentColor;
+}
+.fx-catalogue .fx-product-evidence.is-available { color: var(--catalogue-leaf); }
+.fx-catalogue .fx-product-evidence.is-unavailable { color: #d78f81; }
+.fx-catalogue .fx-product-evidence.is-unknown { color: var(--catalogue-muted); }

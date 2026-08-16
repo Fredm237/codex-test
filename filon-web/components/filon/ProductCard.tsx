@@ -29,6 +29,8 @@ export type CardOffer = {
   image?: string | null;
   link?: string | null;
   merchant?: { name: string; slug: string } | null;
+  /** État déclaré par le dernier flux marchand ; jamais une promesse de livraison. */
+  in_stock?: boolean | null;
   drop_pct?: number;
   price_high?: number | null;
   is_lowest?: boolean;
@@ -38,6 +40,7 @@ export function ProductCard({
   offer,
   copy,
   href,
+  showEvidence = false,
 }: {
   offer: CardOffer;
   /** Facultatif : sans lui, la carte lit la langue courante elle-même. Les
@@ -45,11 +48,18 @@ export function ProductCard({
    *  français par mégarde. */
   copy?: CardCopy;
   href?: string;
+  /** Active les preuves du dernier flux dans les grilles de comparaison. */
+  showEvidence?: boolean;
 }) {
   const { locale } = useLocale();
   const words = copy ?? CARD_COPY[locale];
   const drop = offer.drop_pct && offer.drop_pct >= 1 ? Math.round(offer.drop_pct) : null;
   const target = href ?? `/produit/${offer.id}/`;
+  const availability = offer.in_stock === true
+    ? { label: words.available, state: "available" }
+    : offer.in_stock === false
+      ? { label: words.unavailable, state: "unavailable" }
+      : { label: words.availabilityUnknown, state: "unknown" };
   // Les flux marchands livrent régulièrement des URL d'images mortes. Sans ce
   // repli, la carte affichait un cadre vide sans rien expliquer.
   const [imageOk, setImageOk] = useState(true);
@@ -104,6 +114,13 @@ export function ProductCard({
         {offer.merchant && (
           <span className="fx-product-merchant">
             {words.at} {offer.merchant.name}
+          </span>
+        )}
+
+        {showEvidence && (
+          <span className={`fx-product-evidence is-${availability.state}`}>
+            <span className="fx-product-evidence-dot" aria-hidden="true" />
+            {availability.label}
           </span>
         )}
 
