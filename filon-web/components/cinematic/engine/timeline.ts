@@ -25,7 +25,11 @@ export function resolveTimeline(scene: CinematicScene, progress: number): Timeli
   const rawShotProgress = localProgress(safeProgress, shot.range);
   const shotProgress = ease(rawShotProgress, shot.easing);
   const overlayProgress = localProgress(safeProgress, shot.overlayRange);
-  const overlayOpacity = Math.sin(Math.PI * clamp(overlayProgress));
+  // La promesse d’arrivée doit être lisible au premier pixel de scroll : elle tient,
+  // puis se retire lentement quand la caméra commence réellement sa traversée.
+  const overlayOpacity = shot.id === "arrival"
+    ? 1 - ease(localProgress(safeProgress, [0.065, 0.105]), "settle")
+    : Math.sin(Math.PI * clamp(overlayProgress));
   const frameProgress = clamp(
     shot.visualRange[0] + (shot.visualRange[1] - shot.visualRange[0]) * shotProgress,
   );

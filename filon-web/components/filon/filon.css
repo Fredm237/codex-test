@@ -4823,3 +4823,29 @@ body:has(.fx-catalogue) .ed-nav .ed-btn.dark {
   will-change: transform;
   transition: transform 90ms linear;
 }
+
+/* Le monde cinématique reste nuancé, mais la navigation n’est plus une bande sombre. */
+body:has(.ce-experience) .ed-header {
+  background: color-mix(in srgb, var(--fx-bg) 84%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, var(--fx-ink-1000) 10%, transparent);
+  box-shadow: 0 8px 32px rgb(68 49 29 / 0.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+}
+body:has(.ce-experience) .ed-header .ed-nav a,
+body:has(.ce-experience) .ed-header .ed-nav button {
+  color: var(--fx-ink-1000) !important;
+}
+body:has(.ce-experience) .ed-header .ed-nav .ed-btn.dark {
+  background: var(--fx-action) !important;
+  border-color: var(--fx-action) !important;
+  color: var(--fx-on-action) !important;
+}
+.ce-copy {
+  color: var(--fx-ink-1000);
+  text-shadow: 0 1px 0 rgb(255 250 239 / 0.65), 0 7px 24px rgb(255 250 239 / 0.2);
+}
+.ce-copy h1 { font-size: clamp(38px, 5.2vw, 74px); }
+@media (max-width: 768px) {
+  .ce-copy h1 { font-size: clamp(34px, 10.5vw, 52px); }
+  body:has(.ce-experience) .ed-header { background: color-mix(in srgb, var(--fx-bg) 88%, transparent) !important; }
+}
