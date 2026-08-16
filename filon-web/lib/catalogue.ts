@@ -34,6 +34,8 @@ export type Offer = {
   currency: string | null;
   image: string | null;
   link: string | null;
+  /** Valeur observée dans le dernier flux marchand, éventuellement absente. */
+  in_stock: boolean | null;
   merchant: { name: string; slug: string };
 };
 
