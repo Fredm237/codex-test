@@ -181,6 +181,15 @@ _2DEKANSJE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (ANIMALERIE, r"\bwonen\s*&\s*koken\s*>\s*alles\s+voor\s+huisdieren\b"),
     (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*tafelen\b"),
     (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*luchtbevochtigers\b"),
+    # Seconde vague : catégories homogènes vérifiées après la première campagne.
+    (MAISON, r"\bkerst\s*>\s*kerstdecoratie\b"),
+    (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*potten\s*&\s*pannen\b"),
+    (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*elektrische\s*dekens\b"),
+    (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*fonduesets\s*&\s*friteuses\b"),
+    (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*glazen\s*&\s*bekers\b"),
+    (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*borden\b"),
+    (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*aircoolers\s*&\s*luchtkoelers\b"),
+    (ELECTROMENAGER, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*waterkokers\b"),
 )
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
@@ -1156,13 +1165,14 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
                                   r"tasses?|bols?|mugs?|th[ée]i[èe]res?|tasses?\s+[àa]\s+sak[ée]|bols?\s+[àa]\s+riz|"
                                   r"r[ée]cipients?\s+alimentaires?|bacs?\s+[àa]\s+gla[çc]ons|onderzetters?|placemats?|"
-                                  r"serveerplank(?:en)?|saladeschalen?|kurkentrekker|mandoline|marmites?|faitouts?|"
+                                  r"serveerplank(?:en)?|saladeschalen?|(?:koeken|braad|soep|grill|sauteer)pan(?:nen)?|"
+                                  r"(?:thee|wijn|champagne)?glazen|mokken?|borden?|kurkentrekker|mandoline|marmites?|faitouts?|"
                                   r"autocuiseurs?|bouilloires?|carafes?|saladiers?|sucriers?|pots?\s+[àa]\s+lait|"
                                   r"tire[-\s]?bouchons?|presse[-\s]?agrumes|presse[-\s]?pur[ée]e|"
                                   r"blocs?\s+[àa]\s+couteaux|hachoirs?\s+[àa]\s+herbes|moulins?\s+[àa]\s+poivre|"
                                   r"machines?\s+[àa]\s+expresso|espressokocher)\b"),
         ("Décoration", r"\b(d[ée]corations?|cadres?|bougies?|geurkaars(?:en)?|theelichtjes?|"
-                         r"waxinelichtjes?|kerstbal(?:len)?|(?:kunst)?kerstbo(?:om|men)|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
+                         r"waxinelichtjes?|kerstbal(?:len)?|(?:kunst)?kerstbo(?:om|men)|kerstdecoratie|kerstversiering|kerstfiguren?|topsters?|sneeuwbol(?:len)?|glitterslinger(?:s)?|"
                          r"decoratielint|kerstpapier|aroma\s+diffuseurs?|vases?|miroirs?)\b"),
         ("Rangement & Boîtes aux lettres", r"\b(?:bo[iî]tes?\s+[àa]\s+colis|bo[iî]tes?\s+aux\s+lettres|"
                                            r"bo[iî]tes?\s+de\s+rangement|paniers?\s+de\s+rangement|"
@@ -1176,11 +1186,13 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                   r"milk\s+frothers?|coffee\s+frothers?|cuiseurs?\s+[àa]\s+riz|robots? cuiseur|friteuses?|micro-ondes|"
                                   r"gaufriers?|hachoirs?\s+[àa]\s+viande|distillateurs?\s+d['’]eau|chauffe-plats?|"
                                   r"poussoirs?\s+[àa]\s+saucisses?|d[ée]shydrateurs?\s+alimentaires?|"
-                                  r"machines?\s+[àa]\s+barbe\s+[àa]\s+papa|scies?\s+[àa]\s+os\s+de\s+boucher)\b"),
+                                  r"machines?\s+[àa]\s+barbe\s+[àa]\s+papa|scies?\s+[àa]\s+os\s+de\s+boucher|"
+                                  r"airfryers?|contactgrills?|gourmetstellen?|tosti(?:\s+apparaten?)?|waterkokers?|heetwaterdispensers?)\b"),
         ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
-                                       r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?|"
-                                       r"lucht(?:bevochtigers?|ontvochtigers?|zuiveraars?))\b"),
+                                       r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?|aircoolers?|luchtkoelers?|"
+                                       r"(?:mobiele\s+)?airco(?:'s)?|elektrische\s+(?:warmte)?dekens?|onderdekens?|"
+                                       r"voetenwarmers?|warmtekussens?|lucht(?:bevochtigers?|ontvochtigers?|zuiveraars?))\b"),
     ],
     LOISIRS: [
         ("Patrons & Kits de couture", r"\b(patrons?\b|patrons?\s+(?:burda|mccall(?:'s)?|simplicity|vogue|new\s+look|butterick|know\s+me)|"
