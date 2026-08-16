@@ -545,7 +545,7 @@ export function SearchAssistant() {
           <button type="button" className="sa-film-close" onClick={() => setFilmOpen(false)} aria-label={S.closeFilm}>
             <span aria-hidden="true">×</span>{S.closeFilm}
           </button>
-          <video className="sa-film-player" controls autoPlay playsInline preload="metadata" poster="/film/filon-est-ce-vraiment-le-bon-prix-poster.jpg">
+          <video className="sa-film-player" controls playsInline preload="metadata" poster="/film/filon-est-ce-vraiment-le-bon-prix-poster.jpg">
             <source src="/film/filon-est-ce-vraiment-le-bon-prix.mp4" type="video/mp4" />
           </video>
         </div>
