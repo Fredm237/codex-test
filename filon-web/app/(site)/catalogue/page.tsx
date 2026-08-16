@@ -93,20 +93,23 @@ export default async function CataloguePage({
         </details>
 
         <div className="fx-catalogue-main">
-          <CatalogueHeader
-            query={query}
-            department={department}
-            category={category}
-            subcategory={subcategory}
-            total={total}
-            unavailable={result === null}
-          />
+          <div className="fx-catalogue-intro">
+            <div className="fx-catalogue-intro-copy">
+              <CatalogueHeader
+                query={query}
+                department={department}
+                category={category}
+                subcategory={subcategory}
+                total={total}
+                unavailable={result === null}
+              />
 
-          <Suspense fallback={null}>
-            <CataloguePulse />
-          </Suspense>
-
-          <CatalogueSearch query={query} />
+              <Suspense fallback={null}>
+                <CataloguePulse />
+              </Suspense>
+            </div>
+            <CatalogueSearch query={query} />
+          </div>
 
           {result !== null && total > 0 && (
             <>
