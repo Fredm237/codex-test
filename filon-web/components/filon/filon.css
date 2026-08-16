@@ -4719,3 +4719,107 @@ body:has(.fx-catalogue) .ed-nav .ed-btn.dark {
   .fx-imm-search { bottom: 1.35rem; width: calc(100% - 2rem); }
   .fx-imm-scroll-hint { bottom: 6.25rem; }
 }
+
+/* ── Cinematic Engine — scène persistante, caméra et timeline ── */
+.ce-experience { position: relative; background: var(--fx-bg-sunken); }
+.ce-sticky { position: sticky; top: 0; width: 100%; height: 100svh; overflow: hidden; background: var(--fx-bg-sunken); }
+.ce-renderer, .ce-poster, .ce-canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.ce-poster, .ce-canvas { object-fit: cover; transition: opacity 360ms ease; }
+.ce-poster { z-index: 0; }
+.ce-poster.is-hidden { opacity: 0; }
+.ce-canvas { z-index: 1; opacity: 0; }
+.ce-canvas.is-visible { opacity: 1; }
+.ce-loading { position: absolute; z-index: 3; inset: 0; background: var(--fx-bg); opacity: .14; }
+.ce-atmosphere { position: absolute; z-index: 2; inset: 0; pointer-events: none; background: linear-gradient(90deg, color-mix(in srgb, var(--fx-ink-1000) 36%, transparent), transparent 42%, color-mix(in srgb, var(--fx-ink-1000) 16%, transparent)); }
+.ce-overlay { position: absolute; z-index: 4; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto; padding: clamp(22px, 4vw, 64px); pointer-events: none; color: var(--fx-paper); }
+.ce-copy { align-self: center; max-width: 34rem; transition: opacity 220ms linear; text-shadow: 0 2px 28px color-mix(in srgb, var(--fx-ink-1000) 38%, transparent); }
+.ce-copy p { margin: 0 0 12px; color: var(--fx-accent); font: 600 11px/1.2 var(--fx-font-sans); letter-spacing: .16em; text-transform: uppercase; }
+.ce-copy h1 { margin: 0; white-space: pre-line; font: 400 clamp(38px, 5.7vw, 82px)/.96 var(--fx-font-display); letter-spacing: -.05em; }
+.ce-copy small { display: block; margin-top: 14px; max-width: 24rem; font: 400 var(--fx-text-sm)/1.5 var(--fx-font-sans); }
+.ce-focus-world .ce-copy, .ce-focus-explore .ce-copy { grid-column: 2; justify-self: end; text-align: right; }
+.ce-focus-score .ce-copy, .ce-focus-decision .ce-copy { grid-column: 1 / -1; justify-self: center; text-align: center; }
+.ce-cta, .ce-skip { pointer-events: auto; }
+.ce-cta { display: inline-flex; margin-top: 24px; min-height: 44px; align-items: center; padding: 0 var(--fx-space-4); border: 1px solid color-mix(in srgb, var(--fx-paper) 55%, transparent); color: var(--fx-paper); background: color-mix(in srgb, var(--fx-ink-1000) 28%, transparent); text-decoration: none; }
+.ce-skip { justify-self: end; grid-column: 2; border: 0; padding: 8px 0; color: color-mix(in srgb, var(--fx-paper) 82%, transparent); background: transparent; font: 500 11px/1 var(--fx-font-sans); letter-spacing: .08em; text-transform: uppercase; }
+.ce-proof-line { align-self: end; grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; color: color-mix(in srgb, var(--fx-paper) 92%, transparent); font: 500 11px/1.2 var(--fx-font-sans); letter-spacing: .08em; text-transform: uppercase; transition: opacity 200ms linear; }
+.ce-proof-line i { width: 18px; height: 1px; background: var(--fx-accent); }
+.ce-search { align-self: end; grid-column: 1 / -1; width: min(100%, 660px); pointer-events: auto; margin-top: 18px; }
+.ce-scroll-hint { position: absolute; bottom: clamp(106px, 13vh, 150px); left: 50%; transform: translateX(-50%); color: color-mix(in srgb, var(--fx-paper) 80%, transparent); font: 500 11px/1 var(--fx-font-sans); letter-spacing: .12em; text-transform: uppercase; }
+.ce-experience.is-static .ce-overlay { background: linear-gradient(90deg, color-mix(in srgb, var(--fx-ink-1000) 24%, transparent), transparent 68%); }
+@media (max-width: 768px) {
+  .ce-overlay { grid-template-columns: 1fr; padding: 20px; }
+  .ce-copy, .ce-focus-world .ce-copy, .ce-focus-explore .ce-copy, .ce-focus-score .ce-copy, .ce-focus-decision .ce-copy { grid-column: 1; justify-self: start; align-self: center; text-align: left; max-width: 19rem; }
+  .ce-copy h1 { font-size: clamp(36px, 12vw, 58px); }
+  .ce-skip { grid-column: 1; justify-self: end; }
+  .ce-proof-line { grid-column: 1; flex-wrap: wrap; gap: 7px; max-width: 16rem; }
+  .ce-search { grid-column: 1; width: 100%; }
+  .ce-scroll-hint { bottom: 108px; width: max-content; max-width: calc(100% - 40px); text-align: center; }
+  .ce-atmosphere { background: linear-gradient(180deg, color-mix(in srgb, var(--fx-ink-1000) 15%, transparent), transparent 43%, color-mix(in srgb, var(--fx-ink-1000) 32%, transparent)); }
+}
+@media (prefers-reduced-motion: reduce) { .ce-poster, .ce-canvas, .ce-copy { transition: none; } }
+
+/* ── Acteurs produits FILON : objets réels, profondeur déterministe ── */
+.ce-product-world {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  overflow: hidden;
+  perspective: 1200px;
+}
+.ce-product-actor {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(132px, 18vw, 296px);
+  margin: 0;
+  transform-origin: 50% 86%;
+  transition: opacity 120ms linear;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 26px 22px rgb(20 14 8 / 0.22));
+}
+.ce-product-actor img {
+  display: block;
+  width: 100%;
+  height: auto;
+  position: relative;
+  z-index: 2;
+}
+.ce-product-shadow {
+  position: absolute;
+  z-index: 1;
+  left: 13%;
+  right: 13%;
+  bottom: 7%;
+  height: 11%;
+  border-radius: 50%;
+  background: rgb(32 22 13 / 0.36);
+  filter: blur(10px);
+  transform: rotateX(66deg);
+}
+.ce-laptop-portal {
+  position: absolute;
+  left: 50%;
+  top: 51%;
+  width: min(22vw, 310px);
+  aspect-ratio: 16 / 10;
+  transform: translate(-50%, -50%);
+  border-radius: 6px;
+  background: radial-gradient(ellipse at 50% 60%, rgb(219 163 69 / 0.28), transparent 68%);
+  filter: blur(20px);
+  mix-blend-mode: screen;
+  transition: opacity 180ms ease;
+}
+.ce-experience.is-mobile .ce-product-actor {
+  width: clamp(108px, 43vw, 190px);
+  filter: drop-shadow(0 18px 16px rgb(20 14 8 / 0.24));
+}
+.ce-experience.is-mobile .ce-laptop-portal { width: 46vw; top: 58%; }
+@media (prefers-reduced-motion: reduce) { .ce-product-world { display: none; } }
+
+/* Le décor est une scène unique : la caméra est pilotée par la timeline, pas par un montage de clips. */
+.ce-renderer {
+  transform-origin: 50% 50%;
+  will-change: transform;
+  transition: transform 90ms linear;
+}
