@@ -1269,6 +1269,10 @@ async def reclassify_offers(
         default=None, gt=0,
         description="Limiter le rattrapage à un marchand précis.",
     ),
+    offer_ids: str | None = Query(
+        default=None, max_length=25_000,
+        description="Liste CSV d’identifiants d’offres à reclasser explicitement (5 000 maximum).",
+    ),
     x_admin_token: str | None = Header(default=None),
 ) -> dict:
     """Recalcule la catégorie FILON des offres déjà en base.
@@ -1291,7 +1295,8 @@ async def reclassify_offers(
     rangées dans un rayon précis. `only_unclassified` traite au contraire les
     lignes encore sans rayon ; `merchant_category` cible une famille brute du
     flux (par exemple « Appartement de vacances ») et `merchant_id` une source
-    précise. Ces filtres permettent un rattrapage sûr sans réécrire les
+    précise. `offer_ids` accepte enfin une liste CSV bornée d’offres nommément
+    auditées. Ces filtres permettent un rattrapage sûr sans réécrire les
     catégories déjà vérifiées.
 
     La réponse renvoie `next_after_id` et `done` : l'appelant boucle jusqu'à
@@ -1306,6 +1311,17 @@ async def reclassify_offers(
     only_unclassified = only_unclassified is True
     merchant_category = merchant_category if isinstance(merchant_category, str) else None
     merchant_id = merchant_id if isinstance(merchant_id, int) and not isinstance(merchant_id, bool) else None
+    offer_ids = offer_ids if isinstance(offer_ids, str) else None
+    target_offer_ids: list[int] | None = None
+    if offer_ids:
+        try:
+            target_offer_ids = sorted({int(value.strip()) for value in offer_ids.split(",") if value.strip()})
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail="offer_ids doit être une liste CSV d’entiers positifs") from exc
+        if not target_offer_ids or any(value <= 0 for value in target_offer_ids):
+            raise HTTPException(status_code=422, detail="offer_ids doit contenir au moins un entier positif")
+        if len(target_offer_ids) > 5_000:
+            raise HTTPException(status_code=422, detail="offer_ids est limité à 5 000 offres")
     if not db.is_enabled():
         raise HTTPException(status_code=503, detail="base de données absente")
 
@@ -1339,6 +1355,8 @@ async def reclassify_offers(
                 stmt = stmt.where(models.Offer.category == merchant_category)
             if merchant_id:
                 stmt = stmt.where(models.Offer.merchant_id == merchant_id)
+            if target_offer_ids:
+                stmt = stmt.where(models.Offer.id.in_(target_offer_ids))
             rows = (
                 await session.execute(
                     stmt.order_by(models.Offer.id).limit(remaining)
@@ -1384,6 +1402,7 @@ async def reclassify_offers(
         "only_unclassified": only_unclassified,
         "merchant_category": merchant_category,
         "merchant_id": merchant_id,
+        "offer_ids_count": len(target_offer_ids) if target_offer_ids else 0,
         "offer_kinds": kind_counts,
     }
 

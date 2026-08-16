@@ -204,3 +204,33 @@ async def test_taxonomy_quality_reports_known_contradictions_without_writing(mon
     assert [(offer.id, offer.filon_category, offer.filon_subcategory) for offer in after] == [
         (offer.id, offer.filon_category, offer.filon_subcategory) for offer in before
     ]
+
+
+@pytest.mark.anyio
+async def test_reclassify_can_target_explicit_offer_ids_without_touching_other_rows(monkeypatch, scoped_catalogue):
+    monkeypatch.setattr(catalog, "_require_admin", lambda token: None)
+    async with db.session_scope() as session:
+        offers = (await session.execute(select(models.Offer).order_by(models.Offer.awin_product_id))).scalars().all()
+        by_product = {offer.awin_product_id: offer for offer in offers}
+        case_id = by_product["case"].id
+        phone_id = by_product["phone"].id
+
+    result = await catalog.reclassify_offers(
+        batch=100,
+        after_id=0,
+        max_offers=0,
+        max_seconds=30,
+        filon_category=None,
+        offer_ids=f"{case_id},{phone_id}",
+        x_admin_token="test",
+    )
+
+    assert result["done"] is True
+    assert result["offers_processed"] == 2
+    assert result["offer_ids_count"] == 2
+    async with db.session_scope() as session:
+        offers = (await session.execute(select(models.Offer).order_by(models.Offer.awin_product_id))).scalars().all()
+    by_product = {offer.awin_product_id: offer for offer in offers}
+    assert by_product["case"].filon_subcategory == "Coques & Protections"
+    assert by_product["phone"].filon_subcategory == "Smartphones"
+    assert by_product["outside"].filon_subcategory == "À conserver"
