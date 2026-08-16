@@ -196,6 +196,30 @@ _2DEKANSJE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (MAISON, r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*keukengerei\b"),
     (MAISON, r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*prullenbakken\s*&\s*vuilnisbakken\b"),
 )
+# Quatrième vague : les cinq sources ci-dessous sont hétérogènes. Chaque règle
+# exige donc un objet positif en plus du marchand et du chemin source exact.
+_2DEKANSJE_SMALL_KITCHEN_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*kleine\s+keukenapparaten\b"
+_2DEKANSJE_KITCHEN_ACCESSORY = r"\b(?:extra\s+)?(?:glazen\s+)?kan\b|\bblenderkan\b|\bbeker\b.*\bblender\b|\baccessoire"
+_2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
+    (ELECTROMENAGER,
+     _2DEKANSJE_SMALL_KITCHEN_SOURCE,
+     r"\b(?:poffertjes(?:pan|maker)|multigrill|citruspers|sapcentrifuge|worstenvuller|slowjuicer|hakmolen|(?:power\s+)?blender|keukenweegschaal|grillplaat|elektrische\s+kookplaat|espressomachine|multicooker|ijsblokjesmachine|soepmaker)\b"),
+    (ELECTROMENAGER,
+     r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*stofzuigen\s*&\s*schoonmaken\b",
+     r"\b(?:robotstofzuiger|handstofzuiger|waszuiger|stoomreiniger|tafelsauger)\b"),
+    (ELECTROMENAGER,
+     r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
+     r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
+    (MAISON,
+     r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b|\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*kleine\s+keukenapparaten\b",
+     r"\b(?:thermosbeker|koffiebeker|theepot|percolator|capsulehouder|koffie(?:blik|bewaarbus))\b"),
+    (SANTE,
+     r"\bmooi\s*&\s*gezond\s*>\s*massageapparaten\b",
+     r"\b(?:massage\s*(?:gun|pistool|kussen|apparaat)|voetmassageapparaat|nekmassage|rugmassage|voetbadmassage|cupping)\b"),
+    (ELECTROMENAGER,
+     r"\bwonen\s*&\s*koken\s*>\s*klimaatbeheersing\s*>\s*ventilatoren\b",
+     r"\b(?:[a-z]+)?ventilator(?:en)?\b|\bbladloze\s+ventilator\b"),
+)
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
@@ -1145,6 +1169,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     ],
     SANTE: [
         ("Hygiène bucco-dentaire", r"\b(?:kindertandenborstel|tandenborstel(?:s|koppen)?|tandpasta|toothbrush(?:es|\s+heads?)?|toothpaste)\b"),
+        ("Massage & Bien-être", r"\b(?:massage\s*(?:gun|pistool|kussen|apparaat)|voetmassageapparaat|nekmassage|rugmassage|voetbadmassage|cupping)\b"),
     ],
     CULTURE: [
         ("Papeterie & Bureau", r"\b(?:stylos?\s+(?:[àa]\s+bille|[àa]\s+encre)|blocs?[-\s]?notes?|"
@@ -1170,6 +1195,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Vaisselle & Cuisine", r"\b(vaisselle|assiettes?|verres?|couverts?|casseroles?|po[êe]les?|"
                                   r"tasses?|bols?|mugs?|th[ée]i[èe]res?|tasses?\s+[àa]\s+sak[ée]|bols?\s+[àa]\s+riz|"
                                   r"r[ée]cipients?\s+alimentaires?|bacs?\s+[àa]\s+gla[çc]ons|onderzetters?|placemats?|"
+                                  r"thermosbekers?|koffiebekers?|theepotten?|percolators?|capsulehouders?|"
                                   r"serveerplank(?:en)?|saladeschalen?|(?:koeken|braad|soep|grill|sauteer)pan(?:nen)?|"
                                   r"(?:thee|wijn|champagne)?glazen|mokken?|borden?|kurkentrekker|mandoline|marmites?|faitouts?|"
                                   r"autocuiseurs?|bouilloires?|carafes?|saladiers?|sucriers?|pots?\s+[àa]\s+lait|"
@@ -1192,10 +1218,14 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                   r"gaufriers?|hachoirs?\s+[àa]\s+viande|distillateurs?\s+d['’]eau|chauffe-plats?|"
                                   r"poussoirs?\s+[àa]\s+saucisses?|d[ée]shydrateurs?\s+alimentaires?|"
                                   r"machines?\s+[àa]\s+barbe\s+[àa]\s+papa|scies?\s+[àa]\s+os\s+de\s+boucher|"
-                                  r"airfryers?|contactgrills?|gourmetstellen?|tosti(?:\s+apparaten?)?|waterkokers?|heetwaterdispensers?)\b"),
-        ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur)\b"),
+                                  r"airfryers?|contactgrills?|gourmetstellen?|tosti(?:\s+apparaten?)?|waterkokers?|heetwaterdispensers?|"
+                                  r"poffertjes(?:pan|maker)|multigrills?|citruspersen?|sapcentrifuges?|slowjuicers?|hakmolens?|"
+                                  r"(?:power\s+)?blenders?|keukenweegschalen?|grillplaten?|elektrische\s+kookplaten?|"
+                                  r"espressomachines?|multicookers?|ijsblokjesmachines?|soepmakers?|melkopschuimers?|koffie(?:zetapparaten|machines?))\b"),
+        ("Aspirateurs", r"\b(aspirateurs?|vacuum cleaners?|balais? vapeur|(?:robot|hand|steel)?stofzuigers?|waszuigers?|tafelsaugers?|stoomreinigers?)\b"),
         ("Climatisation & Chauffage", r"\b(ventilateurs?|climatiseurs?|chauffages?|"
                                        r"radiateurs?|purificateurs?|humidificateurs?|humidifiers?|aircoolers?|luchtkoelers?|"
+                                       r"(?:toren|tafel|vloer|statief|box|radiator)?ventilator(?:en)?|bladloze\s+ventilator|"
                                        r"(?:mobiele\s+)?airco(?:'s)?|elektrische\s+(?:warmte)?dekens?|onderdekens?|"
                                        r"voetenwarmers?|warmtekussens?|lucht(?:bevochtigers?|ontvochtigers?|zuiveraars?))\b"),
     ],
@@ -1460,6 +1490,14 @@ def classify(
     if _has(_2DEKANSJE_MERCHANT, merchant_name or ""):
         for category, source_pattern in _2DEKANSJE_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
+                return category
+        for category, source_pattern, object_pattern in _2DEKANSJE_OBJECT_ROUTES:
+            if _has(source_pattern, merchant_category) and _has(object_pattern, name):
+                if (
+                    _has(_2DEKANSJE_SMALL_KITCHEN_SOURCE, merchant_category)
+                    and _has(_2DEKANSJE_KITCHEN_ACCESSORY, name)
+                ):
+                    continue
                 return category
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
