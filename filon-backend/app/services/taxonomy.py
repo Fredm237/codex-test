@@ -1011,8 +1011,12 @@ def from_slug(slug: str) -> str | None:
 # ─────────────────────────────────────────────────────────────────────────────
 SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     CHAUSSURES: [
-        ("Baskets & Sneakers", r"\b(baskets?|sneakers?|running|trainers?)\b"),
-        ("Bottes & Bottines", r"\b(bottes?|bottines?|boots?|laarzen)\b"),
+        # « Rubber boot » désigne une botte de pluie, même si un flux la publie
+        # sous Sneakers ou commence son titre par « Baskets enfant ».
+        ("Bottes & Bottines", r"^(?!.*\bultraboost\b).*\b(?:(?:rubber|rain)\s+boots?|bottes?|bottines?|boots?|laarzen)\b"),
+        # Ultraboost est un modèle de sneaker explicite ; il doit gagner avant le
+        # mot « boot » quand les deux apparaissent dans une collaboration Adidas.
+        ("Baskets & Sneakers", r"\b(baskets?|sneakers?|running|trainers?|ultraboost)\b"),
         ("Escarpins & Talons", r"\b(escarpins?|talons?|heels?|stiletto|mules?)\b"),
         ("Sandales", r"\b(sandales?|sandals?|tongs?|claquettes?)\b"),
         ("Mocassins & Ville", r"\b(mocassins?|derbies?|richelieu|habill[ée]es?|loafers?)\b"),
@@ -1023,13 +1027,22 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         # Les costumes nomment fréquemment une « robe », mais leur usage de fête
         # explicite mérite un sous-rayon distinct plutôt qu'un mélange avec la ville.
         ("Déguisements & Costumes", r"\b(?:d[ée]guisements?|halloween|carnaval|verkleed(?:kleding)?)\b"),
+        # Nightgown, pyjama ou robe de chambre restent des tenues de nuit même
+        # lorsqu'un vendeur les décrit également comme « skirt » ou « dress ».
+        ("Lingerie & Nuit", r"\b(lingerie|soutien-gorge|culottes?|pyjamas?|pajamas?|nuisettes?|nightgowns?|"
+                             r"sleepwears?|home\s+wear|bathrobes?|dressing\s+gowns?)\b"),
         ("Robes", r"\b(robes?|dress(es)?|jurk)\b"),
         ("Jupes", r"\b(jupes?|skirts?|rok)\b"),
+        # Une forme d'extérieur explicite prime sur cardigan : un coat ou blazer
+        # n'est pas un pull, tandis qu'un cardigan simple reste dans Pulls & Sweats.
+        ("Manteaux & Vestes", r"\b(manteaux?|vestes?|jackets?|blousons?|parkas?|trench|blazers?|coats?|overcoats?)\b"),
+        # Pull, sweater et pullover priment sur le mot générique « top ».
+        ("Pulls & Sweats", r"\b(pulls?|sweats?|sweaters?|hoodies?|gilets?|cardigans?|pullovers?)\b"),
         ("Hauts & T-shirts", r"\b(tops?|t-shirts?|blouses?|chemisiers?|d[ée]bardeurs?|tuniques?|tuniek|corsets?)\b"),
-        ("Pulls & Sweats", r"\b(pulls?|sweats?|sweaters?|hoodies?|gilets?|cardigans?)\b"),
+        # Short est un terme de coupe ; il ne doit pas envoyer une chaussette dans
+        # Pantalons & Jeans lorsque l'objet chaussette est explicitement nommé.
+        ("Chaussettes", r"\b(chaussettes?|socks?|sokken)\b"),
         ("Pantalons & Jeans", r"\b(pantalons?|jeans?|leggings?|shorts?|trousers?)\b"),
-        ("Manteaux & Vestes", r"\b(manteaux?|vestes?|jackets?|blousons?|parkas?|trench)\b"),
-        ("Lingerie & Nuit", r"\b(lingerie|soutien-gorge|culottes?|pyjamas?|nuisettes?|sleepwears?)\b"),
         ("Maillots de bain", r"\b(maillots? de bain|bikinis?|swimwear)\b"),
     ],
     MODE_HOMME: [
@@ -1126,6 +1139,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
     ],
     BAGAGERIE: [
         ("Sacs à main", r"\b(sacs? [àa] main|sacs? boston|handbags?|handtas|cabas|besaces?|bandouli[èe]res?|"
+                         r"(?:shoulder|messenger|tote|crossbody)\s+bags?|"
                          r"(?:mini|petits?)\s+sacs?|sacs?\s+(?:bandouli[eè]res?|shopping|hobo|panier|"
                          r"seau|cabas|fourre[-\s]tout|d['’][ée]paule))\b"),
         ("Sacs à dos", r"\b(sacs? [àa] dos|backpacks?|rugzak)\b"),
@@ -1164,6 +1178,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
         ("Cheveux", r"\b(shampooings?|shampoo|conditioner|apr[èe]s-shampooing|haircare|"
                      r"haarverzorging|colorations?|perruques?|wigs?|extensions?|coiffant|styling|"
                      r"hair\s+(?:milk|ampoules?|treatments?)|scalp\s+(?:therapy|ampoules?)|color\s+charge)\b"),
+        ("Rasage & Épilation", r"\b(tondeuses?|rasoirs?|rasage|[ée]pilation|epilation|ladyshaves?|shavers?)\b"),
         ("Ongles", r"\b(ongles?|nails?|vernis|manucure|cuticle\s+oil|nagelknippers?)\b"),
         ("Lentilles & Regard", r"\b(lentilles? color[ée]es?|color(?:ed)? lenses?|contact lenses?)\b"),
     ],
@@ -1587,6 +1602,25 @@ def classify(
         r"\b(?:rasage|[ée]pilation|epilation)\b", merchant_category
     ):
         return BEAUTE
+    # Les perruques, sacs et paniers de table à langer citent parfois « short »,
+    # « top », « women » ou « basket » dans leur nom commercial. Le type d'objet
+    # explicite doit gagner avant la branche vestimentaire : les trois motifs ne
+    # reposent jamais sur le mot ambigu seul.
+    if _has(r"\b(?:perruques?|wigs?|hair\s+extensions?)\b", name):
+        return BEAUTE
+    if _has(r"\b(?:shoulder|messenger|tote|crossbody)\s+bags?\b", name):
+        return BAGAGERIE
+    if _has(r"\bchanging\s+table\b", name) and _has(r"\bbaskets?\b", name):
+        return BEBE
+    # « WMNS » est le marquage féminin Adidas. Ici, il est combiné à la forme
+    # vestimentaire legging : le mot « boot » de la collaboration Moon Boot ne
+    # peut donc pas transformer ce vêtement en chaussure.
+    if _has(r"\bwmns\b", name) and _has(r"\bleggings?\b", name):
+        return MODE_FEMME
+    # Ultraboost est un modèle de chaussure de course Adidas vérifiable, pas une
+    # botte malgré le co-branding Moon Boot présent dans certains titres.
+    if _has(r"\bultraboost\b", name):
+        return CHAUSSURES
     # « Nettoyant robe cheval » concerne le pelage d'un cheval, pas un vêtement.
     # Les deux preuves évitent de déplacer un soin capillaire humain vers Animalerie.
     if _has(r"\banimal\s+cheval\b", merchant_category) and _has(
