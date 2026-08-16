@@ -43,8 +43,9 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
   // Refonte 2026 — hero, méthode, clôture, catalogue.
   "hero.eyebrowNew": { fr: "Copilote d'achat · Belgique", nl: "Aankoopcopiloot · België", en: "Shopping copilot · Belgium" },
   "hero.l1": { fr: "Est-ce vraiment", nl: "Is dit echt", en: "Is this really" },
-  "hero.l2": { fr: "le bon moment", nl: "het juiste moment", en: "the right moment" },
-  "hero.l3": { fr: "pour acheter ?", nl: "om te kopen?", en: "to buy?" },
+  "hero.l2": { fr: "le bon", nl: "de juiste", en: "the right" },
+  "hero.l3": { fr: "prix ?", nl: "prijs?", en: "price?" },
+  "hero.subtitle": { fr: "FILON compare les offres réellement comparables et vous montre ce que le prix d’aujourd’hui vaut.", nl: "FILON vergelijkt echt vergelijkbare aanbiedingen en toont wat de prijs van vandaag waard is.", en: "FILON compares genuinely comparable offers and shows what today’s price is worth." },
   "hero.ledeA": { fr: "FILON réunit les offres de", nl: "FILON bundelt de aanbiedingen van", en: "FILON gathers the offers of" },
   "hero.ledeB": { fr: "marchands partenaires, conserve l'historique des prix, et vous dit ce que vaut celui d'aujourd'hui.", nl: "partnerwinkels, bewaart de prijsgeschiedenis en zegt je wat die van vandaag waard is.", en: "partner merchants, keeps the price history, and tells you what today's price is worth." },
   "hero.ledeOur": { fr: "nos", nl: "onze", en: "our" },
@@ -83,7 +84,7 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
   "closing.fallback": { fr: "Les offres de nos marchands partenaires, réunies et suivies dans le temps.", nl: "De aanbiedingen van onze partnerwinkels, gebundeld en door de tijd gevolgd.", en: "The offers of our partner merchants, gathered and tracked over time." },
 
   "cat.title1": { fr: "Le catalogue,", nl: "De catalogus,", en: "The catalogue," },
-  "cat.title2": { fr: "rayon par rayon.", nl: "afdeling per afdeling.", en: "aisle by aisle." },
+  "cat.title2": { fr: "pour choisir sans deviner.", nl: "om te kiezen zonder giswerk.", en: "to choose without guessing." },
   "cat.count": { fr: "offres indexées chez nos marchands partenaires.", nl: "aanbiedingen van onze partnerwinkels geïndexeerd.", en: "offers indexed from our partner merchants." },
   "cat.down": { fr: "Le catalogue est momentanément indisponible. Réessayez dans un instant.", nl: "De catalogus is even niet beschikbaar. Probeer het zo opnieuw.", en: "The catalogue is momentarily unavailable. Try again in a moment." },
   "cat.search": { fr: "Rechercher dans le catalogue", nl: "Zoeken in de catalogus", en: "Search the catalogue" },
