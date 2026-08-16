@@ -4849,3 +4849,7 @@ body:has(.ce-experience) .ed-header .ed-nav .ed-btn.dark {
   .ce-copy h1 { font-size: clamp(34px, 10.5vw, 52px); }
   body:has(.ce-experience) .ed-header { background: color-mix(in srgb, var(--fx-bg) 88%, transparent) !important; }
 }
+
+/* Stabilisation temporaire : aucun contrôle ne suggère un récit scrollé avant sa reconstruction frame-par-frame. */
+.ce-experience.is-static .ce-skip,
+.ce-experience.is-static .ce-scroll-hint { display: none; }
