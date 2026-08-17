@@ -15,6 +15,8 @@ from app.db import models
 from app.db.base import Base
 from app.intelligence import models as intelligence_models  # noqa: F401
 from app.intelligence.catalog_adapter import retrieve_fashion_offers
+from app.intelligence.contracts import CoreOfferSnapshot
+from app.intelligence.fashion import compose_outfit, parse_fashion_intent, retrieval_query_for_intent
 from app.services import taxonomy
 
 
@@ -150,3 +152,61 @@ class TestFashionCatalogAdapter:
         assert len(snapshots) == 1
         assert snapshots[0].availability == "unknown"
         assert snapshots[0].availability_evidence.status == "unknown"
+
+
+class TestFashionExpert:
+    @staticmethod
+    def _offer(
+        offer_id: int,
+        name: str,
+        category: str,
+        price: float,
+        *,
+        stock: str = "in_stock",
+    ) -> CoreOfferSnapshot:
+        return CoreOfferSnapshot(
+            offer_id=offer_id,
+            catalog_product_id=None,
+            name=name,
+            brand="Test",
+            filon_category=category,
+            filon_subcategory=None,
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            price=price,
+            currency="EUR",
+            availability=stock,  # type: ignore[arg-type]
+            image_url=f"https://example.test/{offer_id}.jpg",
+            deep_link=f"https://example.test/{offer_id}",
+            merchant_id=1,
+            merchant_name="Marchand test",
+            merchant_region="BE",
+            observed_at=None,
+        )
+
+    def test_compose_une_solution_sous_budget_avec_offres_reelles(self):
+        intent = parse_fashion_intent("Un look de mariage sous 200 €", "create")
+        result = compose_outfit(
+            intent,
+            [
+                self._offer(1, "Robe de cérémonie", taxonomy.MODE_FEMME, 120.0),
+                self._offer(2, "Chaussures de cérémonie", taxonomy.CHAUSSURES, 60.0),
+                self._offer(3, "Sac soirée", taxonomy.ACCESSOIRES, 40.0),
+            ],
+        )
+
+        assert result["decision"] == "recommend"
+        assert result["total_known_price"] == {"amount": 180.0, "currency": "EUR", "scope": "items_only"}
+        assert [item["role"] for item in result["items"]] == ["base", "footwear"]
+        assert "delivery_unknown" in result["unknowns"]
+        assert "within_known_budget" in result["rationale_keys"]
+
+    def test_s_abstient_lorsqu_aucune_base_verifiee_n_est_disponible(self):
+        intent = parse_fashion_intent("Une tenue de travail", "create")
+        result = compose_outfit(intent, [self._offer(2, "Chaussures", taxonomy.CHAUSSURES, 60.0)])
+
+        assert result["decision"] == "abstain"
+        assert result["rejection_reason"] == "no_verified_base"
+
+    def test_ne_transmet_pas_une_occasion_au_retrieval_comme_nom_produit(self):
+        assert retrieval_query_for_intent("Un look de mariage sous 200 €") is None
+        assert retrieval_query_for_intent("Une robe de mariage sous 200 €") == "robe"
