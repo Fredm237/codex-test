@@ -93,6 +93,20 @@ class TestFashionCatalogAdapter:
             image_url="https://example.test/veste.jpg",
             deep_link="https://example.test/veste",
         )
+        false_positive = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="ko-wardrobe-accessory",
+            name="Accessoire de garde-robe mural",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=4.3,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/garde-robe.jpg",
+        )
         service = models.Offer(
             merchant_id=merchant.id,
             awin_product_id="ko-service",
@@ -119,7 +133,7 @@ class TestFashionCatalogAdapter:
             in_stock=False,
             image_url="https://example.test/chaussures.jpg",
         )
-        intelligence_session.add_all([eligible, service, unavailable])
+        intelligence_session.add_all([eligible, false_positive, service, unavailable])
         await intelligence_session.commit()
 
         snapshots = await retrieve_fashion_offers(intelligence_session, query="veste")
@@ -128,6 +142,45 @@ class TestFashionCatalogAdapter:
         assert snapshots[0].price_evidence.status == "verified"
         assert snapshots[0].availability_evidence.status == "verified"
         assert snapshots[0].as_dict()["merchant"]["name"] == "Marchand test"
+
+    async def test_exige_une_preuve_lexicale_de_piece_dans_le_sous_rayon(self, intelligence_session):
+        merchant = models.Merchant(awin_mid=903, name="Marchand robes", slug="marchand-robes")
+        intelligence_session.add(merchant)
+        await intelligence_session.flush()
+        dress = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="dress-1",
+            name="Robe de soirée portefeuille",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=95.0,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/robe.jpg",
+        )
+        wardrobe_accessory = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="wardrobe-1",
+            name="Accessoire de garde-robe mural",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=4.3,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/accessoire.jpg",
+        )
+        intelligence_session.add_all([dress, wardrobe_accessory])
+        await intelligence_session.commit()
+
+        snapshots = await retrieve_fashion_offers(intelligence_session, query="robe")
+
+        assert [item.offer_id for item in snapshots] == [dress.id]
 
     async def test_un_stock_inconnu_reste_explicite(self, intelligence_session):
         merchant = models.Merchant(awin_mid=902, name="Marchand inconnu", slug="marchand-inconnu")
