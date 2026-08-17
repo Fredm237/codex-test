@@ -75,14 +75,18 @@ export const filonHomeScene: CinematicScene = {
     frameBase: "/cinematic/interior-city/desktop",
     frames: 1200,
     poster: "/cinematic/interior-city/poster.png",
-    scrollHeightVh: 460,
+    // Un acte conserve presque un viewport : le récit reste maîtrisé
+    // sur molette comme sur balayage tactile, sans temps mort artificiel.
+    scrollHeightVh: 900,
     frameStride: 1,
   },
   mobile: {
     frameBase: "/cinematic/interior-city/desktop",
     frames: 1200,
     poster: "/cinematic/interior-city/poster.png",
-    scrollHeightVh: 460,
+    // Un acte conserve presque un viewport : le récit reste maîtrisé
+    // sur molette comme sur balayage tactile, sans temps mort artificiel.
+    scrollHeightVh: 900,
     frameStride: 1,
   },
   shots,
