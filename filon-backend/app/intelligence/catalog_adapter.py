@@ -81,6 +81,14 @@ def _fashion_scopes(query: str | None) -> list[str]:
     return scopes
 
 
+_OCCASION_TERMS: dict[str, frozenset[str]] = {
+    # Seul le mariage est assez explicitement exprimé dans les titres Fashion
+    # pour constituer un filtre M1. Les autres occasions restent visibles comme
+    # contexte utilisateur et non comme une compatibilité prétendument prouvée.
+    "wedding": frozenset({"wedding", "bridal", "bride", "mariage", "mariée", "mariée", "trouw", "bruids"}),
+}
+
+
 def _scope_clause(scope: str):
     if scope == "dress":
         return models.Offer.filon_subcategory == "Robes"
@@ -99,9 +107,17 @@ def _scope_clause(scope: str):
     raise ValueError(f"Unknown Fashion scope: {scope}")
 
 
-def _matches_scope(scope: str, offer: models.Offer) -> bool:
+def _matches_scope(scope: str, offer: models.Offer, occasion: str | None = None) -> bool:
     terms = _words(offer.name) | _words(offer.brand)
-    return bool(terms & _SCOPE_TERMS[scope])
+    if not terms & _SCOPE_TERMS[scope]:
+        return False
+    occasion_terms = _OCCASION_TERMS.get(occasion or "")
+    # Une paire de chaussures complémentaire n'a pas besoin de répéter
+    # « wedding » : la preuve porte alors sur la pièce principale. En revanche,
+    # une robe de mariage doit nommer l’occasion explicitement.
+    if occasion_terms and scope in {"dress", "outerwear", "skirt", "trouser", "top"}:
+        return bool(terms & occasion_terms)
+    return True
 
 
 def _base_statement():
@@ -149,6 +165,7 @@ async def retrieve_fashion_offers(
     session: AsyncSession,
     *,
     query: str | None = None,
+    occasion: str | None = None,
     limit: int = 120,
 ) -> list[CoreOfferSnapshot]:
     """Retourne des offres Fashion admissibles sans modifier le Core.
@@ -170,7 +187,7 @@ async def retrieve_fashion_offers(
         stmt = _base_statement().where(_scope_clause(scope)).order_by(models.Offer.id.desc()).limit(limit_by_scope)
         rows = (await session.execute(stmt)).all()
         for offer, merchant in rows:
-            if offer.id in seen or not _matches_scope(scope, offer):
+            if offer.id in seen or not _matches_scope(scope, offer, occasion):
                 continue
             seen.add(offer.id)
             snapshots.append(_snapshot(offer, merchant))
