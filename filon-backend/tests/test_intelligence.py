@@ -84,7 +84,9 @@ class TestFashionCatalogAdapter:
             filon_subcategory="Manteaux & Vestes",
             offer_kind=taxonomy.PHYSICAL_PRODUCT,
             is_canonical=True,
-            is_adult=False,
+            # Une offre antérieure au marquage adulte doit rester visible,
+            # exactement comme dans le catalogue public.
+            is_adult=None,
             price=89.0,
             currency="EUR",
             in_stock=True,
