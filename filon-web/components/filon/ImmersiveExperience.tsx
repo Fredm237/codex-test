@@ -6,14 +6,20 @@ import { useLocale } from "@/lib/i18n";
 
 const DESKTOP_TOTAL_FRAMES = 320;
 const MOBILE_TOTAL_FRAMES = 192;
-const DESKTOP_FRAME_BASE = "/seq/hero";
-const MOBILE_FRAME_BASE = "/seq-mobile/frames";
-// Les anciennes variantes claires partageaient les mêmes URLs. Cette révision
-// force le navigateur à charger la scène nocturne restaurée après publication.
-const SEQUENCE_REVISION = "nocturne-reference-20260817";
-const DESKTOP_SCROLL_HEIGHT = 1000;
-const MOBILE_SCROLL_HEIGHT = 640;
+const DARK_DESKTOP_FRAME_BASE = "/seq/hero";
+const DARK_MOBILE_FRAME_BASE = "/seq-mobile/frames";
+const LIGHT_DESKTOP_FRAME_BASE = "/seq-light/hero";
+const LIGHT_MOBILE_FRAME_BASE = "/seq-light-mobile/frames";
+const SEQUENCE_REVISIONS = {
+  dark: "nocturne-reference-20260817",
+  light: "historical-light-5116942",
+} as const;
+const DARK_DESKTOP_SCROLL_HEIGHT = 1000;
+const DARK_MOBILE_SCROLL_HEIGHT = 640;
+const LIGHT_DESKTOP_SCROLL_HEIGHT = 1120;
+const LIGHT_MOBILE_SCROLL_HEIGHT = 820;
 
+type Tone = "dark" | "light";
 type ChapterText = {
   title: string;
   eyebrow?: string;
@@ -27,7 +33,7 @@ type NetworkConnection = {
   removeEventListener?: (type: "change", listener: () => void) => void;
 };
 
-const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
+const DARK_COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
   fr: {
     chapters: [
       { title: "Est-ce vraiment le bon moment\npour acheter ?", eyebrow: "FILON vous donne la réponse." },
@@ -63,9 +69,61 @@ const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: st
   },
 };
 
-function frameSource(index: number, mobile = false) {
-  const base = mobile ? MOBILE_FRAME_BASE : DESKTOP_FRAME_BASE;
-  return `${base}/${String(index + 1).padStart(3, "0")}.jpg?v=${SEQUENCE_REVISION}`;
+const LIGHT_COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
+  fr: {
+    chapters: [
+      { title: "Est-ce vraiment\nle bon prix ?", eyebrow: "FILON compare ce qui est réellement comparable." },
+      { title: "Le prix affiché\nne raconte pas tout." },
+      { title: "Le même produit.\nLes offres comparables." },
+      { title: "Voici les prix\nque nous avons observés." },
+      { title: "Disponible dans le\ndernier flux.\nPas une promesse." },
+      { title: "Quand nous ne savons pas,\nnous le disons." },
+      { title: "Décidez avec\nle contexte." },
+      { title: "Prêt à chercher\nvotre bon prix ?", cta: { label: "Explorer les offres", href: "/recherche" } },
+    ],
+    scrollHint: "Scrollez pour voir ce que nous savons",
+    loading: "Préparation de l’expérience...",
+  },
+  nl: {
+    chapters: [
+      { title: "Is dit echt\nde juiste prijs?", eyebrow: "FILON vergelijkt wat werkelijk vergelijkbaar is." },
+      { title: "De getoonde prijs\nvertelt niet alles." },
+      { title: "Hetzelfde product.\nVergelijkbare aanbiedingen." },
+      { title: "Dit zijn de prijzen\ndie we hebben waargenomen." },
+      { title: "Beschikbaar in de\nlaatste feed.\nGeen belofte." },
+      { title: "Wat we niet weten,\nzeggen we ook." },
+      { title: "Beslis met\nde juiste context." },
+      { title: "Klaar om jouw\njuiste prijs te zoeken?", cta: { label: "Aanbiedingen ontdekken", href: "/recherche" } },
+    ],
+    scrollHint: "Scroll om te zien wat we weten",
+    loading: "Ervaring voorbereiden...",
+  },
+  en: {
+    chapters: [
+      { title: "Is this really\nthe right price?", eyebrow: "FILON compares what is genuinely comparable." },
+      { title: "The displayed price\ndoes not tell the full story." },
+      { title: "The same product.\nComparable offers." },
+      { title: "These are the prices\nwe observed." },
+      { title: "Available in the\nlatest feed.\nNot a promise." },
+      { title: "When we do not know,\nwe say so." },
+      { title: "Decide with\ncontext." },
+      { title: "Ready to find\nyour right price?", cta: { label: "Explore offers", href: "/recherche" } },
+    ],
+    scrollHint: "Scroll to see what we know",
+    loading: "Preparing the experience...",
+  },
+};
+
+const COPY: Record<Tone, Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }>> = {
+  dark: DARK_COPY,
+  light: LIGHT_COPY,
+};
+
+function frameSource(index: number, mobile: boolean, tone: Tone) {
+  const base = tone === "light"
+    ? mobile ? LIGHT_MOBILE_FRAME_BASE : LIGHT_DESKTOP_FRAME_BASE
+    : mobile ? DARK_MOBILE_FRAME_BASE : DARK_DESKTOP_FRAME_BASE;
+  return `${base}/${String(index + 1).padStart(3, "0")}.jpg?v=${SEQUENCE_REVISIONS[tone]}`;
 }
 
 function closestFrame(images: Array<HTMLImageElement | null>, target: number, previous: number, totalFrames: number) {
@@ -91,7 +149,8 @@ function deviceConnection() {
  */
 export function ImmersiveExperience() {
   const { locale } = useLocale();
-  const copy = COPY[locale] ?? COPY.fr;
+  const [tone, setTone] = useState<Tone>("dark");
+  const copy = COPY[tone][locale] ?? COPY[tone].fr;
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imagesRef = useRef<Array<HTMLImageElement | null>>(Array(DESKTOP_TOTAL_FRAMES).fill(null));
@@ -112,6 +171,15 @@ export function ImmersiveExperience() {
   const [deviceReady, setDeviceReady] = useState(false);
   const [activeChapter, setActiveChapter] = useState(0);
   const [chapterOpacity, setChapterOpacity] = useState(1);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    const syncTone = () => setTone(root.dataset.tone === "light" ? "light" : "dark");
+    syncTone();
+    const observer = new MutationObserver(syncTone);
+    observer.observe(root, { attributes: true, attributeFilter: ["data-tone"] });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     const compact = window.matchMedia("(max-width: 768px)");
@@ -135,7 +203,7 @@ export function ImmersiveExperience() {
   }, []);
 
   const totalFrames = isMobile ? MOBILE_TOTAL_FRAMES : DESKTOP_TOTAL_FRAMES;
-  const sequenceKey = isMobile ? "mobile" : "desktop";
+  const sequenceKey = `${tone}:${isMobile ? "mobile" : "desktop"}`;
   const frameStride = isMobile ? (saveData ? 6 : 2) : 1;
   const initialFrameCount = isMobile ? 4 : 12;
   const prefetchWindow = isMobile ? (saveData ? 12 : 20) : 30;
@@ -182,7 +250,7 @@ export function ImmersiveExperience() {
         readyRef.current = true;
         setReady(true);
       };
-      image.src = frameSource(index, isMobile);
+      image.src = frameSource(index, isMobile, tone);
     };
 
     prefetchRef.current = (frame: number) => {
@@ -197,7 +265,7 @@ export function ImmersiveExperience() {
       mounted = false;
       prefetchRef.current = () => {};
     };
-  }, [deviceReady, frameStride, initialFrameCount, isMobile, prefetchWindow, reducedMotion, saveData, totalFrames]);
+  }, [deviceReady, frameStride, initialFrameCount, isMobile, prefetchWindow, reducedMotion, saveData, tone, totalFrames]);
 
   const draw = useCallback(() => {
     const container = containerRef.current;
@@ -228,7 +296,7 @@ export function ImmersiveExperience() {
       const scale = Math.max(width / image.width, height / image.height);
       const drawWidth = image.width * scale;
       const drawHeight = image.height * scale;
-      context.fillStyle = "#0e0c0b";
+      context.fillStyle = tone === "light" ? "#f8efe0" : "#0e0c0b";
       context.fillRect(0, 0, width, height);
       context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
       lastFrameRef.current = targetFrame;
@@ -256,7 +324,7 @@ export function ImmersiveExperience() {
       lastOpacityRef.current = clampedOpacity;
       setChapterOpacity(clampedOpacity);
     }
-  }, [copy.chapters.length, frameStride, isMobile, ready, reducedMotion, saveData, totalFrames]);
+  }, [copy.chapters.length, frameStride, isMobile, ready, reducedMotion, saveData, tone, totalFrames]);
 
   drawRef.current = draw;
 
@@ -278,17 +346,17 @@ export function ImmersiveExperience() {
 
   const chapter = copy.chapters[activeChapter];
   const scrollHeight = isMobile
-    ? (saveData || reducedMotion ? 100 : MOBILE_SCROLL_HEIGHT)
-    : DESKTOP_SCROLL_HEIGHT;
+    ? (saveData || reducedMotion ? 100 : tone === "light" ? LIGHT_MOBILE_SCROLL_HEIGHT : DARK_MOBILE_SCROLL_HEIGHT)
+    : tone === "light" ? LIGHT_DESKTOP_SCROLL_HEIGHT : DARK_DESKTOP_SCROLL_HEIGHT;
 
   return (
-    <div ref={containerRef} className={`fx-imm-wrap${isMobile ? " is-mobile" : ""}`} style={{ height: `${scrollHeight}vh` }}>
+    <div ref={containerRef} className={`fx-imm-wrap${isMobile ? " is-mobile" : ""}${tone === "light" ? " is-light" : ""}`} style={{ height: `${scrollHeight}vh` }}>
       <div className="fx-imm-sticky">
         {/* Poster prioritaire : la première image est déjà adaptée au format du visiteur. */}
         <picture>
-          <source media="(max-width: 768px)" srcSet={frameSource(0, true)} />
+          <source media="(max-width: 768px)" srcSet={frameSource(0, true, tone)} />
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className={`fx-imm-poster${canvasPainted ? " is-hidden" : ""}`} src={frameSource(0)} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
+          <img className={`fx-imm-poster${canvasPainted ? " is-hidden" : ""}`} src={frameSource(0, false, tone)} alt="" aria-hidden="true" fetchPriority="high" decoding="async" />
         </picture>
         <canvas ref={canvasRef} className={`fx-imm-canvas${canvasPainted ? " is-visible" : ""}`} aria-hidden="true" />
         <div className="fx-imm-overlay" />
