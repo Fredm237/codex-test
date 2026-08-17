@@ -151,6 +151,18 @@ def role_of(offer: CoreOfferSnapshot) -> OutfitRole:
     return "base"
 
 
+def _gender_signal(text: str | None) -> str | None:
+    """Signal lexical minimal ; l'absence de signal reste inconnue, jamais déduite."""
+    words = set(re.findall(r"[\wÀ-ÿ'-]+", (text or "").lower()))
+    feminine = {"femme", "femmes", "woman", "women", "ladies", "dames", "dame"}
+    masculine = {"homme", "hommes", "man", "men", "mens", "male", "masculin"}
+    if words & feminine:
+        return "feminine"
+    if words & masculine:
+        return "masculine"
+    return None
+
+
 def _compatible_currency(items: list[OutfitItem]) -> str | None:
     currencies = {item.offer.currency for item in items if item.offer.currency}
     return next(iter(currencies)) if len(currencies) == 1 else None
@@ -178,11 +190,17 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
 
     # La chaussure complète le look uniquement lorsqu’elle est réellement dans
     # le catalogue, dans la même devise et sous le budget explicite.
+    base_gender = _gender_signal(base.name)
     footwear = next(
         (
             offer
             for offer in by_role["footwear"]
             if offer.currency == currency
+            and (
+                base_gender is None
+                or _gender_signal(offer.name) is None
+                or _gender_signal(offer.name) == base_gender
+            )
             and (budget is None or (offer.price or 0.0) + running_total <= budget)
         ),
         None,
@@ -206,11 +224,16 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
 
     confidence = _confidence(selected)
     style = _style_score(selected, intent, budget, running_total)
-    unknowns = ["delivery_unknown"]
+    # Les prix et la disponibilité peuvent être observés. La compatibilité de
+    # style, de coupe et d'occasion ne l'est pas dans M1 : elle reste toujours
+    # explicitement à confirmer par la personne.
+    unknowns = ["delivery_unknown", "style_compatibility_not_verified"]
     if any(item.offer.availability == "unknown" for item in selected):
         unknowns.append("availability_to_verify")
     if intent.occasion is None:
         unknowns.append("occasion_not_specified")
+    else:
+        unknowns.append("occasion_not_verified")
 
     return {
         "decision": "recommend",
@@ -257,16 +280,19 @@ def _confidence(items: list[OutfitItem]) -> int:
 
 
 def _style_score(items: list[OutfitItem], intent: FashionIntent, budget: float | None, total: float) -> int:
+    """Couverture documentaire, conservée sous le nom de contrat historique.
+
+    Ce score ne mesure pas une compatibilité de style : il indique seulement le
+    nombre de rôles avec données vérifiables et le respect du budget connu.
+    """
     roles = {item.role for item in items}
-    score = 35  # base présente
+    score = 50  # pièce principale documentée
     if "footwear" in roles:
-        score += 25
+        score += 20
     if "accessory" in roles:
         score += 10
     if budget is not None and total <= budget:
         score += 20
-    if intent.occasion is not None:
-        score += 10
     return min(score, 100)
 
 
@@ -275,7 +301,7 @@ def _rationale(items: list[OutfitItem], intent: FashionIntent, budget: float | N
     if budget is not None and total <= budget:
         rationale.append("within_known_budget")
     if intent.occasion is not None:
-        rationale.append("occasion_explicitly_considered")
+        rationale.append("occasion_recorded_not_verified")
     if any(item.offer.availability == "unknown" for item in items):
         rationale.append("availability_partially_unknown")
     return rationale
