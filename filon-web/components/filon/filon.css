@@ -4853,3 +4853,30 @@ body:has(.ce-experience) .ed-header .ed-nav .ed-btn.dark {
 /* Stabilisation temporaire : aucun contrôle ne suggère un récit scrollé avant sa reconstruction frame-par-frame. */
 .ce-experience.is-static .ce-skip,
 .ce-experience.is-static .ce-scroll-hint { display: none; }
+
+/* Cité intérieure — la recherche appartient au viewport mobile : ni débordement,
+   ni action tronquée quand le texte de l’interface est plus long. */
+.ce-search .fx-hero-search,
+.ce-search .fx-field {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+  .ce-search .fx-field {
+    gap: 8px;
+    padding: 6px 6px 6px 12px;
+  }
+  .ce-search .fx-field input {
+    min-width: 0;
+    font-size: 14px;
+  }
+  .ce-search .fx-field .fx-btn.primary {
+    min-width: 0;
+    min-height: 44px;
+    padding-inline: 12px;
+    font-size: 13px;
+    flex: 0 0 auto;
+  }
+}
