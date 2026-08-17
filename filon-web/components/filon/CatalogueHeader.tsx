@@ -142,12 +142,22 @@ export function CataloguePager({
   );
 }
 
-export function CatalogueEmpty() {
+export function CatalogueEmpty({ query }: { query: CatalogueQuery }) {
   const { t } = useLocale();
+  const assistantHref = query.q
+    ? `/recherche?q=${encodeURIComponent(query.q)}`
+    : "/recherche";
+
   return (
-    <p className="fx-body fx-catalogue-empty">
-      {t("cat.empty")} <a href="/catalogue/">{t("cat.reset")}</a>.
-    </p>
+    <div className="fx-body fx-catalogue-empty" role="status">
+      <p>{t("cat.empty")}</p>
+      <div className="fx-catalogue-empty-actions">
+        <a href="/catalogue/">{t("cat.reset")}</a>
+        <a className="fx-catalogue-empty-assistant" href={assistantHref}>
+          {t("cat.askAssistant")}
+        </a>
+      </div>
+    </div>
   );
 }
 

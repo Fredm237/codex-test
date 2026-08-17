@@ -128,7 +128,7 @@ export default async function CataloguePage({
             </>
           )}
 
-          {result !== null && total === 0 && <CatalogueEmpty />}
+          {result !== null && total === 0 && <CatalogueEmpty query={query} />}
 
           {/* Les rangées éditoriales viennent après la grille : leur lenteur ne
               bloque ni la navigation, ni le premier produit consultable. */}

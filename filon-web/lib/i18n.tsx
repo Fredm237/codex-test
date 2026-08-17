@@ -109,6 +109,7 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
   "cat.next": { fr: "Suivant", nl: "Volgende", en: "Next" },
   "cat.pageOf": { fr: "Page {p} sur {n}", nl: "Pagina {p} van {n}", en: "Page {p} of {n}" },
   "cat.empty": { fr: "Aucun produit ne correspond à cette sélection.", nl: "Geen enkel product komt overeen met deze selectie.", en: "No product matches this selection." },
+  "cat.askAssistant": { fr: "Décrire mon besoin à l’assistant", nl: "Mijn behoefte aan de assistent beschrijven", en: "Describe my need to the assistant" },
   "cat.reset": { fr: "Repartir de tout le catalogue", nl: "Opnieuw beginnen met de hele catalogus", en: "Start again from the whole catalogue" },
   "cat.from": { fr: "à partir de", nl: "vanaf", en: "from" },
   "cat.upTo": { fr: "jusqu'à", nl: "tot", en: "up to" },
