@@ -57,7 +57,9 @@ async def retrieve_fashion_offers(
             models.Offer.filon_category.in_(FASHION_CATEGORIES),
             models.Offer.offer_kind == taxonomy.PHYSICAL_PRODUCT,
             models.Offer.is_canonical.is_(True),
-            models.Offer.is_adult.is_(False),
+            # Même règle que le catalogue public : les lignes historiques sans
+            # marquage sont visibles, les offres explicitement adultes ne le sont jamais.
+            or_(models.Offer.is_adult.is_(False), models.Offer.is_adult.is_(None)),
             models.Offer.price.isnot(None),
             models.Offer.currency.isnot(None),
             models.Offer.image_url.isnot(None),
