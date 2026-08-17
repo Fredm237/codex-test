@@ -6,10 +6,13 @@ import { useLocale } from "@/lib/i18n";
 
 const DESKTOP_TOTAL_FRAMES = 320;
 const MOBILE_TOTAL_FRAMES = 192;
-const DESKTOP_FRAME_BASE = "/seq-light/hero";
-const MOBILE_FRAME_BASE = "/seq-light-mobile/frames";
-const DESKTOP_SCROLL_HEIGHT = 1120;
-const MOBILE_SCROLL_HEIGHT = 820;
+const DESKTOP_FRAME_BASE = "/seq/hero";
+const MOBILE_FRAME_BASE = "/seq-mobile/frames";
+// Les anciennes variantes claires partageaient les mêmes URLs. Cette révision
+// force le navigateur à charger la scène nocturne restaurée après publication.
+const SEQUENCE_REVISION = "nocturne-reference-20260817";
+const DESKTOP_SCROLL_HEIGHT = 1000;
+const MOBILE_SCROLL_HEIGHT = 640;
 
 type ChapterText = {
   title: string;
@@ -27,51 +30,42 @@ type NetworkConnection = {
 const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
   fr: {
     chapters: [
-      { title: "Est-ce vraiment\nle bon prix ?", eyebrow: "FILON compare ce qui est réellement comparable." },
-      { title: "Le prix affiché\nne raconte pas tout." },
-      { title: "Le même produit.\nLes offres comparables." },
-      { title: "Voici les prix\nque nous avons observés." },
-      { title: "Disponible dans le\ndernier flux.\nPas une promesse." },
-      { title: "Quand nous ne savons pas,\nnous le disons." },
+      { title: "Est-ce vraiment le bon moment\npour acheter ?", eyebrow: "FILON vous donne la réponse." },
+      { title: "On compare les prix\npour vous." },
+      { title: "Le meilleur prix,\ntrouvé en secondes." },
       { title: "Décidez avec\nle contexte." },
-      { title: "Prêt à chercher\nvotre bon prix ?", cta: { label: "Explorer les offres", href: "/recherche" } },
+      { title: "Prêt à trouver\nle bon prix ?", cta: { label: "Explorer le catalogue", href: "/recherche" } },
     ],
-    scrollHint: "Scrollez pour voir ce que nous savons",
+    scrollHint: "Scrollez pour explorer",
     loading: "Préparation de l’expérience...",
   },
   nl: {
     chapters: [
-      { title: "Is dit echt\nde juiste prijs?", eyebrow: "FILON vergelijkt wat werkelijk vergelijkbaar is." },
-      { title: "De getoonde prijs\nvertelt niet alles." },
-      { title: "Hetzelfde product.\nVergelijkbare aanbiedingen." },
-      { title: "Dit zijn de prijzen\ndie we hebben waargenomen." },
-      { title: "Beschikbaar in de\nlaatste feed.\nGeen belofte." },
-      { title: "Wat we niet weten,\nzeggen we ook." },
+      { title: "Is dit echt het juiste moment\nom te kopen?", eyebrow: "FILON geeft je het antwoord." },
+      { title: "Wij vergelijken de prijzen\nvoor jou." },
+      { title: "De beste prijs,\ngevonden in seconden." },
       { title: "Beslis met\nde juiste context." },
-      { title: "Klaar om jouw\njuiste prijs te zoeken?", cta: { label: "Aanbiedingen ontdekken", href: "/recherche" } },
+      { title: "Klaar om de juiste prijs\nte vinden?", cta: { label: "Ontdek de catalogus", href: "/recherche" } },
     ],
-    scrollHint: "Scroll om te zien wat we weten",
+    scrollHint: "Scroll om te ontdekken",
     loading: "Ervaring voorbereiden...",
   },
   en: {
     chapters: [
-      { title: "Is this really\nthe right price?", eyebrow: "FILON compares what is genuinely comparable." },
-      { title: "The displayed price\ndoes not tell the full story." },
-      { title: "The same product.\nComparable offers." },
-      { title: "These are the prices\nwe observed." },
-      { title: "Available in the\nlatest feed.\nNot a promise." },
-      { title: "When we do not know,\nwe say so." },
+      { title: "Is this really the right time\nto buy?", eyebrow: "FILON gives you the answer." },
+      { title: "We compare prices\nfor you." },
+      { title: "The best price,\nfound in seconds." },
       { title: "Decide with\ncontext." },
-      { title: "Ready to find\nyour right price?", cta: { label: "Explore offers", href: "/recherche" } },
+      { title: "Ready to find\nthe right price?", cta: { label: "Explore the catalogue", href: "/recherche" } },
     ],
-    scrollHint: "Scroll to see what we know",
+    scrollHint: "Scroll to explore",
     loading: "Preparing the experience...",
   },
 };
 
 function frameSource(index: number, mobile = false) {
   const base = mobile ? MOBILE_FRAME_BASE : DESKTOP_FRAME_BASE;
-  return `${base}/${String(index + 1).padStart(3, "0")}.jpg`;
+  return `${base}/${String(index + 1).padStart(3, "0")}.jpg?v=${SEQUENCE_REVISION}`;
 }
 
 function closestFrame(images: Array<HTMLImageElement | null>, target: number, previous: number, totalFrames: number) {
@@ -91,9 +85,9 @@ function deviceConnection() {
 }
 
 /**
- * La séquence lumineuse est composée dans les deux formats. Le scroll pilote
- * ses images autour de la position réelle du visiteur ; le mobile ne reçoit
- * jamais un film desktop rogné ni le téléchargement complet de la séquence.
+ * La même séquence existe sur tous les écrans, mais mobile ne doit jamais
+ * être un film desktop rogné et préchargé à 40 Mo. Le portrait lit les
+ * frames par échantillonnage, sans couper les côtés, autour du scroll réel.
  */
 export function ImmersiveExperience() {
   const { locale } = useLocale();
@@ -234,7 +228,7 @@ export function ImmersiveExperience() {
       const scale = Math.max(width / image.width, height / image.height);
       const drawWidth = image.width * scale;
       const drawHeight = image.height * scale;
-      context.fillStyle = "#f8efe0";
+      context.fillStyle = "#0e0c0b";
       context.fillRect(0, 0, width, height);
       context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
       lastFrameRef.current = targetFrame;

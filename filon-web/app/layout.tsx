@@ -4,14 +4,17 @@ import { fraunces, outfit, inter } from "./fonts";
 import { buildMetadata, organizationSchema, websiteSchema, JsonLd } from "@/lib/seo";
 import { site } from "@/lib/site";
 
-// FILON adopte un univers clair chaud par défaut : aucun réglage système ni
-// ancien choix sombre ne doit assombrir le premier pixel de l’expérience.
+// S’exécute avant l’hydratation : le premier pixel respecte le choix
+// enregistré, ou le réglage système si l’utilisateur n’a encore rien choisi.
 const themeBootstrap = `(() => {
   try {
+    const stored = localStorage.getItem("filon-tone");
+    const tone = stored === "light" || stored === "dark"
+      ? stored
+      : window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
     const root = document.documentElement;
-    root.dataset.tone = "light";
-    root.style.colorScheme = "light";
-    localStorage.setItem("filon-tone", "light");
+    root.dataset.tone = tone;
+    root.style.colorScheme = tone;
   } catch (_) {}
 })();`;
 
@@ -25,14 +28,14 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#e8e2d7",
+  themeColor: "#0e0c0b",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="fr" className={`${fraunces.variable} ${outfit.variable} ${inter.variable}`} suppressHydrationWarning>
       <head>
-        <meta name="color-scheme" content="light" />
+        <meta name="color-scheme" content="dark light" />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />
         <JsonLd data={organizationSchema()} />
         <JsonLd data={websiteSchema()} />

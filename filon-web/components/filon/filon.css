@@ -4880,3 +4880,88 @@ body:has(.ce-experience) .ed-header .ed-nav .ed-btn.dark {
     flex: 0 0 auto;
   }
 }
+
+/* Accueil FILON — restauration de la scène nocturne de référence.
+   La navigation reste lisible au-dessus de l'appartement bleu/ambre tout en
+   laissant les pages catalogue et éditoriales conserver leur thème choisi. */
+body:has(.fx-imm-wrap) .ed-header,
+body:has(.fx-imm-wrap) .ed-header:not(.stuck) {
+  background: rgba(8, 9, 13, 0.82) !important;
+  border-bottom: 1px solid rgba(200, 149, 68, 0.10) !important;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.24);
+  backdrop-filter: blur(18px) saturate(1.14);
+  -webkit-backdrop-filter: blur(18px) saturate(1.14);
+}
+body:has(.fx-imm-wrap) .ed-header .ed-nav a,
+body:has(.fx-imm-wrap) .ed-header .ed-nav button,
+body:has(.fx-imm-wrap) .ed-header .ed-brand-word {
+  color: rgba(255, 255, 255, 0.86) !important;
+}
+body:has(.fx-imm-wrap) .ed-header .ed-nav a:hover,
+body:has(.fx-imm-wrap) .ed-header .ed-nav button:hover {
+  color: #fff !important;
+}
+body:has(.fx-imm-wrap) .ed-header .ed-nav .ed-btn.dark {
+  background: var(--fx-action) !important;
+  border-color: var(--fx-action) !important;
+  color: var(--fx-on-action) !important;
+}
+@media (max-width: 768px) {
+  body:has(.fx-imm-wrap) .ed-header,
+  body:has(.fx-imm-wrap) .ed-header:not(.stuck) {
+    background: rgba(8, 9, 13, 0.88) !important;
+  }
+}
+
+/* La scène restaurée ne reprend pas les traitements de la Cité intérieure :
+   elle garde le contraste nocturne de l'appartement et un titre centré. */
+body:has(.fx-imm-wrap) .fx-imm-sticky {
+  background: #000 !important;
+}
+body:has(.fx-imm-wrap) .fx-imm-canvas {
+  filter: none !important;
+}
+body:has(.fx-imm-wrap) .fx-imm-overlay,
+:root[data-tone="light"] body:has(.fx-imm-wrap) .fx-imm-overlay {
+  background: rgba(0, 0, 0, 0.32) !important;
+}
+body:has(.fx-imm-wrap) .fx-imm-chapter {
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 24px !important;
+  text-align: center !important;
+}
+body:has(.fx-imm-wrap) .fx-imm-titre,
+:root[data-tone="light"] body:has(.fx-imm-wrap) .fx-imm-titre {
+  max-width: 700px !important;
+  color: #fff !important;
+  font-family: var(--font-outfit), sans-serif !important;
+  font-size: clamp(32px, 6vw, 72px) !important;
+  font-weight: 200 !important;
+  line-height: 1.08 !important;
+  letter-spacing: -0.03em !important;
+  text-shadow: 0 4px 60px rgba(0, 0, 0, 0.9), 0 2px 10px rgba(0, 0, 0, 0.8) !important;
+}
+body:has(.fx-imm-wrap) .fx-imm-eyebrow {
+  background: rgba(10, 10, 15, 0.52) !important;
+  color: rgba(255, 255, 255, 0.88) !important;
+}
+body:has(.fx-imm-wrap) .fx-imm-scroll-hint,
+body:has(.fx-imm-wrap) .fx-imm-loading {
+  color: rgba(255, 255, 255, 0.58) !important;
+}
+@media (max-width: 768px) {
+  body:has(.fx-imm-wrap) .fx-imm-wrap.is-mobile .fx-imm-overlay {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.48) 0%, rgba(0, 0, 0, 0.10) 42%, rgba(0, 0, 0, 0.62) 100%) !important;
+  }
+  body:has(.fx-imm-wrap) .fx-imm-wrap.is-mobile .fx-imm-chapter {
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 24px 20px 124px !important;
+    text-align: center !important;
+  }
+  body:has(.fx-imm-wrap) .fx-imm-wrap.is-mobile .fx-imm-titre {
+    max-width: 14ch !important;
+    font-size: clamp(28px, 8vw, 44px) !important;
+  }
+}
