@@ -489,7 +489,33 @@
 .fx-catalogue-search { margin-top: var(--fx-space-6); max-width: 620px; }
 .fx-catalogue-grid { margin-top: var(--fx-space-6); }
 .fx-catalogue-empty { margin-top: var(--fx-space-6); }
+.fx-catalogue-empty p { margin: 0; }
+.fx-catalogue-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--fx-space-3);
+  margin-top: var(--fx-space-4);
+}
 .fx-catalogue-empty a { text-decoration: underline; text-underline-offset: 3px; }
+.fx-catalogue-empty-assistant {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 var(--fx-space-4);
+  border: 1px solid var(--fx-border-strong);
+  border-radius: var(--fx-btn-radius);
+  background: var(--fx-action);
+  color: var(--fx-on-action) !important;
+  font-size: var(--fx-text-sm);
+  font-weight: 600;
+  text-decoration: none !important;
+}
+.fx-catalogue-empty-assistant:hover { border-color: var(--fx-action); box-shadow: var(--fx-elevation-1); }
+@media (max-width: 480px) {
+  .fx-catalogue-empty-actions { align-items: stretch; flex-direction: column; }
+  .fx-catalogue-empty-assistant { justify-content: center; }
+}
 
 /* Deux colonnes : arborescence à gauche, résultats à droite. */
 .fx-catalogue-layout {

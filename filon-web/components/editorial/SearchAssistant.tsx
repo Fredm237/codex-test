@@ -171,7 +171,8 @@ function detectBudget(q: string): number | null {
 type Ev =
   | { type: "step"; i: number }
   | { type: "step-done"; i: number }
-  | { type: "results"; data: Result };
+  | { type: "results"; data: Result }
+  | { type: "error"; message?: string };
 
 const isGoogleShoppingUrl = (value?: string | null) =>
   Boolean(value && /(^|\.)google\.[^/]+\/search/i.test(value) && /(?:[?&]tbm=shop|[?&]ibp=oshop)/i.test(value));
@@ -230,10 +231,15 @@ function catalogueHref(input: string) {
    The UI is identical — only the source of the events changes. */
 const API = (process.env.NEXT_PUBLIC_FILON_API || "https://web-production-c6842.up.railway.app").replace(/\/$/, "");
 
-async function* streamAnalyze(q: string, country: string, locale: "fr" | "nl" | "en"): AsyncGenerator<Ev> {
+async function* streamAnalyze(
+  q: string,
+  country: string,
+  locale: "fr" | "nl" | "en",
+  signal: AbortSignal,
+): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
   const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}&locale=${encodeURIComponent(locale)}`;
-  const res = await fetch(url, { headers: { Accept: "text/event-stream" } });
+  const res = await fetch(url, { headers: { Accept: "text/event-stream" }, signal });
   if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
   const reader = res.body.getReader();
   const decoder = new TextDecoder();
@@ -344,11 +350,17 @@ export function SearchAssistant() {
   }, [geoCountry, locale]);
   const S = SL[locale];
   const runId = useRef(0);
+  const activeRequest = useRef<AbortController | null>(null);
+
+  useEffect(() => () => activeRequest.current?.abort(), []);
 
   const ask = async (raw: string) => {
     const q = raw.trim();
     if (!q) return;
     setAsked(q);
+    activeRequest.current?.abort();
+    const controller = new AbortController();
+    activeRequest.current = controller;
     const id = ++runId.current;
     setPhase("thinking");
     setResult(null);
@@ -376,6 +388,10 @@ export function SearchAssistant() {
         }
         setResult({ ...ev.data, cards: verifiedCards });
         setPhase("results");
+      } else if (ev.type === "error") {
+        setDone([]);
+        setActive(-1);
+        setPhase("failed");
       }
       return true;
     };
@@ -383,12 +399,18 @@ export function SearchAssistant() {
     // Le backend, ou rien. Un repli qui invente des offres se présente comme une
     // vraie analyse : le visiteur n'a aucun moyen de faire la différence.
     try {
-      for await (const ev of streamAnalyze(q, country, locale)) if (!apply(ev)) return;
-    } catch {
-      if (runId.current !== id) return;
+      for await (const ev of streamAnalyze(q, country, locale, controller.signal)) {
+        if (!apply(ev)) return;
+      }
+    } catch (error) {
+      // Une nouvelle recherche annule la précédente : elle ne doit ni afficher
+      // une erreur ni conserver des étapes visuelles de l’ancienne analyse.
+      if (runId.current !== id || (error instanceof DOMException && error.name === "AbortError")) return;
       setDone([]);
       setActive(-1);
       setPhase("failed");
+    } finally {
+      if (activeRequest.current === controller) activeRequest.current = null;
     }
   };
 
