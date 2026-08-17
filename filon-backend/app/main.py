@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app import __version__
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
-from app.api.routes import advise, catalog, chat, health, stream
+from app.api.routes import advise, catalog, chat, health, intelligence, stream
 from app.api.middleware import RequestLoggingMiddleware, RateLimitMiddleware
 
 log = get_logger("main")
@@ -91,6 +91,8 @@ def create_app() -> FastAPI:
     app.include_router(advise.router, prefix="/api")
     app.include_router(stream.router, prefix="/api")
     app.include_router(catalog.router, prefix="/api")
+    # Couche additive : le statut Intelligence ne modifie aucun contrat Core.
+    app.include_router(intelligence.router, prefix="/api")
 
     @app.get("/")
     async def root() -> dict:

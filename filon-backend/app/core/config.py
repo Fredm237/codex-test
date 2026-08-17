@@ -61,6 +61,13 @@ class Settings(BaseSettings):
 
     llm_timeout_seconds: float = Field(default=30.0)
 
+    # FILON Intelligence Layer — opt-in explicite. Les trois flags sont séparés
+    # pour qu'un module expérimental n'affecte jamais le catalogue ou l'assistant
+    # existants tant qu'il n'a pas été activé et validé.
+    filon_intelligence_enabled: bool = Field(default=False)
+    fashion_expert_enabled: bool = Field(default=False)
+    outfit_studio_enabled: bool = Field(default=False)
+
     # Données produits réelles (Google Shopping via SerpApi)
     serpapi_api_key: str | None = Field(default=None)
     serpapi_base_url: str = Field(default="https://serpapi.com/search.json")

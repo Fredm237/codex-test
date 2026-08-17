@@ -117,8 +117,10 @@ async def create_all() -> None:
     from app.db.base import Base
 
     # Importe les modèles pour qu'ils soient enregistrés dans Base.metadata
-    # avant create_all (sinon aucune table n'est créée).
+    # avant create_all (sinon aucune table n'est créée). Les modèles Intelligence
+    # sont parallèles : leur présence n'altère aucune table du Core.
     from app.db import models  # noqa: F401
+    from app.intelligence import models as intelligence_models  # noqa: F401
 
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
