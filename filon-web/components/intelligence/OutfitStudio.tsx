@@ -142,7 +142,7 @@ const COPY: Record<Locale, Copy> = {
     keep: "Bewaren",
     reject: "Niet voor mij",
     feedbackThanks: "Bedankt. Deze feedback wordt als signaal bekeken, niet als automatische voorkeur.",
-    roles: { base: "Hoofdstuk", footwear: "Schoenen", accessory: "Accessoire" },
+    roles: { base: "Hoofditem", footwear: "Schoenen", accessory: "Accessoire" },
     modes: {
       create: { label: "Maken", hint: "Vanuit een intentie" },
       complete: { label: "Aanvullen", hint: "Bij een bestaand stuk" },
