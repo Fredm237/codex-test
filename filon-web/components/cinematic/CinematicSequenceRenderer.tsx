@@ -14,7 +14,7 @@ type Props = {
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 
 function source(sequence: SequenceDefinition, index: number) {
-  return `${sequence.frameBase}/${String(index + 1).padStart(3, "0")}.jpg`;
+  return `${sequence.frameBase}/${String(index + 1).padStart(4, "0")}.webp`;
 }
 
 function nearest(images: Array<HTMLImageElement | null>, target: number, previous: number) {

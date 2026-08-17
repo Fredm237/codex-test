@@ -68,10 +68,10 @@ export function CinematicExperience() {
 
   const sequence = mobile ? filonHomeScene.mobile : filonHomeScene.desktop;
   const timeline = useMemo(() => resolveTimeline(filonHomeScene, progress), [progress]);
-  // Stabilisation publique : la scène reste visible, mais aucun scroll narratif
-  // incomplet ne peut consommer l’accueil avant la reconstruction frame-par-frame.
-  const fallback = true;
-  const height = 100;
+  // La Cité intérieure utilise désormais le film maître extrait en frames ;
+  // le scroll contrôle directement sa progression sans mode narratif factice.
+  const fallback = reducedMotion || saveData;
+  const height = fallback ? 100 : sequence.scrollHeightVh;
 
   const skip = () => {
     const element = containerRef.current;
