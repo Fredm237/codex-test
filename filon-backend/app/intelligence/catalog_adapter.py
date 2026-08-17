@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import models
 from app.intelligence.contracts import CoreOfferSnapshot
-from app.services import taxonomy
+from app.services import search, taxonomy
 
 
 FASHION_CATEGORIES = frozenset(taxonomy.categories_of_department("Mode & Accessoires"))
@@ -72,9 +72,17 @@ async def retrieve_fashion_offers(
         needle = f"%{term}%"
         stmt = stmt.where(or_(models.Offer.name.ilike(needle), models.Offer.brand.ilike(needle)))
 
-    # Une sélection déterministe : le prix connu puis l’identifiant, jamais la
-    # commission, le clic ou une donnée commerciale cachée.
-    stmt = stmt.order_by(models.Offer.price.asc(), models.Offer.id.asc()).limit(safe_limit)
+    # Un tri global par prix sur tout le département Fashion dépasse largement
+    # le budget d’interaction. On préserve la pertinence recherchée (si la
+    # personne a nommé une pièce), puis le Fashion Expert compare les prix connus
+    # dans cet ensemble réel. Il ne prétend donc jamais avoir trouvé « le moins
+    # cher de tout le catalogue ».
+    relevance = search.relevance_order(query)
+    if relevance is not None:
+        stmt = stmt.order_by(relevance.asc(), models.Offer.id.asc())
+    else:
+        stmt = stmt.order_by(models.Offer.id.desc())
+    stmt = stmt.limit(safe_limit)
     rows = (await session.execute(stmt)).all()
     return [
         CoreOfferSnapshot(
