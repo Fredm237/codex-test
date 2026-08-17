@@ -103,6 +103,7 @@ async def outfit_analyse(
     offers = await retrieve_fashion_offers(
         session,
         query=retrieval_query_for_intent(payload.request),
+        occasion=intent.occasion,
     )
     solution = compose_outfit(intent, offers)
     trace_key = uuid4().hex
@@ -131,9 +132,11 @@ async def outfit_analyse(
             "known_price",
             "image_present",
             "not_explicitly_out_of_stock",
+            "piece_lexical_proof",
+            "occasion_term_when_explicitly_supported",
         ],
         result_json=solution,
-        rules_version="fashion-m1",
+        rules_version="fashion-m2",
     )
     session.add(trace)
     await session.commit()
