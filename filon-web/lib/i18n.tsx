@@ -118,6 +118,7 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
   // Navigation
   "nav.catalogue": { fr: "Catalogue", nl: "Catalogus", en: "Catalogue" },
   "nav.assistant": { fr: "Assistant", nl: "Assistent", en: "Assistant" },
+  "nav.create": { fr: "Créer", nl: "Creëren", en: "Create" },
   "nav.how": { fr: "Comment ça marche", nl: "Hoe het werkt", en: "How it works" },
   "nav.pricing": { fr: "Tarifs", nl: "Tarieven", en: "Pricing" },
   "nav.cashback": { fr: "Cashback", nl: "Cashback", en: "Cashback" },
@@ -167,6 +168,7 @@ const DICT: Record<string, { fr: string; nl: string; en: string }> = {
 export const NAV_KEYS: Array<{ key: string; href: string }> = [
   { key: "nav.catalogue", href: "/catalogue" },
   { key: "nav.assistant", href: "/recherche" },
+  { key: "nav.create", href: "/creer/outfit-studio" },
   { key: "nav.how", href: "/comment-ca-marche" },
   { key: "nav.score", href: "/score" },
   { key: "nav.refurb", href: "/reconditionne" },
