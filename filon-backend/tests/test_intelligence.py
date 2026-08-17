@@ -255,6 +255,22 @@ class TestFashionExpert:
         assert "delivery_unknown" in result["unknowns"]
         assert "within_known_budget" in result["rationale_keys"]
 
+    def test_ne_combine_pas_un_complement_de_genre_explicitement_incompatible(self):
+        intent = parse_fashion_intent("Une robe de mariage sous 200 € avec chaussures", "create")
+        result = compose_outfit(
+            intent,
+            [
+                self._offer(1, "Robe femme de cérémonie", taxonomy.MODE_FEMME, 120.0),
+                self._offer(2, "Chaussures homme de running", taxonomy.CHAUSSURES, 20.0),
+                self._offer(3, "Chaussures femme de cérémonie", taxonomy.CHAUSSURES, 60.0),
+            ],
+        )
+
+        assert result["decision"] == "recommend"
+        assert [item["offer_id"] for item in result["items"]] == [1, 3]
+        assert "style_compatibility_not_verified" in result["unknowns"]
+        assert "occasion_not_verified" in result["unknowns"]
+
     def test_s_abstient_lorsqu_aucune_base_verifiee_n_est_disponible(self):
         intent = parse_fashion_intent("Une tenue de travail", "create")
         result = compose_outfit(intent, [self._offer(2, "Chaussures", taxonomy.CHAUSSURES, 60.0)])
