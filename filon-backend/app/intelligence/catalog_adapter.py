@@ -1,14 +1,14 @@
 """Adaptateur lecture seule entre le catalogue FILON Core et les experts.
 
 Aucune écriture, aucun appel affilié et aucun enrichissement marchand ne se fait
-ici. Le retrieval Fashion utilise les sous-rayons FILON indexés : il évite une
-recherche textuelle et un tri global sur tout le catalogue Mode.
+ici. Le retrieval Fashion utilise les rayons FILON *et* une preuve lexicale de
+pièce : une erreur de classement isolée ne peut donc pas devenir une tenue.
 """
 
 from __future__ import annotations
 
 import re
-from collections.abc import Iterable
+from collections.abc import Callable
 
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -20,18 +20,28 @@ from app.services import taxonomy
 
 FASHION_CATEGORIES = frozenset(taxonomy.categories_of_department("Mode & Accessoires"))
 
-# Les seuls mots qui déclenchent une recherche sont des pièces explicites. Les
-# contextes comme « mariage », « minimal » ou « travail » ne sont jamais traités
-# à tort comme un nom de produit marchand.
 _PRODUCT_WORDS = frozenset({
-    "robe", "dresses", "dress", "jurk", "jurken",
-    "veste", "vestes", "blazer", "blazers", "jacket", "jas", "manteau", "coat",
-    "jupe", "jupes", "skirt", "rok",
-    "pantalon", "pantalons", "jean", "jeans", "broek", "pants",
-    "chemise", "chemises", "shirt", "hemd", "tshirt", "t-shirt", "top",
-    "chaussure", "chaussures", "shoe", "shoes", "schoen", "schoenen", "sneaker", "sneakers", "basket",
-    "sac", "bag", "tas",
+    "robe", "robes", "dress", "dresses", "jurk", "jurken",
+    "veste", "vestes", "blazer", "blazers", "jacket", "jackets", "jas", "jassen", "manteau", "manteaux", "coat", "coats",
+    "jupe", "jupes", "skirt", "skirts", "rok", "rokken",
+    "pantalon", "pantalons", "jean", "jeans", "broek", "broeken", "pants",
+    "chemise", "chemises", "shirt", "shirts", "hemd", "hemden", "tshirt", "t-shirt", "top", "tops",
+    "chaussure", "chaussures", "shoe", "shoes", "schoen", "schoenen", "sneaker", "sneakers", "basket", "baskets",
+    "sac", "sacs", "bag", "bags", "tas", "tassen", "handbag", "handtas",
 })
+
+# Une catégorie seule n’est pas une preuve de pièce : l’historique a déjà montré
+# des accessoires de vestiaire dans « Robes » et des objets techniques dans
+# « Chaussures ». Le nom ou la marque doit aussi porter un terme explicite.
+_SCOPE_TERMS: dict[str, frozenset[str]] = {
+    "dress": frozenset({"robe", "robes", "dress", "dresses", "jurk", "jurken"}),
+    "outerwear": frozenset({"veste", "vestes", "blazer", "blazers", "jacket", "jackets", "jas", "jassen", "manteau", "manteaux", "coat", "coats"}),
+    "skirt": frozenset({"jupe", "jupes", "skirt", "skirts", "rok", "rokken"}),
+    "trouser": frozenset({"pantalon", "pantalons", "jean", "jeans", "broek", "broeken", "pants"}),
+    "top": frozenset({"chemise", "chemises", "shirt", "shirts", "hemd", "hemden", "tshirt", "top", "tops"}),
+    "footwear": frozenset({"chaussure", "chaussures", "shoe", "shoes", "schoen", "schoenen", "sneaker", "sneakers", "basket", "baskets", "boot", "boots", "botte", "bottes"}),
+    "bag": frozenset({"sac", "sacs", "bag", "bags", "tas", "tassen", "handbag", "handtas", "pochette", "clutch"}),
+}
 
 
 def _availability(in_stock: bool | None) -> str:
@@ -42,50 +52,56 @@ def _availability(in_stock: bool | None) -> str:
     return "unknown"
 
 
+def _words(value: str | None) -> set[str]:
+    return set(re.findall(r"[\wÀ-ÿ'-]+", (value or "").lower()))
+
+
 def _search_terms(query: str | None) -> set[str]:
-    words = re.findall(r"[\wÀ-ÿ'-]+", (query or "").lower())
-    return {word for word in words if word in _PRODUCT_WORDS}
+    return _words(query) & _PRODUCT_WORDS
 
 
-def _fashion_scopes(query: str | None) -> list[dict[str, tuple[str, ...]]]:
-    """Scopes Core indexables pour la pièce demandée et ses compléments.
-
-    Chaque scope est un sous-rayon ou un rayon FILON explicitement associé à une
-    pièce. Si aucune pièce n’est nommée, le moteur s’abstient plutôt que de
-    proposer des produits arbitraires dans un département large.
-    """
+def _fashion_scopes(query: str | None) -> list[str]:
+    """Scopes Core indexables déclenchés uniquement par une pièce explicite."""
     terms = _search_terms(query)
-    if not terms:
-        return []
-
-    scopes: list[dict[str, tuple[str, ...]]] = []
-    if terms & {"robe", "dresses", "dress", "jurk", "jurken"}:
-        scopes.append({"subcategories": ("Robes",)})
-    if terms & {"veste", "vestes", "blazer", "blazers", "jacket", "jas", "manteau", "coat"}:
-        scopes.append({"subcategories": ("Manteaux & Vestes",)})
-    if terms & {"jupe", "jupes", "skirt", "rok"}:
-        scopes.append({"subcategories": ("Jupes",)})
-    if terms & {"pantalon", "pantalons", "jean", "jeans", "broek", "pants"}:
-        scopes.append({"subcategories": ("Pantalons & Jeans",)})
-    if terms & {"chemise", "chemises", "shirt", "hemd", "tshirt", "t-shirt", "top"}:
-        scopes.append({"subcategories": ("Hauts & T-shirts",)})
-
-    # Chaussures et accessoires sont récupérés comme compléments vérifiables
-    # d’une pièce principale. Ils ne deviennent jamais une « pièce principale »
-    # dans le Fashion Expert.
-    wants_complements = bool(scopes) or bool(
-        terms & {"chaussure", "chaussures", "shoe", "shoes", "schoen", "schoenen", "sneaker", "sneakers", "basket", "sac", "bag", "tas"}
-    )
-    if wants_complements:
-        scopes.append({"categories": (taxonomy.CHAUSSURES,)})
-        scopes.append({"categories": (taxonomy.ACCESSOIRES, taxonomy.BAGAGERIE)})
+    scopes: list[str] = []
+    if terms & _SCOPE_TERMS["dress"]:
+        scopes.append("dress")
+    if terms & _SCOPE_TERMS["outerwear"]:
+        scopes.append("outerwear")
+    if terms & _SCOPE_TERMS["skirt"]:
+        scopes.append("skirt")
+    if terms & _SCOPE_TERMS["trouser"]:
+        scopes.append("trouser")
+    if terms & _SCOPE_TERMS["top"]:
+        scopes.append("top")
+    if terms & _SCOPE_TERMS["footwear"]:
+        scopes.append("footwear")
+    if terms & _SCOPE_TERMS["bag"]:
+        scopes.append("bag")
     return scopes
 
 
-def _scope_clause(scope: dict[str, tuple[str, ...]]):
-    if "subcategories" in scope:
-        return models.Offer.filon_subcategory.in_(scope["subcategories"])
-    return models.Offer.filon_category.in_(scope["categories"])
+def _scope_clause(scope: str):
+    if scope == "dress":
+        return models.Offer.filon_subcategory == "Robes"
+    if scope == "outerwear":
+        return models.Offer.filon_subcategory == "Manteaux & Vestes"
+    if scope == "skirt":
+        return models.Offer.filon_subcategory == "Jupes"
+    if scope == "trouser":
+        return models.Offer.filon_subcategory == "Pantalons & Jeans"
+    if scope == "top":
+        return models.Offer.filon_subcategory == "Hauts & T-shirts"
+    if scope == "footwear":
+        return models.Offer.filon_category == taxonomy.CHAUSSURES
+    if scope == "bag":
+        return models.Offer.filon_category.in_((taxonomy.BAGAGERIE, taxonomy.ACCESSOIRES))
+    raise ValueError(f"Unknown Fashion scope: {scope}")
+
+
+def _matches_scope(scope: str, offer: models.Offer) -> bool:
+    terms = _words(offer.name) | _words(offer.brand)
+    return bool(terms & _SCOPE_TERMS[scope])
 
 
 def _base_statement():
@@ -137,24 +153,24 @@ async def retrieve_fashion_offers(
 ) -> list[CoreOfferSnapshot]:
     """Retourne des offres Fashion admissibles sans modifier le Core.
 
-    Le contrat M1 est volontairement strict : offre physique, publique,
-    canonique, non adulte, avec image et prix. Les scopes étroits permettent une
-    réponse réactive sans prétendre couvrir l’intégralité du département ni
-    trouver le prix mondial le plus bas.
+    Le contrat M1 est strict : offre physique, publique, canonique, non adulte,
+    avec image et prix, puis correspondance à la fois taxonomique et lexicale.
+    Sans pièce explicitement nommée, le moteur s’abstient plutôt que de proposer
+    des produits arbitraires dans un département large.
     """
     scopes = _fashion_scopes(query)
     if not scopes:
         return []
 
     safe_limit = max(1, min(limit, 180))
-    limit_by_scope = max(12, safe_limit // len(scopes))
+    limit_by_scope = max(24, safe_limit // len(scopes))
     seen: set[int] = set()
     snapshots: list[CoreOfferSnapshot] = []
     for scope in scopes:
         stmt = _base_statement().where(_scope_clause(scope)).order_by(models.Offer.id.desc()).limit(limit_by_scope)
         rows = (await session.execute(stmt)).all()
         for offer, merchant in rows:
-            if offer.id in seen:
+            if offer.id in seen or not _matches_scope(scope, offer):
                 continue
             seen.add(offer.id)
             snapshots.append(_snapshot(offer, merchant))
