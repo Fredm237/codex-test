@@ -301,6 +301,7 @@ class TestFashionExpert:
             [
                 self._offer(1, "Robe femme de cérémonie", taxonomy.MODE_FEMME, 120.0),
                 self._offer(2, "Chaussures homme de running", taxonomy.CHAUSSURES, 20.0),
+                self._offer(4, "Chaussures basket-ball femme", taxonomy.CHAUSSURES, 25.0),
                 self._offer(3, "Chaussures femme de cérémonie", taxonomy.CHAUSSURES, 60.0),
             ],
         )

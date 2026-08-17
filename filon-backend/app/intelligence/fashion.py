@@ -21,6 +21,10 @@ _ALLOWED_MODES = frozenset({"create", "complete", "recreate", "optimize", "compa
 _BUDGET_PATTERN = re.compile(r"(?:sous|under|budget(?: de)?|moins de|maximum|max)?\s*(\d{2,4})(?:[\s,.]\d{1,2})?\s*(?:€|eur|euro)", re.IGNORECASE)
 # Termes produits suffisamment précis pour interroger le catalogue sans confondre
 # une intention (« mariage », « minimal ») et un nom d’article marchand.
+_ATHLETIC_FOOTWEAR_TERMS = frozenset({
+    "running", "run", "basket-ball", "basketball", "football", "trail", "cycling", "cyclisme", "vélo", "velo", "ski", "tennis",
+})
+
 _PRODUCT_WORDS = frozenset({
     "robe", "dress", "jurk", "veste", "blazer", "jacket", "jas", "manteau",
     "coat", "broek", "pantalon", "pants", "jean", "shirt", "chemise", "hemd",
@@ -163,6 +167,20 @@ def _gender_signal(text: str | None) -> str | None:
     return None
 
 
+def _is_athletic_footwear(text: str | None) -> bool:
+    return bool(set(re.findall(r"[\wÀ-ÿ'-]+", (text or "").lower())) & _ATHLETIC_FOOTWEAR_TERMS)
+
+
+def _sports_requested(text: str) -> bool:
+    return _is_athletic_footwear(text)
+
+
+def _is_dress(offer: CoreOfferSnapshot) -> bool:
+    return offer.filon_subcategory == "Robes" or bool(
+        set(re.findall(r"[\wÀ-ÿ'-]+", (offer.name or "").lower())) & {"robe", "robes", "dress", "dresses", "jurk", "jurken"}
+    )
+
+
 def _compatible_currency(items: list[OutfitItem]) -> str | None:
     currencies = {item.offer.currency for item in items if item.offer.currency}
     return next(iter(currencies)) if len(currencies) == 1 else None
@@ -200,6 +218,11 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
                 base_gender is None
                 or _gender_signal(offer.name) is None
                 or _gender_signal(offer.name) == base_gender
+            )
+            and (
+                not _is_dress(base)
+                or _sports_requested(intent.raw_request)
+                or not _is_athletic_footwear(offer.name)
             )
             and (budget is None or (offer.price or 0.0) + running_total <= budget)
         ),
