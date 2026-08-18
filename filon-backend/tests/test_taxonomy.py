@@ -131,6 +131,18 @@ class Test1FoTeamVerifiedSourceRoutes:
         assert t.classify("Serveur NAS", "Produit opaque", "Synology", "Autre marchand") is None
         assert t.classify("Câbles", "Produit opaque", "générique", "1FoTeam") is None
 
+    def test_games_and_creative_batch_uses_audited_sources_and_objects(self):
+        assert t.classify("Jeux Duo", "Jeu - Agent Avenue", "", "1FoTeam FR") == t.JOUETS
+        assert t.classify("Jeux de Cartes JCC - Pokemon", "Carte Pokemon - Coffret", "", "1FoTeam FR") == t.JOUETS
+        assert t.classify("Aerographes", "Ak Interactive - Aerographe Basic Line", "", "1FoTeam FR") == t.LOISIRS
+        assert t.classify("Jeux & Activités Créatives & Manuelles", "Sachet de 1000 perles Hama", "", "1FoTeam FR") == t.LOISIRS
+        assert t.classify("Jeux & Activités Créatives & Manuelles", "Boite de gouache aux doigts Kreul Mucki", "", "1FoTeam FR") == t.JOUETS
+
+    def test_games_batch_stays_confined_to_merchant_source_and_title(self):
+        assert t.classify("Jeux & Activités Créatives & Manuelles", "Produit opaque", "", "1FoTeam FR") is None
+        assert t.classify("Jeux Duo", "Produit opaque", "", "Autre marchand") is None
+        assert t.classify("Jeux & Activités Créatives", "Sachet de 1000 perles Hama", "", "1FoTeam FR") is None
+
 
 class TestSneakidsVerifiedSourceRoutes:
     """Les routes Sneakids ne couvrent que les chemins relus intégralement."""

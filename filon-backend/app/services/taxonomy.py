@@ -406,6 +406,9 @@ _YESSTYLE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
 # catégorie source exacte ; Câbles, Piles et Adaptateurs restent volontairement
 # absents car leur destination dépend encore de l’objet précis.
 _1FOTEAM_MERCHANT = r"\b1foteam\b"
+_1FOTEAM_CREATIVE_SOURCE = r"^jeux\s*&\s*activit[ée]s\s+cr[ée]atives\s*&\s*manuelles$"
+_1FOTEAM_CREATIVE_CULTURE = r"\b(?:perles?|pinceau|kit\s+cr[ée]atif|cartes?\s+[àa]\s+pailleter|volcans|dinosaures)\b"
+_1FOTEAM_CREATIVE_TOYS = r"\bgouache\s+aux\s+doigts\b"
 _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (LOISIRS, r"^(?:famille\s+mod[ée]lisme\s+gamersgrass|pinceaux\s+citadel\s+gw|"
              r"mod[ée]lisme\s+citadel\s+gw|pinceaux\s+ak\s+interactive\s*&\s+abteilung\s+502)$"),
@@ -415,6 +418,13 @@ _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
                r"star\s+wars|jeux\s+sp[ée]cialistes|jeux\s+d'apprentissage|zombicide|jeux\s+coop[ée]ratif|"
                r"jeux\s+pour\s+enfants|jeux\s+de\s+r[ôo]le)$"),
     (TV_SON, r"^casque$"),
+    # Deuxième vague 1FoTeam : onze chemins Jeux et modélisme ont été relus
+    # exhaustivement. Le chemin créatif mixte est traité plus bas par objet.
+    (JOUETS, r"^(?:jeux\s+duo|jeux\s+en\s+bois|jeux\s+casse-t[êe]tes|poup[ée]es|"
+              r"jeux\s+de\s+cartes\s+jcc\s*-\s*pokemon|jeux\s+de\s+d[ée]s|"
+              r"marvel\s+crisis\s+protocol|tapis\s+de\s+jeux\s*/\s*gamemat|"
+              r"figurines\s*&\s*mondes\s+imaginaires)$"),
+    (LOISIRS, r"^(?:peintures\s+abteilung\s+502|aerographes)$"),
 )
 
 # Sneakids : ces 28 chemins source ont été relus sur les 616 titres non classés
@@ -1926,6 +1936,13 @@ def classify(
         for category, source_pattern in _1FOTEAM_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
                 return category
+        # Le chemin créatif contient à la fois des activités manuelles et de la
+        # gouache enfant : l'objet nommé, plutôt que le seul chemin, décide.
+        if _has(_1FOTEAM_CREATIVE_SOURCE, merchant_category):
+            if _has(_1FOTEAM_CREATIVE_CULTURE, name):
+                return LOISIRS
+            if _has(_1FOTEAM_CREATIVE_TOYS, name):
+                return JOUETS
     # Sneakids : les chemins ci-dessous sont bornés aux formes réellement auditées.
     # Un chemin source voisin mais absent de la liste reste volontairement soumis
     # aux preuves lexicales générales ou à une vague d'audit ultérieure.
