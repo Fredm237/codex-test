@@ -341,6 +341,23 @@ _SPORT_IS_GOOD_FINAL_EXPLICIT_ROUTES: tuple[tuple[str, str, str], ...] = (
      r"\bkit\s+de\s+protection\b"),
 )
 
+# 2dekansje : les sources « Kleine keukenapparaten » et « Massageapparaten »
+# sont hétérogènes et gardent leurs routes objet historiques. Les onze chemins
+# ci-dessous ont au contraire été contrôlés homogènes dans le premier audit et
+# peuvent rester des routes source exactes, localisées au marchand.
+_2DEKANSJE_FIRST_BATCH_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
+    (ELECTROMENAGER, r"^wonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*keukenmachines$"),
+    (ELECTROMENAGER, r"^wonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*magnetrons\s*&\s*kookplaten$"),
+    (MAISON, r"^wonen\s*&\s*koken\s*>\s*wonen\s*>\s*klokken\s*&\s*wekkers$"),
+    (MAISON, r"^wonen\s*&\s*koken\s*>\s*badkamer\s*&\s*sanitair\s*>\s*wastafel-\s*&\s*keukenkranen$"),
+    (SANTE, r"^mooi\s*&\s*gezond\s*>\s*persoonlijke\s+verzorging\s*>\s*mondverzorging$"),
+    (SANTE, r"^mooi\s*&\s*gezond\s*>\s*gezondheid\s*>\s*personenweegschalen$"),
+    (TV_SON, r"^elektronica\s*>\s*beeld\s*&\s*geluid\s*>\s*hoofdtelefoons\s*&\s*oordopjes$"),
+    (SPORT, r"^hobby\s*&\s*sport\s*>\s*sport\s*>\s*sup\s+board$"),
+    (SPORT, r"^hobby\s*&\s*sport\s*>\s*sport\s*>\s*skeeleren,\s*step\s*&\s*skaten$"),
+    (CULTURE, r"^hobby\s*&\s*sport\s*>\s*muziek\s*>\s*muziekinstrumenten$"),
+    (BAGAGERIE, r"^hobby\s*&\s*sport\s*>\s*reizen\s*&\s*vrije\s+tijd\s*>\s*reistassen$"),
+)
 # Bimba y Lola : le flux fournit des identifiants numériques opaques. Les quatre
 # codes ci-dessous ont été contrôlés titre par titre : 439 offres de bagagerie,
 # chaussures, bijoux ou mode femme, sans contre-exemple. Ils restent attachés au
@@ -1739,6 +1756,10 @@ def classify(
             return MODE
         for category, source_pattern, name_pattern in _SPORT_IS_GOOD_FINAL_EXPLICIT_ROUTES:
             if _has(source_pattern, merchant_category) and _has(name_pattern, name):
+                return category
+    if _has(_2DEKANSJE_MERCHANT, merchant_name or ""):
+        for category, source_pattern in _2DEKANSJE_FIRST_BATCH_SOURCE_ROUTES:
+            if _has(source_pattern, merchant_category):
                 return category
     # Bimba y Lola : les codes source opaques ne sont interprétables qu'avec le
     # marchand. Les deux codes mixtes de la même source restent volontairement

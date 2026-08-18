@@ -229,6 +229,22 @@ class TestSportIsGoodFinalExplicitRoutes:
         assert t.classify("Culture et Nature > Glacière > Adulte > Mixte", "Glacière Rex London Best In Show", "Rex London", "Sport Is Good FR") is None
 
 
+class Test2DekansjeVerifiedSourceRoutes:
+    """Les chemins néerlandais 2dekansje restent limités aux familles relues."""
+
+    def test_audited_sources_reach_their_verified_aisles(self):
+        assert t.classify("Wonen & Koken > Koken & tafelen > Keukenmachines", "Produit opaque", "VAIVE", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify("Mooi & Gezond > Gezondheid > Personenweegschalen", "e.volve Weegschaal Personenweegschaal Digitaal", "e.volve", "2dekansje NL-BE") == t.SANTE
+        assert t.classify("Elektronica > Beeld & geluid > Hoofdtelefoons & oordopjes", "SoundFront Pro Draadloze Oordopjes", "SoundFront", "2dekansje NL-BE") == t.TV_SON
+        assert t.classify("Hobby & Sport > Sport > Sup Board", "LifeGoods SUP Board", "LifeGoods", "2dekansje NL-BE") == t.SPORT
+        assert t.classify("Hobby & Sport > Reizen & vrije tijd > Reistassen", "Eagle Creek No Matter What Duffel 60L", "Eagle Creek", "2dekansje NL-BE") == t.BAGAGERIE
+
+    def test_routes_stay_scoped_and_reject_broad_sources(self):
+        source = "Wonen & Koken > Koken & tafelen > Kleine keukenapparaten"
+        assert t.classify(source, "Produit opaque", "KitchenBrothers", "Autre marchand") is None
+        assert t.classify("Wonen & Koken", "Produit opaque", "", "2dekansje NL-BE") is None
+
+
 class TestBimbaYLolaVerifiedSourceRoutes:
     """Les codes source opaques ne valent que pour Bimba y Lola après audit complet."""
 
