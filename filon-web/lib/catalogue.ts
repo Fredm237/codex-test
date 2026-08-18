@@ -57,6 +57,9 @@ const SMARTPHONE_DISPLAY_IMPOSTORS = [
   // Intrus strictement observés : support de téléphone, bracelet ou imprimante
   // compatible avec un mobile, mais pas appareil principal.
   /\b(?:holder|phone\s+stand|finger\s+grip|bracket|socket|wrist\s+band|armband|fotoprinter|photo\s*printer|pocket\s*printer|mini\s*printer)\b/i,
+  // Pièces détachées observées dans la vitrine Smartphones : elles peuvent
+  // citer un modèle précis mais ne constituent jamais un téléphone achetable.
+  /\b(?:circuit(?:\s+imprim[ée])?|pcb|capteur|empreintes?\s+digitales?|gabarit|isolation\s+des\s+pistes)\b/i,
 ] as const;
 
 // Un accessoire peut citer Apple, Samsung ou Huawei dans son titre. On exige
