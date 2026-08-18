@@ -209,6 +209,7 @@ const ANALYSIS_TIMEOUT_MS = 25_000;
 // prouve qu’il s’agit d’un accessoire, d’un sous-vêtement ou d’une gaine.
 const INVALID_BASE_ITEM = /\b(?:jewell?ery|necklace|earrings?|bracelets?|rings?|colliers?|boucles?|bagues?|bra|underwear|lingerie|bralette|soutien[- ]?gorge|body\s*shaper|shapewear|tummy\s*control|waist\s*trainer|bridal\s+veil|veil|voile|accessories?)\b/i;
 const INVALID_FOOTWEAR_ITEM = /\b(?:panel|regulateur|régulateur|verstellfuss|height\s*adjust|wood|bois)\b/i;
+const INVALID_ACCESSORY_ITEM = /\b(?:toiletry\s*bag|washable\s+kraft|trousse\s+de\s+toilette)\b/i;
 
 // Quand l’utilisateur demande une pièce précise, elle doit être prouvée par
 // le titre d’au moins une offre. Un mot technique isolé (ex. « SHOES » sur un
@@ -223,6 +224,13 @@ function hasInvalidMainPiece(solution: OutfitSolution) {
   return Boolean(mainPiece && INVALID_BASE_ITEM.test(mainPiece.name));
 }
 
+function hasInvalidSupportingPiece(solution: OutfitSolution) {
+  return solution.items.some((item) =>
+    (item.role === "footwear" && INVALID_FOOTWEAR_ITEM.test(item.name))
+    || (item.role === "accessory" && INVALID_ACCESSORY_ITEM.test(item.name)),
+  );
+}
+
 function lacksRequestedItemEvidence(request: string, solution: OutfitSolution) {
   return REQUESTED_ITEM_EVIDENCE.some(({ request: requested, item, invalid }) =>
     requested.test(request) && !solution.items.some((offer) => item.test(offer.name) && !(invalid?.test(offer.name))),
@@ -232,6 +240,8 @@ function lacksRequestedItemEvidence(request: string, solution: OutfitSolution) {
 function abstainForIncompatibleSolution(response: OutfitResponse, request: string): OutfitResponse {
   const rejectionReason = hasInvalidMainPiece(response.solution)
     ? "no_verified_base"
+    : hasInvalidSupportingPiece(response.solution)
+      ? "no_verified_outfit_item"
     : lacksRequestedItemEvidence(request, response.solution)
       ? "no_verified_requested_item"
       : null;
@@ -263,6 +273,7 @@ function humanize(key: string, locale: Locale): string {
     budget_unreachable: { fr: "Le budget connu ne permet pas une proposition vérifiable", nl: "Het bekende budget laat geen verifieerbaar voorstel toe", en: "The known budget does not allow a verifiable proposal" },
     no_verified_base: { fr: "Aucune pièce principale vérifiable n’est disponible", nl: "Er is geen verifieerbaar hoofditem beschikbaar", en: "No verifiable main piece is available" },
     no_verified_requested_item: { fr: "Aucune offre ne prouve la pièce explicitement demandée", nl: "Geen aanbieding bewijst het expliciet gevraagde item", en: "No offer proves that the explicitly requested item is available" },
+    no_verified_outfit_item: { fr: "Une pièce de la tenue n’est pas un article vestimentaire vérifiable", nl: "Een onderdeel van de outfit is geen verifieerbaar kledingartikel", en: "An item in the outfit is not a verifiable fashion item" },
   };
   return labels[key]?.[locale] ?? key;
 }
