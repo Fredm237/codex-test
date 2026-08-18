@@ -99,14 +99,33 @@ def test_stale_price_has_a_visible_warning_not_a_hidden_penalty():
     d = compute_decision(
         price=100.0,
         currency="EUR",
-        history=[],
+        history=[(100.0, BASE)],
         in_stock=True,
-        updated_at=BASE,
+        updated_at=BASE + timedelta(days=44),
         now=BASE + timedelta(days=45),
     )
     freshness = next(s for s in d["signals"] if s["key"] == "freshness")
     assert freshness["status"] == "warning"
     assert freshness["age_hours"] == 45 * 24
+
+
+def test_internal_update_never_simulates_a_price_observation():
+    d = compute_decision(
+        price=100.0,
+        currency="EUR",
+        history=[],
+        in_stock=True,
+        # Cette date peut venir d’une correction interne : elle ne doit pas
+        # alimenter la fraîcheur affichée ni le score de décision.
+        updated_at=BASE + timedelta(days=30),
+        now=BASE + timedelta(days=30, hours=1),
+    )
+    freshness = next(s for s in d["signals"] if s["key"] == "freshness")
+    assert freshness["status"] == "unknown"
+    assert freshness["age_hours"] is None
+    assert "data_freshness" in d["missing"]
+    evidence = {item["key"]: item for item in d["evidence"]}
+    assert evidence["price"]["observed_at"] is None
 
 
 def test_accommodation_is_an_indicative_rate_not_a_best_price():
