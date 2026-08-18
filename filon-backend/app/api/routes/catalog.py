@@ -248,7 +248,20 @@ async def offers(
 ) -> dict:
     if session is None:
         return {"total": 0, "items": []}
-    stmt = select(models.Offer, models.Merchant).join(
+    # La fraîcheur d’une carte vient du dernier relevé de prix, jamais de
+    # `offers.updated_at` : ce dernier peut être modifié par une correction
+    # interne de taxonomie sans nouvelle observation marchand. La sous-requête
+    # corrélée fait un accès indexé par offre et ne scanne donc pas tout
+    # l’historique pour une page de 24 à 96 cartes.
+    observed_at = (
+        select(models.PriceSnapshot.captured_at)
+        .where(models.PriceSnapshot.offer_id == models.Offer.id)
+        .order_by(models.PriceSnapshot.captured_at.desc())
+        .limit(1)
+        .correlate(models.Offer)
+        .scalar_subquery()
+    )
+    stmt = select(models.Offer, models.Merchant, observed_at.label("observed_at")).join(
         models.Merchant, models.Offer.merchant_id == models.Merchant.id
     )
     blocked = _visible_merchant_clause()
@@ -368,11 +381,12 @@ async def offers(
                 "price": o.price,
                 "currency": o.currency,
                 "in_stock": o.in_stock,
+                "observed_at": observed.isoformat() if observed else None,
                 "image": o.image_url,
                 "link": o.deep_link,
                 "merchant": {"name": m.name, "slug": m.slug},
             }
-            for (o, m) in rows
+            for (o, m, observed) in rows
         ],
     }
 

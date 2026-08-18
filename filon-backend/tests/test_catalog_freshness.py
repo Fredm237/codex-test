@@ -1,0 +1,98 @@
+from __future__ import annotations
+
+from datetime import UTC, datetime, timedelta
+
+import pytest
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.api.routes import catalog
+from app.db import models
+from app.db import session as db
+from app.db.base import Base
+
+
+async def _offers(session):
+    return await catalog.offers(
+        q=None,
+        merchant=None,
+        department=None,
+        category=None,
+        subcategory=None,
+        brand=None,
+        price_min=None,
+        price_max=None,
+        sort="relevance",
+        duplicates=False,
+        limit=10,
+        offset=0,
+        session=session,
+    )
+
+
+@pytest.fixture
+async def freshness_session():
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    previous = (db._engine, db._sessionmaker)
+    db._engine = engine
+    db._sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
+
+    async with db._sessionmaker() as session:
+        merchant = models.Merchant(awin_mid=9041, name="Marchand fraîcheur", slug="marchand-fraicheur")
+        session.add(merchant)
+        await session.flush()
+        observed = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="observed",
+            name="Casque relevé",
+            price=90.0,
+            currency="EUR",
+            image_url="https://example.test/observed.jpg",
+            deep_link="https://example.test/observed",
+            is_canonical=True,
+        )
+        unobserved = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="unobserved",
+            name="Casque sans relevé",
+            price=75.0,
+            currency="EUR",
+            image_url="https://example.test/unobserved.jpg",
+            deep_link="https://example.test/unobserved",
+            is_canonical=True,
+        )
+        session.add_all([observed, unobserved])
+        await session.flush()
+        now = datetime.now(UTC).replace(tzinfo=None, microsecond=0)
+        session.add_all([
+            models.PriceSnapshot(offer_id=observed.id, price=110.0, captured_at=now - timedelta(days=5)),
+            models.PriceSnapshot(offer_id=observed.id, price=90.0, captured_at=now - timedelta(hours=2)),
+        ])
+        await session.commit()
+        yield session, now, observed.id, unobserved.id
+
+    db._engine, db._sessionmaker = previous
+    await engine.dispose()
+
+
+@pytest.mark.anyio
+async def test_offers_expose_latest_real_snapshot_or_null(freshness_session):
+    session, now, observed_id, unobserved_id = freshness_session
+
+    payload = await _offers(session)
+    by_id = {item["id"]: item for item in payload["items"]}
+
+    assert by_id[observed_id]["observed_at"] == (now - timedelta(hours=2)).isoformat()
+    assert by_id[unobserved_id]["observed_at"] is None
+
+
+@pytest.mark.anyio
+async def test_freshness_comes_from_snapshot_not_offer_timestamp(freshness_session):
+    session, _now, observed_id, _unobserved_id = freshness_session
+
+    payload = await _offers(session)
+    item = next(item for item in payload["items"] if item["id"] == observed_id)
+
+    assert item["observed_at"] is not None
+    assert item["observed_at"] != item.get("updated_at")
