@@ -524,17 +524,25 @@
    faute du visiteur — et ce bloc remplace des recommandations inventées, dont
    il ne doit surtout pas reprendre l'apparence. */
 .fa-steps.hidden { display: none; }
-.sa-failed { max-width: 46ch; padding: 22px 0 4px; }
-.sa-failed-title { font-size: 17px; font-weight: 600; color: var(--ink); margin: 0 0 8px; }
-.sa-failed-body { font-size: 14px; line-height: 1.6; color: var(--ink-2); margin: 0 0 18px; }
+/* Une abstention est une décision utile : le bloc doit être aussi lisible et
+   intentionnel qu’une recommandation, sans imiter une carte produit. */
+.sa-failed {
+  max-width: 620px; padding: clamp(20px, 4vw, 28px);
+  border: 1px solid var(--line); border-left: 3px solid var(--accent);
+  border-radius: var(--r-lg); background: var(--card); box-shadow: var(--shadow-soft);
+}
+.sa-failed-title { max-width: 32ch; font-size: clamp(18px, 2.3vw, 22px); font-weight: 620; letter-spacing: -.025em; line-height: 1.15; color: var(--ink); margin: 0 0 10px; }
+.sa-failed-body { max-width: 58ch; font-size: 14px; line-height: 1.65; color: var(--ink-2); margin: 0 0 20px; }
 .sa-failed-retry {
-  font: inherit; font-size: 14px; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 14px; font-weight: 650; text-decoration: none; cursor: pointer;
   min-height: 44px; padding: 0 20px;
   border: 1px solid var(--line); border-radius: var(--r-full);
   background: var(--card); color: var(--ink);
-  transition: background 0.18s ease, border-color 0.18s ease;
+  transition: transform 160ms cubic-bezier(.23,1,.32,1), background 160ms, border-color 160ms, color 160ms;
 }
-.sa-failed-retry:hover { background: var(--ink); color: var(--paper, #fff); border-color: var(--ink); }
+.sa-failed-retry:hover, .sa-failed-retry:focus-visible { background: var(--ink); color: var(--paper, #fff); border-color: var(--ink); outline: none; }
+.sa-failed-retry:active { transform: scale(.97); }
 @media (prefers-reduced-motion: reduce) { .sa-r, .sa-verdict, .sa-pick { opacity: 1; transform: none; } .sa-text .w { opacity: 1; transform: none; } }
 
 /* ---------- Assistant · need-based (Filon 2.0) ---------- */
