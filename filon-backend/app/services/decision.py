@@ -23,16 +23,16 @@ _ALWAYS_UNKNOWN = ("shipping_cost", "delivery_destination", "return_policy")
 _NON_COMPARABLE_KINDS = {"accommodation", "service", "digital_content", "unknown"}
 
 
-def _freshness(updated_at: datetime | None, *, now: datetime) -> tuple[int | None, int, int, str]:
+def _freshness(observed_at: datetime | None, *, now: datetime) -> tuple[int | None, int, int, str]:
     """Renvoie âge, points, poids actif et statut de fraîcheur.
 
     Les données qui ne portent aucune date n'obtiennent aucun point et ne
     diminuent pas artificiellement la note : elles sont signalées comme
     inconnues dans `missing` par l'appelant.
     """
-    if updated_at is None:
+    if observed_at is None:
         return None, 0, 0, "unknown"
-    age_hours = max(0, int((now - updated_at).total_seconds() // 3600))
+    age_hours = max(0, int((now - observed_at).total_seconds() // 3600))
     if age_hours <= 24:
         return age_hours, 15, 15, "positive"
     if age_hours <= 7 * 24:
@@ -105,7 +105,7 @@ def _contextual_decision(
     offer_kind: str,
     price: float | None,
     currency: str | None,
-    updated_at: datetime | None,
+    observed_at: datetime | None,
     now: datetime,
 ) -> dict[str, Any]:
     """Décision pour un tarif dépendant d’un contexte non observé par FILON."""
@@ -133,7 +133,7 @@ def _contextual_decision(
     else:
         signals.append({"key": "contextual_price", "status": "neutral", "price_semantics": price_semantics})
 
-    freshness_hours, freshness_points, freshness_weight, freshness_status = _freshness(updated_at, now=now)
+    freshness_hours, freshness_points, freshness_weight, freshness_status = _freshness(observed_at, now=now)
     if freshness_hours is None:
         missing.append("data_freshness")
     signals.append({"key": "freshness", "status": freshness_status, "age_hours": freshness_hours})
@@ -144,7 +144,7 @@ def _contextual_decision(
             "observed" if price is not None else "missing",
             "merchant_feed",
             "tarif observé, hors total contextuel" if price is not None else "tarif absent du dernier flux",
-            observed_at=updated_at if price is not None else None,
+            observed_at=observed_at if price is not None else None,
             value={"amount": price, "currency": currency, "semantics": price_semantics} if price is not None else None,
         ),
         _evidence(
@@ -163,8 +163,8 @@ def _contextual_decision(
             "freshness",
             "observed" if freshness_hours is not None else "missing",
             "merchant_feed",
-            "âge du dernier flux disponible" if freshness_hours is not None else "date du flux absente",
-            observed_at=updated_at if freshness_hours is not None else None,
+            "âge du dernier relevé de prix disponible" if freshness_hours is not None else "date de relevé absente",
+            observed_at=observed_at if freshness_hours is not None else None,
             value={"age_hours": freshness_hours, "status": freshness_status} if freshness_hours is not None else None,
         ),
     ]
@@ -195,7 +195,7 @@ def _contextual_decision(
             "price_semantics": price_semantics,
             "merchants_compared": 0,
             "offers_compared": 0,
-            "updated_at": updated_at.isoformat() if updated_at else None,
+            "last_observed_at": observed_at.isoformat() if observed_at else None,
             "history_samples": 0,
             "history_tracked_days": 0,
         },
@@ -224,14 +224,16 @@ def compute_decision(
     GBP n'est pas comparable à un prix EUR sans taux et frais vérifiables.
     """
     # Les timestamps existants de la base sont naïfs mais exprimés en UTC.
-    # On conserve ce contrat tout en évitant datetime.utcnow(), désormais obsolète.
+    # `offers.updated_at` peut changer après une correction interne : la fraîcheur
+    # affichée doit uniquement provenir d’un snapshot de prix réellement observé.
     now = now or datetime.now(UTC).replace(tzinfo=None)
+    observed_at = max((at for _, at in history if at is not None), default=None)
     if offer_kind in _NON_COMPARABLE_KINDS:
         return _contextual_decision(
             offer_kind=offer_kind,
             price=price,
             currency=currency,
-            updated_at=updated_at,
+            observed_at=observed_at,
             now=now,
         )
     if comparison_currency and currency and comparison_currency != currency:
@@ -329,7 +331,7 @@ def compute_decision(
             signals.append({"key": "availability", "status": "warning", "in_stock": False})
 
     # Fraîcheur de collecte.
-    freshness_hours, freshness_points, freshness_weight, freshness_status = _freshness(updated_at, now=now)
+    freshness_hours, freshness_points, freshness_weight, freshness_status = _freshness(observed_at, now=now)
     if freshness_hours is None:
         missing.append("data_freshness")
     else:
@@ -358,7 +360,7 @@ def compute_decision(
             "observed" if price is not None else "missing",
             "merchant_feed",
             "prix affiché dans le dernier flux" if price is not None else "prix absent du dernier flux",
-            observed_at=updated_at if price is not None else None,
+            observed_at=observed_at if price is not None else None,
             value={"amount": price, "currency": currency} if price is not None else None,
         ),
         _evidence(
@@ -380,15 +382,15 @@ def compute_decision(
             "observed" if in_stock is not None else "missing",
             "merchant_feed",
             "stock du dernier flux marchand" if in_stock is not None else "stock absent du dernier flux",
-            observed_at=updated_at if in_stock is not None else None,
+            observed_at=None,
             value={"in_stock": in_stock} if in_stock is not None else None,
         ),
         _evidence(
             "freshness",
             "observed" if freshness_hours is not None else "missing",
             "merchant_feed",
-            "âge du dernier flux disponible" if freshness_hours is not None else "date du flux absente",
-            observed_at=updated_at if freshness_hours is not None else None,
+            "âge du dernier relevé de prix disponible" if freshness_hours is not None else "date de relevé absente",
+            observed_at=observed_at if freshness_hours is not None else None,
             value={"age_hours": freshness_hours, "status": freshness_status} if freshness_hours is not None else None,
         ),
     ]
@@ -428,7 +430,7 @@ def compute_decision(
             "price_semantics": "comparable_product_price",
             "merchants_compared": merchants_count,
             "offers_compared": offers_count,
-            "updated_at": updated_at.isoformat() if updated_at else None,
+            "last_observed_at": observed_at.isoformat() if observed_at else None,
             "history_samples": verdict["samples"],
             "history_tracked_days": verdict["tracked_days"],
         },
