@@ -194,6 +194,25 @@ class TestSportIsGoodVerifiedSportRoots:
         assert t.classify("Lifestyle > Trousse > Adulte > Mixte", "Produit opaque", "Eastpak", "Sport Is Good FR") is None
 
 
+class TestSportIsGoodVerifiedLifestyleRoutes:
+    """Les chemins Lifestyle exigent une preuve source et un objet nommé."""
+
+    def test_audited_lifestyle_objects_reach_their_verified_aisles(self):
+        assert t.classify("Lifestyle > Tongs > Adulte > Homme", "Tongs Fila Troy", "Fila", "Sport Is Good FR") == t.CHAUSSURES
+        assert t.classify("Lifestyle > Trousse > Adulte > Mixte", "Trousse Eastpak Oval", "Eastpak", "Sport Is Good FR") == t.BAGAGERIE
+        assert t.classify("Lifestyle > Lacets > Adulte > Mixte", "Lacets Urban Classic flat", "Urban Classic", "Sport Is Good FR") == t.ACCESSOIRES
+        assert t.classify("Lifestyle > Boucles d'oreilles > Adulte > Femme", "Boucles d'oreilles femme Pieces Bree", "Pieces", "Sport Is Good FR") == t.BIJOUX
+        assert t.classify("Lifestyle > Bomber > Adulte > Homme", "Bomber Alpha Industries MA-1", "Alpha Industries", "Sport Is Good FR") == t.MODE_HOMME
+        assert t.classify("Lifestyle > Chemisier > Adulte > Femme", "Chemiser femme La Petite Étoile Saddie", "La Petite Étoile", "Sport Is Good FR") == t.MODE_FEMME
+        assert t.classify("Lifestyle > Blouson > Junior > Femme", "Blouson fille Name it", "Name it", "Sport Is Good FR") == t.MODE_ENFANT
+
+    def test_lifestyle_routes_stay_scoped_and_require_the_named_object(self):
+        source = "Lifestyle > Tongs > Adulte > Homme"
+        assert t.classify(source, "Produit opaque", "", "Sport Is Good FR") is None
+        assert t.classify(source, "Tongs Fila Troy", "Fila", "Autre marchand") is None
+        assert t.classify("Lifestyle > Gourde > Junior > Mixte", "Gourde acier enfant", "Rex London", "Sport Is Good FR") is None
+
+
 class TestBimbaYLolaVerifiedSourceRoutes:
     """Les codes source opaques ne valent que pour Bimba y Lola après audit complet."""
 
