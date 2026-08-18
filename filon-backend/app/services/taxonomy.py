@@ -275,6 +275,18 @@ _ON_FIGHT_PHYSICAL_SPORT_SOURCE = (
 )
 _ON_FIGHT_SERVICE_TITLE = r"\b(?:cours|coaching|formation|stage|training\s+session)\b"
 
+# Bimba y Lola : le flux fournit des identifiants numériques opaques. Les quatre
+# codes ci-dessous ont été contrôlés titre par titre : 439 offres de bagagerie,
+# chaussures, bijoux ou mode femme, sans contre-exemple. Ils restent attachés au
+# marchand et aux codes exacts ; les codes 166 et 167, hétérogènes, sont exclus.
+_BIMBA_Y_LOLA_MERCHANT = r"\bbimba\s+y\s+lola\b"
+_BIMBA_Y_LOLA_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
+    (BAGAGERIE, r"^6551$"),
+    (CHAUSSURES, r"^187$"),
+    (BIJOUX, r"^188$"),
+    (MODE_FEMME, r"^1604$"),
+)
+
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
 # pas déjà un classement plus précis. Chaque entrée reste donc réversible et
@@ -1616,6 +1628,13 @@ def classify(
         and not _has(_ON_FIGHT_SERVICE_TITLE, name)
     ):
         return SPORT
+    # Bimba y Lola : les codes source opaques ne sont interprétables qu'avec le
+    # marchand. Les deux codes mixtes de la même source restent volontairement
+    # hors de ce mapping et doivent conserver leur preuve lexicale individuelle.
+    if _has(_BIMBA_Y_LOLA_MERCHANT, merchant_name or ""):
+        for category, source_pattern in _BIMBA_Y_LOLA_SOURCE_ROUTES:
+            if _has(source_pattern, merchant_category):
+                return category
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
     # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie

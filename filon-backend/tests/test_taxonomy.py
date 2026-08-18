@@ -176,6 +176,21 @@ class TestOnFightVerifiedPhysicalSportRoutes:
         assert t.classify("Ju-Jitsu > Porte-clé > Adulte > Mixte", "Produit opaque", "Danrho", "On Fight FR") is None
 
 
+class TestBimbaYLolaVerifiedSourceRoutes:
+    """Les codes source opaques ne valent que pour Bimba y Lola après audit complet."""
+
+    def test_audited_numeric_codes_reach_their_verified_aisles(self):
+        assert t.classify("6551", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") == t.BAGAGERIE
+        assert t.classify("187", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") == t.CHAUSSURES
+        assert t.classify("188", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") == t.BIJOUX
+        assert t.classify("1604", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") == t.MODE_FEMME
+
+    def test_numeric_routes_remain_scoped_and_mixed_codes_abstain(self):
+        assert t.classify("187", "Produit opaque", "", "Autre marchand") is None
+        assert t.classify("166", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") is None
+        assert t.classify("167", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") is None
+
+
 class TestRefusesToGuess:
     def test_unknown_returns_none_rather_than_a_wrong_aisle(self):
         assert t.classify("Divers", "Article 12345") is None
