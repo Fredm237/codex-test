@@ -194,6 +194,7 @@ const COPY: Record<Locale, Copy> = {
 };
 
 const MODES: Mode[] = ["create", "complete", "recreate", "optimize", "compare", "discover"];
+const ANALYSIS_TIMEOUT_MS = 25_000;
 
 function humanize(key: string, locale: Locale): string {
   const labels: Record<string, Record<Locale, string>> = {
@@ -251,11 +252,14 @@ export function OutfitStudio() {
     setError(null);
     setResult(null);
     setFeedback(null);
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), ANALYSIS_TIMEOUT_MS);
     try {
       const res = await fetch(`${API}/api/intelligence/outfit/analyse`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ request: trimmed, mode, locale }),
+        signal: controller.signal,
       });
       if (!res.ok) {
         const body = await res.json().catch(() => null);
@@ -266,6 +270,7 @@ export function OutfitStudio() {
     } catch {
       setError(copy.unavailable);
     } finally {
+      window.clearTimeout(timeout);
       setBusy(false);
     }
   }
@@ -299,7 +304,7 @@ export function OutfitStudio() {
 
       {feature === "ready" && (
         <>
-          <form className="os-panel os-form" onSubmit={submit}>
+          <form className="os-panel os-form" onSubmit={submit} aria-busy={busy}>
             <fieldset>
               <legend>{copy.modeLabel}</legend>
               <div className="os-modes">
@@ -333,6 +338,7 @@ export function OutfitStudio() {
             <button className="os-submit" type="submit" disabled={busy || request.trim().length < 2}>
               {busy ? copy.thinking : copy.submit}
             </button>
+            {busy && <p className="os-analysis-status" aria-live="polite">{copy.thinking}</p>}
           </form>
 
           {error && <div className="os-panel os-error" role="alert">{error}</div>}
