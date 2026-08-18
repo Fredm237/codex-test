@@ -262,6 +262,13 @@ class Test2DekansjeSecondBatchSourceRoutes:
         assert t.classify("Hobby & Sport > Reizen & vrije tijd", "Produit opaque", "", "2dekansje NL-BE") is None
         assert t.classify("Elektronica", "Produit opaque", "", "2dekansje NL-BE") is None
 
+    def test_sport_equipment_with_training_in_its_name_is_physical(self):
+        source = "Hobby & Sport > Sport > Overige (Sport)"
+        goal = "Dunlop Voetbaldoel Set - Voetbal Training Goals voor Kinderen"
+        assert t.classify_offer_kind(source, goal, "Dunlop", "2dekansje NL-BE") == t.PHYSICAL_PRODUCT
+        assert t.classify_offer_kind(source, "Formation training football", "", "2dekansje NL-BE") == t.SERVICE
+        assert t.classify_offer_kind(source, goal, "Dunlop", "Autre marchand") == t.SERVICE
+
 
 class TestBimbaYLolaVerifiedSourceRoutes:
     """Les codes source opaques ne valent que pour Bimba y Lola après audit complet."""
