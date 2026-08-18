@@ -221,6 +221,7 @@ _2DEKANSJE_LAUNDRY_ABSTENTION = r"\b(?:air\s+duster|bijzettafel|wasverzachter|dr
 _2DEKANSJE_HOBBY_SPORT_SOURCE = r"\bhobby\s*&\s*sport\b"
 _2DEKANSJE_HEALTH_SOURCE = r"\bmooi\s*&\s*gezond\s*>\s*gezondheid\b"
 _2DEKANSJE_HEALTH_ABSTENTION = r"\b(?:watertester|rayovac\s+13|hygrometer|weerstation|wiebeloogjes|tissues|wierookhouder)\b"
+_2DEKANSJE_TRANSLATED_SOURCE = r"^vertaald(?:\s*>\s*frans)?$"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -306,6 +307,27 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      r"(?:opvouwbare\s+)?rollator|shakti\s+mat|(?:koorts)?thermometer|glucosemeter|"
      r"orthopedisch\s+(?:kussen|kniekussen)|(?:nek|knie)kussen|slaapkussen|snurkbeugel|herstelmondstuk|"
      r"slaaptape|acupressuur)\b"),
+    # Onzième vague : « Vertaald » décrit une étape du flux, jamais un rayon.
+    # Les quatre routes suivantes restent donc entièrement lexicales et sont
+    # scellées au marchand et à ce seul marqueur de flux.
+    (BIJOUX,
+     _2DEKANSJE_TRANSLATED_SOURCE,
+     r"\b(?:oorbellen|oorhangers|(?:dames\s+)?ketting|armband)\b"),
+    (SPORT,
+     _2DEKANSJE_TRANSLATED_SOURCE,
+     r"\b(?:kinderstep|voetbaldoel|basketbalset|bokshandschoenen|cornhole|aerobic\s+stepper|"
+     r"fitnesstrainer|turnmat|bodyboard|campinglounger|klimframe|kindertrampoline|waterhangmat|"
+     r"voetbal\s+goal)\b"),
+    (SANTE,
+     _2DEKANSJE_TRANSLATED_SOURCE,
+     r"\b(?:elektrisch\s+warmtekussen|warmtekussen|voetmassageapparaat|massage\s+gun|"
+     r"acupressuur\s+mat|shakti\s+mat|massagetafel)\b"),
+    (ELECTROMENAGER,
+     _2DEKANSJE_TRANSLATED_SOURCE,
+     r"\b(?:elektrische\s+handdoekradiator|elektrische\s+kachel|convectorkachel|luchtontvochtiger|"
+     r"luchtreiniger|teppanyaki|stoomkoker|voedseldroger|reiswaterkoker|\bblender\b|mini\s+airco|"
+     r"mobiele\s+airco|aircooler|hetelucht\s*friteuse|airfryer(?:\s+oven)?|contactgrill|"
+     r"tosti\s+apparaat|kruimeldief|elektrische\s+ruitenreiniger)\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
