@@ -162,6 +162,20 @@ export function ImmersiveExperience() {
     }
 
     let mounted = true;
+    const trimMobileCache = (center: number) => {
+      if (!isMobile) return;
+      // Le mobile ne doit jamais conserver les 192 images décodées après un long
+      // scroll. On garde la frame d’entrée et une fenêtre assez large pour un
+      // retour fluide, puis on autorise le navigateur à libérer le reste.
+      const keepFrom = Math.max(0, center - frameStride * 6);
+      const keepTo = Math.min(totalFrames - 1, center + prefetchWindow + frameStride * 3);
+      imagesRef.current.forEach((image, index) => {
+        if (image && index !== 0 && (index < keepFrom || index > keepTo)) {
+          imagesRef.current[index] = null;
+          requestedRef.current.delete(index);
+        }
+      });
+    };
     const loadFrame = (index: number) => {
       if (index < 0 || index >= totalFrames || requestedRef.current.has(index)) return;
       requestedRef.current.add(index);
@@ -188,6 +202,7 @@ export function ImmersiveExperience() {
     prefetchRef.current = (frame: number) => {
       const from = Math.max(0, frame - frameStride * 2);
       const to = Math.min(totalFrames - 1, frame + prefetchWindow);
+      trimMobileCache(frame);
       for (let index = from; index <= to; index += frameStride) loadFrame(index);
     };
 
