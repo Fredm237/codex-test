@@ -376,6 +376,11 @@ _2DEKANSJE_SECOND_BATCH_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (TV_SON, r"^elektronica\s*>\s*beeld\s*&\s*geluid\s*>\s*radio's,\s*cd-\s*&\s*platenspelers$"),
     (CULTURE, r"^hobby\s*&\s*sport\s*>\s*boeken$"),
 )
+_2DEKANSJE_PHYSICAL_SPORT_SOURCE = (
+    r"^hobby\s*&\s*sport\s*>\s*sport(?:\s*>\s*(?:overige\s*\(sport\)|gewichten|"
+    r"wintersport|vechtsport|tafeltennis))?$"
+)
+_2DEKANSJE_SERVICE_TITLE = r"\b(?:cours|coaching|formation|stage|r[ée]servation|booking|session)\b"
 # Bimba y Lola : le flux fournit des identifiants numériques opaques. Les quatre
 # codes ci-dessous ont été contrôlés titre par titre : 439 offres de bagagerie,
 # chaussures, bijoux ou mode femme, sans contre-exemple. Ils restent attachés au
@@ -540,6 +545,12 @@ def classify_offer_kind(
         _has(_SPORT_IS_GOOD_MERCHANT, merchant_name)
         and _has(_SPORT_IS_GOOD_PHYSICAL_SPORT_SOURCE, merchant_category)
         and not _has(_SPORT_IS_GOOD_SERVICE_TITLE, name)
+    ):
+        return PHYSICAL_PRODUCT
+    if (
+        _has(_2DEKANSJE_MERCHANT, merchant_name)
+        and _has(_2DEKANSJE_PHYSICAL_SPORT_SOURCE, merchant_category)
+        and not _has(_2DEKANSJE_SERVICE_TITLE, name)
     ):
         return PHYSICAL_PRODUCT
     if _has(_SERVICE_DIRECT, text) or (
