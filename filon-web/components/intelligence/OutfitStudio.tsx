@@ -54,6 +54,8 @@ type Copy = {
   disabledBody: string;
   unavailable: string;
   resultEyebrow: string;
+  itemSingular: string;
+  itemPlural: string;
   knownTotal: string;
   delivery: string;
   confidence: string;
@@ -88,6 +90,8 @@ const COPY: Record<Locale, Copy> = {
     disabledBody: "Le module est isolé du catalogue et n’est pas encore activé publiquement. FILON ne crée pas de recommandation de style sans offres vérifiables.",
     unavailable: "L’analyse est momentanément indisponible. Aucune recommandation n’a été inventée.",
     resultEyebrow: "Solution vérifiable",
+    itemSingular: "pièce",
+    itemPlural: "pièces",
     knownTotal: "Total des articles",
     delivery: "Livraison à vérifier",
     confidence: "Confiance des preuves",
@@ -127,6 +131,8 @@ const COPY: Record<Locale, Copy> = {
     disabledBody: "De module staat los van de catalogus en is nog niet publiek geactiveerd. FILON maakt geen stijlaanbeveling zonder verifieerbare aanbiedingen.",
     unavailable: "De analyse is tijdelijk niet beschikbaar. Er is geen aanbeveling verzonnen.",
     resultEyebrow: "Verifieerbare oplossing",
+    itemSingular: "stuk",
+    itemPlural: "stuks",
     knownTotal: "Totaal van de artikelen",
     delivery: "Levering controleren",
     confidence: "Bewijsvertrouwen",
@@ -166,6 +172,8 @@ const COPY: Record<Locale, Copy> = {
     disabledBody: "The module is isolated from the catalogue and is not publicly enabled yet. FILON does not create style recommendations without verifiable offers.",
     unavailable: "The analysis is temporarily unavailable. No recommendation has been invented.",
     resultEyebrow: "Verifiable solution",
+    itemSingular: "piece",
+    itemPlural: "pieces",
     knownTotal: "Items total",
     delivery: "Delivery to check",
     confidence: "Evidence confidence",
@@ -365,7 +373,7 @@ function OutfitResult({ result, copy, locale, feedback, onFeedback }: { result: 
   return (
     <article className="os-result" aria-live="polite">
       <header className="os-result-head">
-        <div><p className="os-kicker">{copy.resultEyebrow}</p><h2>{solution.items.length} {solution.items.length > 1 ? "pieces" : "piece"}</h2></div>
+        <div><p className="os-kicker">{copy.resultEyebrow}</p><h2>{solution.items.length} {solution.items.length > 1 ? copy.itemPlural : copy.itemSingular}</h2></div>
         <div className="os-scores">
           <span><b>{solution.style_score}/100</b>{copy.style}</span>
           <span><b>{solution.confidence_score}/100</b>{copy.confidence}</span>
