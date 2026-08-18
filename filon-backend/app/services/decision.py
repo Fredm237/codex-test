@@ -33,12 +33,15 @@ def _freshness(observed_at: datetime | None, *, now: datetime) -> tuple[int | No
     if observed_at is None:
         return None, 0, 0, "unknown"
     age_hours = max(0, int((now - observed_at).total_seconds() // 3600))
-    if age_hours <= 24:
+    # La fraîcheur est une preuve temporelle, pas une présomption de disponibilité.
+    # Au-delà de 72 h, le prix reste documenté mais il n’est plus suffisamment
+    # récent pour renforcer une décision d’achat.
+    if age_hours <= 72:
         return age_hours, 15, 15, "positive"
     if age_hours <= 7 * 24:
-        return age_hours, 10, 15, "positive"
-    if age_hours <= 30 * 24:
         return age_hours, 5, 15, "warning"
+    if age_hours <= 30 * 24:
+        return age_hours, 0, 15, "warning"
     return age_hours, 0, 15, "warning"
 
 

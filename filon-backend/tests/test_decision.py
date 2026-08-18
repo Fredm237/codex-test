@@ -167,3 +167,45 @@ def test_service_and_digital_content_require_conditions_instead_of_product_verdi
         assert d["recommendation_scope"] == "conditions_a_verifier"
         assert expected_missing in d["missing"]
         assert d["price_verdict"]["level"] == "insuffisant"
+
+
+def test_four_day_old_price_is_explicitly_marked_for_confirmation():
+    d = compute_decision(
+        price=100.0,
+        currency="EUR",
+        history=[(100.0, BASE)],
+        in_stock=True,
+        now=BASE + timedelta(days=4),
+    )
+    freshness = next(s for s in d["signals"] if s["key"] == "freshness")
+    assert freshness["status"] == "warning"
+    assert freshness["age_hours"] == 4 * 24
+    assert d["score_observed"] == 20  # disponibilité + fraîcheur réduite
+
+
+def test_three_day_old_price_remains_recently_observed():
+    d = compute_decision(
+        price=100.0,
+        currency="EUR",
+        history=[(100.0, BASE)],
+        in_stock=True,
+        now=BASE + timedelta(hours=72),
+    )
+    freshness = next(s for s in d["signals"] if s["key"] == "freshness")
+    assert freshness["status"] == "positive"
+    assert freshness["age_hours"] == 72
+    assert d["score_observed"] == 30  # disponibilité + fraîcheur complète
+
+
+def test_eight_day_old_price_no_longer_adds_freshness_points():
+    d = compute_decision(
+        price=100.0,
+        currency="EUR",
+        history=[(100.0, BASE)],
+        in_stock=True,
+        now=BASE + timedelta(days=8),
+    )
+    freshness = next(s for s in d["signals"] if s["key"] == "freshness")
+    assert freshness["status"] == "warning"
+    assert freshness["age_hours"] == 8 * 24
+    assert d["score_observed"] == 15  # seule la disponibilité reste observée
