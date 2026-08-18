@@ -6,7 +6,7 @@ import { useLocale, type Locale } from "@/lib/i18n";
 import "./outfit-studio.css";
 
 type Mode = "create" | "complete" | "recreate" | "optimize" | "compare" | "discover";
-type FeatureState = "loading" | "ready" | "disabled" | "unavailable";
+type FeatureState = "ready" | "disabled";
 
 type OutfitItem = {
   offer_id: number;
@@ -249,7 +249,10 @@ function humanize(key: string, locale: Locale): string {
 export function OutfitStudio() {
   const { locale } = useLocale();
   const copy = COPY[locale];
-  const [feature, setFeature] = useState<FeatureState>("loading");
+  // Le formulaire ne doit pas attendre un contrôle de statut réseau : la
+  // validation définitive reste celle de l’endpoint d’analyse. Cela élimine
+  // le squelette bloquant sans masquer un désactivation explicite du module.
+  const [feature, setFeature] = useState<FeatureState>("ready");
   const [mode, setMode] = useState<Mode>("create");
   const [request, setRequest] = useState("");
   const [result, setResult] = useState<OutfitResponse | null>(null);
@@ -265,8 +268,10 @@ export function OutfitStudio() {
         return res.json();
       })
       .then((data) => setFeature(data?.modules?.outfit_studio ? "ready" : "disabled"))
-      .catch((err) => {
-        if (err.name !== "AbortError") setFeature("unavailable");
+      .catch(() => {
+        // Un contrôle de statut indisponible ne rend pas l’outil indisponible :
+        // on laisse l’utilisateur soumettre, puis l’endpoint d’analyse fournit
+        // une réponse explicite ou un état d’erreur honnête.
       });
     return () => controller.abort();
   }, []);
@@ -331,9 +336,7 @@ export function OutfitStudio() {
         <p>{copy.intro}</p>
       </div>
 
-      {feature === "loading" && <div className="os-panel os-status" aria-live="polite">{copy.thinking}</div>}
       {feature === "disabled" && <div className="os-panel os-status"><h2>{copy.disabledTitle}</h2><p>{copy.disabledBody}</p></div>}
-      {feature === "unavailable" && <div className="os-panel os-status"><h2>{copy.unavailable}</h2></div>}
 
       {feature === "ready" && (
         <>
