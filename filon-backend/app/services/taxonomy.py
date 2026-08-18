@@ -224,6 +224,7 @@ _2DEKANSJE_HEALTH_ABSTENTION = r"\b(?:watertester|rayovac\s+13|hygrometer|weerst
 _2DEKANSJE_TRANSLATED_SOURCE = r"^vertaald(?:\s*>\s*frans)?$"
 _2DEKANSJE_TRANSLATED_FR_SOURCE = r"^vertaald\s*>\s*frans$"
 _2DEKANSJE_TRANSLATED_FOOTBALL_GOAL = r"\b(?:voetbaldoel|voetbal\s+goal)\b"
+_2DEKANSJE_TRAVEL_SOURCE = r"\bhobby\s*&\s*sport\s*>\s*reizen\s*&\s*vrije\s*tijd\s*>\s*overige\s*\(reizen\)"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -359,6 +360,22 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (TV_SON,
      _2DEKANSJE_TRANSLATED_FR_SOURCE,
      r"\b(?:bluetooth\s+receiver|oordopjes)\b"),
+    # Treizième vague : la branche Voyage mélange bagagerie, loisirs et objets
+    # polyvalents. Les routes ci-dessous ne couvrent que les objets à fonction
+    # explicitement nommée dans les 50 titres audités.
+    (ELECTROMENAGER,
+     _2DEKANSJE_TRAVEL_SOURCE,
+     r"\b(?:elektrische|thermo-elektrische)\s+koelbox\b"),
+    (BAGAGERIE,
+     _2DEKANSJE_TRAVEL_SOURCE,
+     r"\b(?:koeltas|thermotas|picknick(?:tas|lunchtas)|bagagelabels?|koffer(?:\s*(?:tags?|labels?|weegschaal))?|"
+     r"reiskoffer|handbagagekoffer)\b"),
+    (SPORT,
+     _2DEKANSJE_TRAVEL_SOURCE,
+     r"\b(?:zwemring|vissersboot|axe\s+throw)\b"),
+    (AUTO,
+     _2DEKANSJE_TRAVEL_SOURCE,
+     r"\bmotorhelm\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
