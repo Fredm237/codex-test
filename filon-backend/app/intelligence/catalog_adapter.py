@@ -57,6 +57,9 @@ _SCOPE_EXCLUSIONS: dict[str, frozenset[str]] = {
         # Les accessoires de silhouette décrivent une sous-couche ou un maintien,
         # non la robe demandée, même si le feed cite « wedding dress » comme usage.
         "shaper", "shapewear", "tummy", "waist trainer", "body shaper",
+        # Les accessoires de cérémonie peuvent répéter « wedding dress » pour
+        # leur destination : un voile ou un lot d’accessoires ne devient pas une robe.
+        "veil", "voile", "accessory", "accessories", "bridal veil",
     }),
 }
 
