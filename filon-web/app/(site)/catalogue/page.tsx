@@ -111,7 +111,7 @@ export default async function CataloguePage({
             <CatalogueSearch query={query} />
           </div>
 
-          {result !== null && total > 0 && (
+          {result !== null && result.items.length > 0 && (
             <>
               <CatalogueControls query={query} sort={sortValue(query)} per={per} />
               <div className="fx-product-grid fx-catalogue-grid">
@@ -128,7 +128,9 @@ export default async function CataloguePage({
             </>
           )}
 
-          {result !== null && total === 0 && <CatalogueEmpty query={query} />}
+          {result !== null && (total === 0 || result.withheld_for_evidence) && (
+            <CatalogueEmpty query={query} withheldForEvidence={result.withheld_for_evidence} />
+          )}
 
           {/* Les rangées éditoriales viennent après la grille : leur lenteur ne
               bloque ni la navigation, ni le premier produit consultable. */}

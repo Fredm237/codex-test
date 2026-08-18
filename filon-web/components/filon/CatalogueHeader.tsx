@@ -142,15 +142,26 @@ export function CataloguePager({
   );
 }
 
-export function CatalogueEmpty({ query }: { query: CatalogueQuery }) {
-  const { t } = useLocale();
+export function CatalogueEmpty({
+  query,
+  withheldForEvidence = false,
+}: {
+  query: CatalogueQuery;
+  withheldForEvidence?: boolean;
+}) {
+  const { t, locale } = useLocale();
+  const evidenceMessage = {
+    fr: "FILON n’affiche aucune offre ici : les résultats reçus ne prouvent pas un smartphone complet.",
+    nl: "FILON toont hier geen aanbieding: de ontvangen resultaten bewijzen geen volwaardige smartphone.",
+    en: "FILON shows no offer here: the returned results do not prove a complete smartphone.",
+  }[locale];
   const assistantHref = query.q
     ? `/recherche?q=${encodeURIComponent(query.q)}`
     : "/recherche";
 
   return (
     <div className="fx-body fx-catalogue-empty" role="status">
-      <p>{t("cat.empty")}</p>
+      <p>{withheldForEvidence ? evidenceMessage : t("cat.empty")}</p>
       <div className="fx-catalogue-empty-actions">
         <a href="/catalogue/">{t("cat.reset")}</a>
         <a className="fx-catalogue-empty-assistant" href={assistantHref}>

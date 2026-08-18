@@ -191,7 +191,7 @@ export function sortValue(query: CatalogueQuery): string {
 export async function getOffers(
   query: CatalogueQuery,
   resolved: ReturnType<typeof resolve>
-): Promise<{ total: number; items: Offer[] } | null> {
+): Promise<{ total: number; items: Offer[]; withheld_for_evidence: boolean } | null> {
   const per = pageSize(query);
   const page = pageNumber(query);
   const params = new URLSearchParams({
@@ -215,9 +215,11 @@ export async function getOffers(
   const data = await getJson(`/api/catalog/offers?${params.toString()}`, 300);
   if (!data) return null;
   const items = (data.items || []) as Offer[];
+  const visibleItems = items.filter((offer) => isVisibleInSelectedSubcategory(offer, resolved.subcategory));
   return {
     total: Number(data.total || 0),
-    items: items.filter((offer) => isVisibleInSelectedSubcategory(offer, resolved.subcategory)),
+    items: visibleItems,
+    withheld_for_evidence: resolved.subcategory === "Smartphones" && items.length > 0 && visibleItems.length === 0,
   };
 }
 
