@@ -28,17 +28,15 @@ const L: Record<Locale, { label: string; all: string; products: (n: number) => s
 };
 
 /** Nombre de sous-rayons montrés sous un rayon détaillé. */
-const SUBS_SHOWN = 4;
+const SUBS_SHOWN = 3;
 
-/** Nombre de rayons détaillés par département.
- *
- *  Détailler les huit rayons de « Mode & Accessoires » produisait 1 240 px de
- *  contenu dans un panneau haut de 620 px : la moitié du menu était hors de vue
- *  et « Famille & Quotidien » exigeait de faire défiler. Un méga-menu oriente,
- *  il n'énumère pas. On détaille donc les rayons de tête et on laisse les autres
- *  en accès direct — ils restent à un clic.
- */
-const DETAILED_PER_DEPT = 3;
+/** Un méga-menu oriente : chaque département reste atteignable en entier par
+ * son titre, mais il n’a pas à reproduire toute son arborescence. */
+const CATEGORIES_SHOWN = 4;
+
+/** Un seul rayon de tête peut exposer ses sous-rayons dans le panneau. Cela
+ * préserve la découverte sans produire un mur de liens concurrent avec la page. */
+const DETAILED_PER_DEPT = 1;
 
 /** Les plus gros sous-rayons, pas les premiers venus.
  *
@@ -64,13 +62,14 @@ export function pickSubcategories(subs: Subcategory[] | undefined, limit = SUBS_
  *  Le poids en produits sert d'arbitre : dans « High-Tech », Téléphonie
  *  (72 634) mérite son détail, Photo (1 261) se contente de son lien.
  */
+export function pickCategories(categories: Category[], limit = CATEGORIES_SHOWN): Category[] {
+  return [...categories]
+    .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "fr"))
+    .slice(0, limit);
+}
+
 export function detailedCategorySlugs(dep: Department, limit = DETAILED_PER_DEPT): Set<string> {
-  return new Set(
-    [...dep.categories]
-      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "fr"))
-      .slice(0, limit)
-      .map((c) => c.slug)
-  );
+  return new Set(pickCategories(dep.categories, limit).map((c) => c.slug));
 }
 
 /** Répartit les départements en colonnes de hauteur comparable.
@@ -81,15 +80,16 @@ export function detailedCategorySlugs(dep: Department, limit = DETAILED_PER_DEPT
  *  remplit la colonne la moins chargée — un ordonnancement glouton, suffisant
  *  pour six éléments et stable d'un rendu à l'autre.
  */
-export function balanceColumns(departments: Department[], columns = 3): Department[][] {
+export function balanceColumns(departments: Department[], columns = 4): Department[][] {
   const cols: Department[][] = Array.from({ length: columns }, () => []);
   const load = new Array(columns).fill(0);
   const cost = (d: Department) => {
+    const categories = pickCategories(d.categories);
     const detailed = detailedCategorySlugs(d);
     return (
       1 +
-      d.categories.length +
-      d.categories.reduce(
+      categories.length +
+      categories.reduce(
         (n, c) => n + (detailed.has(c.slug) ? pickSubcategories(c.subcategories).length : 0),
         0
       )
@@ -273,6 +273,7 @@ export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Dep
           {columns.map((col, i) => (
             <div className="mm-col" key={i}>
               {col.map((d) => {
+                const categories = pickCategories(d.categories);
                 const detailed = detailedCategorySlugs(d);
                 return (
                 <section className="mm-dept" key={d.slug} aria-labelledby={`${panelId}-${d.slug}`}>
@@ -281,7 +282,7 @@ export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Dep
                     <em>{t.products(d.count)}</em>
                   </a>
                   <ul>
-                    {d.categories.map((c) => (
+                    {categories.map((c) => (
                       <li key={c.slug}>
                         <a href={`/categorie/${c.slug}/`} onClick={() => close()}>
                           {c.name}
