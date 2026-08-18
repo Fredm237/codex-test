@@ -105,6 +105,19 @@ class TestVevorLoadBinders:
         assert t.classify(None, "Classeur à anneaux A4 pour documents de bureau") != t.AUTO
 
 
+class TestYesStyleVerifiedSourceRoutes:
+    """Les routes source YesStyle restent scellées au marchand audité."""
+
+    def test_homogeneous_beauty_sources_are_classified_for_yesstyle_only(self):
+        assert t.classify("Bath & Shower", "Produit opaque", "SOFNON", "YesStyle") == t.BEAUTE
+        assert t.classify("Eyes", "Produit opaque", "MEKO", "YesStyle") == t.BEAUTE
+        assert t.classify("Bath & Shower", "Produit opaque", "SOFNON", "Autre marchand") is None
+
+    def test_toothpaste_is_health_and_lifestyle_stays_unclassified(self):
+        assert t.classify("Toothpaste", "Produit opaque", "ECORO", "YesStyle") == t.SANTE
+        assert t.classify("Lifestyle", "Re-Stay Re-spenser 350ml", "innisfree", "YesStyle") is None
+
+
 class TestRefusesToGuess:
     def test_unknown_returns_none_rather_than_a_wrong_aisle(self):
         assert t.classify("Divers", "Article 12345") is None
