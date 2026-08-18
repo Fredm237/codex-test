@@ -369,7 +369,7 @@ export function OutfitStudio() {
               {copy.examples.map((example) => <button type="button" key={example} onClick={() => setRequest(example)}>{example}</button>)}
             </div>
             <button className="os-submit" type="submit" disabled={busy || request.trim().length < 2}>
-              {busy ? copy.thinking : copy.submit}
+              {copy.submit}
             </button>
             {busy && <p className="os-analysis-status" aria-live="polite">{copy.thinking}</p>}
           </form>
