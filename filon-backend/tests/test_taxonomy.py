@@ -365,6 +365,27 @@ class Test2DekansjeTranslatedObjectRoutes:
         assert t.classify("Vertaald > Frans", "Umbro Voetbaldoel - Metaal", "Umbro", "Autre marchand") is None
 
 
+class Test2DekansjeTranslatedFrenchObjectRoutes:
+    """Le second lot traduit exige une source exacte et un objet nommé."""
+
+    def test_explicit_french_translated_objects_reach_verified_aisles(self):
+        source = "Vertaald > Frans"
+        assert t.classify(source, "Coast Wijnrek - Hout - 16 flessen", "Coast", "2dekansje NL-BE") == t.MAISON
+        assert t.classify(source, "Lifetime Garden Partytent - Paviljoen", "Lifetime", "2dekansje NL-BE") == t.JARDIN
+        assert t.classify(source, "Coast Kindertafel INCL 2 stoelen", "Coast", "2dekansje NL-BE") == t.BEBE
+        assert t.classify(source, "Kattenboom met Hangmat", "Coast", "2dekansje NL-BE") == t.ANIMALERIE
+        assert t.classify(source, "Magische goocheldoos met 150 trucs", "", "2dekansje NL-BE") == t.JOUETS
+        assert t.classify(source, "Dunlop Krik - Hefvermogen 1,5 Ton", "Dunlop", "2dekansje NL-BE") == t.AUTO
+        assert t.classify(source, "JC Stijltang Keramische Coating", "JC", "2dekansje NL-BE") == t.BEAUTE
+        assert t.classify(source, "Motorola Sound In-Ear Oordopjes", "Motorola", "2dekansje NL-BE") == t.TV_SON
+
+    def test_french_translated_routes_stay_narrow(self):
+        assert t.classify("Vertaald > Frans", "Coast 3-wielmotorfiets opladen", "Coast", "2dekansje NL-BE") is None
+        assert t.classify("Vertaald > Frans", "Nampook Netverlichting 200 LED", "Nampook", "2dekansje NL-BE") is None
+        assert t.classify("Vertaald", "Coast Wijnrek - Hout - 16 flessen", "Coast", "2dekansje NL-BE") is None
+        assert t.classify("Vertaald > Frans", "Coast Wijnrek - Hout - 16 flessen", "Coast", "Autre marchand") is None
+
+
 class Test2DekansjeTranslatedFootballGoalOfferKind:
     """Un but physique ne devient pas un service à cause du mot training."""
 

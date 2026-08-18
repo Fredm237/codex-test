@@ -222,6 +222,7 @@ _2DEKANSJE_HOBBY_SPORT_SOURCE = r"\bhobby\s*&\s*sport\b"
 _2DEKANSJE_HEALTH_SOURCE = r"\bmooi\s*&\s*gezond\s*>\s*gezondheid\b"
 _2DEKANSJE_HEALTH_ABSTENTION = r"\b(?:watertester|rayovac\s+13|hygrometer|weerstation|wiebeloogjes|tissues|wierookhouder)\b"
 _2DEKANSJE_TRANSLATED_SOURCE = r"^vertaald(?:\s*>\s*frans)?$"
+_2DEKANSJE_TRANSLATED_FR_SOURCE = r"^vertaald\s*>\s*frans$"
 _2DEKANSJE_TRANSLATED_FOOTBALL_GOAL = r"\b(?:voetbaldoel|voetbal\s+goal)\b"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
@@ -329,6 +330,35 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      r"luchtreiniger|teppanyaki|stoomkoker|voedseldroger|reiswaterkoker|\bblender\b|mini\s+airco|"
      r"mobiele\s+airco|aircooler|hetelucht\s*friteuse|airfryer(?:\s+oven)?|contactgrill|"
      r"tosti\s+apparaat|kruimeldief|elektrische\s+ruitenreiniger)\b"),
+    # Douzième vague : parmi les titres Vertaald > Frans résiduels, seuls les
+    # objets ci-dessous portent une désignation complète. Le marqueur traduit
+    # reste un confinement de flux, jamais une preuve de rayon autonome.
+    (MAISON,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\b(?:wijnrek|badplank|badrek|keukenrek|keukenkast|magnetronkast|vloerstoel|"
+     r"schoenenkast|badkamerrek|badkamerkast|serveerwagen|bedtafel|nachtkastje|"
+     r"dweilsysteem|pedaalemmer|kapstok|kledingrek|boekenkast|ladekast|wasknijpers)\b"),
+    (JARDIN,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\b(?:parasolvoet|parasolstandaard|partytent|paviljoen|outdoor\s+tent)\b"),
+    (BEBE,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\b(?:kindertafel|loopwagen)\b"),
+    (ANIMALERIE,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\bkattenboom\b"),
+    (JOUETS,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\b(?:goocheldoos|crokinole)\b"),
+    (AUTO,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\bkrik\b"),
+    (BEAUTE,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\bstijltang\b"),
+    (TV_SON,
+     _2DEKANSJE_TRANSLATED_FR_SOURCE,
+     r"\b(?:bluetooth\s+receiver|oordopjes)\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
