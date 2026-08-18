@@ -221,6 +221,17 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      r"\b(?:[a-z]+)?ventilator(?:en)?\b|\bbladloze\s+ventilator\b"),
 )
 
+# YesStyle est un flux beauté dont certaines catégories sources sont
+# homogènes sur les échantillons audités. Elles restent scellées au marchand :
+# « Face », « Eyes » ou « Set » ne sont jamais des règles globales.
+_YESSTYLE_MERCHANT = r"\byesstyle\b"
+_YESSTYLE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
+    (BEAUTE, r"^(?:bath\s*&\s*shower|eyes|cheeks|face|hand\s+creams|acne\s+treatments|"
+              r"exfoliators|hair\s+colors|skin\s+care|body\s+care|hair\s+accessory|"
+              r"skin\s+care\s+tools|lens|tools\s*&\s*brushes|after\s+sun\s+care|conditioners)$"),
+    (SANTE, r"^toothpaste$"),
+)
+
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
 # pas déjà un classement plus précis. Chaque entrée reste donc réversible et
@@ -1519,6 +1530,14 @@ def classify(
                     and _has(_2DEKANSJE_KITCHEN_ACCESSORY, name)
                 ):
                     continue
+                return category
+
+    # YesStyle : cette vague repose sur le marchand et sur une catégorie source
+    # exacte, relevée et homogène. Les catégories larges (« Lifestyle », « Set »)
+    # restent exclues : elles doivent garder une preuve de produit individuelle.
+    if _has(_YESSTYLE_MERCHANT, merchant_name or ""):
+        for category, source_pattern in _YESSTYLE_SOURCE_ROUTES:
+            if _has(source_pattern, merchant_category):
                 return category
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
