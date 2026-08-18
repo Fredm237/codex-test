@@ -5000,3 +5000,17 @@ body:has(.fx-imm-wrap) .fx-imm-loading {
     font-size: clamp(28px, 8vw, 44px) !important;
   }
 }
+
+/* Fiche produit : les preuves de décision doivent occuper toute la largeur
+   mobile. L’illustration passe au-dessus au lieu de comprimer le verdict. */
+@media (max-width: 680px) {
+  .pd-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 20px !important;
+  }
+
+  .pd-grid > div:first-child {
+    max-width: min(100%, 360px);
+    margin-inline: auto;
+  }
+}
