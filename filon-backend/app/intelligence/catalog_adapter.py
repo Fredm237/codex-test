@@ -51,6 +51,9 @@ _SCOPE_EXCLUSIONS: dict[str, frozenset[str]] = {
         "jewellery", "jewelry", "necklace", "necklaces", "earring", "earrings",
         "bracelet", "bracelets", "ring", "rings", "tiara", "brooch", "brooches",
         "collier", "colliers", "boucle", "boucles", "bague", "bagues",
+        # Une destination « wedding dress » sur un sous-vêtement décrit l’usage
+        # prévu, non une robe vendue comme pièce principale.
+        "bra", "bras", "underwear", "lingerie", "bralette", "soutien", "gorge",
     }),
 }
 
