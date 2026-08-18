@@ -474,6 +474,39 @@ _SNEAKIDS_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
      r"sac\s+bandouli[èe]re|sacoche)(?:\s*>\s*(?:adulte|junior)\s*>\s*"
      r"(?:femme|homme|mixte))?$"),
 )
+# Seconde vague Sneakids : 283 titres ont une double preuve explicite de type
+# source et d'objet. Les gourdes, gilets de sécurité, pompes, masques et caisses
+# restent hors de cette liste car leur destination FILON n'est pas démontrée.
+_SNEAKIDS_CHILD_ABSTENTION = (
+    r"^lifestyle\s*>\s*gilet(?:\s+de\s+s[ée]curit[ée])?\s*>\s*junior\s*>\s*(?:femme|homme|mixte)$"
+)
+_SNEAKIDS_CHILD_FIXED_ROUTES: tuple[tuple[str, str, str], ...] = (
+    (MODE,
+     r"^lifestyle\s*>\s*(?:surv[êée]tement|bomber|poncho|blouson|mitaines|"
+     r"ensemble(?:\s+imperm[ée]able|\s+de\s+pluie)?|tour\s+de\s+cou|cagoule|bandeau|bob)\s*>\s*junior\s*>\s*(?:femme|homme|mixte)$",
+     r"\b(?:surv[êée]tement|bombers?|poncho|blouson|mitaines?|ensemble|tour\s+de\s+cou|cagoule|bandeau|bob)\b"),
+    (MAISON,
+     r"^(?:pu[ée]riculture\s*>\s*veilleuse(?:\s*>\s*(?:adulte|junior))?|lifestyle\s*>\s*objet\s+d[ée]coratif\s*>\s*junior\s*>\s*mixte)$",
+     r"\b(?:veilleuse|projecteur|d[ée]coratif|d[ée]coration|lettre\s+en\s+bois)\b"),
+    (ACCESSOIRES,
+     r"^lifestyle\s*>\s*(?:lunettes(?:\s+de\s+vue)?|porte-cl[ée]|parapluie|porte-monnaie|cordons?\s+[àa]\s+lunettes|porte-cartes|cadenas)\s*>\s*(?:adulte|junior)\s*>\s*(?:femme|homme|mixte)$",
+     r"\b(?:lunettes?|porte-cl[ée]|parapluie|porte-monnaie|cordon.*lunettes|porte-cartes|cadenas)\b"),
+    (BAGAGERIE,
+     r"^lifestyle\s*>\s*(?:trousse\s+de\s+toilette|pochette|sac\s+[àa]\s+roulettes|cartable|sac|housse)\s*>\s*(?:adulte|junior)\s*>\s*(?:femme|homme|mixte)$",
+     r"\b(?:trousse|pochette|sac\s+[àa]\s+roulettes|cartable|sac|housse\s+de\s+pluie)\b"),
+    (BEBE,
+     r"^(?:mobilit[ée]\s+urbaine\s*>\s*draisienne\s*>\s*junior\s*>\s*mixte|pu[ée]riculture\s*>\s*draisienne)$",
+     r"\bdraisienne\b"),
+    (CULTURE,
+     r"^lifestyle\s*>\s*(?:stylo|porte-fl[ûu]te|boutique\s+du\s+supporter\s*>\s*trousse|bloc-notes)\s*>\s*junior\s*>\s*mixte$",
+     r"\b(?:stylos?|porte-fl[ûu]te|trousse.*crayons|carnet)\b"),
+    (JOUETS,
+     r"^lifestyle\s*>\s*tente\s*>\s*junior\s*>\s*mixte$",
+     r"\btente.*frozen\b"),
+    (SPORT,
+     r"^lifestyle\s*>\s*m[ée]daille\s*>\s*junior\s*>\s*mixte$",
+     r"\bm[ée]daille\s+sport\b"),
+)
 
 # On Fight : les quatre racines retenues ont été lues exhaustivement sur 761
 # offres. Elles désignent des équipements de training, sports de combat ou
@@ -2003,8 +2036,15 @@ def classify(
     # Un chemin source voisin mais absent de la liste reste volontairement soumis
     # aux preuves lexicales générales ou à une vague d'audit ultérieure.
     if _has(_SNEAKIDS_MERCHANT, merchant_name or ""):
+        # Les gilets de visibilité restent volontairement sans destination : ni la
+        # source Lifestyle ni le titre ne prouvent le rayon FILON approprié.
+        if _has(_SNEAKIDS_CHILD_ABSTENTION, merchant_category):
+            return None
         for category, source_pattern in _SNEAKIDS_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
+                return category
+        for category, source_pattern, object_pattern in _SNEAKIDS_CHILD_FIXED_ROUTES:
+            if _has(source_pattern, merchant_category) and _has(object_pattern, name):
                 return category
     # On Fight : les racines source auditées décrivent des équipements physiques
     # de training et d'arts martiaux. Les catégories Santé, Outdoor et Ju-Jitsu
