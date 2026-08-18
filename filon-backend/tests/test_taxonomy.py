@@ -298,6 +298,24 @@ class Test2DekansjeStorageObjectRoutes:
         assert t.classify(source, "Mica Decorations Opbergmand met Deksel", "Mica Decorations", "Autre marchand") is None
 
 
+class Test2DekansjeLaundryObjectRoutes:
+    """Le chemin Lavage n’accepte que les appareils ou supports explicitement nommés."""
+
+    def test_named_laundry_objects_reach_verified_aisles(self):
+        source = "Wonen & Koken > Schoonmaken & opruimen > Wassen, drogen & strijken"
+        assert t.classify(source, "VAIVE SteamMaster 2600 Strijkijzer - Stoomstrijkijzer", "VAIVE", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify(source, "Vlectro Elektrisch droogrek - Opvouwbaar & Verwarmd", "Vlectro", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify(source, "BRASQ Droogtoren 4 Lagen - Droogrek", "BRASQ", "2dekansje NL-BE") == t.MAISON
+        assert t.classify(source, "Yaheetech Wasmand met Deksel 96L", "Yaheetech", "2dekansje NL-BE") == t.MAISON
+
+    def test_laundry_consumables_and_intruders_remain_unclassified(self):
+        source = "Wonen & Koken > Schoonmaken & opruimen > Wassen, drogen & strijken"
+        assert t.classify(source, "Lenor Wasverzachter Fresh Air Morning Fresh", "Lenor", "2dekansje NL-BE") is None
+        assert t.classify(source, "Scanpart wasdrogerballen van wol", "Scanpart", "2dekansje NL-BE") is None
+        assert t.classify(source, "AyeSense 8 in 1 Air Duster Pro", "AyeSense", "2dekansje NL-BE") is None
+        assert t.classify(source, "BRASQ Droogtoren 4 Lagen - Droogrek", "BRASQ", "Autre marchand") is None
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 
