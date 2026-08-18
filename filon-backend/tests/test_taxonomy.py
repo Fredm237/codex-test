@@ -365,6 +365,26 @@ class Test2DekansjeTranslatedObjectRoutes:
         assert t.classify("Vertaald > Frans", "Umbro Voetbaldoel - Metaal", "Umbro", "Autre marchand") is None
 
 
+class Test2DekansjeTranslatedFootballGoalOfferKind:
+    """Un but physique ne devient pas un service à cause du mot training."""
+
+    def test_translated_football_training_goal_is_physical(self):
+        assert t.classify_offer_kind(
+            "Vertaald > Frans",
+            "Umbro Voetbaldoel - Voetbal Training Doel - Metaal",
+            "Umbro",
+            "2dekansje NL-BE",
+        ) == t.PHYSICAL_PRODUCT
+
+    def test_explicit_training_course_and_other_merchant_remain_services(self):
+        assert t.classify_offer_kind(
+            "Vertaald > Frans", "Voetbal training cursus voor volwassenen", "Umbro", "2dekansje NL-BE"
+        ) == t.SERVICE
+        assert t.classify_offer_kind(
+            "Vertaald > Frans", "Umbro Voetbaldoel - Voetbal Training Doel", "Umbro", "Autre marchand"
+        ) == t.SERVICE
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 
