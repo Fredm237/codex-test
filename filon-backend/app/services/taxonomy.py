@@ -284,6 +284,18 @@ _ON_FIGHT_PHYSICAL_SPORT_SOURCE = (
 )
 _ON_FIGHT_SERVICE_TITLE = r"\b(?:cours|coaching|formation|stage|training\s+session)\b"
 
+# Sport Is Good : 301 titres ont été lus dans quatorze racines de pratique ou
+# d'équipement sportif. Aucun n'est un cours, une formation, une réservation ou
+# une session. Les racines Lifestyle, Santé, Automobile, Workwear et Culture
+# restent hors de ce périmètre et nécessitent une preuve distincte.
+_SPORT_IS_GOOD_MERCHANT = r"\bsport\s+is\s+good\b"
+_SPORT_IS_GOOD_PHYSICAL_SPORT_SOURCE = (
+    r"^(?:[ée]quipement\s+du\s+cavalier|training|alpinisme|outdoor|nautisme|squash|"
+    r"kick-boxing|roller|slackline|cirque|foot\s+us|self-d[ée]fense|baseball|"
+    r"netball\s*&\s*korfball)(?:\s*>\s*.+)?$"
+)
+_SPORT_IS_GOOD_SERVICE_TITLE = r"\b(?:cours|coaching|formation|stage|r[ée]servation|booking|session)\b"
+
 # Bimba y Lola : le flux fournit des identifiants numériques opaques. Les quatre
 # codes ci-dessous ont été contrôlés titre par titre : 439 offres de bagagerie,
 # chaussures, bijoux ou mode femme, sans contre-exemple. Ils restent attachés au
@@ -442,6 +454,12 @@ def classify_offer_kind(
         _has(_ON_FIGHT_MERCHANT, merchant_name)
         and _has(_ON_FIGHT_PHYSICAL_SPORT_SOURCE, merchant_category)
         and not _has(_ON_FIGHT_SERVICE_TITLE, name)
+    ):
+        return PHYSICAL_PRODUCT
+    if (
+        _has(_SPORT_IS_GOOD_MERCHANT, merchant_name)
+        and _has(_SPORT_IS_GOOD_PHYSICAL_SPORT_SOURCE, merchant_category)
+        and not _has(_SPORT_IS_GOOD_SERVICE_TITLE, name)
     ):
         return PHYSICAL_PRODUCT
     if _has(_SERVICE_DIRECT, text) or (
@@ -1649,6 +1667,14 @@ def classify(
         _has(_ON_FIGHT_MERCHANT, merchant_name or "")
         and _has(_ON_FIGHT_PHYSICAL_SPORT_SOURCE, merchant_category)
         and not _has(_ON_FIGHT_SERVICE_TITLE, name)
+    ):
+        return SPORT
+    # Sport Is Good : les quatorze racines auditées décrivent des équipements et
+    # pratiques sportives explicites ; les autres racines restent en abstention.
+    if (
+        _has(_SPORT_IS_GOOD_MERCHANT, merchant_name or "")
+        and _has(_SPORT_IS_GOOD_PHYSICAL_SPORT_SOURCE, merchant_category)
+        and not _has(_SPORT_IS_GOOD_SERVICE_TITLE, name)
     ):
         return SPORT
     # Bimba y Lola : les codes source opaques ne sont interprétables qu'avec le

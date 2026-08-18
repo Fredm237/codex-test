@@ -176,6 +176,24 @@ class TestOnFightVerifiedPhysicalSportRoutes:
         assert t.classify("Ju-Jitsu > Porte-clé > Adulte > Mixte", "Produit opaque", "Danrho", "On Fight FR") is None
 
 
+class TestSportIsGoodVerifiedSportRoots:
+    """Les racines Sport Is Good auditées restent des équipements physiques de Sport."""
+
+    def test_audited_roots_are_physical_and_reach_sport(self):
+        training = "Training > Corde à sauter > Adulte > Mixte"
+        equestrian = "Équipement du cavalier > Chaps > Adulte > Mixte"
+        assert t.classify_offer_kind(training, "Corde à sauter Sporti", "Sporti", "Sport Is Good FR") == t.PHYSICAL_PRODUCT
+        assert t.classify(training, "Corde à sauter Sporti", "Sporti", "Sport Is Good FR") == t.SPORT
+        assert t.classify_offer_kind(equestrian, "Chaps en cuir HORKA", "HORKA", "Sport Is Good FR") == t.PHYSICAL_PRODUCT
+        assert t.classify(equestrian, "Chaps en cuir HORKA", "HORKA", "Sport Is Good FR") == t.SPORT
+
+    def test_service_title_and_other_merchants_remain_outside_the_route(self):
+        source = "Training > Corde à sauter > Adulte > Mixte"
+        assert t.classify_offer_kind(source, "Formation training individuel", "", "Sport Is Good FR") == t.SERVICE
+        assert t.classify_offer_kind(source, "Produit opaque", "", "Autre marchand") == t.SERVICE
+        assert t.classify("Lifestyle > Trousse > Adulte > Mixte", "Produit opaque", "Eastpak", "Sport Is Good FR") is None
+
+
 class TestBimbaYLolaVerifiedSourceRoutes:
     """Les codes source opaques ne valent que pour Bimba y Lola après audit complet."""
 
