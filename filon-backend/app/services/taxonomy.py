@@ -409,6 +409,9 @@ _1FOTEAM_MERCHANT = r"\b1foteam\b"
 _1FOTEAM_CREATIVE_SOURCE = r"^jeux\s*&\s*activit[ée]s\s+cr[ée]atives\s*&\s*manuelles$"
 _1FOTEAM_CREATIVE_CULTURE = r"\b(?:perles?|pinceau|kit\s+cr[ée]atif|cartes?\s+[àa]\s+pailleter|volcans|dinosaures)\b"
 _1FOTEAM_CREATIVE_TOYS = r"\bgouache\s+aux\s+doigts\b"
+_1FOTEAM_KITCHEN_SOURCE = r"^pr[ée]paration\s+culinaire$"
+_1FOTEAM_KITCHEN_APPLIANCE = r"\b(?:mixeur\s+plongeant|trancheuse|bouilloire|grille-?pain|machine\s+[àa]\s+p[âa]tes|"
+_1FOTEAM_KITCHEN_APPLIANCE += r"machine\s+sous\s+vide|hachoir|batteur|robot\s+p[âa]tissier)\b"
 _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (LOISIRS, r"^(?:famille\s+mod[ée]lisme\s+gamersgrass|pinceaux\s+citadel\s+gw|"
              r"mod[ée]lisme\s+citadel\s+gw|pinceaux\s+ak\s+interactive\s*&\s+abteilung\s+502)$"),
@@ -425,6 +428,10 @@ _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
               r"marvel\s+crisis\s+protocol|tapis\s+de\s+jeux\s*/\s*gamemat|"
               r"figurines\s*&\s*mondes\s+imaginaires)$"),
     (LOISIRS, r"^(?:peintures\s+abteilung\s+502|aerographes)$"),
+    # Troisième vague 1FoTeam : trois chemins sont homogènes sur titres réels.
+    # Préparation Culinaire reste objet-dépendant afin d’exclure les pierres à whisky.
+    (MAISON, r"^(?:eclairage|entretien)$"),
+    (LOISIRS, r"^impression\s+3d$"),
 )
 
 # Sneakids : ces 28 chemins source ont été relus sur les 616 titres non classés
@@ -1943,6 +1950,11 @@ def classify(
                 return LOISIRS
             if _has(_1FOTEAM_CREATIVE_TOYS, name):
                 return JOUETS
+        if (
+            _has(_1FOTEAM_KITCHEN_SOURCE, merchant_category)
+            and _has(_1FOTEAM_KITCHEN_APPLIANCE, name)
+        ):
+            return ELECTROMENAGER
     # Sneakids : les chemins ci-dessous sont bornés aux formes réellement auditées.
     # Un chemin source voisin mais absent de la liste reste volontairement soumis
     # aux preuves lexicales générales ou à une vague d'audit ultérieure.
