@@ -119,6 +119,16 @@ _TECH_ACCESSORY = (
     r"realme|google\s+pixel|motorola)\b"
 )
 
+# Ces objets techniques peuvent citer un smartphone comme appareil de commande
+# ou de compatibilité. Ils ne sont jamais eux-mêmes un téléphone : l’abstention
+# est plus sûre que les laisser passer dans « Smartphones » via ce seul mot.
+# Les formes proviennent d’intrus réellement observés dans le flux Assistant.
+PHONE_PRIMARY_IMPOSTOR_TERMS = (
+    "onduleur", "inverter", "power inverter", "anemometer", "anémomètre",
+    "luchtstroommeter", "warmtedraad-anemometer", "app-sensoren",
+)
+_PHONE_PRIMARY_IMPOSTOR = r"\b(?:onduleurs?|power\s+inverters?|inverters?|anemometers?|anémomètres?|luchtstroommeters?|warmtedraad-anemometers?|app-sensoren)\b"
+
 # Certains mots sont intrinsèquement ambigus : un studio peut être un logement,
 # un espace de création ou un produit. Le contexte explicite d’un marchand de
 # réservation permet de les comprendre sans étendre aveuglément une règle à tout
@@ -1862,6 +1872,12 @@ def classify(
 
     if _is_tyre_specialist_reference(name, merchant_name):
         return AUTO
+
+    # Un onduleur ou un anémomètre peut être piloté par smartphone, sans être
+    # un mobile. Aucune destination FILON n’est inférée sans preuve de l’objet
+    # réellement vendu : ce sont des familles techniques qui restent en abstention.
+    if _has(_PHONE_PRIMARY_IMPOSTOR, name):
+        return None
 
     # Le support d'abord : un tissu imprimé de souris reste un tissu. Sans ce
     # passage préalable, le motif l'emportait et éparpillait la mercerie dans

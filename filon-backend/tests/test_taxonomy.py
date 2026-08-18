@@ -969,6 +969,20 @@ class TestProvenResidualFamilies:
     def test_assigns_measured_residual_subcategories(self, category, name, merchant_category, expected):
         assert t.classify_subcategory(category, name, merchant_category) == expected
 
+    def test_smartphone_controlled_technical_equipment_stays_unclassified(self):
+        # Deux intrus mesurés dans la réponse Assistant production : le mot
+        # smartphone désigne la commande ou la compatibilité, jamais l’objet vendu.
+        assert t.classify(
+            None,
+            "VEVOR Onduleur à onde sinusoïdale pure 1000 W, pour smartphone et pc",
+            "Vevor",
+        ) is None
+        assert t.classify(
+            "Meetapparatuur > Klimaat- & milieu­meters > Luchtstroommeters",
+            "BA30WP - app-sensoren - warmtedraad-anemometer met smartphone-bediening",
+            "Trotec",
+        ) is None
+
     def test_generic_merchandise_is_not_promoted_from_a_brand_alone(self):
         assert t.classify("", "Fusion 2.0", brand="Karhu") is None
         assert t.classify("", "ROCC Duftkerze Flint", brand="Alessi") == t.MAISON

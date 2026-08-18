@@ -4,6 +4,7 @@ from app.services import taxonomy
 from app.services.catalog_search import (
     _catalogue_intent,
     _INTENT_PRIMARY_SCOPE,
+    _intent_primary_impostor_terms,
     _intent_primary_scope,
     _required_name_terms,
     _search_query_for,
@@ -37,6 +38,15 @@ def test_primary_product_intents_have_an_explicit_core_scope():
     assert _INTENT_PRIMARY_SCOPE["laptop"] == (taxonomy.INFORMATIQUE, "Ordinateurs portables")
     assert _INTENT_PRIMARY_SCOPE["casque"] == (taxonomy.TV_SON, "Casques audio")
     assert _intent_primary_scope("inconnu") is None
+
+
+def test_smartphone_search_excludes_observed_non_phone_impostors():
+    terms = _intent_primary_impostor_terms("smartphone")
+
+    assert "onduleur" in terms
+    assert "app-sensoren" in terms
+    assert _intent_primary_impostor_terms("laptop") == ()
+    assert _intent_primary_impostor_terms("casque") == ()
 
 
 def test_explicit_smartphone_part_is_not_misrepresented_as_a_complete_phone():
