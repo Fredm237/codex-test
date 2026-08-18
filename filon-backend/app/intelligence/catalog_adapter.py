@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 
-from sqlalchemy import func, or_, select
+from sqlalchemy import func, not_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import models
@@ -41,6 +41,17 @@ _SCOPE_TERMS: dict[str, frozenset[str]] = {
     "top": frozenset({"chemise", "chemises", "shirt", "shirts", "hemd", "hemden", "tshirt", "top", "tops"}),
     "footwear": frozenset({"chaussure", "chaussures", "shoe", "shoes", "schoen", "schoenen", "sneaker", "sneakers", "basket", "baskets", "boot", "boots", "botte", "bottes"}),
     "bag": frozenset({"sac", "sacs", "bag", "bags", "tas", "tassen", "handbag", "handtas", "pochette", "clutch"}),
+}
+
+# Une erreur historique de sous-rayon peut faire passer une parure dont le titre
+# cite « dress » dans les Robes. Ces objets ne sont jamais une pièce principale :
+# l’exclusion est limitée aux termes de joaillerie explicites et vérifiés.
+_SCOPE_EXCLUSIONS: dict[str, frozenset[str]] = {
+    "dress": frozenset({
+        "jewellery", "jewelry", "necklace", "necklaces", "earring", "earrings",
+        "bracelet", "bracelets", "ring", "rings", "tiara", "brooch", "brooches",
+        "collier", "colliers", "boucle", "boucles", "bague", "bagues",
+    }),
 }
 
 
@@ -120,6 +131,21 @@ def _occasion_clause(occasion: str | None):
     )
 
 
+def _scope_exclusion_clause(scope: str):
+    """Objets incompatibles avec le rôle de pièce demandé, directement en SQL."""
+    excluded = _SCOPE_EXCLUSIONS.get(scope, frozenset())
+    if not excluded:
+        return None
+    # `brand` est fréquemment NULL dans les flux : sans coalesce, `false OR
+    # NULL` devient NULL en SQL puis élimine aussi les vraies robes.
+    lowered_name = func.lower(func.coalesce(models.Offer.name, ""))
+    lowered_brand = func.lower(func.coalesce(models.Offer.brand, ""))
+    return not_(or_(*[
+        or_(lowered_name.contains(term), lowered_brand.contains(term))
+        for term in excluded
+    ]))
+
+
 def _scope_clause(scope: str):
     if scope == "dress":
         return models.Offer.filon_subcategory == "Robes"
@@ -141,6 +167,8 @@ def _scope_clause(scope: str):
 def _matches_scope(scope: str, offer: models.Offer, occasion: str | None = None) -> bool:
     terms = _words(offer.name) | _words(offer.brand)
     if not terms & _SCOPE_TERMS[scope]:
+        return False
+    if terms & _SCOPE_EXCLUSIONS.get(scope, frozenset()):
         return False
     occasion_terms = _OCCASION_TERMS.get(occasion or "")
     # Une paire de chaussures complémentaire n'a pas besoin de répéter
@@ -217,6 +245,9 @@ async def retrieve_fashion_offers(
     snapshots: list[CoreOfferSnapshot] = []
     for scope in scopes:
         stmt = _base_statement().where(_scope_clause(scope))
+        scope_exclusion_clause = _scope_exclusion_clause(scope)
+        if scope_exclusion_clause is not None:
+            stmt = stmt.where(scope_exclusion_clause)
         # La robe de mariage doit pouvoir prouver l’occasion dans son propre
         # titre. Les pièces complémentaires restent recherchées comme catégories
         # distinctes, car leur adéquation au mariage n’est pas observable.

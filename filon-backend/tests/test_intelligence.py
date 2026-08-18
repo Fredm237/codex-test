@@ -200,6 +200,20 @@ class TestFashionCatalogAdapter:
             in_stock=True,
             image_url="https://example.test/wedding-dress.jpg",
         )
+        wedding_jewellery = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="wedding-jewellery-not-dress",
+            name="Bridal Wedding Jewellery Set Pearl Necklace Earrings Costume Dress Prom",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=5.14,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/wedding-jewellery.jpg",
+        )
         ordinary_dress = models.Offer(
             merchant_id=merchant.id,
             awin_product_id="ordinary-dress-1",
@@ -214,7 +228,7 @@ class TestFashionCatalogAdapter:
             in_stock=True,
             image_url="https://example.test/ordinary-dress.jpg",
         )
-        intelligence_session.add_all([wedding_dress, ordinary_dress])
+        intelligence_session.add_all([wedding_dress, wedding_jewellery, ordinary_dress])
         await intelligence_session.commit()
 
         snapshots = await retrieve_fashion_offers(intelligence_session, query="robe", occasion="wedding")
