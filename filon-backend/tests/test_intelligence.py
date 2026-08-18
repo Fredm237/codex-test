@@ -214,6 +214,20 @@ class TestFashionCatalogAdapter:
             in_stock=True,
             image_url="https://example.test/wedding-jewellery.jpg",
         )
+        wedding_underwear = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="wedding-underwear-not-dress",
+            name="Thin Breathable Invisible Bra Ladies Push-Up Underwear Strapless Wedding Dress Bra",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=10.15,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/wedding-underwear.jpg",
+        )
         ordinary_dress = models.Offer(
             merchant_id=merchant.id,
             awin_product_id="ordinary-dress-1",
@@ -228,7 +242,7 @@ class TestFashionCatalogAdapter:
             in_stock=True,
             image_url="https://example.test/ordinary-dress.jpg",
         )
-        intelligence_session.add_all([wedding_dress, wedding_jewellery, ordinary_dress])
+        intelligence_session.add_all([wedding_dress, wedding_jewellery, wedding_underwear, ordinary_dress])
         await intelligence_session.commit()
 
         snapshots = await retrieve_fashion_offers(intelligence_session, query="robe", occasion="wedding")
