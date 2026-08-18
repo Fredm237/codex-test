@@ -132,6 +132,17 @@ const COPY = {
   },
 } as const;
 
+const EVIDENCE_PRIORITY: Record<DecisionSignal["status"], number> = {
+  warning: 0,
+  positive: 1,
+  neutral: 2,
+  unknown: 3,
+};
+
+function prioritizeEvidence<T extends DecisionSignal>(signals: T[]): T[] {
+  return [...signals].sort((left, right) => EVIDENCE_PRIORITY[left.status] - EVIDENCE_PRIORITY[right.status]);
+}
+
 function signalText(signal: DecisionSignal, C: (typeof COPY)[keyof typeof COPY]) {
   if (signal.key === "comparison") {
     return signal.is_best_observed ? C.best(signal.merchants_count || 1) : C.compared(signal.merchants_count || 1);
@@ -155,10 +166,19 @@ export function DecisionPanel({ decision }: { decision: DecisionData | null | un
   const { locale } = useLocale();
   if (!decision) return null;
   const C = COPY[locale];
-  const visible = decision.signals
-    .filter((signal) => signal.status !== "unknown")
-    .map((signal) => ({ ...signal, text: signalText(signal, C) }))
-    .filter((signal): signal is DecisionSignal & { text: string } => Boolean(signal.text));
+  const visible = prioritizeEvidence(
+    decision.signals
+      .filter((signal) => signal.status !== "unknown")
+      .map((signal) => ({ ...signal, text: signalText(signal, C) }))
+      .filter((signal): signal is DecisionSignal & { text: string } => Boolean(signal.text)),
+  );
+  // Une alerte ne doit jamais être masquée par la limite visuelle des preuves.
+  // Les signaux positifs complètent ensuite l’information jusqu’à trois lignes.
+  const warnings = visible.filter((signal) => signal.status === "warning");
+  const evidenceToShow = [
+    ...warnings,
+    ...visible.filter((signal) => signal.status !== "warning").slice(0, Math.max(0, 3 - warnings.length)),
+  ];
   const missing = decision.missing.map((key) => C.missing[key] || key);
 
   return (
@@ -176,7 +196,7 @@ export function DecisionPanel({ decision }: { decision: DecisionData | null | un
       {visible.length > 0 && (
         <div className="filon-decision-evidence">
           <span>{C.evidence}</span>
-          <ul>{visible.slice(0, 3).map((signal) => <li key={signal.key} className={signal.status}>{signal.text}</li>)}</ul>
+          <ul>{evidenceToShow.map((signal) => <li key={signal.key} className={signal.status}>{signal.text}</li>)}</ul>
         </div>
       )}
       {missing.length > 0 && (
