@@ -386,6 +386,25 @@ class Test2DekansjeTranslatedFrenchObjectRoutes:
         assert t.classify("Vertaald > Frans", "Coast Wijnrek - Hout - 16 flessen", "Coast", "Autre marchand") is None
 
 
+class Test2DekansjeTravelObjectRoutes:
+    """Le chemin Voyage reste scellé aux fonctions explicitement nommées."""
+
+    def test_explicit_travel_objects_reach_verified_aisles(self):
+        source = "Hobby & Sport > Reizen & vrije tijd > Overige (Reizen)"
+        assert t.classify(source, "HELDENWERK Grote koeltas, thermotas", "HELDENWERK", "2dekansje NL-BE") == t.BAGAGERIE
+        assert t.classify(source, "Bagagelabel PU Leer - Koffer Tags", "EverNeeds", "2dekansje NL-BE") == t.BAGAGERIE
+        assert t.classify(source, "Auronic elektrische koelbox - 40L", "Auronic", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify(source, "BestWay opblaasbare zwemring", "BestWay", "2dekansje NL-BE") == t.SPORT
+        assert t.classify(source, "SHARK EVO GT Motorhelm", "Shark", "2dekansje NL-BE") == t.AUTO
+
+    def test_travel_routes_stay_narrow(self):
+        source = "Hobby & Sport > Reizen & vrije tijd > Overige (Reizen)"
+        assert t.classify(source, "LifeGoods Bolderkar - Opvouwbaar", "LifeGoods", "2dekansje NL-BE") is None
+        assert t.classify(source, "Monzana Vlag Italië - Metalen Ringen", "monzana", "2dekansje NL-BE") is None
+        assert t.classify(source, "HELDENWERK Grote koeltas, thermotas", "HELDENWERK", "Autre marchand") is None
+        assert t.classify("Hobby & Sport > Reizen & vrije tijd", "HELDENWERK Grote koeltas, thermotas", "HELDENWERK", "2dekansje NL-BE") is None
+
+
 class Test2DekansjeTranslatedFootballGoalOfferKind:
     """Un but physique ne devient pas un service à cause du mot training."""
 
