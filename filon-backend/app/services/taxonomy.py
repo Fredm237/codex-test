@@ -412,6 +412,8 @@ _1FOTEAM_CREATIVE_TOYS = r"\bgouache\s+aux\s+doigts\b"
 _1FOTEAM_KITCHEN_SOURCE = r"^pr[ée]paration\s+culinaire$"
 _1FOTEAM_KITCHEN_APPLIANCE = r"\b(?:mixeur\s+plongeant|trancheuse|bouilloire|grille-?pain|machine\s+[àa]\s+p[âa]tes|"
 _1FOTEAM_KITCHEN_APPLIANCE += r"machine\s+sous\s+vide|hachoir|batteur|robot\s+p[âa]tissier)\b"
+_1FOTEAM_OFFICE_SUPPLIES_SOURCE = r"^petites\s+fournitures$"
+_1FOTEAM_OFFICE_SUPPLIES_CULTURE = r"\b(?:marque-pages?|ruban\s+adh[ée]sif)\b"
 _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (LOISIRS, r"^(?:famille\s+mod[ée]lisme\s+gamersgrass|pinceaux\s+citadel\s+gw|"
              r"mod[ée]lisme\s+citadel\s+gw|pinceaux\s+ak\s+interactive\s*&\s+abteilung\s+502)$"),
@@ -432,6 +434,15 @@ _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     # Préparation Culinaire reste objet-dépendant afin d’exclure les pierres à whisky.
     (MAISON, r"^(?:eclairage|entretien)$"),
     (LOISIRS, r"^impression\s+3d$"),
+    # Quatrième vague 1FoTeam : routes techniques et bureautiques relues sur titres.
+    # Petites Fournitures reste objet-dépendant afin d’exclure le cutter polyvalent.
+    (CULTURE, r"^(?:support\s+imprimable|ecriture\s*:\s*stylos,\s*crayons,\s*feutres|"
+              r"protection\s+des\s+documents|mobilier,\s*classement\s*&\s*archivage|"
+              r"cahiers\s+et\s+feuilles)$"),
+    (INFORMATIQUE, r"^(?:fibre\s+optique|stockage|lecteur\s+de\s+cartes|bo[iî]tier\s+externe|"
+                   r"souris|autres\s+p[ée]riph[ée]riques\s+de\s+saisie|rack\s+amovible|"
+                   r"carte\s+contr[ôo]leur|injecteurs\s+poe)$"),
+    (GAMING, r"^p[ée]riph[ée]rique\s+de\s+jeu$"),
 )
 
 # Sneakids : ces 28 chemins source ont été relus sur les 616 titres non classés
@@ -1955,6 +1966,11 @@ def classify(
             and _has(_1FOTEAM_KITCHEN_APPLIANCE, name)
         ):
             return ELECTROMENAGER
+        if (
+            _has(_1FOTEAM_OFFICE_SUPPLIES_SOURCE, merchant_category)
+            and _has(_1FOTEAM_OFFICE_SUPPLIES_CULTURE, name)
+        ):
+            return CULTURE
     # Sneakids : les chemins ci-dessous sont bornés aux formes réellement auditées.
     # Un chemin source voisin mais absent de la liste reste volontairement soumis
     # aux preuves lexicales générales ou à une vague d'audit ultérieure.
