@@ -245,6 +245,24 @@ class Test2DekansjeVerifiedSourceRoutes:
         assert t.classify("Wonen & Koken", "Produit opaque", "", "2dekansje NL-BE") is None
 
 
+class Test2DekansjeSecondBatchSourceRoutes:
+    """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
+
+    def test_second_batch_reaches_the_verified_aisles(self):
+        assert t.classify("Hobby & Sport > Sport > Vechtsport", "Joya Fightgear scheenbeschermers", "Joya", "2dekansje NL-BE") == t.SPORT
+        assert t.classify("Hobby & Sport > Reizen & vrije tijd > Tenten", "SoBuy Campingtent 1-Persoons", "SoBuy", "2dekansje NL-BE") == t.SPORT
+        assert t.classify("Mooi & Gezond > Gezondheid > Thermometers", "Bintoi Digitale Thermometer", "Bintoi", "2dekansje NL-BE") == t.SANTE
+        assert t.classify("Elektronica > Mobiele telefoons > Opladers, batterijen & autoladers", "Philips Draadloze Oplader 10W", "Philips", "2dekansje NL-BE") == t.TELEPHONIE
+        assert t.classify("Elektronica > Huistelefoons", "Philips DECT Huistelefoon", "Philips", "2dekansje NL-BE") == t.TELEPHONIE
+        assert t.classify("Elektronica > Beeld & geluid > Beamers", "Spoused Beamer Full-HD", "Spoused", "2dekansje NL-BE") == t.TV_SON
+        assert t.classify("Hobby & Sport > Boeken", "Grow, Cook & Eat It", "", "2dekansje NL-BE") == t.CULTURE
+
+    def test_second_batch_stays_scoped_and_does_not_promote_parent_sources(self):
+        assert t.classify("Elektronica > Huistelefoons", "Philips DECT Huistelefoon", "Philips", "Autre marchand") is None
+        assert t.classify("Hobby & Sport > Reizen & vrije tijd", "Produit opaque", "", "2dekansje NL-BE") is None
+        assert t.classify("Elektronica", "Produit opaque", "", "2dekansje NL-BE") is None
+
+
 class TestBimbaYLolaVerifiedSourceRoutes:
     """Les codes source opaques ne valent que pour Bimba y Lola après audit complet."""
 

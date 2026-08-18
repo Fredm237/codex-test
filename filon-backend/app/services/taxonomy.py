@@ -358,6 +358,24 @@ _2DEKANSJE_FIRST_BATCH_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (CULTURE, r"^hobby\s*&\s*sport\s*>\s*muziek\s*>\s*muziekinstrumenten$"),
     (BAGAGERIE, r"^hobby\s*&\s*sport\s*>\s*reizen\s*&\s*vrije\s+tijd\s*>\s*reistassen$"),
 )
+# Deuxième vague 2dekansje : 157 titres restants ont été contrôlés dans ces
+# familles précises. Les sources parent et les catégories « Vertaald » restent
+# hors de la règle ; aucune destination n'est déduite d'un simple rayon large.
+_2DEKANSJE_SECOND_BATCH_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
+    (SPORT, r"^hobby\s*&\s*sport\s*>\s*sport$"),
+    (SPORT, r"^hobby\s*&\s*sport\s*>\s*sport\s*>\s*(?:overige\s*\(sport\)|gewichten|wintersport|vechtsport|tafeltennis)$"),
+    (SPORT, r"^hobby\s*&\s*sport\s*>\s*reizen\s*&\s*vrije\s+tijd\s*>\s*tenten$"),
+    (SANTE, r"^mooi\s*&\s*gezond\s*>\s*gordels,\s*bandages\s*&\s*braces$"),
+    (SANTE, r"^mooi\s*&\s*gezond\s*>\s*gezondheid\s*>\s*thermometers$"),
+    (SANTE, r"^mooi\s*&\s*gezond\s*>\s*gezondheid\s*>\s*bloeddrukmeters$"),
+    (SANTE, r"^mooi\s*&\s*gezond\s*>\s*gezondheid\s*>\s*supplementen$"),
+    (TELEPHONIE, r"^elektronica\s*>\s*mobiele\s+telefoons\s*>\s*opladers,\s*batterijen\s*&\s*autoladers$"),
+    (TELEPHONIE, r"^elektronica\s*>\s*mobiele\s+telefoons$"),
+    (TELEPHONIE, r"^elektronica\s*>\s*huistelefoons$"),
+    (TV_SON, r"^elektronica\s*>\s*beeld\s*&\s*geluid\s*>\s*beamers$"),
+    (TV_SON, r"^elektronica\s*>\s*beeld\s*&\s*geluid\s*>\s*radio's,\s*cd-\s*&\s*platenspelers$"),
+    (CULTURE, r"^hobby\s*&\s*sport\s*>\s*boeken$"),
+)
 # Bimba y Lola : le flux fournit des identifiants numériques opaques. Les quatre
 # codes ci-dessous ont été contrôlés titre par titre : 439 offres de bagagerie,
 # chaussures, bijoux ou mode femme, sans contre-exemple. Ils restent attachés au
@@ -1759,6 +1777,9 @@ def classify(
                 return category
     if _has(_2DEKANSJE_MERCHANT, merchant_name or ""):
         for category, source_pattern in _2DEKANSJE_FIRST_BATCH_SOURCE_ROUTES:
+            if _has(source_pattern, merchant_category):
+                return category
+        for category, source_pattern in _2DEKANSJE_SECOND_BATCH_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
                 return category
     # Bimba y Lola : les codes source opaques ne sont interprétables qu'avec le
