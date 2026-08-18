@@ -47,10 +47,13 @@ export type Offer = {
 // ne touche aucun autre rayon et sera redondant dès que le correctif backend
 // fusionné sera enfin déployé par Railway.
 const SMARTPHONE_DISPLAY_IMPOSTORS = [
-  /\bsmarttag\b/i,
+  /\bsmarttag\d*\b/i,
   /\b(?:réalité\s+virtuelle|virtual\s+reality|vr\s+(?:glasses|headset|bril))\b/i,
-  /\bsmartphone\s+ventilation\b/i,
+  /\bsmartphone\s+ventilat(?:ion|or)\b/i,
   /\b(?:car|auto|dashboard|vent)\s+(?:mount|holder)\b/i,
+  // Marqueurs d’accessoires déjà mesurés et employés dans le garde-fou
+  // backend Smartphones : ils décrivent une protection, pas un appareil.
+  /\b(?:coque|phone\s+cover|telefoonhoes|smartphonehoes|backcover|bookcase|screen\s+protector|screenprotector|tempered\s+glass|verre\s+tremp[ée]|protege[- ]?ecran|protège[- ]?écran|bescherming)\b/i,
 ] as const;
 
 function isVisibleInSelectedSubcategory(offer: Offer, subcategory: string | null) {
