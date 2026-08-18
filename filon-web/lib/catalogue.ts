@@ -62,7 +62,7 @@ const SMARTPHONE_DISPLAY_IMPOSTORS = [
   /\b(?:circuit(?:\s+imprim[ée])?|pcb|capteur|empreintes?\s+digitales?|gabarit|isolation\s+des\s+pistes)\b/i,
   // Composants et protections relevés ensuite dans les premières cartes :
   // une référence de réparation ou un stylet ne prouve pas un téléphone complet.
-  /\b(?:service\s+pack|gh\d{2}-\d+|haut[- ]?parleur|s[\s-]?pen|verre\s+(?:hybride|tremp[ée])|étui|etui)\b/i,
+  /\b(?:service\s+pack|gh\d{2}-\d+|haut[- ]?parleur|s[\s-]?pen|verre\s+(?:hybride|tremp[ée])|étui|etui|pochette|housse|husa)\b|tui\s+pour/i,
 ] as const;
 
 // Un accessoire peut citer Apple, Samsung ou Huawei dans son titre. On exige
