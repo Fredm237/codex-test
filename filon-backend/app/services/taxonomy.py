@@ -295,6 +295,20 @@ _BIMBA_Y_LOLA_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (BIJOUX, r"^188$"),
     (MODE_FEMME, r"^1604$"),
 )
+# Les codes 166 et 167 mélangent des familles. Une seconde lecture des seuls
+# titres encore nuls y a établi 201 objets explicites, répartis entre bagagerie,
+# accessoires, mode générique et bijoux. Les neuf formulations restantes (dont
+# « Triangle », « Dessus » et « Ligne ») restent volontairement hors de la règle.
+_BIMBA_Y_LOLA_MIXED_SOURCES = r"^(?:166|167)$"
+_BIMBA_Y_LOLA_MIXED_SOURCE_LEXICAL_ROUTES: tuple[tuple[str, str], ...] = (
+    (BAGAGERIE, r"\b(?:sacs?|sacoches?|pochettes?|trousses?|porte[-\s]?monnaie|"
+                r"porte[-\s]?cartes|prot[èe]ge[-\s]?cartes|[ée]tui de passeport)\b"),
+    (ACCESSOIRES, r"\b(?:porte[-\s]?cl[ée]s|ch[âaè]les?|parapluies?|lunettes?|barrettes?|"
+                   r"chouchous?)\b|\bcharm\s+(?:sac|foulard)\b"),
+    (MODE, r"\b(?:blousons?|trenchs?|camisoles?|bod(?:y|ies)|minijupes?|par[ée]os?)\b|"
+           r"\bhauts?\s+(?:[^\s]+\s+){0,3}(?:dos\s+nu|[àa]\s+nouer)\b"),
+    (BIJOUX, r"\bras[-\s]?de[-\s]?cou\b"),
+)
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
@@ -1644,6 +1658,12 @@ def classify(
         for category, source_pattern in _BIMBA_Y_LOLA_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
                 return category
+        # Les codes mixtes ne transportent aucune destination par eux-mêmes : le
+        # nom de l'objet reste obligatoire pour chaque route ci-dessous.
+        if _has(_BIMBA_Y_LOLA_MIXED_SOURCES, merchant_category):
+            for category, name_pattern in _BIMBA_Y_LOLA_MIXED_SOURCE_LEXICAL_ROUTES:
+                if _has(name_pattern, name):
+                    return category
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
     # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie
