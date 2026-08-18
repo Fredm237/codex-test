@@ -153,6 +153,17 @@ class Test1FoTeamVerifiedSourceRoutes:
         assert t.classify("Préparation Culinaire", "Lot de 9 Pierres à whisky", "", "1FoTeam FR") is None
         assert t.classify("Préparation Culinaire", "Robot pâtissier Cecotec", "", "Autre marchand") is None
 
+    def test_office_computing_and_gaming_batch_uses_verified_sources(self):
+        assert t.classify("Support Imprimable", "Papier Photo Epson Premium", "", "1FoTeam FR") == t.CULTURE
+        assert t.classify("Fibre Optique", "Convertisseur fibre optique TP-Link", "", "1FoTeam FR") == t.INFORMATIQUE
+        assert t.classify("Stockage", "Carte mémoire Micro SD Lexar", "", "1FoTeam FR") == t.INFORMATIQUE
+        assert t.classify("Périphérique de Jeu", "Joystick Thrustmaster", "", "1FoTeam FR") == t.GAMING
+
+    def test_office_supplies_requires_a_verified_object_and_merchant(self):
+        assert t.classify("Petites Fournitures", "Ruban adhésif Scotch Magic", "", "1FoTeam FR") == t.CULTURE
+        assert t.classify("Petites Fournitures", "Cutter universel plastique", "", "1FoTeam FR") is None
+        assert t.classify("Fibre Optique", "Convertisseur fibre optique TP-Link", "", "Autre marchand") is None
+
 
 class TestSneakidsVerifiedSourceRoutes:
     """Les routes Sneakids ne couvrent que les chemins relus intégralement."""
