@@ -222,6 +222,7 @@ _2DEKANSJE_HOBBY_SPORT_SOURCE = r"\bhobby\s*&\s*sport\b"
 _2DEKANSJE_HEALTH_SOURCE = r"\bmooi\s*&\s*gezond\s*>\s*gezondheid\b"
 _2DEKANSJE_HEALTH_ABSTENTION = r"\b(?:watertester|rayovac\s+13|hygrometer|weerstation|wiebeloogjes|tissues|wierookhouder)\b"
 _2DEKANSJE_TRANSLATED_SOURCE = r"^vertaald(?:\s*>\s*frans)?$"
+_2DEKANSJE_TRANSLATED_FOOTBALL_GOAL = r"\b(?:voetbaldoel|voetbal\s+goal)\b"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -662,6 +663,16 @@ def classify_offer_kind(
     if (
         _has(_2DEKANSJE_MERCHANT, merchant_name)
         and _has(_2DEKANSJE_PHYSICAL_SPORT_SOURCE, merchant_category)
+        and not _has(_2DEKANSJE_SERVICE_TITLE, name)
+    ):
+        return PHYSICAL_PRODUCT
+    # Dans les titres traduits de 2dekansje, « voetbal training doel » décrit
+    # un but de football physique, pas une prestation. La garde reste limitée
+    # à l’objet nommé et aux deux marqueurs source du flux traduit.
+    if (
+        _has(_2DEKANSJE_MERCHANT, merchant_name)
+        and _has(_2DEKANSJE_TRANSLATED_SOURCE, merchant_category)
+        and _has(_2DEKANSJE_TRANSLATED_FOOTBALL_GOAL, name)
         and not _has(_2DEKANSJE_SERVICE_TITLE, name)
     ):
         return PHYSICAL_PRODUCT
