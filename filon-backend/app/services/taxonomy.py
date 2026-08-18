@@ -108,7 +108,16 @@ _SERVICE_DIRECT = (
 _SERVICE_ACTION = r"\b(installation|montage|r[ée]paration)\b"
 _SERVICE_CONTEXT = r"\b([àa]\s+domicile|sur\s+(?:site|place)|professionnel(?:le)?|intervention)\b"
 _SERVICE_CATEGORY = r"\b(services?|prestations?)\b"
-_TECH_ACCESSORY = r"\b(coques?|backcovers?|bookcases?|screen ?protectors?|chargeurs?|chargers?|c[âa]bles? de charge|charging cables?|power ?banks?|[ée]tuis?)\b"
+# « Étui » seul désigne aussi un passeport, des stylos, une tête de lavage ou un
+# accessoire animalier. Il ne devient technique qu'avec un appareil mobile
+# explicitement nommé ; les autres familles restent des biens physiques.
+_TECH_ACCESSORY = (
+    r"\b(coques?|backcovers?|bookcases?|screen ?protectors?|chargeurs?|chargers?|"
+    r"c[âa]bles? de charge|charging cables?|power ?banks?)\b"
+    r"|\b[ée]tuis?\s+(?:pour\s+)?(?:t[ée]l[ée]phones?|smartphones?|iphone|ipad|"
+    r"samsung(?:\s+galaxy)?|xiaomi|redmi|poco|honor|huawei|oppo|oneplus|"
+    r"realme|google\s+pixel|motorola)\b"
+)
 
 # Certains mots sont intrinsèquement ambigus : un studio peut être un logement,
 # un espace de création ou un produit. Le contexte explicite d’un marchand de

@@ -442,6 +442,9 @@ class TestOfferKinds:
             ("Heimwerker-Zubehör", "Häfele Glissière à extension partielle Acier Montage latéral, 600 mm", t.PHYSICAL_PRODUCT),
             ("Sports & Outdoor", "Palestine Flag Fine Workmanship Simple Installation Canvas Header", t.PHYSICAL_PRODUCT),
             ("Telefoon accessoires", "Coque iPhone 15 Pro MagSafe", t.TECH_ACCESSORY),
+            ("Telefoon accessoires", "Étui pour Samsung Galaxy S24", t.TECH_ACCESSORY),
+            ("", "Étui de passeport en cuir", t.PHYSICAL_PRODUCT),
+            ("", "Étui ramasse crottes", t.PHYSICAL_PRODUCT),
             ("", "iPhone 15 smartphone 128 Go", t.PHYSICAL_PRODUCT),
         ],
     )
