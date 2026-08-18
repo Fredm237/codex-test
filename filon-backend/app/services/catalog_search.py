@@ -145,6 +145,43 @@ def _search_query_for(query: str, intent: tuple[str, tuple[str, ...]] | None) ->
     return (" ".join(required) if required else (anchor if intent else query), required)
 
 
+# Les noms de vrais téléphones ne contiennent pas systématiquement « smartphone »
+# (ex. « Samsung Galaxy S25 »). Ces familles sont donc une porte d'entrée
+# lexicale, toujours doublée du sous-rayon Core : elles n’élargissent jamais une
+# recherche générique vers les accessoires ou les autres rayons.
+_INTENT_PRODUCT_TITLE_TERMS: dict[str, tuple[str, ...]] = {
+    "smartphone": (
+        "smartphone", "telephone", "telefoon", "iphone", "galaxy", "pixel",
+        "samsung", "xiaomi", "redmi", "poco", "oneplus", "oppo", "motorola",
+        "huawei", "honor", "realme", "nothing", "fairphone", "xperia", "zenfone",
+    ),
+    "laptop": ("laptop", "notebook", "macbook", "chromebook", "thinkpad", "vivobook", "ideapad"),
+    "casque": ("casque", "headphone", "koptelefoon", "headset"),
+}
+
+
+def _intent_search_terms(anchor: str) -> tuple[str, ...]:
+    """Termes produit attestés pour une requête Assistant générique."""
+    return _INTENT_PRODUCT_TITLE_TERMS.get(anchor, ())
+
+
+def _intent_search_clause(
+    search_query: str, intent: tuple[str, tuple[str, ...]] | None, required: tuple[str, ...]
+):
+    """Clause texte adaptée aux formulations naturelles et aux titres de feed.
+
+    Pour une marque ou un modèle explicitement demandé, tous les mots restent
+    obligatoires. Pour une intention générique, un des noms de famille de produit
+    suffit, car les titres marchands n’emploient pas tous le mot « smartphone ».
+    """
+    if not intent or required:
+        return search_clause(search_query)
+    terms = _intent_search_terms(intent[0])
+    if not terms:
+        return search_clause(search_query)
+    return or_(*[search_clause(term) for term in terms])
+
+
 def _primary_image_url(value: str | None) -> str | None:
     """Conserve une URL image unique quand le feed en fournit plusieurs séparées par des virgules."""
     if not value:
@@ -224,7 +261,7 @@ async def search_internal_products(
             # jamais correspondre à un titre de feed et masque les vraies offres.
             intent = _catalogue_intent(query)
             search_query, required = _search_query_for(query, intent)
-            clause = search_clause(search_query)
+            clause = _intent_search_clause(search_query, intent, required)
             if clause is None:
                 return []
 

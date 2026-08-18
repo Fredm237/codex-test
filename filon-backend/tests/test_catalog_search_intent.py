@@ -6,6 +6,7 @@ from app.services.catalog_search import (
     _INTENT_PRIMARY_SCOPE,
     _intent_primary_impostor_terms,
     _intent_primary_scope,
+    _intent_search_terms,
     _required_name_terms,
     _search_query_for,
 )
@@ -38,6 +39,16 @@ def test_primary_product_intents_have_an_explicit_core_scope():
     assert _INTENT_PRIMARY_SCOPE["laptop"] == (taxonomy.INFORMATIQUE, "Ordinateurs portables")
     assert _INTENT_PRIMARY_SCOPE["casque"] == (taxonomy.TV_SON, "Casques audio")
     assert _intent_primary_scope("inconnu") is None
+
+
+def test_generic_smartphone_search_covers_actual_phone_title_families():
+    terms = _intent_search_terms("smartphone")
+
+    assert "smartphone" in terms
+    assert "iphone" in terms
+    assert "galaxy" in terms
+    assert "pixel" in terms
+    assert _intent_search_terms("inconnu") == ()
 
 
 def test_smartphone_search_excludes_observed_non_phone_impostors():
