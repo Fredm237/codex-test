@@ -2,7 +2,12 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime, timedelta
+
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.db import models
 
 from app.db.base import Base
 from app.services import catalog_sync
@@ -37,6 +42,33 @@ async def test_a_single_running_sync_is_allowed_and_a_completed_one_becomes_fres
             assert state["status"] == "fresh"
             assert state["last_success"]["offers"] == 120
             assert state["last_success"]["trigger"] == "scheduler"
+    finally:
+        await engine.dispose()
+
+
+async def test_an_abandoned_running_sync_becomes_recoverable():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            stale_run = await catalog_sync.start_run(session, trigger="scheduler")
+            assert stale_run is not None
+            stale_run.started_at = datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=5)
+            await session.commit()
+
+            state = await catalog_sync.health(session, interval_hours=6)
+            assert state["status"] == "interrupted"
+            assert state["recovery_required"] is True
+            assert state["age_hours"] >= 5
+
+            new_run = await catalog_sync.start_run(session, trigger="scheduler")
+            assert new_run is not None
+            previous = (
+                await session.execute(
+                    select(models.CatalogSyncRun).where(models.CatalogSyncRun.id == stale_run.id)
+                )
+            ).scalar_one()
+            assert previous.status == "interrupted"
+            assert previous.failure_reason == "interrupted"
     finally:
         await engine.dispose()
 

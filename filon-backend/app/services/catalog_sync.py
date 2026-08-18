@@ -156,11 +156,24 @@ async def health(session, *, interval_hours: int) -> dict[str, Any]:
     freshness_limit = max(1, interval_hours) * 2
 
     if active is not None:
+        active_age_hours = max(0, int((now - active.started_at).total_seconds() // 3600))
+        # Un cycle réellement actif reste visible comme tel. Au-delà de quatre
+        # heures, un verrou `running` est traité comme interrompu : le prochain
+        # passage du planificateur appelle `start_run()`, qui le marque alors
+        # durablement avant de lancer une tentative neuve.
+        if now - active.started_at >= _INTERRUPTED_AFTER:
+            return {
+                "status": "interrupted",
+                "last_success": _summary(success) if success else None,
+                "active_run": _summary(active),
+                "age_hours": active_age_hours,
+                "recovery_required": True,
+            }
         return {
             "status": "syncing",
             "last_success": _summary(success) if success else None,
             "active_run": _summary(active),
-            "age_hours": max(0, int((now - active.started_at).total_seconds() // 3600)),
+            "age_hours": active_age_hours,
         }
     if success is None:
         # Au déploiement de cette table, les cycles passés n'ont pas de journal.
