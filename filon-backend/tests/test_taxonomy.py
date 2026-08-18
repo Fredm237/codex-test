@@ -281,6 +281,23 @@ class Test2DekansjeCleaningObjectRoutes:
         assert t.classify(source, "Auronic Steelstofzuiger Draadloos - 220 watt", "Auronic", "Autre marchand") is None
 
 
+class Test2DekansjeStorageObjectRoutes:
+    """Le chemin Rangement reste limité aux objets domestiques ou de voyage nommés."""
+
+    def test_named_storage_objects_reach_verified_aisles(self):
+        source = "Wonen & Koken > Schoonmaken & opruimen > Opbergen"
+        assert t.classify(source, "TRVLMORE Handbagage Koffer met Wielen", "TRVLMORE", "2dekansje NL-BE") == t.BAGAGERIE
+        assert t.classify(source, "Mica Decorations Opbergmand met Deksel", "Mica Decorations", "2dekansje NL-BE") == t.MAISON
+        assert t.classify(source, "SoBuy Smalle Schoenenkast met 2 Kleppen", "SoBuy", "2dekansje NL-BE") == t.MAISON
+        assert t.classify(source, "O'DADDY Wasmand 3 Vakken - Wassorteerder", "O'DADDY", "2dekansje NL-BE") == t.MAISON
+
+    def test_storage_leisure_objects_and_other_merchants_remain_unclassified(self):
+        source = "Wonen & Koken > Schoonmaken & opruimen > Opbergen"
+        assert t.classify(source, "Redcliffs Tentorganizer - Hangorganizer 7 Vaks", "Redcliffs", "2dekansje NL-BE") is None
+        assert t.classify(source, "Coast Buiten fietsenstalling - Draagbare garage", "Coast", "2dekansje NL-BE") is None
+        assert t.classify(source, "Mica Decorations Opbergmand met Deksel", "Mica Decorations", "Autre marchand") is None
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 

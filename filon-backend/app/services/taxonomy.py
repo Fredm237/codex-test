@@ -214,6 +214,8 @@ _2DEKANSJE_KITCHEN_ACCESSORY = (
 )
 _2DEKANSJE_CLEANING_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*stofzuigen\s*&\s*schoonmaken\b"
 _2DEKANSJE_CLEANING_MOP_ATTACHMENT = r"\b(?:dweilmop|vloermop|dweil)\b.{0,48}\bopzetstuk\b"
+_2DEKANSJE_STORAGE_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*opbergen\b"
+_2DEKANSJE_STORAGE_ABSTENTION = r"\b(?:tentorganizer|fietsenstalling)\b"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -252,6 +254,21 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      _2DEKANSJE_CLEANING_SOURCE,
      r"\b(?:vloerwisser|vloertrekker|spinning\s+mopset|turbobezem|pluizenverwijderaar|"
      r"dweilsysteem|plumeau|wasborstel|window\s+buddy|raamreiniger|vloermop)\b"),
+    # Septième vague : le chemin Rangement contient surtout du mobilier et des
+    # contenants. Chaque objet reste explicite ; les organisateurs de tente et
+    # abris de vélos ne sont volontairement pas déduits de ce chemin général.
+    (BAGAGERIE,
+     _2DEKANSJE_STORAGE_SOURCE,
+     r"\b(?:handbagage\s+)?koffer\b"),
+    (MAISON,
+     _2DEKANSJE_STORAGE_SOURCE,
+     r"\b(?:douchewisser|schoenen(?:rek|kast|bank)|rolwagen|rolcontainer|(?:opberg)?mand(?:en|je)?|"
+     r"opberg(?:kast|box|kist|bank|rek)|uitschuifbaar\s+rekje|wasknijpers|lage\s+kast|"
+     r"make-?up\s+organizer|bewaarcontainer|brievenbus|(?:zit)?bank\s+met\s+opbergruimte|"
+     r"poef\s+met\s+opbergruimte|(?:gootsteen|keukenkastje|badkamer)\s+organizer|kapstok|"
+     r"kussenbox|wasmachinekast|badkamerkast|plantenrek|telescopische\s+lade|wandgarderobe|"
+     r"boekenrek|wasmand|wassorteerder|kledingrek|garderoberek|sorteerbakje|stellingkast|wasbox|"
+     r"kinder(?:tafel|boekenkast)|tuinkist|wasrek\s+knijpers)\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
@@ -1764,6 +1781,9 @@ def classify(
                 ) or (
                     _has(_2DEKANSJE_CLEANING_SOURCE, merchant_category)
                     and _has(_2DEKANSJE_CLEANING_MOP_ATTACHMENT, name)
+                ) or (
+                    _has(_2DEKANSJE_STORAGE_SOURCE, merchant_category)
+                    and _has(_2DEKANSJE_STORAGE_ABSTENTION, name)
                 ):
                     continue
                 return category
