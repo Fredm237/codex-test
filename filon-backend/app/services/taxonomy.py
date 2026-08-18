@@ -320,6 +320,26 @@ _SPORT_IS_GOOD_LIFESTYLE_CLOTHING_NAME = (
     r"\b(?:bombers?|chemisiers?|chemiser|blousons?|gilets?|body|bodies|shorty|"
     r"coupe[-\s]?vent|cardigans?|ensembles?|surchemises?|ponchos?)\b"
 )
+# Huit offres résiduelles disposent encore d'une preuve complète : le chemin
+# source exact et un objet nommé. Les gourdes, masques, combiné et glacière ne
+# sont volontairement pas inclus, car leur destination FILON reste incertaine.
+_SPORT_IS_GOOD_FINAL_EXPLICIT_ROUTES: tuple[tuple[str, str, str], ...] = (
+    (SANTE,
+     r"^sant[ée]\s+et\s+bien-[êe]tre\s*>\s*[ée]lectrolytes(?:\s*>\s*.+)?$",
+     r"\b(?:electrolytes?|hydro)\b"),
+    (SANTE,
+     r"^sant[ée]\s+et\s+bien-[êe]tre\s*>\s*prot[ée]ine(?:\s*>\s*.+)?$",
+     r"\b(?:whey|prot[ée]ine)\b"),
+    (SANTE,
+     r"^lifestyle\s*>\s*proth[èe]se\s+mammaire(?:\s*>\s*.+)?$",
+     r"\bproth[èe]se\s+mammaire\b"),
+    (AUTO,
+     r"^automobile\s*>\s*baume\s+soin\s+cuir(?:\s*>\s*.+)?$",
+     r"\bbaume\s+soin\s+(?:du\s+)?cuir\b"),
+    (SPORT,
+     r"^mobilit[ée]\s+urbaine\s*>\s*kit\s+de\s+protection\s+mobilit[ée]\s+urbaine(?:\s*>\s*.+)?$",
+     r"\bkit\s+de\s+protection\b"),
+)
 
 # Bimba y Lola : le flux fournit des identifiants numériques opaques. Les quatre
 # codes ci-dessous ont été contrôlés titre par titre : 439 offres de bagagerie,
@@ -1717,6 +1737,9 @@ def classify(
             if _has(_HOMME, merchant_category):
                 return MODE_HOMME
             return MODE
+        for category, source_pattern, name_pattern in _SPORT_IS_GOOD_FINAL_EXPLICIT_ROUTES:
+            if _has(source_pattern, merchant_category) and _has(name_pattern, name):
+                return category
     # Bimba y Lola : les codes source opaques ne sont interprétables qu'avec le
     # marchand. Les deux codes mixtes de la même source restent volontairement
     # hors de ce mapping et doivent conserver leur preuve lexicale individuelle.

@@ -213,6 +213,22 @@ class TestSportIsGoodVerifiedLifestyleRoutes:
         assert t.classify("Lifestyle > Gourde > Junior > Mixte", "Gourde acier enfant", "Rex London", "Sport Is Good FR") is None
 
 
+class TestSportIsGoodFinalExplicitRoutes:
+    """Les derniers objets admis conservent une preuve source et titre complète."""
+
+    def test_final_audited_objects_reach_their_verified_aisles(self):
+        assert t.classify("Santé et bien-être > Electrolytes > Adulte > Mixte", "Electrolytes Science in Sport Go Hydro Citron 4 g", "Science in Sport", "Sport Is Good FR") == t.SANTE
+        assert t.classify("Santé et bien-être > Protéine > Adulte > Mixte", "Doypack Apurna Whey Fraise 750gr", "Apurna", "Sport Is Good FR") == t.SANTE
+        assert t.classify("Lifestyle > Prothèse mammaire > Adulte > Femme", "Prothèse mammaire légère symétrique double gel", "Anita", "Sport Is Good FR") == t.SANTE
+        assert t.classify("Automobile > Baume soin cuir > Adulte > Mixte", "Baume soin du cuir Dr Wack S100", "Dr Wack", "Sport Is Good FR") == t.AUTO
+        assert t.classify("Mobilité urbaine > Kit de protection mobilité urbaine > Adulte > Mixte", "Kit de protection biomécanique comfort Hudora", "Hudora", "Sport Is Good FR") == t.SPORT
+
+    def test_final_routes_remain_scoped_and_uncertain_objects_abstain(self):
+        assert t.classify("Santé et bien-être > Electrolytes > Adulte > Mixte", "Electrolytes Science in Sport Go Hydro", "Science in Sport", "Autre marchand") is None
+        assert t.classify("Lifestyle > Gourde > Junior > Mixte", "Gourde enfant Rex London", "Rex London", "Sport Is Good FR") is None
+        assert t.classify("Culture et Nature > Glacière > Adulte > Mixte", "Glacière Rex London Best In Show", "Rex London", "Sport Is Good FR") is None
+
+
 class TestBimbaYLolaVerifiedSourceRoutes:
     """Les codes source opaques ne valent que pour Bimba y Lola après audit complet."""
 
