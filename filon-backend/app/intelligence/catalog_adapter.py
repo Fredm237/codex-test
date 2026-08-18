@@ -54,6 +54,9 @@ _SCOPE_EXCLUSIONS: dict[str, frozenset[str]] = {
         # Une destination « wedding dress » sur un sous-vêtement décrit l’usage
         # prévu, non une robe vendue comme pièce principale.
         "bra", "bras", "underwear", "lingerie", "bralette", "soutien", "gorge",
+        # Les accessoires de silhouette décrivent une sous-couche ou un maintien,
+        # non la robe demandée, même si le feed cite « wedding dress » comme usage.
+        "shaper", "shapewear", "tummy", "waist trainer", "body shaper",
     }),
 }
 

@@ -228,6 +228,20 @@ class TestFashionCatalogAdapter:
             in_stock=True,
             image_url="https://example.test/wedding-underwear.jpg",
         )
+        wedding_shapewear = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="wedding-shapewear-not-dress",
+            name="Women's clothing zipper body shaper tummy control corset bridal dress palace waist wedding dress corset",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=11.92,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/wedding-shapewear.jpg",
+        )
         ordinary_dress = models.Offer(
             merchant_id=merchant.id,
             awin_product_id="ordinary-dress-1",
@@ -242,7 +256,9 @@ class TestFashionCatalogAdapter:
             in_stock=True,
             image_url="https://example.test/ordinary-dress.jpg",
         )
-        intelligence_session.add_all([wedding_dress, wedding_jewellery, wedding_underwear, ordinary_dress])
+        intelligence_session.add_all([
+            wedding_dress, wedding_jewellery, wedding_underwear, wedding_shapewear, ordinary_dress
+        ])
         await intelligence_session.commit()
 
         snapshots = await retrieve_fashion_offers(intelligence_session, query="robe", occasion="wedding")
