@@ -198,6 +198,23 @@ class TestSneakidsVerifiedSourceRoutes:
             "Lifestyle > Blouson > Junior > Mixte", "Produit opaque", "Schott", "Sneakids FR"
         ) is None
 
+    def test_child_lifestyle_batch_uses_both_source_and_object_proof(self):
+        assert t.classify("Lifestyle > Survêtement > Junior > Mixte", "Survêtement enfant Givova Poker", "", "Sneakids FR") == t.MODE
+        assert t.classify("Lifestyle > Bomber > Junior > Mixte", "Bombers Dallas", "", "Sneakids FR") == t.MODE
+        assert t.classify("Puériculture > Veilleuse > Adulte", "Veilleuse Paladone Harry Potter", "", "Sneakids FR") == t.MAISON
+        assert t.classify("Lifestyle > Objet décoratif > Junior > Mixte", "Lettre en bois D enfant", "", "Sneakids FR") == t.MAISON
+        assert t.classify("Lifestyle > Lunettes > Junior > Mixte", "Lunettes enfant Komono", "", "Sneakids FR") == t.ACCESSOIRES
+        assert t.classify("Lifestyle > Trousse de toilette > Junior > Mixte", "Trousse de toilette enfant", "", "Sneakids FR") == t.BAGAGERIE
+        assert t.classify("Mobilité urbaine > Draisienne > Junior > Mixte", "Draisienne enfant Hornit", "", "Sneakids FR") == t.BEBE
+        assert t.classify("Lifestyle > Stylo > Junior > Mixte", "Sac de 10 Stylos enfant", "", "Sneakids FR") == t.CULTURE
+        assert t.classify("Lifestyle > Tente > Junior > Mixte", "Tente pliante pop-up enfant Frozen", "", "Sneakids FR") == t.JOUETS
+        assert t.classify("Lifestyle > Médaille > Junior > Mixte", "Medaille sport cord enfant", "", "Sneakids FR") == t.SPORT
+
+    def test_child_lifestyle_batch_preserves_ambiguous_objects_and_scope(self):
+        assert t.classify("Lifestyle > Gourde > Junior > Mixte", "Gourde enfant Rex London", "", "Sneakids FR") is None
+        assert t.classify("Lifestyle > Gilet de sécurité > Junior > Homme", "Gilet de sécurité enfant", "", "Sneakids FR") is None
+        assert t.classify("Lifestyle > Survêtement > Junior > Mixte", "Survêtement enfant Givova Poker", "", "Autre marchand") is None
+
 
 class TestOnFightVerifiedPhysicalSportRoutes:
     """Les équipements On Fight restent physiques malgré la racine Training."""
