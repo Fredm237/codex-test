@@ -41,6 +41,23 @@ export type Offer = {
   merchant: { name: string; slug: string };
 };
 
+// Les offres ci-dessous sont des accessoires ou des appareils secondaires dont le
+// titre mentionne un smartphone pour la compatibilité. Elles ont été observées
+// dans le sous-rayon public Smartphones le 18 août 2026. Ce filet de visibilité
+// ne touche aucun autre rayon et sera redondant dès que le correctif backend
+// fusionné sera enfin déployé par Railway.
+const SMARTPHONE_DISPLAY_IMPOSTORS = [
+  /\bsmarttag\b/i,
+  /\b(?:réalité\s+virtuelle|virtual\s+reality|vr\s+(?:glasses|headset|bril))\b/i,
+  /\bsmartphone\s+ventilation\b/i,
+  /\b(?:car|auto|dashboard|vent)\s+(?:mount|holder)\b/i,
+] as const;
+
+function isVisibleInSelectedSubcategory(offer: Offer, subcategory: string | null) {
+  if (subcategory !== "Smartphones") return true;
+  return !SMARTPHONE_DISPLAY_IMPOSTORS.some((pattern) => pattern.test(offer.name));
+}
+
 export type CatalogueQuery = {
   q?: string;
   dept?: string;
@@ -174,7 +191,11 @@ export async function getOffers(
 
   const data = await getJson(`/api/catalog/offers?${params.toString()}`, 300);
   if (!data) return null;
-  return { total: Number(data.total || 0), items: (data.items || []) as Offer[] };
+  const items = (data.items || []) as Offer[];
+  return {
+    total: Number(data.total || 0),
+    items: items.filter((offer) => isVisibleInSelectedSubcategory(offer, resolved.subcategory)),
+  };
 }
 
 /** Construit une URL de catalogue en repartant des filtres courants.
