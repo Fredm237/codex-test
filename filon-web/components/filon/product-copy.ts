@@ -17,20 +17,28 @@ export type CardCopy = {
   available: string;
   unavailable: string;
   availabilityUnknown: string;
+  observedToday: string;
+  observedYesterday: string;
+  observedDays: (days: number) => string;
+  observedOn: (date: string) => string;
+  observationUnavailable: string;
 };
 
 export const CARD_COPY: Record<CardLocale, CardCopy> = {
   fr: {
     see: "Voir l'offre", at: "chez", lowest: "Au plus bas", noImage: "Visuel indisponible",
     available: "En stock dans le dernier flux", unavailable: "Indisponible dans le dernier flux", availabilityUnknown: "Disponibilité non renseignée",
+    observedToday: "Prix relevé aujourd’hui", observedYesterday: "Prix relevé hier", observedDays: (days) => `Prix relevé il y a ${days} j`, observedOn: (date) => `Prix relevé le ${date}`, observationUnavailable: "Date de relevé non disponible",
   },
   nl: {
     see: "Bekijk aanbod", at: "bij", lowest: "Laagste ooit", noImage: "Geen afbeelding",
     available: "Op voorraad in de laatste feed", unavailable: "Niet beschikbaar in de laatste feed", availabilityUnknown: "Beschikbaarheid niet vermeld",
+    observedToday: "Prijs vandaag gemeten", observedYesterday: "Prijs gisteren gemeten", observedDays: (days) => `Prijs ${days} d geleden gemeten`, observedOn: (date) => `Prijs gemeten op ${date}`, observationUnavailable: "Meetdatum niet beschikbaar",
   },
   en: {
     see: "See offer", at: "at", lowest: "Lowest ever", noImage: "No image",
     available: "In stock in the latest feed", unavailable: "Unavailable in the latest feed", availabilityUnknown: "Availability not provided",
+    observedToday: "Price checked today", observedYesterday: "Price checked yesterday", observedDays: (days) => `Price checked ${days} days ago`, observedOn: (date) => `Price checked on ${date}`, observationUnavailable: "Check date unavailable",
   },
 };
 

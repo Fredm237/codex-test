@@ -31,6 +31,8 @@ export type CardOffer = {
   merchant?: { name: string; slug: string } | null;
   /** État déclaré par le dernier flux marchand ; jamais une promesse de livraison. */
   in_stock?: boolean | null;
+  /** Date du dernier relevé de prix Core, distincte d’une mise à jour interne. */
+  observed_at?: string | null;
   drop_pct?: number;
   price_high?: number | null;
   is_lowest?: boolean;
@@ -60,6 +62,19 @@ export function ProductCard({
     : offer.in_stock === false
       ? { label: words.unavailable, state: "unavailable" }
       : { label: words.availabilityUnknown, state: "unknown" };
+  const observed = (() => {
+    const timestamp = offer.observed_at ? Date.parse(offer.observed_at) : Number.NaN;
+    if (!Number.isFinite(timestamp)) return { label: words.observationUnavailable, state: "unknown" };
+    const ageDays = Math.max(0, Math.floor((Date.now() - timestamp) / 86_400_000));
+    if (ageDays === 0) return { label: words.observedToday, state: "fresh" };
+    if (ageDays === 1) return { label: words.observedYesterday, state: "fresh" };
+    if (ageDays < 7) return { label: words.observedDays(ageDays), state: "recent" };
+    const dateLocale = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
+    return {
+      label: words.observedOn(new Intl.DateTimeFormat(dateLocale, { day: "numeric", month: "short" }).format(new Date(timestamp))),
+      state: "old",
+    };
+  })();
   // Les flux marchands livrent régulièrement des URL d'images mortes. Sans ce
   // repli, la carte affichait un cadre vide sans rien expliquer.
   const [imageOk, setImageOk] = useState(true);
@@ -118,10 +133,16 @@ export function ProductCard({
         )}
 
         {showEvidence && (
-          <span className={`fx-product-evidence is-${availability.state}`}>
-            <span className="fx-product-evidence-dot" aria-hidden="true" />
-            {availability.label}
-          </span>
+          <div className="fx-product-evidence-stack" aria-label={`${availability.label}. ${observed.label}.`}>
+            <span className={`fx-product-evidence is-${availability.state}`}>
+              <span className="fx-product-evidence-dot" aria-hidden="true" />
+              {availability.label}
+            </span>
+            <span className={`fx-product-evidence is-${observed.state}`}>
+              <span className="fx-product-evidence-dot" aria-hidden="true" />
+              {observed.label}
+            </span>
+          </div>
         )}
 
         <div className="fx-product-foot">

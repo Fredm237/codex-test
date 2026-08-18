@@ -36,6 +36,8 @@ export type Offer = {
   link: string | null;
   /** Valeur observée dans le dernier flux marchand, éventuellement absente. */
   in_stock: boolean | null;
+  /** Dernier relevé de prix Core, distinct d’une mise à jour interne. */
+  observed_at: string | null;
   merchant: { name: string; slug: string };
 };
 

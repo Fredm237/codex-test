@@ -4369,6 +4369,15 @@ body:has(.fx-catalogue) .ed-nav .ed-btn.dark {
 .fx-catalogue .fx-product-evidence.is-available { color: var(--catalogue-leaf); }
 .fx-catalogue .fx-product-evidence.is-unavailable { color: #d78f81; }
 .fx-catalogue .fx-product-evidence.is-unknown { color: var(--catalogue-muted); }
+/* Fraîcheur par offre : preuve temporelle de prix, jamais promesse de stock ou de livraison. */
+.fx-product-evidence-stack {
+  display: grid;
+  gap: 3px;
+  margin-top: 1px;
+}
+.fx-catalogue .fx-product-evidence.is-fresh { color: var(--catalogue-leaf); }
+.fx-catalogue .fx-product-evidence.is-recent { color: var(--catalogue-amber); }
+.fx-catalogue .fx-product-evidence.is-old { color: #b78778; }
 
 
 /* Thème clair du catalogue : même hiérarchie de décision, béton chaud éclairé. */
