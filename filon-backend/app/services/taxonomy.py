@@ -216,6 +216,8 @@ _2DEKANSJE_CLEANING_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*oprui
 _2DEKANSJE_CLEANING_MOP_ATTACHMENT = r"\b(?:dweilmop|vloermop|dweil)\b.{0,48}\bopzetstuk\b"
 _2DEKANSJE_STORAGE_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*opbergen\b"
 _2DEKANSJE_STORAGE_ABSTENTION = r"\b(?:tentorganizer|fietsenstalling)\b"
+_2DEKANSJE_LAUNDRY_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*wassen,\s*drogen\s*&\s*strijken\b"
+_2DEKANSJE_LAUNDRY_ABSTENTION = r"\b(?:air\s+duster|bijzettafel|wasverzachter|droogballen)\b"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -269,6 +271,17 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      r"kussenbox|wasmachinekast|badkamerkast|plantenrek|telescopische\s+lade|wandgarderobe|"
      r"boekenrek|wasmand|wassorteerder|kledingrek|garderoberek|sorteerbakje|stellingkast|wasbox|"
      r"kinder(?:tafel|boekenkast)|tuinkist|wasrek\s+knijpers)\b"),
+    # Huitième vague : le chemin Lavage est presque domestique, mais reste
+    # scellé à des objets nommés afin de ne pas absorber l'air duster, la table,
+    # l'adoucissant ou les boules de séchage mal sourcés dans cette branche.
+    (ELECTROMENAGER,
+     _2DEKANSJE_LAUNDRY_SOURCE,
+     r"\b(?:stoom)?strijkijzer\b|\bstoomgenerator\b|\belektrisch(?:e)?\s+(?:droog(?:rek|molen)|ronddraaiende\s+droogmolen)\b|\bschoenendroger\b"),
+    (MAISON,
+     _2DEKANSJE_LAUNDRY_SOURCE,
+     r"\b(?:droogrek|wasrek|droogmolen|droogtoren|wastoren|droogcarrousel|roldrooglijn|waslijn|"
+     r"drooglijn|schoenwaszak|strijkplank(?:hoes)?|strijkhoes|wasmand|wassorteerder|wasbox|"
+     r"wasmachineverhoger|wasdroger\s+voor\s+deur|wanddroogrek|droogrekken?)\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
@@ -1784,6 +1797,9 @@ def classify(
                 ) or (
                     _has(_2DEKANSJE_STORAGE_SOURCE, merchant_category)
                     and _has(_2DEKANSJE_STORAGE_ABSTENTION, name)
+                ) or (
+                    _has(_2DEKANSJE_LAUNDRY_SOURCE, merchant_category)
+                    and _has(_2DEKANSJE_LAUNDRY_ABSTENTION, name)
                 ):
                     continue
                 return category
