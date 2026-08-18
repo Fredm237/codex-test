@@ -190,6 +190,17 @@ class TestBimbaYLolaVerifiedSourceRoutes:
         assert t.classify("166", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") is None
         assert t.classify("167", "Produit opaque", "BIMBA Y LOLA", "Bimba y Lola FR") is None
 
+    def test_mixed_codes_require_audited_object_proof(self):
+        assert t.classify("167", "Porte-clés cœurs doré", "BIMBA Y LOLA", "Bimba y Lola FR") == t.ACCESSOIRES
+        assert t.classify("166", "Pochette moyenne en cuir citron", "BIMBA Y LOLA", "Bimba y Lola FR") == t.BAGAGERIE
+        assert t.classify("166", "Trench court fluide col montant camel", "BIMBA Y LOLA", "Bimba y Lola FR") == t.MODE
+        assert t.classify("166", "Body brodé moutarde", "BIMBA Y LOLA", "Bimba y Lola FR") == t.MODE
+        assert t.classify("166", "Ras-de-cou métallique", "BIMBA Y LOLA", "Bimba y Lola FR") == t.BIJOUX
+
+    def test_mixed_codes_remain_local_and_opaque_titles_still_abstain(self):
+        assert t.classify("166", "Trench court fluide col montant camel", "", "Autre marchand") is None
+        assert t.classify("167", "Triangle à rayures écru", "BIMBA Y LOLA", "Bimba y Lola FR") is None
+
 
 class TestRefusesToGuess:
     def test_unknown_returns_none_rather_than_a_wrong_aisle(self):
