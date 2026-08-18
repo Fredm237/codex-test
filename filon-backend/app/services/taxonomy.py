@@ -219,6 +219,8 @@ _2DEKANSJE_STORAGE_ABSTENTION = r"\b(?:tentorganizer|fietsenstalling)\b"
 _2DEKANSJE_LAUNDRY_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*wassen,\s*drogen\s*&\s*strijken\b"
 _2DEKANSJE_LAUNDRY_ABSTENTION = r"\b(?:air\s+duster|bijzettafel|wasverzachter|droogballen)\b"
 _2DEKANSJE_HOBBY_SPORT_SOURCE = r"\bhobby\s*&\s*sport\b"
+_2DEKANSJE_HEALTH_SOURCE = r"\bmooi\s*&\s*gezond\s*>\s*gezondheid\b"
+_2DEKANSJE_HEALTH_ABSTENTION = r"\b(?:watertester|rayovac\s+13|hygrometer|weerstation|wiebeloogjes|tissues|wierookhouder)\b"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -292,6 +294,18 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      r"(?:jump\s+break|pool|carambole)\s*(?:keu|ballen|kaartkleed|rek)?|karperhaken|\bhook\b|bait\s+swivel|"
      r"(?:pike|esox)\s+(?:float|dobber)|\b(?:sup\s*board|trampoline|gymmat|voetbaldoel|loopband|campingstoel|"
      r"softgamas|fietshelm|ren+fietshelm)\b)"),
+    # Dixième vague : le chemin Santé contient quelques intrus maison et loisir.
+    # La route reste donc doublement prouvée par le chemin et le dispositif cité.
+    (SANTE,
+     _2DEKANSJE_HEALTH_SOURCE,
+     r"\b(?:slaapmasker|oogmasker|covid(?:-?19)?\s*(?:antigeen\s*)?(?:zelf)?test|(?:zelf)?test\s+corona|"
+     r"corona\s*(?:zelf)?test|pillendoos(?:je)?|medicijndoos|slaapoordoppen|oordoppen|red\s+light\s+therapy|"
+     r"roodlichttherapie|(?:rood|nabij-?infrarood)\s+lamp.*lichttherapie|infrarood(?:lamp|deken)|"
+     r"(?:elektrisch|verwarmd|verzwaard)\s+warmtekussen|warmtekussen|(?:elektrische\s+)?(?:kruik|inlegzolen|voetenwarmer)|"
+     r"mondtape|neus(?:strips|pleisters)|compressie\s*(?:kousen|sokken)|steunkousen|toiletsteun|"
+     r"(?:opvouwbare\s+)?rollator|shakti\s+mat|(?:koorts)?thermometer|glucosemeter|"
+     r"orthopedisch\s+(?:kussen|kniekussen)|(?:nek|knie)kussen|slaapkussen|snurkbeugel|herstelmondstuk|"
+     r"slaaptape|acupressuur)\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
@@ -1810,6 +1824,9 @@ def classify(
                 ) or (
                     _has(_2DEKANSJE_LAUNDRY_SOURCE, merchant_category)
                     and _has(_2DEKANSJE_LAUNDRY_ABSTENTION, name)
+                ) or (
+                    _has(_2DEKANSJE_HEALTH_SOURCE, merchant_category)
+                    and _has(_2DEKANSJE_HEALTH_ABSTENTION, name)
                 ):
                     continue
                 return category

@@ -333,6 +333,23 @@ class Test2DekansjeHobbySportObjectRoutes:
         assert t.classify(source, "Dartset Winmau pro kabinet, bord en pijlen", "Winmau", "Autre marchand") is None
 
 
+class Test2DekansjeHealthObjectRoutes:
+    """Le chemin Santé reste borné aux dispositifs de santé explicitement cités."""
+
+    def test_named_health_objects_reach_health(self):
+        source = "Mooi & Gezond > Gezondheid"
+        assert t.classify(source, "ACON Flowflex Zelftest Corona, Covid 19", "ACON Flowflex", "2dekansje NL-BE") == t.SANTE
+        assert t.classify(source, "Gandria Pillendoos 7 Dagen - Medicijndoos", "Gandria", "2dekansje NL-BE") == t.SANTE
+        assert t.classify(source, "Medzone Rollator Lichtgewicht en Opvouwbaar", "Medzone", "2dekansje NL-BE") == t.SANTE
+        assert t.classify(source, "Panacea LED Rood & Nabij-Infrarood Lamp - Lichttherapie", "Panacea", "2dekansje NL-BE") == t.SANTE
+
+    def test_health_intruders_and_other_merchants_remain_unclassified(self):
+        source = "Mooi & Gezond > Gezondheid"
+        assert t.classify(source, "Monzana Digitale watertester met LCD-display", "Monzana", "2dekansje NL-BE") is None
+        assert t.classify(source, "Faas Wiebeloogjes - Zelfklevende Hobby Oogjes", "Faas", "2dekansje NL-BE") is None
+        assert t.classify(source, "Gandria Pillendoos 7 Dagen - Medicijndoos", "Gandria", "Autre marchand") is None
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 
