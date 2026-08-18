@@ -295,6 +295,31 @@ _SPORT_IS_GOOD_PHYSICAL_SPORT_SOURCE = (
     r"netball\s*&\s*korfball)(?:\s*>\s*.+)?$"
 )
 _SPORT_IS_GOOD_SERVICE_TITLE = r"\b(?:cours|coaching|formation|stage|r[ée]servation|booking|session)\b"
+# Le résiduel Lifestyle a été relu titre par titre. Une destination exige deux
+# preuves : le type source exact et le nom de l'objet. Les gourdes, masques,
+# prothèses, combinés et chemins non listés restent hors de cette vague.
+_SPORT_IS_GOOD_LIFESTYLE_FIXED_ROUTES: tuple[tuple[str, str, str], ...] = (
+    (CHAUSSURES,
+     r"^lifestyle\s*>\s*(?:bottines|tongs|ballerines|claquettes|chaussons|espadrilles|derbie)(?:\s*>\s*.+)?$",
+     r"\b(?:bottines?|tongs?|ballerines?|claquettes?|chaussons?|espadrilles?|derbies?)\b"),
+    (BAGAGERIE,
+     r"^lifestyle\s*>\s*(?:trousse(?:\s+de\s+toilette)?|sac\s+de\s+voyage|sacoche\s+banane|sac\s+bandouli[èe]re|porte-monnaie|porte-cartes)(?:\s*>\s*.+)?$",
+     r"\b(?:trousses?|sacs?(?:\s+de\s+voyage)?|sacoches?|porte[-\s]?monnaie|porte[-\s]?cartes)\b"),
+    (ACCESSOIRES,
+     r"^lifestyle\s*>\s*(?:lacets|jibbitz|bob|bandana|ruban|lunettes|cordons?\s+[àa]\s+lunettes|bandeau)(?:\s*>\s*.+)?$",
+     r"\b(?:lacets?|jibbitz|bobs?|bandanas?|rubans?|lunettes?|cordons?\s+[àa]\s+lunettes|bandeaux?)\b"),
+    (BIJOUX,
+     r"^lifestyle\s*>\s*boucles?\s+d['’ ]oreilles?(?:\s*>\s*.+)?$",
+     r"\bboucles?\s+d['’ ]oreilles?\b"),
+)
+_SPORT_IS_GOOD_LIFESTYLE_CLOTHING_SOURCE = (
+    r"^lifestyle\s*>\s*(?:bomber|chemisier|blouson(?:\s+aviateur)?|gilet|body|shorty|"
+    r"coupe-vent|cardigan|ensemble|surchemise|poncho)(?:\s*>\s*.+)?$"
+)
+_SPORT_IS_GOOD_LIFESTYLE_CLOTHING_NAME = (
+    r"\b(?:bombers?|chemisiers?|chemiser|blousons?|gilets?|body|bodies|shorty|"
+    r"coupe[-\s]?vent|cardigans?|ensembles?|surchemises?|ponchos?)\b"
+)
 
 # Bimba y Lola : le flux fournit des identifiants numériques opaques. Les quatre
 # codes ci-dessous ont été contrôlés titre par titre : 439 offres de bagagerie,
@@ -1677,6 +1702,21 @@ def classify(
         and not _has(_SPORT_IS_GOOD_SERVICE_TITLE, name)
     ):
         return SPORT
+    if _has(_SPORT_IS_GOOD_MERCHANT, merchant_name or ""):
+        for category, source_pattern, name_pattern in _SPORT_IS_GOOD_LIFESTYLE_FIXED_ROUTES:
+            if _has(source_pattern, merchant_category) and _has(name_pattern, name):
+                return category
+        if (
+            _has(_SPORT_IS_GOOD_LIFESTYLE_CLOTHING_SOURCE, merchant_category)
+            and _has(_SPORT_IS_GOOD_LIFESTYLE_CLOTHING_NAME, name)
+        ):
+            if _has(_ENFANT, merchant_category):
+                return MODE_ENFANT
+            if _has(_FEMME, merchant_category):
+                return MODE_FEMME
+            if _has(_HOMME, merchant_category):
+                return MODE_HOMME
+            return MODE
     # Bimba y Lola : les codes source opaques ne sont interprétables qu'avec le
     # marchand. Les deux codes mixtes de la même source restent volontairement
     # hors de ce mapping et doivent conserver leur preuve lexicale individuelle.
