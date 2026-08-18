@@ -132,6 +132,32 @@ class Test1FoTeamVerifiedSourceRoutes:
         assert t.classify("Câbles", "Produit opaque", "générique", "1FoTeam") is None
 
 
+class TestSneakidsVerifiedSourceRoutes:
+    """Les routes Sneakids ne couvrent que les chemins relus intégralement."""
+
+    def test_audited_footwear_and_baggage_routes_reach_their_verified_aisles(self):
+        assert t.classify(
+            "Lifestyle > Ballerines > Junior > Femme", "Produit opaque", "Gioseppo", "Sneakids FR"
+        ) == t.CHAUSSURES
+        assert t.classify(
+            "Lifestyle > Bottines > Junior > Homme", "Produit opaque", "Birkenstock", "Sneakids FR"
+        ) == t.CHAUSSURES
+        assert t.classify(
+            "Lifestyle > Sac de voyage > Adulte > Mixte", "Produit opaque", "Eastpak", "Sneakids FR"
+        ) == t.BAGAGERIE
+        assert t.classify(
+            "Lifestyle > Trousse > Junior > Mixte", "Produit opaque", "Alpino", "Sneakids FR"
+        ) == t.BAGAGERIE
+
+    def test_routes_remain_scoped_and_neighbouring_sources_still_abstain(self):
+        assert t.classify(
+            "Lifestyle > Claquettes > Junior > Mixte", "Produit opaque", "Fila", "Autre marchand"
+        ) is None
+        assert t.classify(
+            "Lifestyle > Blouson > Junior > Mixte", "Produit opaque", "Schott", "Sneakids FR"
+        ) is None
+
+
 class TestRefusesToGuess:
     def test_unknown_returns_none_rather_than_a_wrong_aisle(self):
         assert t.classify("Divers", "Article 12345") is None

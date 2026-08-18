@@ -239,13 +239,29 @@ _YESSTYLE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
 _1FOTEAM_MERCHANT = r"\b1foteam\b"
 _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (LOISIRS, r"^(?:famille\s+mod[ée]lisme\s+gamersgrass|pinceaux\s+citadel\s+gw|"
-              r"mod[ée]lisme\s+citadel\s+gw|pinceaux\s+ak\s+interactive\s*&\s+abteilung\s+502)$"),
+             r"mod[ée]lisme\s+citadel\s+gw|pinceaux\s+ak\s+interactive\s*&\s+abteilung\s+502)$"),
     (INFORMATIQUE, r"^(?:autres\s+[ée]l[ée]ments\s+de\s+refroidissement|carte\s+graphique|"
                    r"serveur\s+nas|logiciels\s+antivirus)$"),
     (JOUETS, r"^(?:jeux\s+de\s+cartes|jeux\s+d'ambiance|jeux\s+pour\s+joueurs\s+r[ée]guliers\s*/\s+confirm[ée]s|"
                r"star\s+wars|jeux\s+sp[ée]cialistes|jeux\s+d'apprentissage|zombicide|jeux\s+coop[ée]ratif|"
                r"jeux\s+pour\s+enfants|jeux\s+de\s+r[ôo]le)$"),
     (TV_SON, r"^casque$"),
+)
+
+# Sneakids : ces 28 chemins source ont été relus sur les 616 titres non classés
+# correspondants. Chaque titre nomme explicitement l'objet annoncé. Les motifs
+# restent donc attachés au marchand et n'absorbent ni les sources Lifestyle
+# génériques ni les catégories de vêtements, accessoires ou puériculture encore
+# à examiner dans une vague séparée.
+_SNEAKIDS_MERCHANT = r"\bsneakids\b"
+_SNEAKIDS_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
+    (CHAUSSURES,
+     r"^lifestyle\s*>\s*(?:ballerines|claquettes|bottines|tongs|chaussons|espadrilles|derbie)"
+     r"\s*>\s*junior\s*>\s*(?:femme|homme|mixte)$"),
+    (BAGAGERIE,
+     r"^lifestyle\s*>\s*(?:trousse|sac\s+de\s+voyage|sacoche\s+banane|"
+     r"sac\s+bandouli[èe]re|sacoche)(?:\s*>\s*(?:adulte|junior)\s*>\s*"
+     r"(?:femme|homme|mixte))?$"),
 )
 
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
@@ -1561,6 +1577,13 @@ def classify(
     # ne passent pas cette route sans une preuve de nom plus précise.
     if _has(_1FOTEAM_MERCHANT, merchant_name or ""):
         for category, source_pattern in _1FOTEAM_SOURCE_ROUTES:
+            if _has(source_pattern, merchant_category):
+                return category
+    # Sneakids : les chemins ci-dessous sont bornés aux formes réellement auditées.
+    # Un chemin source voisin mais absent de la liste reste volontairement soumis
+    # aux preuves lexicales générales ou à une vague d'audit ultérieure.
+    if _has(_SNEAKIDS_MERCHANT, merchant_name or ""):
+        for category, source_pattern in _SNEAKIDS_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
                 return category
 
