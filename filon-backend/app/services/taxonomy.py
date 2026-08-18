@@ -218,6 +218,7 @@ _2DEKANSJE_STORAGE_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruim
 _2DEKANSJE_STORAGE_ABSTENTION = r"\b(?:tentorganizer|fietsenstalling)\b"
 _2DEKANSJE_LAUNDRY_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*wassen,\s*drogen\s*&\s*strijken\b"
 _2DEKANSJE_LAUNDRY_ABSTENTION = r"\b(?:air\s+duster|bijzettafel|wasverzachter|droogballen)\b"
+_2DEKANSJE_HOBBY_SPORT_SOURCE = r"\bhobby\s*&\s*sport\b"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -282,6 +283,15 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      r"\b(?:droogrek|wasrek|droogmolen|droogtoren|wastoren|droogcarrousel|roldrooglijn|waslijn|"
      r"drooglijn|schoenwaszak|strijkplank(?:hoes)?|strijkhoes|wasmand|wassorteerder|wasbox|"
      r"wasmachineverhoger|wasdroger\s+voor\s+deur|wanddroogrek|droogrekken?)\b"),
+    # Neuvième vague : le chemin Hobby & Sport est hétérogène. Il ne contient
+    # donc qu'un lexique d'équipements sportifs observés ; les loisirs créatifs,
+    # disques, télescopes et accessoires indéterminés restent en abstention.
+    (SPORT,
+     _2DEKANSJE_HOBBY_SPORT_SOURCE,
+     r"\b(?:dart(?:set|bord|pijlen|kabinet|kast|scorebord|vluchten|flights|schachten|shaft|mat|standaard|surround|bundel)?|"
+     r"(?:jump\s+break|pool|carambole)\s*(?:keu|ballen|kaartkleed|rek)?|karperhaken|\bhook\b|bait\s+swivel|"
+     r"(?:pike|esox)\s+(?:float|dobber)|\b(?:sup\s*board|trampoline|gymmat|voetbaldoel|loopband|campingstoel|"
+     r"softgamas|fietshelm|ren+fietshelm)\b)"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),

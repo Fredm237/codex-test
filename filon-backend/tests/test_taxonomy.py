@@ -316,6 +316,23 @@ class Test2DekansjeLaundryObjectRoutes:
         assert t.classify(source, "BRASQ Droogtoren 4 Lagen - Droogrek", "BRASQ", "Autre marchand") is None
 
 
+class Test2DekansjeHobbySportObjectRoutes:
+    """Le chemin Hobby & Sport accepte seulement les équipements sportifs nommés."""
+
+    def test_named_sport_objects_reach_sport(self):
+        source = "Hobby & Sport"
+        assert t.classify(source, "Dartset Winmau pro kabinet, bord en pijlen", "Winmau", "2dekansje NL-BE") == t.SPORT
+        assert t.classify(source, "LifeGoods SUP Board Allround Compact", "LifeGoods", "2dekansje NL-BE") == t.SPORT
+        assert t.classify(source, "Coast Mini Trampoline Opvouwbare Fitnesstrampoline", "Coast", "2dekansje NL-BE") == t.SPORT
+        assert t.classify(source, "Julbo Fast Lane Rennfietshelm", "Julbo", "2dekansje NL-BE") == t.SPORT
+
+    def test_creative_and_ambiguous_hobby_objects_remain_unclassified(self):
+        source = "Hobby & Sport"
+        assert t.classify(source, "Rubye Diamond Painting Volwassenen", "Rubye", "2dekansje NL-BE") is None
+        assert t.classify(source, "EarthVision Metaaldetector TerraWave", "EarthVision", "2dekansje NL-BE") is None
+        assert t.classify(source, "Dartset Winmau pro kabinet, bord en pijlen", "Winmau", "Autre marchand") is None
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 
