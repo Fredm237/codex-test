@@ -362,6 +362,7 @@ export function SearchAssistant() {
     const controller = new AbortController();
     activeRequest.current = controller;
     const id = ++runId.current;
+    let receivedTerminalEvent = false;
     setPhase("thinking");
     setResult(null);
     setBlockedExternal(false);
@@ -373,6 +374,7 @@ export function SearchAssistant() {
       if (ev.type === "step") setActive(ev.i);
       else if (ev.type === "step-done") setDone((d) => [...d, ev.i]);
       else if (ev.type === "results") {
+        receivedTerminalEvent = true;
         // Une recommandation ne peut pas être présentée comme FILON lorsqu’elle
         // ne contient que des liens Google Shopping. On bloque le résultat au
         // lieu de brouiller la promesse de catalogue partenaire.
@@ -381,7 +383,7 @@ export function SearchAssistant() {
         // `real: false` signifie que le backend n’a pas trouvé de réponse dans
         // le catalogue FILON : ce sont des estimations et non des offres à
         // recommander. Elles restent donc hors de l’interface de décision.
-        if (!ev.data.real || (ev.data.cards.length > 0 && verifiedCards.length === 0)) {
+        if (!ev.data.real || verifiedCards.length === 0) {
           setBlockedExternal(true);
           setPhase("failed");
           return true;
@@ -389,6 +391,7 @@ export function SearchAssistant() {
         setResult({ ...ev.data, cards: verifiedCards });
         setPhase("results");
       } else if (ev.type === "error") {
+        receivedTerminalEvent = true;
         setDone([]);
         setActive(-1);
         setPhase("failed");
@@ -401,6 +404,13 @@ export function SearchAssistant() {
     try {
       for await (const ev of streamAnalyze(q, country, locale, controller.signal)) {
         if (!apply(ev)) return;
+      }
+      // Un SSE clos avant "results" n’est pas une réponse : sans ce garde-fou,
+      // l’interface restait indéfiniment sur les étapes d’analyse.
+      if (runId.current === id && !controller.signal.aborted && !receivedTerminalEvent) {
+        setDone([]);
+        setActive(-1);
+        setPhase("failed");
       }
     } catch (error) {
       // Une nouvelle recherche annule la précédente : elle ne doit ni afficher

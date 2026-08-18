@@ -65,12 +65,21 @@ STEPS = [
 
 # Les 5 emplacements de cartes, fixes pour la cohérence de l'UI.
 SLOTS = [
-    ("Meilleur rapport qualité/prix", "🥇"),
-    ("Meilleur budget", "🥈"),
-    ("Meilleure autonomie", "🥉"),
-    ("Meilleure performance", "⭐"),
-    ("Meilleur reconditionné", "♻️"),
+    ("Offre vérifiée", "🥇"),
+    ("Alternative vérifiée", "🥈"),
+    ("Autre offre vérifiée", "🥉"),
+    ("Option à vérifier", "⭐"),
+    ("Autre option", "♻️"),
 ]
+
+# Lorsque le classement LLM n’est pas disponible, FILON ne peut pas déduire
+# autonomie, performance ou état reconditionné depuis un titre marchand. Les
+# cartes de repli restent donc descriptives, localisées et strictement factuelles.
+_VERIFIED_RANKS = {
+    "fr": ("Offre vérifiée", "Alternative vérifiée", "Autre offre vérifiée", "Option à vérifier", "Autre option"),
+    "nl": ("Geverifieerd aanbod", "Geverifieerd alternatief", "Ander geverifieerd aanbod", "Te controleren optie", "Andere optie"),
+    "en": ("Verified offer", "Verified alternative", "Another verified offer", "Offer to verify", "Another option"),
+}
 
 _HIST = {"baisse", "hausse", "stable"}
 _VALID_LOCALES = {"fr", "nl", "en"}
@@ -199,12 +208,21 @@ _SYSTEM_RANK = (
 )
 
 
+def _verified_rank_label(slot: int, locale: str | None) -> str:
+    """Libellé de repli qui ne promet pas une qualité produit non observée."""
+    ranks = _VERIFIED_RANKS[_response_locale(locale)]
+    return ranks[min(max(slot, 0), len(ranks) - 1)]
+
+
 def _build_real_card(
     slot: int, prod: dict[str, Any], ann: dict[str, Any], emoji: str, locale: str | None = None
 ) -> dict[str, Any]:
     """Carte à partir d'une offre réelle du catalogue partenaire + annotation LLM."""
-    default_rank, medal = SLOTS[slot]
-    rank = str(ann.get("label") or default_rank)
+    _, medal = SLOTS[slot]
+    # Une annotation LLM explicite peut préciser une raison basée sur les noms
+    # et prix fournis. Sans annotation, seule une présentation factuelle reste
+    # autorisée : les labels d’autonomie ou de performance seraient inventés.
+    rank = str(ann.get("label") or _verified_rank_label(slot, locale))
     decision_data = prod.get("decision") if isinstance(prod.get("decision"), dict) else None
     observed_score = decision_data.get("score_observed", 0) if decision_data else 0
     possible_score = decision_data.get("score_possible", 0) if decision_data else 0
