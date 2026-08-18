@@ -350,6 +350,21 @@ class Test2DekansjeHealthObjectRoutes:
         assert t.classify(source, "Gandria Pillendoos 7 Dagen - Medicijndoos", "Gandria", "Autre marchand") is None
 
 
+class Test2DekansjeTranslatedObjectRoutes:
+    """Le marqueur Vertaald est un confinement de flux, jamais une destination."""
+
+    def test_explicit_translated_objects_reach_verified_aisles(self):
+        assert t.classify("Vertaald > Frans", "Yolora Oorbellen - Rond - Zilver", "Yolora", "2dekansje NL-BE") == t.BIJOUX
+        assert t.classify("Vertaald", "Umbro Voetbaldoel - Metaal", "Umbro", "2dekansje NL-BE") == t.SPORT
+        assert t.classify("Vertaald > Frans", "Lifeproducts Elektrisch Warmtekussen", "Lifeproducts", "2dekansje NL-BE") == t.SANTE
+        assert t.classify("Vertaald", "alpina Contactgrill - Tosti Apparaat", "alpina", "2dekansje NL-BE") == t.ELECTROMENAGER
+
+    def test_translation_marker_never_creates_a_broad_route(self):
+        assert t.classify("Vertaald > Frans", "Coast Schilderezel met Lade - Beukenhout", "Coast", "2dekansje NL-BE") is None
+        assert t.classify("Vertaald", "Coast Artificial Fig Tree Art Plant Decoratie", "Coast", "2dekansje NL-BE") is None
+        assert t.classify("Vertaald > Frans", "Umbro Voetbaldoel - Metaal", "Umbro", "Autre marchand") is None
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 
