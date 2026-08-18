@@ -414,6 +414,10 @@ _1FOTEAM_KITCHEN_APPLIANCE = r"\b(?:mixeur\s+plongeant|trancheuse|bouilloire|gri
 _1FOTEAM_KITCHEN_APPLIANCE += r"machine\s+sous\s+vide|hachoir|batteur|robot\s+p[âa]tissier)\b"
 _1FOTEAM_OFFICE_SUPPLIES_SOURCE = r"^petites\s+fournitures$"
 _1FOTEAM_OFFICE_SUPPLIES_CULTURE = r"\b(?:marque-pages?|ruban\s+adh[ée]sif)\b"
+_1FOTEAM_CABLE_SOURCE = r"^c[âa]bles$"
+_1FOTEAM_CABLE_PHONE = r"\blightning\b"
+_1FOTEAM_CABLE_COMPUTING = r"\b(?:display\s*port|vga|dvi|s[-\s]?vga|sas|s-ata|kvm|ps2)\b"
+_1FOTEAM_CABLE_TV_SON = r"\b(?:audio|toslink|rca|jack|haut-parleur|antenne|coax|p[ée]ritel|hdmi)\b"
 _1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (LOISIRS, r"^(?:famille\s+mod[ée]lisme\s+gamersgrass|pinceaux\s+citadel\s+gw|"
              r"mod[ée]lisme\s+citadel\s+gw|pinceaux\s+ak\s+interactive\s*&\s+abteilung\s+502)$"),
@@ -1971,6 +1975,14 @@ def classify(
             and _has(_1FOTEAM_OFFICE_SUPPLIES_CULTURE, name)
         ):
             return CULTURE
+        if _has(_1FOTEAM_CABLE_SOURCE, merchant_category):
+            # Le chemin Câbles mélange les univers ; la connectique nommée décide.
+            if _has(_1FOTEAM_CABLE_PHONE, name):
+                return TELEPHONIE
+            if _has(_1FOTEAM_CABLE_COMPUTING, name):
+                return INFORMATIQUE
+            if _has(_1FOTEAM_CABLE_TV_SON, name):
+                return TV_SON
     # Sneakids : les chemins ci-dessous sont bornés aux formes réellement auditées.
     # Un chemin source voisin mais absent de la liste reste volontairement soumis
     # aux preuves lexicales générales ou à une vague d'audit ultérieure.
