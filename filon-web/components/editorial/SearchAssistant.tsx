@@ -230,6 +230,7 @@ function catalogueHref(input: string) {
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
 const API = (process.env.NEXT_PUBLIC_FILON_API || "https://web-production-c6842.up.railway.app").replace(/\/$/, "");
+const ASSISTANT_TIMEOUT_MS = 30_000;
 
 async function* streamAnalyze(
   q: string,
@@ -362,6 +363,7 @@ export function SearchAssistant() {
     const controller = new AbortController();
     activeRequest.current = controller;
     const id = ++runId.current;
+    const timeout = window.setTimeout(() => controller.abort(), ASSISTANT_TIMEOUT_MS);
     let receivedTerminalEvent = false;
     setPhase("thinking");
     setResult(null);
@@ -415,11 +417,14 @@ export function SearchAssistant() {
     } catch (error) {
       // Une nouvelle recherche annule la précédente : elle ne doit ni afficher
       // une erreur ni conserver des étapes visuelles de l’ancienne analyse.
-      if (runId.current !== id || (error instanceof DOMException && error.name === "AbortError")) return;
+      // En revanche, l’annulation par délai est une indisponibilité honnête :
+      // l’utilisateur doit alors voir une conclusion, jamais des étapes figées.
+      if (runId.current !== id) return;
       setDone([]);
       setActive(-1);
       setPhase("failed");
     } finally {
+      window.clearTimeout(timeout);
       if (activeRequest.current === controller) activeRequest.current = null;
     }
   };
