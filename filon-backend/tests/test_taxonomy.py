@@ -263,6 +263,24 @@ class Test2DekansjeSmallKitchenObjectRoutes:
         assert t.classify(source, "KitchenBrothers Airfryer XXL Dual Zone - 9L", "KitchenBrothers", "Autre marchand") is None
 
 
+class Test2DekansjeCleaningObjectRoutes:
+    """Le rayon ménage hétérogène exige un objet complet et explicitement nommé."""
+
+    def test_named_cleaning_devices_and_tools_reach_verified_aisles(self):
+        source = "Wonen & Koken > Schoonmaken & opruimen > Stofzuigen & schoonmaken"
+        assert t.classify(source, "Auronic Steelstofzuiger Draadloos - 220 watt", "Auronic", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify(source, "Perel Ultrasone Reiniger 6 L - 310 W", "Perel", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify(source, "SolidStock Luxe Vloertrekker RVS - Vloerwisser", "SolidStock", "2dekansje NL-BE") == t.MAISON
+        assert t.classify(source, "Ultra Clean 3-in-1 Spinning Mopset", "Ultra Clean", "2dekansje NL-BE") == t.MAISON
+
+    def test_cleaning_consumables_and_mop_attachment_remain_unclassified(self):
+        source = "Wonen & Koken > Schoonmaken & opruimen > Stofzuigen & schoonmaken"
+        assert t.classify(source, "Monzana Stofzuigerzakken - 5 Laags", "Monzana", "2dekansje NL-BE") is None
+        assert t.classify(source, "Livington MultiScrubber Pads - 3-delig", "Livington", "2dekansje NL-BE") is None
+        assert t.classify(source, "Heldenwerk Elektrische vloerwisser - dweil opzetstuk", "Heldenwerk", "2dekansje NL-BE") is None
+        assert t.classify(source, "Auronic Steelstofzuiger Draadloos - 220 watt", "Auronic", "Autre marchand") is None
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 

@@ -212,6 +212,8 @@ _2DEKANSJE_KITCHEN_ACCESSORY = (
     r"\b(?:extra\s+)?(?:glazen\s+)?kan\s+(?:voor\s+)?(?:de\s+)?blender\b|"
     r"\bblenderkan\b|\bbeker\b.*\bblender\b|\baccessoire\b"
 )
+_2DEKANSJE_CLEANING_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*stofzuigen\s*&\s*schoonmaken\b"
+_2DEKANSJE_CLEANING_MOP_ATTACHMENT = r"\b(?:dweilmop|vloermop|dweil)\b.{0,48}\bopzetstuk\b"
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
@@ -236,8 +238,20 @@ _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
      r"\b(?:groentesnijder|messenset|pepermolen)\b"),
     (ELECTROMENAGER,
-     r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*stofzuigen\s*&\s*schoonmaken\b",
+     _2DEKANSJE_CLEANING_SOURCE,
      r"\b(?:robotstofzuiger|handstofzuiger|waszuiger|stoomreiniger|tafelsauger)\b"),
+    # Sixième vague : cette source de ménage reste hétérogène. Seuls les 23
+    # appareils et les 12 outils manuels nommés dans l'audit sont admis ; les
+    # filtres, sacs, lingettes, solvants et pièces détachées restent exclus.
+    (ELECTROMENAGER,
+     _2DEKANSJE_CLEANING_SOURCE,
+     r"\b(?:steelstofzuiger|kruimeldief|spot\s*cleaner|tapijtreiniger|ultrasone\s+reiniger|"
+     r"(?:compressor\s+)?stofzuiger|ecovacs|deebot|bissell\s+crosswave|bluebot|"
+     r"elektrische\s+ruitenreiniger|raamzuiger)\b"),
+    (MAISON,
+     _2DEKANSJE_CLEANING_SOURCE,
+     r"\b(?:vloerwisser|vloertrekker|spinning\s+mopset|turbobezem|pluizenverwijderaar|"
+     r"dweilsysteem|plumeau|wasborstel|window\s+buddy|raamreiniger|vloermop)\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*thee\s*&\s*koffie\b",
      r"\b(?:melkopschuimer|koffie(?:zetapparaat|machine)|waterkoker|contactgrill)\b"),
@@ -1747,6 +1761,9 @@ def classify(
                 if (
                     _has(_2DEKANSJE_SMALL_KITCHEN_SOURCE, merchant_category)
                     and _has(_2DEKANSJE_KITCHEN_ACCESSORY, name)
+                ) or (
+                    _has(_2DEKANSJE_CLEANING_SOURCE, merchant_category)
+                    and _has(_2DEKANSJE_CLEANING_MOP_ATTACHMENT, name)
                 ):
                     continue
                 return category
