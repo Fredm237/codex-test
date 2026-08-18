@@ -245,6 +245,24 @@ class Test2DekansjeVerifiedSourceRoutes:
         assert t.classify("Wonen & Koken", "Produit opaque", "", "2dekansje NL-BE") is None
 
 
+class Test2DekansjeSmallKitchenObjectRoutes:
+    """Le chemin hétérogène des petits appareils exige toujours un objet explicite."""
+
+    def test_named_small_kitchen_objects_reach_their_verified_aisles(self):
+        source = "Wonen & Koken > Koken & tafelen > Kleine keukenapparaten"
+        assert t.classify(source, "KitchenBrothers Airfryer XXL Dual Zone - 9L", "KitchenBrothers", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify(source, "Solis Vac Pro 569 Vacumeermachine", "Solis", "2dekansje NL-BE") == t.ELECTROMENAGER
+        assert t.classify(source, "Digitale Personenweegschaal Gewicht & BMI", "e.volve", "2dekansje NL-BE") == t.SANTE
+        assert t.classify(source, "KitchenBrothers Messenset - Messenblok", "KitchenBrothers", "2dekansje NL-BE") == t.MAISON
+
+    def test_small_kitchen_accessories_and_consumables_remain_unclassified(self):
+        source = "Wonen & Koken > Koken & tafelen > Kleine keukenapparaten"
+        assert t.classify(source, "MOA Extra Glazen Kan voor Blender", "MOA", "2dekansje NL-BE") is None
+        assert t.classify(source, "Solis Vacuumzakken Voedsel 20 x 30 cm", "Solis", "2dekansje NL-BE") is None
+        assert t.classify(source, "Produit opaque", "", "2dekansje NL-BE") is None
+        assert t.classify(source, "KitchenBrothers Airfryer XXL Dual Zone - 9L", "KitchenBrothers", "Autre marchand") is None
+
+
 class Test2DekansjeSecondBatchSourceRoutes:
     """Les familles résiduelles validées restent bornées à leurs chemins exacts."""
 

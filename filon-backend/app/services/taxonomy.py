@@ -208,11 +208,33 @@ _2DEKANSJE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
 # Quatrième vague : les cinq sources ci-dessous sont hétérogènes. Chaque règle
 # exige donc un objet positif en plus du marchand et du chemin source exact.
 _2DEKANSJE_SMALL_KITCHEN_SOURCE = r"\bwonen\s*&\s*koken\s*>\s*koken\s*&\s*tafelen\s*>\s*kleine\s+keukenapparaten\b"
-_2DEKANSJE_KITCHEN_ACCESSORY = r"\b(?:extra\s+)?(?:glazen\s+)?kan\b|\bblenderkan\b|\bbeker\b.*\bblender\b|\baccessoire"
+_2DEKANSJE_KITCHEN_ACCESSORY = (
+    r"\b(?:extra\s+)?(?:glazen\s+)?kan\s+(?:voor\s+)?(?:de\s+)?blender\b|"
+    r"\bblenderkan\b|\bbeker\b.*\bblender\b|\baccessoire\b"
+)
 _2DEKANSJE_OBJECT_ROUTES: tuple[tuple[str, str, str], ...] = (
     (ELECTROMENAGER,
      _2DEKANSJE_SMALL_KITCHEN_SOURCE,
      r"\b(?:poffertjes(?:pan|maker)|multigrill|citruspers|sapcentrifuge|worstenvuller|slowjuicer|hakmolen|(?:power\s+)?blender|keukenweegschaal|grillplaat|elektrische\s+kookplaat|espressomachine|multicooker|ijsblokjesmachine|soepmaker)\b"),
+    # Cinquième vague : 75 appareils, trois objets de maison et une balance ont
+    # été validés titre par titre dans ce chemin hétérogène. Les contenants et
+    # consommables restent absents de ces motifs, et les bols de blender sont
+    # exclus par _2DEKANSJE_KITCHEN_ACCESSORY ci-dessous.
+    (ELECTROMENAGER,
+     _2DEKANSJE_SMALL_KITCHEN_SOURCE,
+     r"\b(?:air\s*fryer|heteluchtfriteuse|vriezer|juicer|slow\s*cooker|pizza(?:maker|oven)|"
+     r"melkopschuimer|staafmixer|popcornmachine|stoomoven|stoomkoker|elektrische\s+kachel|"
+     r"convectorkachel|vac[uü]meermachine|vacuum\s*sealer|sinaasappelpers|sous\s*vide\s*stick|"
+     r"teppanyaki|bakplaat|tafelgrill|(?:contact|panini|hamburger|multifunctionele)\s*grill|tosti(?:\s*apparaat|\s*ijzer)?|"
+     r"wafelijzer|waffelijzer|cr[êe]pe\s*maker|voedseldroger|ijs(?:machine|maker)|inductie\s*kookplaat|"
+     r"raclette|ijsblokjesmaker|smoothie\s*maker|bruiswater(?:toestel|maker)|rijstkoker|rice\s*cooker|"
+     r"mini\s+vaatwasser|sandwichmaker|eierkoker|handmixer)\b"),
+    (SANTE,
+     _2DEKANSJE_SMALL_KITCHEN_SOURCE,
+     r"\bpersonenweegschaal\b"),
+    (MAISON,
+     _2DEKANSJE_SMALL_KITCHEN_SOURCE,
+     r"\b(?:groentesnijder|messenset|pepermolen)\b"),
     (ELECTROMENAGER,
      r"\bwonen\s*&\s*koken\s*>\s*schoonmaken\s*&\s*opruimen\s*>\s*stofzuigen\s*&\s*schoonmaken\b",
      r"\b(?:robotstofzuiger|handstofzuiger|waszuiger|stoomreiniger|tafelsauger)\b"),
