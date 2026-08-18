@@ -221,6 +221,45 @@ class TestFashionCatalogAdapter:
 
         assert [item.offer_id for item in snapshots] == [wedding_dress.id]
 
+    async def test_mariage_sans_piece_explicite_retrouve_une_robe_prouvee(self, intelligence_session):
+        merchant = models.Merchant(awin_mid=905, name="Marchand mariage", slug="marchand-mariage")
+        intelligence_session.add(merchant)
+        await intelligence_session.flush()
+        wedding_dress = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="wedding-dress-fallback",
+            name="Robe de mariage bridal ivoire",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=150.0,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/wedding-fallback.jpg",
+        )
+        ordinary_dress = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="ordinary-dress-fallback",
+            name="Robe estivale femme",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Robes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=35.0,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/ordinary-fallback.jpg",
+        )
+        intelligence_session.add_all([wedding_dress, ordinary_dress])
+        await intelligence_session.commit()
+
+        snapshots = await retrieve_fashion_offers(intelligence_session, query=None, occasion="wedding")
+
+        assert [item.offer_id for item in snapshots] == [wedding_dress.id]
+
     async def test_un_stock_inconnu_reste_explicite(self, intelligence_session):
         merchant = models.Merchant(awin_mid=902, name="Marchand inconnu", slug="marchand-inconnu")
         intelligence_session.add(merchant)

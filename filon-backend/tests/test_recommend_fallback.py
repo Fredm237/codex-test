@@ -5,6 +5,15 @@ import pytest
 from app.services import catalog_search, recommend
 
 
+def test_fallback_labels_are_localized_and_do_not_claim_unverified_product_traits():
+    assert recommend._verified_rank_label(0, "fr") == "Offre vérifiée"
+    assert recommend._verified_rank_label(2, "en") == "Another verified offer"
+    assert recommend._verified_rank_label(3, "nl") == "Te controleren optie"
+    assert "autonomie" not in recommend._verified_rank_label(2, "fr").lower()
+    assert "performance" not in recommend._verified_rank_label(3, "fr").lower()
+    assert "recondition" not in recommend._verified_rank_label(4, "fr").lower()
+
+
 class _EmptyCache:
     async def get_json(self, key):
         return None

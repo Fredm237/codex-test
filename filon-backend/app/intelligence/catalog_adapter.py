@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db import models
@@ -81,12 +81,43 @@ def _fashion_scopes(query: str | None) -> list[str]:
     return scopes
 
 
+# Une intention de mariage est le seul contexte sans pièce qui peut déclencher
+# un retrieval M1 : les titres de robes portent explicitement cette occasion.
+# Le fallback reste volontairement réduit à une base, des chaussures et un sac ;
+# il ne transforme jamais une autre occasion en tenue supposée.
+_OCCASION_FALLBACK_SCOPES: dict[str, tuple[str, ...]] = {
+    "wedding": ("dress", "footwear", "bag"),
+}
+
 _OCCASION_TERMS: dict[str, frozenset[str]] = {
     # Seul le mariage est assez explicitement exprimé dans les titres Fashion
     # pour constituer un filtre M1. Les autres occasions restent visibles comme
     # contexte utilisateur et non comme une compatibilité prétendument prouvée.
     "wedding": frozenset({"wedding", "bridal", "bride", "mariage", "mariée", "mariée", "trouw", "bruids"}),
 }
+
+
+def _retrieval_scopes(query: str | None, occasion: str | None) -> list[str]:
+    """Détermine les pièces à chercher, avec fallback mariage explicite seulement."""
+    scopes = _fashion_scopes(query)
+    if scopes:
+        return scopes
+    return list(_OCCASION_FALLBACK_SCOPES.get(occasion or "", ()))
+
+
+def _occasion_clause(occasion: str | None):
+    """Filtre SQL de l’occasion uniquement lorsqu’elle est prouvable dans le titre."""
+    terms = _OCCASION_TERMS.get(occasion or "")
+    if not terms:
+        return None
+    lowered_name = func.lower(models.Offer.name)
+    lowered_brand = func.lower(models.Offer.brand)
+    return or_(
+        *[
+            or_(lowered_name.contains(term), lowered_brand.contains(term))
+            for term in terms
+        ]
+    )
 
 
 def _scope_clause(scope: str):
@@ -172,10 +203,11 @@ async def retrieve_fashion_offers(
 
     Le contrat M1 est strict : offre physique, publique, canonique, non adulte,
     avec image et prix, puis correspondance à la fois taxonomique et lexicale.
-    Sans pièce explicitement nommée, le moteur s’abstient plutôt que de proposer
-    des produits arbitraires dans un département large.
+    Sans pièce explicitement nommée, le moteur s’abstient, sauf pour un mariage :
+    une robe de mariage est alors une pièce principale explicitement prouvée par
+    son titre, pas une déduction stylistique.
     """
-    scopes = _fashion_scopes(query)
+    scopes = _retrieval_scopes(query, occasion)
     if not scopes:
         return []
 
@@ -184,7 +216,15 @@ async def retrieve_fashion_offers(
     seen: set[int] = set()
     snapshots: list[CoreOfferSnapshot] = []
     for scope in scopes:
-        stmt = _base_statement().where(_scope_clause(scope)).order_by(models.Offer.id.desc()).limit(limit_by_scope)
+        stmt = _base_statement().where(_scope_clause(scope))
+        # La robe de mariage doit pouvoir prouver l’occasion dans son propre
+        # titre. Les pièces complémentaires restent recherchées comme catégories
+        # distinctes, car leur adéquation au mariage n’est pas observable.
+        if occasion == "wedding" and scope == "dress":
+            occasion_clause = _occasion_clause(occasion)
+            if occasion_clause is not None:
+                stmt = stmt.where(occasion_clause)
+        stmt = stmt.order_by(models.Offer.price.asc(), models.Offer.id.desc()).limit(limit_by_scope)
         rows = (await session.execute(stmt)).all()
         for offer, merchant in rows:
             if offer.id in seen or not _matches_scope(scope, offer, occasion):

@@ -53,6 +53,27 @@ _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
 # seulement qu'un produit principal soit présenté à un prix invraisemblable.
 _PRIMARY_MIN_PRICE = {"laptop": 200.0, "smartphone": 80.0, "casque": 25.0}
 
+# Une occurrence textuelle de « smartphone » apparaît fréquemment dans des
+# accessoires, ou dans la compatibilité d’un appareil tiers. L’assistant ne
+# peut recommander un produit principal que si le Core le place aussi dans le
+# sous-rayon public correspondant. Le garde-fou reste limité aux ancres dont
+# la taxonomie est stable et vérifiable.
+_INTENT_PRIMARY_SCOPE: dict[str, tuple[str, str]] = {
+    "laptop": (taxonomy.INFORMATIQUE, "Ordinateurs portables"),
+    "smartphone": (taxonomy.TELEPHONIE, "Smartphones"),
+    "casque": (taxonomy.TV_SON, "Casques audio"),
+}
+
+
+def _intent_primary_scope(anchor: str):
+    """Retourne le filtre Core du produit principal, jamais celui d’un accessoire."""
+    scope = _INTENT_PRIMARY_SCOPE.get(anchor)
+    if not scope:
+        return None
+    category, subcategory = scope
+    return and_(Offer.filon_category == category, Offer.filon_subcategory == subcategory)
+
+
 # Lorsqu’un visiteur cite une gamme ou une marque non ambiguë, l’ancre de rayon
 # ne suffit pas. Retourner un autre smartphone que l’iPhone demandé est pire
 # qu’un état « aucune offre vérifiée » : la contrainte doit donc être présente
@@ -225,6 +246,12 @@ async def search_internal_products(
                 stmt = stmt.where(
                     not_(or_(*[lowered_name.contains(term) for term in excluded]))
                 )
+                # Le sous-rayon Core empêche qu’un titre qui cite le besoin
+                # comme compatibilité (« pour smartphone ») soit présenté comme
+                # le produit principal recherché.
+                primary_scope = _intent_primary_scope(anchor)
+                if primary_scope is not None:
+                    stmt = stmt.where(primary_scope)
                 min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
                 if min_primary_price is not None:
                     stmt = stmt.where(Offer.price >= min_primary_price)
