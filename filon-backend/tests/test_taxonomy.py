@@ -164,6 +164,14 @@ class Test1FoTeamVerifiedSourceRoutes:
         assert t.classify("Petites Fournitures", "Cutter universel plastique", "", "1FoTeam FR") is None
         assert t.classify("Fibre Optique", "Convertisseur fibre optique TP-Link", "", "Autre marchand") is None
 
+    def test_cables_batch_uses_explicit_connectors_not_the_source_alone(self):
+        assert t.classify("Câbles", "Cable Apple Lightning 1m", "", "1FoTeam FR") == t.TELEPHONIE
+        assert t.classify("Câbles", "Câble DisplayPort 1.4", "", "1FoTeam FR") == t.INFORMATIQUE
+        assert t.classify("Câbles", "Cable Audio Optique Toslink", "", "1FoTeam FR") == t.TV_SON
+
+    def test_cables_batch_stays_confined_to_1foteam(self):
+        assert t.classify("Câbles", "Câble DisplayPort 1.4", "", "Autre marchand") is None
+
 
 class TestSneakidsVerifiedSourceRoutes:
     """Les routes Sneakids ne couvrent que les chemins relus intégralement."""
