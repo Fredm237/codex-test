@@ -208,14 +208,34 @@ const ANALYSIS_TIMEOUT_MS = 25_000;
 // jamais une pièce. Il bloque seulement les rôles « base » dont le propre titre
 // prouve qu’il s’agit d’un accessoire, d’un sous-vêtement ou d’une gaine.
 const INVALID_BASE_ITEM = /\b(?:jewell?ery|necklace|earrings?|bracelets?|rings?|colliers?|boucles?|bagues?|bra|underwear|lingerie|bralette|soutien[- ]?gorge|body\s*shaper|shapewear|tummy\s*control|waist\s*trainer|bridal\s+veil|veil|voile|accessories?)\b/i;
+const INVALID_FOOTWEAR_ITEM = /\b(?:panel|regulateur|régulateur|verstellfuss|height\s*adjust|wood|bois)\b/i;
+
+// Quand l’utilisateur demande une pièce précise, elle doit être prouvée par
+// le titre d’au moins une offre. Un mot technique isolé (ex. « SHOES » sur un
+// régulateur de panneau) ne suffit pas à constituer des chaussures.
+const REQUESTED_ITEM_EVIDENCE: ReadonlyArray<{ request: RegExp; item: RegExp; invalid?: RegExp }> = [
+  { request: /\b(?:veil|voile)\b/i, item: /\b(?:veil|voile)\b/i },
+  { request: /\b(?:shoe|shoes|chaussure|chaussures|schoenen|footwear)\b/i, item: /\b(?:shoe|shoes|chaussure|chaussures|schoenen|boots?|bottines?|sandals?|sandales?|sneakers?|baskets?|heels?|talons?)\b/i, invalid: INVALID_FOOTWEAR_ITEM },
+];
 
 function hasInvalidMainPiece(solution: OutfitSolution) {
   const mainPiece = solution.items.find((item) => item.role === "base");
   return Boolean(mainPiece && INVALID_BASE_ITEM.test(mainPiece.name));
 }
 
-function abstainForInvalidMainPiece(response: OutfitResponse): OutfitResponse {
-  if (!hasInvalidMainPiece(response.solution)) return response;
+function lacksRequestedItemEvidence(request: string, solution: OutfitSolution) {
+  return REQUESTED_ITEM_EVIDENCE.some(({ request: requested, item, invalid }) =>
+    requested.test(request) && !solution.items.some((offer) => item.test(offer.name) && !(invalid?.test(offer.name))),
+  );
+}
+
+function abstainForIncompatibleSolution(response: OutfitResponse, request: string): OutfitResponse {
+  const rejectionReason = hasInvalidMainPiece(response.solution)
+    ? "no_verified_base"
+    : lacksRequestedItemEvidence(request, response.solution)
+      ? "no_verified_requested_item"
+      : null;
+  if (!rejectionReason) return response;
   return {
     ...response,
     solution: {
@@ -223,7 +243,7 @@ function abstainForInvalidMainPiece(response: OutfitResponse): OutfitResponse {
       decision: "abstain",
       total_known_price: null,
       items: [],
-      rejection_reason: "no_verified_base",
+      rejection_reason: rejectionReason,
     },
   };
 }
@@ -242,6 +262,7 @@ function humanize(key: string, locale: Locale): string {
     style_compatibility_not_verified: { fr: "La compatibilité de style et de coupe n’est pas vérifiée", nl: "De stijl- en pasvormcompatibiliteit is niet geverifieerd", en: "Style and fit compatibility are not verified" },
     budget_unreachable: { fr: "Le budget connu ne permet pas une proposition vérifiable", nl: "Het bekende budget laat geen verifieerbaar voorstel toe", en: "The known budget does not allow a verifiable proposal" },
     no_verified_base: { fr: "Aucune pièce principale vérifiable n’est disponible", nl: "Er is geen verifieerbaar hoofditem beschikbaar", en: "No verifiable main piece is available" },
+    no_verified_requested_item: { fr: "Aucune offre ne prouve la pièce explicitement demandée", nl: "Geen aanbieding bewijst het expliciet gevraagde item", en: "No offer proves that the explicitly requested item is available" },
   };
   return labels[key]?.[locale] ?? key;
 }
@@ -304,7 +325,7 @@ export function OutfitStudio() {
         throw new Error("analyse_failed");
       }
       const response = (await res.json()) as OutfitResponse;
-      setResult(abstainForInvalidMainPiece(response));
+      setResult(abstainForIncompatibleSolution(response, trimmed));
     } catch {
       setError(copy.unavailable);
     } finally {
