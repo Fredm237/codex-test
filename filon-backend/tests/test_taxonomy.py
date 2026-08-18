@@ -118,6 +118,20 @@ class TestYesStyleVerifiedSourceRoutes:
         assert t.classify("Lifestyle", "Re-Stay Re-spenser 350ml", "innisfree", "YesStyle") is None
 
 
+class Test1FoTeamVerifiedSourceRoutes:
+    """Les routes 1FoTeam restent attachées aux catégories source auditées."""
+
+    def test_homogeneous_routes_reach_their_verified_aisles(self):
+        assert t.classify("Famille Modélisme GamersGrass", "Produit opaque", "Gamers Grass", "1FoTeam") == t.LOISIRS
+        assert t.classify("Autres Eléments de Refroidissement", "Produit opaque", "Noctua", "1FoTeam") == t.INFORMATIQUE
+        assert t.classify("Jeux d'Ambiance", "Produit opaque", "Ravensburger", "1FoTeam") == t.JOUETS
+        assert t.classify("Casque", "Produit opaque", "Logitech", "1FoTeam") == t.TV_SON
+
+    def test_routes_do_not_escape_the_audited_merchant_or_mixed_sources(self):
+        assert t.classify("Serveur NAS", "Produit opaque", "Synology", "Autre marchand") is None
+        assert t.classify("Câbles", "Produit opaque", "générique", "1FoTeam") is None
+
+
 class TestRefusesToGuess:
     def test_unknown_returns_none_rather_than_a_wrong_aisle(self):
         assert t.classify("Divers", "Article 12345") is None

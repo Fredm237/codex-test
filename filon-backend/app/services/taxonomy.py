@@ -232,6 +232,22 @@ _YESSTYLE_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
     (SANTE, r"^toothpaste$"),
 )
 
+# 1FoTeam agrège plusieurs univers, mais les routes ci-dessous sont homogènes
+# dans le flux audité. Elles sont donc explicitement liées au marchand et à sa
+# catégorie source exacte ; Câbles, Piles et Adaptateurs restent volontairement
+# absents car leur destination dépend encore de l’objet précis.
+_1FOTEAM_MERCHANT = r"\b1foteam\b"
+_1FOTEAM_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
+    (LOISIRS, r"^(?:famille\s+mod[ée]lisme\s+gamersgrass|pinceaux\s+citadel\s+gw|"
+              r"mod[ée]lisme\s+citadel\s+gw|pinceaux\s+ak\s+interactive\s*&\s+abteilung\s+502)$"),
+    (INFORMATIQUE, r"^(?:autres\s+[ée]l[ée]ments\s+de\s+refroidissement|carte\s+graphique|"
+                   r"serveur\s+nas|logiciels\s+antivirus)$"),
+    (JOUETS, r"^(?:jeux\s+de\s+cartes|jeux\s+d'ambiance|jeux\s+pour\s+joueurs\s+r[ée]guliers\s*/\s+confirm[ée]s|"
+               r"star\s+wars|jeux\s+sp[ée]cialistes|jeux\s+d'apprentissage|zombicide|jeux\s+coop[ée]ratif|"
+               r"jeux\s+pour\s+enfants|jeux\s+de\s+r[ôo]le)$"),
+    (TV_SON, r"^casque$"),
+)
+
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
 # pas déjà un classement plus précis. Chaque entrée reste donc réversible et
@@ -1537,6 +1553,14 @@ def classify(
     # restent exclues : elles doivent garder une preuve de produit individuelle.
     if _has(_YESSTYLE_MERCHANT, merchant_name or ""):
         for category, source_pattern in _YESSTYLE_SOURCE_ROUTES:
+            if _has(source_pattern, merchant_category):
+                return category
+
+    # 1FoTeam : ces chemins décrivent respectivement du modélisme, des composants
+    # informatiques, des jeux et des casques audio. Les familles techniques mixtes
+    # ne passent pas cette route sans une preuve de nom plus précise.
+    if _has(_1FOTEAM_MERCHANT, merchant_name or ""):
+        for category, source_pattern in _1FOTEAM_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
                 return category
 
