@@ -536,7 +536,7 @@ _RULES: list[tuple[str, str]] = [
     # Les « classeurs » VEVOR peuvent être des tendeurs de chaîne pour remorque,
     # jamais des classeurs de bureau. Les deux preuves — mécanisme d’arrimage et
     # contexte charge/transport — sont indispensables avant de quitter Culture.
-    (AUTO, r"(?=.*\b(?:classeurs?\s+(?:à\s+)?cliquet|classeurs?\s+(?:de\s+)?cha[iî]ne|classeurs?\s+de\s+charge)\b)(?=.*\b(?:arrimage|remorquage|transport|charge\s+(?:de\s+)?travail|g(?:70|80))\b)"),
+    (AUTO, r"(?=.*\b(?:classeurs?\s+(?:à\s+)?cliquet|classeurs?\s+(?:[àa]|de)\s+cha[iî]ne|classeurs?\s+de\s+charge)\b)(?=.*\b(?:arrimage|remorquage|transport|charge\s+(?:de\s+)?travail|g(?:70|80))\b)"),
     # Équipements de véhicule VEVOR : les deux dimensions de la preuve sont
     # exigées (fonction et contexte camion/remorque/bateau), jamais le véhicule nu.
     (AUTO, r"(?=.*\b(?:e-track|rails?\s+d['’]arrimage|kits?\s+d['’]arrimage)\b)(?=.*\b(?:camions?|remorques?)\b)"),
@@ -1298,7 +1298,7 @@ SUBCATEGORIES: dict[str, list[tuple[str, str]]] = {
                                       r"kits?\s+d['’]arrimage\s+(?:pour\s+)?camions?|bo[iî]tes?\s+de\s+rangement\s+pour\s+lit\s+de\s+camion|"
                                       r"d[ée]bosselage\s+(?:sans\s+peinture|carrosserie)|catalyseurs?\s+d['’][ée]chappement|"
                                       r"cl[ée]s?\s+[àa]\s+choc.*(?:automobile|m[ée]canicien))\b"),
-        ("Arrimage & Hydraulique", r"(?=.*\b(?:e-track|rails?\s+d['’]arrimage|kits?\s+d['’]arrimage|pompes?\s+hydrauliques?|classeurs?\s+(?:à\s+)?cliquet|classeurs?\s+(?:de\s+)?cha[iî]ne|classeurs?\s+de\s+charge)\b)(?=.*\b(?:camions?|remorques?|nacelles?|bennage|arrimage|remorquage|transport|charge\s+(?:de\s+)?travail|g(?:70|80))\b)"),
+        ("Arrimage & Hydraulique", r"(?=.*\b(?:e-track|rails?\s+d['’]arrimage|kits?\s+d['’]arrimage|pompes?\s+hydrauliques?|classeurs?\s+(?:à\s+)?cliquet|classeurs?\s+(?:[àa]|de)\s+cha[iî]ne|classeurs?\s+de\s+charge)\b)(?=.*\b(?:camions?|remorques?|nacelles?|bennage|arrimage|remorquage|transport|charge\s+(?:de\s+)?travail|g(?:70|80))\b)"),
         ("Chauffage véhicule", r"(?=.*\b(?:chauffages?|r[ée]chauffeurs?\s+d['’]air)\s+diesel\b)(?=.*\b(?:camions?|bateaux?|rv)\b)"),
         ("Accessoires auto", r"\b(tapis de sol|housses?|supports? t[ée]l[ée]phone|chargeurs? allume-cigare)\b"),
     ],
