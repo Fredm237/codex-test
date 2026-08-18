@@ -204,6 +204,30 @@ const COPY: Record<Locale, Copy> = {
 const MODES: Mode[] = ["create", "complete", "recreate", "optimize", "compare", "discover"];
 const ANALYSIS_TIMEOUT_MS = 25_000;
 
+// Dernier filet de décision côté interface : il ne reclasse rien et n’invente
+// jamais une pièce. Il bloque seulement les rôles « base » dont le propre titre
+// prouve qu’il s’agit d’un accessoire, d’un sous-vêtement ou d’une gaine.
+const INVALID_BASE_ITEM = /\b(?:jewell?ery|necklace|earrings?|bracelets?|rings?|colliers?|boucles?|bagues?|bra|underwear|lingerie|bralette|soutien[- ]?gorge|body\s*shaper|shapewear|tummy\s*control|waist\s*trainer|bridal\s+veil|veil|voile|accessories?)\b/i;
+
+function hasInvalidMainPiece(solution: OutfitSolution) {
+  const mainPiece = solution.items.find((item) => item.role === "base");
+  return Boolean(mainPiece && INVALID_BASE_ITEM.test(mainPiece.name));
+}
+
+function abstainForInvalidMainPiece(response: OutfitResponse): OutfitResponse {
+  if (!hasInvalidMainPiece(response.solution)) return response;
+  return {
+    ...response,
+    solution: {
+      ...response.solution,
+      decision: "abstain",
+      total_known_price: null,
+      items: [],
+      rejection_reason: "no_verified_base",
+    },
+  };
+}
+
 function humanize(key: string, locale: Locale): string {
   const labels: Record<string, Record<Locale, string>> = {
     verified_catalog_items: { fr: "Pièces issues d’offres réelles du catalogue", nl: "Stukken uit echte catalogusaanbiedingen", en: "Pieces from real catalogue offers" },
@@ -274,7 +298,8 @@ export function OutfitStudio() {
         if (body?.detail?.code === "feature_disabled") setFeature("disabled");
         throw new Error("analyse_failed");
       }
-      setResult((await res.json()) as OutfitResponse);
+      const response = (await res.json()) as OutfitResponse;
+      setResult(abstainForInvalidMainPiece(response));
     } catch {
       setError(copy.unavailable);
     } finally {
