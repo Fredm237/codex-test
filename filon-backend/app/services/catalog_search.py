@@ -74,6 +74,16 @@ def _intent_primary_scope(anchor: str):
     return and_(Offer.filon_category == category, Offer.filon_subcategory == subcategory)
 
 
+def _intent_primary_impostor_terms(anchor: str) -> tuple[str, ...]:
+    """Objets explicitement incompatibles avec un téléphone complet.
+
+    Le Core peut contenir une erreur historique de taxonomie. Ces termes bornés
+    aux intrus observés protègent donc l’Assistant sans supprimer des offres
+    ambiguës du catalogue général ; le reclassement reste la correction durable.
+    """
+    return taxonomy.PHONE_PRIMARY_IMPOSTOR_TERMS if anchor == "smartphone" else ()
+
+
 # Lorsqu’un visiteur cite une gamme ou une marque non ambiguë, l’ancre de rayon
 # ne suffit pas. Retourner un autre smartphone que l’iPhone demandé est pire
 # qu’un état « aucune offre vérifiée » : la contrainte doit donc être présente
@@ -252,6 +262,15 @@ async def search_internal_products(
                 primary_scope = _intent_primary_scope(anchor)
                 if primary_scope is not None:
                     stmt = stmt.where(primary_scope)
+                # Défense en profondeur : la taxonomie historique peut encore
+                # compter un onduleur ou un capteur parmi les Smartphones parce
+                # que leur titre cite une app mobile. Ils sont exclus seulement
+                # de la réponse Assistant, avant la campagne de reclassement.
+                impostor_terms = _intent_primary_impostor_terms(anchor)
+                if impostor_terms:
+                    stmt = stmt.where(
+                        not_(or_(*[lowered_name.contains(term) for term in impostor_terms]))
+                    )
                 min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
                 if min_primary_price is not None:
                     stmt = stmt.where(Offer.price >= min_primary_price)

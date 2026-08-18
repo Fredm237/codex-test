@@ -73,6 +73,35 @@ async def session():
                 image_url="https://example.test/legacy-case.jpg",
                 is_canonical=True,
             ),
+            # Deux intrus observés dans la réponse Assistant : leurs titres
+            # citent un smartphone comme commande ou compatibilité, pas comme
+            # produit vendu. Le filtre public Smartphones doit les masquer.
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="legacy-inverter-in-phone",
+                name="VEVOR Onduleur 1000 W avec USB pour smartphone et pc",
+                category=None,
+                filon_category=TELEPHONIE,
+                filon_subcategory="Smartphones",
+                offer_kind="physical_product",
+                price=83.9,
+                currency="EUR",
+                image_url="https://example.test/inverter.jpg",
+                is_canonical=True,
+            ),
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="legacy-anemometer-in-phone",
+                name="BA30WP app-sensoren warmtedraad-anemometer met smartphone-bediening",
+                category="Meetapparatuur > Luchtstroommeters",
+                filon_category=TELEPHONIE,
+                filon_subcategory="Smartphones",
+                offer_kind="physical_product",
+                price=88.99,
+                currency="EUR",
+                image_url="https://example.test/anemometer.jpg",
+                is_canonical=True,
+            ),
             models.Offer(
                 merchant_id=merchant.id,
                 awin_product_id="wrong-gender",
@@ -107,7 +136,10 @@ async def session():
 
 async def test_la_carte_expose_la_categorie_filon_et_la_source_separement(session):
     result = await call(offers_endpoint, category=TELEPHONIE, session=session)
-    assert result["total"] == 3
+    # Le rayon Téléphonie inclut les cinq entrées, y compris les deux lignes
+    # historiques mal taxées ; le contrat de visibilité stricte est vérifié
+    # séparément sur le sous-rayon Smartphones ci-dessous.
+    assert result["total"] == 5
     phone = next(item for item in result["items"] if item["id"])
     assert all(item["category"] == TELEPHONIE for item in result["items"])
     assert {item["subcategory"] for item in result["items"]} == {"Smartphones", "Coques & Protections"}

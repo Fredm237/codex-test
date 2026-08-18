@@ -91,9 +91,13 @@ def _smartphone_primary_product_clause():
     """
     name = func.lower(func.coalesce(models.Offer.name, ""))
     source_category = func.lower(func.coalesce(models.Offer.category, ""))
+    # Une compatibilité smartphone ne décrit pas forcément un mobile. Les
+    # onduleurs et capteurs mesurés dans la vitrine publique sont masqués avec
+    # les accessoires historiques, en attendant leur reclassement explicite.
+    non_phone_markers = _PHONE_ACCESSORY_MARKERS + taxonomy.PHONE_PRIMARY_IMPOSTOR_TERMS
     accessory = or_(*[
         or_(name.contains(marker), source_category.contains(marker))
-        for marker in _PHONE_ACCESSORY_MARKERS
+        for marker in non_phone_markers
     ])
     return not_(accessory)
 
