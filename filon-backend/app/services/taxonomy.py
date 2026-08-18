@@ -264,6 +264,17 @@ _SNEAKIDS_SOURCE_ROUTES: tuple[tuple[str, str], ...] = (
      r"(?:femme|homme|mixte))?$"),
 )
 
+# On Fight : les quatre racines retenues ont été lues exhaustivement sur 761
+# offres. Elles désignent des équipements de training, sports de combat ou
+# autoprotection ; aucun titre ne décrit un cours, coaching, stage ou formation.
+# Le mot « Training » est autrement un signal de prestation : cette exception
+# reste donc scellée au marchand, aux chemins source et aux titres physiques.
+_ON_FIGHT_MERCHANT = r"\bon\s+fight\b"
+_ON_FIGHT_PHYSICAL_SPORT_SOURCE = (
+    r"^(?:training|kick-boxing|self-d[ée]fense|kali\s+arnis\s+eskrima)(?:\s*>\s*.+)?$"
+)
+_ON_FIGHT_SERVICE_TITLE = r"\b(?:cours|coaching|formation|stage|training\s+session)\b"
+
 # Profils de spécialistes vérifiés dans les flux réels : ils ne s'appliquent
 # qu'en dernier recours, quand le nom et la catégorie marchande ne permettent
 # pas déjà un classement plus précis. Chaque entrée reste donc réversible et
@@ -388,6 +399,16 @@ def classify_offer_kind(
         return ACCOMMODATION
     if _has(_DIGITAL_CONTENT, text):
         return DIGITAL_CONTENT
+    # Le flux On Fight emploie « Training » comme racine de produits physiques.
+    # Sans ce garde-fou marchand, les 690 équipements relevés étaient masqués
+    # comme services ; un titre qui décrit explicitement une formation reste
+    # néanmoins un service.
+    if (
+        _has(_ON_FIGHT_MERCHANT, merchant_name)
+        and _has(_ON_FIGHT_PHYSICAL_SPORT_SOURCE, merchant_category)
+        and not _has(_ON_FIGHT_SERVICE_TITLE, name)
+    ):
+        return PHYSICAL_PRODUCT
     if _has(_SERVICE_DIRECT, text) or (
         _has(_SERVICE_ACTION, name)
         and (_has(_SERVICE_CONTEXT, name) or _has(_SERVICE_CATEGORY, merchant_category))
@@ -1586,6 +1607,15 @@ def classify(
         for category, source_pattern in _SNEAKIDS_SOURCE_ROUTES:
             if _has(source_pattern, merchant_category):
                 return category
+    # On Fight : les racines source auditées décrivent des équipements physiques
+    # de training et d'arts martiaux. Les catégories Santé, Outdoor et Ju-Jitsu
+    # restent hors de la règle jusqu'à un audit distinct.
+    if (
+        _has(_ON_FIGHT_MERCHANT, merchant_name or "")
+        and _has(_ON_FIGHT_PHYSICAL_SPORT_SOURCE, merchant_category)
+        and not _has(_ON_FIGHT_SERVICE_TITLE, name)
+    ):
+        return SPORT
 
     # Le modèle compatible suit toujours le produit principal : une rallonge USB-C,
     # un SSD ou un adaptateur HDMI explicitement rattaché à une catégorie

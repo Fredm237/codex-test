@@ -158,6 +158,24 @@ class TestSneakidsVerifiedSourceRoutes:
         ) is None
 
 
+class TestOnFightVerifiedPhysicalSportRoutes:
+    """Les équipements On Fight restent physiques malgré la racine Training."""
+
+    def test_audited_roots_are_physical_and_reach_sport(self):
+        training_source = "Training > Corde à sauter > Adulte > Mixte"
+        kick_boxing_source = "Kick-Boxing > Protège-tibias Kick-Boxing > Adulte > Mixte"
+        assert t.classify_offer_kind(training_source, "Produit opaque", "Sveltus", "On Fight FR") == t.PHYSICAL_PRODUCT
+        assert t.classify(training_source, "Produit opaque", "Sveltus", "On Fight FR") == t.SPORT
+        assert t.classify_offer_kind(kick_boxing_source, "Produit opaque", "Montana", "On Fight FR") == t.PHYSICAL_PRODUCT
+        assert t.classify(kick_boxing_source, "Produit opaque", "Montana", "On Fight FR") == t.SPORT
+
+    def test_service_titles_and_other_merchants_keep_the_generic_service_rule(self):
+        source = "Training > Corde à sauter > Adulte > Mixte"
+        assert t.classify_offer_kind(source, "Cours de training individuel", "", "On Fight FR") == t.SERVICE
+        assert t.classify_offer_kind(source, "Produit opaque", "", "Autre marchand") == t.SERVICE
+        assert t.classify("Ju-Jitsu > Porte-clé > Adulte > Mixte", "Produit opaque", "Danrho", "On Fight FR") is None
+
+
 class TestRefusesToGuess:
     def test_unknown_returns_none_rather_than_a_wrong_aisle(self):
         assert t.classify("Divers", "Article 12345") is None
