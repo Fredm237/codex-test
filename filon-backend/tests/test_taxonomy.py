@@ -82,6 +82,21 @@ class TestMainCategories:
         assert t.classify(category, name) == expected
 
 
+class TestVevorLoadBinders:
+    """Un classeur d’arrimage n’est pas un classeur de bureau."""
+
+    def test_explicit_load_binder_is_vehicle_tie_down_equipment(self):
+        name = (
+            "VEVOR Classeurs à cliquet 10-13 mm charge de travail sécurisée 4,18 t "
+            "crochets G70 pour chaînes, arrimage de charge transport remorquage"
+        )
+        assert t.classify(None, name, "Vevor") == t.AUTO
+        assert t.classify_subcategory(t.AUTO, name) == "Arrimage & Hydraulique"
+
+    def test_office_binder_is_never_sent_to_auto(self):
+        assert t.classify(None, "Classeur à anneaux A4 pour documents de bureau") != t.AUTO
+
+
 class TestRefusesToGuess:
     def test_unknown_returns_none_rather_than_a_wrong_aisle(self):
         assert t.classify("Divers", "Article 12345") is None
