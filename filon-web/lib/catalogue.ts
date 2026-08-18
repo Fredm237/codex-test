@@ -53,12 +53,26 @@ const SMARTPHONE_DISPLAY_IMPOSTORS = [
   /\b(?:car|auto|dashboard|vent)\s+(?:mount|holder)\b/i,
   // Marqueurs d’accessoires déjà mesurés et employés dans le garde-fou
   // backend Smartphones : ils décrivent une protection, pas un appareil.
-  /\b(?:coque|phone\s+cover|telefoonhoes|smartphonehoes|backcover|bookcase|screen\s+protector|screenprotector|tempered\s+glass|verre\s+tremp[ée]|protege[- ]?ecran|protège[- ]?écran|bescherming)\b/i,
+  /\b(?:coque|phone\s+cover|telefoonhoes|smartphonehoes|backcover|bookcase|screen\s+protector|screenprotector|tempered\s+glass|verre\s+tremp[ée]|protege[- ]?ecran|protège[- ]?écran|bescherm(?:ing|hoes)|cover|covr|prot(?:ection|ction))\b/i,
+  // Intrus strictement observés : support de téléphone, bracelet ou imprimante
+  // compatible avec un mobile, mais pas appareil principal.
+  /\b(?:holder|phone\s+stand|finger\s+grip|bracket|socket|wrist\s+band|armband|fotoprinter|photo\s*printer|pocket\s*printer|mini\s*printer)\b/i,
+] as const;
+
+// Un accessoire peut citer Apple, Samsung ou Huawei dans son titre. On exige
+// donc une famille de téléphone concrète et on applique ensuite les exclusions
+// ci-dessus. Quand la preuve manque, FILON préfère ne pas afficher l’offre.
+const SMARTPHONE_PRIMARY_EVIDENCE = [
+  /\biphone\s*(?:\d|se\b|pro\b|plus\b|mini\b|air\b)/i,
+  /\bgalaxy\s+(?:s|a|z|note|m|xcover)\s*\d/i,
+  /\b(?:google\s+)?pixel\s*\d/i,
+  /\b(?:oneplus|xiaomi|redmi|poco|huawei|honor|oppo|realme|vivo|nokia|motorola|moto|asus|sony\s+xperia|nothing\s+phone)\s*[a-z0-9]/i,
 ] as const;
 
 function isVisibleInSelectedSubcategory(offer: Offer, subcategory: string | null) {
   if (subcategory !== "Smartphones") return true;
-  return !SMARTPHONE_DISPLAY_IMPOSTORS.some((pattern) => pattern.test(offer.name));
+  return SMARTPHONE_PRIMARY_EVIDENCE.some((pattern) => pattern.test(offer.name))
+    && !SMARTPHONE_DISPLAY_IMPOSTORS.some((pattern) => pattern.test(offer.name));
 }
 
 export type CatalogueQuery = {
