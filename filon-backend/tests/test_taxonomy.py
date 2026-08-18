@@ -93,6 +93,14 @@ class TestVevorLoadBinders:
         assert t.classify(None, name, "Vevor") == t.AUTO
         assert t.classify_subcategory(t.AUTO, name) == "Arrimage & Hydraulique"
 
+    def test_chain_load_binder_with_transport_proof_is_vehicle_equipment(self):
+        name = (
+            "VEVOR Chaîne d'Arrimage à Tendeur Lot de 2 Classeur à Chaîne G80 à Cliquet "
+            "Capacité de Charge 5443 kg pour Transport Remorque Camion à Plateau"
+        )
+        assert t.classify(None, name, "Vevor") == t.AUTO
+        assert t.classify_subcategory(t.AUTO, name) == "Arrimage & Hydraulique"
+
     def test_office_binder_is_never_sent_to_auto(self):
         assert t.classify(None, "Classeur à anneaux A4 pour documents de bureau") != t.AUTO
 
