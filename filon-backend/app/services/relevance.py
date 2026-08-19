@@ -44,7 +44,8 @@ _SATELLITES = {
     # produit principal sans le constituer (vitre caméra, outil de montre,
     # porte-bidon) et ne sont conservés que lorsqu’ils sont demandés.
     "outil", "outils", "tool", "tools", "vitre", "glass", "cadre", "frame",
-    "couvercle", "cover", "holder", "porte", "mount", "service",
+    "couvercle", "cover", "holder", "porte", "mount", "service", "wire",
+    "molybdene", "molybdenum", "repair", "repairing",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
@@ -168,7 +169,14 @@ def _term_is_present(term: str, offer_words: set[str], normalized_offer_name: st
 
 def request_describes_collection(text: str) -> bool:
     """Indique qu’une demande porte sur un kit ou un ensemble d’équipement."""
-    return bool(set(mots(text)) & _COLLECTION_REQUEST_TERMS)
+    normalized = _plat(text)
+    return bool(
+        set(mots(normalized)) & _COLLECTION_REQUEST_TERMS
+        # Le néerlandais compose couramment l’objet et l’ensemble demandé,
+        # par exemple « fietsuitrusting ». Ce suffixe est linguistique et ne
+        # dépend donc d’aucun domaine de catalogue.
+        or re.search(r"[a-z]{3,}(?:uitrusting|materiaal)\b", normalized)
+    )
 
 
 def is_unrequested_component(request: str, nom_offre: str) -> bool:
@@ -229,7 +237,11 @@ def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
     # doivent être re-tokenisés avant comparaison pour ne jamais écarter une
     # composante explicitement demandée.
     demande = set(termes_significatifs(mots(" ".join(demande_termes))))
-    return bool(set(mots(nom_offre)) & _SATELLITES) and not bool(demande & _INTENTION_SATELLITE)
+    satellites_offre = set(mots(nom_offre)) & _SATELLITES
+    satellites_demandes = demande & _INTENTION_SATELLITE
+    # Une demande de sacoche autorise une sacoche, pas par extension une vitre
+    # ou un cadre. La comparaison porte sur la nature précise du satellite.
+    return bool(satellites_offre - satellites_demandes)
 
 
 def score(

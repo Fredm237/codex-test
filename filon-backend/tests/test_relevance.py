@@ -87,3 +87,17 @@ def test_un_bijou_mentionnant_dress_ne_prouve_pas_un_vetement():
     title = "Yamaler Chic Bracelet Rhinestone Sparkling Dress-up Tennis Bracelet Women Wrist Jewelry"
     assert relevance.has_clothing_proof(title) is False
     assert relevance.has_clothing_proof("T-shirt Tennis Court Femme") is True
+
+
+
+def test_demande_de_kit_neerlandais_compose_est_reconnue():
+    assert relevance.request_describes_collection("fietsuitrusting onder 500 euro")
+
+
+def test_satellite_compare_les_natures_dobjet_et_preserve_laccessoire_demande():
+    assert relevance.is_unrequested_satellite(
+        ["camera", "camera bag"], "Rear camera glass and inner frame service pack"
+    )
+    assert not relevance.is_unrequested_satellite(
+        ["camera", "camera bag"], "Waterproof camera bag with shoulder strap"
+    )
