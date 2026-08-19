@@ -15,6 +15,8 @@ from sqlalchemy import and_, func, not_, or_, select
 from app.core.logging import get_logger
 from app.db.session import session_scope
 from app.db.models import CatalogProduct, Merchant, Offer, PriceSnapshot
+from app.intelligence.general_catalog import retrieve_general_offers
+from app.intelligence.intent_resolution import resolve_intent_with_fallback
 from app.services import decision, taxonomy
 from app.services.catalog_paging import fetch_all_offer_rows
 from app.services.search import search_clause, terms_of
@@ -337,78 +339,75 @@ async def search_internal_products(
                 log.warning("Base de données non disponible")
                 return []
 
-            # Une demande en langage naturel est ancrée sur son produit principal.
-            # Sans cela, la conjonction « ordinateur + étudiant + 800 » ne peut
-            # jamais correspondre à un titre de feed et masque les vraies offres.
-            intent = _catalogue_intent(query)
-            search_query, required = _search_query_for(query, intent)
-            clause = _intent_search_clause(search_query, intent, required)
-            if clause is None:
-                return []
-
+            # La voie générale est la référence : elle résout la demande vers les
+            # catégories et sous-catégories FILON, lit toutes les offres admissibles
+            # puis seulement les classe. Les anciennes ancres ne servent plus que
+            # d’ultime repli quand la taxonomie ne reconnaît aucune intention.
+            general_intent = await resolve_intent_with_fallback(query)
             from sqlalchemy.orm import joinedload as jl
-
-            # Requête : offres canoniques (dédupliquées), pas adultes, avec prix
-            stmt = (
-                select(Offer)
-                .join(Merchant, Offer.merchant_id == Merchant.id)
-                .where(
-                    and_(
-                        clause,
-                        Offer.is_canonical == True,
-                        Offer.is_adult == False,
-                        Offer.price.isnot(None),
-                        Offer.price > 0,
+            if general_intent.resolved:
+                snapshots = await retrieve_general_offers(session, general_intent)
+                snapshot_ids = [snapshot.offer_id for snapshot in snapshots]
+                if budget is not None:
+                    snapshots = [
+                        snapshot for snapshot in snapshots
+                        if snapshot.currency == "EUR" and snapshot.price is not None and snapshot.price <= budget
+                    ]
+                    snapshot_ids = [snapshot.offer_id for snapshot in snapshots]
+                if snapshot_ids:
+                    hydrated = (
+                        await session.execute(
+                            select(Offer).where(Offer.id.in_(snapshot_ids)).options(jl(Offer.merchant))
+                        )
+                    ).scalars().all()
+                    by_id = {offer.id: offer for offer in hydrated}
+                    offers = [by_id[offer_id] for offer_id in snapshot_ids if offer_id in by_id]
+                else:
+                    offers = []
+            else:
+                intent = _catalogue_intent(query)
+                search_query, required = _search_query_for(query, intent)
+                clause = _intent_search_clause(search_query, intent, required)
+                if clause is None:
+                    return []
+                stmt = (
+                    select(Offer)
+                    .join(Merchant, Offer.merchant_id == Merchant.id)
+                    .where(
+                        and_(
+                            clause,
+                            Offer.is_canonical == True,
+                            Offer.is_adult == False,
+                            Offer.price.isnot(None),
+                            Offer.price > 0,
+                        )
                     )
+                    .options(jl(Offer.merchant))
                 )
-                .options(jl(Offer.merchant))
-            )
-
-            # Les feeds classent parfois housses et supports dans le même
-            # sous-rayon qu'un ordinateur ou un téléphone. Pour un besoin explicite
-            # de produit principal, on les exclut avant de classer les résultats.
-            if intent:
-                anchor, excluded = intent
-                lowered_name = func.lower(Offer.name)
-                stmt = stmt.where(
-                    not_(or_(*[lowered_name.contains(term) for term in excluded]))
-                )
-                # Le sous-rayon Core empêche qu’un titre qui cite le besoin
-                # comme compatibilité (« pour smartphone ») soit présenté comme
-                # le produit principal recherché.
-                primary_scope = _intent_primary_scope(anchor)
-                if primary_scope is not None:
-                    stmt = stmt.where(primary_scope)
-                # Défense en profondeur : la taxonomie historique peut encore
-                # compter un onduleur ou un capteur parmi les Smartphones parce
-                # que leur titre cite une app mobile. Ils sont exclus seulement
-                # de la réponse Assistant, avant la campagne de reclassement.
-                impostor_terms = _intent_primary_impostor_terms(anchor)
-                if impostor_terms:
-                    stmt = stmt.where(
-                        not_(or_(*[lowered_name.contains(term) for term in impostor_terms]))
-                    )
-                min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
-                if min_primary_price is not None:
-                    stmt = stmt.where(Offer.price >= min_primary_price)
-                feature_clause = _intent_feature_clause(query, anchor, lowered_name)
-                if feature_clause is not None:
-                    stmt = stmt.where(feature_clause)
-                exact_model_terms = _exact_model_title_terms(anchor, required)
-                if exact_model_terms:
-                    stmt = stmt.where(or_(*[lowered_name.contains(term) for term in exact_model_terms]))
-
-            # Filtre budget si spécifié
-            if budget:
-                stmt = stmt.where(Offer.price <= budget * 1.1)
-
-            # `limit` était appliqué avant le calcul du Score FILON et coupait
-            # la recherche à 20 offres. Il reste compatible avec les appelants,
-            # mais ne restreint plus la récupération : seules les cartes finales
-            # de l’interface sont limitées après le classement global.
-            del limit
-            rows = await fetch_all_offer_rows(session.execute, stmt)
-            offers = [row[0] for row in rows]
+                if intent:
+                    anchor, excluded = intent
+                    lowered_name = func.lower(Offer.name)
+                    stmt = stmt.where(not_(or_(*[lowered_name.contains(term) for term in excluded])))
+                    primary_scope = _intent_primary_scope(anchor)
+                    if primary_scope is not None:
+                        stmt = stmt.where(primary_scope)
+                    impostor_terms = _intent_primary_impostor_terms(anchor)
+                    if impostor_terms:
+                        stmt = stmt.where(not_(or_(*[lowered_name.contains(term) for term in impostor_terms])))
+                    min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
+                    if min_primary_price is not None:
+                        stmt = stmt.where(Offer.price >= min_primary_price)
+                    feature_clause = _intent_feature_clause(query, anchor, lowered_name)
+                    if feature_clause is not None:
+                        stmt = stmt.where(feature_clause)
+                    exact_model_terms = _exact_model_title_terms(anchor, required)
+                    if exact_model_terms:
+                        stmt = stmt.where(or_(*[lowered_name.contains(term) for term in exact_model_terms]))
+                if budget:
+                    stmt = stmt.where(Offer.price <= budget)
+                del limit
+                rows = await fetch_all_offer_rows(session.execute, stmt)
+                offers = [row[0] for row in rows]
 
             decisions = await _decisions_for_offers(session, offers)
             products: list[dict[str, Any]] = []
