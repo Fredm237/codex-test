@@ -336,6 +336,7 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
 
     selected: list[OutfitItem] = []
     primary_role = _primary_role_for_intent(intent)
+    budget = intent.budget_eur
     # Une catégorie Core seule ne suffit jamais pour la pièce principale : elle
     # doit aussi prouver les caractéristiques produits explicitement demandées.
     # Une chaussure ou un sac explicitement demandé peut légitimement être cette
@@ -343,7 +344,16 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
     base = next(
         (
             offer for offer in by_role[primary_role]
-            if _eligible(offer) and _matches_requested_piece(offer, fallback_base=True)
+            if _eligible(offer)
+            and _matches_requested_piece(offer, fallback_base=True)
+            # Le budget est une contrainte de sélection, pas seulement un motif
+            # d’échec après avoir choisi la première pièce très pertinente. Tous
+            # les candidats restent lus et classés, puis la première offre
+            # réellement achetable est retenue.
+            and (
+                budget is None
+                or (offer.currency == "EUR" and offer.price is not None and offer.price <= budget)
+            )
         ),
         None,
     )
@@ -352,7 +362,6 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
     selected.append(OutfitItem(offer=base, role=primary_role))
 
     currency = base.currency
-    budget = intent.budget_eur
     running_total = base.price or 0.0
     if budget is not None and (currency != "EUR" or running_total > budget):
         return _abstention(intent, "budget_unreachable", offers)

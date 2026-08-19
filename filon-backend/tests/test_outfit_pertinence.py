@@ -35,7 +35,9 @@ def _tenue(*noms: str) -> list[fashion.OutfitItem]:
     return [fashion.OutfitItem(offer=_Offre(n), role=r) for n, r in zip(noms, roles)]
 
 
-def _snapshot(offer_id: int, name: str, category: str, subcategory: str) -> CoreOfferSnapshot:
+def _snapshot(
+    offer_id: int, name: str, category: str, subcategory: str, *, price: float = 20.0
+) -> CoreOfferSnapshot:
     return CoreOfferSnapshot(
         offer_id=offer_id,
         catalog_product_id=None,
@@ -44,7 +46,7 @@ def _snapshot(offer_id: int, name: str, category: str, subcategory: str) -> Core
         filon_category=category,
         filon_subcategory=subcategory,
         offer_kind="physical_product",
-        price=20.0,
+        price=price,
         currency="EUR",
         availability="in_stock",
         image_url="https://images.example/item.jpg",
@@ -148,6 +150,29 @@ def test_chaussures_explicitement_demandees_deviennent_piece_principale():
     assert solution["decision"] == "recommend"
     assert solution["items"][0]["name"] == chaussures.name
     assert solution["items"][0]["role"] == "footwear"
+
+
+def test_robe_sous_budget_est_retenue_apres_une_robe_plus_pertinente_mais_trop_chere():
+    intent = fashion.parse_fashion_intent("Une robe noire pour une soirée sous 150 euros")
+    robe_hors_budget = _snapshot(
+        10,
+        "Robe noire de soirée premium",
+        taxonomy.MODE_FEMME,
+        "Robes",
+        price=190.0,
+    )
+    robe_achetable = _snapshot(
+        11,
+        "Robe noire de soirée",
+        taxonomy.MODE_FEMME,
+        "Robes",
+        price=120.0,
+    )
+
+    solution = fashion.compose_outfit(intent, [robe_hors_budget, robe_achetable])
+    assert solution["decision"] == "recommend"
+    assert solution["items"][0]["name"] == robe_achetable.name
+    assert solution["total_known_price"]["amount"] == 120.0
 
 
 def test_robe_ecarte_un_gel_douche_qui_cite_une_robe_dans_son_nom():
