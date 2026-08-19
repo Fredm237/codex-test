@@ -130,3 +130,22 @@ async def test_fallback_semantique_ne_specialise_pas_un_sous_rayon_sans_preuve_d
 
     assert [(scope.category, scope.subcategory) for scope in intent.scopes] == [(taxonomy.SPORT, None)]
     assert intent.scopes[0].query_terms == ("tennis",)
+
+
+@pytest.mark.asyncio
+async def test_fallback_semantique_enrichit_un_scope_deja_precis_avec_des_mots_de_besoin(monkeypatch):
+    monkeypatch.setattr(
+        intent_resolution,
+        "get_router",
+        lambda: FakeRouter(
+            '{"scopes":[{"category":"Sport & Plein air","subcategory":"Camping & Randonnée",'
+            '"keywords":["tent","sleeping bag","camping mattress","stove"]}]}'
+        ),
+    )
+
+    intent = await intent_resolution.resolve_intent_with_fallback("camping equipment under €300", "en")
+
+    assert [(scope.category, scope.subcategory) for scope in intent.scopes] == [
+        (taxonomy.SPORT, "Camping & Randonnée")
+    ]
+    assert intent.scopes[0].query_terms == ("tent", "sleeping bag", "camping mattress", "stove")
