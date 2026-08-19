@@ -4,6 +4,7 @@ from app.services import taxonomy
 from app.services.catalog_search import (
     _catalogue_intent,
     _coffee_automation_requirement,
+    _exact_model_title_terms,
     _INTENT_PRIMARY_SCOPE,
     _intent_primary_impostor_terms,
     _intent_primary_scope,
@@ -97,6 +98,13 @@ def test_coffee_automation_is_an_explicit_requirement_and_never_an_inference():
     assert _coffee_automation_requirement("machine a cafe automatique") == "automatic"
     assert _coffee_automation_requirement("machine à café semi-automatique") == "semi"
     assert _coffee_automation_requirement("machine à expresso") is None
+
+
+def test_iphone_model_number_requires_the_model_name_not_a_screen_measurement():
+    assert _exact_model_title_terms("smartphone", ("iphone", "15")) == (
+        "iphone 15", "iphone-15", "iphone15",
+    )
+    assert _exact_model_title_terms("smartphone", ("galaxy", "15")) == ()
 
 
 def test_named_model_searches_the_model_before_the_generic_category_anchor():

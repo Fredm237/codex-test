@@ -168,6 +168,18 @@ def _intent_feature_clause(query: str, anchor: str, lowered_name):
     return None
 
 
+def _exact_model_title_terms(anchor: str, required: tuple[str, ...]) -> tuple[str, ...]:
+    """Preuves de modèle qui empêchent un numéro technique de faire foi.
+
+    « iPhone 16e 15,5 cm » contient le chiffre 15, mais ne peut pas remplacer
+    un iPhone 15 : le nombre doit être adjacent au nom de gamme dans le titre.
+    """
+    if anchor == "smartphone" and len(required) == 2 and required[0] == "iphone":
+        model = required[1]
+        return (f"iphone {model}", f"iphone-{model}", f"iphone{model}")
+    return ()
+
+
 def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
     """Retourne une ancre catalogue et les accessoires à exclure pour un besoin courant."""
     normalized = " ".join(terms_of(query))
@@ -373,8 +385,9 @@ async def search_internal_products(
                 feature_clause = _intent_feature_clause(query, anchor, lowered_name)
                 if feature_clause is not None:
                     stmt = stmt.where(feature_clause)
-                if required:
-                    stmt = stmt.where(or_(*[lowered_name.contains(term) for term in required]))
+                exact_model_terms = _exact_model_title_terms(anchor, required)
+                if exact_model_terms:
+                    stmt = stmt.where(or_(*[lowered_name.contains(term) for term in exact_model_terms]))
 
             # Filtre budget si spécifié
             if budget:
