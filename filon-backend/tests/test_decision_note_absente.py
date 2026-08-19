@@ -30,23 +30,41 @@ def _analyse(real_price: float, rating) -> dict:
     }
 
 
+# La clé de tri commence désormais par la pertinence, négative pour que le
+# score le plus élevé sorte en tête. Les cas ci-dessous portent sur la
+# tolérance au `rating` absent, qui reste entière : c'est la forme du tuple qui
+# a changé, pas le comportement qu'ils protègent.
+
+
 def test_rank_key_tolere_rating_none_explicite():
     """Le cas exact de la panne : la clé existe et vaut None."""
     a = {"real_price": 10.0, "reviews": {"rating": None, "count": 0}}
-    assert _rank_key(a) == (10.0, 0.0)
+    assert _rank_key(a) == (-0.0, 10.0, 0.0)
 
 
 def test_rank_key_tolere_reviews_absent():
-    assert _rank_key({"real_price": 10.0}) == (10.0, 0.0)
+    assert _rank_key({"real_price": 10.0}) == (-0.0, 10.0, 0.0)
 
 
 def test_rank_key_tolere_reviews_none():
-    assert _rank_key({"real_price": 10.0, "reviews": None}) == (10.0, 0.0)
+    assert _rank_key({"real_price": 10.0, "reviews": None}) == (-0.0, 10.0, 0.0)
 
 
 def test_rank_key_conserve_la_note_quand_elle_existe():
     a = {"real_price": 10.0, "reviews": {"rating": 4.5, "count": 12}}
-    assert _rank_key(a) == (10.0, -4.5)
+    assert _rank_key(a) == (-0.0, 10.0, -4.5)
+
+
+def test_rank_key_place_la_pertinence_avant_le_prix():
+    """Un article cher mais pertinent passe devant un article hors sujet à 0,01 €.
+
+    C'est la correction du 19/08/2026 : l'assistant répondait « Carte Cadeau
+    Crypto Voucher » à qui demandait un casque, parce que le tri portait
+    d'abord sur le prix.
+    """
+    hors_sujet = {"real_price": 0.01, "relevance": 0.1, "reviews": None}
+    pertinent = {"real_price": 129.0, "relevance": 0.9, "reviews": None}
+    assert sorted([hors_sujet, pertinent], key=_rank_key)[0] is pertinent
 
 
 def test_tri_mixte_ne_leve_pas_et_ordonne_par_prix():

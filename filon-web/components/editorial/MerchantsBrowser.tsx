@@ -178,13 +178,17 @@ export function MerchantsBrowser({ initialItems = null }: { initialItems?: Merch
           {["", ...regions].map((r) => (
             <button
               key={r || "all"}
+              className="fx-region-chip"
               type="button"
               onClick={() => setRegion(r)}
+              aria-pressed={region === r}
               style={{
-                cursor: "pointer", padding: "7px 14px", borderRadius: "var(--r-full)", fontSize: 13, fontWeight: 600,
+                cursor: "pointer", padding: "7px 14px", borderRadius: "var(--fx-radius-caption)", fontSize: 13, fontWeight: 600,
                 border: "1px solid " + (region === r ? "var(--accent)" : "var(--line-2)"),
                 background: region === r ? "var(--accent)" : "transparent",
-                color: region === r ? "#fff" : "var(--ink-2)",
+                // Sur l'ambre, le texte est sombre : du blanc n'y tient pas le
+                // contraste. C'est la règle du système, pas une préférence.
+                color: region === r ? "var(--fx-ink-1000)" : "var(--ink-2)",
               }}
             >
               {r ? REGION_LABEL[r] || r : t.all}

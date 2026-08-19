@@ -5030,3 +5030,11 @@ body:has(.fx-imm-wrap) .fx-imm-loading {
     margin-inline: auto;
   }
 }
+
+/* Le filtre de région des marchands porte son style en ligne, donc la règle
+   tactile générique ne l'atteignait pas : mesuré à 37 px sur mobile, là où un
+   doigt en demande 44. Le style en ligne ne définit pas `min-height`, celle-ci
+   passe donc sans conflit. */
+@media (pointer: coarse) {
+  .fx-region-chip { min-height: 44px; }
+}
