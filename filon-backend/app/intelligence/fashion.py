@@ -24,7 +24,10 @@ _BUDGET_PATTERN = re.compile(r"(?:sous|under|budget(?: de)?|moins de|maximum|max
 # Termes produits suffisamment précis pour interroger le catalogue sans confondre
 # une intention (« mariage », « minimal ») et un nom d’article marchand.
 _ATHLETIC_FOOTWEAR_TERMS = frozenset({
-    "running", "run", "basket-ball", "basketball", "football", "trail", "cycling", "cyclisme", "vélo", "velo", "ski", "tennis",
+    "running", "run", "basket-ball", "basketball", "football", "futsal", "trail", "cycling", "cyclisme", "vélo", "velo", "ski", "tennis",
+})
+_CHILD_FOOTWEAR_TERMS = frozenset({
+    "enfant", "enfants", "kid", "kids", "child", "children", "junior", "baby", "bebe", "bébé", "kind", "kinder",
 })
 
 # Les occasions guident le filtre de retrieval mais ne sont pas des pièces :
@@ -206,7 +209,11 @@ def _gender_signal(text: str | None) -> str | None:
 
 
 def _is_athletic_footwear(text: str | None) -> bool:
-    return bool(set(re.findall(r"[\wÀ-ÿ'-]+", (text or "").lower())) & _ATHLETIC_FOOTWEAR_TERMS)
+    return bool(_words(text) & _ATHLETIC_FOOTWEAR_TERMS)
+
+
+def _is_child_footwear(text: str | None) -> bool:
+    return bool(_words(text) & _CHILD_FOOTWEAR_TERMS)
 
 
 def _sports_requested(text: str) -> bool:
@@ -251,7 +258,14 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         # Une taxonomie historique peut placer un élément de bricolage dans les
         # chaussures. Le rôle Core reste nécessaire, mais un marqueur d’article
         # satellite non demandé le disqualifie avant toute composition.
-        return not relevance.is_unrequested_satellite(termes, offer.name or "")
+        if relevance.is_unrequested_satellite(termes, offer.name or ""):
+            return False
+        # « Travail » est une contrainte explicite. FILON n’infère pas qu’une
+        # chaussure de futsal ou enfant est professionnelle : sans alternative
+        # adulte non sportive documentée, il préfère l’abstention.
+        if intent.occasion == "work" and role_of(offer) == "footwear":
+            return not (_is_athletic_footwear(offer.name) or _is_child_footwear(offer.name))
+        return True
 
     def _matches_requested_piece(offer: CoreOfferSnapshot, *, fallback_base: bool = False) -> bool:
         # Sans pièce explicite, la requête SQL a déjà réduit le fallback

@@ -150,6 +150,27 @@ def test_chaussures_explicitement_demandees_deviennent_piece_principale():
     assert solution["items"][0]["role"] == "footwear"
 
 
+def test_chaussures_de_travail_ecartent_futsal_et_enfant_explicitement_nomme():
+    intent = fashion.parse_fashion_intent("Des chaussures noires pour le travail sous 120 euros")
+    futsal_enfant = _snapshot(
+        13,
+        "Chaussures Futsal Enfant Munich Arenga Kid 306, noires",
+        taxonomy.CHAUSSURES,
+        "Chaussures basses",
+    )
+    chaussures_adultes = _snapshot(
+        14,
+        "Chaussures noires adultes pour le travail",
+        taxonomy.CHAUSSURES,
+        "Chaussures basses",
+    )
+
+    assert fashion.compose_outfit(intent, [futsal_enfant])["decision"] == "abstain"
+    solution = fashion.compose_outfit(intent, [futsal_enfant, chaussures_adultes])
+    assert solution["decision"] == "recommend"
+    assert solution["items"][0]["name"] == chaussures_adultes.name
+
+
 def test_sans_termes_le_comportement_documentaire_est_conserve():
     """La signature reste rétrocompatible : sans demande, on note la documentation."""
     tenue = _tenue("Peu importe", "Peu importe non plus")
