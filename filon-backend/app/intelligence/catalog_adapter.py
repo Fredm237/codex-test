@@ -141,6 +141,17 @@ def _occasion_clause(occasion: str | None):
     )
 
 
+def _scope_title_clause(scope: str):
+    """Preuve SQL de pièce identique à celle vérifiée ensuite par `_matches_scope`."""
+    terms = _SCOPE_TERMS[scope]
+    lowered_name = func.lower(func.coalesce(models.Offer.name, ""))
+    lowered_brand = func.lower(func.coalesce(models.Offer.brand, ""))
+    return or_(*[
+        or_(lowered_name.contains(term), lowered_brand.contains(term))
+        for term in terms
+    ])
+
+
 def _scope_exclusion_clause(scope: str):
     """Objets incompatibles avec le rôle de pièce demandé, directement en SQL."""
     excluded = _SCOPE_EXCLUSIONS.get(scope, frozenset())
@@ -254,17 +265,23 @@ async def retrieve_fashion_offers(
     # admissibles. Il est maintenu dans la signature pour compatibilité appelant,
     # mais ne limite plus la lecture catalogue ; seul l’affichage final est borné.
     del limit
+    explicit_scopes = set(_fashion_scopes(query))
     seen: set[int] = set()
     snapshots: list[CoreOfferSnapshot] = []
     for scope in scopes:
-        stmt = _base_statement().where(_scope_clause(scope))
+        # Une offre est éligible uniquement si le titre ou la marque prouve la
+        # pièce demandée. Ce filtre reprenait auparavant après la lecture, ce qui
+        # faisait transiter des milliers d’intrus de rayon sans élargir la
+        # couverture réelle. Il est maintenant appliqué avant la pagination.
+        stmt = _base_statement().where(_scope_clause(scope), _scope_title_clause(scope))
         scope_exclusion_clause = _scope_exclusion_clause(scope)
         if scope_exclusion_clause is not None:
             stmt = stmt.where(scope_exclusion_clause)
-        # La robe de mariage doit pouvoir prouver l’occasion dans son propre
-        # titre. Les pièces complémentaires restent recherchées comme catégories
-        # distinctes, car leur adéquation au mariage n’est pas observable.
-        if occasion == "wedding" and scope == "dress":
+        # Lorsqu’une pièce n’est pas explicitement demandée, un complément de
+        # mariage doit porter un marqueur cérémoniel dans son propre titre. C’est
+        # exactement le contrat de `_matches_requested_piece` dans la composition
+        # finale : on réduit seulement les intrus, jamais les offres admissibles.
+        if occasion == "wedding" and (scope == "dress" or scope not in explicit_scopes):
             occasion_clause = _occasion_clause(occasion)
             if occasion_clause is not None:
                 stmt = stmt.where(occasion_clause)
