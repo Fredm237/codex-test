@@ -43,7 +43,7 @@ _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
     (
         ("casque", "headphone", "koptelefoon", "noise cancelling", "noise-cancelling"),
         "casque",
-        ("housse", "hoes", "case", "cable", "adaptateur", "support", "earpad", "coussin"),
+        ("housse", "hoes", "case", "cable", "adaptateur", "support", "earpad", "coussin", "ecouteur", "écouteur", "earbud", "in-ear", "in ear", "intra"),
     ),
 )
 
@@ -118,7 +118,10 @@ def _required_name_terms(query: str, anchor: str) -> tuple[str, ...]:
                 return ("iphone", next_token)
         return exact
     if anchor == "casque" and any(token in normalized for token in ("bruit", "noise", "cancellation", "cancelling", "anc")):
-        return ("reduction de bruit", "noise", "anc", "cancel")
+        # « anc » est un acronyme pertinent, mais une recherche SQL par sous-chaîne
+        # le confond avec des couleurs comme « blanc ». Les formulations longues
+        # restent des preuves textuelles sûres dans les titres de feed.
+        return ("reduction de bruit", "noise", "cancel")
     return ()
 
 
@@ -177,7 +180,7 @@ def _intent_search_clause(
     if not intent:
         return search_clause(search_query)
     if required:
-        # « réduction de bruit », « noise », « ANC » et « cancelling » sont
+        # « réduction de bruit », « noise » et « cancelling » sont
         # des formulations alternatives d’une même attente. Les exiger toutes
         # dans un titre rendait une demande de casque ANC impossible alors que
         # le catalogue contenait des casques « noise cancelling » ou « ANC ».
