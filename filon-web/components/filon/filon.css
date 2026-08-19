@@ -3851,3 +3851,10 @@ html, body {
 .filon-decision-missing summary { cursor: pointer; color: var(--ink-2); font-size: 13px; font-weight: 600; }
 .filon-decision-missing p { margin: 8px 0 0; color: var(--ink-3); font-size: 12px; line-height: 1.5; }
 @media (max-width: 600px) { .filon-decision { padding: 14px; } .filon-decision-head { align-items: flex-start; } }
+
+/* Le filtre de région des marchands porte son style en ligne, donc la règle
+   tactile générique ne l'atteignait pas : mesuré à 37 px sur mobile. Le style
+   en ligne ne définit pas `min-height`, celle-ci passe donc sans conflit. */
+@media (pointer: coarse) {
+  .fx-region-chip { min-height: 44px; }
+}

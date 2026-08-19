@@ -24,7 +24,7 @@ type NetworkConnection = {
   removeEventListener?: (type: "change", listener: () => void) => void;
 };
 
-const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string }> = {
+const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string; pageTitle: string }> = {
   fr: {
     chapters: [
       { title: "Est-ce vraiment le bon moment\npour acheter ?", eyebrow: "FILON vous donne la réponse." },
@@ -33,6 +33,7 @@ const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: st
       { title: "Décidez avec\nle contexte." },
       { title: "Prêt à trouver\nle bon prix ?", cta: { label: "Explorer le catalogue", href: "/recherche" } },
     ],
+    pageTitle: "FILON — est-ce vraiment le bon moment pour acheter ?",
     scrollHint: "Scrollez pour explorer",
     loading: "Préparation de l’expérience...",
   },
@@ -44,6 +45,7 @@ const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: st
       { title: "Beslis met\nde juiste context." },
       { title: "Klaar om de juiste prijs\nte vinden?", cta: { label: "Ontdek de catalogus", href: "/recherche" } },
     ],
+    pageTitle: "FILON — is dit echt het juiste moment om te kopen?",
     scrollHint: "Scroll om te ontdekken",
     loading: "Ervaring voorbereiden...",
   },
@@ -55,6 +57,7 @@ const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: st
       { title: "Decide with\ncontext." },
       { title: "Ready to find\nthe right price?", cta: { label: "Explore the catalogue", href: "/recherche" } },
     ],
+    pageTitle: "FILON — is this really the right time to buy?",
     scrollHint: "Scroll to explore",
     loading: "Preparing the experience...",
   },
@@ -289,6 +292,13 @@ export function ImmersiveExperience() {
         </picture>
         <canvas ref={canvasRef} className={`fx-imm-canvas${canvasPainted ? " is-visible" : ""}`} aria-hidden="true" />
         <div className="fx-imm-overlay" />
+        {/* Le titre de niveau 1 de la page d'accueil.
+            Il ne peut pas être le titre de chapitre : celui-ci change au
+            défilement, et un h1 qui mute au scroll ne désigne plus la page —
+            ni pour un moteur, ni pour un lecteur d'écran. Il est donc stable
+            et seulement masqué à l'œil, l'expérience portant le titre
+            visible. Mesuré avant : l'accueil n'avait aucun h1. */}
+        <h1 className="fx-sr">{copy.pageTitle}</h1>
         <div className="fx-imm-chapter" style={{ opacity: chapterOpacity }}>
           {chapter.eyebrow && <p className="fx-imm-eyebrow">{chapter.eyebrow}</p>}
           <h2 className="fx-imm-titre" aria-live="polite">{chapter.title}</h2>
