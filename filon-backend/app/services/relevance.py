@@ -37,13 +37,25 @@ _SATELLITES = {
     "sticker", "autocollant", "lingette", "lingettes", "nettoyant", "nettoyante",
     "chargeur", "cable", "adaptateur", "support", "fixation", "vis", "cache",
     "rechange", "reparation", "kit", "sachet", "recharge",
-    "bouchon", "bouchons", "filtre", "sac", "sacoche", "bandouliere",
+    "bouchon", "bouchons", "filtre", "sac", "bag", "tas", "sacoche", "bandouliere",
     "carte", "cadeau", "voucher", "cle", "clé", "licence", "abonnement",
     "regulateur", "embout", "lame", "collier", "timer",
 }
 
 # Un article satellite reste légitime si la demande le nomme.
 _INTENTION_SATELLITE = _SATELLITES - {"carte", "cle", "clé"}
+
+# Équivalences lexicales limitées aux termes de mode et d’occasion utilisés par
+# Outfit Studio. Elles relient les trois langues cibles sans prétendre déduire
+# un style : « wedding dress » est une preuve textuelle de « robe de mariage ».
+_EQUIVALENCES = {
+    "mariage": frozenset({"mariage", "wedding", "bruiloft", "bridal", "bride"}),
+    "wedding": frozenset({"mariage", "wedding", "bruiloft", "bridal", "bride"}),
+    "bruiloft": frozenset({"mariage", "wedding", "bruiloft", "bridal", "bride"}),
+    "robe": frozenset({"robe", "dress", "jurk"}),
+    "dress": frozenset({"robe", "dress", "jurk"}),
+    "jurk": frozenset({"robe", "dress", "jurk"}),
+}
 
 
 def _plat(texte: str) -> str:
@@ -62,6 +74,9 @@ _VIDES = {
     "besoin", "bon", "bonne", "meilleur", "meilleure", "euro", "euros", "eur",
     "moins", "plus", "qui", "que", "quoi", "mon", "ma", "mes", "ce", "cette",
     "est", "prix", "budget", "environ", "vers", "sous", "entre", "max", "maxi",
+    # Contexte de tenue ou de saison : il ne prouve pas à lui seul une pièce du
+    # catalogue et ne doit pas pénaliser une robe de mariage correctement titrée.
+    "tenue", "outfit", "look", "ete", "summer", "zomer",
 }
 
 
@@ -79,6 +94,18 @@ def termes_significatifs(termes: list[str]) -> list[str]:
     """
     uniques = list(dict.fromkeys(t for t in termes if len(t) >= 3))
     return sorted(uniques, key=len, reverse=True)
+
+
+def _term_is_present(term: str, offer_words: set[str], normalized_offer_name: str) -> bool:
+    """Vérifie un terme ou son équivalent explicite dans le titre marchand."""
+    variants = _EQUIVALENCES.get(term, frozenset({term}))
+    return any(variant in offer_words or variant in normalized_offer_name for variant in variants)
+
+
+def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
+    """Indique qu’un titre décrit un accessoire que la demande ne nomme pas."""
+    demande = set(termes_significatifs([_plat(t) for t in demande_termes]))
+    return bool(set(mots(nom_offre)) & _SATELLITES) and not bool(demande & _INTENTION_SATELLITE)
 
 
 def score(
@@ -101,13 +128,13 @@ def score(
     nom = _plat(nom_offre)
 
     # Part des termes de la demande réellement présents.
-    trouves = sum(1 for t in termes if t in mots_offre or t in nom)
+    trouves = sum(1 for t in termes if _term_is_present(t, mots_offre, nom))
     couverture = trouves / len(termes)
 
     # Le terme le plus discriminant doit être là. Sans lui, la correspondance
     # est accidentelle — c'est le cas « Crazy Machines » pour « machine à café ».
     tete = termes[0]
-    if tete not in mots_offre and tete not in nom:
+    if not _term_is_present(tete, mots_offre, nom):
         couverture *= 0.35
 
     # Une correspondance partielle n'est pas une correspondance. Quand
@@ -123,8 +150,7 @@ def score(
         s *= 0.15
 
     # Article satellite non demandé : il porte le nom sans être la chose.
-    demande = set(termes)
-    if (mots_offre & _SATELLITES) and not (demande & _INTENTION_SATELLITE):
+    if is_unrequested_satellite(termes, nom_offre):
         s *= 0.25
 
     return max(0.0, min(1.0, s))

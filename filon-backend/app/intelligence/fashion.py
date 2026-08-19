@@ -208,11 +208,17 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         prix = offer.price if offer.price is not None else float("inf")
         return (-round(pertinence, 1), prix, getattr(offer, "id", None) or offer.offer_id)
 
+    def _eligible(offer: CoreOfferSnapshot) -> bool:
+        # Une taxonomie historique peut placer un élément de bricolage dans les
+        # chaussures. Le rôle Core reste nécessaire, mais un marqueur d’article
+        # satellite non demandé le disqualifie avant toute composition.
+        return not relevance.is_unrequested_satellite(termes, offer.name or "")
+
     for candidates in by_role.values():
         candidates.sort(key=_rang)
 
     selected: list[OutfitItem] = []
-    base = by_role["base"][0] if by_role["base"] else None
+    base = next((offer for offer in by_role["base"] if _eligible(offer)), None)
     if base is None:
         return _abstention(intent, "no_verified_base", offers)
     selected.append(OutfitItem(offer=base, role="base"))
@@ -230,7 +236,8 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         (
             offer
             for offer in by_role["footwear"]
-            if offer.currency == currency
+            if _eligible(offer)
+            and offer.currency == currency
             and (
                 base_gender is None
                 or _gender_signal(offer.name) is None
@@ -253,7 +260,8 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         (
             offer
             for offer in by_role["accessory"]
-            if offer.currency == currency
+            if _eligible(offer)
+            and offer.currency == currency
             and (budget is None or (offer.price or 0.0) + running_total <= budget)
         ),
         None,

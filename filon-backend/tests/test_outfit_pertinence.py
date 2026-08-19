@@ -14,7 +14,8 @@ laissait donc à 100.
 from __future__ import annotations
 
 from app.intelligence import fashion
-from app.services import relevance
+from app.intelligence.contracts import CoreOfferSnapshot
+from app.services import relevance, taxonomy
 
 
 class _Offre:
@@ -32,6 +33,27 @@ class _Offre:
 def _tenue(*noms: str) -> list[fashion.OutfitItem]:
     roles = ["base", "footwear", "accessory"]
     return [fashion.OutfitItem(offer=_Offre(n), role=r) for n, r in zip(noms, roles)]
+
+
+def _snapshot(offer_id: int, name: str, category: str, subcategory: str) -> CoreOfferSnapshot:
+    return CoreOfferSnapshot(
+        offer_id=offer_id,
+        catalog_product_id=None,
+        name=name,
+        brand=None,
+        filon_category=category,
+        filon_subcategory=subcategory,
+        offer_kind="physical_product",
+        price=20.0,
+        currency="EUR",
+        availability="in_stock",
+        image_url="https://images.example/item.jpg",
+        deep_link="https://merchant.example/item",
+        merchant_id=1,
+        merchant_name="Marchand test",
+        merchant_region="BE",
+        observed_at=None,
+    )
 
 
 def test_une_piece_hors_sujet_fait_chuter_la_confiance():
@@ -52,6 +74,34 @@ def test_la_confiance_reste_haute_quand_tout_correspond():
         "Chaussures de running homme Nike Revolution",
     )
     assert fashion._confidence(tenue, termes) >= 80
+
+
+def test_composition_mariage_ecarte_les_pieces_techniques_et_le_sac_non_demande():
+    intent = fashion.parse_fashion_intent("Une tenue pour un mariage en été")
+    robe = _snapshot(
+        1,
+        "Women's lace white long evening wedding dress",
+        taxonomy.MODE_FEMME,
+        "Robes",
+    )
+    faux_chaussure = _snapshot(
+        2,
+        "Siso Régulateur de hauteur de panneau SHOES en plastique",
+        taxonomy.CHAUSSURES,
+        "Bottes",
+    )
+    sac_non_demande = _snapshot(
+        3,
+        "Washable Kraft Paper Toiletry Bag Silver",
+        taxonomy.ACCESSOIRES,
+        "Sacs",
+    )
+
+    solution = fashion.compose_outfit(intent, [robe, faux_chaussure, sac_non_demande])
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == [robe.name]
+    assert solution["confidence_score"] >= 55
 
 
 def test_sans_termes_le_comportement_documentaire_est_conserve():
