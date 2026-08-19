@@ -150,6 +150,27 @@ def test_chaussures_explicitement_demandees_deviennent_piece_principale():
     assert solution["items"][0]["role"] == "footwear"
 
 
+def test_robe_ecarte_un_gel_douche_qui_cite_une_robe_dans_son_nom():
+    intent = fashion.parse_fashion_intent("Une robe noire pour une soirée sous 150 euros")
+    gel_douche = _snapshot(
+        11,
+        "Guerlain - La Petite Robe Noire Shower Gel - 200 ML",
+        taxonomy.MODE_FEMME,
+        "Robes",
+    )
+    robe_soiree = _snapshot(
+        12,
+        "Robe noire de soirée",
+        taxonomy.MODE_FEMME,
+        "Robes",
+    )
+
+    assert fashion.compose_outfit(intent, [gel_douche])["decision"] == "abstain"
+    solution = fashion.compose_outfit(intent, [gel_douche, robe_soiree])
+    assert solution["decision"] == "recommend"
+    assert solution["items"][0]["name"] == robe_soiree.name
+
+
 def test_robe_de_soiree_ecarte_un_costume_a_theme_non_demande():
     intent = fashion.parse_fashion_intent("Une robe noire pour une soirée sous 150 euros")
     costume_tueur = _snapshot(
