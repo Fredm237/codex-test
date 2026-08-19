@@ -48,7 +48,8 @@ def test_noise_cancelling_headphone_synonyms_are_alternative_search_terms():
     clause = _intent_search_clause(" ".join(required), intent, required)
 
     assert intent is not None
-    assert required == ("reduction de bruit", "noise", "anc", "cancel")
+    assert required == ("reduction de bruit", "noise", "cancel")
+    assert "anc" not in required
     assert getattr(clause.operator, "__name__", "") == "or_"
 
 
@@ -69,6 +70,11 @@ def test_smartphone_search_excludes_observed_non_phone_impostors():
     assert "app-sensoren" in terms
     assert _intent_primary_impostor_terms("laptop") == ()
     assert _intent_primary_impostor_terms("casque") == ()
+
+
+def test_headphone_request_excludes_explicit_earbuds_from_a_headphone_intent():
+    assert _catalogue_intent("casque à réduction de bruit") is not None
+    assert _catalogue_intent("écouteur à réduction de bruit") is None
 
 
 def test_explicit_smartphone_part_is_not_misrepresented_as_a_complete_phone():

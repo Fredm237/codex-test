@@ -155,7 +155,8 @@ class TestCatalogueIntent:
 
     def test_noise_cancelling_request_requires_a_verified_feature_in_title(self):
         required = _required_name_terms("casque à réduction de bruit", "casque")
-        assert {"noise", "anc", "cancel"}.issubset(required)
+        assert {"noise", "cancel"}.issubset(required)
+        assert "anc" not in required
 
     def test_generic_headphone_request_does_not_add_unrequested_feature_constraint(self):
         assert _required_name_terms("casque bluetooth", "casque") == ()
