@@ -80,3 +80,10 @@ def test_un_accessoire_reste_valable_si_on_le_demande():
 def test_les_accents_ne_separent_pas():
     assert relevance.score(_termes("cafetière"), "Cafetiere italienne inox",
                            offer_kind="physical_product") >= relevance.SEUIL
+
+
+
+def test_un_bijou_mentionnant_dress_ne_prouve_pas_un_vetement():
+    title = "Yamaler Chic Bracelet Rhinestone Sparkling Dress-up Tennis Bracelet Women Wrist Jewelry"
+    assert relevance.has_clothing_proof(title) is False
+    assert relevance.has_clothing_proof("T-shirt Tennis Court Femme") is True

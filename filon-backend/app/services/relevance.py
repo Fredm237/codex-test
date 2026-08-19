@@ -82,6 +82,14 @@ _CLOTHING_REQUEST_TERMS = frozenset({
     "clothing", "clothes", "apparel", "garment", "garments", "kleding", "kledij",
     "vetement", "vetements", "vêtement", "vêtements",
 })
+# Un titre peut contenir une coupe ou un mot de style vestimentaire tout en
+# décrivant sans ambiguïté un bijou. La nature d’objet explicite prévaut sur ce
+# vocabulaire de style, pour tous les domaines et toutes les langues cibles.
+_JEWELLERY_OBJECT_TERMS = frozenset({
+    "bracelet", "bracelets", "necklace", "necklaces", "jewelry", "jewellery",
+    "earring", "earrings", "pendant", "pendants", "collier", "colliers",
+    "bague", "bagues", "bijou", "bijoux", "boucle", "boucles", "choker",
+})
 _CLOTHING_OFFER_TERMS = frozenset({
     "tshirt", "shirt", "polo", "top", "jersey", "dress", "skirt", "short", "shorts",
     "trousers", "pants", "legging", "socks", "sock", "jacket", "coat", "sweater", "hoodie",
@@ -141,7 +149,10 @@ def request_requires_clothing(text: str) -> bool:
 
 def has_clothing_proof(nom_offre: str) -> bool:
     """Indique qu’un titre marchand prouve qu’il vend une pièce vestimentaire."""
-    return bool(set(mots(nom_offre)) & _CLOTHING_OFFER_TERMS)
+    offer_terms = set(mots(nom_offre))
+    if offer_terms & _JEWELLERY_OBJECT_TERMS:
+        return False
+    return bool(offer_terms & _CLOTHING_OFFER_TERMS)
 
 
 def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
