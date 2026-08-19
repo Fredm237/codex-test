@@ -214,6 +214,20 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         # satellite non demandé le disqualifie avant toute composition.
         return not relevance.is_unrequested_satellite(termes, offer.name or "")
 
+    def _matches_requested_piece(offer: CoreOfferSnapshot) -> bool:
+        # Une pièce complémentaire est optionnelle, mais elle ne doit pas être
+        # ajoutée seulement parce qu’elle est classée sous Chaussures ou Accessoires.
+        # Elle doit confirmer une pièce explicitement demandée, ou — pour un
+        # mariage — porter un marqueur cérémoniel réel dans son propre titre.
+        if relevance.score(
+            termes, offer.name or "", offer_kind=getattr(offer, "offer_kind", None)
+        ) >= relevance.SEUIL:
+            return True
+        if intent.occasion == "wedding":
+            words = set(re.findall(r"[\wÀ-ÿ'-]+", (offer.name or "").lower()))
+            return bool(words & {"mariage", "wedding", "bridal", "bride", "cérémonie", "ceremonie", "soirée", "soiree", "evening", "formal", "formel"})
+        return False
+
     for candidates in by_role.values():
         candidates.sort(key=_rang)
 
@@ -237,6 +251,7 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
             offer
             for offer in by_role["footwear"]
             if _eligible(offer)
+            and _matches_requested_piece(offer)
             and offer.currency == currency
             and (
                 base_gender is None
@@ -261,6 +276,7 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
             offer
             for offer in by_role["accessory"]
             if _eligible(offer)
+            and _matches_requested_piece(offer)
             and offer.currency == currency
             and (budget is None or (offer.price or 0.0) + running_total <= budget)
         ),
