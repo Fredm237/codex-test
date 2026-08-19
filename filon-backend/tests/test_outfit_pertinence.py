@@ -96,8 +96,17 @@ def test_composition_mariage_ecarte_les_pieces_techniques_et_le_sac_non_demande(
         taxonomy.ACCESSOIRES,
         "Sacs",
     )
+    chaussure_non_demandee = _snapshot(
+        4,
+        "BlackFox | Comfortabele Schoenen / Instappers maat 36 Kleur geel",
+        taxonomy.CHAUSSURES,
+        "Chaussures basses",
+    )
 
-    solution = fashion.compose_outfit(intent, [robe, faux_chaussure, sac_non_demande])
+    solution = fashion.compose_outfit(
+        intent,
+        [robe, faux_chaussure, sac_non_demande, chaussure_non_demandee],
+    )
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == [robe.name]
