@@ -150,6 +150,27 @@ def test_chaussures_explicitement_demandees_deviennent_piece_principale():
     assert solution["items"][0]["role"] == "footwear"
 
 
+def test_robe_de_soiree_ecarte_un_costume_a_theme_non_demande():
+    intent = fashion.parse_fashion_intent("Une robe noire pour une soirée sous 150 euros")
+    costume_tueur = _snapshot(
+        12,
+        "Une robe noire pour un tueur",
+        taxonomy.MODE_FEMME,
+        "Robes",
+    )
+    robe_soiree = _snapshot(
+        13,
+        "Robe noire de soirée",
+        taxonomy.MODE_FEMME,
+        "Robes",
+    )
+
+    assert fashion.compose_outfit(intent, [costume_tueur])["decision"] == "abstain"
+    solution = fashion.compose_outfit(intent, [costume_tueur, robe_soiree])
+    assert solution["decision"] == "recommend"
+    assert solution["items"][0]["name"] == robe_soiree.name
+
+
 def test_chaussures_de_travail_ecartent_futsal_et_enfant_explicitement_nomme():
     intent = fashion.parse_fashion_intent("Des chaussures noires pour le travail sous 120 euros")
     futsal_enfant = _snapshot(

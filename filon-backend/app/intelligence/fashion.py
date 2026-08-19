@@ -37,6 +37,11 @@ _WORK_FOOTWEAR_EVIDENCE = frozenset({
     "formel", "formal", "formeel", "ville", "oxford", "derby", "mocassin", "loafer",
     "escarpin", "pump", "pumps", "cuir", "leather", "leder", "securite", "sécurité", "safety",
 })
+# Ces marqueurs décrivent un costume ou une tenue à thème, pas une robe de
+# soirée ordinaire. Ils restent autorisés uniquement si l’utilisateur les cite.
+_THEMED_COSTUME_TERMS = frozenset({
+    "costume", "déguisement", "deguisement", "cosplay", "tueur", "killer", "halloween", "carnaval", "carnival",
+})
 
 # Les occasions guident le filtre de retrieval mais ne sont pas des pièces :
 # leur absence dans un titre ne doit ni pénaliser un blazer réel ni permettre à
@@ -228,6 +233,11 @@ def _has_work_footwear_evidence(text: str | None) -> bool:
     return bool(_words(text) & _WORK_FOOTWEAR_EVIDENCE)
 
 
+def _is_unrequested_themed_costume(request: str, offer_name: str | None) -> bool:
+    request_words = _words(request)
+    return bool(_words(offer_name) & _THEMED_COSTUME_TERMS) and not bool(request_words & _THEMED_COSTUME_TERMS)
+
+
 def _sports_requested(text: str) -> bool:
     return _is_athletic_footwear(text)
 
@@ -271,6 +281,8 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         # chaussures. Le rôle Core reste nécessaire, mais un marqueur d’article
         # satellite non demandé le disqualifie avant toute composition.
         if relevance.is_unrequested_satellite(termes, offer.name or ""):
+            return False
+        if _is_unrequested_themed_costume(intent.raw_request, offer.name):
             return False
         # « Travail » est une contrainte explicite. FILON n’infère pas qu’une
         # chaussure de futsal ou enfant est professionnelle : sans alternative
