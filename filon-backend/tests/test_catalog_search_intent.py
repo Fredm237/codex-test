@@ -7,6 +7,7 @@ from app.services.catalog_search import (
     _intent_primary_impostor_terms,
     _intent_primary_scope,
     _intent_search_terms,
+    _intent_search_clause,
     _required_name_terms,
     _search_query_for,
 )
@@ -39,6 +40,16 @@ def test_primary_product_intents_have_an_explicit_core_scope():
     assert _INTENT_PRIMARY_SCOPE["laptop"] == (taxonomy.INFORMATIQUE, "Ordinateurs portables")
     assert _INTENT_PRIMARY_SCOPE["casque"] == (taxonomy.TV_SON, "Casques audio")
     assert _intent_primary_scope("inconnu") is None
+
+
+def test_noise_cancelling_headphone_synonyms_are_alternative_search_terms():
+    intent = _catalogue_intent("casque à réduction de bruit sous 300 euros")
+    required = _required_name_terms("casque à réduction de bruit sous 300 euros", "casque")
+    clause = _intent_search_clause(" ".join(required), intent, required)
+
+    assert intent is not None
+    assert required == ("reduction de bruit", "noise", "anc", "cancel")
+    assert getattr(clause.operator, "__name__", "") == "or_"
 
 
 def test_generic_smartphone_search_covers_actual_phone_title_families():
