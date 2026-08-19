@@ -14,14 +14,34 @@ def _display_role(offer: CoreOfferSnapshot) -> str:
     return "base"
 
 
+def _match_proof(
+    scope: IntentScope,
+    offer: CoreOfferSnapshot,
+    *,
+    request_terms: tuple[str, ...],
+) -> float:
+    """Conserve séparément la preuve de scope et celle d’un qualificatif.
+
+    Les synonymes proposés pour un scope constituent des alternatives. Les
+    fusionner avec « connectée » ou « réduction de bruit » dilue cette exigence
+    explicite ; chaque source de preuve est donc notée indépendamment.
+    """
+    scope_match = relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind)
+    qualifier_match = (
+        relevance.score(list(request_terms), offer.name or "", offer_kind=offer.offer_kind)
+        if request_terms
+        else 0.0
+    )
+    return max(scope_match, qualifier_match)
+
+
 def _rank(
     scope: IntentScope,
     offer: CoreOfferSnapshot,
     *,
     request_terms: tuple[str, ...],
 ) -> tuple[float, float, int]:
-    terms = list(dict.fromkeys([*scope.query_terms, *request_terms]))
-    match = relevance.score(terms, offer.name or "", offer_kind=offer.offer_kind)
+    match = _match_proof(scope, offer, request_terms=request_terms)
     price = offer.price if offer.price is not None else float("inf")
     return (-round(match, 3), price, offer.offer_id)
 
@@ -48,6 +68,16 @@ def _scope_candidates(
             if relevance.has_clothing_proof(offer.name or "")
             and relevance.gender_compatible(scope.source_text, offer.name or "")
         ]
+    feature_proven = [
+        offer for offer in scoped
+        if relevance.proves_required_features(scope.source_text, offer.name or "")
+    ]
+    # Si aucun titre ne prouve l’attribut demandé, conserver le scope permet
+    # l’abstention contrôlée en aval plutôt qu’une recommandation inventée.
+    if feature_proven:
+        scoped = feature_proven
+    elif relevance.request_has_required_features(scope.source_text):
+        return []
     # Les satellites sont légitimes seulement quand les mots de besoin les
     # demandent. Ce filtre intervient après la lecture exhaustive du scope : il
     # ne masque jamais une offre sans avoir vérifié qu’un produit principal est
@@ -80,11 +110,7 @@ def _scope_candidates(
             scoped = substantial
     strict = [
         offer for offer in scoped
-        if relevance.score(
-            list(dict.fromkeys([*scope.query_terms, *request_terms])),
-            offer.name or "",
-            offer_kind=offer.offer_kind,
-        ) >= relevance.SEUIL
+        if _match_proof(scope, offer, request_terms=request_terms) >= relevance.SEUIL
     ]
     # Les offres ont déjà franchi le filtre de scope, de nature physique,
     # disponibilité, prix et image dans general_catalog. Si les mots de la

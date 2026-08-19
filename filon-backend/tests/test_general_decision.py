@@ -217,3 +217,50 @@ def test_plan_general_dun_kit_neerlandais_ecarte_un_composant_de_reglage():
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Fietshelm met verstelbaar vizier"]
+
+
+
+def test_plan_general_prefere_un_smartphone_prouve_a_un_bijou_pour_telephone():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="smartphone under €400",
+        locale="en",
+        scopes=(IntentScope(taxonomy.TELEPHONIE, "Smartphones", "smartphone under €400", ("smartphone", "mobile phone", "android", "iphone")),),
+        terms=("smartphone",),
+        required_title_phrases=(),
+        budget_eur=400.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Mobile phone leather bracelet chain for iPhone", taxonomy.TELEPHONIE, "Smartphones", 3.31),
+            offer(2, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Android smartphone with 128 GB storage"]
+
+
+def test_plan_general_exige_la_preuve_dune_reduction_de_bruit_explicitement_demandee():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="casque à réduction de bruit sous 200 €",
+        locale="fr",
+        scopes=(IntentScope(taxonomy.TV_SON, "Casques audio", "casque à réduction de bruit sous 200 €", ("casque", "réduction de bruit", "bluetooth", "sans fil", "noise cancelling")),),
+        terms=("casque", "reduction", "bruit"),
+        required_title_phrases=(),
+        budget_eur=200.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Ecouteurs sans fil Bluetooth", taxonomy.TV_SON, "Casques audio", 14.06),
+            offer(2, "Casque Bluetooth à réduction de bruit active", taxonomy.TV_SON, "Casques audio", 119.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Casque Bluetooth à réduction de bruit active"]
