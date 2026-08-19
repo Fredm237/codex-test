@@ -134,6 +134,22 @@ def test_blazer_de_travail_exige_une_preuve_de_piece_principale():
     assert solution["items"][0]["name"] == vrai_blazer.name
 
 
+def test_chaussures_explicitement_demandees_deviennent_piece_principale():
+    intent = fashion.parse_fashion_intent("Des chaussures noires pour le travail sous 120 euros")
+    chaussures = _snapshot(
+        12,
+        "Chaussures noires femme pour le travail",
+        taxonomy.CHAUSSURES,
+        "Chaussures basses",
+    )
+
+    solution = fashion.compose_outfit(intent, [chaussures])
+
+    assert solution["decision"] == "recommend"
+    assert solution["items"][0]["name"] == chaussures.name
+    assert solution["items"][0]["role"] == "footwear"
+
+
 def test_sans_termes_le_comportement_documentaire_est_conserve():
     """La signature reste rétrocompatible : sans demande, on note la documentation."""
     tenue = _tenue("Peu importe", "Peu importe non plus")

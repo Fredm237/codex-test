@@ -35,12 +35,20 @@ _OUTFIT_CONTEXT_WORDS = frozenset({
     "soiree", "soirée", "evening", "avond", "vacances", "holiday", "vakantie",
 })
 
+_FOOTWEAR_REQUEST_TERMS = frozenset({
+    "schoenen", "chaussure", "chaussures", "shoe", "shoes", "schoen", "sneaker", "sneakers", "basket", "baskets", "boot", "boots", "botte", "bottes",
+})
+_ACCESSORY_REQUEST_TERMS = frozenset({
+    "sac", "sacs", "bag", "bags", "tas", "tassen", "handbag", "handtas", "pochette", "clutch",
+})
+
 _PRODUCT_WORDS = frozenset({
     "robe", "dress", "jurk", "veste", "blazer", "jacket", "jas", "manteau",
     "coat", "broek", "pantalon", "pants", "jean", "shirt", "chemise", "hemd",
     "tshirt", "t-shirt", "top", "schoenen", "chaussures", "shoe", "sneaker",
     "basket", "sac", "bag", "tas", "jupe", "skirt", "rok",
 })
+_BASE_REQUEST_TERMS = _PRODUCT_WORDS - _FOOTWEAR_REQUEST_TERMS - _ACCESSORY_REQUEST_TERMS
 
 
 @dataclass(frozen=True)
@@ -155,6 +163,26 @@ def _color_terms(color: str) -> tuple[str, ...]:
     }[color]
 
 
+def _words(value: str | None) -> set[str]:
+    """Découpe un texte de demande sans déduire de propriété non présente."""
+    return set(re.findall(r"[\wÀ-ÿ'-]+", (value or "").lower()))
+
+
+def _primary_role_for_intent(intent: FashionIntent) -> OutfitRole:
+    """La pièce explicitement demandée devient la base de la recommandation."""
+    words = _words(intent.raw_request)
+    # Lorsqu’une tenue cite plusieurs pièces, le vêtement principal reste la
+    # base. Chaussures et sac ne deviennent principaux que s’ils sont demandés
+    # seuls, par exemple « des chaussures noires ».
+    if words & _BASE_REQUEST_TERMS:
+        return "base"
+    if words & _FOOTWEAR_REQUEST_TERMS:
+        return "footwear"
+    if words & _ACCESSORY_REQUEST_TERMS:
+        return "accessory"
+    return "base"
+
+
 def role_of(offer: CoreOfferSnapshot) -> OutfitRole:
     """Rôle fondé sur la taxonomie FILON; pas sur une description imaginée."""
     category = offer.filon_category
@@ -254,17 +282,21 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         candidates.sort(key=_rang)
 
     selected: list[OutfitItem] = []
+    primary_role = _primary_role_for_intent(intent)
     # Une catégorie Core seule ne suffit jamais pour la pièce principale : elle
     # doit aussi prouver les caractéristiques produits explicitement demandées.
-    # En l’absence de preuve, FILON s’abstient plutôt que de recommander une
-    # veste sport comme « blazer de travail ».
+    # Une chaussure ou un sac explicitement demandé peut légitimement être cette
+    # pièce principale ; FILON ne force donc pas une robe ou un blazer absent.
     base = next(
-        (offer for offer in by_role["base"] if _eligible(offer) and _matches_requested_piece(offer, fallback_base=True)),
+        (
+            offer for offer in by_role[primary_role]
+            if _eligible(offer) and _matches_requested_piece(offer, fallback_base=True)
+        ),
         None,
     )
     if base is None:
         return _abstention(intent, "no_verified_base", offers)
-    selected.append(OutfitItem(offer=base, role="base"))
+    selected.append(OutfitItem(offer=base, role=primary_role))
 
     currency = base.currency
     budget = intent.budget_eur
@@ -279,6 +311,7 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         (
             offer
             for offer in by_role["footwear"]
+            if primary_role != "footwear"
             if _eligible(offer)
             and _matches_requested_piece(offer)
             and offer.currency == currency
@@ -304,6 +337,7 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         (
             offer
             for offer in by_role["accessory"]
+            if primary_role != "accessory"
             if _eligible(offer)
             and _matches_requested_piece(offer)
             and offer.currency == currency
