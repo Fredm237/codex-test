@@ -73,6 +73,24 @@ def _plat(texte: str) -> str:
 # vocabulaire du budget. Sans ce filtre, « un casque audio sans fil pour moins
 # de 150 euros » pèse huit termes dont quatre décrivent le prix, et un vrai
 # casque Sony n'en retrouve que la moitié — donc se fait rejeter.
+# Une demande qui désigne explicitement des vêtements ne peut être satisfaite
+# par un objet de sport, un bijou ou un accessoire partageant seulement le nom de
+# la pratique. Ces vocabulaires décrivent la nature générique « vêtement » dans
+# les langues cibles ; ils ne sont pas des listes propres à un sport ou à une
+# catégorie de catalogue.
+_CLOTHING_REQUEST_TERMS = frozenset({
+    "clothing", "clothes", "apparel", "garment", "garments", "kleding", "kledij",
+    "vetement", "vetements", "vêtement", "vêtements",
+})
+_CLOTHING_OFFER_TERMS = frozenset({
+    "tshirt", "shirt", "polo", "top", "jersey", "dress", "skirt", "short", "shorts",
+    "trousers", "pants", "legging", "socks", "sock", "jacket", "coat", "sweater", "hoodie",
+    "sweatshirt", "maillot", "haut", "robe", "jupe", "pantalon", "chaussette", "veste",
+    "manteau", "pull", "gilet", "chemise", "tunique", "broek", "jurk", "rok", "sokken",
+    "jas", "trui", "vest", "kleding", "kledij",
+})
+
+
 _VIDES = {
     "un", "une", "des", "les", "le", "la", "de", "du", "pour", "avec", "sans",
     "et", "ou", "en", "au", "aux", "dans", "sur", "je", "veux", "cherche",
@@ -105,6 +123,16 @@ def _term_is_present(term: str, offer_words: set[str], normalized_offer_name: st
     """Vérifie un terme ou son équivalent explicite dans le titre marchand."""
     variants = _EQUIVALENCES.get(term, frozenset({term}))
     return any(variant in offer_words or variant in normalized_offer_name for variant in variants)
+
+
+def request_requires_clothing(text: str) -> bool:
+    """Indique que la demande exige un vêtement, quelle que soit sa pratique."""
+    return bool(set(mots(text)) & _CLOTHING_REQUEST_TERMS)
+
+
+def has_clothing_proof(nom_offre: str) -> bool:
+    """Indique qu’un titre marchand prouve qu’il vend une pièce vestimentaire."""
+    return bool(set(mots(nom_offre)) & _CLOTHING_OFFER_TERMS)
 
 
 def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
