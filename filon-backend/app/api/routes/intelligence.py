@@ -17,6 +17,10 @@ from app.db import session as db
 from app.intelligence import models
 from app.intelligence.catalog_adapter import retrieve_fashion_offers
 from app.intelligence.fashion import compose_outfit, parse_fashion_intent, retrieval_query_for_intent
+from app.intelligence.general_catalog import retrieve_general_offers
+from app.intelligence.general_decision import compose_general_plan
+from app.intelligence.intent_resolution import resolve_intent_with_fallback
+from app.services import taxonomy
 
 router = APIRouter(tags=["intelligence"])
 
@@ -99,21 +103,35 @@ async def outfit_analyse(
             detail={"code": "catalog_unavailable", "message": "Catalog data is unavailable."},
         )
 
-    intent = parse_fashion_intent(payload.request, payload.mode)
-    offers = await retrieve_fashion_offers(
-        session,
-        query=retrieval_query_for_intent(payload.request),
-        occasion=intent.occasion,
+    fashion_intent = parse_fashion_intent(payload.request, payload.mode)
+    general_intent = await resolve_intent_with_fallback(payload.request, payload.locale)
+    # Les besoins hors Mode passent au moteur général : une même résolution
+    # taxonomique multilingue sert tous les rayons, sans profils de produit.
+    use_general = general_intent.resolved and not any(
+        scope.category == taxonomy.MODE for scope in general_intent.scopes
     )
-    solution = compose_outfit(intent, offers)
+    if use_general:
+        intent = general_intent
+        offers = await retrieve_general_offers(session, general_intent)
+        solution = compose_general_plan(general_intent, offers)
+        trace_domain = "general"
+    else:
+        intent = fashion_intent
+        offers = await retrieve_fashion_offers(
+            session,
+            query=retrieval_query_for_intent(payload.request),
+            occasion=fashion_intent.occasion,
+        )
+        solution = compose_outfit(fashion_intent, offers)
+        trace_domain = "fashion"
     trace_key = uuid4().hex
 
     trace = models.IntelligenceTrace(
         trace_key=trace_key,
-        domain="fashion",
+        domain=trace_domain,
         status=str(solution["decision"]),
-        request_json={"locale": payload.locale, "mode": intent.mode},
-        intent_json=_trace_payload(intent),
+        request_json={"locale": payload.locale, "mode": payload.mode},
+        intent_json=(intent.as_dict() if trace_domain == "general" else _trace_payload(intent)),
         candidates_json=[
             {
                 "offer_id": offer.offer_id,
@@ -125,26 +143,26 @@ async def outfit_analyse(
             for offer in offers
         ],
         filters_json=[
-            "fashion_department",
+            "taxonomy_resolved_scope" if trace_domain == "general" else "fashion_department",
             "physical_product",
             "canonical",
             "not_adult",
             "known_price",
             "image_present",
             "not_explicitly_out_of_stock",
-            "piece_lexical_proof",
+            "general_lexical_proof" if trace_domain == "general" else "piece_lexical_proof",
             "occasion_term_when_explicitly_supported",
         ],
         result_json=solution,
-        rules_version="fashion-m2",
+        rules_version="general-intent-m1" if trace_domain == "general" else "fashion-m2",
     )
     session.add(trace)
     await session.commit()
 
     return {
         "trace_id": trace_key,
-        "domain": "fashion",
-        "intent": _trace_payload(intent),
+        "domain": trace_domain,
+        "intent": (intent.as_dict() if trace_domain == "general" else _trace_payload(intent)),
         "candidates_considered": len(offers),
         "solution": solution,
     }
