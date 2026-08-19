@@ -20,6 +20,7 @@ from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
 from app.services import relevance
+from app.services.catalog_paging import fetch_all_offer_rows
 
 log = get_logger("catalog_source")
 
@@ -129,14 +130,10 @@ async def search_products(
             # Marge de 5 % : une offre à peine au-dessus du budget reste utile.
             stmt = stmt.where(models.Offer.price <= budget_max * 1.05)
 
-        # On récupère large, puis on regroupe et on classe en mémoire.
-        #
-        # Le tri par prix croissant se faisait AVANT la limite : on ne chargeait
-        # donc que les cent articles les moins chers contenant un mot, et les
-        # vrais candidats n'étaient jamais lus — aucun classement en mémoire ne
-        # pouvait les rattraper. On charge maintenant un échantillon plus large,
-        # sans le biaiser par le prix, et c'est la pertinence qui tranche.
-        rows = (await session.execute(stmt.limit(400))).all()
+        # Toutes les offres éligibles sont lues avant le filtrage et le
+        # classement. La pagination est purement technique : elle ne coupe jamais
+        # la couverture du catalogue ni ne favorise les articles les moins chers.
+        rows = await fetch_all_offer_rows(session.execute, stmt)
         if not rows:
             return []
 
@@ -206,5 +203,10 @@ async def search_products(
             key=lambda p: (-round(p.get("relevance") or 0.0, 1),
                            min(o["price"] for o in p["offers"]))
         )
-        log.info("Catalogue réel : %d produits pour « %s »", len(products), query)
+        log.info(
+            "Catalogue exhaustif : %d offres pertinentes, %d produits pour « %s »",
+            len(rows),
+            len(products),
+            query,
+        )
         return products[:limit]
