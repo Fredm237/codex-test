@@ -65,3 +65,24 @@ def test_plan_general_s_abstient_si_aucune_offre_du_scope_ne_respecte_le_budget(
 
     assert solution["decision"] == "abstain"
     assert solution["rejection_reason"] == "budget_unreachable"
+
+
+
+def test_plan_general_recommande_un_scope_prouve_meme_sans_terme_libre_dans_le_titre():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="kampeeruitrusting onder 300 €",
+        locale="nl",
+        scopes=(IntentScope(taxonomy.SPORT, "Camping & Randonnée", "kampeeruitrusting", ("kampeer", "uitrusting")),),
+        terms=("kampeer", "uitrusting"),
+        required_title_phrases=(),
+        budget_eur=300.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [offer(1, "Tente familiale 4 personnes", taxonomy.SPORT, "Camping & Randonnée", 120.0)],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert solution["items"][0]["name"] == "Tente familiale 4 personnes"

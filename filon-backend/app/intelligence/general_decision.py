@@ -21,13 +21,20 @@ def _rank(scope: IntentScope, offer: CoreOfferSnapshot) -> tuple[float, float, i
 
 
 def _scope_candidates(scope: IntentScope, offers: list[CoreOfferSnapshot]) -> list[CoreOfferSnapshot]:
-    candidates = [
+    scoped = [
         offer for offer in offers
         if offer.filon_category == scope.category
         and (scope.subcategory is None or offer.filon_subcategory == scope.subcategory)
-        and relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind) >= relevance.SEUIL
     ]
-    return sorted(candidates, key=lambda offer: _rank(scope, offer))
+    strict = [
+        offer for offer in scoped
+        if relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind) >= relevance.SEUIL
+    ]
+    # Les offres ont déjà franchi le filtre de scope, de nature physique,
+    # disponibilité, prix et image dans general_catalog. Si les mots de la
+    # demande n’existent pas dans la nomenclature marchande, le scope résolu
+    # demeure la preuve vérifiable ; il ne faut pas fabriquer une abstention.
+    return sorted(strict or scoped, key=lambda offer: _rank(scope, offer))
 
 
 def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot], *, max_items: int = 3) -> dict[str, object]:
