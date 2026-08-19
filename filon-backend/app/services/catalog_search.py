@@ -95,6 +95,14 @@ def _intent_primary_impostor_terms(anchor: str) -> tuple[str, ...]:
 # ne suffit pas. Retourner un autre smartphone que l’iPhone demandé est pire
 # qu’un état « aucune offre vérifiée » : la contrainte doit donc être présente
 # dans le titre que le marchand a effectivement fourni.
+_COFFEE_AUTOMATIC_TERMS = ("automatique", "automatic", "automatisch", "volautomatisch")
+_COFFEE_SEMI_AUTOMATIC_TERMS = (
+    "semi-automatique", "semi automatique", "semiautomatique",
+    "semi-automatic", "semi automatic", "semiautomatic",
+    "half automatisch", "half-automatisch", "handmatig", "manual",
+)
+
+
 _EXACT_PRODUCT_TERMS = (
     "iphone", "ipad", "macbook", "airpods", "galaxy", "playstation",
     "xbox", "nintendo", "dyson",
@@ -130,6 +138,34 @@ def _required_name_terms(query: str, anchor: str) -> tuple[str, ...]:
         # restent des preuves textuelles sûres dans les titres de feed.
         return ("reduction de bruit", "noise", "cancel")
     return ()
+
+
+def _coffee_automation_requirement(query: str) -> str | None:
+    """Retourne uniquement une caractéristique explicitement nommée par l’utilisateur."""
+    normalized = " ".join(terms_of(query))
+    # Les mots composés (semi-automatique) sont conservés par le tokeniseur :
+    # les rechercher avant « automatique » évite de les confondre avec une
+    # machine entièrement automatique.
+    if any(term in normalized for term in _COFFEE_SEMI_AUTOMATIC_TERMS):
+        return "semi"
+    if any(term in normalized for term in _COFFEE_AUTOMATIC_TERMS):
+        return "automatic"
+    return None
+
+
+def _intent_feature_clause(query: str, anchor: str, lowered_name):
+    """Construit la preuve SQL d’une caractéristique sans la deviner."""
+    if anchor != "coffee_machine":
+        return None
+    requirement = _coffee_automation_requirement(query)
+    if requirement == "semi":
+        return or_(*[lowered_name.contains(term) for term in _COFFEE_SEMI_AUTOMATIC_TERMS])
+    if requirement == "automatic":
+        return and_(
+            or_(*[lowered_name.contains(term) for term in _COFFEE_AUTOMATIC_TERMS]),
+            not_(or_(*[lowered_name.contains(term) for term in _COFFEE_SEMI_AUTOMATIC_TERMS])),
+        )
+    return None
 
 
 def _catalogue_intent(query: str) -> tuple[str, tuple[str, ...]] | None:
@@ -334,6 +370,9 @@ async def search_internal_products(
                 min_primary_price = _PRIMARY_MIN_PRICE.get(anchor)
                 if min_primary_price is not None:
                     stmt = stmt.where(Offer.price >= min_primary_price)
+                feature_clause = _intent_feature_clause(query, anchor, lowered_name)
+                if feature_clause is not None:
+                    stmt = stmt.where(feature_clause)
                 if required:
                     stmt = stmt.where(or_(*[lowered_name.contains(term) for term in required]))
 

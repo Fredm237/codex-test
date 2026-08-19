@@ -3,6 +3,7 @@
 from app.services import taxonomy
 from app.services.catalog_search import (
     _catalogue_intent,
+    _coffee_automation_requirement,
     _INTENT_PRIMARY_SCOPE,
     _intent_primary_impostor_terms,
     _intent_primary_scope,
@@ -90,6 +91,12 @@ def test_coffee_machine_intent_uses_the_appliance_scope_and_keeps_capsules_expli
     assert _INTENT_PRIMARY_SCOPE["coffee_machine"] == (taxonomy.ELECTROMENAGER, "Petit électroménager")
     assert "espresso" in _intent_search_terms("coffee_machine")
     assert _catalogue_intent("capsules de cafe") is None
+
+
+def test_coffee_automation_is_an_explicit_requirement_and_never_an_inference():
+    assert _coffee_automation_requirement("machine a cafe automatique") == "automatic"
+    assert _coffee_automation_requirement("machine à café semi-automatique") == "semi"
+    assert _coffee_automation_requirement("machine à expresso") is None
 
 
 def test_named_model_searches_the_model_before_the_generic_category_anchor():
