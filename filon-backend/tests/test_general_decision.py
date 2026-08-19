@@ -110,10 +110,43 @@ def test_plan_general_ne_suppose_pas_le_genre_dans_une_demande_vestimentaire():
     solution = compose_general_plan(
         intent,
         [
-            offer(1, "T-shirt Tennis Joma Femme", taxonomy.SPORT, "Vêtements de sport", 1.0),
+            offer(0, "Kids' Quick-Dry Running Set - Breathable Short Sleeve & Shorts", taxonomy.SPORT, "Running", 1.0),
+            offer(1, "T-shirt Tennis Joma Femme", taxonomy.SPORT, "Vêtements de sport", 1.5),
             offer(2, "Tennissokken - Unisex - Multi wit", taxonomy.SPORT, "Vêtements de sport", 3.99),
         ],
     )
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Tennissokken - Unisex - Multi wit"]
+
+
+
+def test_plan_general_dun_kit_ecarte_un_composant_minime_au_profit_dun_equipement_utilisable():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="camping equipment under €300",
+        locale="en",
+        scopes=(
+            IntentScope(
+                taxonomy.SPORT,
+                "Camping & Randonnée",
+                "camping equipment under €300",
+                ("tent", "sleeping bag", "camping mattress", "stove"),
+            ),
+        ),
+        terms=("camping", "equipment"),
+        required_title_phrases=(),
+        budget_eur=300.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Piquet de tente BW 25 cm occasion", taxonomy.SPORT, "Camping & Randonnée", 1.99),
+            offer(2, "Tasse camping Regatta", taxonomy.SPORT, "Camping & Randonnée", 3.99),
+            offer(3, "Matelas de camping autogonflant 2 personnes", taxonomy.SPORT, "Camping & Randonnée", 49.99),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Matelas de camping autogonflant 2 personnes"]

@@ -78,6 +78,23 @@ def _plat(texte: str) -> str:
 # la pratique. Ces vocabulaires décrivent la nature générique « vêtement » dans
 # les langues cibles ; ils ne sont pas des listes propres à un sport ou à une
 # catégorie de catalogue.
+# Les mots qui désignent une collection d’équipement, quel que soit son
+# domaine. Ils activent seulement une préférence de représentativité ; ils ne
+# créent ni catégorie ni profil produit.
+_COLLECTION_REQUEST_TERMS = frozenset({
+    "equipment", "gear", "kit", "kits", "uitrusting", "materiaal", "materiel", "matériel",
+    "set", "ensemble", "complet", "complete",
+})
+# Les composants individuels ne représentent pas à eux seuls une demande de kit
+# lorsqu’un équipement autonome et correctement observable existe dans le même
+# scope. La liste décrit la nature générique de composant, pas un domaine.
+_COMPONENT_TERMS = frozenset({
+    "piquet", "piquets", "peg", "pegs", "stake", "stakes", "screw", "screws", "vis",
+    "spare", "replacement", "rechange", "part", "parts", "piece", "pieces", "component",
+    "components", "clip", "clips", "hook", "hooks", "adapter", "adaptor", "cord", "cords",
+})
+
+
 _CLOTHING_REQUEST_TERMS = frozenset({
     "clothing", "clothes", "apparel", "garment", "garments", "kleding", "kledij",
     "vetement", "vetements", "vêtement", "vêtements",
@@ -142,6 +159,18 @@ def _term_is_present(term: str, offer_words: set[str], normalized_offer_name: st
     """Vérifie un terme ou son équivalent explicite dans le titre marchand."""
     variants = _EQUIVALENCES.get(term, frozenset({term}))
     return any(variant in offer_words or variant in normalized_offer_name for variant in variants)
+
+
+def request_describes_collection(text: str) -> bool:
+    """Indique qu’une demande porte sur un kit ou un ensemble d’équipement."""
+    return bool(set(mots(text)) & _COLLECTION_REQUEST_TERMS)
+
+
+def is_unrequested_component(request: str, nom_offre: str) -> bool:
+    """Repère un composant non explicitement demandé dans une demande de kit."""
+    request_terms = set(mots(request))
+    offer_terms = set(mots(nom_offre))
+    return bool(offer_terms & _COMPONENT_TERMS) and not bool(request_terms & _COMPONENT_TERMS)
 
 
 def request_requires_clothing(text: str) -> bool:

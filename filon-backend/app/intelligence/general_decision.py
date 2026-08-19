@@ -20,7 +20,12 @@ def _rank(scope: IntentScope, offer: CoreOfferSnapshot) -> tuple[float, float, i
     return (-round(match, 3), price, offer.offer_id)
 
 
-def _scope_candidates(scope: IntentScope, offers: list[CoreOfferSnapshot]) -> list[CoreOfferSnapshot]:
+def _scope_candidates(
+    scope: IntentScope,
+    offers: list[CoreOfferSnapshot],
+    *,
+    budget: float | None,
+) -> list[CoreOfferSnapshot]:
     scoped = [
         offer for offer in offers
         if offer.filon_category == scope.category
@@ -36,6 +41,24 @@ def _scope_candidates(scope: IntentScope, offers: list[CoreOfferSnapshot]) -> li
             if relevance.has_clothing_proof(offer.name or "")
             and relevance.gender_compatible(scope.source_text, offer.name or "")
         ]
+    if relevance.request_describes_collection(scope.source_text):
+        # Un kit ne doit pas se réduire à une vis, un piquet ou un adaptateur
+        # lorsque le même scope propose un article autonome. La préférence de
+        # prix reste disponible si le budget ne permet réellement rien d’autre.
+        non_components = [
+            offer for offer in scoped
+            if not relevance.is_unrequested_component(scope.source_text, offer.name or "")
+        ]
+        if non_components:
+            scoped = non_components
+        substantial = [
+            offer for offer in scoped
+            if offer.price is not None
+            and offer.price >= 10.0
+            and (budget is None or offer.price <= budget)
+        ]
+        if substantial:
+            scoped = substantial
     strict = [
         offer for offer in scoped
         if relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind) >= relevance.SEUIL
@@ -64,7 +87,7 @@ def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot],
     budget = intent.budget_eur
 
     for scope in intent.scopes:
-        candidates = _scope_candidates(scope, offers)
+        candidates = _scope_candidates(scope, offers, budget=budget)
         if not candidates:
             return _abstention(intent, "no_verified_scope", offers, missing_scope=scope)
         # Une demande multi-produits exige un représentant par scope. Une demande
