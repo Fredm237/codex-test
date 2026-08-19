@@ -94,6 +94,17 @@ def test_coffee_machine_intent_uses_the_appliance_scope_and_keeps_capsules_expli
     assert _catalogue_intent("capsules de cafe") is None
 
 
+def test_robot_vacuum_intent_uses_the_vacuum_scope_and_excludes_parts():
+    intent = _catalogue_intent("aspirateur robot sous 300 euros")
+
+    assert intent is not None
+    anchor, excluded = intent
+    assert anchor == "robot_vacuum"
+    assert _INTENT_PRIMARY_SCOPE[anchor] == (taxonomy.ELECTROMENAGER, "Aspirateurs")
+    assert {"filtre", "brosse", "batterie"}.issubset(excluded)
+    assert "robot vacuum" in _intent_search_terms(anchor)
+
+
 def test_coffee_automation_is_an_explicit_requirement_and_never_an_inference():
     assert _coffee_automation_requirement("machine a cafe automatique") == "automatic"
     assert _coffee_automation_requirement("machine à café semi-automatique") == "semi"
