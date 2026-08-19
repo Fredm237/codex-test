@@ -113,6 +113,27 @@ def test_composition_mariage_ecarte_les_pieces_techniques_et_le_sac_non_demande(
     assert solution["confidence_score"] >= 55
 
 
+def test_blazer_de_travail_exige_une_preuve_de_piece_principale():
+    intent = fashion.parse_fashion_intent("Un blazer noir pour le travail sous 150 euros")
+    blouson_sport = _snapshot(
+        10,
+        "Veste Sportstyle Pqe Camo Tk Jt - Noir / S",
+        taxonomy.MODE_FEMME,
+        "Manteaux & Vestes",
+    )
+    vrai_blazer = _snapshot(
+        11,
+        "Blazer noir femme pour le travail",
+        taxonomy.MODE_FEMME,
+        "Manteaux & Vestes",
+    )
+
+    assert fashion.compose_outfit(intent, [blouson_sport])["decision"] == "abstain"
+    solution = fashion.compose_outfit(intent, [blouson_sport, vrai_blazer])
+    assert solution["decision"] == "recommend"
+    assert solution["items"][0]["name"] == vrai_blazer.name
+
+
 def test_sans_termes_le_comportement_documentaire_est_conserve():
     """La signature reste rétrocompatible : sans demande, on note la documentation."""
     tenue = _tenue("Peu importe", "Peu importe non plus")

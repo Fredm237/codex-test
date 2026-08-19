@@ -27,6 +27,14 @@ _ATHLETIC_FOOTWEAR_TERMS = frozenset({
     "running", "run", "basket-ball", "basketball", "football", "trail", "cycling", "cyclisme", "vélo", "velo", "ski", "tennis",
 })
 
+# Les occasions guident le filtre de retrieval mais ne sont pas des pièces :
+# leur absence dans un titre ne doit ni pénaliser un blazer réel ni permettre à
+# une veste sportive de satisfaire le mot « travail » par défaut.
+_OUTFIT_CONTEXT_WORDS = frozenset({
+    "mariage", "wedding", "bruiloft", "travail", "work", "bureau", "kantoor",
+    "soiree", "soirée", "evening", "avond", "vacances", "holiday", "vakantie",
+})
+
 _PRODUCT_WORDS = frozenset({
     "robe", "dress", "jurk", "veste", "blazer", "jacket", "jas", "manteau",
     "coat", "broek", "pantalon", "pants", "jean", "shirt", "chemise", "hemd",
@@ -199,7 +207,10 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
     # moins cher du rôle : « Siso Régulateur de hauteur de panneau SHOES » à
     # 0,70 € tenait lieu de chaussure parce que son nom contient « SHOES ».
     # Un article hors sujet ne devient pas juste parce qu'il est bon marché.
-    termes = relevance.mots(intent.raw_request or "")
+    termes = [
+        term for term in relevance.mots(intent.raw_request or "")
+        if term not in _OUTFIT_CONTEXT_WORDS
+    ]
 
     def _rang(offer: CoreOfferSnapshot) -> tuple:
         pertinence = relevance.score(
@@ -214,7 +225,18 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         # satellite non demandé le disqualifie avant toute composition.
         return not relevance.is_unrequested_satellite(termes, offer.name or "")
 
-    def _matches_requested_piece(offer: CoreOfferSnapshot) -> bool:
+    def _matches_requested_piece(offer: CoreOfferSnapshot, *, fallback_base: bool = False) -> bool:
+        # Sans pièce explicite, la requête SQL a déjà réduit le fallback
+        # d’occasion à une base documentée. Seule cette pièce principale peut
+        # être retenue sans preuve supplémentaire ; les compléments doivent
+        # toujours prouver leur caractère cérémoniel dans leur propre titre.
+        if not termes:
+            if fallback_base:
+                return True
+            if intent.occasion == "wedding":
+                words = set(re.findall(r"[\wÀ-ÿ'-]+", (offer.name or "").lower()))
+                return bool(words & {"mariage", "wedding", "bridal", "bride", "cérémonie", "ceremonie", "soirée", "soiree", "evening", "formal", "formel"})
+            return False
         # Une pièce complémentaire est optionnelle, mais elle ne doit pas être
         # ajoutée seulement parce qu’elle est classée sous Chaussures ou Accessoires.
         # Elle doit confirmer une pièce explicitement demandée, ou — pour un
@@ -232,7 +254,14 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         candidates.sort(key=_rang)
 
     selected: list[OutfitItem] = []
-    base = next((offer for offer in by_role["base"] if _eligible(offer)), None)
+    # Une catégorie Core seule ne suffit jamais pour la pièce principale : elle
+    # doit aussi prouver les caractéristiques produits explicitement demandées.
+    # En l’absence de preuve, FILON s’abstient plutôt que de recommander une
+    # veste sport comme « blazer de travail ».
+    base = next(
+        (offer for offer in by_role["base"] if _eligible(offer) and _matches_requested_piece(offer, fallback_base=True)),
+        None,
+    )
     if base is None:
         return _abstention(intent, "no_verified_base", offers)
     selected.append(OutfitItem(offer=base, role="base"))
