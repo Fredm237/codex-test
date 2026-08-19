@@ -86,3 +86,19 @@ def test_plan_general_recommande_un_scope_prouve_meme_sans_terme_libre_dans_le_t
 
     assert solution["decision"] == "recommend"
     assert solution["items"][0]["name"] == "Tente familiale 4 personnes"
+
+
+
+def test_plan_general_exige_une_preuve_de_vetement_quand_la_demande_le_precise():
+    intent = resolve_intent("tennis clothing under €200", "en")
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Balles de tennis 6.5 cm", taxonomy.SPORT, "Fitness & Musculation", 1.8),
+            offer(2, "Filet de tennis multifonction", taxonomy.SPORT, "Sports collectifs", 8.19),
+            offer(3, "T-shirt Tennis Court Femme", taxonomy.SPORT, "Vêtements de sport", 24.99),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["T-shirt Tennis Court Femme"]

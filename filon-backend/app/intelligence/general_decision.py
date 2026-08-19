@@ -26,6 +26,12 @@ def _scope_candidates(scope: IntentScope, offers: list[CoreOfferSnapshot]) -> li
         if offer.filon_category == scope.category
         and (scope.subcategory is None or offer.filon_subcategory == scope.subcategory)
     ]
+    # Le scope prouve l’univers de recherche, non la nature de chaque objet.
+    # Si la demande formule explicitement « vêtements », chaque résultat doit
+    # aussi le prouver dans son titre. Cette règle générique bloque ainsi les
+    # balles, filets, jeux ou bijoux qui portent seulement le nom d’un sport.
+    if relevance.request_requires_clothing(scope.source_text):
+        scoped = [offer for offer in scoped if relevance.has_clothing_proof(offer.name or "")]
     strict = [
         offer for offer in scoped
         if relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind) >= relevance.SEUIL
