@@ -72,6 +72,9 @@ async def retrieve_general_offers(session: AsyncSession, intent: GeneralIntent) 
     snapshots: list[CoreOfferSnapshot] = []
     for scope in intent.scopes:
         rows = await fetch_all_offer_rows(session.execute, _base_statement(scope))
+        strict: list[CoreOfferSnapshot] = []
+        scoped: list[CoreOfferSnapshot] = []
+        terms = list(scope.query_terms)
         for offer, merchant in rows:
             if offer.id in seen:
                 continue
@@ -80,11 +83,19 @@ async def retrieve_general_offers(session: AsyncSession, intent: GeneralIntent) 
                 phrase in normalized_name for phrase in intent.required_title_phrases
             ):
                 continue
-            terms = list(scope.query_terms)
-            if relevance.is_unrequested_satellite(terms, offer.name or ""):
-                continue
-            if relevance.score(terms, offer.name or "", offer_kind=offer.offer_kind) < relevance.SEUIL:
-                continue
-            seen.add(offer.id)
-            snapshots.append(_snapshot(offer, merchant))
+            # Le scope FILON résolu est la preuve de compatibilité principale.
+            # L’heuristique locale « satellite » ne s’applique pas ici : elle
+            # éliminerait des composants légitimes d’un kit (p. ex. sac de couchage).
+            snapshot = _snapshot(offer, merchant)
+            scoped.append(snapshot)
+            if relevance.score(terms, offer.name or "", offer_kind=offer.offer_kind) >= relevance.SEUIL:
+                strict.append(snapshot)
+        # Une résolution de scope est une preuve plus forte qu’un mot de requête
+        # absent des titres des marchands. Ainsi « kampeeruitrusting » peut lire
+        # tout Camping & Randonnée sans devenir une abstention artificielle.
+        selected = strict or scoped
+        for snapshot in selected:
+            if snapshot.offer_id not in seen:
+                seen.add(snapshot.offer_id)
+                snapshots.append(snapshot)
     return snapshots

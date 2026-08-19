@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.db import models
 from app.db.base import Base
 from app.intelligence.general_catalog import retrieve_general_offers
-from app.intelligence.intent_resolution import resolve_intent
+from app.intelligence.intent_resolution import GeneralIntent, IntentScope, resolve_intent
 from app.services import taxonomy
 
 
@@ -85,3 +85,25 @@ async def test_lit_tous_les_scopes_d_une_demande_multi_produits(session):
     offers = await retrieve_general_offers(session, intent)
 
     assert {offer.offer_id for offer in offers} == {laptop.id, bag.id}
+
+
+async def test_scope_taxonomique_valide_survit_aux_termes_libres_absents(session):
+    merchant = models.Merchant(awin_mid=9914, name="Test scope", slug="test-scope")
+    session.add(merchant)
+    await session.flush()
+    tent = catalog_offer(merchant.id, 1, "Tente familiale 4 personnes", taxonomy.SPORT, "Camping & Randonnée")
+    sleeping_bag = catalog_offer(merchant.id, 2, "Sac de couchage léger", taxonomy.SPORT, "Camping & Randonnée")
+    session.add_all([tent, sleeping_bag])
+    await session.commit()
+
+    intent = GeneralIntent(
+        raw_request="kampeeruitrusting onder 300 €",
+        locale="nl",
+        scopes=(IntentScope(taxonomy.SPORT, "Camping & Randonnée", "kampeeruitrusting", ("kampeer", "uitrusting")),),
+        terms=("kampeer", "uitrusting"),
+        required_title_phrases=(),
+        budget_eur=300.0,
+    )
+    offers = await retrieve_general_offers(session, intent)
+
+    assert {offer.offer_id for offer in offers} == {tent.id, sleeping_bag.id}
