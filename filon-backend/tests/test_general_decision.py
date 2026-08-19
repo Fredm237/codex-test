@@ -26,7 +26,7 @@ def offer(offer_id: int, name: str, category: str, subcategory: str | None, pric
 
 
 def test_plan_general_selectionne_des_offres_prouvees_dans_un_scope_unique():
-    intent = resolve_intent("Tenniskleding onder 200 €", "nl")
+    intent = resolve_intent("Tenniskleding voor vrouwen onder 200 €", "nl")
     solution = compose_general_plan(
         intent,
         [
@@ -96,9 +96,24 @@ def test_plan_general_exige_une_preuve_de_vetement_quand_la_demande_le_precise()
         [
             offer(1, "Balles tennis de table Enebe Haut à partir de 3+1", taxonomy.SPORT, "Fitness & Musculation", 2.5),
             offer(2, "Filet de tennis multifonction", taxonomy.SPORT, "Sports collectifs", 8.19),
-            offer(3, "T-shirt Tennis Court Femme", taxonomy.SPORT, "Vêtements de sport", 24.99),
+            offer(3, "T-shirt Tennis Court Unisex", taxonomy.SPORT, "Vêtements de sport", 24.99),
         ],
     )
 
     assert solution["decision"] == "recommend"
-    assert [item["name"] for item in solution["items"]] == ["T-shirt Tennis Court Femme"]
+    assert [item["name"] for item in solution["items"]] == ["T-shirt Tennis Court Unisex"]
+
+
+
+def test_plan_general_ne_suppose_pas_le_genre_dans_une_demande_vestimentaire():
+    intent = resolve_intent("tenniskleding onder 200 €", "nl")
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "T-shirt Tennis Joma Femme", taxonomy.SPORT, "Vêtements de sport", 1.0),
+            offer(2, "Tennissokken - Unisex - Multi wit", taxonomy.SPORT, "Vêtements de sport", 3.99),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Tennissokken - Unisex - Multi wit"]

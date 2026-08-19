@@ -31,7 +31,11 @@ def _scope_candidates(scope: IntentScope, offers: list[CoreOfferSnapshot]) -> li
     # aussi le prouver dans son titre. Cette règle générique bloque ainsi les
     # balles, filets, jeux ou bijoux qui portent seulement le nom d’un sport.
     if relevance.request_requires_clothing(scope.source_text):
-        scoped = [offer for offer in scoped if relevance.has_clothing_proof(offer.name or "")]
+        scoped = [
+            offer for offer in scoped
+            if relevance.has_clothing_proof(offer.name or "")
+            and relevance.gender_compatible(scope.source_text, offer.name or "")
+        ]
     strict = [
         offer for offer in scoped
         if relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind) >= relevance.SEUIL

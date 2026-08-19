@@ -85,6 +85,17 @@ _CLOTHING_REQUEST_TERMS = frozenset({
 # Un titre peut contenir une coupe ou un mot de style vestimentaire tout en
 # décrivant sans ambiguïté un bijou. La nature d’objet explicite prévaut sur ce
 # vocabulaire de style, pour tous les domaines et toutes les langues cibles.
+# Le genre ne doit jamais être deviné. Ces marqueurs servent uniquement à ne
+# pas opposer au besoin une pièce dont le titre se déclare explicitement pour un
+# autre public, et à préserver les articles sans marqueur ou unisexes.
+_FEMININE_GENDER_TERMS = frozenset({
+    "femme", "femmes", "women", "woman", "female", "dame", "dames", "vrouw", "vrouwen", "girl", "girls", "fille", "filles",
+})
+_MASCULINE_GENDER_TERMS = frozenset({
+    "homme", "hommes", "men", "mens", "male", "heren", "heer", "boy", "boys", "garcon", "garcons",
+})
+
+
 _JEWELLERY_OBJECT_TERMS = frozenset({
     "bracelet", "bracelets", "necklace", "necklaces", "jewelry", "jewellery",
     "earring", "earrings", "pendant", "pendants", "collier", "colliers",
@@ -152,7 +163,30 @@ def has_clothing_proof(nom_offre: str) -> bool:
     offer_terms = set(mots(nom_offre))
     if offer_terms & _JEWELLERY_OBJECT_TERMS:
         return False
-    return bool(offer_terms & _CLOTHING_OFFER_TERMS)
+    if offer_terms & _CLOTHING_OFFER_TERMS:
+        return True
+    # Même mécanisme linguistique que pour la demande : les flux néerlandais
+    # concatènent fréquemment la pratique et la pièce (« tennissokken »).
+    return bool(re.search(r"[a-z]{3,}(?:sokken|kleding|kledij|trui|broek|jurk)\b", _plat(nom_offre)))
+
+
+def gender_marker(text: str) -> str | None:
+    """Retourne seulement le genre explicitement déclaré par un texte, sinon rien."""
+    terms = set(mots(text))
+    if terms & _FEMININE_GENDER_TERMS:
+        return "female"
+    if terms & _MASCULINE_GENDER_TERMS:
+        return "male"
+    return None
+
+
+def gender_compatible(request: str, nom_offre: str) -> bool:
+    """Évite une hypothèse de genre, sans exclure les articles non marqués."""
+    wanted = gender_marker(request)
+    declared = gender_marker(nom_offre)
+    if wanted is None:
+        return declared is None
+    return declared is None or declared == wanted
 
 
 def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
