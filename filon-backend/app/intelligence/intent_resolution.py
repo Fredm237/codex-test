@@ -162,11 +162,19 @@ def _semantic_scopes(raw: str, payload: object) -> tuple[IntentScope, ...]:
             continue
         if subcategory is not None and (not isinstance(subcategory, str) or subcategory not in allowed[category]):
             continue
+        semantic_terms = item.get("keywords")
+        if isinstance(semantic_terms, list):
+            terms = tuple(
+                token.lower().strip() for token in semantic_terms
+                if isinstance(token, str) and re.fullmatch(r"[a-zà-ÿ][a-zà-ÿ0-9 -]{1,40}", token.lower().strip())
+            )[:8]
+        else:
+            terms = ()
         scope = IntentScope(
             category=category,
             subcategory=subcategory,
             source_text=raw,
-            query_terms=_tokens(raw)[:4],
+            query_terms=terms or _tokens(raw)[:4],
         )
         if (scope.category, scope.subcategory) not in {(value.category, value.subcategory) for value in scopes}:
             scopes.append(scope)
@@ -200,8 +208,9 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
             role="system",
             content=(
                 "Classifie uniquement l’intention d’achat vers les catégories FILON fournies. "
-                "Réponds en JSON strict {\\\"scopes\\\":[{\\\"category\\\":string,\\\"subcategory\\\":string|null}]}. "
-                "N’invente aucune valeur ; renvoie scopes vide si aucun choix n’est défendable."
+                "Réponds en JSON strict {\\\"scopes\\\":[{\\\"category\\\":string,\\\"subcategory\\\":string|null,\\\"keywords\\\":[string]}]}. "
+                "Les keywords sont au plus huit termes concrets, multilingues si nécessaire, décrivant les articles utiles au besoin ; ils servent seulement à classer les offres du scope. "
+                "N’invente aucune catégorie ni sous-catégorie ; renvoie scopes vide si aucun choix n’est défendable."
             ),
         ),
         Message(role="user", content=f"Langue: {locale}. Demande: {raw_request}. Choix autorisés: {json.dumps(choices, ensure_ascii=False)}"),

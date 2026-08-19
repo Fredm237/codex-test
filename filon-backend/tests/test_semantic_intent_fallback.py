@@ -40,6 +40,19 @@ async def test_fallback_semantique_accepte_un_scope_taxonomique_valide(monkeypat
 
 
 @pytest.mark.asyncio
+async def test_fallback_semantique_utilise_des_termes_de_besoin_concrets(monkeypatch):
+    monkeypatch.setattr(
+        intent_resolution,
+        "get_router",
+        lambda: FakeRouter('{"scopes":[{"category":"Sport & Plein air","subcategory":"Camping & Randonnée","keywords":["tente","sac de couchage","rechaud"]}]}'),
+    )
+
+    intent = await intent_resolution.resolve_intent_with_fallback("kampeeruitrusting onder 300 €", "nl")
+
+    assert intent.scopes[0].query_terms == ("tente", "sac de couchage", "rechaud")
+
+
+@pytest.mark.asyncio
 async def test_fallback_semantique_peut_preciser_un_scope_lexical_large(monkeypatch):
     monkeypatch.setattr(
         intent_resolution,
