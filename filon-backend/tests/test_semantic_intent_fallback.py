@@ -91,3 +91,25 @@ async def test_fallback_semantique_refuse_un_scope_invente(monkeypatch):
     intent = await intent_resolution.resolve_intent_with_fallback("objet imaginaire inexistant", "fr")
 
     assert intent.resolved is False
+
+
+@pytest.mark.asyncio
+async def test_fallback_semantique_ne_remplace_pas_un_scope_prouve_par_des_scopes_divergents(monkeypatch):
+    monkeypatch.setattr(
+        intent_resolution,
+        "get_router",
+        lambda: FakeRouter(
+            '{"scopes":[{'
+            '"category":"Mode homme","subcategory":"T-shirts & Polos",'
+            '"keywords":["tennis shirt","polo"]},{'
+            '"category":"Mode femme","subcategory":"Hauts & T-shirts",'
+            '"keywords":["tennis top","skort"]},{'
+            '"category":"Chaussures","subcategory":"Baskets & Sneakers",'
+            '"keywords":["tennis shoes"]}]}'
+        ),
+    )
+
+    intent = await intent_resolution.resolve_intent_with_fallback("tennis clothing under €200", "en")
+
+    assert [(scope.category, scope.subcategory) for scope in intent.scopes] == [(taxonomy.SPORT, None)]
+    assert intent.scopes[0].query_terms == ("tennis",)

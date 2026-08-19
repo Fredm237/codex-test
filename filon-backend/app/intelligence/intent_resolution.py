@@ -227,6 +227,31 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
         scopes = ()
     if not scopes:
         return deterministic
+    if deterministic.resolved:
+        # Un seul remplacement d’un scope lexical large est admissible : il peut
+        # lever une ambiguïté réelle (p. ex. « machine à café » mal rangée dans
+        # Alimentation vers Petit électroménager). À l’inverse, un éclatement en
+        # plusieurs univers voisins traduit une hypothèse d’usage non formulée
+        # (« tennis clothing » → homme, femme et chaussures) ; dans ce cas, la
+        # continuité taxonomique déterministe prévaut.
+        may_replace_single_broad_scope = (
+            len(deterministic.scopes) == 1
+            and deterministic.scopes[0].subcategory is None
+            and len(scopes) == 1
+        )
+        if not may_replace_single_broad_scope:
+            refined: list[IntentScope] = []
+            for original in deterministic.scopes:
+                semantic = next(
+                    (
+                        candidate for candidate in scopes
+                        if candidate.category == original.category
+                        and (original.subcategory is None or candidate.subcategory == original.subcategory)
+                    ),
+                    None,
+                )
+                refined.append(semantic or original)
+            scopes = tuple(refined)
     return GeneralIntent(
         raw_request=deterministic.raw_request,
         locale=deterministic.locale,
