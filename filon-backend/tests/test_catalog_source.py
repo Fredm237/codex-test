@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import pytest
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db import models
@@ -85,6 +86,46 @@ async def test_budget_is_respected(catalogue):
     results = await search_products("casque", budget_max=100)
     assert results
     assert all(min(o["price"] for o in p["offers"]) <= 105 for p in results)
+
+
+async def test_lit_toutes_les_pages_avant_de_classer_la_meilleure_offre(catalogue):
+    """Une offre pertinente après les 500 premières lignes ne doit pas être ignorée."""
+    async with db._sessionmaker() as session:
+        merchant = (
+            await session.execute(select(models.Merchant).where(models.Merchant.slug == "coolblue"))
+        ).scalar_one()
+        session.add_all([
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id=f"support-{index}",
+                name=f"Support casque audio mural {index}",
+                brand="Test",
+                price=10.0 + index,
+                currency="EUR",
+                image_url="https://example.test/support.jpg",
+                deep_link="https://example.test/support",
+                offer_kind="physical_product",
+            )
+            for index in range(501)
+        ])
+        session.add(
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="casque-apres-page-500",
+                name="Sony casque audio sans fil",
+                brand="Sony",
+                price=199.0,
+                currency="EUR",
+                image_url="https://example.test/sony.jpg",
+                deep_link="https://example.test/sony",
+                offer_kind="physical_product",
+            )
+        )
+        await session.commit()
+
+    results = await search_products("casque audio", budget_max=400)
+
+    assert any(product["name"] == "Sony casque audio sans fil" for product in results)
 
 
 async def test_no_database_returns_nothing_rather_than_invented_data():

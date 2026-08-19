@@ -16,6 +16,7 @@ from app.core.logging import get_logger
 from app.db.session import session_scope
 from app.db.models import CatalogProduct, Merchant, Offer, PriceSnapshot
 from app.services import decision, taxonomy
+from app.services.catalog_paging import fetch_all_offer_rows
 from app.services.search import search_clause, terms_of
 
 log = get_logger("catalog_search")
@@ -294,7 +295,6 @@ async def search_internal_products(
                     )
                 )
                 .options(jl(Offer.merchant))
-                .order_by(Offer.price.asc())
             )
 
             # Les feeds classent parfois housses et supports dans le même
@@ -331,11 +331,13 @@ async def search_internal_products(
             if budget:
                 stmt = stmt.where(Offer.price <= budget * 1.1)
 
-            # Limiter les résultats
-            stmt = stmt.limit(limit)
-
-            result = await session.execute(stmt)
-            offers = result.scalars().all()
+            # `limit` était appliqué avant le calcul du Score FILON et coupait
+            # la recherche à 20 offres. Il reste compatible avec les appelants,
+            # mais ne restreint plus la récupération : seules les cartes finales
+            # de l’interface sont limitées après le classement global.
+            del limit
+            rows = await fetch_all_offer_rows(session.execute, stmt)
+            offers = [row[0] for row in rows]
 
             decisions = await _decisions_for_offers(session, offers)
             products: list[dict[str, Any]] = []
@@ -360,7 +362,7 @@ async def search_internal_products(
                 })
 
             log.info(
-                "Catalogue interne : %d produits pour '%s' (budget=%s)",
+                "Catalogue Assistant exhaustif : %d offres évaluées pour '%s' (budget=%s)",
                 len(products), query[:40], budget
             )
             return products

@@ -345,6 +345,50 @@ class TestFashionCatalogAdapter:
         assert snapshots[0].availability_evidence.status == "unknown"
 
 
+    async def test_lit_toutes_les_pages_du_rayon_avant_de_retenir_une_piece(self, intelligence_session):
+        """Une vraie chaussure au-delà de l’ancien plafond de 180 reste considérée."""
+        merchant = models.Merchant(awin_mid=990, name="Marchand pagination", slug="pagination")
+        intelligence_session.add(merchant)
+        await intelligence_session.flush()
+        intelligence_session.add_all([
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id=f"intrus-chaussures-{index}",
+                name=f"Support mural technique {index}",
+                filon_category=taxonomy.CHAUSSURES,
+                filon_subcategory="Chaussures basses",
+                offer_kind=taxonomy.PHYSICAL_PRODUCT,
+                is_canonical=True,
+                is_adult=False,
+                price=10.0 + index,
+                currency="EUR",
+                in_stock=True,
+                image_url="https://example.test/support.jpg",
+            )
+            for index in range(501)
+        ])
+        eligible = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="chaussure-apres-page-500",
+            name="Chaussures de cérémonie femme",
+            filon_category=taxonomy.CHAUSSURES,
+            filon_subcategory="Chaussures basses",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=99.0,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/chaussures.jpg",
+        )
+        intelligence_session.add(eligible)
+        await intelligence_session.commit()
+
+        snapshots = await retrieve_fashion_offers(intelligence_session, query="chaussures")
+
+        assert [snapshot.offer_id for snapshot in snapshots] == [eligible.id]
+
+
 class TestFashionExpert:
     @staticmethod
     def _offer(

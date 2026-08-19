@@ -72,6 +72,12 @@ SLOTS = [
     ("Autre option", "♻️"),
 ]
 
+# Le catalogue entier est évalué avant cette étape. Cette borne concerne
+# uniquement le contexte envoyé au modèle de langage, jamais la récupération ou
+# le classement FILON : le modèle n’a pas besoin de relire des milliers de
+# doublons pour choisir parmi les meilleurs candidats déjà comparés.
+MAX_LLM_RANKING_CANDIDATES = 80
+
 # Lorsque le classement LLM n’est pas disponible, FILON ne peut pas déduire
 # autonomie, performance ou état reconditionné depuis un titre marchand. Les
 # cartes de repli restent donc descriptives, localisées et strictement factuelles.
@@ -280,9 +286,13 @@ async def _rank_real_products(
     timeout = settings.llm_timeout_seconds
 
     provider = get_router().for_task("reasoning")
+    # `products` contient toutes les offres éligibles, déjà comparées par le
+    # Score FILON. Seul le contexte du modèle est compacté après ce classement
+    # global afin de respecter sa fenêtre de contexte sans tronquer la recherche.
+    ranking_candidates = products[:MAX_LLM_RANKING_CANDIDATES]
     listing = [
         {"index": i, "name": p["name"], "price": p["price"], "merchant": p["merchant"], "offer_kind": p.get("offer_kind", "physical_product")}
-        for i, p in enumerate(products)
+        for i, p in enumerate(ranking_candidates)
     ]
     budget_txt = f" Budget max : {int(budget)} €." if budget else ""
     response_locale = _response_locale(locale)
@@ -331,14 +341,14 @@ async def _rank_real_products(
     used: set[int] = set()
     for ann in picks[:5]:
         idx = ann.get("index")
-        if not (isinstance(idx, int) and 0 <= idx < len(products)) or idx in used:
+        if not (isinstance(idx, int) and 0 <= idx < len(ranking_candidates)) or idx in used:
             continue
         used.add(idx)
-        cards.append(_build_real_card(len(cards), products[idx], ann, emoji, response_locale))
+        cards.append(_build_real_card(len(cards), ranking_candidates[idx], ann, emoji, response_locale))
 
     if not cards:
-        for slot in range(min(5, len(products))):
-            cards.append(_build_real_card(slot, products[slot], {}, emoji, response_locale))
+        for slot in range(min(5, len(ranking_candidates))):
+            cards.append(_build_real_card(slot, ranking_candidates[slot], {}, emoji, response_locale))
 
     return {"usage": usage, "emoji": emoji, "offers": len(products), "cards": cards, "real": True}
 
@@ -395,14 +405,13 @@ async def generate_result(
 
     # PRIORITÉ 1 : Catalogue interne FILON (1,3M offres, 207 marchands)
     try:
-        products = await asyncio.wait_for(
-            search_internal_products(query, budget, country=country),
-            timeout=5.0,
-        )
+        # La recherche parcourt l’intégralité des offres éligibles. Aucun délai
+        # arbitraire ne la transforme en échantillon incomplet ou en abstention.
+        products = await search_internal_products(query, budget, country=country)
         if products:
             log.info("Catalogue interne : %d résultats pour '%s'", len(products), query[:40])
-    except (asyncio.TimeoutError, Exception) as exc:
-        log.warning("Catalogue interne timeout/erreur (%s)", exc)
+    except Exception as exc:
+        log.warning("Catalogue interne erreur (%s)", exc)
         products = []
 
     # Sans offre du catalogue, le frontend affiche un état explicite « aucune

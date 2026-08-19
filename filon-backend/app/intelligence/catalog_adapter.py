@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.db import models
 from app.intelligence.contracts import CoreOfferSnapshot
 from app.services import taxonomy
+from app.services.catalog_paging import fetch_all_offer_rows
 
 
 FASHION_CATEGORIES = frozenset(taxonomy.categories_of_department("Mode & Accessoires"))
@@ -248,8 +249,11 @@ async def retrieve_fashion_offers(
     if not scopes:
         return []
 
-    safe_limit = max(1, min(limit, 180))
-    limit_by_scope = max(24, safe_limit // len(scopes))
+    # `limit` était un plafond de récupération (120, au plus 180) : il coupait
+    # une recherche avant que la composition ne puisse comparer toutes les pièces
+    # admissibles. Il est maintenu dans la signature pour compatibilité appelant,
+    # mais ne limite plus la lecture catalogue ; seul l’affichage final est borné.
+    del limit
     seen: set[int] = set()
     snapshots: list[CoreOfferSnapshot] = []
     for scope in scopes:
@@ -264,8 +268,9 @@ async def retrieve_fashion_offers(
             occasion_clause = _occasion_clause(occasion)
             if occasion_clause is not None:
                 stmt = stmt.where(occasion_clause)
-        stmt = stmt.order_by(models.Offer.price.asc(), models.Offer.id.desc()).limit(limit_by_scope)
-        rows = (await session.execute(stmt)).all()
+        # Lecture exhaustive par lots : aucune offre du rayon admissible n’est
+        # perdue avant le filtrage lexical et la composition Outfit Studio.
+        rows = await fetch_all_offer_rows(session.execute, stmt)
         for offer, merchant in rows:
             if offer.id in seen or not _matches_scope(scope, offer, occasion):
                 continue
