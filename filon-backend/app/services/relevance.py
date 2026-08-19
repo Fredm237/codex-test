@@ -1,0 +1,136 @@
+"""Pertinence d'une offre face à une demande en langage naturel.
+
+Écrit après constat en production : sur 1,59 million d'offres, l'assistant
+répondait « Carte Cadeau Crypto Voucher 10-150 Euro » à qui demandait un casque
+audio de moins de 150 euros, et « Crazy Machines » à qui cherchait une machine à
+café. Douze demandes, zéro bonne réponse.
+
+Deux causes se combinaient, et aucune n'est une question de modèle :
+
+1. Le filtre SQL unissait les termes par OU. Un seul mot commun suffisait, donc
+   « machine à café » attrapait « Crazy **Machines** » et « maillot de bain
+   **femme** » attrapait « La **Femme** Lipstick ».
+2. La requête triait par prix croissant AVANT de limiter. On ne chargeait donc
+   que les cent articles les moins chers contenant un mot — les bons candidats
+   n'étaient jamais lus, et aucun classement en mémoire ne pouvait les rattraper.
+
+D'où ce module : il donne un score de correspondance, et surtout un seuil en
+dessous duquel il vaut mieux ne rien proposer. Tout est pur et testable sans
+base — c'est ce qui permet de figer les douze cas constatés en tests.
+"""
+
+from __future__ import annotations
+
+import re
+import unicodedata
+
+# Genres d'offre qui ne peuvent pas répondre à une demande d'objet physique.
+# Une carte cadeau « 10-150 Euro » correspond lexicalement à un budget, jamais
+# à un casque.
+_KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
+
+# Familles d'articles satellites : elles portent le nom du produit recherché
+# sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
+# écran iPhone » n'est pas un iPhone, « housse » n'est pas un téléphone.
+_SATELLITES = {
+    "housse", "etui", "coque", "protection", "protecteur", "adhesif", "adhesive",
+    "sticker", "autocollant", "lingette", "lingettes", "nettoyant", "nettoyante",
+    "chargeur", "cable", "adaptateur", "support", "fixation", "vis", "cache",
+    "rechange", "reparation", "kit", "sachet", "recharge",
+    "bouchon", "bouchons", "filtre", "sac", "sacoche", "bandouliere",
+    "carte", "cadeau", "voucher", "cle", "clé", "licence", "abonnement",
+    "regulateur", "embout", "lame", "collier", "timer",
+}
+
+# Un article satellite reste légitime si la demande le nomme.
+_INTENTION_SATELLITE = _SATELLITES - {"carte", "cle", "clé"}
+
+
+def _plat(texte: str) -> str:
+    """Minuscules sans accents : « été » et « ete » doivent se rencontrer."""
+    sans = unicodedata.normalize("NFKD", (texte or "").lower())
+    return "".join(c for c in sans if not unicodedata.combining(c))
+
+
+# Mots qui n'expriment jamais un produit : liaisons, verbes de demande, et le
+# vocabulaire du budget. Sans ce filtre, « un casque audio sans fil pour moins
+# de 150 euros » pèse huit termes dont quatre décrivent le prix, et un vrai
+# casque Sony n'en retrouve que la moitié — donc se fait rejeter.
+_VIDES = {
+    "un", "une", "des", "les", "le", "la", "de", "du", "pour", "avec", "sans",
+    "et", "ou", "en", "au", "aux", "dans", "sur", "je", "veux", "cherche",
+    "besoin", "bon", "bonne", "meilleur", "meilleure", "euro", "euros", "eur",
+    "moins", "plus", "qui", "que", "quoi", "mon", "ma", "mes", "ce", "cette",
+    "est", "prix", "budget", "environ", "vers", "sous", "entre", "max", "maxi",
+}
+
+
+def mots(texte: str) -> list[str]:
+    """Mots exploitables d'un texte, sans liaisons ni vocabulaire de budget."""
+    bruts = re.findall(r"[a-z0-9]{2,}", _plat(texte))
+    return [m for m in bruts if m not in _VIDES]
+
+
+def termes_significatifs(termes: list[str]) -> list[str]:
+    """Les termes qui portent l'intention, les plus discriminants d'abord.
+
+    Un mot long est plus spécifique qu'un mot court : « expresso » désigne mieux
+    qu'« café ». C'est grossier, mais c'est mesurable et sans dépendance.
+    """
+    uniques = list(dict.fromkeys(t for t in termes if len(t) >= 3))
+    return sorted(uniques, key=len, reverse=True)
+
+
+def score(
+    demande_termes: list[str],
+    nom_offre: str,
+    *,
+    offer_kind: str | None = None,
+    categorie: str | None = None,
+) -> float:
+    """Score de 0 à 1. Au-dessous de `SEUIL`, l'offre ne répond pas.
+
+    Le score n'est pas une probabilité : c'est une part de la demande
+    réellement retrouvée dans le nom, corrigée par ce qui disqualifie.
+    """
+    termes = termes_significatifs([_plat(t) for t in demande_termes])
+    if not termes:
+        return 0.0
+
+    mots_offre = set(mots(nom_offre))
+    nom = _plat(nom_offre)
+
+    # Part des termes de la demande réellement présents.
+    trouves = sum(1 for t in termes if t in mots_offre or t in nom)
+    couverture = trouves / len(termes)
+
+    # Le terme le plus discriminant doit être là. Sans lui, la correspondance
+    # est accidentelle — c'est le cas « Crazy Machines » pour « machine à café ».
+    tete = termes[0]
+    if tete not in mots_offre and tete not in nom:
+        couverture *= 0.35
+
+    # Une correspondance partielle n'est pas une correspondance. Quand
+    # l'utilisateur nomme deux choses — « cafetière Delonghi » — n'en retrouver
+    # qu'une désigne un autre produit : la Kitchencraft n'est pas la Delonghi.
+    if couverture < 0.6:
+        couverture *= 0.6
+
+    s = couverture
+
+    # Un genre d'offre incompatible disqualifie, quelle que soit la couverture.
+    if offer_kind in _KINDS_HORS_PRODUIT:
+        s *= 0.15
+
+    # Article satellite non demandé : il porte le nom sans être la chose.
+    demande = set(termes)
+    if (mots_offre & _SATELLITES) and not (demande & _INTENTION_SATELLITE):
+        s *= 0.25
+
+    return max(0.0, min(1.0, s))
+
+
+# Sous ce seuil, mieux vaut s'abstenir que répondre à côté. Calé sur les cas
+# constatés : « bouchons anti-bruit » pour « casque à réduction de bruit »
+# tombe dessous, un vrai casque passe au-dessus.
+SEUIL = 0.5

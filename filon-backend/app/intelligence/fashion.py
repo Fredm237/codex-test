@@ -7,6 +7,8 @@ matière, une taille ou une silhouette en l’absence de donnée du Core. Il com
 
 from __future__ import annotations
 
+from app.services import relevance
+
 import re
 from dataclasses import asdict, dataclass
 from typing import Literal
@@ -191,8 +193,23 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
     by_role: dict[OutfitRole, list[CoreOfferSnapshot]] = {"base": [], "footwear": [], "accessory": []}
     for offer in offers:
         by_role[role_of(offer)].append(offer)
+    # Correspondance d'abord, prix ensuite.
+    #
+    # Le tri portait sur le seul prix croissant, et remontait donc l'article le
+    # moins cher du rôle : « Siso Régulateur de hauteur de panneau SHOES » à
+    # 0,70 € tenait lieu de chaussure parce que son nom contient « SHOES ».
+    # Un article hors sujet ne devient pas juste parce qu'il est bon marché.
+    termes = relevance.mots(intent.raw_request or "")
+
+    def _rang(offer: CoreOfferSnapshot) -> tuple:
+        pertinence = relevance.score(
+            termes, offer.name or "", offer_kind=getattr(offer, "offer_kind", None)
+        )
+        prix = offer.price if offer.price is not None else float("inf")
+        return (-round(pertinence, 1), prix, getattr(offer, "id", None) or offer.offer_id)
+
     for candidates in by_role.values():
-        candidates.sort(key=lambda offer: (offer.price if offer.price is not None else float("inf"), offer.id if hasattr(offer, "id") else offer.offer_id))
+        candidates.sort(key=_rang)
 
     selected: list[OutfitItem] = []
     base = by_role["base"][0] if by_role["base"] else None
@@ -245,7 +262,7 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         selected.append(OutfitItem(offer=accessory, role="accessory"))
         running_total += accessory.price or 0.0
 
-    confidence = _confidence(selected)
+    confidence = _confidence(selected, termes)
     style = _style_score(selected, intent, budget, running_total)
     # Les prix et la disponibilité peuvent être observés. La compatibilité de
     # style, de coupe et d'occasion ne l'est pas dans M1 : elle reste toujours
@@ -288,7 +305,18 @@ def _abstention(intent: FashionIntent, reason: str, offers: list[CoreOfferSnapsh
     }
 
 
-def _confidence(items: list[OutfitItem]) -> int:
+def _confidence(items: list[OutfitItem], termes: list[str] | None = None) -> int:
+    """Confiance dans la solution — documentation ET correspondance.
+
+    Elle ne mesurait que la complétude documentaire : un prix, un marchand, une
+    disponibilité, au moins deux pièces. Une tenue composée d'un régulateur de
+    panneau et d'un sac à 0 € sortait donc à 100 sur 100. Se tromper est
+    réparable ; se tromper en affichant « confiance élevée » ne l'est pas.
+
+    La correspondance la plus faible de la tenue plafonne désormais l'ensemble :
+    une seule pièce hors sujet suffit à faire tomber la confiance, et donc à
+    déclencher l'abstention en amont.
+    """
     if not items:
         return 0
     score = 45  # prix, marchand et catégorie Core de toutes les pièces.
@@ -299,7 +327,16 @@ def _confidence(items: list[OutfitItem]) -> int:
         score += 5
     if len(items) >= 2:
         score += 15
-    return min(score, 100)
+    score = min(score, 100)
+
+    if termes:
+        pire = min(
+            relevance.score(termes, item.offer.name or "",
+                            offer_kind=getattr(item.offer, "offer_kind", None))
+            for item in items
+        )
+        score = int(round(score * min(1.0, pire / relevance.SEUIL)))
+    return max(0, min(score, 100))
 
 
 def _style_score(items: list[OutfitItem], intent: FashionIntent, budget: float | None, total: float) -> int:

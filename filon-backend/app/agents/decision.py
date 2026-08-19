@@ -25,6 +25,7 @@ def _build_analysis(product: dict, e: dict) -> dict:
     return {
         "product_id": product["product_id"],
         "name": product["name"],
+        "relevance": product.get("relevance", 0.0),
         "specs": product.get("specs", {}),
         "best_offer": e["best_offer"],
         "cashback": e.get("cashback"),
@@ -42,8 +43,18 @@ def _rank_key(a: dict) -> tuple:
     # protège que de la clé manquante, pas d'une valeur None présente, d'où le
     # `or 0.0` qui couvre les deux cas avant l'inversion de signe.
     rating = (a.get("reviews") or {}).get("rating") or 0.0
-    # Prix réel croissant d'abord, puis meilleure note.
-    return (a["real_price"], -float(rating))
+    # La pertinence prime sur le prix.
+    #
+    # Le tri portait d'abord sur le prix réel croissant. Comme les candidats
+    # pouvaient ne correspondre que par un mot, c'était toujours l'article le
+    # moins cher du lot qui gagnait : une carte cadeau à 0,01 € plutôt qu'un
+    # casque. Un résultat hors sujet ne devient pas bon parce qu'il est bon
+    # marché — la correspondance passe donc devant, et le prix départage à
+    # pertinence comparable.
+    pertinence = float(a.get("relevance") or 0.0)
+    # Arrondi au dixième : deux offres également pertinentes se départagent au
+    # prix, sans qu'un écart de score négligeable ne l'emporte.
+    return (-round(pertinence, 1), a["real_price"], -float(rating))
 
 
 async def run(state: AdviseState) -> AdviseState:

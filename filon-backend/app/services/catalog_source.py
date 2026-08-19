@@ -19,6 +19,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
+from app.services import relevance
 
 log = get_logger("catalog_source")
 
@@ -45,6 +46,7 @@ def _shape(
     category: str | None,
     image: str | None,
     offers: list[tuple],
+    relevance_score: float = 0.0,
 ) -> dict:
     """Format attendu par les agents en aval (product_search, price_compare…)."""
     return {
@@ -52,6 +54,9 @@ def _shape(
         "name": name,
         "brand": brand,
         "category": category,
+        # Score de correspondance à la demande : c'est lui qui classe en aval,
+        # devant le prix. Sans lui, le moins cher gagnait toujours.
+        "relevance": relevance_score,
         "tags": keywords(name),
         "specs": {},
         "rating": None,
@@ -98,6 +103,15 @@ async def search_products(
         if session is None:
             return []
 
+        # Les termes les plus discriminants doivent TOUS être présents.
+        #
+        # Le filtre unissait auparavant les termes par OU : un seul mot commun
+        # suffisait, et « machine à café » remontait « Crazy Machines ». On exige
+        # désormais les deux termes les plus spécifiques, ce qui écarte la
+        # correspondance accidentelle sans imposer la phrase entière — un nom
+        # d'offre ne reprend jamais toute une demande.
+        exigés = relevance.termes_significatifs(terms)[:2] or terms[:1]
+
         stmt = (
             select(models.Offer, models.Merchant)
             .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
@@ -105,7 +119,7 @@ async def search_products(
                 models.Offer.price.isnot(None),
                 models.Offer.price > 0,
                 models.Offer.image_url.isnot(None),
-                or_(*[models.Offer.name.ilike(f"%{t}%") for t in terms]),
+                *[models.Offer.name.ilike(f"%{t}%") for t in exigés],
             )
         )
         blocked = get_settings().blocked_merchant_slugs
@@ -115,13 +129,30 @@ async def search_products(
             # Marge de 5 % : une offre à peine au-dessus du budget reste utile.
             stmt = stmt.where(models.Offer.price <= budget_max * 1.05)
 
-        # On récupère large, puis on regroupe et on classe en mémoire : le tri
-        # final porte sur le meilleur prix *du produit*, pas de l'offre isolée.
-        rows = (
-            await session.execute(stmt.order_by(models.Offer.price.asc()).limit(limit * 20))
-        ).all()
+        # On récupère large, puis on regroupe et on classe en mémoire.
+        #
+        # Le tri par prix croissant se faisait AVANT la limite : on ne chargeait
+        # donc que les cent articles les moins chers contenant un mot, et les
+        # vrais candidats n'étaient jamais lus — aucun classement en mémoire ne
+        # pouvait les rattraper. On charge maintenant un échantillon plus large,
+        # sans le biaiser par le prix, et c'est la pertinence qui tranche.
+        rows = (await session.execute(stmt.limit(400))).all()
         if not rows:
             return []
+
+        # Les offres qui ne répondent pas à la demande sont écartées ici, pas
+        # rangées derrière : mieux vaut ne rien proposer qu'un article à côté.
+        pertinentes = [
+            pair for pair in rows
+            if relevance.score(
+                terms, pair[0].name or "",
+                offer_kind=getattr(pair[0], "offer_kind", None),
+            ) >= relevance.SEUIL
+        ]
+        if not pertinentes:
+            log.info("catalog_search_sans_correspondance", extra={"query": query[:80]})
+            return []
+        rows = pertinentes
 
         grouped: dict[object, list[tuple]] = {}
         for pair in rows:
@@ -157,10 +188,23 @@ async def search_products(
                     category=(product.category if product else first.category),
                     image=(product.image_url if product else first.image_url),
                     offers=offers,
+                    # Le nom présenté au visiteur est celui du produit regroupé
+                    # quand il existe : c'est donc lui qu'on note, pas l'offre.
+                    relevance_score=relevance.score(
+                        terms,
+                        (product.name if product else first.name) or "",
+                        offer_kind=getattr(first, "offer_kind", None),
+                    ),
                 )
             )
 
         products = [p for p in products if p["offers"]]
-        products.sort(key=lambda p: min(o["price"] for o in p["offers"]))
+        # Le classement final : correspondance d'abord, prix ensuite. Trier sur
+        # le seul prix faisait remonter l'article le moins cher du lot, pas le
+        # plus proche de la demande.
+        products.sort(
+            key=lambda p: (-round(p.get("relevance") or 0.0, 1),
+                           min(o["price"] for o in p["offers"]))
+        )
         log.info("Catalogue réel : %d produits pour « %s »", len(products), query)
         return products[:limit]
