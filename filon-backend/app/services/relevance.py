@@ -40,6 +40,11 @@ _SATELLITES = {
     "bouchon", "bouchons", "filtre", "sac", "bag", "tas", "sacoche", "bandouliere",
     "carte", "cadeau", "voucher", "cle", "clé", "licence", "abonnement",
     "regulateur", "embout", "lame", "collier", "timer",
+    # Outils, éléments de réparation et supports. Ces objets peuvent citer le
+    # produit principal sans le constituer (vitre caméra, outil de montre,
+    # porte-bidon) et ne sont conservés que lorsqu’ils sont demandés.
+    "outil", "outils", "tool", "tools", "vitre", "glass", "cadre", "frame",
+    "couvercle", "cover", "holder", "porte", "mount", "service",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
@@ -220,7 +225,10 @@ def gender_compatible(request: str, nom_offre: str) -> bool:
 
 def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
     """Indique qu’un titre décrit un accessoire que la demande ne nomme pas."""
-    demande = set(termes_significatifs([_plat(t) for t in demande_termes]))
+    # Les mots sémantiques peuvent être des expressions (« camera bag ») : ils
+    # doivent être re-tokenisés avant comparaison pour ne jamais écarter une
+    # composante explicitement demandée.
+    demande = set(termes_significatifs(mots(" ".join(demande_termes))))
     return bool(set(mots(nom_offre)) & _SATELLITES) and not bool(demande & _INTENTION_SATELLITE)
 
 
