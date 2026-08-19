@@ -179,3 +179,41 @@ def test_plan_general_ecarte_une_piece_de_camera_au_profit_dun_appareil_autonome
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Mirrorless camera body with interchangeable lens"]
+
+
+
+def test_plan_general_conserve_le_qualificatif_explicite_dune_montre_connectee():
+    intent = resolve_intent("montre connectée sous 250 €", "fr")
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Montre digitale enfant avec projection d'images", taxonomy.BIJOUX, "Montres", 9.74),
+            offer(2, "Montre connectée sport GPS avec cardio", taxonomy.BIJOUX, "Montres", 129.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Montre connectée sport GPS avec cardio"]
+
+
+def test_plan_general_dun_kit_neerlandais_ecarte_un_composant_de_reglage():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="fietsuitrusting onder 500 €",
+        locale="nl",
+        scopes=(IntentScope(taxonomy.SPORT, "Cyclisme", "fietsuitrusting onder 500 €", ("fietshelm", "fietslamp", "fietsslot")),),
+        terms=("fiets", "uitrusting"),
+        required_title_phrases=(),
+        budget_eur=500.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Ajusteur de rebond Fox Factory FIT4", taxonomy.SPORT, "Cyclisme", 10.0),
+            offer(2, "Fietshelm met verstelbaar vizier", taxonomy.SPORT, "Cyclisme", 59.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Fietshelm met verstelbaar vizier"]

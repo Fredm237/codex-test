@@ -14,8 +14,14 @@ def _display_role(offer: CoreOfferSnapshot) -> str:
     return "base"
 
 
-def _rank(scope: IntentScope, offer: CoreOfferSnapshot) -> tuple[float, float, int]:
-    match = relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind)
+def _rank(
+    scope: IntentScope,
+    offer: CoreOfferSnapshot,
+    *,
+    request_terms: tuple[str, ...],
+) -> tuple[float, float, int]:
+    terms = list(dict.fromkeys([*scope.query_terms, *request_terms]))
+    match = relevance.score(terms, offer.name or "", offer_kind=offer.offer_kind)
     price = offer.price if offer.price is not None else float("inf")
     return (-round(match, 3), price, offer.offer_id)
 
@@ -25,6 +31,7 @@ def _scope_candidates(
     offers: list[CoreOfferSnapshot],
     *,
     budget: float | None,
+    request_terms: tuple[str, ...],
 ) -> list[CoreOfferSnapshot]:
     scoped = [
         offer for offer in offers
@@ -47,7 +54,9 @@ def _scope_candidates(
     # disponible dans ce même univers taxonomique.
     primary = [
         offer for offer in scoped
-        if not relevance.is_unrequested_satellite(list(scope.query_terms), offer.name or "")
+        if not relevance.is_unrequested_satellite(
+            list(dict.fromkeys([*scope.query_terms, *request_terms])), offer.name or ""
+        )
     ]
     if primary:
         scoped = primary
@@ -71,13 +80,20 @@ def _scope_candidates(
             scoped = substantial
     strict = [
         offer for offer in scoped
-        if relevance.score(list(scope.query_terms), offer.name or "", offer_kind=offer.offer_kind) >= relevance.SEUIL
+        if relevance.score(
+            list(dict.fromkeys([*scope.query_terms, *request_terms])),
+            offer.name or "",
+            offer_kind=offer.offer_kind,
+        ) >= relevance.SEUIL
     ]
     # Les offres ont déjà franchi le filtre de scope, de nature physique,
     # disponibilité, prix et image dans general_catalog. Si les mots de la
     # demande n’existent pas dans la nomenclature marchande, le scope résolu
     # demeure la preuve vérifiable ; il ne faut pas fabriquer une abstention.
-    return sorted(strict or scoped, key=lambda offer: _rank(scope, offer))
+    return sorted(
+        strict or scoped,
+        key=lambda offer: _rank(scope, offer, request_terms=request_terms),
+    )
 
 
 def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot], *, max_items: int = 3) -> dict[str, object]:
@@ -96,8 +112,14 @@ def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot],
     total = 0.0
     budget = intent.budget_eur
 
+    ranking_qualifiers = relevance.explicit_qualifier_terms(intent.terms)
     for scope in intent.scopes:
-        candidates = _scope_candidates(scope, offers, budget=budget)
+        candidates = _scope_candidates(
+            scope,
+            offers,
+            budget=budget,
+            request_terms=ranking_qualifiers,
+        )
         if not candidates:
             return _abstention(intent, "no_verified_scope", offers, missing_scope=scope)
         # Une demande multi-produits exige un représentant par scope. Une demande

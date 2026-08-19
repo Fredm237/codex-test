@@ -45,7 +45,8 @@ _SATELLITES = {
     # porte-bidon) et ne sont conservés que lorsqu’ils sont demandés.
     "outil", "outils", "tool", "tools", "vitre", "glass", "cadre", "frame",
     "couvercle", "cover", "holder", "porte", "mount", "service", "wire",
-    "molybdene", "molybdenum", "repair", "repairing",
+    "molybdene", "molybdenum", "repair", "repairing", "ajusteur", "adjuster",
+    "rebond", "rebound", "calibration", "tuning",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
@@ -66,6 +67,12 @@ _EQUIVALENCES = {
     "robe": frozenset({"robe", "dress", "jurk"}),
     "dress": frozenset({"robe", "dress", "jurk"}),
     "jurk": frozenset({"robe", "dress", "jurk"}),
+    # Qualificatif de connectivité explicitement demandé. Le rapprochement
+    # couvre les titres de catalogue FR/NL/EN sans déduire de fonctionnalité.
+    "connectee": frozenset({"connectee", "connecte", "connected", "smartwatch"}),
+    "connecte": frozenset({"connectee", "connecte", "connected", "smartwatch"}),
+    "connected": frozenset({"connectee", "connecte", "connected", "smartwatch"}),
+    "smartwatch": frozenset({"connectee", "connecte", "connected", "smartwatch"}),
 }
 
 
@@ -165,6 +172,20 @@ def _term_is_present(term: str, offer_words: set[str], normalized_offer_name: st
     """Vérifie un terme ou son équivalent explicite dans le titre marchand."""
     variants = _EQUIVALENCES.get(term, frozenset({term}))
     return any(variant in offer_words or variant in normalized_offer_name for variant in variants)
+
+
+def explicit_qualifier_terms(terms: tuple[str, ...]) -> tuple[str, ...]:
+    """Conserve les qualificatifs explicites, pas les mots composés de contexte.
+
+    Les suffixes néerlandais « kleding » et « uitrusting » décrivent le type de
+    demande. Les injecter comme termes obligatoires ferait tomber sous le seuil
+    des titres marchands pourtant pertinents (par exemple « tennissokken »).
+    """
+    return tuple(
+        term for term in terms
+        if term not in _COLLECTION_REQUEST_TERMS
+        and not re.search(r"(?:kleding|kledij|uitrusting|materiaal)$", _plat(term))
+    )
 
 
 def request_describes_collection(text: str) -> bool:
