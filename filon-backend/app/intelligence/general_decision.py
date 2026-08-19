@@ -41,6 +41,16 @@ def _scope_candidates(
             if relevance.has_clothing_proof(offer.name or "")
             and relevance.gender_compatible(scope.source_text, offer.name or "")
         ]
+    # Les satellites sont légitimes seulement quand les mots de besoin les
+    # demandent. Ce filtre intervient après la lecture exhaustive du scope : il
+    # ne masque jamais une offre sans avoir vérifié qu’un produit principal est
+    # disponible dans ce même univers taxonomique.
+    primary = [
+        offer for offer in scoped
+        if not relevance.is_unrequested_satellite(list(scope.query_terms), offer.name or "")
+    ]
+    if primary:
+        scoped = primary
     if relevance.request_describes_collection(scope.source_text):
         # Un kit ne doit pas se réduire à une vis, un piquet ou un adaptateur
         # lorsque le même scope propose un article autonome. La préférence de

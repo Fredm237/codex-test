@@ -150,3 +150,32 @@ def test_plan_general_dun_kit_ecarte_un_composant_minime_au_profit_dun_equipemen
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Matelas de camping autogonflant 2 personnes"]
+
+
+
+def test_plan_general_ecarte_un_outil_de_montre_au_profit_dune_montre_connectee():
+    intent = resolve_intent("montre connectée sous 250 €", "fr")
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Outil Métallique OEM pour Couvercles de Montres", taxonomy.BIJOUX, "Montres", 1.13),
+            offer(2, "Montre connectée GPS avec cardio", taxonomy.BIJOUX, "Montres", 129.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Montre connectée GPS avec cardio"]
+
+
+def test_plan_general_ecarte_une_piece_de_camera_au_profit_dun_appareil_autonome():
+    intent = resolve_intent("camera equipment under €800", "en")
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Rear camera glass and inner frame service pack", taxonomy.PHOTO, None, 15.52),
+            offer(2, "Mirrorless camera body with interchangeable lens", taxonomy.PHOTO, None, 499.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Mirrorless camera body with interchangeable lens"]
