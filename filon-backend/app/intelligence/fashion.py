@@ -42,6 +42,12 @@ _WORK_FOOTWEAR_EVIDENCE = frozenset({
 _THEMED_COSTUME_TERMS = frozenset({
     "costume", "déguisement", "deguisement", "cosplay", "tueur", "killer", "halloween", "carnaval", "carnival",
 })
+# Une marque peut nommer un gel douche « La Petite Robe Noire ». Ces produits
+# d’hygiène ne sont jamais un vêtement, même lorsqu’un mot de mode apparaît.
+_NON_WEARABLE_BODYCARE_TERMS = frozenset({
+    "shower", "gel", "bodywash", "bath", "bain", "parfum", "perfume", "eau", "shampoo", "shampoing",
+    "conditioner", "lotion", "creme", "crème", "serum", "sérum", "deodorant", "déodorant", "soap", "savon",
+})
 
 # Les occasions guident le filtre de retrieval mais ne sont pas des pièces :
 # leur absence dans un titre ne doit ni pénaliser un blazer réel ni permettre à
@@ -238,6 +244,10 @@ def _is_unrequested_themed_costume(request: str, offer_name: str | None) -> bool
     return bool(_words(offer_name) & _THEMED_COSTUME_TERMS) and not bool(request_words & _THEMED_COSTUME_TERMS)
 
 
+def _is_non_wearable_bodycare(offer_name: str | None) -> bool:
+    return bool(_words(offer_name) & _NON_WEARABLE_BODYCARE_TERMS)
+
+
 def _sports_requested(text: str) -> bool:
     return _is_athletic_footwear(text)
 
@@ -283,6 +293,8 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         if relevance.is_unrequested_satellite(termes, offer.name or ""):
             return False
         if _is_unrequested_themed_costume(intent.raw_request, offer.name):
+            return False
+        if _words(intent.raw_request) & _BASE_REQUEST_TERMS and _is_non_wearable_bodycare(offer.name):
             return False
         # « Travail » est une contrainte explicite. FILON n’infère pas qu’une
         # chaussure de futsal ou enfant est professionnelle : sans alternative
