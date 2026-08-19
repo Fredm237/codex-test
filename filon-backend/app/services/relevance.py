@@ -40,6 +40,11 @@ _SATELLITES = {
     "bouchon", "bouchons", "filtre", "sac", "bag", "tas", "sacoche", "bandouliere",
     "carte", "cadeau", "voucher", "cle", "clé", "licence", "abonnement",
     "regulateur", "embout", "lame", "collier", "timer",
+    # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
+    # veste. Ces couches et pièces de lingerie restent valides uniquement quand
+    # l’utilisateur les demande explicitement.
+    "underwear", "lingerie", "crotch", "bra", "bralette", "panty", "panties",
+    "culotte", "soutien", "gorge", "shapewear", "bodysuit",
 }
 
 # Un article satellite reste légitime si la demande le nomme.

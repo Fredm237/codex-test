@@ -389,6 +389,46 @@ class TestFashionCatalogAdapter:
         assert [snapshot.offer_id for snapshot in snapshots] == [eligible.id]
 
 
+    async def test_blazer_ecarte_un_sous_vetement_qui_utilise_jacket(self, intelligence_session):
+        merchant = models.Merchant(awin_mid=991, name="Marchand outerwear", slug="outerwear")
+        intelligence_session.add(merchant)
+        await intelligence_session.flush()
+        blazer = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="blazer-verifie",
+            name="Blazer noir femme pour le travail",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Manteaux & Vestes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=99.0,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/blazer.jpg",
+        )
+        faux_blazer = models.Offer(
+            merchant_id=merchant.id,
+            awin_product_id="lingerie-jacket",
+            name="Women's mesh cross belt jacket empty cotton crotch underwear",
+            filon_category=taxonomy.MODE_FEMME,
+            filon_subcategory="Manteaux & Vestes",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT,
+            is_canonical=True,
+            is_adult=False,
+            price=20.0,
+            currency="EUR",
+            in_stock=True,
+            image_url="https://example.test/underwear.jpg",
+        )
+        intelligence_session.add_all([blazer, faux_blazer])
+        await intelligence_session.commit()
+
+        snapshots = await retrieve_fashion_offers(intelligence_session, query="blazer")
+
+        assert [snapshot.offer_id for snapshot in snapshots] == [blazer.id]
+
+
 class TestFashionExpert:
     @staticmethod
     def _offer(

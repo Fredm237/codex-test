@@ -48,6 +48,13 @@ _SCOPE_TERMS: dict[str, frozenset[str]] = {
 # cite « dress » dans les Robes. Ces objets ne sont jamais une pièce principale :
 # l’exclusion est limitée aux termes de joaillerie explicites et vérifiés.
 _SCOPE_EXCLUSIONS: dict[str, frozenset[str]] = {
+    "outerwear": frozenset({
+        # « jacket » peut qualifier un sous-vêtement ou une couche technique.
+        # Ces objets ne peuvent jamais remplir le rôle d’un blazer, d’une veste
+        # ou d’un manteau dans Outfit Studio.
+        "underwear", "lingerie", "crotch", "bra", "bralette", "panty", "panties",
+        "culotte", "soutien", "gorge", "shapewear", "body shaper", "bodysuit",
+    }),
     "dress": frozenset({
         "jewellery", "jewelry", "necklace", "necklaces", "earring", "earrings",
         "bracelet", "bracelets", "ring", "rings", "tiara", "brooch", "brooches",
