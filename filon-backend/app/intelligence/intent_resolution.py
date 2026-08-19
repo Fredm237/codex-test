@@ -193,8 +193,15 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
     # mais elle peut aussi provenir d’un mot ambigu dans une phrase naturelle.
     # Le choix sémantique reste donc contraint aux scopes FILON et peut préciser
     # ce cas ; une réponse vide laisse intacte la résolution déterministe.
-    needs_semantic_check = not deterministic.resolved or all(
-        scope.subcategory is None for scope in deterministic.scopes
+    # Un scope précis prouve le rayon mais pas nécessairement le type d’article
+    # attendu dans un kit. Avec un seul terme comme « camping », trier ensuite
+    # par prix ferait remonter une tasse avant une tente ou un sac de couchage.
+    # Le modèle ne peut enrichir que les mots de classement ; catégories et
+    # sous-catégories restent soumises aux garde-fous ci-dessous.
+    needs_semantic_check = (
+        not deterministic.resolved
+        or all(scope.subcategory is None for scope in deterministic.scopes)
+        or any(len(scope.query_terms) <= 2 for scope in deterministic.scopes)
     )
     if not needs_semantic_check:
         return deterministic
