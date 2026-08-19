@@ -174,7 +174,17 @@ def _intent_search_clause(
     obligatoires. Pour une intention générique, un des noms de famille de produit
     suffit, car les titres marchands n’emploient pas tous le mot « smartphone ».
     """
-    if not intent or required:
+    if not intent:
+        return search_clause(search_query)
+    if required:
+        # « réduction de bruit », « noise », « ANC » et « cancelling » sont
+        # des formulations alternatives d’une même attente. Les exiger toutes
+        # dans un titre rendait une demande de casque ANC impossible alors que
+        # le catalogue contenait des casques « noise cancelling » ou « ANC ».
+        # Les modèles explicites (iPhone 15, Galaxy…) gardent en revanche leur
+        # conjonction stricte afin de ne jamais substituer un autre modèle.
+        if intent[0] == "casque":
+            return or_(*[search_clause(term) for term in required])
         return search_clause(search_query)
     terms = _intent_search_terms(intent[0])
     if not terms:
