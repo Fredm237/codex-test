@@ -239,7 +239,24 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
             and deterministic.scopes[0].subcategory is None
             and len(scopes) == 1
         )
-        if not may_replace_single_broad_scope:
+        if may_replace_single_broad_scope:
+            original = deterministic.scopes[0]
+            candidate = scopes[0]
+            # À catégorie identique, un sous-rayon proposé par le modèle doit
+            # déjà être démontrable depuis le texte par la taxonomie. Sans cela,
+            # « tennis clothing » pourrait devenir arbitrairement Running ; le
+            # scope large prouvé reste alors la seule base vérifiable.
+            taxonomic_subcategory = taxonomy.classify_subcategory(
+                original.category,
+                name=_normalize_compounds(raw_request),
+            )
+            if (
+                candidate.category == original.category
+                and candidate.subcategory is not None
+                and candidate.subcategory != taxonomic_subcategory
+            ):
+                scopes = deterministic.scopes
+        else:
             refined: list[IntentScope] = []
             for original in deterministic.scopes:
                 semantic = next(
