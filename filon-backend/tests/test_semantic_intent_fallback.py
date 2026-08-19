@@ -113,3 +113,20 @@ async def test_fallback_semantique_ne_remplace_pas_un_scope_prouve_par_des_scope
 
     assert [(scope.category, scope.subcategory) for scope in intent.scopes] == [(taxonomy.SPORT, None)]
     assert intent.scopes[0].query_terms == ("tennis",)
+
+
+@pytest.mark.asyncio
+async def test_fallback_semantique_ne_specialise_pas_un_sous_rayon_sans_preuve_dans_la_demande(monkeypatch):
+    monkeypatch.setattr(
+        intent_resolution,
+        "get_router",
+        lambda: FakeRouter(
+            '{"scopes":[{"category":"Sport & Plein air","subcategory":"Running",'
+            '"keywords":["tennis apparel","sportswear","breathable"]}]}'
+        ),
+    )
+
+    intent = await intent_resolution.resolve_intent_with_fallback("tennis clothing under €200", "en")
+
+    assert [(scope.category, scope.subcategory) for scope in intent.scopes] == [(taxonomy.SPORT, None)]
+    assert intent.scopes[0].query_terms == ("tennis",)
