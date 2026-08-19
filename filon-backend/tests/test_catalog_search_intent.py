@@ -82,6 +82,16 @@ def test_explicit_smartphone_part_is_not_misrepresented_as_a_complete_phone():
     assert _catalogue_intent("écran iphone 15") is None
 
 
+def test_coffee_machine_intent_uses_the_appliance_scope_and_keeps_capsules_explicit():
+    intent = _catalogue_intent("machine a cafe automatique sous 500 euros")
+
+    assert intent is not None
+    assert intent[0] == "coffee_machine"
+    assert _INTENT_PRIMARY_SCOPE["coffee_machine"] == (taxonomy.ELECTROMENAGER, "Petit électroménager")
+    assert "espresso" in _intent_search_terms("coffee_machine")
+    assert _catalogue_intent("capsules de cafe") is None
+
+
 def test_named_model_searches_the_model_before_the_generic_category_anchor():
     iphone_intent = _catalogue_intent("iphone 15")
     generic_intent = _catalogue_intent("smartphone sous 400 €")
