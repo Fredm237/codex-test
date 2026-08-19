@@ -29,6 +29,14 @@ _ATHLETIC_FOOTWEAR_TERMS = frozenset({
 _CHILD_FOOTWEAR_TERMS = frozenset({
     "enfant", "enfants", "kid", "kids", "child", "children", "junior", "baby", "bebe", "bébé", "kind", "kinder",
 })
+# La compatibilité professionnelle n’est jamais déduite d’une simple couleur ou
+# d’un prix. Les titres doivent porter une preuve utilisable : usage, forme
+# formelle, matière de ville ou chaussure de sécurité explicitement annoncée.
+_WORK_FOOTWEAR_EVIDENCE = frozenset({
+    "travail", "work", "bureau", "office", "business", "professionnel", "professional",
+    "formel", "formal", "formeel", "ville", "oxford", "derby", "mocassin", "loafer",
+    "escarpin", "pump", "pumps", "cuir", "leather", "leder", "securite", "sécurité", "safety",
+})
 
 # Les occasions guident le filtre de retrieval mais ne sont pas des pièces :
 # leur absence dans un titre ne doit ni pénaliser un blazer réel ni permettre à
@@ -216,6 +224,10 @@ def _is_child_footwear(text: str | None) -> bool:
     return bool(_words(text) & _CHILD_FOOTWEAR_TERMS)
 
 
+def _has_work_footwear_evidence(text: str | None) -> bool:
+    return bool(_words(text) & _WORK_FOOTWEAR_EVIDENCE)
+
+
 def _sports_requested(text: str) -> bool:
     return _is_athletic_footwear(text)
 
@@ -264,7 +276,10 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         # chaussure de futsal ou enfant est professionnelle : sans alternative
         # adulte non sportive documentée, il préfère l’abstention.
         if intent.occasion == "work" and role_of(offer) == "footwear":
-            return not (_is_athletic_footwear(offer.name) or _is_child_footwear(offer.name))
+            return (
+                not (_is_athletic_footwear(offer.name) or _is_child_footwear(offer.name))
+                and _has_work_footwear_evidence(offer.name)
+            )
         return True
 
     def _matches_requested_piece(offer: CoreOfferSnapshot, *, fallback_base: bool = False) -> bool:

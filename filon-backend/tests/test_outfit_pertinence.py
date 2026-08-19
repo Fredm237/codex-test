@@ -158,15 +158,22 @@ def test_chaussures_de_travail_ecartent_futsal_et_enfant_explicitement_nomme():
         taxonomy.CHAUSSURES,
         "Chaussures basses",
     )
-    chaussures_adultes = _snapshot(
+    sneaker_generique = _snapshot(
         14,
-        "Chaussures noires adultes pour le travail",
+        "Chaussures adidas Vs Pace 2.0 Homme blanches et noires",
+        taxonomy.CHAUSSURES,
+        "Chaussures basses",
+    )
+    chaussures_adultes = _snapshot(
+        15,
+        "Chaussures noires adultes en cuir pour le travail",
         taxonomy.CHAUSSURES,
         "Chaussures basses",
     )
 
     assert fashion.compose_outfit(intent, [futsal_enfant])["decision"] == "abstain"
-    solution = fashion.compose_outfit(intent, [futsal_enfant, chaussures_adultes])
+    assert fashion.compose_outfit(intent, [sneaker_generique])["decision"] == "abstain"
+    solution = fashion.compose_outfit(intent, [futsal_enfant, sneaker_generique, chaussures_adultes])
     assert solution["decision"] == "recommend"
     assert solution["items"][0]["name"] == chaussures_adultes.name
 
