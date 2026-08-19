@@ -46,13 +46,18 @@ _INTENT_ANCHORS: tuple[tuple[tuple[str, ...], str, tuple[str, ...]], ...] = (
         "casque",
         ("housse", "hoes", "case", "cable", "adaptateur", "support", "earpad", "coussin", "ecouteur", "écouteur", "earbud", "in-ear", "in ear", "intra"),
     ),
+    (
+        ("machine a cafe", "machine à café", "cafetiere", "cafetière", "coffee machine", "koffiezetapparaat", "koffiemachine", "espresso", "cafe", "café", "coffee", "koffie"),
+        "coffee_machine",
+        ("capsule", "capsules", "dosette", "dosettes", "filtre", "filtres", "mug", "tasse", "tasses"),
+    ),
 )
 
 
 # Un flux peut publier un prix technique (1 €) ou une garantie sous un nom de
 # produit. Ces seuils ne donnent pas une valeur de marché : ils empêchent
 # seulement qu'un produit principal soit présenté à un prix invraisemblable.
-_PRIMARY_MIN_PRICE = {"laptop": 200.0, "smartphone": 80.0, "casque": 25.0}
+_PRIMARY_MIN_PRICE = {"laptop": 200.0, "smartphone": 80.0, "casque": 25.0, "coffee_machine": 30.0}
 
 # Une occurrence textuelle de « smartphone » apparaît fréquemment dans des
 # accessoires, ou dans la compatibilité d’un appareil tiers. L’assistant ne
@@ -63,6 +68,7 @@ _INTENT_PRIMARY_SCOPE: dict[str, tuple[str, str]] = {
     "laptop": (taxonomy.INFORMATIQUE, "Ordinateurs portables"),
     "smartphone": (taxonomy.TELEPHONIE, "Smartphones"),
     "casque": (taxonomy.TV_SON, "Casques audio"),
+    "coffee_machine": (taxonomy.ELECTROMENAGER, "Petit électroménager"),
 }
 
 
@@ -161,6 +167,10 @@ _INTENT_PRODUCT_TITLE_TERMS: dict[str, tuple[str, ...]] = {
     ),
     "laptop": ("laptop", "notebook", "macbook", "chromebook", "thinkpad", "vivobook", "ideapad"),
     "casque": ("casque", "headphone", "koptelefoon", "headset"),
+    "coffee_machine": (
+        "machine a cafe", "machine à café", "cafetiere", "cafetière", "coffee machine",
+        "koffiezetapparaat", "koffiemachine", "espressomachine", "espresso",
+    ),
 }
 
 
