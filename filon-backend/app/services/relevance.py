@@ -85,7 +85,7 @@ _CLOTHING_REQUEST_TERMS = frozenset({
 _CLOTHING_OFFER_TERMS = frozenset({
     "tshirt", "shirt", "polo", "top", "jersey", "dress", "skirt", "short", "shorts",
     "trousers", "pants", "legging", "socks", "sock", "jacket", "coat", "sweater", "hoodie",
-    "sweatshirt", "maillot", "haut", "robe", "jupe", "pantalon", "chaussette", "veste",
+    "sweatshirt", "maillot", "robe", "jupe", "pantalon", "chaussette", "veste",
     "manteau", "pull", "gilet", "chemise", "tunique", "broek", "jurk", "rok", "sokken",
     "jas", "trui", "vest", "kleding", "kledij",
 })
@@ -126,8 +126,17 @@ def _term_is_present(term: str, offer_words: set[str], normalized_offer_name: st
 
 
 def request_requires_clothing(text: str) -> bool:
-    """Indique que la demande exige un vêtement, quelle que soit sa pratique."""
-    return bool(set(mots(text)) & _CLOTHING_REQUEST_TERMS)
+    """Indique que la demande exige un vêtement, quelle que soit sa pratique.
+
+    Le néerlandais soude régulièrement la pratique et le type de besoin
+    (« tenniskleding »). Cette terminaison linguistique est traitée sans faire
+    intervenir un sport ni une catégorie de produit.
+    """
+    normalized = _plat(text)
+    return bool(
+        set(mots(normalized)) & _CLOTHING_REQUEST_TERMS
+        or re.search(r"[a-z]{3,}(?:kleding|kledij)\b", normalized)
+    )
 
 
 def has_clothing_proof(nom_offre: str) -> bool:

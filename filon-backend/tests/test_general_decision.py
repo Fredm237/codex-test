@@ -37,8 +37,8 @@ def test_plan_general_selectionne_des_offres_prouvees_dans_un_scope_unique():
     )
 
     assert solution["decision"] == "recommend"
-    assert [item["name"] for item in solution["items"]] == ["Tennis Shirt Femme", "Tennis Shoes Femme"]
-    assert solution["total_known_price"]["amount"] == 120.0
+    assert [item["name"] for item in solution["items"]] == ["Tennis Shirt Femme"]
+    assert solution["total_known_price"]["amount"] == 40.0
 
 
 def test_plan_general_exige_un_resultat_par_scope_multi_produits():
@@ -90,11 +90,11 @@ def test_plan_general_recommande_un_scope_prouve_meme_sans_terme_libre_dans_le_t
 
 
 def test_plan_general_exige_une_preuve_de_vetement_quand_la_demande_le_precise():
-    intent = resolve_intent("tennis clothing under €200", "en")
+    intent = resolve_intent("tenniskleding onder 200 €", "nl")
     solution = compose_general_plan(
         intent,
         [
-            offer(1, "Balles de tennis 6.5 cm", taxonomy.SPORT, "Fitness & Musculation", 1.8),
+            offer(1, "Balles tennis de table Enebe Haut à partir de 3+1", taxonomy.SPORT, "Fitness & Musculation", 2.5),
             offer(2, "Filet de tennis multifonction", taxonomy.SPORT, "Sports collectifs", 8.19),
             offer(3, "T-shirt Tennis Court Femme", taxonomy.SPORT, "Vêtements de sport", 24.99),
         ],
