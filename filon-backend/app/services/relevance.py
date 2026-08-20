@@ -64,6 +64,8 @@ _SATELLITES = {
     "compteur", "display", "dashboard", "warmtekussen", "heating", "kussen", "coussin", "pad",
     "veiligheidsvest", "veiligheidsvestje", "fluojas", "tussentuk", "tussenstuk", "stapelkit", "stacking",
     "bequille", "kickstand", "standaard", "stand", "tarp", "canopy", "doublure", "lining", "liner",
+    "enceinte", "enceintes", "speaker", "speakers", "loudspeaker",
+    "piquet", "piquets", "stake", "stakes", "ancrage", "anchor",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
