@@ -297,3 +297,47 @@ def test_plan_general_ecarte_un_peripherique_vr_du_smartphone_principal():
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Android smartphone with 128 GB storage"]
+
+
+
+def test_plan_general_s_abstient_dans_un_scope_large_sans_preuve_titre_du_produit_demande():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="machine à laver sous 600 euros",
+        locale="fr",
+        scopes=(IntentScope(taxonomy.ELECTROMENAGER, None, "machine à laver", ("machine à laver", "lave linge", "washing machine")),),
+        terms=("machine", "laver"),
+        required_title_phrases=(),
+        budget_eur=600.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [offer(1, "Frigo HP2", taxonomy.ELECTROMENAGER, None, 89.0)],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_verified_scope"
+
+
+def test_plan_general_ecarte_les_satellites_generiques_observes_dans_l_audit_large():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="robot vacuum under 300 euros",
+        locale="en",
+        scopes=(IntentScope(taxonomy.ELECTROMENAGER, "Aspirateurs", "robot vacuum", ("robot vacuum", "robot aspirateur")),),
+        terms=("robot", "vacuum"),
+        required_title_phrases=(),
+        budget_eur=300.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Brosse pour Xiaomi Robot Vacuum", taxonomy.ELECTROMENAGER, "Aspirateurs", 4.35),
+            offer(2, "Robot vacuum with self-emptying station", taxonomy.ELECTROMENAGER, "Aspirateurs", 229.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Robot vacuum with self-emptying station"]

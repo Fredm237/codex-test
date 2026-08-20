@@ -122,10 +122,12 @@ def _scope_candidates(
         offer for offer in scoped
         if _match_proof(scope, offer, request_terms=request_terms) >= relevance.SEUIL
     ]
-    # Les offres ont déjà franchi le filtre de scope, de nature physique,
-    # disponibilité, prix et image dans general_catalog. Si les mots de la
-    # demande n’existent pas dans la nomenclature marchande, le scope résolu
-    # demeure la preuve vérifiable ; il ne faut pas fabriquer une abstention.
+    # Un sous-rayon taxonomique précis constitue une preuve de nature qui peut
+    # suppléer un titre marchand pauvre. Un rayon large ne le permet pas : sans
+    # preuve textuelle, recommander un frigo pour « machine à laver » serait une
+    # substitution inventée. Dans ce cas, l’abstention est la réponse honnête.
+    if not strict and scope.subcategory is None:
+        return []
     return sorted(
         strict or scoped,
         key=lambda offer: _rank(scope, offer, request_terms=request_terms),

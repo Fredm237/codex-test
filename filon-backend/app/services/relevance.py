@@ -36,10 +36,13 @@ _SATELLITES = {
     "housse", "etui", "coque", "protection", "protecteur", "adhesif", "adhesive",
     "sticker", "autocollant", "lingette", "lingettes", "nettoyant", "nettoyante",
     "chargeur", "cable", "adaptateur", "support", "fixation", "vis", "cache",
+    "brosse", "brosses", "brush", "brushes", "oorkussen", "oorkussens", "earpad", "earpads",
     "rechange", "reparation", "kit", "sachet", "recharge",
     "bouchon", "bouchons", "filtre", "sac", "bag", "tas", "sacoche", "bandouliere",
     "carte", "cadeau", "voucher", "cle", "clé", "licence", "abonnement",
-    "regulateur", "embout", "lame", "collier", "timer",
+    "regulateur", "embout", "embouts", "lame", "collier", "timer",
+    "verre", "graisse", "grease", "lubricant", "band", "bandje", "strap",
+    "chaussette", "chaussettes", "sock", "socks", "kous", "kousen", "poudre", "powder",
     # Outils, éléments de réparation et supports. Ces objets peuvent citer le
     # produit principal sans le constituer (vitre caméra, outil de montre,
     # porte-bidon) et ne sont conservés que lorsqu’ils sont demandés.
@@ -78,6 +81,10 @@ _REQUIRED_FEATURE_PROOFS: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = 
     (
         re.compile(r"(?:connect[ée]e?|connected|smartwatch)"),
         re.compile(r"(?:connect[ée]e?|connected|smartwatch)"),
+    ),
+    (
+        re.compile(r"(?:automatic\w*|automatique\w*|volautomatisch)\s+(?:coffee|koffie|caf[eé])"),
+        re.compile(r"(?:fully\s+automatic|volautomatisch|automatique\w*|automatic\w*)"),
     ),
 )
 
@@ -330,8 +337,15 @@ def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
     # doivent être re-tokenisés avant comparaison pour ne jamais écarter une
     # composante explicitement demandée.
     demande = set(termes_significatifs(mots(" ".join(demande_termes))))
-    satellites_offre = set(mots(nom_offre)) & _SATELLITES
+    offer_words = set(mots(nom_offre))
+    satellites_offre = offer_words & _SATELLITES
     satellites_demandes = demande & _INTENTION_SATELLITE
+    # Une bandoulière ou une poignée est constitutive d’une sacoche explicitement
+    # demandée ; ce n’est pas un second produit. Cette relation est générique aux
+    # articles de portage et ne dépend d’aucun rayon de catalogue.
+    carrier_terms = {"sac", "bag", "sacoche"}
+    if offer_words & carrier_terms and demande & carrier_terms:
+        satellites_offre -= {"strap", "bandouliere", "handle", "handgreep"}
     # Une demande de sacoche autorise une sacoche, pas par extension une vitre
     # ou un cadre. La comparaison porte sur la nature précise du satellite.
     return bool(satellites_offre - satellites_demandes)

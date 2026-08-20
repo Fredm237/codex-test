@@ -115,3 +115,24 @@ def test_neutralite_de_public_ninfere_pas_un_produit_senior():
     assert relevance.age_compatible("smartphone under 400 euros", "Senior mobile phone with 4G") is False
     assert relevance.age_compatible("smartphone under 400 euros", "Senioren mobiele telefoon met 4G") is False
     assert relevance.age_compatible("smartphone for seniors", "Senior mobile phone with 4G") is True
+
+
+
+def test_satellites_generiques_observes_dans_l_audit_large_sont_ecartes_hors_demande():
+    request = ["smartphone"]
+    for title in (
+        "Pack embouts USB-C pour ordinateur portable",
+        "Graisse silicone pour vélo électrique",
+        "Verre de caméra arrière Oppo A79",
+        "Bracelet smartwatch Milanese bandje",
+        "Chaussettes de compression pour running",
+        "Poudre détartrante pour lave-linge",
+    ):
+        assert relevance.is_unrequested_satellite(request, title) is True
+
+
+def test_machine_automatique_exige_une_preuve_textuelle_de_l_automatisation():
+    request = "automatic coffee machine under 500 euros"
+
+    assert relevance.proves_required_features(request, "Filter coffee machine with glass jug") is False
+    assert relevance.proves_required_features(request, "Fully automatic espresso coffee machine") is True
