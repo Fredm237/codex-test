@@ -285,3 +285,17 @@ def test_exclut_une_table_pour_ordinateur_d_une_demande_d_ordinateur_portable():
         relevance.mots("ordinateur portable sous 700 euros"),
         "Table pour ordinateur portable en bambou avec trous d'aération",
     ) is True
+
+
+@pytest.mark.parametrize(
+    "offer_name",
+    [
+        "CHUWI Clavier magnétique pour ordinateur portable Hi10 Max",
+        "Souris sans fil pour ordinateur portable",
+        "Dock USB-C pour ordinateur portable",
+    ],
+)
+def test_exclut_les_peripheriques_informatiques_d_une_demande_d_ordinateur_portable(offer_name):
+    assert relevance.is_unrequested_satellite(
+        relevance.mots("ordinateur portable sous 700 euros"), offer_name
+    ) is True
