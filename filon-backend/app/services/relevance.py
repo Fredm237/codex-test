@@ -43,7 +43,8 @@ _SATELLITES = {
     # Outils, éléments de réparation et supports. Ces objets peuvent citer le
     # produit principal sans le constituer (vitre caméra, outil de montre,
     # porte-bidon) et ne sont conservés que lorsqu’ils sont demandés.
-    "outil", "outils", "tool", "tools", "vitre", "glass", "cadre", "frame",
+    "outil", "outils", "tool", "tools", "tournevis", "screwdriver", "screwdrivers",
+    "vitre", "glass", "cadre", "frame",
     "couvercle", "cover", "holder", "porte", "mount", "service", "wire",
     "molybdene", "molybdenum", "repair", "repairing", "ajusteur", "adjuster",
     "bracelet", "bracelets", "chain", "chaine", "chaîne", "rope", "cord",

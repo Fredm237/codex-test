@@ -237,7 +237,9 @@ def test_plan_general_prefere_un_smartphone_prouve_a_un_bijou_pour_telephone():
             offer(1, "Mobile phone leather bracelet chain for iPhone", taxonomy.TELEPHONIE, "Smartphones", 3.31),
             offer(2, "Smartphone video rig with hand grip", taxonomy.TELEPHONIE, "Smartphones", 3.99),
             offer(3, "3-in-1 smartphone ventilator Lightning USB-C Micro-USB", taxonomy.TELEPHONIE, "Smartphones", 7.99),
-            offer(4, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
+            offer(4, "Selfie stick phone tripod with Bluetooth remote", taxonomy.TELEPHONIE, "Smartphones", 9.09),
+            offer(5, "Precision screwdriver set for computer and smartphone", taxonomy.TELEPHONIE, "Smartphones", 10.28),
+            offer(6, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
         ],
     )
 
