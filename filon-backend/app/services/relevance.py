@@ -32,13 +32,13 @@ _KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
 # Cette version fait partie de la clé de cache Assistant. Toute évolution de la
 # politique de pertinence doit donc l’avancer dans le même changement afin qu’une
 # carte décidée sous une règle ancienne ne survive jamais au déploiement.
-CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.2"
+CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.3"
 
 # Familles d'articles satellites : elles portent le nom du produit recherché
 # sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
 # écran iPhone » n'est pas un iPhone, « housse » n'est pas un téléphone.
 _SATELLITES = {
-    "housse", "housses", "pochette", "etui", "coque", "protection", "protecteur", "adhesif", "adhesive",
+    "housse", "housses", "pochette", "etui", "case", "coque", "protection", "protecteur", "adhesif", "adhesive",
     "sticker", "autocollant", "lingette", "lingettes", "chiffon", "chiffons", "nettoyant", "nettoyante",
     "chargeur", "cable", "adaptateur", "support", "fixation", "vis", "cache",
     "brosse", "brosses", "brush", "brushes", "lavette", "mop", "dweildoek", "zijborstel",
@@ -70,7 +70,7 @@ _SATELLITES = {
     "veiligheidsvest", "veiligheidsvestje", "fluojas", "tussentuk", "tussenstuk", "stapelkit", "stacking",
     "bequille", "kickstand", "standaard", "stand", "tarp", "canopy", "doublure", "lining", "liner",
     "enceinte", "enceintes", "speaker", "speakers", "loudspeaker", "table", "desk", "plateau", "lapdesk",
-    "clavier", "keyboard", "souris", "mouse", "dock", "docking", "hub", "stylus", "moniteur", "monitor", "ecran", "écran", "display",
+    "clavier", "keyboard", "souris", "mouse", "dock", "docking", "hub", "stylus", "moniteur", "ecran", "écran", "display",
     "piquet", "piquets", "stake", "stakes", "ancrage", "anchor",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
