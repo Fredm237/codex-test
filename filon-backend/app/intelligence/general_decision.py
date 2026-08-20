@@ -52,6 +52,7 @@ def _scope_candidates(
     *,
     budget: float | None,
     request_terms: tuple[str, ...],
+    all_scope_terms: tuple[str, ...],
 ) -> list[CoreOfferSnapshot]:
     scoped = [
         offer for offer in offers
@@ -99,6 +100,23 @@ def _scope_candidates(
         scoped = feature_proven
     elif relevance.request_has_required_features(scope.source_text):
         return []
+    # Les qualificatifs qui ne servent pas à résoudre le scope restent des
+    # contraintes explicites : « chaise de bureau » ne peut pas devenir une
+    # chaise pliante. Sans titre qui les atteste, l'abstention prévaut.
+    context_terms = relevance.distinct_context_terms(request_terms, all_scope_terms)
+    # Les attributs fonctionnels (« connecté », « électrique », « automatique »)
+    # sont contrôlés séparément par des preuves multilingues dédiées ; les exiger
+    # une seconde fois ici empêcherait leurs synonymes prouvés de passer.
+    if relevance.request_has_required_features(scope.source_text):
+        context_terms = ()
+    if context_terms:
+        context_proven = [
+            offer for offer in scoped
+            if relevance.proves_context_terms(context_terms, offer.name or "")
+        ]
+        if not context_proven:
+            return []
+        scoped = context_proven
     # Les satellites sont légitimes seulement quand les mots de besoin les
     # demandent. Ce filtre intervient après la lecture exhaustive du scope : il
     # ne masque jamais une offre sans avoir vérifié qu’un produit principal est
@@ -156,10 +174,20 @@ def _scope_candidates(
     # suppléer un titre marchand pauvre. Un rayon large ne le permet pas : sans
     # preuve textuelle, recommander un frigo pour « machine à laver » serait une
     # substitution inventée. Dans ce cas, l’abstention est la réponse honnête.
-    if not strict and scope.subcategory is None:
+    phrase_proven = [
+        offer for offer in scoped
+        if relevance.proves_any_product_phrase(scope.query_terms, offer.name or "")
+    ]
+    if strict:
+        candidates = strict
+    elif phrase_proven:
+        candidates = phrase_proven
+    elif scope.subcategory is None:
         return []
+    else:
+        candidates = scoped
     return sorted(
-        strict or scoped,
+        candidates,
         key=lambda offer: _rank(scope, offer, request_terms=request_terms),
     )
 
@@ -181,12 +209,22 @@ def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot],
     budget = intent.budget_eur
 
     ranking_qualifiers = relevance.explicit_qualifier_terms(intent.terms)
+    all_scope_terms = tuple(
+        term
+        for scoped_intent in intent.scopes
+        for term in (
+            relevance.mots(scoped_intent.source_text)
+            if len(intent.scopes) > 1
+            else scoped_intent.query_terms
+        )
+    )
     for scope in intent.scopes:
         candidates = _scope_candidates(
             scope,
             offers,
             budget=budget,
             request_terms=ranking_qualifiers,
+            all_scope_terms=all_scope_terms,
         )
         if not candidates:
             return _abstention(intent, "no_verified_scope", offers, missing_scope=scope)
