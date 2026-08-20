@@ -111,6 +111,19 @@ def _scope_candidates(
     ]
     if primary:
         scoped = primary
+    # Dans un même scope, une micro-offre peut être un consommable ou un
+    # périphérique dont le titre ne révèle pas encore assez sa nature. Ce signal
+    # ne fabrique pas une valeur produit : il préfère seulement un candidat plus
+    # représentatif déjà disponible sous le budget. Sans alternative substantielle,
+    # aucune offre n’est écartée sur le seul prix.
+    if budget is not None and len(scoped) > 1:
+        representativeness_floor = min(40.0, max(10.0, budget * 0.05))
+        substantial = [
+            offer for offer in scoped
+            if offer.price is not None and offer.price >= representativeness_floor
+        ]
+        if substantial:
+            scoped = substantial
     if relevance.request_describes_collection(scope.source_text):
         # Un kit ne doit pas se réduire à une vis, un piquet ou un adaptateur
         # lorsque le même scope propose un article autonome. La préférence de

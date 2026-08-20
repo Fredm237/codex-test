@@ -413,3 +413,27 @@ def test_plan_general_ne_permet_pas_aux_expansions_semantiques_dautoriser_un_sat
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Vélo électrique urbain 500 Wh"]
+
+
+
+def test_plan_general_prefere_un_produit_substantiel_sous_budget_a_un_accessoire_minimal_du_meme_scope():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="elektrische fiets onder 1200 euro",
+        locale="nl",
+        scopes=(IntentScope(taxonomy.SPORT, "Cyclisme", "elektrische fiets onder 1200 euro", ("fiets",)),),
+        terms=("elektrische", "fiets"),
+        required_title_phrases=(),
+        budget_eur=1200.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Spatbord set voor fietsen", taxonomy.SPORT, "Cyclisme", 17.0),
+            offer(2, "Vélo électrique pliant U4", taxonomy.SPORT, "Cyclisme", 558.99),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Vélo électrique pliant U4"]
