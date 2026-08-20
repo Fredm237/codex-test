@@ -58,7 +58,8 @@ _SATELLITES = {
     "selfie", "selfiestick", "stick", "tripod", "statief", "remote", "afstandsbediening",
     "imprimante", "printer", "printers", "fotoprinter", "thermometre", "thermometer",
     "sensor", "sensors", "capteur", "capteurs", "appsensoren",
-    "rebond", "rebound", "calibration", "tuning",
+    "rebond", "rebound", "calibration", "tuning", "batterie", "battery",
+    "tapis", "mat", "trillingsmat", "vibration", "exercise", "exercice", "fitness", "resistance",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
@@ -77,18 +78,18 @@ _INTENTION_SATELLITE = _SATELLITES - {"carte", "cle", "clé"}
 # prouver dans l’une des langues cibles avant toute recommandation.
 _REQUIRED_FEATURE_PROOFS: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = (
     (
-        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|\banc\b)"),
-        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|\banc\b)"),
+        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|\banc\b|ruisonderdrukking)"),
+        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|\banc\b|ruisonderdrukking)"),
     ),
     (
         re.compile(r"(?:connect[ée]e?|connected|smartwatch)"),
         re.compile(r"(?:connect[ée]e?|connected|smartwatch)"),
     ),
     (
-        re.compile(r"(?:automatic\w*|automatique\w*|volautomatisch)\s+(?:coffee|koffie|caf[eé])"),
+        re.compile(r"(?:automatic\w*|automatique\w*|automatisch\w*|volautomatisch)\s+(?:coffee|koffie|caf[eé])"),
         re.compile(
-            r"(?:(?:fully\s+automatic|volautomatisch\w*|automatique\w*|automatic\w*)(?:\s+[a-z0-9]+){0,2}\s+(?:coffee|koffie|caf[eé])|"
-            r"(?:coffee|koffie|caf[eé])(?:\s+[a-z0-9]+){0,2}\s+(?:fully\s+automatic|volautomatisch\w*|automatique\w*|automatic\w*))"
+            r"(?:(?:fully\s+automatic|volautomatisch\w*|automatisch\w*|automatique\w*|automatic\w*)(?:\s+[a-z0-9]+){0,2}\s+(?:coffee|koffie|caf[eé])|"
+            r"(?:coffee|koffie|caf[eé])(?:\s+[a-z0-9]+){0,2}\s+(?:fully\s+automatic|volautomatisch\w*|automatisch\w*|automatique\w*|automatic\w*))"
         ),
     ),
     (
@@ -184,6 +185,9 @@ _JEWELLERY_OBJECT_TERMS = frozenset({
     "bague", "bagues", "bijou", "bijoux", "boucle", "boucles", "choker",
 })
 _FOOTWEAR_OFFER_TERMS = _FOOTWEAR_REQUEST_TERMS
+_HEADPHONE_REQUEST_TERMS = frozenset({"casque", "headphone", "headphones", "koptelefoon"})
+_HEADPHONE_EARBUD_TERMS = frozenset({"earbud", "earbuds", "ecouteur", "ecouteurs", "inear", "intra"})
+_HEADPHONE_OFFER_TERMS = _HEADPHONE_REQUEST_TERMS
 _CLOTHING_OFFER_TERMS = frozenset({
     "tshirt", "shirt", "polo", "top", "jersey", "dress", "skirt", "short", "shorts",
     "trousers", "pants", "legging", "socks", "sock", "jacket", "coat", "sweater", "hoodie",
@@ -306,6 +310,19 @@ def has_footwear_proof(nom_offre: str) -> bool:
         set(mots(normalized)) & _FOOTWEAR_OFFER_TERMS
         or re.search(r"[a-z]{3,}(?:schoenen|shoes)\b", normalized)
     )
+
+
+def request_requires_headphones(text: str) -> bool:
+    """Indique qu’une demande vise un casque plutôt que des écouteurs."""
+    return bool(set(mots(text)) & _HEADPHONE_REQUEST_TERMS)
+
+
+def has_headphone_proof(nom_offre: str) -> bool:
+    """Vérifie qu’un titre désigne un casque et non des écouteurs intra-auriculaires."""
+    offer_terms = set(mots(nom_offre))
+    if offer_terms & _HEADPHONE_EARBUD_TERMS:
+        return False
+    return bool(offer_terms & _HEADPHONE_OFFER_TERMS or "circum" in _plat(nom_offre))
 
 
 def has_clothing_proof(nom_offre: str) -> bool:
