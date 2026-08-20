@@ -464,3 +464,48 @@ def test_plan_general_prefere_un_produit_principal_representatif_a_un_objet_mini
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["HP 17 Ordinateur portable 17 pouces"]
+
+
+
+def test_plan_general_exige_le_qualificatif_explicite_distinctif_du_scope():
+    intent = resolve_intent("chaise de bureau sous 300 euros", "fr")
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Chaises pliantes Brixy lot de 4", taxonomy.MAISON, "Meubles", 60.39),
+            offer(2, "Chaise de bureau ergonomique réglable", taxonomy.MAISON, "Meubles", 149.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Chaise de bureau ergonomique réglable"]
+
+
+def test_plan_general_ne_replie_pas_un_scope_precis_sur_un_titre_sans_sa_phrase_de_preuve():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="machine à laver sous 600 euros",
+        locale="fr",
+        scopes=(
+            IntentScope(
+                taxonomy.ELECTROMENAGER,
+                "Gros électroménager",
+                "machine à laver sous 600 euros",
+                ("machine à laver", "lave-linge", "washing machine"),
+            ),
+        ),
+        terms=("machine", "laver"),
+        required_title_phrases=(),
+        budget_eur=600.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Four à pizza électrique VEVOR", taxonomy.ELECTROMENAGER, "Gros électroménager", 164.25),
+            offer(2, "Lave-linge hublot 8 kg", taxonomy.ELECTROMENAGER, "Gros électroménager", 429.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Lave-linge hublot 8 kg"]

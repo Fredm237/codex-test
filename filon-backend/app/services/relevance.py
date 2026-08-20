@@ -32,7 +32,7 @@ _KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
 # Cette version fait partie de la clé de cache Assistant. Toute évolution de la
 # politique de pertinence doit donc l’avancer dans le même changement afin qu’une
 # carte décidée sous une règle ancienne ne survive jamais au déploiement.
-CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.5"
+CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.6"
 
 # Familles d'articles satellites : elles portent le nom du produit recherché
 # sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
@@ -153,6 +153,10 @@ def _plat(texte: str) -> str:
 # Les mots qui désignent une collection d’équipement, quel que soit son
 # domaine. Ils activent seulement une préférence de représentativité ; ils ne
 # créent ni catégorie ni profil produit.
+_CONTEXT_STOPWORDS = frozenset({
+    "voor", "van", "the", "of", "for", "with", "met", "avec", "sans",
+})
+
 _COLLECTION_REQUEST_TERMS = frozenset({
     "equipment", "gear", "kit", "kits", "uitrusting", "materiaal", "materiel", "matériel",
     "set", "ensemble", "complet", "complete",
@@ -279,6 +283,53 @@ def explicit_qualifier_terms(terms: tuple[str, ...]) -> tuple[str, ...]:
         if term not in _COLLECTION_REQUEST_TERMS
         and not re.search(r"(?:kleding|kledij|uitrusting|materiaal)$", _plat(term))
     )
+
+
+def distinct_context_terms(request_terms: tuple[str, ...], scope_terms: tuple[str, ...]) -> tuple[str, ...]:
+    """Retourne les mots explicites qui précisent le produit au-delà du scope.
+
+    Le scope « chaise » ne doit pas absorber le qualificatif réellement saisi
+    « bureau » ; ce dernier doit être attesté dans le titre marchand. Les mots
+    déjà présents dans les synonymes de scope ne sont pas redemandés.
+    """
+    scope_words = set(mots(" ".join(scope_terms)))
+    return tuple(
+        term for term in explicit_qualifier_terms(request_terms)
+        if len(term) >= 3
+        and term not in scope_words
+        and term not in _CONTEXT_STOPWORDS
+        # Les contraintes de genre et de public disposent déjà de règles
+        # compatibles multilingues ; elles ne doivent pas être redemandées sous
+        # leur orthographe exacte dans les titres marchands.
+        and gender_marker(term) is None
+        and audience_marker(term) is None
+    )
+
+
+def proves_context_terms(context_terms: tuple[str, ...], offer_name: str) -> bool:
+    """Vérifie tous les qualificatifs distinctifs explicitement demandés."""
+    offer_words = set(mots(offer_name))
+    normalized_offer = _plat(offer_name)
+    return all(_term_is_present(term, offer_words, normalized_offer) for term in context_terms)
+
+
+def proves_any_product_phrase(scope_terms: tuple[str, ...], offer_name: str) -> bool:
+    """Vérifie une expression produit explicite de deux mots ou plus.
+
+    Une phrase telle que « machine à laver » ne peut être satisfaite par la
+    seule occurrence de « machine » dans « four à pizza ». Cette preuve n’est
+    utilisée que pour empêcher un repli lorsqu’aucun score strict ne subsiste.
+    """
+    offer_words = set(mots(offer_name))
+    normalized_offer = _plat(offer_name)
+    for phrase in scope_terms:
+        phrase_terms = mots(phrase)
+        if len(phrase_terms) >= 2 and all(
+            _term_is_present(term, offer_words, normalized_offer)
+            for term in phrase_terms
+        ):
+            return True
+    return False
 
 
 def request_describes_collection(text: str) -> bool:
