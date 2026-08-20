@@ -36,11 +36,13 @@ _SATELLITES = {
     "housse", "etui", "coque", "protection", "protecteur", "adhesif", "adhesive",
     "sticker", "autocollant", "lingette", "lingettes", "nettoyant", "nettoyante",
     "chargeur", "cable", "adaptateur", "support", "fixation", "vis", "cache",
-    "brosse", "brosses", "brush", "brushes", "oorkussen", "oorkussens", "earpad", "earpads",
+    "brosse", "brosses", "brush", "brushes", "lavette", "mop", "dweildoek", "zijborstel",
+    "oorkussen", "oorkussens", "earpad", "earpads", "earbud", "earbuds", "accessoireset",
     "rechange", "reparation", "kit", "sachet", "recharge",
     "bouchon", "bouchons", "filtre", "sac", "bag", "tas", "sacoche", "bandouliere",
     "carte", "cadeau", "voucher", "cle", "clé", "licence", "abonnement",
-    "regulateur", "embout", "embouts", "lame", "collier", "timer",
+    "regulateur", "embout", "embouts", "lame", "collier", "timer", "boitier", "connexion",
+    "chariot", "trolley", "demenagement", "ontkalkings", "detartrant", "descaler",
     "verre", "graisse", "grease", "lubricant", "band", "bandje", "strap",
     "chaussette", "chaussettes", "sock", "socks", "kous", "kousen", "poudre", "powder",
     # Outils, éléments de réparation et supports. Ces objets peuvent citer le
@@ -141,6 +143,10 @@ _CLOTHING_REQUEST_TERMS = frozenset({
     "clothing", "clothes", "apparel", "garment", "garments", "kleding", "kledij",
     "vetement", "vetements", "vêtement", "vêtements",
 })
+_FOOTWEAR_REQUEST_TERMS = frozenset({
+    "shoe", "shoes", "schoen", "schoenen", "chaussure", "chaussures",
+    "sneaker", "sneakers", "boot", "boots", "botte", "bottes",
+})
 # Un titre peut contenir une coupe ou un mot de style vestimentaire tout en
 # décrivant sans ambiguïté un bijou. La nature d’objet explicite prévaut sur ce
 # vocabulaire de style, pour tous les domaines et toutes les langues cibles.
@@ -170,6 +176,7 @@ _JEWELLERY_OBJECT_TERMS = frozenset({
     "earring", "earrings", "pendant", "pendants", "collier", "colliers",
     "bague", "bagues", "bijou", "bijoux", "boucle", "boucles", "choker",
 })
+_FOOTWEAR_OFFER_TERMS = _FOOTWEAR_REQUEST_TERMS
 _CLOTHING_OFFER_TERMS = frozenset({
     "tshirt", "shirt", "polo", "top", "jersey", "dress", "skirt", "short", "shorts",
     "trousers", "pants", "legging", "socks", "sock", "jacket", "coat", "sweater", "hoodie",
@@ -276,6 +283,24 @@ def request_requires_clothing(text: str) -> bool:
     )
 
 
+def request_requires_footwear(text: str) -> bool:
+    """Indique qu’une demande exige une chaussure, quel que soit le sport."""
+    normalized = _plat(text)
+    return bool(
+        set(mots(normalized)) & _FOOTWEAR_REQUEST_TERMS
+        or re.search(r"[a-z]{3,}(?:schoenen|shoes)\b", normalized)
+    )
+
+
+def has_footwear_proof(nom_offre: str) -> bool:
+    """Indique qu’un titre marchand prouve une chaussure plutôt qu’un vêtement."""
+    normalized = _plat(nom_offre)
+    return bool(
+        set(mots(normalized)) & _FOOTWEAR_OFFER_TERMS
+        or re.search(r"[a-z]{3,}(?:schoenen|shoes)\b", normalized)
+    )
+
+
 def has_clothing_proof(nom_offre: str) -> bool:
     """Indique qu’un titre marchand prouve qu’il vend une pièce vestimentaire."""
     offer_terms = set(mots(nom_offre))
@@ -339,6 +364,12 @@ def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
     demande = set(termes_significatifs(mots(" ".join(demande_termes))))
     offer_words = set(mots(nom_offre))
     satellites_offre = offer_words & _SATELLITES
+    normalized_offer = _plat(nom_offre)
+    # Les titres néerlandais soudent fréquemment le produit et son accessoire,
+    # par exemple « smartwatchbandje ». Cette terminaison renseigne la nature
+    # de l’objet sans dépendre d’une famille de produits précise.
+    if re.search(r"[a-z]{3,}(?:bandje|band|strap|hoes|case)\b", normalized_offer):
+        satellites_offre.add("bandje")
     satellites_demandes = demande & _INTENTION_SATELLITE
     # Une bandoulière ou une poignée est constitutive d’une sacoche explicitement
     # demandée ; ce n’est pas un second produit. Cette relation est générique aux
