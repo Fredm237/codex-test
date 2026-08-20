@@ -160,3 +160,24 @@ def test_satellites_de_maintenance_et_peripheriques_observes_dans_la_revalidatio
         "Poudre détartrante pour lave-linge",
     ):
         assert relevance.is_unrequested_satellite(request, title) is True
+
+
+
+def test_preuves_fonctionnelles_4k_et_cafe_automatique_exigent_le_contexte_complet():
+    assert relevance.proves_required_features("4K televisie onder 500 euro", "TV-Kast Lowboard voor televisie") is False
+    assert relevance.proves_required_features("4K televisie onder 500 euro", "4K UHD Smart TV 50 inch") is True
+    assert relevance.proves_required_features(
+        "automatic coffee machine under 500 euros", "Automatic electric blender for hot chocolate"
+    ) is False
+    assert relevance.proves_required_features(
+        "automatic coffee machine under 500 euros", "Fully automatic espresso coffee machine"
+    ) is True
+
+
+def test_mots_composes_sac_et_meuble_sont_des_satellites_hors_demande_explicite():
+    for title in (
+        "Dubbele fietstas voor elektrische fietsen",
+        "Schoenen waszak voor wasmachine en droger",
+        "TV-kast lowboard voor televisies",
+    ):
+        assert relevance.is_unrequested_satellite(["fiets"], title) is True
