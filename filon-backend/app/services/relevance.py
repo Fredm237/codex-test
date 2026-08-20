@@ -39,7 +39,7 @@ _SATELLITES = {
     "brosse", "brosses", "brush", "brushes", "lavette", "mop", "dweildoek", "zijborstel",
     "oorkussen", "oorkussens", "earpad", "earpads", "earbud", "earbuds", "accessoireset",
     "rechange", "reparation", "kit", "sachet", "recharge",
-    "bouchon", "bouchons", "filtre", "sac", "bag", "tas", "sacoche", "bandouliere",
+    "bouchon", "bouchons", "filtre", "sac", "bag", "tas", "zak", "sacoche", "bandouliere", "kast",
     "carte", "cadeau", "voucher", "cle", "clé", "licence", "abonnement",
     "regulateur", "embout", "embouts", "lame", "collier", "timer", "boitier", "connexion",
     "chariot", "trolley", "demenagement", "ontkalkings", "detartrant", "descaler",
@@ -86,7 +86,14 @@ _REQUIRED_FEATURE_PROOFS: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = 
     ),
     (
         re.compile(r"(?:automatic\w*|automatique\w*|volautomatisch)\s+(?:coffee|koffie|caf[eé])"),
-        re.compile(r"(?:fully\s+automatic|volautomatisch|automatique\w*|automatic\w*)"),
+        re.compile(
+            r"(?:(?:fully\s+automatic|volautomatisch\w*|automatique\w*|automatic\w*)(?:\s+[a-z0-9]+){0,2}\s+(?:coffee|koffie|caf[eé])|"
+            r"(?:coffee|koffie|caf[eé])(?:\s+[a-z0-9]+){0,2}\s+(?:fully\s+automatic|volautomatisch\w*|automatique\w*|automatic\w*))"
+        ),
+    ),
+    (
+        re.compile(r"\b(?:4k|uhd)\b"),
+        re.compile(r"\b(?:4k|uhd)\b"),
     ),
 )
 
@@ -370,6 +377,8 @@ def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
     # de l’objet sans dépendre d’une famille de produits précise.
     if re.search(r"[a-z]{3,}(?:bandje|band|strap|hoes|case)\b", normalized_offer):
         satellites_offre.add("bandje")
+    if re.search(r"[a-z]{3,}(?:tas|tassen|zak|kast|houder)\b", normalized_offer):
+        satellites_offre.add("tas")
     satellites_demandes = demande & _INTENTION_SATELLITE
     # Une bandoulière ou une poignée est constitutive d’une sacoche explicitement
     # demandée ; ce n’est pas un second produit. Cette relation est générique aux
