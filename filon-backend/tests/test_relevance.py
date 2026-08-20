@@ -222,3 +222,12 @@ def test_peripheriques_portes_affichage_et_confort_observes_sont_des_satellites_
         "Elektrisch warmtekussen wasmachine heating pad",
     ):
         assert relevance.is_unrequested_satellite(["produit principal"], title) is True
+
+
+
+def test_vetements_de_securite_et_kits_de_superposition_sont_des_satellites_hors_demande():
+    for title in (
+        "Veiligheidsvestje fluojas fietsen hardlopen",
+        "Tussenstuk wasmachine droger stapelkit universeel",
+    ):
+        assert relevance.is_unrequested_satellite(["produit principal"], title) is True
