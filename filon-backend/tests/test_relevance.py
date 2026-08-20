@@ -101,3 +101,10 @@ def test_satellite_compare_les_natures_dobjet_et_preserve_laccessoire_demande():
     assert not relevance.is_unrequested_satellite(
         ["camera", "camera bag"], "Waterproof camera bag with shoulder strap"
     )
+
+
+
+def test_anc_exige_un_mot_entier_et_ne_correspond_pas_a_blanc():
+    request = "je cherche un casque avec ANC actif"
+    assert relevance.proves_required_features(request, "Ecouteurs sans fil Bluetooth TooQ Bender Blanc") is False
+    assert relevance.proves_required_features(request, "Casque Bluetooth ANC avec réduction de bruit") is True

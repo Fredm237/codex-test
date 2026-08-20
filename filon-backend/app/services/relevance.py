@@ -47,6 +47,7 @@ _SATELLITES = {
     "couvercle", "cover", "holder", "porte", "mount", "service", "wire",
     "molybdene", "molybdenum", "repair", "repairing", "ajusteur", "adjuster",
     "bracelet", "bracelets", "chain", "chaine", "chaîne", "rope", "cord",
+    "handgreep", "handle", "grip", "rig",
     "rebond", "rebound", "calibration", "tuning",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
@@ -66,8 +67,8 @@ _INTENTION_SATELLITE = _SATELLITES - {"carte", "cle", "clé"}
 # prouver dans l’une des langues cibles avant toute recommandation.
 _REQUIRED_FEATURE_PROOFS: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = (
     (
-        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|anc)"),
-        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|anc)"),
+        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|\banc\b)"),
+        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|\banc\b)"),
     ),
     (
         re.compile(r"(?:connect[ée]e?|connected|smartwatch)"),
