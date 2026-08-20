@@ -284,4 +284,4 @@
 - [x] Build unified Scanner and Assistant surfaces with factual data-reveal states
 - [ ] Validate Scanner and Assistant themes, motion and Android behavior
 - [x] Validate Scanner and Assistant types plus scan/theme regressions
-- [ ] Publish the validated current FILON mobile workspace to the connected GitHub repository
+- [x] Publish the validated current FILON mobile workspace to the connected GitHub repository
