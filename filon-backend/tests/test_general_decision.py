@@ -240,7 +240,8 @@ def test_plan_general_prefere_un_smartphone_prouve_a_un_bijou_pour_telephone():
             offer(4, "Selfie stick phone tripod with Bluetooth remote", taxonomy.TELEPHONIE, "Smartphones", 9.09),
             offer(5, "Precision screwdriver set for computer and smartphone", taxonomy.TELEPHONIE, "Smartphones", 10.28),
             offer(6, "Pocket photo printer for smartphone with WiFi Bluetooth", taxonomy.TELEPHONIE, "Smartphones", 10.89),
-            offer(7, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
+            offer(7, "Interactive smartphone for children aged 2 to 6", taxonomy.TELEPHONIE, "Smartphones", 14.55),
+            offer(8, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
         ],
     )
 

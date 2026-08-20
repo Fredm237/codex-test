@@ -59,6 +59,16 @@ def _scope_candidates(
         and (scope.subcategory is None or offer.filon_subcategory == scope.subcategory)
     ]
     # Le scope prouve l’univers de recherche, non la nature de chaque objet.
+    # Une demande qui ne désigne pas explicitement un public enfant ne doit pas
+    # faire inférer ce public depuis une offre moins chère.
+    age_compatible = [
+        offer for offer in scoped
+        if relevance.age_compatible(scope.source_text, offer.name or "")
+    ]
+    if age_compatible:
+        scoped = age_compatible
+    elif not relevance.targets_children(scope.source_text):
+        return []
     # Si la demande formule explicitement « vêtements », chaque résultat doit
     # aussi le prouver dans son titre. Cette règle générique bloque ainsi les
     # balles, filets, jeux ou bijoux qui portent seulement le nom d’un sport.
