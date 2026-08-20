@@ -212,3 +212,13 @@ def test_casque_exige_un_format_casque_et_ecarte_les_ecouteurs_intra_auriculaire
     assert relevance.request_requires_headphones("casque avec réduction de bruit") is True
     assert relevance.has_headphone_proof("Wireless in-ear earbuds noise cancelling") is False
     assert relevance.has_headphone_proof("Casque circum-aural avec réduction de bruit") is True
+
+
+
+def test_peripheriques_portes_affichage_et_confort_observes_sont_des_satellites_hors_demande():
+    for title in (
+        "Regenponcho fiets waterdicht unisex",
+        "Compteur vélo électrique connectique 6 pins",
+        "Elektrisch warmtekussen wasmachine heating pad",
+    ):
+        assert relevance.is_unrequested_satellite(["produit principal"], title) is True

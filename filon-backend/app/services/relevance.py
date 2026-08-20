@@ -60,7 +60,8 @@ _SATELLITES = {
     "sensor", "sensors", "capteur", "capteurs", "appsensoren",
     "rebond", "rebound", "calibration", "tuning", "batterie", "battery", "selle", "zadel",
     "tapis", "mat", "trillingsmat", "vibration", "verhoger", "rehausseur", "poot", "poten",
-    "exercise", "exercice", "fitness", "resistance",
+    "exercise", "exercice", "fitness", "resistance", "poncho", "cape", "regencape",
+    "compteur", "display", "dashboard", "warmtekussen", "heating", "kussen", "coussin", "pad",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
@@ -397,6 +398,8 @@ def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
         satellites_offre.add("bandje")
     if re.search(r"[a-z]{3,}(?:tas|tassen|zak|kast|houder)\b", normalized_offer):
         satellites_offre.add("tas")
+    if re.search(r"[a-z]{3,}(?:poncho|kussen|coussin)\b", normalized_offer):
+        satellites_offre.add("poncho")
     satellites_demandes = demande & _INTENTION_SATELLITE
     # Une bandoulière ou une poignée est constitutive d’une sacoche explicitement
     # demandée ; ce n’est pas un second produit. Cette relation est générique aux
