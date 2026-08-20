@@ -5,6 +5,8 @@ sur le catalogue de production. Aucun n'est inventé pour l'exercice : ce sont
 les noms d'offres exacts qui remontaient.
 """
 
+import pytest
+
 from app.services import relevance
 
 
@@ -248,3 +250,19 @@ def test_velo_electrique_exige_une_preuve_du_qualificatif_fonctionnel():
 
     assert relevance.proves_required_features(request, "Tuinberging voor fietsen en gereedschap") is False
     assert relevance.proves_required_features(request, "Elektrische fiets met 500 Wh accu") is True
+
+
+@pytest.mark.parametrize(
+    ("query", "offer_name"),
+    [
+        ("ordinateur portable sous 700 euros", "Pochette pour ordinateur portable"),
+        ("aspirateur robot sous 300 euros", "Lot de chiffons de nettoyage pour aspirateur robot"),
+        ("wireless printer under 200 euros", "Rail de guidage pour imprimantes 3D"),
+        ("lave-vaisselle sous 700 euros", "Bac gastronorme lavable au lave-vaisselle"),
+        ("camping tent under 300 euros", "Tent cloth canopy tarp"),
+        ("sac de couchage sous 150 euros", "Doublure sac de couchage"),
+        ("chaise de bureau sous 300 euros", "Housses de chaise anthracite"),
+    ],
+)
+def test_exclut_les_satellites_de_produit_principal_observes_en_production(query, offer_name):
+    assert relevance.is_unrequested_satellite(relevance.mots(query), offer_name) is True
