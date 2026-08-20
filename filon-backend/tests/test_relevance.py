@@ -299,3 +299,11 @@ def test_exclut_les_peripheriques_informatiques_d_une_demande_d_ordinateur_porta
     assert relevance.is_unrequested_satellite(
         relevance.mots("ordinateur portable sous 700 euros"), offer_name
     ) is True
+
+
+
+def test_exclut_un_moniteur_portable_d_une_demande_d_ordinateur_portable():
+    assert relevance.is_unrequested_satellite(
+        relevance.mots("ordinateur portable sous 700 euros"),
+        "Extension d'écran Moniteur Portable pour Ordinateur Portable",
+    ) is True
