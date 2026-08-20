@@ -92,7 +92,7 @@ _VALID_LOCALES = {"fr", "nl", "en"}
 _LANGUAGE_NAMES = {"fr": "français", "nl": "néerlandais", "en": "anglais"}
 # Chaque évolution du moteur de preuve doit séparer son cache des décisions
 # précédentes : une réponse devenue invalide ne peut pas survivre à un déploiement.
-RECOMMENDATION_ENGINE_VERSION = "2"
+RECOMMENDATION_ENGINE_VERSION = "3"
 
 
 def _recommend_cache_key(query: str, budget: float | None, country: str | None, locale: str) -> str:
