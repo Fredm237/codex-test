@@ -27,7 +27,7 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.llm.base import Message
 from app.llm.router import get_router
-from app.services import awin
+from app.services import awin, relevance
 from app.services.cache import get_cache, cache_key, TTL_RECOMMEND
 
 log = get_logger("recommend")
@@ -92,7 +92,7 @@ _VALID_LOCALES = {"fr", "nl", "en"}
 _LANGUAGE_NAMES = {"fr": "français", "nl": "néerlandais", "en": "anglais"}
 # Chaque évolution du moteur de preuve doit séparer son cache des décisions
 # précédentes : une réponse devenue invalide ne peut pas survivre à un déploiement.
-RECOMMENDATION_ENGINE_VERSION = "6"
+RECOMMENDATION_ENGINE_VERSION = f"assistant-catalog-policy-{relevance.CATALOG_RELEVANCE_POLICY_VERSION}"
 
 
 def _recommend_cache_key(query: str, budget: float | None, country: str | None, locale: str) -> str:
