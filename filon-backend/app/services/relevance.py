@@ -47,7 +47,8 @@ _SATELLITES = {
     "couvercle", "cover", "holder", "porte", "mount", "service", "wire",
     "molybdene", "molybdenum", "repair", "repairing", "ajusteur", "adjuster",
     "bracelet", "bracelets", "chain", "chaine", "chaîne", "rope", "cord",
-    "handgreep", "handle", "grip", "rig",
+    "handgreep", "handle", "grip", "rig", "lunette", "lunettes", "glasses",
+    "virtual", "reality", "vr",
     "rebond", "rebound", "calibration", "tuning",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
