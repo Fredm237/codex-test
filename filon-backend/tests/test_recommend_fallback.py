@@ -42,3 +42,11 @@ async def test_missing_catalogue_offer_does_not_generate_synthetic_cards_or_call
     assert result["offers"] == 0
     assert result["cards"] == []
     assert cache.value["cards"] == []
+
+
+
+def test_cle_cache_assistant_inclut_la_version_du_moteur_de_decision():
+    current = recommend._recommend_cache_key("smartphone sous 400 euros", 400, "be", "fr")
+    previous = recommend.cache_key("recommend", "1", "smartphone sous 400 euros", "400", "be", "fr")
+
+    assert current != previous
