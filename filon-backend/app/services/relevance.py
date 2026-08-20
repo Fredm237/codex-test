@@ -152,6 +152,9 @@ _CHILD_AUDIENCE_TERMS = frozenset({
     "baby", "bebe", "bébé", "kleuter", "peuter", "educatif", "educational",
     "learning", "toy", "jouet", "jouets",
 })
+_SENIOR_AUDIENCE_TERMS = frozenset({
+    "senior", "seniors", "elderly", "elder", "bejaarde", "bejaarden",
+})
 
 
 _JEWELLERY_OBJECT_TERMS = frozenset({
@@ -296,14 +299,28 @@ def gender_compatible(request: str, nom_offre: str) -> bool:
     return declared is None or declared == wanted
 
 
+def audience_marker(text: str) -> str | None:
+    """Retourne seulement un public d’âge explicitement déclaré, sinon rien."""
+    terms = set(mots(text))
+    if terms & _CHILD_AUDIENCE_TERMS:
+        return "child"
+    if terms & _SENIOR_AUDIENCE_TERMS:
+        return "senior"
+    return None
+
+
 def targets_children(text: str) -> bool:
     """Indique qu’une demande désigne explicitement un public enfant."""
-    return bool(set(mots(text)) & _CHILD_AUDIENCE_TERMS)
+    return audience_marker(text) == "child"
 
 
 def age_compatible(request: str, nom_offre: str) -> bool:
-    """Évite de recommander un produit enfant quand le public n’est pas précisé."""
-    return targets_children(request) or not bool(set(mots(nom_offre)) & _CHILD_AUDIENCE_TERMS)
+    """Évite d’inférer un public enfant ou senior dans une demande neutre."""
+    wanted = audience_marker(request)
+    declared = audience_marker(nom_offre)
+    if wanted is None:
+        return declared is None
+    return declared is None or declared == wanted
 
 
 def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
