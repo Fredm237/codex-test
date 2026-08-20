@@ -243,7 +243,8 @@ def test_plan_general_prefere_un_smartphone_prouve_a_un_bijou_pour_telephone():
             offer(7, "Interactive smartphone for children aged 2 to 6", taxonomy.TELEPHONIE, "Smartphones", 14.55),
             offer(8, "Educational Paw Patrol smartphone toy", taxonomy.TELEPHONIE, "Smartphones", 16.04),
             offer(9, "Senior mobile phone with 4G", taxonomy.TELEPHONIE, "Smartphones", 29.99),
-            offer(10, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
+            offer(10, "Smartphone-controlled thermometer with app sensors", taxonomy.TELEPHONIE, "Smartphones", 33.99),
+            offer(11, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
         ],
     )
 
