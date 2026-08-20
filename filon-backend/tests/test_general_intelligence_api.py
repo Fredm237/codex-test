@@ -63,3 +63,43 @@ async def test_outfit_non_mode_utilise_le_moteur_general(monkeypatch):
     assert response["domain"] == "general"
     assert response["solution"]["decision"] == "recommend"
     assert session.committed is True
+
+
+@pytest.mark.asyncio
+async def test_outfit_non_vestimentaire_non_resolu_s_abstient_dans_le_moteur_general(monkeypatch):
+    from app.intelligence.intent_resolution import GeneralIntent
+
+    session = FakeSession()
+    used = {"general": False, "fashion": False}
+
+    async def unresolved_intent(_request, _locale):
+        return GeneralIntent(
+            raw_request="hardloophorloge onder 250 euro",
+            locale="nl",
+            scopes=(),
+            terms=("hardloophorloge",),
+            required_title_phrases=(),
+            budget_eur=250.0,
+        )
+
+    async def general_retrieval(_session, _intent):
+        used["general"] = True
+        return []
+
+    async def fashion_retrieval(*_args, **_kwargs):
+        used["fashion"] = True
+        return []
+
+    monkeypatch.setattr(intelligence, "resolve_intent_with_fallback", unresolved_intent)
+    monkeypatch.setattr(intelligence, "retrieve_general_offers", general_retrieval)
+    monkeypatch.setattr(intelligence, "retrieve_fashion_offers", fashion_retrieval)
+    monkeypatch.setattr(intelligence, "intelligence_capabilities", lambda: {"intelligence": True, "fashion_expert": True, "outfit_studio": True})
+
+    response = await intelligence.outfit_analyse(
+        intelligence.OutfitAnalyseRequest(request="hardloophorloge onder 250 euro", locale="nl"),
+        session=session,
+    )
+
+    assert used == {"general": True, "fashion": False}
+    assert response["domain"] == "general"
+    assert response["solution"]["decision"] == "abstain"

@@ -107,9 +107,14 @@ async def outfit_analyse(
     general_intent = await resolve_intent_with_fallback(payload.request, payload.locale)
     # Les besoins hors Mode passent au moteur général : une même résolution
     # taxonomique multilingue sert tous les rayons, sans profils de produit.
-    use_general = general_intent.resolved and not any(
-        scope.category == taxonomy.MODE for scope in general_intent.scopes
-    )
+    # Le moteur mode ne peut traiter qu’une pièce explicitement vestimentaire.
+    # Une demande générale encore non résolue doit s’abstenir dans le moteur
+    # général, jamais être transformée en tenue ou en accessoire de mode.
+    fashion_piece_requested = bool(retrieval_query_for_intent(payload.request))
+    use_general = (
+        general_intent.resolved
+        and not any(scope.category == taxonomy.MODE for scope in general_intent.scopes)
+    ) or not fashion_piece_requested
     if use_general:
         intent = general_intent
         offers = await retrieve_general_offers(session, general_intent)
