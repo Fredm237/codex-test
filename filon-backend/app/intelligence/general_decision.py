@@ -178,11 +178,22 @@ def _scope_candidates(
         offer for offer in scoped
         if relevance.proves_any_product_phrase(scope.query_terms, offer.name or "")
     ]
+    has_specific_product_phrase = any(len(relevance.mots(term)) >= 2 for term in scope.query_terms)
     if strict:
         candidates = strict
     elif phrase_proven:
         candidates = phrase_proven
-    elif scope.subcategory is None:
+    elif relevance.request_has_required_features(scope.source_text):
+        # La fonctionnalité demandée a déjà été prouvée sur les candidats et
+        # les satellites ont déjà été retirés : cette preuve indépendante peut
+        # couvrir les variantes multilingues et l’inversion des mots du titre.
+        candidates = scoped
+    elif scope.subcategory is None or has_specific_product_phrase:
+        # Le sous-rayon prouve seulement l’univers, jamais le produit précis :
+        # « Camping & Randonnée » ne transforme pas un T-shirt en sac de
+        # couchage. Une phrase produit explicitement résolue mais absente du
+        # titre impose donc l’abstention. Un scope sans phrase conserve en
+        # revanche sa preuve taxonomique minimale, utile aux titres pauvres.
         return []
     else:
         candidates = scoped

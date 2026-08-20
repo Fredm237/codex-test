@@ -32,7 +32,7 @@ _KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
 # Cette version fait partie de la clé de cache Assistant. Toute évolution de la
 # politique de pertinence doit donc l’avancer dans le même changement afin qu’une
 # carte décidée sous une règle ancienne ne survive jamais au déploiement.
-CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.8"
+CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.9"
 
 # Familles d'articles satellites : elles portent le nom du produit recherché
 # sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
@@ -115,6 +115,18 @@ _REQUIRED_FEATURE_PROOFS: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = 
             r"(?:(?:electric|electrique|elektrisch\w*)\s+(?:bike|bicycle|velo|fiets)|"
             r"(?:bike|bicycle|velo|fiets)(?:\s+[a-z0-9]+){0,2}\s+(?:electric|electrique|elektrisch\w*))"
         ),
+    ),
+    (re.compile(r"\b5g\b"), re.compile(r"\b5g\b")),
+    (
+        re.compile(
+            r"(?:(?:wireless|wi[- ]?fi|sans\s+fil|draadloos)(?:\s+[a-z0-9]+){0,3}\s+(?:printer|imprimante|perceuse|drill|boormachine)|"
+            r"(?:printer|imprimante|perceuse|drill|boormachine)(?:\s+[a-z0-9]+){0,3}\s+(?:wireless|wi[- ]?fi|sans\s+fil|draadloos|cordless))"
+        ),
+        re.compile(r"(?:wireless|wi[- ]?fi|sans\s+fil|draadloos|cordless)"),
+    ),
+    (
+        re.compile(r"(?:(?:running|course|hardloop)(?:\s+[a-z0-9]+){0,2}\s+(?:watch|montre|horloge)|(?:watch|montre|horloge)(?:\s+[a-z0-9]+){0,2}\s+(?:running|course|hardloop))"),
+        re.compile(r"(?:gps|sport|fitness|activity|heart\s+rate|cardio|hardloop|running(?!\s+second))"),
     ),
 )
 

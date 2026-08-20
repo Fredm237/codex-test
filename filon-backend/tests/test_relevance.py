@@ -333,3 +333,31 @@ def test_machine_semi_automatique_ne_satisfait_jamais_une_demande_automatique():
         request,
         "HiBREW H10A Machine à café expresso semiautomatique 20 bars",
     ) is False
+
+
+
+def test_fonctionnalites_5g_sans_fil_et_course_exigent_une_preuve_dans_le_titre():
+    assert relevance.proves_required_features(
+        "5G smartphone under 300 euros", "Smartphone TCL 501 64Go Prime Noir 4G"
+    ) is False
+    assert relevance.proves_required_features(
+        "5G smartphone under 300 euros", "Samsung Galaxy A36 5G smartphone"
+    ) is True
+    assert relevance.proves_required_features(
+        "wireless printer under 200 euros", "Canon FX-10 toner"
+    ) is False
+    assert relevance.proves_required_features(
+        "wireless printer under 200 euros", "Epson Wi-Fi wireless printer"
+    ) is True
+    assert relevance.proves_required_features(
+        "perceuse sans fil sous 150 euros", "Perceuse filaire mélangeur de mortier"
+    ) is False
+    assert relevance.proves_required_features(
+        "perceuse sans fil sous 150 euros", "Perceuse-visseuse sans fil 18 V"
+    ) is True
+    assert relevance.proves_required_features(
+        "running watch under 250 euros", "Business quartz watch running second hand"
+    ) is False
+    assert relevance.proves_required_features(
+        "running watch under 250 euros", "GPS running sports watch with heart rate"
+    ) is True
