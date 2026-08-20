@@ -16,7 +16,8 @@ from app.core.logging import get_logger
 from app.db.session import session_scope
 from app.db.models import CatalogProduct, Merchant, Offer, PriceSnapshot
 from app.intelligence.general_catalog import retrieve_general_offers
-from app.intelligence.intent_resolution import resolve_intent_with_fallback
+from app.intelligence.general_decision import compose_general_plan
+from app.intelligence.intent_resolution import GeneralIntent, resolve_intent_with_fallback
 from app.services import decision, taxonomy
 from app.services.catalog_paging import fetch_all_offer_rows
 from app.services.search import search_clause, terms_of
@@ -321,6 +322,19 @@ async def _decisions_for_offers(session, offers: list[Offer]) -> dict[int, dict[
     return decisions
 
 
+def _planned_general_offer_ids(intent: GeneralIntent, snapshots) -> list[int]:
+    """Retourne seulement les offres retenues par la décision générale partagée.
+
+    L’Assistant exploite le même moteur que Outfit Studio : la récupération reste
+    exhaustive, mais le modèle conversationnel ne reçoit jamais un accessoire ou
+    un produit hors besoin déjà éliminé par les preuves de pertinence.
+    """
+    plan = compose_general_plan(intent, snapshots, max_items=5)
+    if plan.get("decision") != "recommend":
+        return []
+    return [int(item["offer_id"]) for item in plan.get("items", []) if item.get("offer_id") is not None]
+
+
 async def search_internal_products(
     query: str, budget: float | None, *, limit: int = 20, country: str | None = None
 ) -> list[dict[str, Any]]:
@@ -347,13 +361,12 @@ async def search_internal_products(
             from sqlalchemy.orm import joinedload as jl
             if general_intent.resolved:
                 snapshots = await retrieve_general_offers(session, general_intent)
-                snapshot_ids = [snapshot.offer_id for snapshot in snapshots]
                 if budget is not None:
                     snapshots = [
                         snapshot for snapshot in snapshots
                         if snapshot.currency == "EUR" and snapshot.price is not None and snapshot.price <= budget
                     ]
-                    snapshot_ids = [snapshot.offer_id for snapshot in snapshots]
+                snapshot_ids = _planned_general_offer_ids(general_intent, snapshots)
                 if snapshot_ids:
                     hydrated = (
                         await session.execute(

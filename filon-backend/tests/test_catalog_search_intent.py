@@ -124,3 +124,33 @@ def test_named_model_searches_the_model_before_the_generic_category_anchor():
 
     assert _search_query_for("iphone 15", iphone_intent) == ("iphone 15", ("iphone", "15"))
     assert _search_query_for("smartphone sous 400 €", generic_intent) == ("smartphone", ())
+
+
+
+def test_assistant_conserve_la_selection_du_planificateur_general():
+    from app.intelligence.contracts import CoreOfferSnapshot
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+    from app.services.catalog_search import _planned_general_offer_ids
+
+    intent = GeneralIntent(
+        raw_request="robot vacuum under 300 euros",
+        locale="en",
+        scopes=(IntentScope(taxonomy.ELECTROMENAGER, "Aspirateurs", "robot vacuum", ("robot vacuum", "robot aspirateur")),),
+        terms=("robot", "vacuum"),
+        required_title_phrases=(),
+        budget_eur=300.0,
+    )
+    def snapshot(offer_id, name, price):
+        return CoreOfferSnapshot(
+            offer_id=offer_id, catalog_product_id=None, name=name, brand="Test",
+            filon_category=taxonomy.ELECTROMENAGER, filon_subcategory="Aspirateurs",
+            offer_kind=taxonomy.PHYSICAL_PRODUCT, price=price, currency="EUR",
+            availability="in_stock", image_url="https://example.test/item.jpg",
+            deep_link="https://example.test/item", merchant_id=1, merchant_name="Test",
+            merchant_region="BE", observed_at=None,
+        )
+
+    assert _planned_general_offer_ids(intent, [
+        snapshot(1, "Brosse pour Xiaomi Robot Vacuum", 4.35),
+        snapshot(2, "Robot vacuum with self-emptying station", 229.0),
+    ]) == [2]
