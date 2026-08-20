@@ -136,3 +136,27 @@ def test_machine_automatique_exige_une_preuve_textuelle_de_l_automatisation():
 
     assert relevance.proves_required_features(request, "Filter coffee machine with glass jug") is False
     assert relevance.proves_required_features(request, "Fully automatic espresso coffee machine") is True
+
+
+
+def test_mots_composes_neerlandais_preservent_la_nature_satellite_et_chaussure():
+    assert relevance.is_unrequested_satellite(
+        ["smartwatch"], "Podec Smartwatchbandje Samsung Galaxy Watch compatibel"
+    ) is True
+    assert relevance.request_requires_footwear("hardloopschoenen onder 150 euro") is True
+    assert relevance.has_footwear_proof("Hardloopvest met LED en telefoonvak") is False
+    assert relevance.has_footwear_proof("Hardloopschoenen met demping") is True
+
+
+
+def test_satellites_de_maintenance_et_peripheriques_observes_dans_la_revalidation():
+    request = ["produit principal"]
+    for title in (
+        "Robot vacuum accessoireset with HEPA filter and side brush",
+        "Lavette mop pour aspirateur robot",
+        "Wireless in-ear earbuds with charging case",
+        "Chariot de déménagement pour machine à laver",
+        "Boîtier de connexion vélo électrique",
+        "Poudre détartrante pour lave-linge",
+    ):
+        assert relevance.is_unrequested_satellite(request, title) is True

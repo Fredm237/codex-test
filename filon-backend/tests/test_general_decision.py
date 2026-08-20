@@ -341,3 +341,50 @@ def test_plan_general_ecarte_les_satellites_generiques_observes_dans_l_audit_lar
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Robot vacuum with self-emptying station"]
+
+
+
+def test_plan_general_nutilise_pas_les_mots_semantiques_pour_autoriser_un_accessoire_non_demande():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="smartwatch under 200 euros",
+        locale="en",
+        scopes=(IntentScope(taxonomy.BIJOUX, "Montres", "smartwatch under 200 euros", ("smartwatch", "watch strap", "watch band")),),
+        terms=("smartwatch",),
+        required_title_phrases=(),
+        budget_eur=200.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Smartwatch magnetic watch strap 20 mm", taxonomy.BIJOUX, "Montres", 3.89),
+            offer(2, "Smartwatch with heart-rate monitor", taxonomy.BIJOUX, "Montres", 79.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Smartwatch with heart-rate monitor"]
+
+
+def test_plan_general_exige_une_chaussure_lorsque_la_demande_le_precise():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="hardloopschoenen onder 150 euro",
+        locale="nl",
+        scopes=(IntentScope(taxonomy.CHAUSSURES, None, "hardloopschoenen", ("running shoes", "hardloopschoenen")),),
+        terms=("hardloopschoenen",),
+        required_title_phrases=(),
+        budget_eur=150.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Hardloopvest met LED en telefoonvak", taxonomy.CHAUSSURES, None, 24.19),
+            offer(2, "Hardloopschoenen met demping", taxonomy.CHAUSSURES, None, 79.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Hardloopschoenen met demping"]
