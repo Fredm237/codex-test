@@ -266,3 +266,14 @@ def test_velo_electrique_exige_une_preuve_du_qualificatif_fonctionnel():
 )
 def test_exclut_les_satellites_de_produit_principal_observes_en_production(query, offer_name):
     assert relevance.is_unrequested_satellite(relevance.mots(query), offer_name) is True
+
+
+@pytest.mark.parametrize(
+    ("query", "offer_name"),
+    [
+        ("ordinateur portable sous 700 euros", "Set d'enceintes PC pour ordinateur portable"),
+        ("camping tent under 300 euros", "Piquets d'ancrage au sol pour tentes camping"),
+    ],
+)
+def test_exclut_les_peripheriques_audio_et_ancrages_de_tente_non_demandes(query, offer_name):
+    assert relevance.is_unrequested_satellite(relevance.mots(query), offer_name) is True
