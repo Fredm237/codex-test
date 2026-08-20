@@ -509,3 +509,39 @@ def test_plan_general_ne_replie_pas_un_scope_precis_sur_un_titre_sans_sa_phrase_
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Lave-linge hublot 8 kg"]
+
+
+
+def test_plan_general_s_abstient_pour_une_machine_semi_automatique_quand_automatique_est_exigee():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="automatische koffiemachine onder 500 euro",
+        locale="nl",
+        scopes=(
+            IntentScope(
+                taxonomy.ELECTROMENAGER,
+                "Petit électroménager",
+                "automatische koffiemachine onder 500 euro",
+                ("koffiemachine", "automatische koffiemachine", "espressomachine"),
+            ),
+        ),
+        terms=("automatische", "koffiemachine"),
+        required_title_phrases=(),
+        budget_eur=500.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "HiBREW H10A Machine à café expresso semiautomatique 20 bars",
+                taxonomy.ELECTROMENAGER,
+                "Petit électroménager",
+                199.0,
+            )
+        ],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_verified_scope"
