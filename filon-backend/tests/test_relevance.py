@@ -240,3 +240,11 @@ def test_bequilles_et_stands_de_velo_sont_des_satellites_hors_demande():
         "Kickstand stand for electric bicycle",
     ):
         assert relevance.is_unrequested_satellite(["velo electrique"], title) is True
+
+
+
+def test_velo_electrique_exige_une_preuve_du_qualificatif_fonctionnel():
+    request = "elektrische fiets onder 1200 euro"
+
+    assert relevance.proves_required_features(request, "Tuinberging voor fietsen en gereedschap") is False
+    assert relevance.proves_required_features(request, "Elektrische fiets met 500 Wh accu") is True

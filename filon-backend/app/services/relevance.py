@@ -100,6 +100,13 @@ _REQUIRED_FEATURE_PROOFS: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = 
         re.compile(r"\b(?:4k|uhd)\b"),
         re.compile(r"\b(?:4k|uhd)\b"),
     ),
+    (
+        re.compile(r"(?:electric|electrique|elektrisch\w*)\s+(?:bike|bicycle|velo|fiets)"),
+        re.compile(
+            r"(?:(?:electric|electrique|elektrisch\w*)\s+(?:bike|bicycle|velo|fiets)|"
+            r"(?:bike|bicycle|velo|fiets)(?:\s+[a-z0-9]+){0,2}\s+(?:electric|electrique|elektrisch\w*))"
+        ),
+    ),
 )
 
 
