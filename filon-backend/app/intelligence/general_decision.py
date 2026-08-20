@@ -106,7 +106,7 @@ def _scope_candidates(
     primary = [
         offer for offer in scoped
         if not relevance.is_unrequested_satellite(
-            list(dict.fromkeys([*scope.query_terms, *request_terms])), offer.name or ""
+            list(request_terms), offer.name or ""
         )
     ]
     if primary:

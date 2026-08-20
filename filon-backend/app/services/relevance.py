@@ -58,8 +58,9 @@ _SATELLITES = {
     "selfie", "selfiestick", "stick", "tripod", "statief", "remote", "afstandsbediening",
     "imprimante", "printer", "printers", "fotoprinter", "thermometre", "thermometer",
     "sensor", "sensors", "capteur", "capteurs", "appsensoren",
-    "rebond", "rebound", "calibration", "tuning", "batterie", "battery",
-    "tapis", "mat", "trillingsmat", "vibration", "exercise", "exercice", "fitness", "resistance",
+    "rebond", "rebound", "calibration", "tuning", "batterie", "battery", "selle", "zadel",
+    "tapis", "mat", "trillingsmat", "vibration", "verhoger", "rehausseur", "poot", "poten",
+    "exercise", "exercice", "fitness", "resistance",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
