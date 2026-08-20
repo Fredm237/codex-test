@@ -32,7 +32,7 @@ _KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
 # Cette version fait partie de la clé de cache Assistant. Toute évolution de la
 # politique de pertinence doit donc l’avancer dans le même changement afin qu’une
 # carte décidée sous une règle ancienne ne survive jamais au déploiement.
-CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.7"
+CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.8"
 
 # Familles d'articles satellites : elles portent le nom du produit recherché
 # sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
@@ -265,6 +265,20 @@ def proves_required_features(request: str, offer_name: str) -> bool:
     """Vérifie chaque attribut fonctionnel explicitement demandé."""
     normalized_request = _plat(request)
     normalized_offer = _plat(offer_name)
+    automatic_request = re.search(
+        r"(?:automatic\w*|automatique\w*|automatisch\w*|volautomatisch)\s+(?:coffee|koffie|caf[eé])",
+        normalized_request,
+    )
+    # Une mention de l’automatisation à l’intérieur de « semi-automatique » ne
+    # constitue pas une preuve de machine entièrement automatique. Les formats
+    # manuels, à dosette ou semi-automatiques restent des catégories de
+    # fonctionnement différentes, quel que soit le rayon ou la langue du feed.
+    if automatic_request and re.search(
+        r"(?:semi[- ]?automatic\w*|semi[- ]?automatique\w*|semiautomatisch\w*|"
+        r"manual\w*|handmatig\w*|dosette\w*|capsule\w*|padmachine)",
+        normalized_offer,
+    ):
+        return False
     return all(
         not request_pattern.search(normalized_request) or bool(offer_pattern.search(normalized_offer))
         for request_pattern, offer_pattern in _REQUIRED_FEATURE_PROOFS

@@ -324,3 +324,12 @@ def test_exclut_un_moniteur_portable_d_une_demande_d_ordinateur_portable():
 )
 def test_exclut_les_satellites_multilingues_releves_dans_outfit(query, offer_name):
     assert relevance.is_unrequested_satellite(relevance.mots(query), offer_name) is True
+
+
+
+def test_machine_semi_automatique_ne_satisfait_jamais_une_demande_automatique():
+    request = "automatische koffiemachine onder 500 euro"
+    assert relevance.proves_required_features(
+        request,
+        "HiBREW H10A Machine à café expresso semiautomatique 20 bars",
+    ) is False
