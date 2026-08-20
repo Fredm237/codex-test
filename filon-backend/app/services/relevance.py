@@ -46,6 +46,7 @@ _SATELLITES = {
     "outil", "outils", "tool", "tools", "vitre", "glass", "cadre", "frame",
     "couvercle", "cover", "holder", "porte", "mount", "service", "wire",
     "molybdene", "molybdenum", "repair", "repairing", "ajusteur", "adjuster",
+    "bracelet", "bracelets", "chain", "chaine", "chaîne", "rope", "cord",
     "rebond", "rebound", "calibration", "tuning",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
@@ -60,6 +61,21 @@ _INTENTION_SATELLITE = _SATELLITES - {"carte", "cle", "clé"}
 # Équivalences lexicales limitées aux termes de mode et d’occasion utilisés par
 # Outfit Studio. Elles relient les trois langues cibles sans prétendre déduire
 # un style : « wedding dress » est une preuve textuelle de « robe de mariage ».
+# Attributs fonctionnels explicitement déclarés dans une demande. Ils ne sont
+# jamais déduits d’un scope : si l’utilisateur les nomme, le titre doit les
+# prouver dans l’une des langues cibles avant toute recommandation.
+_REQUIRED_FEATURE_PROOFS: tuple[tuple[re.Pattern[str], re.Pattern[str]], ...] = (
+    (
+        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|anc)"),
+        re.compile(r"(?:r[ée]duction\s+de\s+bruit|noise\s+cancell?ing|anc)"),
+    ),
+    (
+        re.compile(r"(?:connect[ée]e?|connected|smartwatch)"),
+        re.compile(r"(?:connect[ée]e?|connected|smartwatch)"),
+    ),
+)
+
+
 _EQUIVALENCES = {
     "mariage": frozenset({"mariage", "wedding", "bruiloft", "bridal", "bride"}),
     "wedding": frozenset({"mariage", "wedding", "bruiloft", "bridal", "bride"}),
@@ -172,6 +188,22 @@ def _term_is_present(term: str, offer_words: set[str], normalized_offer_name: st
     """Vérifie un terme ou son équivalent explicite dans le titre marchand."""
     variants = _EQUIVALENCES.get(term, frozenset({term}))
     return any(variant in offer_words or variant in normalized_offer_name for variant in variants)
+
+
+def request_has_required_features(request: str) -> bool:
+    """Indique que la demande contient un attribut fonctionnel à prouver."""
+    normalized_request = _plat(request)
+    return any(request_pattern.search(normalized_request) for request_pattern, _ in _REQUIRED_FEATURE_PROOFS)
+
+
+def proves_required_features(request: str, offer_name: str) -> bool:
+    """Vérifie chaque attribut fonctionnel explicitement demandé."""
+    normalized_request = _plat(request)
+    normalized_offer = _plat(offer_name)
+    return all(
+        not request_pattern.search(normalized_request) or bool(offer_pattern.search(normalized_offer))
+        for request_pattern, offer_pattern in _REQUIRED_FEATURE_PROOFS
+    )
 
 
 def explicit_qualifier_terms(terms: tuple[str, ...]) -> tuple[str, ...]:
