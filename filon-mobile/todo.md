@@ -1,0 +1,287 @@
+# Project TODO
+
+- [x] Configure FILON mobile design tokens, brand identity and navigation shell
+- [x] Implement FR/NL/EN localization and domain data contracts
+- [x] Connect live FILON catalogue search, filtering and product detail flows
+- [x] Build the verified FILON assistant SSE experience
+- [x] Add local favorites and alert-creation experience
+- [x] Deliver synchronized server-side price alerts and push notifications when FILON account APIs are available
+- [x] Add accessible loading, empty, offline and error states
+- [x] Add mobile tests for domain parsing and core search flows
+- [x] Generate FILON app icon and update native branding configuration
+- [ ] Validate native iOS/Android flows and save the first delivery checkpoint
+- [x] Optimize generated native icon assets below the checkpoint size limit
+- [x] Add practical price and availability filters to live catalogue results
+- [x] Make catalogue loading, error and offline states explicit and accessible
+- [x] Surface saved local price thresholds in the Watching screen
+- [x] Add deterministic tests for filters, favorites and local alerts
+- [x] Detect offline catalogue access and expose accessible retry states
+- [x] Allow local alert thresholds to be edited and removed from Watching
+- [x] Persist alert data with a synchronization-ready contract
+- [x] Add deterministic persistence tests for favorites and alert thresholds
+- [x] Add barcode scan permission and a native product-discovery flow
+- [x] Route scanned product codes to verified catalogue searches
+- [x] Define a versioned sync payload for future account-backed alerts
+- [x] Add deterministic tests for scan parsing and alert sync serialization
+- [x] Verify and support dedicated EAN/UPC product lookups in the FILON catalogue contract
+- [x] Distinguish a verified scanned match from a generic catalogue search result
+- [x] Expose synchronization readiness without claiming server-side alert delivery
+- [x] Add deterministic tests for scanned-match and synchronization-state decisions
+- [x] Map verified price history and verdict fields from FILON product detail responses
+- [x] Render price-history evidence and explicit insufficiency states on product details
+- [x] Allow following a verified scanned product from its comparison screen
+- [x] Add deterministic tests for factual product-price signal decisions
+- [x] Audit existing mobile account and notification capabilities before remote alert delivery
+- [x] Define authenticated remote alert records and device notification registrations
+- [x] Synchronize local alert thresholds to the signed-in FILON account
+- [x] Request push permission only after explicit alert synchronization intent
+- [x] Show synchronized, pending and local-only alert states in Watching
+- [x] Add deterministic tests for authenticated alert synchronization decisions
+- [x] Add a clear account connection and synchronization status in Settings
+- [x] Surface notification permission and native-build readiness transparently
+- [x] Route notification payloads safely to the matching FILON product screen
+- [x] Add deterministic tests for account and notification navigation decisions
+- [x] Show a factual multi-merchant offer comparison on verified EAN product screens
+- [x] Identify the best observed offer without presenting it as a universal best price
+- [x] Open partner offers through a safe native browser handoff with explicit merchant context
+- [x] Add deterministic tests for merchant comparison and external-link safety
+- [x] Add native sharing for factual verified product comparisons
+- [x] Generate localized share text without best-price or prediction claims
+- [x] Add deterministic tests for localized product-comparison share content
+- [x] Persist a private local history of recent catalogue searches
+- [x] Surface recent searches with one-handed replay and explicit clear action
+- [x] Add deterministic tests for search-history normalization and limits
+- [x] Derive factual category trend signals from live verified catalogue offers
+- [x] Present trend coverage and insufficiency states without market predictions
+- [x] Add local favorite grouping and a clear removal workflow
+- [x] Add deterministic tests for trend derivation and favorite grouping
+- [x] Derive observed price variation signals from verified offer history only
+- [x] Show price-history insufficiency rather than infer a movement
+- [x] Persist private favorite collections and collection membership locally
+- [x] Add deterministic tests for observed variation and collection operations
+- [x] Define authenticated remote collection records and membership schema
+- [x] Sync private local collections to the signed-in FILON account
+- [x] Show collection synchronization state without claiming remote persistence prematurely
+- [x] Add deterministic tests for collection synchronization decisions
+- [x] Add explicit local and remote collection deletion lifecycle
+- [x] Persist collection tombstones to prevent deleted collections from returning after sync
+- [x] Surface last collection synchronization time and reconciliation state
+- [x] Add deterministic tests for collection deletion and tombstone merge rules
+- [x] Add local rename flow for private collections with confirmation feedback
+- [x] Synchronize collection rename timestamps and use an explicit last-write-wins rule
+- [x] Display collection modification and reconciliation metadata without exposing device details
+- [x] Add deterministic tests for rename and conflict-resolution rules
+- [x] Persist whether local collections contain changes awaiting account reconciliation
+- [x] Clear the pending state only after a successful authenticated collection sync
+- [x] Show pending, synchronized and retry states accurately in Watching
+- [x] Add deterministic tests for synchronization-state transitions
+- [x] Persist a retry intent when a collection reconciliation cannot run offline
+- [x] Retry pending collection synchronization after confirmed network recovery
+- [x] Present automatic retry progress and manual fallback in Watching
+- [x] Add deterministic tests for offline queue and recovery transitions
+- [x] Persist whether local price-alert changes await remote reconciliation
+- [x] Retry pending price-alert synchronization only after internet recovery
+- [x] Show a unified pending and reconciled state for alerts and collections
+- [x] Add deterministic tests for alert retry and unified synchronization state
+- [x] Persist a unified sync queue with attempt count and next retry metadata
+- [x] Apply bounded gradual retry delays after remote synchronization failures
+- [x] Show concise pending and retry progress in Watching without technical jargon
+- [x] Add deterministic tests for queue attempts and retry scheduling
+- [x] Restore and verify the mobile development preview server after interruption
+- [x] Add a web-safe haptic feedback utility for meaningful mobile actions
+- [x] Trigger haptics for scan success, saved-item changes and successful synchronization
+- [x] Keep visual feedback as the primary fallback on unsupported devices
+- [x] Add deterministic tests for haptic action routing
+- [x] Trigger a meaningful confirmation on favorite add/remove and alert create/remove
+- [x] Preserve visual confirmation when native haptics are unavailable
+- [x] Add deterministic scenario coverage for offline change, queued retry and reconciliation
+- [x] Add deterministic scenario coverage for collection and alert follow-up actions
+- [x] Persist concise local follow-up events for favorites, alerts and successful synchronization
+- [x] Expose a clear-on-device activity timeline in Watching
+- [x] Provide factual localized labels and explicit timeline clearing
+- [x] Add deterministic tests for event ordering, limits and clearing
+- [x] Audit Expo identity, EAS project linkage and current native build settings
+- [x] Add documented EAS development and production build profiles without initiating a remote build
+- [x] Validate the resolved Expo configuration and retain a controlled build handoff
+- [x] Securely validate Expo authentication for the FILON EAS project
+- [x] Confirm the development build profile and native project metadata before launch
+- [x] Trigger and monitor the first internal EAS development build without store submission
+- [x] Align the Expo app slug with the existing FILON EAS project before retrying the internal build
+- [x] Add Expo Updates support required by the configured EAS build channels
+- [x] Add the Expo Updates URL and app-version runtime policy to the dynamic Expo configuration
+- [x] Generate and retain the Android development keystore through the authenticated EAS project
+- [x] Restore and verify the FILON mobile development server after the reported outage
+- [x] Limit Metro worker concurrency to prevent the observed memory-kill during web bundling
+- [x] Run Metro in non-interactive mode so the managed preview does not exit on terminal closure
+- [x] Start an Android Development Build Metro session accessible from a physical device
+- [x] Provide a verified deep link or QR path for the installed FILON Development Build
+- [x] Generate a scannable Android Development Build QR code for the public Metro manifest
+- [x] Diagnose the Android Development Build bundle blocked at 77.1 percent
+- [x] Rebuild and verify a clean remote Android Metro bundle before retrying on device
+- [ ] Serve a compact non-development Android bundle through a dedicated device Metro endpoint
+- [ ] Switch the primary Metro server to a compact Android bundle to avoid competing Metro processes
+- [ ] Keep a compact Android Metro session alive independently of the web preview orchestrator
+- [x] Build an internal Android preview APK with an embedded FILON bundle for device testing without Metro
+- [x] Reproduce irrelevant mobile catalogue results against the live FILON endpoint
+- [x] Correct mobile catalogue result relevance and empty-state decisions
+- [x] Add deterministic relevance regressions for real catalogue query patterns
+- [ ] Validate the corrected catalogue on the Android preview build
+- [ ] Audit the end-to-end behaviour of catalogue search, product links, assistant, scan, favourites, alerts and sync
+- [ ] Replace decorative or misleading states with verified data or explicit unavailability states
+- [x] Add regression coverage for the user-visible flows that currently fail on Android
+- [x] Produce an Android preview build only after the core journeys are demonstrably functional
+- [x] Prevent merchant-opening actions from appearing usable when an offer has no safe partner link
+- [x] Distinguish scanner validation, unmatched product and catalogue unavailability states
+- [x] Prevent generic iPhone queries from stemming into unrelated words such as siphon
+- [x] Audit actual catalogue pagination, category depth and offer-image coverage on the live FILON API
+- [x] Expose paginated catalogue browsing with real main categories and subcategories
+- [x] Let the mobile catalogue load further real offers rather than cap the session at the initial result window
+- [x] Show Assistant cards only with a verified image or an explicit image-unavailable state
+- [ ] Validate category exploration, progressive loading and Assistant imagery on a new Android preview build
+- [x] Reuse the established FILON web taxonomy and filtering contract for mobile category exploration
+- [x] Audit the Catalogue screen against native one-handed navigation conventions
+- [x] Replace web-like catalogue sections with a native progressive exploration flow
+- [x] Use native sheets, concise list rows and clear back navigation for catalogue refinement
+- [ ] Validate touch targets, transitions and progressive loading on Android hardware
+- [x] Generate an Android preview APK for the native Catalogue navigation test
+- [x] Audit the product-detail, comparison and Watching screens against native decision-making flows
+- [x] Redesign product choice and merchant handoff with concise native hierarchy and verified evidence
+- [x] Improve follow-up feedback so favourites and alerts explain their next useful action
+- [ ] Validate product-to-merchant and product-to-alert flows on Android preview
+- [x] Audit and remove non-essential first-screen copy from the FILON home experience
+- [x] Replace the web-like home hero with a compact native search entry and two action shortcuts
+- [ ] Validate the simplified first screen on Android hardware
+- [x] Apply a premium mobile-first home hierarchy: one goal, progressive disclosure and thumb-reachable actions
+- [x] Add restrained tactile depth and motion without adding explanatory copy
+- [x] Generate an Android preview APK for the compact premium home test
+- [x] Define and implement a living ambient motion layer for the compact FILON home
+- [x] Add restrained native press and navigation feedback to the home entry actions
+- [ ] Validate the animated home on Android without reducing readability or battery-conscious restraint
+- [x] Generate an Android preview APK for the living FILON home test
+- [x] Audit existing theme tokens and hard-coded surfaces across the mobile experience
+- [x] Define FILON light and dark palettes with accessible amber contrast
+- [x] Add a persistent Light, Dark and System appearance setting
+- [x] Adapt primary navigation, home and catalogue surfaces to the selected appearance
+- [x] Add deterministic coverage for Light, Dark and System appearance resolution
+- [ ] Validate theme switching on Android preview
+- [x] Map every user-facing FILON promise to its concrete mobile implementation and evidence
+- [x] Verify live catalogue, Assistant and merchant contracts against production responses
+- [ ] Verify scan, favourites, alerts and synchronization behaviour independently
+- [ ] Replace any unsupported promise with an explicit factual state or a working implementation
+- [ ] Build and test a compliance-focused Android preview APK
+- [x] Preserve tri-state offer availability instead of treating unknown availability as in stock
+- [x] Ingest merchant, brand, minimum-price and sort controls exposed by the live catalogue contract
+- [ ] Add optional pulse freshness and deferred highlights without blocking Catalogue exploration
+- [ ] Repair OAuth configuration for native account synchronization after public endpoints are supplied
+- [x] Audit current catalogue cache, refetch options and application foreground lifecycle
+- [x] Define automatic revalidation for taxonomy, offers and availability with offline-safe fallback
+- [x] Refresh live FILON data on launch, return to foreground and controlled freshness intervals
+- [x] Surface a compact factual freshness state without blocking catalogue navigation
+- [ ] Validate automatic backend ingestion on Android preview
+- [x] Submit an Android preview build for automatic backend ingestion testing
+- [x] Audit visible screens and shared components for premium-native polish gaps
+- [x] Define shared premium tokens for spacing, type rhythm, elevation and press feedback
+- [x] Apply the premium finish to Home, Catalogue and Assistant
+- [x] Apply the premium finish to Product, Watching and Settings
+- [x] Apply adaptive premium surfaces and action hierarchy to Product detail
+- [x] Audit Watching, Settings and current offer availability normalization
+- [x] Apply premium adaptive surfaces to Watching and Settings
+- [x] Preserve and display available, unavailable and unknown offer availability truthfully
+- [ ] Validate premium Watching, Settings and availability states on Android preview
+- [ ] Validate premium interactions on Android hardware
+- [x] Replace hard-coded dark Catalogue surfaces with premium dynamic theme tokens
+- [x] Exclude gift cards and unrelated accessories from generic product department results
+- [ ] Adapt Assistant and Scanner surfaces to the selected Light, Dark or System appearance
+- [ ] Replace any visual wording that overstates catalogue confidence with a factual status
+- [x] Inspect the live taxonomy contract for new classification fields and hierarchy levels
+- [x] Preserve unknown category branches and metadata when normalizing backend navigation
+- [x] Make native catalogue navigation render new taxonomy branches without a mobile release
+- [x] Add contract regressions for evolving taxonomy payloads and validate on Android
+- [x] Audit catalogue discovery screens and the live taxonomy metadata available per branch
+- [x] Create dynamic icon, accent and density rules that work for unknown backend categories
+- [x] Apply native tactile hierarchy to department and category lists without hard-coding classification
+- [ ] Validate dynamic discovery styling on Android preview
+- [x] Audit the Assistant screen, streaming events and action states against a mobile decision flow
+- [x] Replace chat-like filler with concise decision prompts and progress states
+- [ ] Turn verified Assistant offers into image-led cards with compare, save and merchant actions
+- [ ] Adapt Assistant to Light, Dark and System appearance and validate on Android
+- [x] Audit verified identifiers available in the Assistant recommendation stream
+- [x] Preserve offer identifiers in Assistant cards for direct comparison and follow-up actions
+- [x] Add Compare, Follow and Merchant actions to verified Assistant recommendations
+- [ ] Validate Assistant actions on Android preview
+- [x] Audit Assistant surfaces and existing local price-threshold creation
+- [x] Apply Light, Dark and System tokens across Assistant states and cards
+- [x] Let a verified Assistant recommendation create a local follow-up threshold safely
+- [ ] Validate themed Assistant actions on Android preview
+- [x] Audit live catalogue support for merchant, brand, price-minimum and sorting controls
+- [x] Extend the mobile catalogue request contract for supported live controls
+- [x] Design concise adaptive native controls for supported catalogue criteria
+- [ ] Add contract regressions and validate live catalogue controls on Android preview
+- [x] Audit the latest production catalogue, assistant, taxonomy and account contracts
+- [x] Compare production contract changes with the current mobile implementation
+- [x] Integrate verified production capabilities that improve the native FILON journey
+- [ ] Validate synchronized mobile contracts and flows on Android preview
+- [x] Audit the merged FILON Intelligence routes, contracts and navigation for compatibility with Catalogue
+- [x] Preserve and connect compatible Catalogue evidence without overwriting Intelligence work
+- [x] Validate shared navigation and critical regressions after the synchronization merge
+- [x] Prevent the managed Metro preview from exiting after its first web bundle
+- [x] Audit the Catalogue and Intelligence front-end hierarchy against the new production signals
+- [x] Design a live decision surface for observed price movement and source freshness
+- [x] Build a concise dynamic bridge from Catalogue discovery to FILON Intelligence
+- [ ] Validate the new data-led front end in Light, Dark and System appearances
+- [x] Research 2026 mobile product and interaction references relevant to FILON
+- [x] Define FILON-specific innovation principles from the research without copying competitors
+- [x] Convert the highest-value principles into an executable front-end roadmap
+- [x] Research credible 2027-2030 shifts in AI, commerce and mobile interaction
+- [x] Define FILON’s 2027 and 2030 product vision with explicit trust boundaries
+- [x] Produce an execution path from the current product to the future FILON experience
+- [x] Audit current search, Assistant and follow-up flows for a shared purchase-intent contract
+- [x] Define and persist a local FILON purchase intent with explicit, editable constraints
+- [x] Build a native purchase-intent editor with FR/NL/EN copy and accessible controls
+- [x] Connect the saved intent to Catalogue and Assistant entry points without hidden automation
+- [ ] Add deterministic intent regressions and validate the flow on Android preview
+- [x] Add deterministic intent model regressions for normalization, editing and locale-aware assistant context
+- [x] Audit Watching, local alerts and the purchase-intent contract for an explicit linkage
+- [x] Design localized Watching states for active purchase intents and alert eligibility
+- [x] Surface active intents in Watching with edit, explore and explicit alert actions
+- [ ] Add intent-to-alert rule regressions and validate the Watching flow on Android preview
+- [x] Add intent-to-catalogue rule regression without fabricating an automatic price alert
+- [x] Audit product detail, local alerts and purchase intents for verified offer linkage
+- [x] Define a local offer-evidence record with explicit replacement and removal rules
+- [x] Link a verified offer to an intent from the native product decision flow
+- [x] Show linked offer evidence in Watching and cover the linkage with deterministic tests
+- [ ] Validate offer-to-intent linkage on Android preview
+- [x] Audit existing follow-up events and define the private purchase-intent decision journal
+- [x] Persist bounded intent decisions with explicit local-only retention rules
+- [x] Display a localized decision history in Watching with a clear-on-device action
+- [ ] Add deterministic decision-journal tests and validate the flow on Android preview
+- [x] Add deterministic decision-journal rules for bounds and intent isolation
+- [x] Audit existing mobile motion, imagery and performance constraints across FILON screens
+- [x] Define FILON’s animated material system with reduced-motion and theme-safe behavior
+- [x] Add living visual layers and data-reactive transitions to Home, Catalogue and Intelligence
+- [x] Add or prepare concise FILON motion media without generic stock visuals
+- [ ] Validate animated layers for performance, accessibility and Android behavior
+- [x] Validate animated layers with TypeScript and theme/source-state regressions
+- [x] Diagnose and restore the interrupted FILON mobile development server
+- [x] Verify the restarted preview remains reachable after initial bundling
+- [x] Audit Catalogue and Intelligence data-loading states for meaningful motion opportunities
+- [x] Define data-reveal transitions for price movement, source freshness and verified results
+- [x] Animate data-led Catalogue and Intelligence surfaces with reduced-motion support
+- [ ] Validate data-motion behavior on themes and Android preview
+- [x] Validate data-motion types and source/theme regressions
+- [x] Audit product proof signals, merchant actions and existing intent links
+- [x] Define the product decision-proof hierarchy and data motion behavior
+- [x] Animate observed price, stock truth and merchant handoff with reduced-motion support
+- [ ] Validate the product evidence experience on themes and Android preview
+- [x] Validate product-proof types and intent-evidence/theme regressions
+- [x] Audit EAN comparison offers, availability states and observed-price signals
+- [x] Define a factual multi-merchant comparison hierarchy with data-led movement
+- [x] Animate merchant comparison cards with price and stock evidence
+- [ ] Validate multi-merchant comparison on themes and Android preview
+- [x] Validate comparison types and theme/filter regressions
+- [x] Audit Scanner and Assistant visual/data states against the FILON motion language
+- [x] Define shared evidence, motion and reduced-motion behavior for Scanner and Assistant
+- [x] Build unified Scanner and Assistant surfaces with factual data-reveal states
+- [ ] Validate Scanner and Assistant themes, motion and Android behavior
+- [x] Validate Scanner and Assistant types plus scan/theme regressions
+- [ ] Publish the validated current FILON mobile workspace to the connected GitHub repository

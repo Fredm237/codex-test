@@ -1,0 +1,34 @@
+data: {"type": "step", "i": 0}
+
+data: {"type": "step-done", "i": 0}
+
+data: {"type": "step", "i": 1}
+
+data: {"type": "step-done", "i": 1}
+
+data: {"type": "step", "i": 2}
+
+data: {"type": "step-done", "i": 2}
+
+data: {"type": "step", "i": 3}
+
+data: {"type": "step-done", "i": 3}
+
+data: {"type": "step", "i": 4}
+
+data: {"type": "step-done", "i": 4}
+
+data: {"type": "step", "i": 5}
+
+data: {"type": "step-done", "i": 5}
+
+data: {"type": "step", "i": 6}
+
+data: {"type": "step-done", "i": 6}
+
+data: {"type": "step", "i": 7}
+
+data: {"type": "step-done", "i": 7}
+
+data: {"type": "results", "data": {"usage": "ordinateur portable", "emoji": "💻", "offers": 8, "cards": [{"rank": "Meilleur rapport qualité/prix", "medal": "🥇", "name": "Acer Aspire Go 15, AG15-72P, Laptop, 15.6\" Full HD, Intel® Core™ 7, 16GB RAM, 1TB SSD, Intel® Graphics", "emoji": "💻", "image": "https://static2-ecemea.acer.com/media/catalog/product/a/c/acer-aspire-go-15-ag15-72p-non-fingerprint-non-backlit-wp-start-screen-pure-silver-01_6.jpg", "link": "https://www.awin1.com/cread.php?awinmid=63342&awinaffid=3005443&clickref=filon&ued=https%3A%2F%2Fwww.awin1.com%2Fpclick.php%3Fp%3D43042680518%26a%3D3005443%26m%3D63342", "price": 749, "merchant": "ACER BE", "delivery": "voir marchand", "warranty": "conditions marchand", "cashback": 0, "coupon": null, "hist": null, "histNote": "", "score": 92, "why": "Processeur Core 7, 16 Go de RAM et 1 To de SSD pour un prix contenu, idéal pour un usage polyvalent.", "alt": null, "buy": true}, {"rank": "Le plus polyvalent", "medal": "🥈", "name": "Acer Aspire Go 15, AG15-72P, Dagelijks Laptop, 15.6\" FHD IPS, Intel® Core™ 7, 16 GB RAM, 512 GB SSD, Intel® Graphics", "emoji": "💻", "image": "https://static2-ecemea.acer.com/media/catalog/product/a/c/acer-aspire-go-15-ag15-72p-non-fingerprint-non-backlit-wp-start-screen-pure-silver-01_1.jpg", "link": "https://www.awin1.com/cread.php?awinmid=63342&awinaffid=3005443&clickref=filon&ued=https%3A%2F%2Fwww.awin1.com%2Fpclick.php%3Fp%3D43042680517%26a%3D3005443%26m%3D63342", "price": 699, "merchant": "ACER BE", "delivery": "voir marchand", "warranty": "conditions marchand", "cashback": 0, "coupon": null, "hist": null, "histNote": "", "score": 90, "why": "Core 7, 16 Go de RAM et 512 Go SSD, excellent équilibre performances/prix pour la plupart des usages.", "alt": "Acer Aspire Go 15 (1 To)", "buy": true}, {"rank": "Le plus moderne", "medal": "🥉", "name": "Acer Aspire 14 AI OLED, A14-52M, Laptop, 14\", Intel Core Ultra 7, 16GB RAM, 1TB SSD, Intel Arc Graphics", "emoji": "💻", "image": "https://static2-ecemea.acer.com/media/catalog/product/a/c/acer-aspire-14-ai-al14-52m-52mt-non-fingerprint-with-backlit-on-wp-oled-copilot-steel-gray-01-1_10.jpg", "link": "https://www.awin1.com/cread.php?awinmid=63342&awinaffid=3005443&clickref=filon&ued=https%3A%2F%2Fwww.awin1.com%2Fpclick.php%3Fp%3D41121472064%26a%3D3005443%26m%3D63342", "price": 849, "merchant": "ACER BE", "delivery": "voir marchand", "warranty": "conditions marchand", "cashback": 0, "coupon": null, "hist": null, "histNote": "", "score": 88, "why": "Écran OLED 14\", processeur Intel Core Ultra 7 et 1 To SSD, technologie récente et qualité d'affichage supérieure.", "alt": null, "buy": false}, {"rank": "Grand écran", "medal": "⭐", "name": "Acer Aspire 17, A17-51M, Laptop, 17.3” Full HD, Intel Core 5, 16GB RAM, 512GB SSD, Intel Graphics", "emoji": "💻", "image": "https://static2-ecemea.acer.com/media/catalog/product/a/c/acer-aspire-17-a17-51m-with-fingerprint-with-backlit-on-wallpaper-start-screen-steel-gray-01_17.jpg", "link": "https://www.awin1.com/cread.php?awinmid=63342&awinaffid=3005443&clickref=filon&ued=https%3A%2F%2Fwww.awin1.com%2Fpclick.php%3Fp%3D44633457524%26a%3D3005443%26m%3D63342", "price": 749, "merchant": "ACER BE", "delivery": "voir marchand", "warranty": "conditions marchand", "cashback": 0, "coupon": null, "hist": null, "histNote": "", "score": 85, "why": "Écran 17.3\" FHD, Core 5 et 16 Go de RAM, bon choix pour une utilisation confortable à la maison.", "alt": null, "buy": true}, {"rank": "Performances élevées", "medal": "♻️", "name": "Acer Aspire 17, A17-51M, Laptop, 17.3\" FHD, Intel Core i7, 16GB RAM, 512GB SSD", "emoji": "💻", "image": "https://static2-ecemea.acer.com/media/catalog/product/a/c/acer-aspire-17-a17-51m-with-fingerprint-with-backlit-on-wallpaper-start-screen-steel-gray-01_18.jpg", "link": "https://www.awin1.com/cread.php?awinmid=63342&awinaffid=3005443&clickref=filon&ued=https%3A%2F%2Fwww.awin1.com%2Fpclick.php%3Fp%3D44915928137%26a%3D3005443%26m%3D63342", "price": 849, "merchant": "ACER BE", "delivery": "voir marchand", "warranty": "conditions marchand", "cashback": 0, "coupon": null, "hist": null, "histNote": "", "score": 84, "why": "Core i7 et 16 Go de RAM sur grand écran, adapté aux tâches exigeantes mais légèrement au-dessus du budget.", "alt": null, "buy": false}], "real": true, "country": "be", "currency": "€"}}
+

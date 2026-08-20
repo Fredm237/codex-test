@@ -1,0 +1,89 @@
+# Project TODO
+
+- [x] Auditer les parcours FILON existants et cartographier les points d’extension non destructifs.
+- [x] Ajouter la documentation d’interface mobile et du périmètre local de FILON Intelligence Layer.
+- [x] Définir les modèles locaux de provenance, confiance, préférences de style et propositions de tenue.
+- [x] Ajouter une entrée additive Outfit Studio depuis l’Assistant existant.
+- [x] Implémenter l’écran de brief d’intention et le moteur de composition initial fondé sur les offres FILON.
+- [x] Afficher une proposition de tenue avec confiance, provenance, contraintes et réutilisation des actions d’offre existantes.
+- [x] Ajouter la persistance locale et réversible des préférences de style.
+- [x] Écrire et exécuter les tests unitaires du module Intelligence et des parcours existants concernés.
+- [x] Vérifier l’interface mobile et créer un point de restauration versionné.
+- [x] Définir un contrat Fashion Expert extensible avec relations, preuves et score de critique.
+- [x] Ajouter un critique de tenue déterministe avant l’affichage d’une proposition.
+- [x] Enregistrer localement les retours d’utilisateur sur les solutions Outfit Studio.
+- [x] Présenter les explications, avertissements et actions de feedback dans Outfit Studio.
+- [x] Tester le graphe Fashion, la critique et la persistance des feedbacks avant une nouvelle version.
+- [x] Définir le contrat d’une pièce possédée et les stratégies alternatives de composition.
+- [x] Composer une tenue autour d’une pièce déclarée par l’utilisateur, sans la confondre avec une offre marchande.
+- [x] Afficher le mode Complete et les alternatives Safe et Signature dans Outfit Studio.
+- [x] Tester le mode Complete, les budgets et l’abstention avant un nouveau point de restauration.
+- [x] Définir le Style DNA local et les règles de pondération fondées sur la répétition et la récence.
+- [x] Ajouter des signaux locaux de retour utilisateur sans sur-apprentissage à partir d’une seule action.
+- [x] Proposer des directions Discover compatibles avec les préférences déclarées.
+- [x] Afficher le profil Style DNA et les directions Discover dans Outfit Studio.
+- [x] Tester les règles Style DNA et Discover avant le prochain point de restauration.
+- [x] Définir le contrat Recreate avec niveaux certain, probable et inconnu.
+- [x] Ajouter l’analyse d’une inspiration visuelle via la couche Intelligence sans toucher au catalogue.
+- [x] Afficher l’inspiration, la confiance et les limites dans Outfit Studio.
+- [x] Tester Recreate, ses niveaux de preuve et la non-régression avant le prochain point de restauration.
+- [x] Définir le modèle local de dressing pour les pièces possédées et sa limite de conservation.
+- [x] Implémenter l’ajout, la lecture et la suppression réversible de pièces du dressing.
+- [x] Connecter le dressing local au flux Complete d’Outfit Studio.
+- [x] Tester la persistance du dressing et la non-régression avant le prochain point de restauration.
+- [x] Définir le modèle local d’une tenue sauvegardée et ses limites de conservation.
+- [x] Implémenter l’ajout, la lecture et la suppression réversible du journal de tenues.
+- [x] Connecter la sauvegarde et la consultation des tenues dans Outfit Studio.
+- [x] Tester le journal de tenues et la non-régression avant le prochain point de restauration.
+- [x] Définir un registre de décision qui sépare contraintes, offres éligibles et exclusions.
+- [x] Générer une synthèse de trace non modifiable et sans signal commercial caché.
+- [x] Afficher le registre de décision dans les résultats Outfit Studio.
+- [x] Tester la traçabilité et la non-régression avant le prochain point de restauration.
+- [x] Définir les capsules d’inspiration locales et leurs requêtes de départ vérifiables.
+- [x] Implémenter une sélection de capsules pondérée par le Style DNA déclaré ou répété.
+- [x] Ajouter les capsules Discover au brief Outfit Studio.
+- [x] Tester les capsules et la non-régression avant le prochain point de restauration.
+- [x] Définir la lecture budgétaire locale et les états sous budget, limite et dépassement.
+- [x] Implémenter le calcul budgétaire sans données de prix inventées.
+- [x] Afficher la lecture budgétaire dans les propositions Outfit Studio.
+- [x] Tester les scénarios budgétaires et la non-régression avant le prochain point de restauration.
+- [x] Définir le modèle local d’occasion planifiée et sa conservation bornée.
+- [x] Implémenter l’ajout, la lecture et le retrait réversible d’occasions.
+- [x] Relier une tenue du journal à une occasion déclarée dans Outfit Studio.
+- [x] Tester le planificateur et la non-régression avant le prochain point de restauration.
+- [x] Préparer l’import local d’une image Recreate et ses limites de confidentialité.
+- [x] Implémenter la sélection d’image et son envoi à l’analyse Recreate.
+- [x] Ajouter l’import visuel au parcours Recreate avec un retour de statut explicite.
+- [x] Tester l’import local et la non-régression avant le prochain point de restauration.
+- [x] Définir les critères transparents de comparaison entre stratégies Safe et Signature.
+- [x] Implémenter le comparateur local de coût, confiance et couverture.
+- [x] Afficher les compromis de stratégies dans Outfit Studio.
+- [x] Tester le comparateur et la non-régression avant le prochain point de restauration.
+- [x] Définir les critères locaux de rotation à partir des tenues sauvegardées.
+- [x] Implémenter le calcul de fraîcheur et les suggestions de réemploi.
+- [x] Afficher les suggestions de rotation dans le journal Outfit Studio.
+- [x] Tester la rotation et la non-régression avant le prochain point de restauration.
+- [x] Définir le Lookbook local et les synthèses de tenues et d’occasions affichables.
+- [x] Implémenter l’agrégation locale du journal et du planificateur pour le Lookbook.
+- [x] Ajouter l’écran Lookbook et l’accès depuis Outfit Studio.
+- [x] Tester le Lookbook et la non-régression avant le prochain point de restauration.
+- [x] Définir les états de filtre Lookbook et les compteurs locaux associés.
+- [x] Implémenter le filtrage de tenues planifiées, non planifiées et orphelines.
+- [x] Ajouter les filtres au Lookbook avec retours de statut accessibles.
+- [x] Tester le filtrage Lookbook et la non-régression avant le prochain point de restauration.
+- [x] Préparer les rappels locaux d’occasions avec activation et retrait explicites.
+- [x] Implémenter le calcul d’échéance et l’enregistrement local des rappels.
+- [x] Ajouter l’activation facultative des rappels dans le planificateur Outfit Studio.
+- [x] Tester les rappels et la non-régression avant le prochain point de restauration.
+- [x] Définir la reprise contextualisée d’une occasion depuis un rappel local.
+- [x] Relier le tap sur un rappel au planificateur Outfit Studio sans modifier le Core FILON.
+- [x] Mettre en évidence l’occasion ouverte depuis un rappel et conserver les contrôles existants.
+- [x] Tester la reprise depuis rappel et la non-régression avant le point de restauration de phase 2.
+- [x] Auditer la couverture réelle de la spécification maître V2 et documenter les écarts restants.
+- [x] Définir les contrats transversaux de domaine, provenance et confiance réutilisables.
+- [x] Ajouter les modes et stratégies Fashion Expert manquants sans modifier le Core FILON.
+- [x] Mettre en place un benchmark local, une taxonomie d’erreurs et une boucle de correction explicite.
+- [x] Vérifier les invariants de sûreté, la performance et la non-régression de la couche Intelligence.
+- [x] Restaurer les contrats V3 Core ↔ Intelligence et le pipeline observable sans modifier le Core.
+- [x] Ajouter les cas d’acceptation V3 et la trace de décision Fashion.
+- [x] Vérifier TypeScript, les critères d’acceptation et la non-régression complète.
