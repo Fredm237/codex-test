@@ -149,7 +149,8 @@ _MASCULINE_GENDER_TERMS = frozenset({
 # Ces marqueurs sont linguistiques et transversaux, sans dépendance au rayon.
 _CHILD_AUDIENCE_TERMS = frozenset({
     "enfant", "enfants", "child", "children", "kid", "kids", "junior", "toddler",
-    "baby", "bebe", "bébé", "kleuter", "peuter",
+    "baby", "bebe", "bébé", "kleuter", "peuter", "educatif", "educational",
+    "learning", "toy", "jouet", "jouets",
 })
 
 
