@@ -153,7 +153,7 @@ _CHILD_AUDIENCE_TERMS = frozenset({
     "learning", "toy", "jouet", "jouets",
 })
 _SENIOR_AUDIENCE_TERMS = frozenset({
-    "senior", "seniors", "elderly", "elder", "bejaarde", "bejaarden",
+    "senior", "seniors", "senioren", "elderly", "elder", "bejaarde", "bejaarden",
 })
 
 

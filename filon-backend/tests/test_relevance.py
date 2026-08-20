@@ -113,4 +113,5 @@ def test_anc_exige_un_mot_entier_et_ne_correspond_pas_a_blanc():
 
 def test_neutralite_de_public_ninfere_pas_un_produit_senior():
     assert relevance.age_compatible("smartphone under 400 euros", "Senior mobile phone with 4G") is False
+    assert relevance.age_compatible("smartphone under 400 euros", "Senioren mobiele telefoon met 4G") is False
     assert relevance.age_compatible("smartphone for seniors", "Senior mobile phone with 4G") is True
