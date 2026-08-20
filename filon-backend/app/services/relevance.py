@@ -33,8 +33,8 @@ _KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
 # sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
 # écran iPhone » n'est pas un iPhone, « housse » n'est pas un téléphone.
 _SATELLITES = {
-    "housse", "etui", "coque", "protection", "protecteur", "adhesif", "adhesive",
-    "sticker", "autocollant", "lingette", "lingettes", "nettoyant", "nettoyante",
+    "housse", "housses", "pochette", "etui", "coque", "protection", "protecteur", "adhesif", "adhesive",
+    "sticker", "autocollant", "lingette", "lingettes", "chiffon", "chiffons", "nettoyant", "nettoyante",
     "chargeur", "cable", "adaptateur", "support", "fixation", "vis", "cache",
     "brosse", "brosses", "brush", "brushes", "lavette", "mop", "dweildoek", "zijborstel",
     "oorkussen", "oorkussens", "earpad", "earpads", "earbud", "earbuds", "accessoireset",
@@ -50,7 +50,7 @@ _SATELLITES = {
     # porte-bidon) et ne sont conservés que lorsqu’ils sont demandés.
     "outil", "outils", "tool", "tools", "tournevis", "screwdriver", "screwdrivers",
     "vitre", "glass", "cadre", "frame",
-    "couvercle", "cover", "holder", "porte", "mount", "service", "wire",
+    "couvercle", "cover", "holder", "porte", "mount", "service", "wire", "rail", "guidage", "bac", "gastronorme",
     "molybdene", "molybdenum", "repair", "repairing", "ajusteur", "adjuster",
     "bracelet", "bracelets", "chain", "chaine", "chaîne", "rope", "cord",
     "handgreep", "handle", "grip", "rig", "lunette", "lunettes", "glasses",
@@ -63,7 +63,7 @@ _SATELLITES = {
     "exercise", "exercice", "fitness", "resistance", "poncho", "cape", "regencape",
     "compteur", "display", "dashboard", "warmtekussen", "heating", "kussen", "coussin", "pad",
     "veiligheidsvest", "veiligheidsvestje", "fluojas", "tussentuk", "tussenstuk", "stapelkit", "stacking",
-    "bequille", "kickstand", "standaard", "stand",
+    "bequille", "kickstand", "standaard", "stand", "tarp", "canopy", "doublure", "lining", "liner",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
     # l’utilisateur les demande explicitement.
