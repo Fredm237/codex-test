@@ -388,3 +388,28 @@ def test_plan_general_exige_une_chaussure_lorsque_la_demande_le_precise():
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Hardloopschoenen met demping"]
+
+
+
+def test_plan_general_ne_permet_pas_aux_expansions_semantiques_dautoriser_un_satellite_non_demande():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="elektrische fiets onder 1200 euro",
+        locale="nl",
+        scopes=(IntentScope(taxonomy.SPORT, "Cyclisme", "elektrische fiets onder 1200 euro", ("elektrische fiets", "fiets batterij", "fietszadel")),),
+        terms=("elektrische", "fiets"),
+        required_title_phrases=(),
+        budget_eur=1200.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Batterie vélo électrique tige de selle", taxonomy.SPORT, "Cyclisme", 320.0),
+            offer(2, "Selle de vélo électrique confort", taxonomy.SPORT, "Cyclisme", 83.99),
+            offer(3, "Vélo électrique urbain 500 Wh", taxonomy.SPORT, "Cyclisme", 899.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Vélo électrique urbain 500 Wh"]
