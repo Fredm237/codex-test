@@ -32,7 +32,7 @@ _KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
 # Cette version fait partie de la clé de cache Assistant. Toute évolution de la
 # politique de pertinence doit donc l’avancer dans le même changement afin qu’une
 # carte décidée sous une règle ancienne ne survive jamais au déploiement.
-CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.6"
+CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.7"
 
 # Familles d'articles satellites : elles portent le nom du produit recherché
 # sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
@@ -69,7 +69,7 @@ _SATELLITES = {
     "compteur", "display", "dashboard", "warmtekussen", "heating", "kussen", "coussin", "pad",
     "veiligheidsvest", "veiligheidsvestje", "fluojas", "tussentuk", "tussenstuk", "stapelkit", "stacking",
     "bequille", "kickstand", "standaard", "stand", "tarp", "canopy", "doublure", "lining", "liner",
-    "enceinte", "enceintes", "speaker", "speakers", "loudspeaker", "table", "desk", "plateau", "lapdesk",
+    "enceinte", "enceintes", "speaker", "speakers", "loudspeaker", "table", "desk", "plateau", "lapdesk", "countertop", "comptoir", "worktop",
     "clavier", "keyboard", "souris", "mouse", "dock", "docking", "hub", "stylus", "moniteur", "ecran", "écran", "display",
     "piquet", "piquets", "stake", "stakes", "ancrage", "anchor", "moustiquaire", "mosquito", "net",
     "clip", "clips", "couverts", "cutlery", "couteau", "fourchette", "cuillere", "cuillère", "coussins",

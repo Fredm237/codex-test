@@ -319,6 +319,7 @@ def test_exclut_un_moniteur_portable_d_une_demande_d_ordinateur_portable():
         ("kampeertent onder 300 euro", "Moustiquaire pour Tente"),
         ("sleeping bag under 150 euros", "Clip ceinture Garmin"),
         ("chaise de bureau sous 300 euros", "Coussins pour chaise"),
+        ("washing machine under 600 euros", "VEVOR Countertop for washing machine and dryer"),
     ],
 )
 def test_exclut_les_satellites_multilingues_releves_dans_outfit(query, offer_name):
