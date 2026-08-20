@@ -430,7 +430,7 @@ def test_plan_general_prefere_un_produit_substantiel_sous_budget_a_un_accessoire
     solution = compose_general_plan(
         intent,
         [
-            offer(1, "Spatbord set voor fietsen", taxonomy.SPORT, "Cyclisme", 17.0),
+            offer(1, "Monzana Fietsenrek 2 Fietsen", taxonomy.SPORT, "Cyclisme", 41.99),
             offer(2, "Vélo électrique pliant U4", taxonomy.SPORT, "Cyclisme", 558.99),
         ],
     )

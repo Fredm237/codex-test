@@ -117,7 +117,7 @@ def _scope_candidates(
     # représentatif déjà disponible sous le budget. Sans alternative substantielle,
     # aucune offre n’est écartée sur le seul prix.
     if budget is not None and len(scoped) > 1:
-        representativeness_floor = min(40.0, max(10.0, budget * 0.05))
+        representativeness_floor = min(60.0, max(10.0, budget * 0.05))
         substantial = [
             offer for offer in scoped
             if offer.price is not None and offer.price >= representativeness_floor
