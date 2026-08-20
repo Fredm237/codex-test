@@ -32,7 +32,7 @@ _KINDS_HORS_PRODUIT = {"digital_content", "accommodation", "service"}
 # Cette version fait partie de la clé de cache Assistant. Toute évolution de la
 # politique de pertinence doit donc l’avancer dans le même changement afin qu’une
 # carte décidée sous une règle ancienne ne survive jamais au déploiement.
-CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.4"
+CATALOG_RELEVANCE_POLICY_VERSION = "2026-08-20.5"
 
 # Familles d'articles satellites : elles portent le nom du produit recherché
 # sans en être. « Lingettes nettoyantes casques » n'est pas un casque, « adhésif
