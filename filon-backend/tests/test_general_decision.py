@@ -265,3 +265,27 @@ def test_plan_general_exige_la_preuve_dune_reduction_de_bruit_explicitement_dema
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Casque Bluetooth à réduction de bruit active"]
+
+
+
+def test_plan_general_ecarte_un_peripherique_vr_du_smartphone_principal():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="smartphone under €400",
+        locale="en",
+        scopes=(IntentScope(taxonomy.TELEPHONIE, "Smartphones", "smartphone under €400", ("smartphone", "mobile phone", "android", "iphone")),),
+        terms=("smartphone",),
+        required_title_phrases=(),
+        budget_eur=400.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "Virtual reality glasses for smartphone", taxonomy.TELEPHONIE, "Smartphones", 6.4),
+            offer(2, "Android smartphone with 128 GB storage", taxonomy.TELEPHONIE, "Smartphones", 249.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["Android smartphone with 128 GB storage"]
