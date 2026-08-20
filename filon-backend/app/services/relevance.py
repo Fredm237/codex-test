@@ -51,6 +51,7 @@ _SATELLITES = {
     "handgreep", "handle", "grip", "rig", "lunette", "lunettes", "glasses",
     "virtual", "reality", "vr", "ventilateur", "ventilator", "fan", "cooler", "cooling",
     "selfie", "selfiestick", "stick", "tripod", "statief", "remote", "afstandsbediening",
+    "imprimante", "printer", "printers", "fotoprinter",
     "rebond", "rebound", "calibration", "tuning",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
