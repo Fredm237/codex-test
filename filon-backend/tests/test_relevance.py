@@ -307,3 +307,19 @@ def test_exclut_un_moniteur_portable_d_une_demande_d_ordinateur_portable():
         relevance.mots("ordinateur portable sous 700 euros"),
         "Extension d'écran Moniteur Portable pour Ordinateur Portable",
     ) is True
+
+
+@pytest.mark.parametrize(
+    ("query", "offer_name"),
+    [
+        ("laptop onder 700 euro", "Wouf Studio Laptop Hoes 13-14 inch Laptopsleeve"),
+        ("smartwatch under 200 euros", "Vervangende Armbanden Set voor Smartwatch"),
+        ("wireless printer under 200 euros", "Canon Cartouche d'encre jaune"),
+        ("lave-vaisselle sous 700 euros", "Ménagère couverts couteau fourchette cuillère"),
+        ("kampeertent onder 300 euro", "Moustiquaire pour Tente"),
+        ("sleeping bag under 150 euros", "Clip ceinture Garmin"),
+        ("chaise de bureau sous 300 euros", "Coussins pour chaise"),
+    ],
+)
+def test_exclut_les_satellites_multilingues_releves_dans_outfit(query, offer_name):
+    assert relevance.is_unrequested_satellite(relevance.mots(query), offer_name) is True
