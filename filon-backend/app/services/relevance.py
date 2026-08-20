@@ -145,6 +145,12 @@ _FEMININE_GENDER_TERMS = frozenset({
 _MASCULINE_GENDER_TERMS = frozenset({
     "homme", "hommes", "men", "mens", "male", "heren", "heer", "boy", "boys", "garcon", "garcons",
 })
+# Comme le genre, le public enfant ne peut pas être déduit d’une demande neutre.
+# Ces marqueurs sont linguistiques et transversaux, sans dépendance au rayon.
+_CHILD_AUDIENCE_TERMS = frozenset({
+    "enfant", "enfants", "child", "children", "kid", "kids", "junior", "toddler",
+    "baby", "bebe", "bébé", "kleuter", "peuter",
+})
 
 
 _JEWELLERY_OBJECT_TERMS = frozenset({
@@ -287,6 +293,16 @@ def gender_compatible(request: str, nom_offre: str) -> bool:
     if wanted is None:
         return declared is None
     return declared is None or declared == wanted
+
+
+def targets_children(text: str) -> bool:
+    """Indique qu’une demande désigne explicitement un public enfant."""
+    return bool(set(mots(text)) & _CHILD_AUDIENCE_TERMS)
+
+
+def age_compatible(request: str, nom_offre: str) -> bool:
+    """Évite de recommander un produit enfant quand le public n’est pas précisé."""
+    return targets_children(request) or not bool(set(mots(nom_offre)) & _CHILD_AUDIENCE_TERMS)
 
 
 def is_unrequested_satellite(demande_termes: list[str], nom_offre: str) -> bool:
