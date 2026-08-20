@@ -48,7 +48,7 @@ _SATELLITES = {
     "molybdene", "molybdenum", "repair", "repairing", "ajusteur", "adjuster",
     "bracelet", "bracelets", "chain", "chaine", "chaîne", "rope", "cord",
     "handgreep", "handle", "grip", "rig", "lunette", "lunettes", "glasses",
-    "virtual", "reality", "vr",
+    "virtual", "reality", "vr", "ventilateur", "ventilator", "fan", "cooler", "cooling",
     "rebond", "rebound", "calibration", "tuning",
     # Une mention de "jacket" ne rend pas un sous-vêtement équivalent à une
     # veste. Ces couches et pièces de lingerie restent valides uniquement quand
