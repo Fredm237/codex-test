@@ -449,3 +449,18 @@ def test_plan_general_s_abstient_lorsqu_un_scope_ne_contient_que_des_satellites(
 
     assert solution["decision"] == "abstain"
     assert solution["items"] == []
+
+
+
+def test_plan_general_prefere_un_produit_principal_representatif_a_un_objet_minimal_sous_le_meme_budget():
+    intent = resolve_intent("laptop onder 700 euro", "nl")
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(1, "VTech Challenger Laptop", taxonomy.INFORMATIQUE, "Ordinateurs portables", 41.45),
+            offer(2, "HP 17 Ordinateur portable 17 pouces", taxonomy.INFORMATIQUE, "Ordinateurs portables", 379.0),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["name"] for item in solution["items"]] == ["HP 17 Ordinateur portable 17 pouces"]
