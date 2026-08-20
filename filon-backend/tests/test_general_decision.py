@@ -545,3 +545,31 @@ def test_plan_general_s_abstient_pour_une_machine_semi_automatique_quand_automat
 
     assert solution["decision"] == "abstain"
     assert solution["rejection_reason"] == "no_verified_scope"
+
+
+
+def test_plan_general_s_abstient_dans_un_sous_rayon_precis_sans_preuve_de_phrase_produit():
+    from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+
+    intent = GeneralIntent(
+        raw_request="sleeping bag under 150 euros",
+        locale="en",
+        scopes=(
+            IntentScope(
+                taxonomy.SPORT,
+                "Camping & Randonnée",
+                "sleeping bag under 150 euros",
+                ("sleeping bag", "sac de couchage", "camping sleeping bag"),
+            ),
+        ),
+        terms=("sleeping", "bag"),
+        required_title_phrases=(),
+        budget_eur=150.0,
+    )
+    solution = compose_general_plan(
+        intent,
+        [offer(1, "T-shirt randonnée adidas Multi Terrex Homme", taxonomy.SPORT, "Camping & Randonnée", 30.0)],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_verified_scope"
