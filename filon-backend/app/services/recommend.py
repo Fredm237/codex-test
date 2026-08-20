@@ -90,6 +90,21 @@ _VERIFIED_RANKS = {
 _HIST = {"baisse", "hausse", "stable"}
 _VALID_LOCALES = {"fr", "nl", "en"}
 _LANGUAGE_NAMES = {"fr": "français", "nl": "néerlandais", "en": "anglais"}
+# Chaque évolution du moteur de preuve doit séparer son cache des décisions
+# précédentes : une réponse devenue invalide ne peut pas survivre à un déploiement.
+RECOMMENDATION_ENGINE_VERSION = "2"
+
+
+def _recommend_cache_key(query: str, budget: float | None, country: str | None, locale: str) -> str:
+    """Construit une clé liée à la version du moteur de décision."""
+    return cache_key(
+        "recommend",
+        RECOMMENDATION_ENGINE_VERSION,
+        query.strip().lower(),
+        str(budget),
+        str(country),
+        locale,
+    )
 
 
 def _response_locale(locale: str | None) -> str:
@@ -391,7 +406,7 @@ async def generate_result(
     # La locale fait partie du cache : une annotation néerlandaise ne doit jamais
     # être réutilisée pour un visiteur anglais ou francophone.
     response_locale = _response_locale(locale)
-    key = cache_key("recommend", query.strip().lower(), str(budget), str(country), response_locale)
+    key = _recommend_cache_key(query, budget, country, response_locale)
 
     # Vérification du cache
     cached = await cache.get_json(key)
@@ -451,7 +466,7 @@ async def stream_events(
     """
     cache = get_cache()
     response_locale = _response_locale(locale)
-    key = cache_key("recommend", query.strip().lower(), str(budget), str(country), response_locale)
+    key = _recommend_cache_key(query, budget, country, response_locale)
 
     # Vérification rapide du cache
     cached = await cache.get_json(key)
