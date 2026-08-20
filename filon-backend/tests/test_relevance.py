@@ -231,3 +231,12 @@ def test_vetements_de_securite_et_kits_de_superposition_sont_des_satellites_hors
         "Tussenstuk wasmachine droger stapelkit universeel",
     ):
         assert relevance.is_unrequested_satellite(["produit principal"], title) is True
+
+
+
+def test_bequilles_et_stands_de_velo_sont_des_satellites_hors_demande():
+    for title in (
+        "Bicycle Gear Fietsstandaard Achterwiel verstelbaar",
+        "Kickstand stand for electric bicycle",
+    ):
+        assert relevance.is_unrequested_satellite(["velo electrique"], title) is True
