@@ -181,3 +181,34 @@ def test_mots_composes_sac_et_meuble_sont_des_satellites_hors_demande_explicite(
         "TV-kast lowboard voor televisies",
     ):
         assert relevance.is_unrequested_satellite(["fiets"], title) is True
+
+
+
+def test_preuves_neerlandaises_automatique_et_reduction_bruit_exigent_un_attribut_explicitement_documente():
+    assert relevance.proves_required_features(
+        "automatische koffiemachine onder 500 euro", "Koffiezetapparaat met glazen kan en timer"
+    ) is False
+    assert relevance.proves_required_features(
+        "automatische koffiemachine onder 500 euro", "Volautomatische koffiemachine met bonenmaler"
+    ) is True
+    assert relevance.proves_required_features(
+        "koptelefoon met ruisonderdrukking onder 150 euro", "Kinder koptelefoon Bluetooth"
+    ) is False
+    assert relevance.proves_required_features(
+        "koptelefoon met ruisonderdrukking onder 150 euro", "Koptelefoon met actieve ruisonderdrukking"
+    ) is True
+
+
+def test_batteries_tapis_et_velos_exercice_sont_des_satellites_ou_objets_connexes_hors_demande():
+    for title in (
+        "Batterie vélo électrique tige de selle",
+        "Anti trillingsmat wasmachine en droger",
+        "Mini vélo d exercice électrique avec résistance",
+    ):
+        assert relevance.is_unrequested_satellite(["produit principal"], title) is True
+
+
+def test_casque_exige_un_format_casque_et_ecarte_les_ecouteurs_intra_auriculaires():
+    assert relevance.request_requires_headphones("casque avec réduction de bruit") is True
+    assert relevance.has_headphone_proof("Wireless in-ear earbuds noise cancelling") is False
+    assert relevance.has_headphone_proof("Casque circum-aural avec réduction de bruit") is True

@@ -84,6 +84,11 @@ def _scope_candidates(
             if relevance.has_footwear_proof(offer.name or "")
             and relevance.gender_compatible(scope.source_text, offer.name or "")
         ]
+    if relevance.request_requires_headphones(scope.source_text):
+        scoped = [
+            offer for offer in scoped
+            if relevance.has_headphone_proof(offer.name or "")
+        ]
     feature_proven = [
         offer for offer in scoped
         if relevance.proves_required_features(scope.source_text, offer.name or "")
