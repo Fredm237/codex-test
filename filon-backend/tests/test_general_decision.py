@@ -437,3 +437,15 @@ def test_plan_general_prefere_un_produit_substantiel_sous_budget_a_un_accessoire
 
     assert solution["decision"] == "recommend"
     assert [item["name"] for item in solution["items"]] == ["Vélo électrique pliant U4"]
+
+
+
+def test_plan_general_s_abstient_lorsqu_un_scope_ne_contient_que_des_satellites():
+    intent = resolve_intent("ordinateur portable sous 700 €", "fr")
+    solution = compose_general_plan(
+        intent,
+        [offer(1, "Ramsvik Laptop Case", taxonomy.INFORMATIQUE, "Ordinateurs portables", 35.0)],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["items"] == []

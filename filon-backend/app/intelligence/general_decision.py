@@ -111,6 +111,12 @@ def _scope_candidates(
     ]
     if primary:
         scoped = primary
+    elif scoped:
+        # Le scope taxonomique ne rend pas un accessoire équivalent au produit
+        # principal. Lorsque la lecture exhaustive ne trouve que des satellites
+        # que la demande ne nomme pas, l'abstention est plus honnête qu'une
+        # substitution par une housse, un bracelet ou une cartouche.
+        return []
     # Dans un même scope, une micro-offre peut être un consommable ou un
     # périphérique dont le titre ne révèle pas encore assez sa nature. Ce signal
     # ne fabrique pas une valeur produit : il préfère seulement un candidat plus
