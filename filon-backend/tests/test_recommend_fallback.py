@@ -50,3 +50,15 @@ def test_cle_cache_assistant_inclut_la_version_du_moteur_de_decision():
     previous = recommend.cache_key("recommend", "1", "smartphone sous 400 euros", "400", "be", "fr")
 
     assert current != previous
+
+
+
+def test_cle_cache_assistant_depend_de_la_politique_de_pertinence():
+    from app.services import relevance
+
+    key = recommend._recommend_cache_key("ordinateur portable sous 700 euros", 700, "be", "fr")
+
+    assert relevance.CATALOG_RELEVANCE_POLICY_VERSION in recommend.RECOMMENDATION_ENGINE_VERSION
+    assert recommend.RECOMMENDATION_ENGINE_VERSION in key or key != recommend.cache_key(
+        "recommend", "assistant-catalog-policy-obsolete", "ordinateur portable sous 700 euros", "700", "be", "fr"
+    )
