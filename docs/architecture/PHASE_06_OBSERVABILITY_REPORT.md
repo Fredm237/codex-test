@@ -12,11 +12,12 @@ prouvés.**
 Le backend propage désormais un identifiant de requête opaque jusque dans les
 sous-étapes décisionnelles et les dépendances, mesure les latences HTTP agrégées
 et refuse la readiness quand la base ou la révision Alembic n'est pas prête. Un
-moteur local provisoire évalue cinq violations manifestes. Un export
-OpenMetrics standard est maintenant prêt et fermé sans secret. Sa configuration
-Prometheus, ses rollups multi-réplica et un dashboard Grafana descriptif sont
-versionnés et validés localement, mais aucun agrégateur, backend de traces,
-dashboard, sink/pager ou trafic représentatif n'est encore qualifié.
+moteur local provisoire évalue cinq violations manifestes. L'export
+OpenMetrics standard, fermé sans secret, est désormais vérifié sur le backend
+Railway de production. Sa configuration Prometheus, ses rollups multi-réplica
+et un dashboard Grafana descriptif sont versionnés et validés localement, mais
+aucun agrégateur, backend de traces, dashboard, sink/pager ou trafic
+représentatif n'est encore qualifié.
 
 Le 29 août 2026, le backend Core a été déployé sur Railway après sauvegarde et
 restore drill. `/health/live` et `/health/ready` répondent HTTP 200, la base est
@@ -80,6 +81,14 @@ invalide ou une version inconnue. Les latences sont exportées en secondes sous
 forme de gauges statistiques : elles ne sont pas présentées comme un
 histogramme multi-replica.
 
+Le contrôle production du 29 août 2026 confirme HTTP 401 sans Bearer, avec un
+Bearer incorrect et avec le secret en query string, puis HTTP 200 uniquement
+avec le Bearer correct. Le corps OpenMetrics réel respecte le content type 1.0,
+`Cache-Control: no-store`, le suffixe `# EOF`, les familles `filon_` et les
+labels fermés ; le secret est absent de toutes les réponses. Le
+[reçu production expurgé](PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md) borne
+précisément cette preuve.
+
 ### Pack agrégateur et dashboard
 
 `filon-backend/observability` fournit une configuration Prometheus 3.13.2 LTS
@@ -102,7 +111,9 @@ ou inventaire partiel avant un remplacement atomique. Le vérificateur HTTPS
 interroge ensuite l’API Prometheus : version 3.13.2 exacte, roster et santé des
 11 règles, compte exact des cibles, scrapes récents et une série présente par
 rollup. Son reçu versionné ne contient ni hôte, ni instance, ni URL, ni token.
-Aucun reçu réel n’est encore produit faute d’endpoint et d’inventaire externes.
+Aucun reçu d'agrégation réel n’est encore produit faute d'un Prometheus déployé
+et d'un inventaire externe ; cela n'annule pas la qualification directe de
+l'endpoint Railway.
 
 ### Sorties Product Intelligence
 
@@ -187,6 +198,9 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 - activation : contrats JSON Draft 2020-12, compilation atomique et preuve
   distante expurgée couvertes avec le pack par **49/49 tests** ; état vide
   explicitement compilé en `sha256:37517e5f3dc66819f61f5a7bb8ace1921282415f10551d2defa5c3eb0985b570` ;
+- production Railway : matrice d'authentification **401/401/401/200**, content
+  type OpenMetrics 1.0, `no-store`, `# EOF`, **24 familles**, **15 labels
+  fermés**, aucun préfixe hors `filon_` et aucune fuite du secret ;
 - corrélation décisionnelle et dépendances : **8/8 tests ciblés** ; même
   trace-id sur les jalons et spans imbriqués, isolation concurrente,
   `traceparent` LLM et sur les trois chemins Awin, restauration de contexte,
@@ -218,15 +232,16 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 - build web isolé du parent `922766e`, inchangé par ce commit backend/docs :
   compilation, types et 42 routes verts ; contrats v1 et claims verts ;
 - contrat et syntaxe de l'extension isolés verts ;
-- `npm test` isolé reste rouge sur les **5 tests MegaMenu de baseline** déjà
-  consignés. Le commit ne masque ni ne revendique la résolution de cette dette.
+- l'intégration autorisée de MegaMenu et de sa suite porte ensuite le web à
+  **17/17**, avec typecheck et build de production verts localement et dans la
+  qualification distante.
 
 ## Limites connues
 
 1. Les métriques sont locales à un processus et repartent de zéro au
    redémarrage ; elles ne permettent pas un SLO multi-réplica.
-2. L'export OpenMetrics reste un scrape de compteurs locaux ; le pack de
-   collecte est prêt, mais aucun collecteur, rétention ou agrégation
+2. L'export OpenMetrics qualifié reste un scrape de compteurs locaux ; le pack
+   de collecte est prêt, mais aucun collecteur, rétention ou agrégation
    multi-replica n'est encore prouvé en environnement réel. Le compilateur et
    le vérificateur empêchent une preuve partielle, mais ne créent pas les
    réplicas ni l’accès manquants.
@@ -243,11 +258,9 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
    l'export standard dans un environnement distant.
 7. Les compteurs de décision portent sur des évaluations d'offre, pas sur des
    utilisateurs uniques ; une page peut en produire plusieurs.
-8. Le nettoyage de confidentialité de ce lot couvre le middleware, les étapes
-   instrumentées et le parcours assistant ciblé. Le fichier local protégé
-   `api/routes/catalog.py` conserve encore des logs/diagnostics admin pouvant
-   contenir filtres libres, réponse fournisseur ou message d'exception ; il
-   n'est ni intégré ni revendiqué dans cette preuve sans autorisation explicite.
+8. Le contrôle direct valide un instant du contrat, pas la conservation à
+   travers les redémarrages, les resets sous charge ou une période de trafic
+   représentatif.
 9. `FORWARDED_ALLOW_IPS` est fermé à `127.0.0.1` en production, sans wildcard.
    La chaîne de pairs réellement présentée par le proxy Railway doit encore
    être vérifiée avant de déclarer la front door entièrement qualifiée.
@@ -262,8 +275,8 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
   chaque replica puis conserver le reçu expurgé ;
 - déployer un backend de traces approuvé, vérifier la réception des
   `traceparent` et relier sa rétention aux règles de confidentialité ;
-- vérifier à distance l'export du contrat versionné unknown, fraîcheur,
-  exclusions et abstentions ;
+- vérifier via l'agrégateur le contrat versionné unknown, fraîcheur, exclusions
+  et abstentions sur une période représentative ;
 - importer le dashboard, vérifier les rollups et percentiles locaux, puis
   conserver une preuve datée des scrapes et resets ;
 - brancher l'instance canonique à un ordonnanceur contrôlé, puis tester son

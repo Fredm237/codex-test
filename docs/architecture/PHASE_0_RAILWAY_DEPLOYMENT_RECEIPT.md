@@ -118,7 +118,11 @@ Le volume PostgreSQL est `READY` à **7 855,56 Mio sur 20 000 Mio**, soit
 **39,28 %**. Les logs historiques du 28 août 2026 contiennent cependant des
 échecs `No space left on device` sur des fichiers temporaires PostgreSQL. Une
 alerte de capacité et une politique de sauvegarde planifiée restent requises ;
-aucun planning de backup n'était configuré au moment du reçu.
+un audit API ultérieur a confirmé **zéro planning**, deux sauvegardes manuelles
+sans expiration et aucun dashboard/moniteur Railway dans l'environnement.
+L'export OpenMetrics direct de production a en revanche passé son contrat
+d'authentification, de format et de cardinalité. Les mesures expurgées figurent
+dans le [reçu observabilité et résilience](PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md).
 
 Le rollback opérationnel reste applicatif : les déploiements précédents sont
 conservés dans l'historique, la nouvelle structure est compatible avec
@@ -126,10 +130,11 @@ l'ancien runtime et la migration des drapeaux ne réintroduit volontairement ni
 nullable ni default en downgrade. La sauvegarde native et le dump restauré
 restent les recours de restauration de données en cas d'incident explicite.
 
-La production Core ne lève pas les autres gates : agrégateur OpenMetrics,
-backend de traces, WAF ou limite distribuée, pager, trafic représentatif et
-SLO restent non prouvés. Les sept datasets humains Quality Lab restent vides ;
-Product Graph, Phase 1 et Immersive demeurent donc **NO-GO**.
+La production Core ne lève pas les autres gates : l'endpoint OpenMetrics direct
+est qualifié, mais agrégateur, rétention, backend de traces, WAF ou limite
+distribuée, pager, trafic représentatif et SLO restent non prouvés. Les sept
+datasets humains Quality Lab restent vides ; Product Graph, Phase 1 et
+Immersive demeurent donc **NO-GO**.
 
 ## Nettoyage des accès temporaires
 
