@@ -4,9 +4,10 @@ Date : 29 août 2026
 
 ## Décision
 
-**GO local pour la fondation HTTP, les probes fail-closed et l'export
-OpenMetrics authentifié. NO-GO pour
-considérer P0.6 terminé en production.**
+**GO production pour le backend Core, les probes fail-closed et l'export
+OpenMetrics authentifié. NO-GO pour considérer P0.6 entièrement terminé tant
+que l'agrégation, les traces, le pager et la protection distribuée ne sont pas
+prouvés.**
 
 Le backend propage désormais un identifiant de requête opaque jusque dans les
 sous-étapes décisionnelles et les dépendances, mesure les latences HTTP agrégées
@@ -15,7 +16,14 @@ moteur local provisoire évalue cinq violations manifestes. Un export
 OpenMetrics standard est maintenant prêt et fermé sans secret. Sa configuration
 Prometheus, ses rollups multi-réplica et un dashboard Grafana descriptif sont
 versionnés et validés localement, mais aucun agrégateur, backend de traces,
-dashboard, sink/pager ou trafic de production n'est encore déployé.
+dashboard, sink/pager ou trafic représentatif n'est encore qualifié.
+
+Le 29 août 2026, le backend Core a été déployé sur Railway après sauvegarde et
+restore drill. `/health/live` et `/health/ready` répondent HTTP 200, la base est
+`ok`, la révision active est `f4c81a9d2e70`, le runtime journalise
+`env=production` et un seul réplica est `RUNNING`. La preuve détaillée et les
+limites de cette qualification sont dans le
+[reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md).
 
 ## Périmètre livré
 
@@ -240,8 +248,9 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
    `api/routes/catalog.py` conserve encore des logs/diagnostics admin pouvant
    contenir filtres libres, réponse fournisseur ou message d'exception ; il
    n'est ni intégré ni revendiqué dans cette preuve sans autorisation explicite.
-9. Le CIDR réel du proxy Railway n'est pas inventé : il doit être vérifié et
-   défini dans `FORWARDED_ALLOW_IPS` avant tout GO production.
+9. `FORWARDED_ALLOW_IPS` est fermé à `127.0.0.1` en production, sans wildcard.
+   La chaîne de pairs réellement présentée par le proxy Railway doit encore
+   être vérifiée avant de déclarer la front door entièrement qualifiée.
 10. Le besoin Assistant reste transporté dans `q=` par le flux SSE actuel ; les
     logs applicatifs sont propres, mais un proxy ou une plateforme amont peut
     encore observer l'URL avant FILON.

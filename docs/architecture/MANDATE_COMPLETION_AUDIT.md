@@ -1,10 +1,10 @@
 # FILON — audit canonique de complétude des trois mandats
 
 - Date de coupure initiale : **29 août 2026, 10:03 CEST**
-- Dernière qualification : **29 août 2026, 14:00 CEST**
+- Dernière qualification : **29 août 2026, 16:00 CEST**
 - Branche locale : `codex/filon-phase-0-core`
-- Référence applicative locale auditée : `2cf314c`
-- Référence applicative distante auditée : `7f914b2`, arbre commun `822edf543e8ba43943372cdbeff09357bc3e82fa`
+- Référence applicative locale auditée : `6717b39`
+- Référence applicative distante auditée : `7896c6d`, arbre commun `04560737a72825928612ae00fb52eef4eb7e009f`
 - Dépôt distant : `Fredm237/codex-test`, public
 - `main` distant : `57724c72e77c50ca54aaf64338f838dda3be2747`
 - Décision : **MANDAT INCOMPLET — PHASE 0 NO-GO — PHASE 1 ET IMMERSIVE INTERDITES PAR GATE**
@@ -40,13 +40,13 @@ courant, mais le mandat complet n'est pas fini. Les tests techniques verts ne
 remplacent ni un benchmark humain indépendant, ni un run GitHub Actions, ni une
 preuve de production.
 
-Les trois conditions qui empêchent encore un GO sont :
+Les trois conditions qui empêchent encore un GO global sont :
 
 1. les sept datasets Quality Lab contiennent chacun **0 cas humain** ;
 2. Product/Variant Graph n'existe pas encore et ne peut pas être évalué sans ces datasets ;
-3. l'accès Railway et sa topologie sont maintenant qualifiés en lecture, mais le
-   backend public reste un ancien processus `env=dev`, sans backup/restore drill
-   ni preuve de collecte/traces/WAF/pager.
+3. le backend Core Railway, son backup/restore drill et sa migration sont
+   qualifiés, mais l'agrégateur, les traces, le WAF ou la limite distribuée, le
+   pager et les SLO sur trafic représentatif ne le sont pas.
 
 Depuis la coupure initiale, l'intégration catalogue/Assistant/MegaMenu est
 acquise, la branche est publique et byte-identique, Actions #344 a exécuté les
@@ -111,8 +111,8 @@ ne doit donc être lancé.
 | Root causes et dette | **PROUVÉ** | [Baseline qualité](BASELINE_QUALITY_REPORT.md), [Keep/Refactor/Rewrite/Delete](KEEP_REFACTOR_REWRITE_DELETE.md) |
 | Architecture proposée | **PROUVÉ COMME CIBLE** | [Architecture cible](TARGET_ARCHITECTURE.md) |
 | Fichiers et ownership | **PROUVÉ DANS LE LOT P0** | Cartographie, [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) et ruleset distante sans bypass |
-| Migration et rollback | **PROUVÉ LOCALEMENT** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md) |
-| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 035 + 1 ignoré, web 17/17, typecheck/build ; Actions #344 : migrations 12/12, backend 2 036/2 036 et trois clients verts |
+| Migration et rollback | **PROUVÉ LOCALEMENT ET EN PRODUCTION** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) |
+| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 035 réussis + 2 ignorés, web 17/17, typecheck/build ; Actions #345 : migrations et régressions backend vertes, trois clients verts, échec final attendu du seul gate Quality humain vide |
 | Benchmarks | **EXTERNE NON MESURABLE** | Holdout humain absent |
 | Before/after metrics | **EXTERNE NON MESURABLE** | Aucun scorecard métier éligible ni trafic représentatif |
 | Known limitations | **PROUVÉ** | Ce document, le registre des preuves et les rapports P0 |
@@ -157,11 +157,12 @@ force-push sont interdits, sans bypass.
 
 ### 4. Production
 
-Le préflight Railway authentifié a confirmé le service web, Postgres et le
-chemin Config as Code, sans lire de secret ni muter la production. Le GO exige
-encore un backup logique avec restore drill, puis une preuve sur
-l'environnement réel : CIDR proxy Railway, WAF/limitation distribuée,
-ordonnanceur effectivement déployé, scrapes
+Le backend Core Railway est désormais qualifié après sauvegarde native, dump
+logique restauré hors production, fenêtre sans écrivain, adoption Alembic,
+déploiement Docker et readiness réelle. Le
+[reçu de déploiement](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) en est l'autorité.
+Le GO P0.6 complet exige encore une preuve sur l'environnement réel : WAF ou
+limitation distribuée, ordonnanceur effectivement déployé, scrapes
 OpenMetrics de chaque replica vers l'agrégateur, reçu du vérificateur,
 dashboards, canal/pager, canary et trafic représentatif. Une suite locale ne
 peut pas attester ces propriétés.
@@ -170,10 +171,9 @@ peut pas attester ces propriétés.
 
 **NO-GO Phase 1. NO-GO Immersive.**
 
-Les actions locales et de gouvernance disponibles sont épuisées pour ce gate.
-La prochaine entrée métier est la curation et l'annotation indépendante de
-l'inventaire réel ; la prochaine entrée production est l'autorisation de
-charger temporairement les variables PostgreSQL pour le backup/restore drill,
-puis le déploiement et l'infrastructure de collecte/alerting. Avant ces preuves,
+Le backend Core et sa migration de production sont acquis. La prochaine entrée
+métier est la curation et l'annotation indépendante de l'inventaire réel ; la
+prochaine entrée production est l'infrastructure de collecte, traces,
+protection distribuée et alerting. Avant ces preuves,
 commencer Product Graph, Fashion, Personal Commerce ou la bible immersive
 violerait directement l'ordre de dépendances des mandats.

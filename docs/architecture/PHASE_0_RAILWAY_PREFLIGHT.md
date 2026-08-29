@@ -3,7 +3,11 @@
 - Date de coupure : **29 août 2026, 13:37 CEST**
 - Environnement : `production`
 - Projet Railway : `feisty-rejoicing`
-- Décision : **accès confirmé ; déploiement NO-GO avant backup et restore drill**
+- Décision initiale : **accès confirmé ; déploiement NO-GO avant backup et restore drill**
+- Décision après exécution : **backup, restore drill, adoption Alembic et backend Core qualifiés**
+
+Le reçu d'exécution canonique est
+[PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md).
 
 Ce rapport ne contient ni jeton, ni valeur de variable, ni chaîne de connexion.
 L'identifiant transmis par le propriétaire a été validé comme jeton de projet
@@ -45,11 +49,17 @@ preuve de restauration.
 
 ## Outil qualifié
 
-La CLI officielle Railway v5.30.1 pour macOS arm64 a été téléchargée dans un
-répertoire temporaire, sans installation globale. L'archive vérifiée porte le
-SHA-256 :
+La CLI officielle Railway v5.30.1 pour macOS arm64 a d'abord été téléchargée
+dans un répertoire temporaire, sans installation globale. L'archive vérifiée
+porte le SHA-256 :
 
 `305dbcacfe3c1241b1375e40aaa06bceeefce6fdbcd827c04b06219bf7d703e5`.
+
+Pour corriger le comportement de scale et poursuivre avec la version courante,
+la copie temporaire a été remplacée par la v5.45.7 officielle. Son archive
+macOS arm64 a été vérifiée contre le digest GitHub publié :
+
+`b8f0692f585875b1d1767ad65e62b93488cf38b4b6af2665bcf530c8a58d9dbe`.
 
 Références opératoires : [API Railway](https://docs.railway.com/integrations/api),
 [CLI Railway](https://docs.railway.com/cli),
@@ -71,5 +81,7 @@ L'ordre obligatoire est désormais :
 6. seulement ensuite qualifier ordonnanceur, scrapes multi-réplica, rétention,
    dashboard, traces, WAF/CIDR et pager.
 
-Tant que les étapes 1 à 5 ne sont pas prouvées, l'accès Railway ne vaut ni
-backup, ni qualification production, ni autorisation de lancement.
+Les étapes 1 à 5 sont désormais prouvées dans le reçu d'exécution. Cette
+qualification couvre le backend Core, sa migration et ses probes ; elle ne
+vaut ni preuve Quality humaine, ni qualification de l'agrégateur, des traces,
+du WAF, du pager ou d'un SLO sur trafic représentatif.
