@@ -20,7 +20,8 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
-HEAD_REVISION = "3a7f9c2e5b61"
+BASELINE_REVISION = "b9db07b15986"
+HEAD_REVISION = "f4c81a9d2e70"
 MIGRATION_LOCK_ID = 0x46494C4F4E
 
 
@@ -59,6 +60,91 @@ async def _reset_public_schema(url: str) -> None:
         async with engine.begin() as connection:
             await connection.execute(text("DROP SCHEMA public CASCADE"))
             await connection.execute(text("CREATE SCHEMA public"))
+    finally:
+        await engine.dispose()
+
+
+async def test_postgresql_adopts_known_offer_flag_drift_fail_closed() -> None:
+    url = _test_database_url()
+    await _reset_public_schema(url)
+
+    baseline = await asyncio.to_thread(_run_alembic, url, "upgrade", BASELINE_REVISION)
+    assert baseline.returncode == 0, "La baseline PostgreSQL n'a pas pu être créée"
+
+    engine = create_async_engine(url)
+    try:
+        async with engine.begin() as connection:
+            for statement in (
+                "ALTER TABLE offers ALTER COLUMN is_canonical DROP NOT NULL",
+                "ALTER TABLE offers ALTER COLUMN is_canonical SET DEFAULT TRUE",
+                "ALTER TABLE offers ALTER COLUMN is_adult DROP NOT NULL",
+                "ALTER TABLE offers ALTER COLUMN is_adult SET DEFAULT FALSE",
+            ):
+                await connection.execute(text(statement))
+
+        adopted = await asyncio.to_thread(_run_alembic, url, "upgrade", "head")
+        assert adopted.returncode == 0, "L'adoption du drift historique a échoué"
+
+        async with engine.connect() as connection:
+            states = {
+                row.column_name: (row.is_nullable, row.column_default)
+                for row in (
+                    await connection.execute(
+                        text(
+                            "SELECT column_name, is_nullable, column_default "
+                            "FROM information_schema.columns "
+                            "WHERE table_schema = 'public' AND table_name = 'offers' "
+                            "AND column_name IN ('is_canonical', 'is_adult')"
+                        )
+                    )
+                )
+            }
+            revision = await connection.scalar(
+                text("SELECT version_num FROM alembic_version")
+            )
+
+        assert states == {
+            "is_canonical": ("NO", None),
+            "is_adult": ("NO", None),
+        }
+        assert revision == HEAD_REVISION
+        drift = await asyncio.to_thread(_run_alembic, url, "check")
+        assert drift.returncode == 0, "Le schéma adopté conserve un drift"
+    finally:
+        await engine.dispose()
+
+    await _reset_public_schema(url)
+    baseline = await asyncio.to_thread(_run_alembic, url, "upgrade", BASELINE_REVISION)
+    assert baseline.returncode == 0
+    engine = create_async_engine(url)
+    try:
+        async with engine.begin() as connection:
+            for statement in (
+                "ALTER TABLE offers ALTER COLUMN is_canonical DROP NOT NULL",
+                "ALTER TABLE offers ALTER COLUMN is_canonical SET DEFAULT TRUE",
+                "ALTER TABLE offers ALTER COLUMN is_adult DROP NOT NULL",
+                "ALTER TABLE offers ALTER COLUMN is_adult SET DEFAULT FALSE",
+            ):
+                await connection.execute(text(statement))
+            await connection.execute(
+                text(
+                    "INSERT INTO merchants (id, awin_mid, name, slug, joined) "
+                    "VALUES (1, 1001, 'Migration Merchant', 'migration-merchant', TRUE)"
+                )
+            )
+            await connection.execute(
+                text(
+                    "INSERT INTO offers "
+                    "(id, merchant_id, awin_product_id, name, is_canonical, is_adult) "
+                    "VALUES (1, 1, 'migration-offer', 'Migration Offer', NULL, NULL)"
+                )
+            )
+
+        rejected = await asyncio.to_thread(_run_alembic, url, "upgrade", "head")
+        combined_output = f"{rejected.stdout}\n{rejected.stderr}"
+        assert rejected.returncode != 0
+        assert "Adoption refusée" in combined_output
+        assert "valeur(s) NULL" in combined_output
     finally:
         await engine.dispose()
 

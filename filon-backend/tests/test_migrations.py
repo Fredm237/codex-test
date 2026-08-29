@@ -28,7 +28,8 @@ APPLICATION_TABLES = set(Base.metadata.tables)
 SHADOW_TABLES = {"raw_source_records", "observations", "quarantine_records"}
 BASELINE_REVISION = "b9db07b15986"
 SHADOW_REVISION = "d75faf1f6a94"
-HEAD_REVISION = "3a7f9c2e5b61"
+CURRENCY_REVISION = "3a7f9c2e5b61"
+HEAD_REVISION = "f4c81a9d2e70"
 
 
 @pytest.fixture(autouse=True)
@@ -99,7 +100,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
 
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == SHADOW_REVISION
+    assert scripts.get_revision(HEAD_REVISION).down_revision == CURRENCY_REVISION
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):

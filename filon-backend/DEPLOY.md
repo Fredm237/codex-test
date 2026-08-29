@@ -70,7 +70,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    Railway fournit ensuite une URL publique, par exemple
    `https://filon-backend-production.up.railway.app`.
 7. Vérifier : ouvrir `https://<url>/health/ready` → HTTP 200 avec la révision
-   `3a7f9c2e5b61` attendue. Railway exige ce 200 avant de basculer le trafic.
+   `f4c81a9d2e70` attendue. Railway exige ce 200 avant de basculer le trafic.
    `/health/live` reste un diagnostic de processus et `/health` un diagnostic
    détaillé des dépendances. Enfin,
    `https://<url>/api/advise/stream?q=un%20pc%20portable%20800€` doit renvoyer un flux SSE.
@@ -171,7 +171,8 @@ retrait ultérieur du contrat legacy seront un changement séparé, fondé sur c
 import live.
 
 En cas de régression, remettre la version applicative précédente et
-`OBSERVATION_SHADOW_ENABLED=false`, tout en conservant le schéma à la tête.
+`OBSERVATION_SHADOW_ENABLED=false`, tout en conservant le schéma à la tête
+`f4c81a9d2e70`.
 Ne jamais downgrader vers la baseline. Le downgrade technique
 `3a7f9c2e5b61` → `d75faf1f6a94` supprime la colonne de devise et les valeurs
 qu'elle contient ; une suppression structurelle exige une migration

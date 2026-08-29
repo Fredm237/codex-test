@@ -10,9 +10,10 @@ projet et l'environnement n'ont pas été confirmés par l'opérateur.
 |---|---|---|
 | Baseline historique | `b9db07b15986` | Adopte les 14 tables Core/Intelligence historiques |
 | Expansion shadow | `d75faf1f6a94` | Ajoute `raw_source_records`, `observations` et `quarantine_records` |
-| Tête réelle | `3a7f9c2e5b61` | Ajoute `price_snapshots.currency`, nullable et sans backfill inventé |
+| Devise observée | `3a7f9c2e5b61` | Ajoute `price_snapshots.currency`, nullable et sans backfill inventé |
+| Tête réelle | `f4c81a9d2e70` | Normalise fail-closed les deux drapeaux historiques d'`offers` |
 
-La seule tête attendue est `3a7f9c2e5b61`. La colonne de devise reste
+La seule tête attendue est `f4c81a9d2e70`. La colonne de devise reste
 `NULL` pour les relevés antérieurs : la devise d'un montant historique n'est
 pas déductible de l'offre courante.
 
@@ -29,7 +30,9 @@ pas déductible de l'offre courante.
 - Snapshot, checksum et exercice de restauration réussi précèdent toute
   adoption ou activation de la configuration Railway.
 - Une base existante conforme est **stampée** à sa structure réelle ; elle
-  n'est jamais upgradée depuis `base`.
+  n'est jamais upgradée depuis `base`. La seule variante couverte est celle du
+  parcours 3B : elle est prouvée exhaustivement, stampée à la baseline puis
+  immédiatement normalisée par la révision fail-closed dédiée.
 - Un rollback applicatif ne dégrade pas le schéma. La baseline n'est jamais
   une cible de downgrade en production.
 
@@ -128,7 +131,7 @@ python -m pip install -r requirements.txt
 alembic heads
 ```
 
-Résultat attendu : une seule tête, `3a7f9c2e5b61`. Confirmer ensuite hors log
+Résultat attendu : une seule tête, `f4c81a9d2e70`. Confirmer ensuite hors log
 le projet, l'environnement et l'hôte visés. Pour PostgreSQL, `pg_dump` et
 `pg_restore` reçoivent une URL native `postgresql://`, pas le suffixe
 SQLAlchemy `+asyncpg`.
@@ -159,15 +162,26 @@ alembic current
 alembic check
 ```
 
-La révision courante doit être `3a7f9c2e5b61 (head)` et le check doit afficher
+La révision courante doit être `f4c81a9d2e70 (head)` et le check doit afficher
 `No new upgrade operations detected.`.
 
-### 3B. Base existante exactement à la baseline
+### 3B. Base existante à la baseline ou variante legacy couverte
 
 Vérifier les 14 tables attendues et les colonnes historiques de `offers` :
 `product_id`, `filon_category`, `filon_subcategory`, `offer_kind`, `dedup_key`,
 `is_canonical`, `is_adult`. Vérifier aussi `pg_trgm`,
 `ix_offers_name_trgm` et `ix_offers_brand_trgm`.
+
+Deux formes seulement sont admises pour `offers.is_canonical` et
+`offers.is_adult` :
+
+- baseline stricte : `NOT NULL`, sans default serveur ;
+- variante legacy couverte : colonnes nullables, respectivement defaults
+  `TRUE` et `FALSE`, avec **zéro** valeur `NULL` dans les deux colonnes.
+
+La révision `f4c81a9d2e70` refuse toute colonne absente, tout default différent
+ou toute valeur `NULL`. Elle valide les contraintes avant de poser `NOT NULL`,
+puis retire les defaults sans modifier les valeurs existantes.
 
 Ce chemin n'est valide que si les trois tables shadow et
 `price_snapshots.currency` sont encore absentes. Après preuve :
@@ -179,8 +193,9 @@ alembic current
 alembic check
 ```
 
-L'upgrade ajoute les trois tables shadow puis la colonne de devise, sans
-modifier les données historiques ni fabriquer de devise.
+L'upgrade ajoute les trois tables shadow puis la colonne de devise, et
+normalise les deux drapeaux couverts sans modifier les valeurs historiques ni
+fabriquer de devise.
 
 ### 3C. Base existante exactement identique à la tête
 
@@ -189,7 +204,7 @@ exactement aux modèles et aux migrations de tête, une adoption directe est
 possible après la même sauvegarde et une comparaison exhaustive :
 
 ```bash
-alembic stamp 3a7f9c2e5b61
+alembic stamp f4c81a9d2e70
 alembic current
 alembic check
 ```
@@ -211,7 +226,7 @@ Avant tout premier déploiement avec migration automatique :
 3. configurer `ENV=production`, `DATABASE_SCHEMA_MODE=alembic` et une
    `DATABASE_URL` confirmée ;
 4. garder `OBSERVATION_SHADOW_ENABLED=false` ;
-5. obtenir `3a7f9c2e5b61 (head)` avec `alembic current` et un `alembic check`
+5. obtenir `f4c81a9d2e70 (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -222,7 +237,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `3a7f9c2e5b61` ;
+  `f4c81a9d2e70` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -245,7 +260,7 @@ baseline.**
 ### Régression applicative
 
 Remettre la version applicative précédente, conserver le schéma à
-`3a7f9c2e5b61` et garder le shadow désactivé. Les structures d'expansion sont
+`f4c81a9d2e70` et garder le shadow désactivé. Les structures d'expansion sont
 compatibles avec l'ancien lecteur, qui les ignore. Un rollback applicatif ne
 justifie ni un downgrade ni `DATABASE_SCHEMA_MODE=legacy`.
 
