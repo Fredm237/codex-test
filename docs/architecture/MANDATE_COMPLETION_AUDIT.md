@@ -147,8 +147,10 @@ tableau.
 
 ### 3. GitHub et CI distante — acquis
 
-La branche publique pointe sur `7f914b2` avec le même arbre que le commit local
-`2cf314c`. Actions #344 prouve les quatre surfaces et publie l'artefact Quality. La ruleset
+La référence applicative distante `7f914b2` possède le même arbre que le commit
+local `2cf314c` ; la tête de branche est un descendant documentaire sans
+modification applicative. Actions #344 prouve les quatre surfaces et publie
+l'artefact Quality. La ruleset
 `21798272` est active sur `main`, exige les quatre jobs GitHub Actions, la PR,
 la résolution des conversations et une branche à jour ; suppression et
 force-push sont interdits, sans bypass.
