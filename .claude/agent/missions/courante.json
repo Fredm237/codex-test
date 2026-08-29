@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 0 Product Intelligence Core",
   "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
   "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-29T12:14:39+02:00",
+  "maj": "2026-08-29T13:06:00+02:00",
   "contraintes": [
     "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
     "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
@@ -24,14 +24,14 @@
     {
       "id": "p0_b",
       "objectif": "Figer et tester les contrats v1 et la sémantique unknown",
-      "statut": "en_cours",
+      "statut": "fait",
       "depend": [
         "p0_a"
       ],
       "outil": "contracts + compatibility suite",
       "attendu": "Snapshots web/mobile/extension et aucune valeur positive sans preuve",
-      "obtenu": "Registre contracts/v1 et snapshots unknown ; devise/observation additives ; /advise, recherche catalogue et planificateur général durcis sur stock, fraîcheur 72 h, prix, livraison, budget, FX et remises ; primitives de vérité prix partagées ; cartes, rails et fiches web non protégés masqués sans preuve courante ; invariance commerciale bornée ; intégration protégée catalogue/Assistant/MegaMenu encore ouverte",
-      "verification": "Commits f5ae21b, e152ed0, 4e5755d et 56de1cf : les consommateurs versionnés s'abstiennent sans prix positif, devise supportée, stock explicite et preuve fraîche. Copie isolée du lot protégé : backend 1928 réussis + 1 ignoré, 120 tests catalogue ciblés, web 17/17, typecheck et build de 42 pages. L'état réel reste incomplet tant que catalog.py, SearchAssistant.tsx et le lot MegaMenu ne sont pas intégrés sous autorisation ciblée.",
+      "obtenu": "Registre contracts/v1 et snapshots unknown ; devise/observation additives ; /advise, recherche catalogue et planificateur général durcis sur stock, fraîcheur 72 h, prix, livraison, budget, FX et remises ; primitives de vérité prix partagées ; catalogue, agrégats, cartes, rails, fiches et Assistant s'abstiennent sans preuve courante exacte ; invariance commerciale bornée ; MegaMenu et sa couverture équilibrée intégrés",
+      "verification": "Commits f5ae21b, e152ed0, 4e5755d, 56de1cf, 4a95a42 et 90246b2 : aucun prix, ordre, agrégat, verdict ou carte favorable sans snapshot exact et frais, devise supportée et stock positif ; aucune comparaison inter-devise ; liens Assistant limités au catalogue interne ou à un HTTPS marchand public sûr. Validation locale : 173 tests backend ciblés, 2020 réussis + 1 ignoré au complet, web 17/17, typecheck et build de 42 pages. GitHub Actions #343 confirme 2021 tests backend, web, mobile et extension verts.",
       "tentatives": 1
     },
     {
@@ -97,8 +97,8 @@
       ],
       "outil": "GitHub",
       "attendu": "Backend, web, mobile, extension, contrats, migrations et quality lab requis",
-      "obtenu": "Workflow local multi-surfaces avec backend, Postgres/Alembic, contrats, Quality, web, mobile et extension ; rapport readiness téléversé et intégrité invalide toujours bloquante ; simulation complète verte ; publication distante, exécution CI et protection main restantes",
-      "verification": "Le 29-08-2026 à 10:03 CEST, GitHub confirme Fredm237/codex-test public, main au commit 57724c72e77c50ca54aaf64338f838dda3be2747, branche codex/filon-phase-0-core absente, aucun ruleset et aucune protection classique. La copie isolée passe backend 1928 + 1 ignoré, web 17/17, typecheck et build 42 pages ; cette preuve n'est ni un run GitHub Actions ni une publication.",
+      "obtenu": "Workflow multi-surfaces publié avec backend, Postgres/Alembic, contrats, Quality, web, mobile et extension ; branche publique codex/filon-phase-0-core publiée avec un arbre byte-identique au HEAD local ; run manuel réel exécuté et rapport readiness téléversé ; protection main restante",
+      "verification": "Publication GitHub consolidée e04dfc2c18ef58177d4182acbb67c966058ff9c0, arbre 77ca57dbd92a028dc693de66b5f3e00d381f1115 identique au HEAD local 90246b2. Actions #343 : migrations 12/12, backend 2021/2021, web tests/build, mobile types/lint/tests et extension contrats/manifeste/syntaxe verts. Le seul échec est le gate strict attendu : rapport intègre, 27 gates techniques passées, status=not_ready car les sept datasets humains sont vides ; artefact 9713798390 publié. Aucun ruleset détecté ; protection classique non vérifiable par l'intégration.",
       "tentatives": 1
     },
     {
@@ -110,8 +110,8 @@
       ],
       "outil": "backend observability",
       "attendu": "Corrélation bout en bout, percentiles, unknown/freshness/abstentions, dashboards et alertes testés",
-      "obtenu": "Request ID opaque généré côté serveur, corrélation HTTP vers catalogue/retrieval/decision/ingestion/observation y compris 429/500, huit jalons fermés intent/retrieval/candidats/filtrage/classement/sélection/preuves/décision, spans applicatifs PostgreSQL/Redis/Awin/SerpAPI/LLM et traceparent W3C vers les dépendances HTTP sans donnée métier libre ; latences P50/P95/P99 et cardinalité bornées, probes DB/révision fail-closed, compteurs versionnés unknown/freshness/exclusions/abstentions, ingestion degraded, cycle SSE maîtrisé et logs ciblés nettoyés sans payload ; moteur local canonique de cinq règles provisoires, hystérésis, replay/conflict fail-closed, silence borné et runbook livrés ; front door HMAC, fenêtre glissante, plafond strict, buckets 429 et confiance proxy explicite livrés ; ordonnanceur d'ingestion autonome et journalisé disponible mais non déployé ; export OpenMetrics 1.0 authentifié et fail-closed ; pack Prometheus/Grafana avec inventaire vide, secret-file, labels fermés, 11 rollups multi-réplica et dashboard descriptif sans SLO ; contrats JSON, compilateur d’inventaire atomique et vérificateur HTTPS produisant un reçu expurgé livrés ; backend de traces, CIDR Railway, WAF, déploiement agrégateur/dashboard, reçu réel, pager et trafic représentatif encore absents",
-      "verification": "Commits ee13023 et f6efcd0 : 8 tests ciblés de corrélation décisionnelle/dépendances et backend 2001 réussis + 1 ignoré sous Python 3.12.14, 4 avertissements historiques datetime.utcnow ; isolation concurrente, erreurs sans message, listes fermées, traceparent LLM et sur tous les chemins Awin, transactions PostgreSQL Awin en lot et absence de requête/produit/marchand/URL/token prouvées. Commit 10a1866 : 49 tests d’activation et 227 tests observabilité ciblés ; Prometheus/promtool 3.13.2 LTS valide la configuration, lint les 11 règles et réussit leur scénario officiel à deux réplicas. Production maintenue NO-GO sans backend de traces ni agrégateur réellement déployé, scrapes/rétention, reçu, pager, CIDR et WAF.",
+      "obtenu": "Request ID opaque généré côté serveur, corrélation HTTP vers catalogue/retrieval/decision/ingestion/observation y compris 429/500, huit jalons fermés intent/retrieval/candidats/filtrage/classement/sélection/preuves/décision, spans applicatifs PostgreSQL/Redis/Awin/SerpAPI/LLM et traceparent W3C vers les dépendances HTTP sans donnée métier libre ; latences P50/P95/P99 et cardinalité bornées, probes DB/révision fail-closed, compteurs versionnés unknown/freshness/exclusions/abstentions, ingestion degraded, cycle SSE maîtrisé et logs ciblés nettoyés sans payload ; moteur local canonique de cinq règles provisoires, hystérésis, replay/conflict fail-closed, silence borné et runbook livrés ; front door HMAC, fenêtre glissante, plafond strict, buckets 429 et confiance proxy explicite livrés ; téléchargement Awin en flux avec spool disque après 8 MiB, plafonds compressé/décompressé et limite dure de 250 000 lignes ; ordonnanceur d'ingestion autonome et journalisé disponible mais non déployé ; export OpenMetrics 1.0 authentifié et fail-closed ; pack Prometheus/Grafana avec inventaire vide, secret-file, labels fermés, 11 rollups multi-réplica et dashboard descriptif sans SLO ; contrats JSON, compilateur d’inventaire atomique et vérificateur HTTPS produisant un reçu expurgé livrés ; backend de traces, CIDR Railway, WAF, déploiement agrégateur/dashboard, reçu réel, pager et trafic représentatif encore absents",
+      "verification": "Commits ee13023, f6efcd0 et dfe9098 : corrélation décisionnelle/dépendances, isolation concurrente, erreurs sans message, listes fermées, traceparent LLM et tous chemins Awin, transactions PostgreSQL Awin en lot, absence de donnée métier libre et mémoire de feed bornée prouvées. Commit 10a1866 : 49 tests d’activation et 227 tests observabilité ciblés ; Prometheus/promtool 3.13.2 LTS valide la configuration, lint les 11 règles et réussit leur scénario officiel à deux réplicas. Suite locale finale : backend 2020 réussis + 1 ignoré ; GitHub Actions #343 : 2021/2021 verts. Production maintenue NO-GO sans backend de traces ni agrégateur réellement déployé, scrapes/rétention, reçu, pager, CIDR et WAF.",
       "tentatives": 1
     },
     {
@@ -354,6 +354,21 @@
       "ts": "2026-08-29T12:34:09+02:00",
       "evenement": "verification",
       "detail": "p0_i — commit f6efcd0 : corrélation étendue aux programmes, listing et téléchargements Awin ainsi qu'aux transactions PostgreSQL d'ingestion bornées à un span par feed ; 8 tests ciblés, backend 2001 + 1 ignoré ; infrastructure de traces distante toujours absente"
+    },
+    {
+      "ts": "2026-08-29T12:43:00+02:00",
+      "evenement": "verification",
+      "detail": "p0_i — commit dfe9098 : ingestion Awin spoulée après 8 MiB, volumes compressé/décompressé et nombre de lignes bornés, dépassements fail-closed ; backend complet ultérieur 2020 + 1 ignoré"
+    },
+    {
+      "ts": "2026-08-29T12:52:00+02:00",
+      "evenement": "tache_faite",
+      "detail": "p0_b — commits 4a95a42 et 90246b2 : catalogue, agrégats, cartes, Assistant et MegaMenu intégrés sans fallback de devise ni preuve commerciale synthétique ; suite locale complète verte"
+    },
+    {
+      "ts": "2026-08-29T13:06:00+02:00",
+      "evenement": "verification",
+      "detail": "p0_g — branche publique codex/filon-phase-0-core publiée via e04dfc2 avec arbre identique au HEAD local ; Actions #343 : migrations, 2021 tests backend, web, mobile et extension verts ; gate strict correctement rouge sur readiness not_ready, 27 gates techniques passées, sept datasets humains vides, artefact 9713798390"
     }
   ]
 }
