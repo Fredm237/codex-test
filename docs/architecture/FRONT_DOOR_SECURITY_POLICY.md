@@ -1,7 +1,8 @@
 # FILON — Politique de sécurité de la front door
 
 Date : 29 août 2026
-Statut : **GO local pour le socle ; NO-GO comme protection DDoS distribuée**
+Statut : **GO pour le socle et le mode Redis opt-in ; NO-GO distribué tant que
+Redis et le proxy réels ne sont pas qualifiés en production**
 
 ## Décision
 
@@ -12,11 +13,13 @@ par une allowlist explicite. La front door borne strictement sa mémoire et évi
 de journaliser les termes de recherche encore transportés dans les query
 strings.
 
-Ce socle ne remplace ni un WAF, ni une limite distribuée, ni une politique
-réseau de production. Son rôle est de fermer les failles applicatives
-immédiates sans modifier les schémas de réponse ou les données métier. Il
-modifie volontairement le comportement opérationnel : toute route protégée
-peut désormais répondre `429` lorsque son quota est épuisé.
+Le compteur Redis atomique est désormais disponible en opt-in pour coordonner
+les réplicas. Ce socle ne remplace ni un WAF, ni une politique réseau de
+production. Son rôle est de fermer les failles applicatives immédiates sans
+modifier les schémas de réponse ou les données métier. Il modifie
+volontairement le comportement opérationnel : toute route protégée peut
+répondre `429` lorsque son quota est épuisé et, si Redis a été explicitement
+activé mais ne peut plus rendre une décision fiable, `503` sans fallback local.
 
 ## Menaces couvertes
 
@@ -80,6 +83,24 @@ observés. L'analyse et le feedback Outfit partagent également le budget strict
 - une clé inactive depuis 60 secondes est retirée dès la prochaine décision ;
 - quand le plafond est plein, toute nouvelle clé est rejetée sans allocation.
 
+Le mode `redis` conserve les mêmes classes et quotas mais remplace l'horloge et
+les fenêtres locales par un script Lua atomique :
+
+- `TIME` fournit une horloge commune aux réplicas ;
+- un `ZSET` par couple pseudonyme/classe contient au plus le quota de la minute ;
+- un registre partagé expire les identités inactives et borne globalement à
+  10 000 le nombre de couples actifs ;
+- les clés et membres ne contiennent qu'un HMAC-SHA-256 issu d'un secret partagé
+  distinct ; l'adresse brute n'est jamais envoyée à Redis ;
+- une URL Redis, un schéma `redis`/`rediss`, un secret de 32 à 256 caractères et
+  un timeout entre 50 ms et 2 s sont obligatoires pour activer ce mode ;
+- erreur réseau, timeout, réponse invalide ou plafond global donnent une
+  décision fermée ; le plafond répond `429`, l'indisponibilité Redis `503`.
+
+Le mode historique `local` reste la valeur par défaut. Il n'existe aucun
+fallback automatique de `redis` vers `local`, car chaque réplica retrouverait
+alors un budget neuf et la barrière annoncée deviendrait fausse.
+
 Le dépassement retourne `429`, `Retry-After: 60` et la limite de la classe.
 Le middleware de corrélation, placé à l'extérieur, ajoute aussi les en-têtes de
 requête. Les refus sont comptés dans les métriques, mais les logs 429 sont
@@ -104,8 +125,9 @@ observés. Railway utilise cette liveness bon marché plutôt que `/health`.
 
 ## Limites et travaux restants
 
-1. Le quota est local à un processus, repart à zéro au redémarrage et ne se
-   coordonne pas entre réplicas.
+1. La production reste configurée en mode local tant qu'un Redis privé n'a pas
+   été créé, relié et testé ; le quota actif repart donc encore à zéro au
+   redémarrage et ne se coordonne pas entre réplicas.
 2. Il ne protège pas à lui seul la bande passante, les sockets, la sonde de
    liveness exemptée ou l'infrastructure en amont du processus.
 3. Les utilisateurs partageant une même adresse validée partagent un quota.
@@ -115,8 +137,8 @@ observés. Railway utilise cette liveness bon marché plutôt que `/health`.
    clients et du composant `SearchAssistant` protégé.
 5. Les diagnostics du grand module catalogue protégé ne font pas partie de ce
    lot et restent consignés comme dette de confidentialité P2.
-6. Aucune adresse proxy Railway, règle WAF ou mesure de trafic représentatif
-   n'est validée par cette preuve locale.
+6. Aucune adresse proxy Railway, règle WAF, activation Redis production ou
+   mesure de trafic représentatif n'est validée par cette preuve locale.
 
 ## Vérification et rollback
 

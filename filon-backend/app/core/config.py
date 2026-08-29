@@ -69,10 +69,28 @@ class Settings(BaseSettings):
     @model_validator(mode="after")
     def reject_unsafe_production_configuration(self) -> Self:
         origins = self.cors_origins_list
+        errors: list[str] = []
+        if self.rate_limit_backend == "redis":
+            redis_url = (self.redis_url or "").strip()
+            if not redis_url:
+                errors.append("REDIS_URL is required for distributed rate limiting")
+            else:
+                parsed_redis_url = urlsplit(redis_url)
+                if (
+                    parsed_redis_url.scheme not in {"redis", "rediss"}
+                    or not parsed_redis_url.hostname
+                ):
+                    errors.append("REDIS_URL must use Redis")
+            if self.rate_limit_identity_secret is None:
+                errors.append(
+                    "RATE_LIMIT_IDENTITY_SECRET is required for distributed rate limiting"
+                )
+
         if not self.is_production:
+            if errors:
+                raise ValueError("unsafe configuration: " + "; ".join(errors))
             return self
 
-        errors: list[str] = []
         if self.debug:
             errors.append("DEBUG must be false")
         if not origins:
@@ -118,6 +136,15 @@ class Settings(BaseSettings):
     database_schema_mode: Literal["alembic", "legacy"] = Field(default="alembic")
     redis_url: str | None = Field(default=None)
     qdrant_url: str | None = Field(default=None)
+    # Le compteur local préserve la compatibilité. Le mode Redis doit être un
+    # opt-in complet : URL, secret partagé et aucune dégradation locale.
+    rate_limit_backend: Literal["local", "redis"] = Field(default="local")
+    rate_limit_identity_secret: str | None = Field(default=None)
+    rate_limit_redis_timeout_seconds: float = Field(
+        default=0.25,
+        ge=0.05,
+        le=2.0,
+    )
     # Secret dédié au scrape OpenMetrics. Sans valeur, l'export standard est
     # désactivé et répond 503 ; le snapshot JSON historique reste inchangé.
     metrics_export_token: str | None = Field(default=None)
@@ -135,6 +162,29 @@ class Settings(BaseSettings):
         ):
             raise ValueError(
                 "METRICS_EXPORT_TOKEN must be 32-256 printable non-whitespace ASCII characters"
+            )
+        return value
+
+    @field_validator("rate_limit_identity_secret")
+    @classmethod
+    def validate_rate_limit_identity_secret(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None or value == "":
+            return None
+        if (
+            value != value.strip()
+            or not 32 <= len(value) <= 256
+            or not value.isascii()
+            or any(
+                character.isspace() or not character.isprintable()
+                for character in value
+            )
+        ):
+            raise ValueError(
+                "RATE_LIMIT_IDENTITY_SECRET must be 32-256 printable "
+                "non-whitespace ASCII characters"
             )
         return value
 

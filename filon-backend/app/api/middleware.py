@@ -20,6 +20,11 @@ from typing import Callable
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 
+from app.core.distributed_rate_limit import (
+    DistributedRateLimitUnavailable,
+    RedisEvalClient,
+    RedisSlidingWindowRateLimiter,
+)
 from app.core.logging import get_logger
 from app.core.observability import (
     bind_request_id_context,
@@ -228,6 +233,8 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         *,
         max_tracked_identities: int = _MAX_TRACKED_IDENTITIES,
         clock: Callable[[], float] | None = None,
+        distributed_client: RedisEvalClient | None = None,
+        identity_secret: bytes | None = None,
     ):
         super().__init__(app)
         if expensive_limit < 1 or general_limit < 1:
@@ -243,6 +250,20 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self._identity_secret = secrets.token_bytes(32)
         self._windows: OrderedDict[str, _RateWindow] = OrderedDict()
         self._lock = threading.Lock()
+        if (distributed_client is None) != (identity_secret is None):
+            raise ValueError(
+                "Le client distribué et son secret doivent être fournis ensemble"
+            )
+        self._distributed_limiter = (
+            RedisSlidingWindowRateLimiter(
+                distributed_client,
+                identity_secret=identity_secret or b"",
+                window_seconds=self._WINDOW_SECONDS,
+                max_tracked_identities=max_tracked_identities,
+            )
+            if distributed_client is not None
+            else None
+        )
 
     @staticmethod
     def _path_is_under(path: str, prefix: str) -> bool:
@@ -383,10 +404,31 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         is_expensive = policy_class == "expensive"
         limit = self._expensive_limit if is_expensive else self._general_limit
 
-        if self._is_rate_limited(
-            client_address,
-            policy_class=policy_class,
-        ):
+        try:
+            if self._distributed_limiter is None:
+                limited = self._is_rate_limited(
+                    client_address,
+                    policy_class=policy_class,
+                )
+            else:
+                limited = await self._distributed_limiter.is_rate_limited(
+                    client_address,
+                    policy_class=policy_class,
+                    limit=limit,
+                )
+        except DistributedRateLimitUnavailable:
+            request.scope["filon.rate_limit_bucket"] = self._policy_bucket(path)
+            return Response(
+                content='{"error": "rate_limit_unavailable"}',
+                status_code=503,
+                media_type="application/json",
+                headers={
+                    "Retry-After": "1",
+                    "X-RateLimit-Limit": str(limit),
+                },
+            )
+
+        if limited:
             request.scope["filon.rate_limit_bucket"] = self._policy_bucket(path)
             return Response(
                 content='{"error": "Too many requests. Please wait a moment."}',

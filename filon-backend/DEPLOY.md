@@ -52,6 +52,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    CORS_ORIGINS=["https://filon.be","https://www.filon.be"]
    FORWARDED_ALLOW_IPS=<IP/CIDR exacts et vérifiés du proxy Railway>
    METRICS_EXPORT_TOKEN=<secret aléatoire distinct, 32-256 caractères ASCII>
+   RATE_LIMIT_BACKEND=local
    ```
 
    `DATABASE_URL` est obligatoire : le pre-deploy doit pouvoir migrer la base
@@ -62,6 +63,25 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    du proxy ne sont pas identifiés et vérifiés, le déploiement reste NO-GO.
    `METRICS_EXPORT_TOKEN` active uniquement l'export standard authentifié ; il
    ne doit être ni réutilisé comme jeton admin, ni ajouté à une URL.
+
+   Le quota distribué est un opt-in séparé. Après avoir créé un Redis privé et
+   vérifié sa disponibilité depuis le service web, remplacer la dernière ligne
+   par :
+
+   ```
+   REDIS_URL=<référence privée vers Redis Railway>
+   RATE_LIMIT_BACKEND=redis
+   RATE_LIMIT_IDENTITY_SECRET=<secret partagé distinct, 32-256 caractères ASCII>
+   RATE_LIMIT_REDIS_TIMEOUT_SECONDS=0.25
+   ```
+
+   Tous les réplicas doivent recevoir le même secret afin de produire le même
+   pseudonyme réseau sans stocker l'adresse brute. En mode `redis`, une erreur,
+   un timeout ou une décision illisible ferme les routes protégées avec `503` ;
+   FILON ne retombe jamais sur un compteur local qui rouvrirait le quota. Le
+   seul `GET`/`HEAD /health/live` reste exempt pour diagnostiquer le processus.
+   Conserver `local` tant que Redis n'est pas créé et qualifié ; la présence du
+   code seule ne prouve pas une protection distribuée en production.
 5. Avant de déployer, exécuter intégralement le
    [runbook d'adoption et de rollback](../docs/architecture/DATABASE_MIGRATION_RUNBOOK.md) :
    sauvegarde, restauration test et adoption Alembic précèdent la migration

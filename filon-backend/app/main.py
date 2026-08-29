@@ -7,6 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from redis.asyncio import Redis
 
 from app import __version__
 from app.core.config import get_settings
@@ -47,15 +48,23 @@ async def lifespan(app: FastAPI):
 
     schema_task = asyncio.create_task(_prepare_schema()) if db.is_enabled() else None
 
-    yield
-
-    if schema_task is not None and not schema_task.done():
-        schema_task.cancel()
-        try:
-            await schema_task
-        except asyncio.CancelledError:
-            pass
-    log.info("Arrêt de %s", settings.app_name)
+    try:
+        yield
+    finally:
+        if schema_task is not None and not schema_task.done():
+            schema_task.cancel()
+            try:
+                await schema_task
+            except asyncio.CancelledError:
+                pass
+        rate_limit_client = getattr(
+            app.state,
+            "rate_limit_redis_client",
+            None,
+        )
+        if rate_limit_client is not None:
+            await rate_limit_client.aclose()
+        log.info("Arrêt de %s", settings.app_name)
 
 
 def create_app() -> FastAPI:
@@ -66,9 +75,25 @@ def create_app() -> FastAPI:
         description="Agent IA d'achat : comprendre le besoin, comparer, décider.",
         lifespan=lifespan,
     )
+    rate_limit_options: dict[str, object] = {}
+    if settings.rate_limit_backend == "redis":
+        rate_limit_client = Redis.from_url(
+            settings.redis_url or "",
+            socket_connect_timeout=settings.rate_limit_redis_timeout_seconds,
+            socket_timeout=settings.rate_limit_redis_timeout_seconds,
+            retry_on_timeout=False,
+        )
+        app.state.rate_limit_redis_client = rate_limit_client
+        rate_limit_options = {
+            "distributed_client": rate_limit_client,
+            "identity_secret": (
+                settings.rate_limit_identity_secret or ""
+            ).encode("ascii"),
+        }
+
     # Starlette exécute le dernier middleware ajouté en premier : CORS reste
     # extérieur, puis Logging corrèle aussi les 429 produits par RateLimit.
-    app.add_middleware(RateLimitMiddleware)
+    app.add_middleware(RateLimitMiddleware, **rate_limit_options)
     app.add_middleware(RequestLoggingMiddleware)
     app.add_middleware(
         CORSMiddleware,

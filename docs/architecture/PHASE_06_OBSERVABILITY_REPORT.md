@@ -59,6 +59,14 @@ dashboard applicatif Prometheus/Grafana et de son pager, qui restent à déploye
 - les 429 sont agrégés par bucket fermé et journalisés au plus une fois par
   minute et par bucket, sans perdre leurs compteurs métriques.
 
+Un mode Redis opt-in ajoute une fenêtre glissante atomique commune aux
+réplicas. Il utilise l'horloge Redis, un HMAC partagé qui ne transmet jamais
+l'adresse brute, un registre expirant borné à 10 000 couples actifs et les
+mêmes classes de quota. URL, secret et timeout sont validés au démarrage. Une
+panne ou une réponse Redis invalide ferme les routes avec `503` sans recréer de
+budget local ; le client est fermé avec le cycle de vie FastAPI. Ce mode est
+qualifié par tests mais n'est pas encore activé sur le service Railway.
+
 ### Métriques bornées
 
 `GET /health/metrics` expose uniquement des agrégats en mémoire :
@@ -233,6 +241,10 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
   avertissements historiques `datetime.utcnow()` ;
 - deux relectures indépendantes supplémentaires et un fuzz de fenêtre
   glissante/concurrence : aucun P0, P1 ou P2 restant dans la front door ;
+- lot limite distribuée Redis du 29 août 2026 : **127 tests ciblés réussis** et
+  suite backend complète **2 054 réussis + 2 ignorés** sous Python 3.12.14 ;
+  concurrence, panne fail-closed, plafond partagé, confidentialité, validation
+  de configuration et fermeture du client sont couverts ;
 - la preuve détaillée se trouve dans `LOCAL_ALERT_EVALUATION_REPORT.md` ;
 - build web isolé du parent `922766e`, inchangé par ce commit backend/docs :
   compilation, types et 42 routes verts ; contrats v1 et claims verts ;
@@ -274,6 +286,9 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 10. Le besoin Assistant reste transporté dans `q=` par le flux SSE actuel ; les
     logs applicatifs sont propres, mais un proxy ou une plateforme amont peut
     encore observer l'URL avant FILON.
+11. Le mode Redis est livré mais la production reste en mode local : aucune
+    instance Redis privée, latence réelle, coupure contrôlée ou coordination
+    multi-réplica n'est encore prouvée sur Railway.
 
 ## Sortie de P0.6 encore requise
 
@@ -289,5 +304,5 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 - brancher l'instance canonique à un ordonnanceur contrôlé, puis tester son
   export, son canal, ses silences et son rollback hors production ;
 - mesurer sur trafic représentatif avant de ratifier un SLO ;
-- vérifier/configurer les pairs proxy Railway, puis ajouter une protection WAF
-  ou une limite distribuée avant de revendiquer une barrière DDoS.
+- vérifier/configurer les pairs proxy Railway, puis activer et tester le mode
+  Redis privé ou ajouter un WAF avant de revendiquer une barrière DDoS.

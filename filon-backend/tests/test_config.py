@@ -154,6 +154,80 @@ def test_empty_metrics_export_token_keeps_the_export_disabled() -> None:
     assert settings.metrics_export_token is None
 
 
+def test_rate_limit_remains_local_without_an_explicit_opt_in() -> None:
+    settings = Settings(_env_file=None, env="test")
+
+    assert settings.rate_limit_backend == "local"
+    assert settings.rate_limit_identity_secret is None
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        (
+            {"rate_limit_backend": "redis"},
+            "REDIS_URL is required",
+        ),
+        (
+            {
+                "rate_limit_backend": "redis",
+                "redis_url": "redis://redis:6379/0",
+            },
+            "RATE_LIMIT_IDENTITY_SECRET is required",
+        ),
+        (
+            {
+                "rate_limit_backend": "redis",
+                "redis_url": "https://redis.invalid",
+                "rate_limit_identity_secret": "r" * 32,
+            },
+            "REDIS_URL must use Redis",
+        ),
+    ],
+)
+def test_distributed_rate_limit_requires_its_complete_contract(
+    overrides,
+    message,
+) -> None:
+    with pytest.raises(ValidationError, match=message):
+        Settings(_env_file=None, env="test", **overrides)
+
+
+@pytest.mark.parametrize(
+    "secret",
+    [
+        "short",
+        " leading-secret-that-is-long-enough",
+        "trailing-secret-that-is-long-enough ",
+        "secret-with-a-newline-that-is-long\nenough",
+        "secret-non-ascii-qui-est-assez-long-éééééééé",
+    ],
+)
+def test_rate_limit_identity_secret_rejects_ambiguous_values(secret) -> None:
+    with pytest.raises(ValidationError, match="RATE_LIMIT_IDENTITY_SECRET"):
+        Settings(
+            _env_file=None,
+            env="test",
+            rate_limit_identity_secret=secret,
+        )
+
+
+def test_distributed_rate_limit_accepts_a_bounded_redis_configuration() -> None:
+    secret = "rate-limit-shared-secret-with-32-characters"
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        rate_limit_backend="redis",
+        redis_url="rediss://redis.internal:6380/0",
+        rate_limit_identity_secret=secret,
+        rate_limit_redis_timeout_seconds=0.2,
+    )
+
+    assert settings.rate_limit_backend == "redis"
+    assert settings.rate_limit_identity_secret == secret
+    assert settings.rate_limit_redis_timeout_seconds == 0.2
+
+
 def test_awin_feed_limits_are_finite_by_default() -> None:
     settings = Settings(_env_file=None, env="test")
 

@@ -14,7 +14,14 @@ from fastapi import FastAPI, Request
 from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 
 from app import __main__ as app_entrypoint
+from app import main as app_main
 from app.api.middleware import RateLimitMiddleware, RequestLoggingMiddleware
+from app.core.config import Settings
+from app.core.distributed_rate_limit import (
+    DistributedRateLimitUnavailable,
+    RedisSlidingWindowRateLimiter,
+    _ATOMIC_SLIDING_WINDOW_SCRIPT,
+)
 from app.core.logging import configure_logging
 from app.core.observability import request_metrics
 
@@ -28,6 +35,42 @@ class _Clock:
 
     def advance(self, seconds: float) -> None:
         self.value += seconds
+
+
+class _RedisDecisionClient:
+    def __init__(self, decision: object = 0, error: Exception | None = None):
+        self.decision = decision
+        self.error = error
+        self.calls: list[tuple[object, ...]] = []
+
+    async def eval(self, *args: object) -> object:
+        self.calls.append(args)
+        if self.error is not None:
+            raise self.error
+        return self.decision
+
+
+class _AtomicQuotaClient:
+    def __init__(self, limit: int):
+        self.limit = limit
+        self.count = 0
+        self.lock = asyncio.Lock()
+
+    async def eval(self, *_args: object) -> int:
+        async with self.lock:
+            if self.count >= self.limit:
+                return 1
+            self.count += 1
+            return 0
+
+
+class _CloseableRedisClient(_RedisDecisionClient):
+    def __init__(self):
+        super().__init__()
+        self.closed = False
+
+    async def aclose(self) -> None:
+        self.closed = True
 
 
 def _limiter(**kwargs) -> RateLimitMiddleware:
@@ -171,6 +214,97 @@ class TestComptage:
             address,
             policy_class="expensive",
         ) is False
+
+
+class TestComptageDistribue:
+    def test_le_script_est_atomique_borne_et_utilise_l_horloge_redis(self):
+        commands = {
+            "TIME",
+            "ZREMRANGEBYSCORE",
+            "ZSCORE",
+            "ZCARD",
+            "ZADD",
+            "PEXPIRE",
+        }
+
+        assert all(
+            f'redis.call("{command}"' in _ATOMIC_SLIDING_WINDOW_SCRIPT
+            for command in commands
+        )
+        assert "max_identities" in _ATOMIC_SLIDING_WINDOW_SCRIPT
+
+    @pytest.mark.asyncio
+    async def test_l_identite_redis_est_stable_sans_conserver_l_adresse(self):
+        client = _RedisDecisionClient()
+        limiter = RedisSlidingWindowRateLimiter(
+            client,
+            identity_secret=b"s" * 32,
+            window_seconds=60,
+            max_tracked_identities=10_000,
+        )
+
+        assert await limiter.is_rate_limited(
+            "203.0.113.44",
+            policy_class="general",
+            limit=240,
+        ) is False
+        assert await limiter.is_rate_limited(
+            "203.0.113.44",
+            policy_class="general",
+            limit=240,
+        ) is False
+
+        first = client.calls[0]
+        second = client.calls[1]
+        assert first[2] == second[2]
+        assert first[7] == second[7]
+        assert first[6] != second[6]
+        assert "203.0.113.44" not in repr(client.calls)
+        assert first[1] == 2
+        assert first[3].endswith(":registry")
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize("decision", [1, 2])
+    async def test_quota_et_plafond_global_refusent_sans_allocation_locale(
+        self,
+        decision,
+    ):
+        client = _RedisDecisionClient(decision=decision)
+        limiter = RedisSlidingWindowRateLimiter(
+            client,
+            identity_secret=b"s" * 32,
+            window_seconds=60,
+            max_tracked_identities=10_000,
+        )
+
+        assert await limiter.is_rate_limited(
+            "198.51.100.8",
+            policy_class="expensive",
+            limit=30,
+        ) is True
+
+    @pytest.mark.asyncio
+    @pytest.mark.parametrize(
+        "client",
+        [
+            _RedisDecisionClient(decision=9),
+            _RedisDecisionClient(error=ConnectionError("redis secret endpoint")),
+        ],
+    )
+    async def test_une_decision_absente_ou_invalide_echoue_fermee(self, client):
+        limiter = RedisSlidingWindowRateLimiter(
+            client,
+            identity_secret=b"s" * 32,
+            window_seconds=60,
+            max_tracked_identities=10_000,
+        )
+
+        with pytest.raises(DistributedRateLimitUnavailable):
+            await limiter.is_rate_limited(
+                "198.51.100.9",
+                policy_class="general",
+                limit=240,
+            )
 
 
 class TestJournal429:
@@ -575,6 +709,125 @@ async def test_les_requetes_concurrentes_respectent_exactement_la_limite():
     statuses = [response.status_code for response in responses]
     assert statuses.count(200) == 5
     assert statuses.count(429) == 15
+
+
+@pytest.mark.asyncio
+async def test_le_quota_distribue_serialise_les_requetes_concurrentes():
+    app = FastAPI()
+    client = _AtomicQuotaClient(limit=5)
+    app.add_middleware(
+        RateLimitMiddleware,
+        expensive_limit=5,
+        general_limit=10,
+        distributed_client=client,
+        identity_secret=b"s" * 32,
+    )
+
+    @app.get("/api/advise/concurrent")
+    async def expensive() -> dict:
+        await asyncio.sleep(0)
+        return {"ok": True}
+
+    transport = httpx.ASGITransport(
+        app=app,
+        client=("198.51.100.71", 12345),
+    )
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://test",
+    ) as http_client:
+        responses = await asyncio.gather(
+            *(http_client.get("/api/advise/concurrent") for _ in range(20))
+        )
+
+    statuses = [response.status_code for response in responses]
+    assert statuses.count(200) == 5
+    assert statuses.count(429) == 15
+
+
+@pytest.mark.asyncio
+async def test_redis_indisponible_ferme_les_routes_mais_pas_la_liveness():
+    app = FastAPI()
+    client = _RedisDecisionClient(error=TimeoutError("redis endpoint"))
+    protected_calls = 0
+    app.add_middleware(
+        RateLimitMiddleware,
+        distributed_client=client,
+        identity_secret=b"s" * 32,
+    )
+
+    @app.get("/health/live")
+    async def live() -> dict:
+        return {"ok": True}
+
+    @app.get("/ordinary")
+    async def protected() -> dict:
+        nonlocal protected_calls
+        protected_calls += 1
+        return {"ok": True}
+
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://test",
+    ) as http_client:
+        live_response = await http_client.get("/health/live")
+        protected_response = await http_client.get("/ordinary")
+
+    assert live_response.status_code == 200
+    assert protected_response.status_code == 503
+    assert protected_response.json() == {"error": "rate_limit_unavailable"}
+    assert protected_response.headers["retry-after"] == "1"
+    assert protected_calls == 0
+    assert len(client.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_create_app_branche_et_ferme_le_client_redis(monkeypatch):
+    redis_client = _CloseableRedisClient()
+    factory_calls: list[tuple[str, dict[str, object]]] = []
+
+    class FakeRedis:
+        @staticmethod
+        def from_url(url: str, **kwargs: object) -> _CloseableRedisClient:
+            factory_calls.append((url, kwargs))
+            return redis_client
+
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        rate_limit_backend="redis",
+        redis_url="redis://redis.internal:6379/0",
+        rate_limit_identity_secret="s" * 32,
+        rate_limit_redis_timeout_seconds=0.2,
+    )
+    monkeypatch.setattr(app_main, "get_settings", lambda: settings)
+    monkeypatch.setattr(app_main, "Redis", FakeRedis)
+
+    app = app_main.create_app()
+    rate_limit_middleware = next(
+        middleware
+        for middleware in app.user_middleware
+        if middleware.cls is RateLimitMiddleware
+    )
+
+    assert app.state.rate_limit_redis_client is redis_client
+    assert rate_limit_middleware.kwargs["distributed_client"] is redis_client
+    assert rate_limit_middleware.kwargs["identity_secret"] == b"s" * 32
+    assert factory_calls == [
+        (
+            "redis://redis.internal:6379/0",
+            {
+                "socket_connect_timeout": 0.2,
+                "socket_timeout": 0.2,
+                "retry_on_timeout": False,
+            },
+        )
+    ]
+
+    async with app.router.lifespan_context(app):
+        assert redis_client.closed is False
+    assert redis_client.closed is True
 
 
 def test_entrypoint_desactive_access_log_et_borne_les_proxies(monkeypatch):
