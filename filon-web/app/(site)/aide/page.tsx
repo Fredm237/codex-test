@@ -25,9 +25,9 @@ function AideFR() {
         <div className="ed-wrap">
           <InfoGrid
             items={[
-              { n: "01", h: "Prise en main", p: "Comment poser un besoin, lire le verdict et activer la meilleure offre. Voir « Comment ça marche »." },
+              { n: "01", h: "Prise en main", p: "Comment poser un besoin, lire les preuves et ouvrir une offre observée. Voir « Comment ça marche »." },
               { n: "02", h: "Cashback", p: "Plateformes comparées, cumul avec un code promo, délais de validation et de retrait." },
-              { n: "03", h: "Reconditionné", p: "Grades, garanties, vendeurs certifiés et calcul de l'économie réelle." },
+              { n: "03", h: "Reconditionné", p: "Grades indiqués, garantie lorsqu'elle est fournie et conditions à vérifier chez le vendeur." },
               { n: "04", h: "Extension", p: "Installation, navigateurs pris en charge, ce qui s'affiche sur une fiche produit." },
               { n: "05", h: "Compte & alertes", p: "Créer un compte, gérer les alertes de baisse de prix et vos préférences." },
               { n: "06", h: "Données & confidentialité", p: "Ce que FILON lit, ce qu'il ne fait pas, et comment exercer vos droits RGPD." },
@@ -47,7 +47,7 @@ function AideFR() {
         </p>
       </ProseBlock>
 
-      <ClosingCta title={<>Prêt·e à ne plus <span className="it">surpayer</span> ?</>} sub="Ajoutez FILON et laissez le copilote faire le travail avant chaque achat." />
+      <ClosingCta title={<>Prêt·e à mieux <span className="it">comparer</span> ?</>} sub="Utilisez FILON sur les offres indexées et confirmez le total chez le marchand." />
     </>
   );
 }
@@ -68,7 +68,7 @@ function AideNL() {
             items={[
               { n: "01", h: "Aan de slag", p: "Hoe je een behoefte formuleert, het oordeel leest en het beste aanbod activeert. Zie « Hoe het werkt »." },
               { n: "02", h: "Cashback", p: "Vergeleken platforms, combinatie met een promocode, validatie- en opnametermijnen." },
-              { n: "03", h: "Refurbished", p: "Grades, garanties, gecertificeerde verkopers en berekening van de echte besparing." },
+              { n: "03", h: "Refurbished", p: "Vermelde staat, garantie wanneer verstrekt en voorwaarden die je bij de verkoper controleert." },
               { n: "04", h: "Extensie", p: "Installatie, ondersteunde browsers, wat verschijnt op een productpagina." },
               { n: "05", h: "Account & meldingen", p: "Een account aanmaken, prijsdalings-meldingen en je voorkeuren beheren." },
               { n: "06", h: "Gegevens & privacy", p: "Wat FILON leest, wat het niet doet, en hoe je je GDPR-rechten uitoefent." },
@@ -88,7 +88,7 @@ function AideNL() {
         </p>
       </ProseBlock>
 
-      <ClosingCta title={<>Klaar om niet meer te <span className="it">veel te betalen</span> ?</>} sub="Voeg FILON toe en laat de copiloot het werk doen vóór elke aankoop." />
+      <ClosingCta title={<>Klaar om beter te <span className="it">vergelijken</span> ?</>} sub="Gebruik FILON voor geïndexeerde aanbiedingen en bevestig het totaal bij de winkel." />
     </>
   );
 }
@@ -107,9 +107,9 @@ function AideEN() {
         <div className="ed-wrap">
           <InfoGrid
             items={[
-              { n: "01", h: "Getting started", p: "How to state a need, read the verdict and activate the best offer. See « How it works »." },
+              { n: "01", h: "Getting started", p: "How to state a need, read the evidence and open an observed offer. See « How it works »." },
               { n: "02", h: "Cashback", p: "Platforms compared, combining with a promo code, validation and withdrawal times." },
-              { n: "03", h: "Refurbished", p: "Grades, warranties, certified sellers and calculating the real saving." },
+              { n: "03", h: "Refurbished", p: "Stated condition, warranty when supplied and terms to verify with the seller." },
               { n: "04", h: "Extension", p: "Installation, supported browsers, what shows on a product page." },
               { n: "05", h: "Account & alerts", p: "Create an account, manage price-drop alerts and your preferences." },
               { n: "06", h: "Data & privacy", p: "What FILON reads, what it doesn't do, and how to exercise your GDPR rights." },
@@ -129,7 +129,7 @@ function AideEN() {
         </p>
       </ProseBlock>
 
-      <ClosingCta title={<>Ready to stop <span className="it">overpaying</span> ?</>} sub="Add FILON and let the copilot do the work before every purchase." />
+      <ClosingCta title={<>Ready to <span className="it">compare</span> more clearly ?</>} sub="Use FILON for indexed offers and confirm the total with the merchant." />
     </>
   );
 }

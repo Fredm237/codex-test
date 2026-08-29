@@ -9,7 +9,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/comment-ca-marche",
   title: "Comment ça marche",
   description:
-    "En quelques secondes, FILON vous donne votre vrai prix et vous dit s'il faut acheter ou attendre. Voici l'expérience.",
+    "FILON montre les offres indexées, leur fraîcheur et les preuves disponibles ; il s'abstient lorsque ces données ne suffisent pas.",
 });
 
 function CommentFR() {
@@ -17,8 +17,8 @@ function CommentFR() {
     <>
       <ContentHero
         eyebrow="Comment ça marche"
-        title={<>Trois secondes entre vous et le <span className="it">meilleur prix</span>.</>}
-        intro="Vous ne changez rien à vos habitudes. FILON travaille pour vous et vous présente un seul chiffre : votre vrai prix. Et une réponse : acheter, ou attendre."
+        title={<>Les offres observées, avec leur <span className="it">contexte</span>.</>}
+        intro="FILON compare son catalogue indexé, indique le périmètre et rend les inconnues visibles. Si la preuve manque, il ne force pas une conclusion."
         breadcrumb={[{ name: "Comment ça marche", path: "/comment-ca-marche" }]}
       />
       <Method />
@@ -29,17 +29,17 @@ function CommentFR() {
           </div>
           <InfoGrid
             items={[
-              { n: "€", h: "Votre vrai prix", p: "Un seul chiffre, tout compris. Fini les calculs de coin de table." },
-              { n: "◷", h: "Acheter ou attendre", p: "Une réponse claire, pour acheter au bon moment." },
-              { n: "✓", h: "La meilleure option", p: "Neuf, reconditionné, ailleurs : le meilleur choix, quand il existe." },
-              { n: "★", h: "Un vendeur fiable", p: "La fiabilité et les garanties sont prises en compte, pas seulement le prix." },
-              { n: "↧", h: "Sans rien changer", p: "Vous gardez vos habitudes. FILON travaille en arrière-plan." },
-              { n: <IcHeart />, h: "Zéro effort", p: "Vous décrivez, FILON tranche. C'est tout." },
+              { n: "€", h: "Prix observé", p: "Le montant du dernier relevé, sans inventer les frais de livraison absents." },
+              { n: "◷", h: "Historique borné", p: "Nombre de relevés, durée suivie et conclusion seulement si l'historique suffit." },
+              { n: "✓", h: "Périmètre visible", p: "Nombre d'offres et de marchands comparables actuellement indexés." },
+              { n: "★", h: "Fraîcheur", p: "Date du relevé disponible et avertissement lorsque la donnée vieillit." },
+              { n: "?", h: "Inconnues explicites", p: "Stock, livraison, retour ou garantie restent inconnus sans source." },
+              { n: <IcHeart />, h: "Abstention", p: "FILON peut demander une vérification au lieu de recommander sans preuve." },
             ]}
           />
         </div>
       </section>
-      <ClosingCta title={<>Essayez, c&apos;est <span className="it">gratuit</span>.</>} sub="Ajoutez FILON et laissez-le trouver le filon avant chaque achat." />
+      <ClosingCta title={<>Consultez l&apos;accès <span className="it">actuel</span>.</>} sub="Comparez les offres indexées et gardez les inconnues visibles avant de choisir." />
     </>
   );
 }
@@ -49,8 +49,8 @@ function CommentNL() {
     <>
       <ContentHero
         eyebrow="Hoe het werkt"
-        title={<>Drie seconden tussen jou en de <span className="it">beste prijs</span>.</>}
-        intro="Je verandert niets aan je gewoontes. FILON werkt voor jou en toont je één cijfer : je echte prijs. En één antwoord : kopen, of wachten."
+        title={<>Bekeken aanbiedingen, met hun <span className="it">context</span>.</>}
+        intro="FILON vergelijkt zijn geïndexeerde catalogus, toont het bereik en maakt onbekenden zichtbaar. Als bewijs ontbreekt, forceert het geen conclusie."
         breadcrumb={[{ name: "Hoe het werkt", path: "/comment-ca-marche" }]}
       />
       <Method />
@@ -61,17 +61,17 @@ function CommentNL() {
           </div>
           <InfoGrid
             items={[
-              { n: "€", h: "Je echte prijs", p: "Eén cijfer, alles inbegrepen. Geen rekenwerk meer." },
-              { n: "◷", h: "Kopen of wachten", p: "Een duidelijk antwoord, om op het juiste moment te kopen." },
-              { n: "✓", h: "De beste optie", p: "Nieuw, refurbished, elders : de beste keuze, wanneer die bestaat." },
-              { n: "★", h: "Een betrouwbare verkoper", p: "Betrouwbaarheid en garanties tellen mee, niet alleen de prijs." },
-              { n: "↧", h: "Zonder iets te veranderen", p: "Je behoudt je gewoontes. FILON werkt op de achtergrond." },
-              { n: <IcHeart />, h: "Nul moeite", p: "Jij beschrijft, FILON beslist. Meer niet." },
+              { n: "€", h: "Bekeken prijs", p: "Het bedrag van de laatste meting, zonder ontbrekende verzendkosten te verzinnen." },
+              { n: "◷", h: "Afgebakende historiek", p: "Aantal metingen, gevolgde duur en alleen een conclusie als de historiek volstaat." },
+              { n: "✓", h: "Zichtbaar bereik", p: "Aantal vergelijkbare aanbiedingen en winkels die momenteel geïndexeerd zijn." },
+              { n: "★", h: "Actualiteit", p: "Datum van de beschikbare meting en een waarschuwing wanneer gegevens verouderen." },
+              { n: "?", h: "Expliciete onbekenden", p: "Voorraad, levering, retour of garantie blijven onbekend zonder bron." },
+              { n: <IcHeart />, h: "Onthouding", p: "FILON kan om controle vragen in plaats van zonder bewijs aan te bevelen." },
             ]}
           />
         </div>
       </section>
-      <ClosingCta title={<>Probeer het, het is <span className="it">gratis</span>.</>} sub="Voeg FILON toe en laat het de vondst vinden vóór elke aankoop." />
+      <ClosingCta title={<>Bekijk de huidige <span className="it">toegang</span>.</>} sub="Vergelijk geïndexeerde aanbiedingen en houd onbekenden zichtbaar voordat je kiest." />
     </>
   );
 }
@@ -81,8 +81,8 @@ function CommentEN() {
     <>
       <ContentHero
         eyebrow="How it works"
-        title={<>Three seconds between you and the <span className="it">best price</span>.</>}
-        intro="You change nothing about your habits. FILON works for you and shows you a single number: your real price. And one answer: buy, or wait."
+        title={<>Observed offers, with their <span className="it">context</span>.</>}
+        intro="FILON compares its indexed catalogue, states the scope and exposes unknowns. When evidence is missing, it does not force a conclusion."
         breadcrumb={[{ name: "How it works", path: "/comment-ca-marche" }]}
       />
       <Method />
@@ -93,17 +93,17 @@ function CommentEN() {
           </div>
           <InfoGrid
             items={[
-              { n: "€", h: "Your real price", p: "A single number, all in. No more back-of-the-envelope maths." },
-              { n: "◷", h: "Buy or wait", p: "A clear answer, to buy at the right moment." },
-              { n: "✓", h: "The best option", p: "New, refurbished, elsewhere: the best choice, when it exists." },
-              { n: "★", h: "A reliable seller", p: "Reliability and warranties are taken into account, not just the price." },
-              { n: "↧", h: "Without changing a thing", p: "You keep your habits. FILON works in the background." },
-              { n: <IcHeart />, h: "Zero effort", p: "You describe, FILON decides. That's all." },
+              { n: "€", h: "Observed price", p: "The latest reading, without inventing missing delivery costs." },
+              { n: "◷", h: "Bounded history", p: "Reading count, tracking duration and a conclusion only when history is sufficient." },
+              { n: "✓", h: "Visible scope", p: "The number of comparable offers and merchants currently indexed." },
+              { n: "★", h: "Freshness", p: "The available reading date and a warning when data grows stale." },
+              { n: "?", h: "Explicit unknowns", p: "Stock, shipping, returns or warranty stay unknown without a source." },
+              { n: <IcHeart />, h: "Abstention", p: "FILON can ask for verification instead of recommending without evidence." },
             ]}
           />
         </div>
       </section>
-      <ClosingCta title={<>Try it, it&apos;s <span className="it">free</span>.</>} sub="Add FILON and let it find the deal before every purchase." />
+      <ClosingCta title={<>See the current <span className="it">access</span>.</>} sub="Compare indexed offers and keep unknowns visible before choosing." />
     </>
   );
 }

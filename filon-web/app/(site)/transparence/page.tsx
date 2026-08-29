@@ -7,7 +7,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/transparence",
   title: "Transparence & affiliation",
   description:
-    "Comment FILON gagne de l'argent : liens d'affiliation, sans surcoût pour vous, sans jamais fausser un conseil. Neutralité, gratuité et clarté, expliquées.",
+    "Comment FILON utilise les liens d'affiliation, quels champs entrent dans le score actuel et quelles conditions restent à confirmer chez le marchand.",
 });
 
 function TransparenceFR() {
@@ -17,13 +17,13 @@ function TransparenceFR() {
         eyebrow="Transparence"
         title={
           <>
-            Comment FILON gagne sa vie, <span className="it">sans jamais vous coûter plus cher</span>.
+            Comment FILON utilise l&apos;affiliation, <span className="it">avec un périmètre explicite</span>.
           </>
         }
         intro={
           <>
             Un service gratuit doit s&apos;expliquer. Voici, sans détour, notre modèle : d&apos;où vient
-            l&apos;argent, ce que ça change pour vous (rien), et ce que nous nous interdisons.
+            l&apos;argent et les données qui entrent — ou non — dans le score actuel.
           </>
         }
         breadcrumb={[{ name: "Transparence", path: "/transparence" }]}
@@ -35,14 +35,12 @@ function TransparenceFR() {
           nous verser une <b>commission d&apos;affiliation</b>. C&apos;est notre source de revenus.
         </p>
         <p>
-          Point essentiel&nbsp;: cette commission est payée par le <b>marchand</b>, prélevée sur sa marge. Elle
-          <b> n&apos;augmente jamais le prix que vous payez</b>. Vous payez exactement le même montant qu&apos;en
-          allant directement sur le site du marchand.
+          La commission éventuelle n&apos;entre pas dans les dimensions du score actuel. Le prix, les frais, les
+          conditions d&apos;éligibilité et le total final restent toutefois à confirmer sur le site du marchand.
         </p>
         <p style={{ color: "var(--ink-3)", fontSize: 14 }}>
-          En clair, comme l&apos;exige la réglementation (DGCCRF, ARPP) et nos partenaires&nbsp;: certains liens de
-          ce site sont des liens affiliés. Cliquer dessus et acheter peut nous rapporter une commission, sans coût
-          supplémentaire pour vous.
+          En clair&nbsp;: certains liens de ce site sont affiliés. Cliquer puis acheter peut rapporter une commission
+          à FILON. La fiche affiche le marchand ; le panier du marchand fait foi pour le montant payé.
         </p>
       </ProseBlock>
 
@@ -51,40 +49,40 @@ function TransparenceFR() {
           <div className="ed-lead">
             <span className="idx">Nos règles</span>
             <h2>
-              Ce que la rémunération ne change <span className="it">jamais</span>.
+              Ce que l&apos;implémentation actuelle <span className="it">sépare</span>.
             </h2>
           </div>
           <InfoGrid
             items={[
               {
                 n: "01",
-                h: "Aucun classement acheté",
-                p: "Un marchand qui nous rémunère mieux n'obtient pas une meilleure place, ni un meilleur Score. Le classement suit votre intérêt, point.",
+                h: "Commission hors score",
+                p: "Le score actuel utilise les preuves de comparaison, d'historique, de disponibilité, de fraîcheur et de largeur de comparaison ; aucun taux de commission n'est un champ d'entrée.",
               },
               {
                 n: "02",
-                h: "Le meilleur prix d'abord",
-                p: "Si l'offre la moins chère ne nous rapporte rien, c'est quand même elle que nous vous montrons. Toujours.",
+                h: "Périmètre comparé visible",
+                p: "Une position ou un prix n'est décrit que dans le périmètre des offres éligibles et indexées ; FILON ne prétend pas à une couverture exhaustive.",
               },
               {
                 n: "03",
-                h: "Sans publicité",
-                p: "Pas de bannières, pas de placements déguisés. Rien ne vient troubler le conseil que vous recevez.",
+                h: "Lien affilié identifiable",
+                p: "Le lien peut générer une commission. L'offre conserve son marchand source et les inconnues restent visibles.",
               },
               {
                 n: "04",
-                h: "Gratuit, pour de vrai",
-                p: "Aucun abonnement, aucune carte bancaire, aucune option payante. Vous ne payez jamais FILON.",
+                h: "Accès actuel gratuit",
+                p: "L'accès public actuel ne demande ni paiement ni carte bancaire. Les conditions publiées font foi si l'offre évolue.",
               },
               {
                 n: "05",
-                h: "Vos données restent à vous",
-                p: "Mesure d'audience sans cookie et anonyme (Plausible). Aucun profil publicitaire, aucune revente.",
+                h: "Confidentialité documentée",
+                p: "La politique de confidentialité décrit les données traitées et la mesure d'audience. Consultez-la pour le périmètre à jour.",
               },
               {
                 n: "06",
                 h: "Le raisonnement est ouvert",
-                p: "Le Score se décompose critère par critère. Vous voyez pourquoi une offre est recommandée.",
+                p: "Le Score expose ses dimensions documentées, ses dimensions manquantes et son périmètre de recommandation.",
               },
             ]}
           />
@@ -107,8 +105,8 @@ function TransparenceFR() {
       </ProseBlock>
 
       <ClosingCta
-        title={<>Un conseil de votre côté, <span className="it">rien d&apos;autre.</span></>}
-        sub="Demandez à FILON avant d'acheter. Gratuit, neutre, sans publicité."
+        title={<>Des preuves visibles, <span className="it">des inconnues nommées.</span></>}
+        sub="Demandez à FILON avant d'acheter, puis confirmez le total et les conditions chez le marchand."
       />
     </>
   );
@@ -121,13 +119,13 @@ function TransparenceNL() {
         eyebrow="Transparantie"
         title={
           <>
-            Hoe FILON zijn brood verdient, <span className="it">zonder je ooit meer te kosten</span>.
+            Hoe FILON affiliatie gebruikt, <span className="it">met een expliciete reikwijdte</span>.
           </>
         }
         intro={
           <>
             Een gratis dienst moet zich verantwoorden. Hier, zonder omwegen, ons model : waar het geld vandaan komt,
-            wat het voor jou verandert (niets), en wat we onszelf verbieden.
+            en welke gegevens wel of niet in de huidige score worden gebruikt.
           </>
         }
         breadcrumb={[{ name: "Transparantie", path: "/transparence" }]}
@@ -139,13 +137,12 @@ function TransparenceNL() {
           <b>affiliatiecommissie</b> betalen. Dat is onze inkomstenbron.
         </p>
         <p>
-          Essentieel punt&nbsp;: die commissie wordt betaald door de <b>winkel</b>, afgehouden van zijn marge. Ze
-          <b> verhoogt nooit de prijs die jij betaalt</b>. Je betaalt exact hetzelfde bedrag als wanneer je
-          rechtstreeks naar de website van de winkel gaat.
+          Een eventuele commissie is geen invoerveld van de huidige score. Bevestig prijs, kosten,
+          geschiktheidsvoorwaarden en eindtotaal op de website van de winkel.
         </p>
         <p style={{ color: "var(--ink-3)", fontSize: 14 }}>
-          In klare taal, zoals de regelgeving en onze partners het eisen&nbsp;: sommige links op deze site zijn
-          affiliatielinks. Erop klikken en kopen kan ons een commissie opleveren, zonder extra kost voor jou.
+          In klare taal&nbsp;: sommige links op deze site zijn affiliatielinks. Klikken en kopen kan FILON een
+          commissie opleveren. De winkelmand van de verkoper bepaalt het betaalde bedrag.
         </p>
       </ProseBlock>
 
@@ -154,40 +151,40 @@ function TransparenceNL() {
           <div className="ed-lead">
             <span className="idx">Onze regels</span>
             <h2>
-              Wat de vergoeding <span className="it">nooit</span> verandert.
+              Wat de huidige implementatie <span className="it">scheidt</span>.
             </h2>
           </div>
           <InfoGrid
             items={[
               {
                 n: "01",
-                h: "Geen gekochte rangschikking",
-                p: "Een winkel die ons beter vergoedt, krijgt geen betere plaats, noch een betere Score. De rangschikking volgt jouw belang, punt.",
+                h: "Commissie buiten de score",
+                p: "De huidige score gebruikt bewijs voor vergelijking, historiek, beschikbaarheid, actualiteit en vergelijkingsbreedte; een commissietarief is geen invoerveld.",
               },
               {
                 n: "02",
-                h: "De beste prijs eerst",
-                p: "Als het goedkoopste aanbod ons niets opbrengt, is het toch dat wat we je tonen. Altijd.",
+                h: "Zichtbare vergelijkingsomvang",
+                p: "Een positie of prijs geldt alleen binnen de in aanmerking komende, geïndexeerde aanbiedingen; FILON claimt geen volledige marktdekking.",
               },
               {
                 n: "03",
-                h: "Zonder reclame",
-                p: "Geen banners, geen verkapte plaatsingen. Niets komt het advies dat je krijgt verstoren.",
+                h: "Herkenbare affiliatielink",
+                p: "De link kan een commissie opleveren. De aanbieding behoudt haar bron en onbekenden blijven zichtbaar.",
               },
               {
                 n: "04",
-                h: "Gratis, echt waar",
-                p: "Geen abonnement, geen bankkaart, geen betalende optie. Je betaalt FILON nooit.",
+                h: "Huidige toegang gratis",
+                p: "De huidige publieke toegang vraagt geen betaling of bankkaart. De gepubliceerde voorwaarden gelden als het aanbod verandert.",
               },
               {
                 n: "05",
-                h: "Je gegevens blijven van jou",
-                p: "Bezoekersmeting zonder cookie en anoniem (Plausible). Geen advertentieprofiel, geen doorverkoop.",
+                h: "Gedocumenteerde privacy",
+                p: "Het privacybeleid beschrijft de verwerkte gegevens en bezoekersmeting. Raadpleeg het voor de actuele reikwijdte.",
               },
               {
                 n: "06",
                 h: "De redenering ligt open",
-                p: "De Score wordt criterium per criterium ontleed. Je ziet waarom een aanbod aanbevolen is.",
+                p: "De Score toont gedocumenteerde dimensies, ontbrekende dimensies en de aanbevelingsomvang.",
               },
             ]}
           />
@@ -209,8 +206,8 @@ function TransparenceNL() {
       </ProseBlock>
 
       <ClosingCta
-        title={<>Advies aan jouw kant, <span className="it">niets anders.</span></>}
-        sub="Vraag het aan FILON vóór je koopt. Gratis, neutraal, zonder reclame."
+        title={<>Zichtbaar bewijs, <span className="it">benoemde onbekenden.</span></>}
+        sub="Vraag FILON vóór je koopt en bevestig daarna totaal en voorwaarden bij de winkel."
       />
     </>
   );
@@ -223,13 +220,13 @@ function TransparenceEN() {
         eyebrow="Transparency"
         title={
           <>
-            How FILON makes a living, <span className="it">without ever costing you more</span>.
+            How FILON uses affiliation, <span className="it">with explicit scope</span>.
           </>
         }
         intro={
           <>
             A free service owes an explanation. Here, plainly, is our model: where the money comes from, what it
-            changes for you (nothing), and what we forbid ourselves.
+            and which data does or does not enter the current score.
           </>
         }
         breadcrumb={[{ name: "Transparency", path: "/transparence" }]}
@@ -241,13 +238,12 @@ function TransparenceEN() {
           <b>affiliation commission</b>. That&apos;s our source of income.
         </p>
         <p>
-          Key point&nbsp;: this commission is paid by the <b>merchant</b>, taken from its margin. It
-          <b> never increases the price you pay</b>. You pay exactly the same amount as going directly to the
-          merchant&apos;s site.
+          A possible commission is not an input field in the current score. Confirm the price, fees, eligibility
+          terms and final total on the merchant&apos;s website.
         </p>
         <p style={{ color: "var(--ink-3)", fontSize: 14 }}>
-          In plain terms, as the regulations and our partners require&nbsp;: some links on this site are affiliate
-          links. Clicking them and buying may earn us a commission, at no extra cost to you.
+          In plain terms&nbsp;: some links on this site are affiliate links. Clicking and buying may earn FILON a
+          commission. The merchant&apos;s basket determines the amount paid.
         </p>
       </ProseBlock>
 
@@ -256,40 +252,40 @@ function TransparenceEN() {
           <div className="ed-lead">
             <span className="idx">Our rules</span>
             <h2>
-              What the income <span className="it">never</span> changes.
+              What the current implementation <span className="it">separates</span>.
             </h2>
           </div>
           <InfoGrid
             items={[
               {
                 n: "01",
-                h: "No ranking is bought",
-                p: "A merchant that pays us more doesn't get a better place, nor a better Score. The ranking follows your interest, full stop.",
+                h: "Commission outside the score",
+                p: "The current score uses evidence for comparison, history, availability, freshness and comparison breadth; a commission rate is not an input field.",
               },
               {
                 n: "02",
-                h: "The best price first",
-                p: "If the cheapest offer earns us nothing, it's still the one we show you. Always.",
+                h: "Visible comparison scope",
+                p: "A position or price applies only within eligible indexed offers; FILON does not claim whole-market coverage.",
               },
               {
                 n: "03",
-                h: "No advertising",
-                p: "No banners, no disguised placements. Nothing disturbs the recommendation you receive.",
+                h: "Identifiable affiliate link",
+                p: "The link may generate a commission. The offer retains its source merchant and unknowns remain visible.",
               },
               {
                 n: "04",
-                h: "Free, for real",
-                p: "No subscription, no credit card, no paid option. You never pay FILON.",
+                h: "Current access is free",
+                p: "Current public access requires no payment or card. Published terms apply if the offering changes.",
               },
               {
                 n: "05",
-                h: "Your data stays yours",
-                p: "Cookie-free, anonymous audience measurement (Plausible). No advertising profile, no reselling.",
+                h: "Documented privacy",
+                p: "The privacy policy describes processed data and audience measurement. Consult it for the current scope.",
               },
               {
                 n: "06",
                 h: "The reasoning is open",
-                p: "The Score breaks down criterion by criterion. You see why an offer is recommended.",
+                p: "The Score exposes documented dimensions, missing dimensions and its recommendation scope.",
               },
             ]}
           />
@@ -311,8 +307,8 @@ function TransparenceEN() {
       </ProseBlock>
 
       <ClosingCta
-        title={<>Advice on your side, <span className="it">nothing else.</span></>}
-        sub="Ask FILON before you buy. Free, neutral, ad-free."
+        title={<>Visible evidence, <span className="it">named unknowns.</span></>}
+        sub="Ask FILON before buying, then confirm the total and terms with the merchant."
       />
     </>
   );

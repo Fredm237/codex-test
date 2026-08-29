@@ -1,16 +1,18 @@
-import type { FilonOffer } from "@/lib/filon-api";
+import { FILON_OFFER_MAX_AGE_HOURS, isFilonOfferActionable, normalizeFilonObservedAt, type FilonOffer } from "./filon-api";
 import { buildFashionRelations, critiqueFashionComposition, type FashionCritique, type FashionRelation } from "./filon-fashion-graph";
+import type { OutfitOccasionCode, OutfitPublicMessage, OutfitSeasonCode, OutfitStyleCode } from "./filon-outfit-i18n";
 import { createV3PipelineTrace, updateV3PipelineStage, type V3PipelineStage, type V3PipelineTrace } from "./filon-v3-contracts";
 import { isSafePartnerOfferUrl } from "./partner-offer";
 
 export type IntelligenceConfidence = "high" | "medium" | "low";
+export type IntelligenceMeasurementStatus = "not_calibrated";
 export type OutfitRole = "base" | "structure" | "footwear" | "accessory";
 export type OutfitIntent = {
   request: string;
-  occasion: string | null;
-  season: string | null;
+  occasion: OutfitOccasionCode | null;
+  season: OutfitSeasonCode | null;
   budget: number | null;
-  declaredStyle: string | null;
+  declaredStyle: OutfitStyleCode | null;
 };
 
 export type OutfitPiece = {
@@ -18,53 +20,77 @@ export type OutfitPiece = {
   offer: FilonOffer;
   confidence: IntelligenceConfidence;
   provenance: "catalogue_partner" | "filon_inference";
-  explanation: string;
+  explanation: OutfitPublicMessage;
 };
 
 export type OutfitSolution = {
   pieces: OutfitPiece[];
   total: number;
-  styleScore: number;
-  confidenceScore: number;
-  confidence: IntelligenceConfidence;
-  scoreExplanation: string;
-  constraints: string[];
+  currency: string;
+  styleScore: null;
+  confidenceScore: null;
+  confidence: IntelligenceMeasurementStatus;
+  measurementStatus: IntelligenceMeasurementStatus;
+  scoreExplanation: OutfitPublicMessage;
+  constraints: OutfitPublicMessage[];
   relations: FashionRelation[];
   critique: FashionCritique;
 };
 
 export type OutfitRecommendation =
   | { status: "solution"; solution: OutfitSolution; trace: RecommendationTrace }
-  | { status: "abstain"; reason: string; trace: RecommendationTrace };
+  | { status: "abstain"; reason: OutfitPublicMessage; trace: RecommendationTrace };
 
 export type RecommendationTrace = {
   intent: OutfitIntent;
   considered: number;
   eligible: number;
-  excludedUnavailable: number;
+  /** Offres au lien sûr mais non actionnables ou incompatibles avec le budget EUR. */
+  excludedNonEligible: number;
   excludedUnsafe: number;
   pipeline?: V3PipelineTrace;
 };
 
-function readFlag(name: string, fallback: boolean) {
-  const value = typeof process === "undefined" ? undefined : process.env?.[name];
+function readFlag(value: string | undefined, fallback: boolean) {
   if (value === undefined || value === "") return fallback;
   return value.toLowerCase() === "true";
 }
 
 /**
- * Les trois flags isolent entièrement l’extension. Les valeurs par défaut
- * activent le MVP, tandis qu’une configuration de build peut le masquer sans
- * changer le Core FILON.
+ * Les trois flags isolent entièrement l’extension. Ils restent fermés tant
+ * qu’une configuration de build ne les active pas explicitement tous les trois.
  */
-export const intelligenceFeatures = {
-  intelligence: readFlag("EXPO_PUBLIC_FILON_INTELLIGENCE_ENABLED", true),
-  outfitStudio: readFlag("EXPO_PUBLIC_OUTFIT_STUDIO_ENABLED", true),
-  fashionExpert: readFlag("EXPO_PUBLIC_FASHION_EXPERT_ENABLED", true),
-};
+export function resolveIntelligenceFeatures(environment: Record<string, string | undefined> = {}) {
+  return {
+    intelligence: readFlag(environment.EXPO_PUBLIC_FILON_INTELLIGENCE_ENABLED, false),
+    outfitStudio: readFlag(environment.EXPO_PUBLIC_OUTFIT_STUDIO_ENABLED, false),
+    fashionExpert: readFlag(environment.EXPO_PUBLIC_FASHION_EXPERT_ENABLED, false),
+  };
+}
+
+export const intelligenceFeatures = resolveIntelligenceFeatures({
+  EXPO_PUBLIC_FILON_INTELLIGENCE_ENABLED: typeof process === "undefined" ? undefined : process.env.EXPO_PUBLIC_FILON_INTELLIGENCE_ENABLED,
+  EXPO_PUBLIC_OUTFIT_STUDIO_ENABLED: typeof process === "undefined" ? undefined : process.env.EXPO_PUBLIC_OUTFIT_STUDIO_ENABLED,
+  EXPO_PUBLIC_FASHION_EXPERT_ENABLED: typeof process === "undefined" ? undefined : process.env.EXPO_PUBLIC_FASHION_EXPERT_ENABLED,
+});
 
 export function isOutfitStudioEnabled() {
   return intelligenceFeatures.intelligence && intelligenceFeatures.outfitStudio && intelligenceFeatures.fashionExpert;
+}
+
+export function getOutfitSolutionEvidenceExpiry(solution: OutfitSolution) {
+  const observations = solution.pieces.map((piece) => normalizeFilonObservedAt(piece.offer.observedAt));
+  if (observations.length === 0 || observations.some((observedAt) => observedAt === null)) return null;
+  return Math.min(...(observations as string[]).map((observedAt) => Date.parse(observedAt) + FILON_OFFER_MAX_AGE_HOURS * 60 * 60 * 1000));
+}
+
+export function isOutfitSolutionCurrent(solution: OutfitSolution, now: number | Date = Date.now()) {
+  const currency = solution.currency;
+  const observedTotal = solution.pieces.reduce((total, piece) => total + piece.offer.price, 0);
+  return solution.pieces.length > 0
+    && solution.pieces.every((piece) => piece.offer.currency === currency && isFilonOfferActionable(piece.offer, now) && isSafePartnerOfferUrl(piece.offer.link))
+    && Number.isFinite(solution.total)
+    && Math.abs(observedTotal - solution.total) <= 0.005;
 }
 
 function normalized(value: string | null | undefined) {
@@ -80,28 +106,64 @@ function roleFromCatalogue(offer: FilonOffer): OutfitRole | null {
   return null;
 }
 
-function scoreForComposition(pieces: OutfitPiece[], budget: number | null) {
-  const roles = new Set(pieces.map((piece) => piece.role)).size;
-  const total = pieces.reduce((sum, piece) => sum + piece.offer.price, 0);
-  const allVerifiedAvailable = pieces.every((piece) => piece.offer.inStock === true);
-  const withinBudget = budget === null || total <= budget;
-  const coverage = pieces.length >= 3 ? 36 : 24;
-  const roleCoverage = Math.min(20, roles * 7);
-  const availability = allVerifiedAvailable ? 24 : 0;
-  const budgetFit = withinBudget ? 15 : 0;
-  const verifiedLinks = pieces.every((piece) => isSafePartnerOfferUrl(piece.offer.link)) ? 5 : 0;
-  return Math.min(100, coverage + roleCoverage + availability + budgetFit + verifiedLinks);
-}
-
-function confidenceForComposition(pieces: OutfitPiece[], declaredStyle: string | null) {
-  const catalogueEvidence = pieces.every((piece) => piece.offer.inStock === true && isSafePartnerOfferUrl(piece.offer.link));
-  const inferredRoles = pieces.filter((piece) => piece.provenance === "filon_inference").length;
-  const score = Math.max(0, Math.min(100, (catalogueEvidence ? 72 : 42) + Math.min(18, pieces.length * 5) - inferredRoles * 5 + (declaredStyle ? 4 : 0)));
-  return { score, level: score >= 80 ? "high" as const : score >= 60 ? "medium" as const : "low" as const };
-}
-
 function pickFirst(offers: FilonOffer[], role: OutfitRole, used: Set<number>, remainingBudget: number | null) {
   return offers.find((offer) => roleFromCatalogue(offer) === role && !used.has(offer.id) && (remainingBudget === null || offer.price <= remainingBudget));
+}
+
+function isEligibleOffer(offer: FilonOffer, budget: number | null, now: number | Date) {
+  return isFilonOfferActionable(offer, now)
+    && isSafePartnerOfferUrl(offer.link)
+    // Le budget saisi dans l’interface est explicitement libellé en euros.
+    // Une offre qui le dépasse à elle seule ne doit pas gonfler le compteur
+    // « éligibles », même si la composition l’écarterait ensuite.
+    && (budget === null || (offer.currency === "EUR" && offer.price <= budget));
+}
+
+export function summarizeOutfitOfferEligibility(offers: FilonOffer[], budget: number | null, now: number | Date = Date.now()) {
+  const eligibleOffers: FilonOffer[] = [];
+  let excludedNonEligible = 0;
+  let excludedUnsafe = 0;
+  for (const offer of offers) {
+    // Une offre appartient à une seule catégorie. Le lien est contrôlé en
+    // premier pour qu'une URL dangereuse ne soit jamais recomptée ailleurs.
+    if (!isSafePartnerOfferUrl(offer.link)) {
+      excludedUnsafe += 1;
+    } else if (isEligibleOffer(offer, budget, now)) {
+      eligibleOffers.push(offer);
+    } else {
+      excludedNonEligible += 1;
+    }
+  }
+  return { eligibleOffers, excludedNonEligible, excludedUnsafe };
+}
+
+function groupByCurrency(offers: FilonOffer[]) {
+  const groups = new Map<string, FilonOffer[]>();
+  for (const offer of offers) {
+    const group = groups.get(offer.currency) ?? [];
+    group.push(offer);
+    groups.set(offer.currency, group);
+  }
+  return [...groups.values()];
+}
+
+function findBaseFootwearPair(offers: FilonOffer[], budget: number | null): [FilonOffer, FilonOffer] | null {
+  const bases = offers.filter((offer) => roleFromCatalogue(offer) === "base");
+  const footwear = offers.filter((offer) => roleFromCatalogue(offer) === "footwear");
+  for (const base of bases) {
+    for (const shoes of footwear) {
+      if (base.id !== shoes.id && (budget === null || base.price + shoes.price <= budget)) return [base, shoes];
+    }
+  }
+  return null;
+}
+
+function selectComposableCurrencyGroup(offers: FilonOffer[], budget: number | null) {
+  for (const group of groupByCurrency(offers)) {
+    const pair = findBaseFootwearPair(group, budget);
+    if (pair) return { offers: group, pair };
+  }
+  return null;
 }
 
 function setPipelineStage(trace: RecommendationTrace, stage: V3PipelineStage, status: "completed" | "skipped" | "abstained", reason: string) {
@@ -109,19 +171,18 @@ function setPipelineStage(trace: RecommendationTrace, stage: V3PipelineStage, st
 }
 
 /**
- * Compose une première solution vérifiable uniquement à partir des offres
+ * Compose une première solution documentée uniquement à partir des offres
  * partenariales. Cette fonction ne fabrique ni prix, ni stock, ni attribut.
  */
-export function buildOutfitRecommendation(intent: OutfitIntent, offers: FilonOffer[]): OutfitRecommendation {
-  const unsafe = offers.filter((offer) => !isSafePartnerOfferUrl(offer.link));
-  const unavailable = offers.filter((offer) => offer.inStock !== true);
-  const eligible = offers.filter((offer) => offer.inStock === true && isSafePartnerOfferUrl(offer.link));
+export function buildOutfitRecommendation(intent: OutfitIntent, offers: FilonOffer[], now: number | Date = Date.now()): OutfitRecommendation {
+  const eligibility = summarizeOutfitOfferEligibility(offers, intent.budget, now);
+  const eligible = eligibility.eligibleOffers;
   const trace: RecommendationTrace = {
     intent,
     considered: offers.length,
     eligible: eligible.length,
-    excludedUnavailable: unavailable.length,
-    excludedUnsafe: unsafe.length,
+    excludedNonEligible: eligibility.excludedNonEligible,
+    excludedUnsafe: eligibility.excludedUnsafe,
     pipeline: createV3PipelineTrace(`fashion-${Date.now()}-${offers.length}`),
   };
   setPipelineStage(trace, "INTENT", "completed", "Brief déclaré par l’utilisateur.");
@@ -130,35 +191,35 @@ export function buildOutfitRecommendation(intent: OutfitIntent, offers: FilonOff
   setPipelineStage(trace, "FILTERING", eligible.length > 0 ? "completed" : "abstained", `${eligible.length} offre(s) disponibles avec lien sûr.`);
 
   if (eligible.length === 0) {
-    const reason = "Aucune offre partenaire disponible et vérifiable ne permet de composer une proposition responsable.";
-    setPipelineStage(trace, "RESPONSE", "abstained", reason);
+    const reason: OutfitPublicMessage = { code: "recommendation.no_eligible_offers" };
+    setPipelineStage(trace, "RESPONSE", "abstained", reason.code);
     return { status: "abstain", reason, trace };
   }
 
+  const comparable = selectComposableCurrencyGroup(eligible, intent.budget);
+  if (!comparable) {
+    const reason: OutfitPublicMessage = { code: "recommendation.no_comparable_currency" };
+    setPipelineStage(trace, "UNDERSTANDING", "abstained", "Les offres actuelles ne permettent pas une composition mono-devise identifiable.");
+    setPipelineStage(trace, "COMPOSITION", "abstained", reason.code);
+    setPipelineStage(trace, "RESPONSE", "abstained", reason.code);
+    return { status: "abstain", reason, trace };
+  }
+
+  const currency = comparable.offers[0].currency;
   const used = new Set<number>();
-  const base = pickFirst(eligible, "base", used, intent.budget);
-  if (base) used.add(base.id);
-  const afterBase = intent.budget === null || !base ? intent.budget : intent.budget - base.price;
-  const footwear = pickFirst(eligible, "footwear", used, afterBase);
-  if (footwear) used.add(footwear.id);
-
-  if (!base || !footwear) {
-    const reason = "FILON a trouvé des offres, mais pas assez de pièces clairement identifiables et disponibles pour former une tenue fiable. Essayez une demande plus précise ou assouplissez votre budget.";
-    setPipelineStage(trace, "UNDERSTANDING", "abstained", "Les rôles base et chaussures ne sont pas tous identifiables avec les informations Core disponibles.");
-    setPipelineStage(trace, "COMPOSITION", "abstained", reason);
-    setPipelineStage(trace, "RESPONSE", "abstained", reason);
-    return { status: "abstain", reason, trace };
-  }
+  const [base, footwear] = comparable.pair;
+  used.add(base.id);
+  used.add(footwear.id);
 
   const selected = [base, footwear];
   const afterFootwear = intent.budget === null ? null : intent.budget - selected.reduce((sum, offer) => sum + offer.price, 0);
-  const structure = pickFirst(eligible, "structure", used, afterFootwear);
+  const structure = pickFirst(comparable.offers, "structure", used, afterFootwear);
   if (structure) {
     selected.push(structure);
     used.add(structure.id);
   }
   const afterStructure = intent.budget === null ? null : intent.budget - selected.reduce((sum, offer) => sum + offer.price, 0);
-  const accessory = pickFirst(eligible, "accessory", used, afterStructure);
+  const accessory = pickFirst(comparable.offers, "accessory", used, afterStructure);
   if (accessory) selected.push(accessory);
 
   const pieces: OutfitPiece[] = selected.map((offer) => {
@@ -168,47 +229,44 @@ export function buildOutfitRecommendation(intent: OutfitIntent, offers: FilonOff
       offer,
       confidence: role ? "medium" : "low",
       provenance: role ? "filon_inference" : "catalogue_partner",
-      explanation: role
-        ? "Rôle interprété à partir du nom et de la catégorie fournis par le catalogue partenaire."
-        : "Offre partenaire disponible ; son rôle dans la tenue reste à confirmer.",
+      explanation: { code: role ? "piece.role_inferred" : "piece.role_unconfirmed" },
     };
   });
   const total = pieces.reduce((sum, piece) => sum + piece.offer.price, 0);
   if (intent.budget !== null && total > intent.budget) {
-    const reason = "Les pièces disponibles dépassent votre budget total. FILON préfère ne pas présenter une solution qui ne respecte pas votre contrainte.";
-    setPipelineStage(trace, "COMPOSITION", "abstained", reason);
-    setPipelineStage(trace, "RESPONSE", "abstained", reason);
+    const reason: OutfitPublicMessage = { code: "recommendation.budget_exceeded" };
+    setPipelineStage(trace, "COMPOSITION", "abstained", reason.code);
+    setPipelineStage(trace, "RESPONSE", "abstained", reason.code);
     return { status: "abstain", reason, trace };
   }
 
   const relations = buildFashionRelations(pieces, intent);
   const critique = critiqueFashionComposition(pieces, intent, relations);
-  const styleScore = Math.max(0, scoreForComposition(pieces, intent.budget) - critique.scorePenalty);
-  const baseConfidence = confidenceForComposition(pieces, intent.declaredStyle);
-  const confidenceScore = Math.max(0, baseConfidence.score - critique.scorePenalty);
-  const confidence = { score: confidenceScore, level: confidenceScore >= 80 ? "high" as const : confidenceScore >= 60 ? "medium" as const : "low" as const };
   const constraints = [
-    "Offres partenaires disponibles uniquement",
-    intent.budget === null ? "Budget non précisé" : `Budget total respecté : ${intent.budget.toFixed(2)} €`,
-    intent.occasion ? `Contexte déclaré : ${intent.occasion}` : "Contexte à préciser",
-    intent.season ? `Saison déclarée : ${intent.season}` : "Saison à préciser",
-  ];
+    { code: "constraint.catalogue_current_offers" },
+    { code: "constraint.single_currency", currency },
+    intent.budget === null ? { code: "constraint.budget_unspecified" } : { code: "constraint.budget_respected", amount: intent.budget, currency: "EUR" },
+    intent.occasion ? { code: "constraint.context_declared", occasion: intent.occasion } : { code: "constraint.context_unspecified" },
+    intent.season ? { code: "constraint.season_declared", season: intent.season } : { code: "constraint.season_unspecified" },
+  ] satisfies OutfitPublicMessage[];
   setPipelineStage(trace, "UNDERSTANDING", "completed", "Rôles inférés uniquement depuis le nom et la catégorie fournis par le Core.");
   setPipelineStage(trace, "COMPOSITION", "completed", `${pieces.length} pièce(s) composées sous contraintes.`);
   setPipelineStage(trace, "CRITIC", "completed", `${critique.findings.length} constat(s) explicitement listés.`);
-  setPipelineStage(trace, "RANKING", "completed", "Style Score calculé sans signal commercial caché.");
+  setPipelineStage(trace, "RANKING", "skipped", "Aucun Style Score n’est publié sans méthode calibrée et validée.");
   setPipelineStage(trace, "OPTIMIZATION", "skipped", "L’optimisation intervient uniquement sur une tenue sauvegardée.");
-  setPipelineStage(trace, "CONFIDENCE", "completed", "Confidence Score séparé du Style Score.");
-  setPipelineStage(trace, "RESPONSE", "completed", "Solution vérifiable présentée avec contraintes et limites.");
+  setPipelineStage(trace, "CONFIDENCE", "skipped", "La confiance quantitative reste non calibrée.");
+  setPipelineStage(trace, "RESPONSE", "completed", "Solution présentée à partir des données retenues, avec contraintes et limites.");
   return {
     status: "solution",
     solution: {
       pieces,
       total,
-      styleScore,
-      confidenceScore: confidence.score,
-      confidence: confidence.level,
-      scoreExplanation: "Score reproductible fondé sur la couverture de la tenue, la diversité des rôles, la disponibilité confirmée, le respect du budget, la validité des liens partenaires et la critique finale — jamais sur la commission.",
+      currency,
+      styleScore: null,
+      confidenceScore: null,
+      confidence: "not_calibrated",
+      measurementStatus: "not_calibrated",
+      scoreExplanation: { code: "score.not_measured" },
       constraints,
       relations,
       critique,

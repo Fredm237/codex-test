@@ -1,15 +1,16 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { buildMetadata, JsonLd } from "@/lib/seo";
+import { buildMetadata, JsonLd, siteUrl } from "@/lib/seo";
 import { API } from "@/lib/api";
 import type { VerdictData } from "@/components/editorial/Verdict";
 import type { DecisionData } from "@/components/filon/DecisionPanel";
 import { ProductDetails } from "@/components/filon/ProductDetails";
-import { site } from "@/lib/site";
+import { deriveProductComparison, money } from "@/components/filon/product-copy";
 
-// Fiche d'un produit regroupé par EAN : le même article, comparé chez tous les
-// marchands qui le vendent. Rendu serveur + ISR — indexable, et sans spinner.
-export const revalidate = 1800;
+// Fiche d'un produit regroupé par EAN. Comparaison et JSON-LD expirent avec les
+// observations : aucun cache ISR ne prolonge un prix au-delà de sa preuve.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 export const dynamicParams = true;
 
 type ProductOffer = {
@@ -17,6 +18,8 @@ type ProductOffer = {
   price: number | null;
   currency: string | null;
   in_stock: boolean | null;
+  observed_at: string | null;
+  evidence_current: boolean | null;
   link: string | null;
   merchant: { name: string; slug: string; region: string | null };
 };
@@ -27,11 +30,6 @@ type Product = {
   brand: string | null;
   category: string | null;
   image: string | null;
-  price_min: number | null;
-  price_max: number | null;
-  currency: string | null;
-  offers_count: number;
-  merchants_count: number;
   offers: ProductOffer[];
   verdict: VerdictData | null;
   decision: DecisionData | null;
@@ -62,7 +60,7 @@ async function getProduct(ean: string): Promise<Product | null> {
   let res: Response;
   try {
     res = await fetch(`${API}/api/catalog/product/${encodeURIComponent(ean)}`, {
-      next: { revalidate: 1800 },
+      cache: "no-store",
       signal: AbortSignal.timeout(8000),
     });
   } catch (e) {
@@ -79,24 +77,34 @@ async function getProduct(ean: string): Promise<Product | null> {
   }
 }
 
-function money(price: number | null, currency: string | null): string {
-  if (price == null) return "—";
-  const sym = currency === "GBP" ? "£" : currency === "USD" ? "$" : "€";
-  return `${price.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${sym}`;
+function gtinSchema(ean: string): Record<string, string> {
+  const normalized = ean.trim();
+  if (!/^\d+$/.test(normalized)) return {};
+  if (normalized.length === 8) return { gtin8: normalized };
+  if (normalized.length === 13) return { gtin13: normalized };
+  if (normalized.length === 14) return { gtin14: normalized };
+  return {};
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ ean: string }> }): Promise<Metadata> {
   const { ean } = await params;
   const p = await getProduct(ean);
   if (!p) {
-    return buildMetadata({ path: `/produits/${ean}`, title: "Produit", description: "Produit comparé par FILON." });
+    return buildMetadata({ path: `/produits/${encodeURIComponent(ean)}`, title: "Produit", description: "Produit comparé par FILON." });
   }
   const label = [p.brand, p.name].filter(Boolean).join(" ");
-  const from = p.price_min != null ? ` à partir de ${money(p.price_min, p.currency)}` : "";
+  const comparison = deriveProductComparison(p.offers);
+  const merchantsCount = comparison
+    ? new Set(comparison.offers.map((offer) => offer.merchant.slug || offer.merchant.name)).size
+    : 0;
+  const from = comparison ? ` à partir de ${money(comparison.priceMin, comparison.currency)}` : "";
+  const scope = comparison
+    ? ` observé chez ${merchantsCount} marchand${merchantsCount > 1 ? "s" : ""}`
+    : " à comparer chez les marchands indexés";
   return buildMetadata({
-    path: `/produits/${ean}`,
+    path: `/produits/${encodeURIComponent(ean)}`,
     title: `${label}${from}`,
-    description: `${label} comparé chez ${p.merchants_count} marchand${p.merchants_count > 1 ? "s" : ""}${from}. Prix, disponibilité et meilleure offre réunis par FILON.`,
+    description: `${label}${scope}${from}. Prix et disponibilité déclarée des offres indexées réunis par FILON.`,
     image: p.image || undefined,
   });
 }
@@ -106,12 +114,7 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
   const p = await getProduct(ean);
   if (!p) notFound();
 
-  const inStock = p.offers.filter((o) => o.in_stock !== false);
-  const best = inStock[0] ?? p.offers[0];
-  const saving =
-    p.price_min != null && p.price_max != null && p.price_max > p.price_min
-      ? p.price_max - p.price_min
-      : null;
+  const comparison = deriveProductComparison(p.offers);
 
   return (
     <>
@@ -121,16 +124,16 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
           "@type": "Product",
           name: p.name,
           brand: p.brand ? { "@type": "Brand", name: p.brand } : undefined,
-          gtin13: p.ean,
+          ...gtinSchema(p.ean),
           image: p.image || undefined,
-          offers: {
+          offers: comparison ? {
             "@type": "AggregateOffer",
-            priceCurrency: p.currency || "EUR",
-            lowPrice: p.price_min ?? undefined,
-            highPrice: p.price_max ?? undefined,
-            offerCount: p.offers_count,
-            url: `${site.url}/produits/${p.ean}`,
-          },
+            priceCurrency: comparison.currency,
+            lowPrice: comparison.priceMin,
+            highPrice: comparison.priceMax,
+            offerCount: comparison.offers.length,
+            url: siteUrl(`/produits/${encodeURIComponent(p.ean)}`),
+          } : undefined,
         }}
       />
 
@@ -148,7 +151,7 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
               ) : <span aria-hidden="true">—</span>}
             </div>
 
-            <ProductDetails p={p} best={best} saving={saving} />
+            <ProductDetails p={p} />
           </div>
         </div>
       </section>

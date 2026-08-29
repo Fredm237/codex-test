@@ -8,6 +8,7 @@ pouvait occuper toute la rangée.
 from __future__ import annotations
 
 from collections import Counter
+from datetime import UTC, datetime
 
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -34,11 +35,16 @@ async def _seed(s) -> None:
     s.add_all([shirts, other])
     await s.flush()
 
+    seeded_offers = []
+
     def offer(m, pid, name, price, brand="GANT"):
-        return models.Offer(
+        row = models.Offer(
             merchant_id=m.id, awin_product_id=pid, name=name, brand=brand,
-            price=price, currency="EUR", image_url="https://example.test/i.jpg",
+            price=price, currency="EUR", in_stock=True,
+            image_url="https://example.test/i.jpg",
         )
+        seeded_offers.append(row)
+        return row
 
     # Le cas réel : quatre tailles du même article, donc quatre lignes identiques.
     for i in range(4):
@@ -48,6 +54,20 @@ async def _seed(s) -> None:
         s.add(offer(shirts, f"oxford-{i}", f"Chemise Oxford {i}", 50.0 + i))
     for i in range(6):
         s.add(offer(other, f"divers-{i}", f"Produit Divers {i}", 30.0 + i, brand="AUTRE"))
+    await s.flush()
+    captured_at = datetime.now(UTC).replace(tzinfo=None)
+    s.add_all(
+        [
+            models.PriceSnapshot(
+                offer_id=row.id,
+                price=row.price,
+                currency="EUR",
+                in_stock=True,
+                captured_at=captured_at,
+            )
+            for row in seeded_offers
+        ]
+    )
     await s.commit()
 
 
@@ -92,27 +112,48 @@ async def test_rail_dedups_size_variants_via_ean(session):
     session.add(m)
     await session.flush()
     ean = "4006381333931"
+    seeded_offers = []
     for size in ("S", "M", "L", "XL"):
-        session.add(models.Offer(
+        offer = models.Offer(
             merchant_id=m.id, awin_product_id=f"shirt-{size}",
             name=f"GANT Regular Fit shirt green, Chequered - Size {size}",
-            brand="GANT", price=100.0, currency="EUR", ean=ean,
+            brand="GANT", price=100.0, currency="EUR", in_stock=True, ean=ean,
             image_url="https://example.test/i.jpg",
-        ))
+        )
+        seeded_offers.append(offer)
+        session.add(offer)
     # Assez d'articles distincts pour que le rail atteigne le minimum d'affichage.
     for i, (pid, name, price) in enumerate([
         ("tie", "Cravate", 45.0), ("belt", "Ceinture", 55.0),
         ("sock", "Chaussettes", 15.0), ("scarf", "Écharpe", 65.0),
     ]):
-        session.add(models.Offer(
+        offer = models.Offer(
             merchant_id=m.id, awin_product_id=pid, name=name,
-            brand="GANT", price=price, currency="EUR",
+            brand="GANT", price=price, currency="EUR", in_stock=True,
             image_url="https://example.test/i.jpg",
-        ))
+        )
+        seeded_offers.append(offer)
+        session.add(offer)
+    await session.flush()
+    captured_at = datetime.now(UTC).replace(tzinfo=None)
+    session.add_all(
+        [
+            models.PriceSnapshot(
+                offer_id=row.id,
+                price=row.price,
+                currency="EUR",
+                in_stock=True,
+                captured_at=captured_at,
+            )
+            for row in seeded_offers
+        ]
+    )
     await session.commit()
     await rebuild_products(session)
 
     items = await _budget(session, limit=12)
+    assert all(item["evidence_current"] is True for item in items)
+    assert all(item["observed_at"] is not None for item in items)
     shirts = [i for i in items if "Chequered" in i["name"]]
     assert len(shirts) == 1, f"les 4 tailles devraient donner 1 carte, obtenu {len(shirts)}"
 
@@ -124,11 +165,11 @@ async def test_budget_rail_excludes_non_euro_and_out_of_range(session):
     await session.flush()
     session.add(models.Offer(
         merchant_id=m.id, awin_product_id="gbp", name="Veste Anglaise", brand="UK",
-        price=95.0, currency="GBP", image_url="https://example.test/i.jpg",
+        price=95.0, currency="GBP", in_stock=True, image_url="https://example.test/i.jpg",
     ))
     session.add(models.Offer(
         merchant_id=m.id, awin_product_id="cheap", name="Bricole", brand="UK",
-        price=2.0, currency="EUR", image_url="https://example.test/i.jpg",
+        price=2.0, currency="EUR", in_stock=True, image_url="https://example.test/i.jpg",
     ))
     await session.commit()
 
@@ -138,3 +179,41 @@ async def test_budget_rail_excludes_non_euro_and_out_of_range(session):
     names = [i["name"] for i in items]
     assert "Veste Anglaise" not in names  # 95 GBP n'est pas « moins de 100 € »
     assert "Bricole" not in names
+
+
+async def test_cartes_sans_devise_ou_stock_confirme_disparaissent(session):
+    await _seed(session)
+    merchant = models.Merchant(
+        awin_mid=77,
+        name="Boutique Inconnue",
+        slug="boutique-inconnue",
+    )
+    session.add(merchant)
+    await session.flush()
+    session.add_all(
+        [
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="missing-currency",
+                name="Devise absente",
+                price=50.0,
+                currency=None,
+                in_stock=True,
+                image_url="https://example.test/i.jpg",
+            ),
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="unknown-stock",
+                name="Stock inconnu",
+                price=50.0,
+                currency="EUR",
+                in_stock=None,
+                image_url="https://example.test/i.jpg",
+            ),
+        ]
+    )
+    await session.commit()
+
+    names = [item["name"] for item in await _budget(session, limit=24)]
+    assert "Devise absente" not in names
+    assert "Stock inconnu" not in names

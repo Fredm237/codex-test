@@ -4,9 +4,9 @@
 //
 // Tout ce qui est chiffré vient du catalogue réel, lu au rendu de la page
 // (lib/proof.ts). L'ancienne version annonçait « 5+ marchands » et « chiffres
-// réels à venir » sous les logos d'enseignes qui ne sont pas nos partenaires :
-// elle sous-vendait un catalogue de 795 000 offres tout en promettant ce que
-// nous ne distribuons pas.
+// réels à venir » sous des logos qui ne prouvaient ni la source ni le
+// périmètre. La version actuelle n'affiche que les agrégats renvoyés par le
+// catalogue au moment du rendu.
 //
 // La vidéo d'unboxing décorative est retirée. Elle pesait 500 Ko, n'apportait
 // aucune information, et occupait à elle seule une part notable des 1 973 px
@@ -19,16 +19,17 @@
 import { motion } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
 import type { Proof } from "@/lib/proof";
+import { money } from "./product-copy";
 
 const COPY = {
   fr: {
     eyebrow: "Ce que contient le catalogue",
     title: "Des chiffres qu'on peut",
     titleIt: "aller vérifier.",
-    note: "Marchands partenaires actifs, relus à chaque synchronisation du catalogue.",
+    note: "Sources marchandes indexées dans l'état courant du catalogue.",
     labels: {
-      merchants: "marchands partenaires",
-      offers: "offres suivies",
+      merchants: "sources marchandes indexées",
+      offers: "offres indexées",
       multi: "produits vendus par plusieurs marchands",
       snapshots: "relevés de prix conservés",
     },
@@ -36,26 +37,26 @@ const COPY = {
     spreadTitle: "Le même article,",
     spreadTitleIt: "deux prix.",
     spreadBody:
-      "Ce produit est vendu par plusieurs de nos marchands. Voici ce que nous avons relevé, sans arrondi et sans exemple inventé.",
+      "Ces offres partagent l'identifiant produit affiché. Voici les valeurs renvoyées par le catalogue, sans exemple inventé.",
     merchants: "marchands le vendent",
     highest: "Le plus cher constaté",
     lowest: "Le moins cher constaté",
     gap: "Écart",
     see: "Voir le dossier",
     trust: [
-      ["Aucune place ne s'achète", "Aucune marque ni marchand ne peut payer pour un meilleur classement ou un meilleur Verdict. Jamais."],
-      ["Gratuit, et de votre côté", "Notre rémunération vient de l'affiliation, sans jamais augmenter votre prix ni fausser un conseil."],
-      ["Vos données restent à vous", "Analytics sans cookies, aucune revente. Ce que vous cherchez ne quitte jamais FILON."],
+      ["Commission hors score actuel", "Le taux de commission n'est pas un champ du calcul de score actuellement déployé."],
+      ["Affiliation signalée", "Certains liens peuvent générer une commission ; confirmez le total chez le marchand."],
+      ["Confidentialité documentée", "La politique de confidentialité décrit les données traitées et vos droits."],
     ] as Array<[string, string]>,
   },
   nl: {
     eyebrow: "Wat de catalogus bevat",
     title: "Cijfers die je",
     titleIt: "kunt nagaan.",
-    note: "Actieve partnerwinkels, herlezen bij elke synchronisatie van de catalogus.",
+    note: "Winkelbronnen die in de huidige catalogus zijn geïndexeerd.",
     labels: {
-      merchants: "partnerwinkels",
-      offers: "gevolgde aanbiedingen",
+      merchants: "geïndexeerde winkelbronnen",
+      offers: "geïndexeerde aanbiedingen",
       multi: "producten bij meerdere winkels",
       snapshots: "bewaarde prijsmetingen",
     },
@@ -63,26 +64,26 @@ const COPY = {
     spreadTitle: "Hetzelfde artikel,",
     spreadTitleIt: "twee prijzen.",
     spreadBody:
-      "Dit product wordt door meerdere van onze winkels verkocht. Dit is wat we hebben gemeten, zonder afronding en zonder verzonnen voorbeeld.",
+      "Deze aanbiedingen delen de getoonde productidentificatie. Dit zijn de cataloguswaarden, zonder verzonnen voorbeeld.",
     merchants: "winkels verkopen het",
     highest: "Duurst vastgesteld",
     lowest: "Goedkoopst vastgesteld",
     gap: "Verschil",
     see: "Bekijk de fiche",
     trust: [
-      ["Geen plaats te koop", "Geen enkel merk of winkel kan betalen voor een betere rangschikking of een beter Verdict. Nooit."],
-      ["Gratis, en aan jouw kant", "Onze vergoeding komt uit affiliatie, zonder ooit je prijs te verhogen of een advies te vervalsen."],
-      ["Je gegevens blijven van jou", "Analytics zonder cookies, geen doorverkoop. Wat je zoekt verlaat FILON nooit."],
+      ["Commissie buiten huidige score", "Het commissietarief is geen invoerveld van de momenteel geïmplementeerde score."],
+      ["Affiliatie vermeld", "Sommige links kunnen een commissie opleveren; bevestig het totaal bij de winkel."],
+      ["Privacy gedocumenteerd", "Het privacybeleid beschrijft verwerkte gegevens en je rechten."],
     ] as Array<[string, string]>,
   },
   en: {
     eyebrow: "What the catalogue holds",
     title: "Figures you can",
     titleIt: "go and check.",
-    note: "Active partner merchants, re-read on every catalogue synchronisation.",
+    note: "Merchant sources indexed in the current catalogue state.",
     labels: {
-      merchants: "partner merchants",
-      offers: "offers tracked",
+      merchants: "indexed merchant sources",
+      offers: "indexed offers",
       multi: "products sold by several merchants",
       snapshots: "price readings kept",
     },
@@ -90,29 +91,21 @@ const COPY = {
     spreadTitle: "The same item,",
     spreadTitleIt: "two prices.",
     spreadBody:
-      "This product is sold by several of our merchants. Here is what we recorded — no rounding, no invented example.",
+      "These offers share the displayed product identifier. These are catalogue values, with no invented example.",
     merchants: "merchants sell it",
     highest: "Highest observed",
     lowest: "Lowest observed",
     gap: "Spread",
     see: "See the product",
     trust: [
-      ["No place is for sale", "No brand or merchant can pay for a better ranking or a better Verdict. Ever."],
-      ["Free, and on your side", "Our income comes from affiliation, without ever raising your price or skewing a recommendation."],
-      ["Your data stays yours", "Cookie-free analytics, no reselling. What you search for never leaves FILON."],
+      ["Commission outside current score", "The commission rate is not an input field in the currently implemented score."],
+      ["Affiliation disclosed", "Some links may generate a commission; confirm the total with the merchant."],
+      ["Privacy documented", "The privacy policy describes processed data and your rights."],
     ] as Array<[string, string]>,
   },
 };
 
 const TAG = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
-
-function money(value: number, currency: string, tag: string): string {
-  const symbol = currency === "GBP" ? "£" : currency === "USD" ? "$" : "€";
-  return `${value.toLocaleString(tag, {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  })} ${symbol}`;
-}
 
 export function Proof({ live }: { live: Proof | null }) {
   const { locale } = useLocale();
@@ -216,17 +209,17 @@ export function Proof({ live }: { live: Proof | null }) {
               <dl className="fx-verdict-rows">
                 <div>
                   <dt>{x.highest}</dt>
-                  <dd className="strike">{money(product.priceMax, product.currency, tag)}</dd>
+                  <dd className="strike">{money(product.priceMax, product.currency, locale)}</dd>
                 </div>
                 <div>
                   <dt>{x.lowest}</dt>
-                  <dd className="lead">{money(product.priceMin, product.currency, tag)}</dd>
+                  <dd className="lead">{money(product.priceMin, product.currency, locale)}</dd>
                 </div>
               </dl>
 
               <footer className="fx-verdict-foot">
                 <span className="fx-badge gain">
-                  {x.gap} −{money(product.priceMax - product.priceMin, product.currency, tag)}
+                  {x.gap} −{money(product.priceMax - product.priceMin, product.currency, locale)}
                 </span>
                 <a className="fx-verdict-link" href={`/produits/${product.ean}/`}>
                   {x.see}

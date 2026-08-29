@@ -1,10 +1,25 @@
-from app.intelligence.contracts import CoreOfferSnapshot
+import math
+from dataclasses import replace
+from datetime import UTC, datetime, timedelta
+
+import pytest
+
+from app.intelligence.contracts import Availability, CoreOfferSnapshot
 from app.intelligence.general_decision import compose_general_plan
 from app.intelligence.intent_resolution import resolve_intent
 from app.services import taxonomy
 
 
-def offer(offer_id: int, name: str, category: str, subcategory: str | None, price: float) -> CoreOfferSnapshot:
+def offer(
+    offer_id: int,
+    name: str,
+    category: str,
+    subcategory: str | None,
+    price: float | None,
+    *,
+    currency: str | None = "EUR",
+    availability: Availability = "in_stock",
+) -> CoreOfferSnapshot:
     return CoreOfferSnapshot(
         offer_id=offer_id,
         catalog_product_id=None,
@@ -14,14 +29,14 @@ def offer(offer_id: int, name: str, category: str, subcategory: str | None, pric
         filon_subcategory=subcategory,
         offer_kind=taxonomy.PHYSICAL_PRODUCT,
         price=price,
-        currency="EUR",
-        availability="in_stock",
+        currency=currency,
+        availability=availability,
         image_url="https://example.test/item.jpg",
         deep_link="https://example.test/item",
         merchant_id=1,
         merchant_name="Test",
         merchant_region="BE",
-        observed_at=None,
+        observed_at=datetime.now(UTC),
     )
 
 
@@ -65,6 +80,298 @@ def test_plan_general_s_abstient_si_aucune_offre_du_scope_ne_respecte_le_budget(
 
     assert solution["decision"] == "abstain"
     assert solution["rejection_reason"] == "budget_unreachable"
+    assert solution["style_score"] is None
+    assert solution["confidence_score"] is None
+    assert solution["confidence_band"] == "not_calibrated"
+    assert "confidence_not_calibrated" in solution["unknowns"]
+
+
+def test_plan_general_s_abstient_si_le_prix_est_inconnu():
+    intent = resolve_intent("ordinateur portable sous 500 €", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                None,
+            )
+        ],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_eligible_offer"
+    assert solution["items"] == []
+
+
+@pytest.mark.parametrize("price", [0.0, -1.0, math.nan, math.inf, -math.inf])
+def test_plan_general_s_abstient_si_le_prix_n_est_pas_fini_et_positif(price):
+    intent = resolve_intent("ordinateur portable sous 500 €", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                price,
+            )
+        ],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_eligible_offer"
+    assert solution["items"] == []
+
+
+@pytest.mark.parametrize(
+    "currency",
+    [None, "", "   ", "unknown", "ABC", "XXX", "XTS"],
+)
+def test_plan_general_s_abstient_si_la_devise_est_inconnue(currency):
+    # Le cas sans budget verrouille aussi le caller public Intelligence : une
+    # devise factice ne doit pas passer seulement parce qu'aucune comparaison
+    # avec l'euro n'est demandée.
+    intent = resolve_intent("ordinateur portable", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                400.0,
+                currency=currency,
+            )
+        ],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_eligible_offer"
+    assert solution["items"] == []
+
+
+def test_plan_general_normalise_la_devise_prouvee_avant_de_l_exposer():
+    intent = resolve_intent("ordinateur portable", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                400.0,
+                currency=" eur ",
+            )
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert solution["total_known_price"]["currency"] == "EUR"
+    assert solution["items"][0]["currency"] == "EUR"
+    assert solution["items"][0]["evidence"][0]["value"] == "400.00 EUR"
+    assert all(
+        evidence["confidence"] is None
+        for evidence in solution["items"][0]["evidence"]
+    )
+
+
+def test_plan_general_s_abstient_si_le_stock_est_inconnu():
+    intent = resolve_intent("ordinateur portable sous 500 €", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                400.0,
+                availability="unknown",
+            )
+        ],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_eligible_offer"
+    assert solution["items"] == []
+
+
+@pytest.mark.parametrize(
+    "observed_at",
+    [
+        None,
+        datetime.now(UTC) - timedelta(hours=73),
+        datetime.now(UTC) + timedelta(hours=1),
+    ],
+)
+def test_plan_general_s_abstient_si_observation_absente_ou_expiree(observed_at):
+    intent = resolve_intent("ordinateur portable sous 500 €", "fr")
+    stale = replace(
+        offer(
+            1,
+            "Ordinateur portable étudiant",
+            taxonomy.INFORMATIQUE,
+            "Ordinateurs portables",
+            400.0,
+        ),
+        observed_at=observed_at,
+    )
+
+    solution = compose_general_plan(intent, [stale])
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "no_eligible_offer"
+    assert solution["items"] == []
+
+
+def test_plan_general_ignore_les_offres_incompletes_si_une_offre_est_eligible():
+    intent = resolve_intent("ordinateur portable sous 500 €", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant sans prix",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                None,
+            ),
+            offer(
+                3,
+                "Ordinateur portable étudiant sans devise",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                350.0,
+                currency=None,
+            ),
+            offer(
+                4,
+                "Ordinateur portable étudiant stock inconnu",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                400.0,
+                availability="unknown",
+            ),
+            offer(
+                2,
+                "Ordinateur portable étudiant disponible",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                450.0,
+            ),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["offer_id"] for item in solution["items"]] == [2]
+    assert solution["total_known_price"] == {
+        "amount": 450.0,
+        "currency": "EUR",
+        "scope": "items_only",
+    }
+    assert solution["confidence_score"] is None
+    assert solution["confidence_band"] == "not_calibrated"
+    assert "confidence_not_calibrated" in solution["unknowns"]
+
+
+def test_plan_general_s_abstient_plutot_que_comparer_des_devises_sans_fx():
+    intent = resolve_intent("ordinateur portable", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant EUR",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                90.0,
+                currency="EUR",
+            ),
+            offer(
+                2,
+                "Ordinateur portable étudiant JPY",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                100.0,
+                currency="JPY",
+            ),
+        ],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "currency_not_comparable"
+    assert solution["items"] == []
+
+
+def test_plan_general_budget_eur_ignore_une_offre_etrangere_concurrente():
+    intent = resolve_intent("ordinateur portable sous 500 €", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant EUR",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                400.0,
+                currency="EUR",
+            ),
+            offer(
+                2,
+                "Ordinateur portable étudiant USD",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                350.0,
+                currency="USD",
+            ),
+        ],
+    )
+
+    assert solution["decision"] == "recommend"
+    assert [item["offer_id"] for item in solution["items"]] == [1]
+    assert solution["total_known_price"]["currency"] == "EUR"
+
+
+def test_plan_general_s_abstient_si_le_total_multi_scope_deborde():
+    intent = resolve_intent("ordinateur portable et sac à dos", "fr")
+
+    solution = compose_general_plan(
+        intent,
+        [
+            offer(
+                1,
+                "Ordinateur portable étudiant",
+                taxonomy.INFORMATIQUE,
+                "Ordinateurs portables",
+                1e308,
+            ),
+            offer(
+                2,
+                "Sac à dos ordinateur",
+                taxonomy.BAGAGERIE,
+                "Sacs à dos",
+                1e308,
+            ),
+        ],
+    )
+
+    assert solution["decision"] == "abstain"
+    assert solution["rejection_reason"] == "non_finite_total"
+    assert solution["total_known_price"] is None
 
 
 

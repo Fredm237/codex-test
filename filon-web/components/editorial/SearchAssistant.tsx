@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
+import { API } from "@/lib/api";
+import { formatSupportedMoney, normalizeSupportedMoney } from "@/lib/currency";
 import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
+import { hasCurrentOfferEvidence, isSafeExternalOfferUrl } from "@/components/filon/product-copy";
 
 const SL = {
   fr: {
@@ -77,16 +80,6 @@ const SL = {
    SSE. There is no second source: when the stream fails, the assistant says so.
    ────────────────────────────────────────────────────────────────────────── */
 
-const money = (n: number, cur = "€", locale: "fr" | "nl" | "en" = "fr") => {
-  const currency = cur === "€" ? "EUR" : cur === "£" ? "GBP" : cur === "$" ? "USD" : cur;
-  const numberLocale = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
-  try {
-    return new Intl.NumberFormat(numberLocale, { style: "currency", currency, maximumFractionDigits: 2 }).format(n);
-  } catch {
-    return `${n.toLocaleString(numberLocale)} ${cur}`;
-  }
-};
-
 /** Pays couverts par les offres et prix suivis dans le catalogue FILON. */
 const COUNTRIES = [
   { code: "be", labels: { fr: "Belgique (FR)", nl: "België (FR)", en: "Belgium (FR)" } },
@@ -135,7 +128,8 @@ type Hist = "baisse" | "hausse" | "stable";
 type Card = {
   rank: string; medal: string; name: string; emoji: string;
   offer_kind?: string; image?: string | null; link?: string | null;
-  price: number; currency?: string; merchant: string; delivery: string; warranty: string;
+  price: number; currency: string; merchant: string; delivery: string; warranty: string;
+  in_stock: boolean; observed_at: string; evidence_current: boolean;
   cashback: number; coupon: string | null; hist: Hist | null; histNote: string;
   score?: number; evidence_score?: number; decision?: DecisionData | null;
   why: string; alt: string | null; buy: boolean;
@@ -229,7 +223,6 @@ function catalogueHref(input: string) {
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
-const API = (process.env.NEXT_PUBLIC_FILON_API || "https://web-production-c6842.up.railway.app").replace(/\/$/, "");
 const ASSISTANT_TIMEOUT_MS = 30_000;
 
 async function* streamAnalyze(
@@ -259,18 +252,22 @@ async function* streamAnalyze(
   }
 }
 
-function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string }) {
+function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
   const [imgOk, setImgOk] = useState(true);
   const { locale } = useLocale();
   const S = SL[locale];
   const isContextualOffer = Boolean(c.offer_kind && !["physical_product", "tech_accessory"].includes(c.offer_kind));
   // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
   // Google Shopping : on le laisse explorer le même produit dans FILON.
-  const hasMerchantLink = Boolean(c.link) && !isGoogleShoppingUrl(c.link);
+  const hasMerchantLink = isSafeExternalOfferUrl(c.link) && !isGoogleShoppingUrl(c.link);
   const offerUrl = hasMerchantLink
     ? (c.link as string)
     : `/catalogue/?q=${encodeURIComponent(q || c.name)}`;
   const showImg = c.image && imgOk;
+  const displayedPrice = hasCurrentOfferEvidence(c) && c.in_stock === true
+    ? formatSupportedMoney(c.price, c.currency, locale)
+    : null;
+  if (displayedPrice === null) return null;
   return (
     <motion.article 
       className={`fa-card${i === 0 ? " win" : ""}`}
@@ -290,7 +287,7 @@ function RecCard({ c, i, q, cur }: { c: Card; i: number; q: string; cur: string 
         </div>
         <div className="fa-main">
           <h3>{c.name}</h3>
-          <div className="fa-price">{isContextualOffer && <span className="mc">{S.observedRate}</span>}<b>{money(c.price, c.currency || cur, locale)}</b><span className="mc">{S.at} {c.merchant}</span></div>
+          <div className="fa-price">{isContextualOffer && <span className="mc">{S.observedRate}</span>}<b>{displayedPrice}</b><span className="mc">{S.at} {c.merchant}</span></div>
           <div className="fa-specs">
             {!isContextualOffer && <><span><IcTruck /> {c.delivery}</span><span><IcShield /> {c.warranty}</span></>}
             {c.cashback ? <span className="g"><IcCashback /> {S.cashback} {c.cashback} %</span> : null}
@@ -380,7 +377,20 @@ export function SearchAssistant() {
         // Une recommandation ne peut pas être présentée comme FILON lorsqu’elle
         // ne contient que des liens Google Shopping. On bloque le résultat au
         // lieu de brouiller la promesse de catalogue partenaire.
-        const verifiedCards = ev.data.cards.filter((card) => !isGoogleShoppingUrl(card.link));
+        const verifiedCards = ev.data.cards.flatMap((card) => {
+          if (isGoogleShoppingUrl(card.link)) return [];
+          const money = normalizeSupportedMoney(card.price, card.currency);
+          if (money === null) return [];
+          const verified = {
+            ...card,
+            price: money.amount,
+            currency: money.currency,
+            link: isSafeExternalOfferUrl(card.link) ? card.link : null,
+          };
+          return hasCurrentOfferEvidence(verified) && verified.in_stock === true
+            ? [verified]
+            : [];
+        });
         setActive(-1);
         // `real: false` signifie que le backend n’a pas trouvé de réponse dans
         // le catalogue FILON : ce sont des estimations et non des offres à
@@ -568,7 +578,7 @@ export function SearchAssistant() {
                     <span className="fa-country-note">{S.countryHelp}</span>
                   </p>
                   <div className="fa-cards">
-                    {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} cur={result.currency || "€"} />)}
+                    {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} />)}
                   </div>
                   <p className="sa-disc">{S.disc}</p>
                 </motion.div>

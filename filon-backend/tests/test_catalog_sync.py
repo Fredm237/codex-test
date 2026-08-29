@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
+from unittest.mock import AsyncMock
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -89,5 +90,61 @@ async def test_a_failed_first_sync_is_exposed_as_degraded_not_as_fresh():
             state = await catalog_sync.health(session, interval_hours=6)
             assert state["status"] == "degraded"
             assert state["last_success"] is None
+    finally:
+        await engine.dispose()
+
+
+async def test_an_incomplete_first_sync_is_exposed_as_degraded():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            run = await catalog_sync.start_run(session, trigger="scheduler")
+            assert run is not None
+            await catalog_sync.finish_run(
+                session,
+                run,
+                status="degraded",
+                feeds=2,
+                skipped_feeds=2,
+                failure_reason="all_feeds_skipped",
+            )
+
+            state = await catalog_sync.health(session, interval_hours=6)
+            assert state["status"] == "degraded"
+            assert state["last_success"] is None
+    finally:
+        await engine.dispose()
+
+
+async def test_run_marks_an_all_skipped_ingestion_degraded(monkeypatch):
+    engine, maker = await _session()
+    monkeypatch.setattr(
+        catalog_sync.awin_catalog,
+        "sync_merchants",
+        AsyncMock(return_value=3),
+    )
+    monkeypatch.setattr(
+        catalog_sync.awin_catalog,
+        "ingest_feeds",
+        AsyncMock(return_value={"feeds": 2, "offers": 0, "skipped": 2}),
+    )
+    monkeypatch.setattr(
+        catalog_sync.catalog_grouping,
+        "rebuild_products",
+        AsyncMock(return_value={"products": 0}),
+    )
+    try:
+        async with maker() as session:
+            result = await catalog_sync.run_catalog_sync(
+                session,
+                trigger="scheduler",
+            )
+
+            assert result["started"] is True
+            assert result["run"]["status"] == "degraded"
+            assert result["run"]["failure_reason"] == "all_feeds_skipped"
+            assert (await catalog_sync.health(session, interval_hours=6))["status"] == (
+                "degraded"
+            )
     finally:
         await engine.dispose()

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { site } from "@/lib/site";
+import { siteUrl } from "@/lib/site-url";
 import { API } from "@/lib/api";
 
 // Revalidé quotidiennement : les rayons apparaissent au rythme du catalogue.
@@ -59,7 +59,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const slugs = await categorySlugs();
   const all = [...routes, ...slugs.map((s) => `/categorie/${s}`)];
   return all.map((path) => ({
-    url: `${site.url}${path}`,
+    url: siteUrl(path || "/"),
     lastModified: now,
     changeFrequency: path === "" || path === "/blog" ? "daily" : "weekly",
     priority: path === "" ? 1 : 0.7,

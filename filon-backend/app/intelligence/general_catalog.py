@@ -1,14 +1,18 @@
 """Récupération catalogue générale fondée sur une intention taxonomique résolue."""
 from __future__ import annotations
 
+from dataclasses import replace
+
 from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.observability import decision_trace_event, traced_dependency
 from app.db import models
 from app.intelligence.contracts import CoreOfferSnapshot
 from app.intelligence.intent_resolution import GeneralIntent, IntentScope
 from app.services import relevance, taxonomy
 from app.services.catalog_paging import fetch_all_offer_rows
+from app.services.offer_evidence import load_offer_evidence
 
 
 def _availability(in_stock: bool | None) -> str:
@@ -57,7 +61,9 @@ def _snapshot(offer: models.Offer, merchant: models.Merchant) -> CoreOfferSnapsh
         merchant_id=merchant.id,
         merchant_name=merchant.name,
         merchant_region=merchant.region,
-        observed_at=offer.updated_at,
+        # `updated_at` est technique et peut changer lors d'un reclassement.
+        # Le vrai relevé prix+devise+stock est rattaché en lot ci-dessous.
+        observed_at=None,
     )
 
 
@@ -70,8 +76,14 @@ async def retrieve_general_offers(session: AsyncSession, intent: GeneralIntent) 
     """
     seen: set[int] = set()
     snapshots: list[CoreOfferSnapshot] = []
+    input_count = 0
     for scope in intent.scopes:
-        rows = await fetch_all_offer_rows(session.execute, _base_statement(scope))
+        async with traced_dependency("postgres", "read"):
+            rows = await fetch_all_offer_rows(
+                session.execute,
+                _base_statement(scope),
+            )
+        input_count += len(rows)
         strict: list[CoreOfferSnapshot] = []
         scoped: list[CoreOfferSnapshot] = []
         terms = list(scope.query_terms)
@@ -98,4 +110,47 @@ async def retrieve_general_offers(session: AsyncSession, intent: GeneralIntent) 
             if snapshot.offer_id not in seen:
                 seen.add(snapshot.offer_id)
                 snapshots.append(snapshot)
-    return snapshots
+    decision_trace_event(
+        "retrieval",
+        counts={
+            "scopes_count": len(intent.scopes),
+            "input_count": input_count,
+            "candidate_count": len(snapshots),
+        },
+    )
+    decision_trace_event(
+        "candidate_count",
+        counts={"candidate_count": len(snapshots)},
+    )
+    decision_trace_event(
+        "filtering",
+        counts={
+            "input_count": input_count,
+            "eligible_count": len(snapshots),
+            "rejected_count": max(0, input_count - len(snapshots)),
+        },
+    )
+    async with traced_dependency("postgres", "read"):
+        evidence_by_offer = await load_offer_evidence(
+            session,
+            list(snapshots),
+            current_only=True,
+        )
+    evidenced = [
+        replace(
+            snapshot,
+            currency=evidence_by_offer.get(snapshot.offer_id).currency,
+            observed_at=evidence_by_offer.get(snapshot.offer_id).current_observed_at,
+        )
+        if snapshot.offer_id in evidence_by_offer
+        else replace(snapshot, currency=None, observed_at=None)
+        for snapshot in snapshots
+    ]
+    decision_trace_event(
+        "evidence",
+        counts={
+            "evidenced_count": len(evidence_by_offer),
+            "unknown_count": max(0, len(snapshots) - len(evidence_by_offer)),
+        },
+    )
+    return evidenced

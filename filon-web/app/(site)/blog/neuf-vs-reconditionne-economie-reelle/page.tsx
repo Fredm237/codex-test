@@ -3,9 +3,9 @@ import { buildMetadata, articleSchema, breadcrumbSchema, JsonLd } from "@/lib/se
 import { Localized } from "@/components/editorial/Localized";
 
 const PATH = "/blog/neuf-vs-reconditionne-economie-reelle";
-const TITLE = "Neuf vs reconditionné : l'économie réelle, produit par produit";
+const TITLE = "Neuf vs reconditionné : comparer les prix et conditions";
 const DESC =
-  "Combien économise-t-on vraiment en choisissant le reconditionné ? Écarts de prix, grades, garanties, et le cumul avec le cashback, le guide clair pour décider.";
+  "Prix affiché, état, grade, garantie et retour : les champs à comparer entre une offre neuve et reconditionnée.";
 
 export const metadata: Metadata = buildMetadata({ path: PATH, title: TITLE, description: DESC });
 
@@ -15,7 +15,7 @@ function ArticleFR() {
       <div className="ed-article-hero">
         <div className="ed-article">
           <div className="ed-article-meta">Guide · 5 min · 2026</div>
-          <h1>Neuf vs reconditionné&nbsp;: l&apos;économie réelle</h1>
+          <h1>Neuf vs reconditionné&nbsp;: comparer prix et conditions</h1>
           <p className="lede">
             « Reconditionné » rime souvent avec « moins cher », mais l&apos;écart et les conditions varient. Voici les
             points à vérifier pour décider avec plus de contexte.
@@ -54,9 +54,9 @@ function ArticleFR() {
 
         <h2>Comprendre les grades</h2>
         <ul>
-          <li><b>Grade A+ / « comme neuf »</b>, aucune ou quasi aucune trace d&apos;usage. Le meilleur compromis prix/état.</li>
-          <li><b>Grade A / « très bon état »</b>, micro-rayures invisibles à distance d&apos;usage.</li>
-          <li><b>Grade B / « bon état »</b>, marques visibles mais sans impact sur le fonctionnement. Le plus économique.</li>
+          <li><b>Grade A+ / « comme neuf »</b> : libellé souvent utilisé pour un faible niveau de traces.</li>
+          <li><b>Grade A / « très bon état »</b> : définition à lire dans les conditions du vendeur.</li>
+          <li><b>Grade B / « bon état »</b> : traces possibles, étendue à confirmer pour l&apos;offre.</li>
         </ul>
         <p>
           Les appellations de grade ne sont pas standardisées. Elles décrivent souvent l&apos;aspect extérieur, mais il faut
@@ -64,7 +64,7 @@ function ArticleFR() {
           accessoires inclus.
         </p>
 
-        <h2>La garantie, le vrai filet de sécurité</h2>
+        <h2>La garantie et le recours disponible</h2>
         <p>
           La durée et l&apos;étendue de la garantie diffèrent selon le vendeur, le pays et le produit. Avant d&apos;acheter,
           vérifiez la <b>garantie proposée</b>, la procédure de retour, les exclusions et l&apos;identité du vendeur. Une
@@ -108,7 +108,7 @@ function ArticleNL() {
       <div className="ed-article-hero">
         <div className="ed-article">
           <div className="ed-article-meta">Gids · 5 min · 2026</div>
-          <h1>Nieuw vs refurbished&nbsp;: de echte besparing</h1>
+          <h1>Nieuw vs refurbished&nbsp;: prijs en voorwaarden vergelijken</h1>
           <p className="lede">
             « Refurbished » rijmt vaak met « goedkoper », maar het verschil en de voorwaarden variëren. Dit zijn de
             punten die je moet controleren om met meer context te beslissen.
@@ -147,16 +147,16 @@ function ArticleNL() {
 
         <h2>De grades begrijpen</h2>
         <ul>
-          <li><b>Grade A+ / « als nieuw »</b>, geen of nauwelijks gebruikssporen. Het beste compromis prijs/toestand.</li>
-          <li><b>Grade A / « zeer goede staat »</b>, microkrasjes onzichtbaar op gebruiksafstand.</li>
-          <li><b>Grade B / « goede staat »</b>, zichtbare sporen maar zonder impact op de werking. Het goedkoopst.</li>
+          <li><b>Grade A+ / « als nieuw »</b>: een label dat vaak voor weinig gebruikssporen wordt gebruikt.</li>
+          <li><b>Grade A / « zeer goede staat »</b>: lees de definitie in de voorwaarden van de verkoper.</li>
+          <li><b>Grade B / « goede staat »</b>: mogelijke sporen, te bevestigen voor het concrete aanbod.</li>
         </ul>
         <p>
           Gradebenamingen zijn niet gestandaardiseerd. Ze beschrijven vaak het uiterlijk, maar controleer bij de
           verkoper wat ze dekken, samen met uitgevoerde tests, batterijtoestand en inbegrepen accessoires.
         </p>
 
-        <h2>De garantie, het echte vangnet</h2>
+        <h2>De garantie en het beschikbare verhaal</h2>
         <p>
           De duur en reikwijdte van de garantie verschillen per verkoper, land en product. Controleer vóór je koopt de
           <b>geboden garantie</b>, retourprocedure, uitsluitingen en identiteit van de verkoper. Een garantie neemt niet
@@ -200,7 +200,7 @@ function ArticleEN() {
       <div className="ed-article-hero">
         <div className="ed-article">
           <div className="ed-article-meta">Guide · 5 min · 2026</div>
-          <h1>New vs refurbished&nbsp;: the real saving</h1>
+          <h1>New vs refurbished&nbsp;: comparing price and terms</h1>
           <p className="lede">
             « Refurbished » often rhymes with « cheaper », but the difference and conditions vary. Here are the points
             to check so you can decide with more context.
@@ -239,16 +239,16 @@ function ArticleEN() {
 
         <h2>Understanding the grades</h2>
         <ul>
-          <li><b>Grade A+ / « like new »</b>, no or almost no signs of use. The best price/condition compromise.</li>
-          <li><b>Grade A / « very good condition »</b>, micro-scratches invisible at use distance.</li>
-          <li><b>Grade B / « good condition »</b>, visible marks but no impact on functioning. The most economical.</li>
+          <li><b>Grade A+ / « like new »</b>: a label often used for a low level of visible wear.</li>
+          <li><b>Grade A / « very good condition »</b>: read the definition in the seller&apos;s terms.</li>
+          <li><b>Grade B / « good condition »</b>: possible marks, to be confirmed for the specific offer.</li>
         </ul>
         <p>
           Grade labels are not standardised. They often describe appearance, but check with the seller what they cover,
           along with tests performed, battery condition and included accessories.
         </p>
 
-        <h2>The warranty, the real safety net</h2>
+        <h2>The warranty and available recourse</h2>
         <p>
           Warranty length and scope differ by seller, country and product. Before buying, check the <b>warranty offered</b>,
           return process, exclusions and seller identity. A warranty does not remove every risk, but clarifies the

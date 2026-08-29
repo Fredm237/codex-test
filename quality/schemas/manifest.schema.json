@@ -1,0 +1,451 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FILON Quality Lab Manifest v0.5",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "lab_version",
+    "status",
+    "record_version",
+    "pack_version",
+    "split_policy",
+    "policy",
+    "datasets",
+    "measurement_support",
+    "gates",
+    "bootstrap"
+  ],
+  "properties": {
+    "schema_version": { "const": "quality-manifest/v1" },
+    "lab_version": { "const": "0.5.0" },
+    "status": { "enum": ["bootstrap_not_ready", "ready"] },
+    "record_version": { "const": "0.5.0" },
+    "pack_version": { "const": "0.5.0" },
+    "split_policy": {
+      "type": "object",
+      "required": ["version", "salt", "thresholds"],
+      "properties": {
+        "version": { "const": "sha256-prefix32-mod100-70-15-15-v1" },
+        "salt": { "const": "filon-quality-v1" },
+        "thresholds": {
+          "type": "object",
+          "required": ["train_lt", "dev_lt", "test_lt"],
+          "properties": {
+            "train_lt": { "const": 70 },
+            "dev_lt": { "const": 85 },
+            "test_lt": { "const": 100 }
+          },
+          "additionalProperties": false
+        }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": [
+        "unknown_first",
+        "false_merge_is_worse_than_false_split",
+        "independent_test_required",
+        "double_annotation_required",
+        "allowed_splits",
+        "leakage_key"
+      ],
+      "properties": {
+        "unknown_first": { "const": true },
+        "false_merge_is_worse_than_false_split": { "const": true },
+        "independent_test_required": { "const": true },
+        "double_annotation_required": { "const": true },
+        "allowed_splits": { "const": ["train", "dev", "test"] },
+        "leakage_key": { "const": "group_id" }
+      },
+      "additionalProperties": false
+    },
+    "datasets": {
+      "type": "object",
+      "required": [
+        "taxonomy",
+        "entity_resolution",
+        "variant_resolution",
+        "offer_attachment",
+        "offer_truth",
+        "retrieval",
+        "decision"
+      ],
+      "properties": {
+        "taxonomy": { "$ref": "#/$defs/taxonomy_config" },
+        "entity_resolution": {
+          "$ref": "#/$defs/entity_resolution_config"
+        },
+        "variant_resolution": {
+          "$ref": "#/$defs/variant_resolution_config"
+        },
+        "offer_attachment": {
+          "$ref": "#/$defs/offer_attachment_config"
+        },
+        "offer_truth": { "$ref": "#/$defs/offer_truth_config" },
+        "retrieval": { "$ref": "#/$defs/retrieval_config" },
+        "decision": { "$ref": "#/$defs/decision_config" }
+      },
+      "additionalProperties": false
+    },
+    "measurement_support": {
+      "type": "object",
+      "required": [
+        "taxonomy_cases_min",
+        "entity_different_pairs_min",
+        "entity_same_pairs_min",
+        "entity_variant_pairs_min",
+        "variant_cases_min",
+        "offer_eligible_cases_min",
+        "offer_all_cases_min",
+        "offer_noneligible_cases_min",
+        "offer_truth_cases_min",
+        "retrieval_queries_min",
+        "retrieval_answerable_queries_min",
+        "retrieval_exact_product_queries_min",
+        "retrieval_no_match_queries_min",
+        "retrieval_ambiguous_queries_min",
+        "decision_cases_min",
+        "decision_non_abstain_min",
+        "calibration_cases_min",
+        "scenario_exact_product_cases_min",
+        "scenario_generic_product_cases_min",
+        "scenario_use_case_cases_min",
+        "scenario_constraint_heavy_cases_min",
+        "scenario_accessory_cases_min",
+        "scenario_replacement_part_cases_min",
+        "scenario_variant_sensitive_cases_min",
+        "scenario_multi_product_cases_min",
+        "scenario_ambiguous_cases_min",
+        "scenario_no_match_cases_min",
+        "language_fr_cases_min",
+        "language_nl_cases_min",
+        "language_en_cases_min",
+        "vertical_smartphones_cases_min",
+        "vertical_laptops_cases_min",
+        "vertical_tv_cases_min",
+        "vertical_headphones_audio_cases_min",
+        "vertical_appliances_cases_min"
+      ],
+      "properties": {
+        "taxonomy_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "entity_different_pairs_min": { "$ref": "#/$defs/positive_integer" },
+        "entity_same_pairs_min": { "$ref": "#/$defs/positive_integer" },
+        "entity_variant_pairs_min": { "$ref": "#/$defs/positive_integer" },
+        "variant_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "offer_eligible_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "offer_all_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "offer_noneligible_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "offer_truth_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "retrieval_queries_min": { "$ref": "#/$defs/positive_integer" },
+        "retrieval_answerable_queries_min": { "$ref": "#/$defs/positive_integer" },
+        "retrieval_exact_product_queries_min": { "$ref": "#/$defs/positive_integer" },
+        "retrieval_no_match_queries_min": { "$ref": "#/$defs/positive_integer" },
+        "retrieval_ambiguous_queries_min": { "$ref": "#/$defs/positive_integer" },
+        "decision_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "decision_non_abstain_min": { "$ref": "#/$defs/positive_integer" },
+        "calibration_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_exact_product_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_generic_product_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_use_case_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_constraint_heavy_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_accessory_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_replacement_part_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_variant_sensitive_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_multi_product_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_ambiguous_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "scenario_no_match_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "language_fr_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "language_nl_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "language_en_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "vertical_smartphones_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "vertical_laptops_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "vertical_tv_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "vertical_headphones_audio_cases_min": { "$ref": "#/$defs/positive_integer" },
+        "vertical_appliances_cases_min": { "$ref": "#/$defs/positive_integer" }
+      },
+      "additionalProperties": false
+    },
+    "gates": {
+      "type": "object",
+      "required": [
+        "category_accuracy_min",
+        "subcategory_accuracy_min",
+        "product_role_accuracy_min",
+        "entity_match_accuracy_min",
+        "false_merge_rate_max",
+        "false_split_rate_max",
+        "entity_variant_relation_accuracy_min",
+        "variant_resolution_accuracy_min",
+        "offer_attachment_accuracy_min",
+        "offer_eligibility_accuracy_min",
+        "false_eligible_offers_max",
+        "price_accuracy_min",
+        "stock_accuracy_min",
+        "shipping_accuracy_min",
+        "affiliate_link_accuracy_min",
+        "retrieval_top_3_relevance_min",
+        "exact_product_match_accuracy_min",
+        "absurd_result_rate_max",
+        "retrieval_recall_at_50_min",
+        "retrieval_ndcg_at_10_min",
+        "retrieval_no_match_accuracy_min",
+        "retrieval_ambiguous_accuracy_min",
+        "retrieval_constraint_violations_at_10_max",
+        "constraint_violations_max",
+        "unsupported_claims_max",
+        "calibration_ece_max",
+        "sourced_explanation_coverage_min"
+      ],
+      "properties": {
+        "category_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "subcategory_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "product_role_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "entity_match_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "false_merge_rate_max": { "$ref": "#/$defs/ratio" },
+        "false_split_rate_max": { "$ref": "#/$defs/ratio" },
+        "entity_variant_relation_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "variant_resolution_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "offer_attachment_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "offer_eligibility_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "false_eligible_offers_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "price_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "stock_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "shipping_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "affiliate_link_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "retrieval_top_3_relevance_min": { "$ref": "#/$defs/ratio" },
+        "exact_product_match_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "absurd_result_rate_max": { "$ref": "#/$defs/ratio" },
+        "retrieval_recall_at_50_min": { "$ref": "#/$defs/ratio" },
+        "retrieval_ndcg_at_10_min": { "$ref": "#/$defs/ratio" },
+        "retrieval_no_match_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "retrieval_ambiguous_accuracy_min": { "$ref": "#/$defs/ratio" },
+        "retrieval_constraint_violations_at_10_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "constraint_violations_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "unsupported_claims_max": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "calibration_ece_max": { "$ref": "#/$defs/ratio" },
+        "sourced_explanation_coverage_min": { "$ref": "#/$defs/ratio" }
+      },
+      "additionalProperties": false
+    },
+    "bootstrap": {
+      "type": "object",
+      "required": [
+        "path",
+        "independent",
+        "eligible_for_launch_gate",
+        "reason"
+      ],
+      "properties": {
+        "path": { "$ref": "#/$defs/nonblank_string" },
+        "independent": { "const": false },
+        "eligible_for_launch_gate": { "const": false },
+        "reason": { "$ref": "#/$defs/nonblank_string" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonblank_string": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\s)[\\s\\S]*\\S(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "positive_integer": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "required_fields": {
+      "const": [
+        "record_version",
+        "dataset",
+        "case_id",
+        "group_id",
+        "split",
+        "split_policy_version",
+        "input",
+        "gold",
+        "annotations",
+        "source_pack_fingerprints",
+        "schema_fingerprint",
+        "case_fingerprint"
+      ]
+    },
+    "taxonomy_config": {
+      "type": "object",
+      "required": [
+        "path",
+        "schema",
+        "schema_fingerprint",
+        "minimum_cases",
+        "minimum_test_cases",
+        "double_annotation",
+        "required_fields"
+      ],
+      "properties": {
+        "path": { "const": "datasets/taxonomy.jsonl" },
+        "schema": { "const": "schemas/taxonomy.schema.json" },
+        "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+        "minimum_cases": { "const": 1000 },
+        "minimum_test_cases": { "const": 500 },
+        "double_annotation": { "const": true },
+        "required_fields": { "$ref": "#/$defs/required_fields" }
+      },
+      "additionalProperties": false
+    },
+    "entity_resolution_config": {
+      "type": "object",
+      "required": [
+        "path",
+        "schema",
+        "schema_fingerprint",
+        "minimum_cases",
+        "minimum_test_cases",
+        "double_annotation",
+        "required_fields"
+      ],
+      "properties": {
+        "path": { "const": "datasets/entity-resolution.jsonl" },
+        "schema": { "const": "schemas/entity-resolution.schema.json" },
+        "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+        "minimum_cases": { "const": 2000 },
+        "minimum_test_cases": { "const": 1000 },
+        "double_annotation": { "const": true },
+        "required_fields": { "$ref": "#/$defs/required_fields" }
+      },
+      "additionalProperties": false
+    },
+    "variant_resolution_config": {
+      "type": "object",
+      "required": [
+        "path",
+        "schema",
+        "schema_fingerprint",
+        "minimum_cases",
+        "minimum_test_cases",
+        "double_annotation",
+        "required_fields"
+      ],
+      "properties": {
+        "path": { "const": "datasets/variant-resolution.jsonl" },
+        "schema": { "const": "schemas/variant-resolution.schema.json" },
+        "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+        "minimum_cases": { "const": 500 },
+        "minimum_test_cases": { "const": 200 },
+        "double_annotation": { "const": true },
+        "required_fields": { "$ref": "#/$defs/required_fields" }
+      },
+      "additionalProperties": false
+    },
+    "offer_attachment_config": {
+      "type": "object",
+      "required": [
+        "path",
+        "schema",
+        "schema_fingerprint",
+        "minimum_cases",
+        "minimum_test_cases",
+        "double_annotation",
+        "required_fields"
+      ],
+      "properties": {
+        "path": { "const": "datasets/offer-attachment.jsonl" },
+        "schema": { "const": "schemas/offer-attachment.schema.json" },
+        "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+        "minimum_cases": { "const": 1000 },
+        "minimum_test_cases": { "const": 500 },
+        "double_annotation": { "const": true },
+        "required_fields": { "$ref": "#/$defs/required_fields" }
+      },
+      "additionalProperties": false
+    },
+    "offer_truth_config": {
+      "type": "object",
+      "required": [
+        "path",
+        "schema",
+        "schema_fingerprint",
+        "minimum_cases",
+        "minimum_test_cases",
+        "double_annotation",
+        "required_fields"
+      ],
+      "properties": {
+        "path": { "const": "datasets/offer-truth.jsonl" },
+        "schema": { "const": "schemas/offer-truth.schema.json" },
+        "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+        "minimum_cases": { "const": 1000 },
+        "minimum_test_cases": { "const": 500 },
+        "double_annotation": { "const": true },
+        "required_fields": { "$ref": "#/$defs/required_fields" }
+      },
+      "additionalProperties": false
+    },
+    "retrieval_config": {
+      "type": "object",
+      "required": [
+        "path",
+        "schema",
+        "schema_fingerprint",
+        "minimum_cases",
+        "minimum_test_cases",
+        "double_annotation",
+        "required_fields"
+      ],
+      "properties": {
+        "path": { "const": "datasets/retrieval.jsonl" },
+        "schema": { "const": "schemas/retrieval.schema.json" },
+        "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+        "minimum_cases": { "const": 3000 },
+        "minimum_test_cases": { "const": 1300 },
+        "double_annotation": { "const": true },
+        "required_fields": { "$ref": "#/$defs/required_fields" }
+      },
+      "additionalProperties": false
+    },
+    "decision_config": {
+      "type": "object",
+      "required": [
+        "path",
+        "schema",
+        "schema_fingerprint",
+        "minimum_cases",
+        "minimum_test_cases",
+        "double_annotation",
+        "required_fields"
+      ],
+      "properties": {
+        "path": { "const": "datasets/decision.jsonl" },
+        "schema": { "const": "schemas/decision.schema.json" },
+        "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+        "minimum_cases": { "const": 500 },
+        "minimum_test_cases": { "const": 500 },
+        "double_annotation": { "const": true },
+        "required_fields": { "$ref": "#/$defs/required_fields" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

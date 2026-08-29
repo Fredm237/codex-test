@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { redirect } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
 import { ProductCard } from "@/components/filon/ProductCard";
 import { CatalogueSearch, CatalogueControls } from "@/components/filon/CatalogueControls";
@@ -55,7 +56,7 @@ export async function generateMetadata({
     path: "/catalogue",
     title,
     description:
-      "Les produits de nos marchands partenaires, regroupés par code-barres et comparés. Prix relevés, historique conservé, meilleure offre en évidence.",
+      "Les offres des marchands indexés, regroupées lorsqu'un identifiant produit commun est disponible. Prix observés et historique lorsqu'il existe.",
   });
 }
 
@@ -68,8 +69,6 @@ export default async function CataloguePage({
   const departments = await getDepartments();
   const resolved = resolve(departments, query);
   const { department, category, subcategory } = resolved;
-  const browsing = !department && !category && !query.q;
-
   // Chemin critique : uniquement les offres affichées et la taxonomie déjà
   // requise par la navigation. Le reste est diffusé ensuite sous Suspense.
   const result = await getOffers(query, resolved);
@@ -77,6 +76,22 @@ export default async function CataloguePage({
   const page = pageNumber(query);
   const total = result?.total ?? 0;
   const lastPage = Math.max(1, Math.ceil(total / per));
+  if (result !== null && total > 0 && page > lastPage) {
+    redirect(href(query, { page: String(lastPage) }));
+  }
+  const browsing = !department
+    && !category
+    && !subcategory
+    && !query.dept
+    && !query.cat
+    && !query.sub
+    && !query.q
+    && !query.brand
+    && !query.min
+    && !query.max
+    && !query.sort
+    && !query.per
+    && page === 1;
 
   return (
     <section className="fx-section page-top fx-catalogue">

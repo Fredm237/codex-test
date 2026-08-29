@@ -39,20 +39,25 @@ def _analyse(real_price: float, rating) -> dict:
 def test_rank_key_tolere_rating_none_explicite():
     """Le cas exact de la panne : la clé existe et vaut None."""
     a = {"real_price": 10.0, "reviews": {"rating": None, "count": 0}}
-    assert _rank_key(a) == (-0.0, 10.0, 0.0)
+    assert _rank_key(a) == (-0.0, True, 10.0, 0.0)
 
 
 def test_rank_key_tolere_reviews_absent():
-    assert _rank_key({"real_price": 10.0}) == (-0.0, 10.0, 0.0)
+    assert _rank_key({"real_price": 10.0}) == (-0.0, True, 10.0, 0.0)
 
 
 def test_rank_key_tolere_reviews_none():
-    assert _rank_key({"real_price": 10.0, "reviews": None}) == (-0.0, 10.0, 0.0)
+    assert _rank_key({"real_price": 10.0, "reviews": None}) == (
+        -0.0,
+        True,
+        10.0,
+        0.0,
+    )
 
 
 def test_rank_key_conserve_la_note_quand_elle_existe():
     a = {"real_price": 10.0, "reviews": {"rating": 4.5, "count": 12}}
-    assert _rank_key(a) == (-0.0, 10.0, -4.5)
+    assert _rank_key(a) == (-0.0, True, 10.0, -4.5)
 
 
 def test_rank_key_place_la_pertinence_avant_le_prix():

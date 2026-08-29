@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FILON Quality Lab Prediction v0.5",
+  "type": "object",
+  "required": [
+    "record_version",
+    "dataset",
+    "case_id",
+    "case_fingerprint",
+    "run_id",
+    "confidence",
+    "prediction"
+  ],
+  "properties": {
+    "record_version": { "const": "0.5.0" },
+    "dataset": { "type": "string" },
+    "case_id": { "$ref": "#/$defs/nonblank_string" },
+    "case_fingerprint": { "$ref": "#/$defs/sha256" },
+    "run_id": { "$ref": "#/$defs/nonblank_string" },
+    "confidence": { "$ref": "#/$defs/confidence" },
+    "prediction": { "type": "object" }
+  },
+  "oneOf": [
+    {
+      "properties": {
+        "dataset": { "const": "taxonomy" },
+        "prediction": { "$ref": "#/$defs/taxonomy_prediction" }
+      }
+    },
+    {
+      "properties": {
+        "dataset": { "const": "entity_resolution" },
+        "prediction": { "$ref": "#/$defs/entity_prediction" }
+      }
+    },
+    {
+      "properties": {
+        "dataset": { "const": "variant_resolution" },
+        "prediction": { "$ref": "#/$defs/variant_prediction" }
+      }
+    },
+    {
+      "properties": {
+        "dataset": { "const": "offer_attachment" },
+        "prediction": { "$ref": "#/$defs/offer_prediction" }
+      }
+    },
+    {
+      "properties": {
+        "dataset": { "const": "offer_truth" },
+        "prediction": { "$ref": "#/$defs/offer_truth_prediction" }
+      }
+    },
+    {
+      "properties": {
+        "dataset": { "const": "retrieval" },
+        "prediction": { "$ref": "#/$defs/retrieval_prediction" }
+      }
+    },
+    {
+      "properties": {
+        "dataset": { "const": "decision" },
+        "prediction": { "$ref": "#/$defs/decision_prediction" }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "nonblank_string": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\s)[\\s\\S]*\\S(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1
+    },
+    "taxonomy_prediction": {
+      "type": "object",
+      "required": ["category", "subcategory", "product_role"],
+      "properties": {
+        "category": { "$ref": "#/$defs/nonblank_string" },
+        "subcategory": { "$ref": "#/$defs/nonblank_string" },
+        "product_role": {
+          "enum": ["primary_product", "accessory", "replacement_part", "consumable", "service", "digital_content", "accommodation", "bundle", "unknown"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "entity_prediction": {
+      "type": "object",
+      "required": ["product_relation", "variant_relation"],
+      "properties": {
+        "product_relation": { "enum": ["same", "different", "ambiguous"] },
+        "variant_relation": {
+          "enum": ["same", "different", "not_applicable", "ambiguous"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "product_relation": { "const": "different" } },
+            "required": ["product_relation"]
+          },
+          "then": {
+            "properties": {
+              "variant_relation": { "const": "not_applicable" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "product_relation": { "const": "same" } },
+            "required": ["product_relation"]
+          },
+          "then": {
+            "properties": {
+              "variant_relation": {
+                "enum": ["same", "different", "ambiguous"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "product_relation": { "const": "ambiguous" } },
+            "required": ["product_relation"]
+          },
+          "then": {
+            "properties": {
+              "variant_relation": { "const": "ambiguous" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "expected_variant": {
+      "type": "object",
+      "required": ["variant_key", "attributes", "resolution"],
+      "properties": {
+        "variant_key": {
+          "anyOf": [
+            { "$ref": "#/$defs/nonblank_string" },
+            { "type": "null" }
+          ]
+        },
+        "attributes": { "type": "object" },
+        "resolution": {
+          "enum": ["resolved", "ambiguous", "insufficient_evidence"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "resolution": { "const": "resolved" } },
+            "required": ["resolution"]
+          },
+          "then": {
+            "properties": {
+              "variant_key": { "$ref": "#/$defs/nonblank_string" }
+            }
+          },
+          "else": {
+            "properties": {
+              "variant_key": { "type": "null" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "variant_prediction": {
+      "type": "object",
+      "required": ["expected_variant"],
+      "properties": {
+        "expected_variant": { "$ref": "#/$defs/expected_variant" }
+      },
+      "additionalProperties": false
+    },
+    "offer_prediction": {
+      "type": "object",
+      "required": ["expected_variant_id", "eligibility"],
+      "properties": {
+        "expected_variant_id": {
+          "anyOf": [
+            { "$ref": "#/$defs/nonblank_string" },
+            { "type": "null" }
+          ]
+        },
+        "eligibility": { "enum": ["eligible", "quarantine", "reject"] }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "eligibility": { "const": "eligible" } },
+            "required": ["eligibility"]
+          },
+          "then": {
+            "properties": {
+              "expected_variant_id": {
+                "$ref": "#/$defs/nonblank_string"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "expected_variant_id": { "type": "null" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "money": {
+      "type": "object",
+      "required": ["amount_minor", "currency"],
+      "properties": {
+        "amount_minor": { "type": "integer", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}(?![\\s\\S])" }
+      },
+      "additionalProperties": false
+    },
+    "known_or_unknown_money": {
+      "anyOf": [
+        { "$ref": "#/$defs/money" },
+        { "type": "null" }
+      ]
+    },
+    "https_url": {
+      "type": "string",
+      "pattern": "^https://[^\\s]+(?![\\s\\S])"
+    },
+    "offer_truth_prediction": {
+      "type": "object",
+      "required": ["price", "stock", "shipping", "affiliate_link"],
+      "properties": {
+        "price": { "$ref": "#/$defs/known_or_unknown_money" },
+        "stock": { "enum": ["in_stock", "out_of_stock", "preorder", "unknown"] },
+        "shipping": { "$ref": "#/$defs/known_or_unknown_money" },
+        "affiliate_link": {
+          "anyOf": [
+            { "$ref": "#/$defs/https_url" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "retrieval_prediction": {
+      "type": "object",
+      "required": ["resolution", "retrieved_product_ids"],
+      "properties": {
+        "resolution": {
+          "enum": ["matched", "no_match", "ambiguous"]
+        },
+        "retrieved_product_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank_string" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "resolution": { "const": "matched" } },
+            "required": ["resolution"]
+          },
+          "then": {
+            "properties": { "retrieved_product_ids": { "minItems": 1 } }
+          },
+          "else": {
+            "properties": { "retrieved_product_ids": { "maxItems": 0 } }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "decision_prediction": {
+      "type": "object",
+      "required": ["outcome", "claims"],
+      "properties": {
+        "outcome": { "enum": ["recommend", "wait", "abstain"] },
+        "claims": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/claim_evidence" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "outcome": { "enum": ["recommend", "wait"] }
+            },
+            "required": ["outcome"]
+          },
+          "then": {
+            "properties": {
+              "claims": { "minItems": 1 }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "claim_evidence": {
+      "type": "object",
+      "required": ["claim", "evidence_refs"],
+      "properties": {
+        "claim": { "$ref": "#/$defs/nonblank_string" },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank_string" }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

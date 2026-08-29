@@ -8,7 +8,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/confidentialite",
   title: "Politique de confidentialité",
   description:
-    "Comment FILON protège vos données : aucune revente, analytics sans cookie, formulaires, liens partenaires et vos droits RGPD.",
+    "Comment FILON traite les données : formulaires, mesure d'audience, extension, liens affiliés et droits applicables.",
 });
 
 function ConfidentialiteFR() {
@@ -22,14 +22,14 @@ function ConfidentialiteFR() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Dernière mise à jour : 21 juillet 2026</p>
+          <p className="upd">Dernière mise à jour : 28 août 2026</p>
 
           <h2>En résumé</h2>
           <ul>
             <li>Nous ne construisons <b>aucun profil publicitaire</b> et ne <b>revendons aucune donnée</b>.</li>
             <li>Notre mesure d&apos;audience est <b>sans cookie</b> et anonyme (Plausible).</li>
             <li>Nous ne collectons des données personnelles que si <b>vous nous les fournissez</b> (contact, newsletter).</li>
-            <li>Les liens partenaires n&apos;augmentent <b>jamais</b> votre prix.</li>
+            <li>Certains liens sont affiliés et peuvent générer une commission ; le total doit être confirmé chez le marchand.</li>
           </ul>
 
           <h2>Responsable du traitement</h2>
@@ -77,11 +77,11 @@ function ConfidentialiteFR() {
             navigateur.
           </p>
 
-          <h2>Liens partenaires</h2>
+          <h2>Liens affiliés</h2>
           <p>
-            Lorsque vous activez une offre via FILON, un service partenaire peut déposer un cookie technique afin de
-            rattacher votre commande. Ce traitement relève de la politique de confidentialité de ce partenaire. Cela ne
-            modifie jamais le prix que vous payez.
+            Lorsque vous activez une offre via FILON, un service d&apos;affiliation peut déposer un cookie technique afin de
+            rattacher votre commande. Ce traitement relève de sa propre politique de confidentialité. Le prix, les frais
+            et le total final doivent être confirmés chez le marchand.
           </p>
 
           <h2>Sous-traitants</h2>
@@ -121,14 +121,14 @@ function ConfidentialiteNL() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Laatste update : 21 juli 2026</p>
+          <p className="upd">Laatste update : 28 augustus 2026</p>
 
           <h2>Samengevat</h2>
           <ul>
             <li>We bouwen <b>geen enkel advertentieprofiel</b> en <b>verkopen geen enkele gegevens door</b>.</li>
             <li>Onze bezoekersmeting is <b>zonder cookie</b> en anoniem (Plausible).</li>
             <li>We verzamelen enkel persoonsgegevens als <b>jij ze ons bezorgt</b> (contact, nieuwsbrief).</li>
-            <li>Partnerlinks verhogen <b>nooit</b> je prijs.</li>
+            <li>Sommige links zijn affiliatielinks en kunnen een commissie opleveren; bevestig het totaal bij de winkel.</li>
           </ul>
 
           <h2>Verwerkingsverantwoordelijke</h2>
@@ -175,11 +175,11 @@ function ConfidentialiteNL() {
             voor de goede werking kunnen gebruikt worden. Je behoudt de controle via de instellingen van je browser.
           </p>
 
-          <h2>Partnerlinks</h2>
+          <h2>Affiliatielinks</h2>
           <p>
-            Wanneer je een aanbod activeert via FILON, kan een partnerdienst een technische cookie plaatsen om je
-            bestelling te koppelen. Deze verwerking valt onder het privacybeleid van die partner. Dit verandert nooit de
-            prijs die jij betaalt.
+            Wanneer je een aanbod activeert via FILON, kan een affiliatiedienst een technische cookie plaatsen om je
+            bestelling te koppelen. Deze verwerking valt onder het eigen privacybeleid van die dienst. Bevestig prijs,
+            kosten en eindtotaal bij de winkel.
           </p>
 
           <h2>Verwerkers</h2>
@@ -219,14 +219,14 @@ function ConfidentialiteEN() {
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-legal">
-          <p className="upd">Last updated: 21 July 2026</p>
+          <p className="upd">Last updated: 28 August 2026</p>
 
           <h2>In short</h2>
           <ul>
             <li>We build <b>no advertising profile</b> and <b>resell no data</b>.</li>
             <li>Our audience measurement is <b>cookie-free</b> and anonymous (Plausible).</li>
             <li>We only collect personal data if <b>you provide it</b> (contact, newsletter).</li>
-            <li>Partner links <b>never</b> increase your price.</li>
+            <li>Some links are affiliate links and may generate a commission; confirm the total with the merchant.</li>
           </ul>
 
           <h2>Data controller</h2>
@@ -271,11 +271,11 @@ function ConfidentialiteEN() {
             functioning may be used. You keep control via your browser settings.
           </p>
 
-          <h2>Partner links</h2>
+          <h2>Affiliate links</h2>
           <p>
-            When you activate an offer via FILON, a partner service may place a technical cookie to attribute your
-            order. This processing falls under that partner&apos;s privacy policy. It never changes the price you
-            pay.
+            When you activate an offer via FILON, an affiliate service may place a technical cookie to attribute your
+            order. This processing falls under that service&apos;s own privacy policy. Confirm price, fees and final total
+            with the merchant.
           </p>
 
           <h2>Processors</h2>

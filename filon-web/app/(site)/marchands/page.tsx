@@ -5,15 +5,15 @@ import { MerchantsBrowser, type Merchant } from "@/components/editorial/Merchant
 import { Localized } from "@/components/editorial/Localized";
 import { API } from "@/lib/api";
 
-// Les logos et le portefeuille partenaire évoluent, mais ne justifient pas
+// Les logos et le portefeuille indexé évoluent, mais ne justifient pas
 // un appel bloquant au backend à chaque visite.
 export const revalidate = 3600;
 
 export const metadata: Metadata = buildMetadata({
   path: "/marchands",
-  title: "Les marchands partenaires",
+  title: "Les marchands indexés",
   description:
-    "Les marchands que FILON compare pour vous. Prix, cashback et codes promo réunis sur chaque fiche produit, en toute transparence.",
+    "Les marchands dont FILON indexe des offres. Les prix observés et, lorsqu'ils existent, les avantages documentés restent identifiés par source.",
 });
 
 function Hero({ eyebrow, title, intro, crumb }: { eyebrow: string; title: React.ReactNode; intro: string; crumb: string }) {
@@ -42,9 +42,9 @@ export default async function MarchandsPage() {
   return (
     <>
       <Localized
-        fr={<Hero eyebrow="Partenaires" crumb="Marchands" title={<>Les marchands que FILON <span className="it">compare</span>.</>} intro="Les enseignes que nous comparons pour vous. Sur chaque produit, FILON réunit le prix, le cashback et les codes promo — et vous montre votre vrai prix." />}
-        nl={<Hero eyebrow="Partners" crumb="Winkels" title={<>De winkels die FILON <span className="it">vergelijkt</span>.</>} intro="De winkels die we voor je vergelijken. Bij elk product brengt FILON de prijs, de cashback en de kortingscodes samen — en toont je je echte prijs." />}
-        en={<Hero eyebrow="Partners" crumb="Merchants" title={<>The merchants FILON <span className="it">compares</span>.</>} intro="The stores we compare for you. On every product, FILON brings together the price, the cashback and the promo codes — and shows you your real price." />}
+        fr={<Hero eyebrow="Catalogue" crumb="Marchands" title={<>Les marchands que FILON <span className="it">indexe</span>.</>} intro="FILON présente les prix observés chez les enseignes indexées. Un cashback ou un code promo n'apparaît que lorsqu'il est documenté ; ses conditions restent à confirmer chez le marchand." />}
+        nl={<Hero eyebrow="Catalogus" crumb="Winkels" title={<>De winkels die FILON <span className="it">indexeert</span>.</>} intro="FILON toont waargenomen prijzen bij geïndexeerde winkels. Cashback of een kortingscode verschijnt alleen wanneer die is gedocumenteerd; controleer de voorwaarden bij de winkel." />}
+        en={<Hero eyebrow="Catalogue" crumb="Merchants" title={<>The merchants FILON <span className="it">indexes</span>.</>} intro="FILON shows observed prices from indexed merchants. Cashback or a promo code appears only when documented; verify its terms with the merchant." />}
       />
       <section className="ed-band" style={{ borderTop: 0, paddingTop: 0 }}>
         <div className="ed-wrap">

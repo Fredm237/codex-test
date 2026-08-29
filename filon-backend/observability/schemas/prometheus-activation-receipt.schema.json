@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/schemas/prometheus-activation-receipt-v1.json",
+  "title": "FILON Prometheus activation receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "verified_at",
+    "source",
+    "prometheus_version",
+    "environment",
+    "cluster",
+    "expected_replicas",
+    "healthy_replicas",
+    "max_scrape_age_seconds",
+    "target_identity_fingerprint",
+    "recording_rule_group",
+    "recording_rules",
+    "recording_series_present"
+  ],
+  "properties": {
+    "schema_version": {
+      "const": 1
+    },
+    "status": {
+      "const": "verified"
+    },
+    "verified_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "source": {
+      "const": "prometheus-http-api"
+    },
+    "prometheus_version": {
+      "const": "3.13.2"
+    },
+    "environment": {
+      "$ref": "#/$defs/closedLabel"
+    },
+    "cluster": {
+      "$ref": "#/$defs/closedLabel"
+    },
+    "expected_replicas": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "healthy_replicas": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100
+    },
+    "max_scrape_age_seconds": {
+      "type": "integer",
+      "minimum": 30,
+      "maximum": 600
+    },
+    "target_identity_fingerprint": {
+      "$ref": "#/$defs/fingerprint"
+    },
+    "recording_rule_group": {
+      "const": "filon-rollups-v1"
+    },
+    "recording_rules": {
+      "$ref": "#/$defs/ruleRoster"
+    },
+    "recording_series_present": {
+      "$ref": "#/$defs/ruleRoster"
+    }
+  },
+  "$defs": {
+    "closedLabel": {
+      "type": "string",
+      "pattern": "^[a-z0-9](?:[a-z0-9._-]{0,62}[a-z0-9])?$"
+    },
+    "fingerprint": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "ruleRoster": {
+      "type": "array",
+      "minItems": 11,
+      "maxItems": 11,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "filon:assistant_timeout_ratio5m",
+          "filon:buy_card_rate5m",
+          "filon:decision_exclusion_rate5m",
+          "filon:decision_rate5m",
+          "filon:http_5xx_ratio5m",
+          "filon:http_request_rate5m",
+          "filon:missing_dimension_rate5m",
+          "filon:pipeline_error_ratio5m",
+          "filon:pipeline_execution_rate5m",
+          "filon:recommendation_abstention_ratio5m",
+          "filon:recommendation_rate5m"
+        ]
+      }
+    }
+  }
+}

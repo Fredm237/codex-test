@@ -54,10 +54,11 @@ function MentionsFR() {
             reproduction sans autorisation est interdite.
           </p>
 
-          <h2>Nature du service et liens partenaires</h2>
+          <h2>Nature du service et liens affiliés</h2>
           <p>
-            FILON est un service gratuit d&apos;aide à la décision d&apos;achat. Le site peut contenir des <b>liens
-            partenaires</b>. Les activer <b>ne modifie jamais le prix payé par l&apos;utilisateur.</b>
+            L&apos;accès public actuel à FILON est gratuit. Le site peut contenir des <b>liens affiliés</b>
+            susceptibles de générer une commission. Le taux de commission n&apos;entre pas dans le score actuel ;
+            le prix, les frais et le total final doivent être confirmés chez le marchand.
           </p>
 
           <h2>Données personnelles</h2>
@@ -123,10 +124,11 @@ function MentionsNL() {
             intellectuele eigendom. Elke reproductie zonder toestemming is verboden.
           </p>
 
-          <h2>Aard van de dienst en partnerlinks</h2>
+          <h2>Aard van de dienst en affiliatielinks</h2>
           <p>
-            FILON is een gratis dienst voor hulp bij de aankoopbeslissing. De website kan <b>partnerlinks</b> bevatten.
-            Ze activeren <b>verandert nooit de prijs die de gebruiker betaalt.</b>
+            De huidige publieke toegang tot FILON is gratis. De website kan <b>affiliatielinks</b> bevatten die een
+            commissie kunnen opleveren. Het commissietarief telt niet mee in de huidige score; bevestig prijs,
+            kosten en eindtotaal bij de winkel.
           </p>
 
           <h2>Persoonsgegevens</h2>
@@ -191,10 +193,11 @@ function MentionsEN() {
             without authorisation is prohibited.
           </p>
 
-          <h2>Nature of the service and partner links</h2>
+          <h2>Nature of the service and affiliate links</h2>
           <p>
-            FILON is a free purchase-decision aid service. The website may contain <b>partner links</b>. Activating
-            them <b>never changes the price paid by the user.</b>
+            Current public access to FILON is free. The website may contain <b>affiliate links</b> that can generate
+            a commission. Commission rate is not part of the current score; confirm price, fees and final total with
+            the merchant.
           </p>
 
           <h2>Personal data</h2>

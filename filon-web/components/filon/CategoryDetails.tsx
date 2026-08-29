@@ -28,7 +28,7 @@ const COPY: Record<Locale, {
 }> = {
   fr: {
     back: "← Tout le catalogue",
-    compared: (count) => `${count} offres indexées chez nos marchands partenaires.`,
+    compared: (count) => `${count} offres indexées dans ce rayon.`,
     subs: "Sous-rayons",
     other: "Autres rayons",
     all: "Tout",
@@ -37,7 +37,7 @@ const COPY: Record<Locale, {
   },
   nl: {
     back: "← Volledige catalogus",
-    compared: (count) => `${count} aanbiedingen van onze partnerwinkels geïndexeerd.`,
+    compared: (count) => `${count} aanbiedingen in deze categorie geïndexeerd.`,
     subs: "Subcategorieën",
     other: "Andere categorieën",
     all: "Alles",
@@ -46,7 +46,7 @@ const COPY: Record<Locale, {
   },
   en: {
     back: "← Full catalogue",
-    compared: (count) => `${count} offers indexed from our partner merchants.`,
+    compared: (count) => `${count} offers indexed in this category.`,
     subs: "Subcategories",
     other: "Other categories",
     all: "All",

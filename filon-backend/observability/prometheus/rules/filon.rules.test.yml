@@ -1,0 +1,109 @@
+rule_files:
+  - filon.rules.yml
+
+evaluation_interval: 1m
+
+tests:
+  - name: aggregate_two_replicas_without_double_counting
+    interval: 1m
+    input_series:
+      - series: filon_http_requests_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a"}
+        values: 0+60x10
+      - series: filon_http_requests_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b"}
+        values: 0+60x10
+      - series: filon_http_responses_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a",status_group="5xx"}
+        values: 0+3x10
+      - series: filon_http_responses_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b",status_group="5xx"}
+        values: 0+3x10
+      - series: filon_recommendation_responses_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a"}
+        values: 0+60x10
+      - series: filon_recommendation_responses_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b"}
+        values: 0+60x10
+      - series: filon_recommendation_outcome_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a",outcome="abstained"}
+        values: 0+15x10
+      - series: filon_recommendation_outcome_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b",outcome="abstained"}
+        values: 0+15x10
+      - series: filon_recommendation_delivery_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a",delivery="timeout"}
+        values: 0+3x10
+      - series: filon_recommendation_delivery_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b",delivery="timeout"}
+        values: 0+3x10
+      - series: filon_pipeline_executions_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a",stage="retrieval"}
+        values: 0+60x10
+      - series: filon_pipeline_executions_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b",stage="retrieval"}
+        values: 0+60x10
+      - series: filon_pipeline_outcomes_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a",stage="retrieval",outcome="error"}
+        values: 0+6x10
+      - series: filon_pipeline_outcomes_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b",stage="retrieval",outcome="error"}
+        values: 0+6x10
+      - series: filon_decision_evaluations_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a"}
+        values: 0+120x10
+      - series: filon_decision_evaluations_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b"}
+        values: 0+120x10
+      - series: filon_recommendation_buy_cards_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a"}
+        values: 0+12x10
+      - series: filon_recommendation_buy_cards_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b"}
+        values: 0+12x10
+      - series: filon_decision_missing_dimension_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a",dimension="price"}
+        values: 0+6x10
+      - series: filon_decision_missing_dimension_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b",dimension="price"}
+        values: 0+6x10
+      - series: filon_decision_exclusion_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-a",reason="missing_price"}
+        values: 0+3x10
+      - series: filon_decision_exclusion_total{job="filon-backend",environment="production",cluster="filon-eu",instance="replica-b",reason="missing_price"}
+        values: 0+3x10
+    promql_expr_test:
+      - expr: filon:http_request_rate5m{environment="production",cluster="filon-eu"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:http_request_rate5m{cluster="filon-eu",environment="production"}
+            value: 2
+      - expr: filon:http_5xx_ratio5m{environment="production",cluster="filon-eu"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:http_5xx_ratio5m{cluster="filon-eu",environment="production"}
+            value: 0.05
+      - expr: filon:recommendation_rate5m{environment="production",cluster="filon-eu"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:recommendation_rate5m{cluster="filon-eu",environment="production"}
+            value: 2
+      - expr: filon:recommendation_abstention_ratio5m{environment="production",cluster="filon-eu"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:recommendation_abstention_ratio5m{cluster="filon-eu",environment="production"}
+            value: 0.25
+      - expr: filon:assistant_timeout_ratio5m{environment="production",cluster="filon-eu"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:assistant_timeout_ratio5m{cluster="filon-eu",environment="production"}
+            value: 0.05
+      - expr: filon:pipeline_execution_rate5m{environment="production",cluster="filon-eu",stage="retrieval"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:pipeline_execution_rate5m{cluster="filon-eu",environment="production",stage="retrieval"}
+            value: 2
+      - expr: filon:pipeline_error_ratio5m{environment="production",cluster="filon-eu",stage="retrieval"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:pipeline_error_ratio5m{cluster="filon-eu",environment="production",stage="retrieval"}
+            value: 0.1
+      - expr: filon:decision_rate5m{environment="production",cluster="filon-eu"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:decision_rate5m{cluster="filon-eu",environment="production"}
+            value: 4
+      - expr: filon:buy_card_rate5m{environment="production",cluster="filon-eu"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:buy_card_rate5m{cluster="filon-eu",environment="production"}
+            value: 0.4
+      - expr: filon:missing_dimension_rate5m{environment="production",cluster="filon-eu",dimension="price"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:missing_dimension_rate5m{cluster="filon-eu",dimension="price",environment="production"}
+            value: 0.2
+      - expr: filon:decision_exclusion_rate5m{environment="production",cluster="filon-eu",reason="missing_price"}
+        eval_time: 10m
+        exp_samples:
+          - labels: filon:decision_exclusion_rate5m{cluster="filon-eu",environment="production",reason="missing_price"}
+            value: 0.1

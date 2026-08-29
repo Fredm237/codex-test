@@ -16,6 +16,13 @@ def configure_logging(debug: bool = True) -> None:
     for noisy in ("httpx", "httpcore", "hpack", "urllib3", "asyncio"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
+    # Le format d'accès Uvicorn inclut la query string. Or le flux Assistant
+    # reçoit encore le besoin libre dans ``q=`` : le logger applicatif conserve
+    # seulement la route templatisée et doit rester l'unique journal HTTP.
+    access_logger = logging.getLogger("uvicorn.access")
+    access_logger.disabled = True
+    access_logger.propagate = False
+
 
 def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(f"filon.{name}")

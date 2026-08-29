@@ -11,9 +11,9 @@ const copy = {
 };
 
 export function IntentDecisionTimeline({ events, locale, onClear }: { events: IntentDecisionEvent[]; locale: keyof typeof copy; onClear: () => void }) {
-  if (!events.length) return null;
   const colors = useColors();
   const styles = createStyles(colors);
+  if (!events.length) return null;
   const text = copy[locale];
   return <View style={styles.wrap}><View style={styles.header}><Text style={styles.title}>{text.title}</Text><Pressable accessibilityRole="button" accessibilityLabel={text.clear} onPress={onClear} style={({ pressed }) => [styles.clear, pressed && styles.pressed]}><Text style={styles.clearText}>{text.clear}</Text></Pressable></View>{events.map((event) => <View key={event.id} style={styles.row}><MaterialIcons name={event.kind === "alert-created" ? "notifications-none" : event.kind.includes("offer") ? "verified" : event.kind === "assistant-opened" ? "auto-awesome" : "track-changes"} size={16} color={colors.primary} /><View style={styles.words}><Text style={styles.event}>{text[event.kind]}</Text><Text numberOfLines={1} style={styles.label}>{event.label}</Text></View><Text style={styles.date}>{new Intl.DateTimeFormat(locale, { day: "2-digit", month: "short" }).format(new Date(event.occurredAt))}</Text></View>)}</View>;
 }

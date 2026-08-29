@@ -1,10 +1,10 @@
 {
   "extName": {
-    "message": "FILON — le vrai prix, avant d'acheter",
+    "message": "FILON — les offres observées",
     "description": "Nom de l'extension"
   },
   "extDescription": {
-    "message": "FILON trouve le vrai prix le plus bas : marchand, reconditionné, code promo et cashback réunis sur chaque fiche produit.",
+    "message": "FILON ouvre les offres indexées et le contexte disponible pour la fiche produit reconnue.",
     "description": "Description de l'extension"
   }
 }

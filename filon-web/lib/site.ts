@@ -1,8 +1,8 @@
 export const site = {
   name: "FILON",
-  tagline: "Le réflexe malin avant chaque achat.",
+  tagline: "Le contexte disponible avant un achat en ligne.",
   description:
-    "Avant chaque achat, FILON compare le meilleur cashback, le meilleur prix en reconditionné et les codes promo qui marchent vraiment. En toute transparence.",
+    "FILON compare les offres indexées et rend visibles le prix observé, sa fraîcheur et les informations encore inconnues.",
   // Avec `www` : c'est la forme réellement servie. L'apex redirige en 308 vers
   // elle, donc déclarer l'apex ici faisait subir une redirection à CHAQUE URL
   // du sitemap et à chaque balise canonique — un moteur y voit des pages

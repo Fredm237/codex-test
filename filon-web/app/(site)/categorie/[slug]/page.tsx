@@ -95,7 +95,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return buildMetadata({
     path: `/categorie/${slug}`,
     title: category.name,
-    description: `${category.count.toLocaleString("fr-FR")} produits en ${category.name}, comparés chez nos marchands partenaires. Prix, disponibilité et meilleure offre réunis par FILON.`,
+    description: `${category.count.toLocaleString("fr-FR")} produits indexés en ${category.name}. Prix observés et disponibilité déclarée réunis par FILON.`,
   });
 }
 

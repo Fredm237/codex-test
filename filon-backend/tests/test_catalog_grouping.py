@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -51,12 +53,16 @@ async def _seed(s):
     s.add_all([a, b])
     await s.flush()
 
+    seeded_offers = []
+
     def offer(m, pid, name, price, ean):
-        return models.Offer(
+        row = models.Offer(
             merchant_id=m.id, awin_product_id=pid, name=name, brand="ACME",
-            price=price, currency="EUR", ean=ean,
+            price=price, currency="EUR", in_stock=True, ean=ean,
             image_url="https://example.test/i.jpg", deep_link="https://example.test/go",
         )
+        seeded_offers.append(row)
+        return row
 
     # Même produit, trois marchands-lignes, trois écritures d'EAN différentes.
     s.add(offer(a, "a1", "Casque ACME X1", 129.0, EAN_A))
@@ -67,6 +73,20 @@ async def _seed(s):
     # Sans EAN exploitable : doit rester autonome.
     s.add(offer(a, "a3", "Produit sans code", 20.0, "N/A"))
     s.add(offer(a, "a4", "Produit code faux", 25.0, "4006381333932"))
+    await s.flush()
+    captured_at = datetime.now(UTC).replace(tzinfo=None)
+    s.add_all(
+        [
+            models.PriceSnapshot(
+                offer_id=offer_row.id,
+                price=offer_row.price,
+                currency="EUR",
+                in_stock=True,
+                captured_at=captured_at,
+            )
+            for offer_row in seeded_offers
+        ]
+    )
     await s.commit()
 
 
@@ -127,7 +147,71 @@ async def test_product_detail_lists_offers_cheapest_first(session):
     prices = [o["price"] for o in detail["offers"]]
     assert prices == sorted(prices)
     assert prices[0] == 119.0
+    assert all(offer["evidence_current"] is True for offer in detail["offers"])
+    assert all(offer["observed_at"] is not None for offer in detail["offers"])
     assert detail["merchants_count"] == 2
+
+
+async def test_product_detail_abstains_across_current_currencies(session):
+    await _seed(session)
+    await rebuild_products(session)
+    gbp_offer = await session.scalar(
+        select(models.Offer).where(models.Offer.awin_product_id == "b2")
+    )
+    gbp_offer.currency = "GBP"
+    session.add(
+        models.PriceSnapshot(
+            offer_id=gbp_offer.id,
+            price=gbp_offer.price,
+            currency="GBP",
+            in_stock=True,
+            captured_at=datetime.now(UTC).replace(tzinfo=None),
+        )
+    )
+    await session.commit()
+
+    detail = await product_detail(ean=EAN_A, session=session)
+    assert detail["currency"] is None
+    assert detail["price_min"] is None
+    assert detail["price_max"] is None
+    assert {offer["currency"] for offer in detail["offers"]} == {"EUR", "GBP"}
+    assert detail["decision"]["facts"]["currency"] is None
+
+    listing = await products(
+        q=None,
+        brand=None,
+        multi_merchant=False,
+        limit=48,
+        offset=0,
+        session=session,
+    )
+    product = next(item for item in listing["items"] if item["ean"] == EAN_A)
+    assert product["currency"] is None
+    assert product["price_min"] is None
+    assert product["price_max"] is None
+    assert product["compared_offers_count"] == 0
+
+
+async def test_offer_detail_masks_a_price_without_matching_snapshot(session):
+    from app.api.routes.catalog import offer_detail
+
+    await _seed(session)
+    offer = await session.scalar(
+        select(models.Offer).where(models.Offer.awin_product_id == "a3")
+    )
+    offer.price = 21.0
+    await session.commit()
+
+    detail = await offer_detail(offer_id=offer.id, session=session)
+    assert detail["price"] is None
+    assert detail["currency"] is None
+    assert detail["in_stock"] is None
+    assert detail["observed_at"] is None
+    assert detail["evidence_current"] is False
+    assert detail["history"]
+    assert all(point["currency"] == "EUR" for point in detail["history"])
+    assert all(point["in_stock"] is True for point in detail["history"])
+    assert detail["decision"]["recommendation_scope"] == "non_recommandee"
 
 
 async def test_products_endpoint_can_filter_multi_merchant(session):

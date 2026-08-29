@@ -66,7 +66,7 @@ function loadModule() {
   return import(runnable);
 }
 
-const { pickSubcategories, detailedCategorySlugs, balanceColumns } = await loadModule();
+const { pickSubcategories, pickCategories, detailedCategorySlugs, balanceColumns } = await loadModule();
 
 const tests = [];
 const test = (name, fn) => tests.push([name, fn]);
@@ -206,12 +206,13 @@ test("detailedCategorySlugs ne modifie pas l'ordre des rayons du département", 
 /** Coût en lignes, reproduit indépendamment de l'implémentation. */
 function measure(column) {
   return column.reduce((total, d) => {
+    const categories = pickCategories(d.categories);
     const detailed = detailedCategorySlugs(d);
     return (
       total +
       1 +
-      d.categories.length +
-      d.categories.reduce(
+      categories.length +
+      categories.reduce(
         (n, c) => n + (detailed.has(c.slug) ? pickSubcategories(c.subcategories).length : 0),
         0
       )

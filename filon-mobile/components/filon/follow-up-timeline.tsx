@@ -16,10 +16,10 @@ function eventTitle(event: FollowUpEvent, locale: keyof typeof copy) {
 }
 
 export function FollowUpTimeline({ events, locale, onClear }: { events: FollowUpEvent[]; locale: keyof typeof copy; onClear: () => void }) {
-  if (!events.length) return null;
-  const text = copy[locale];
   const colors = useColors();
   const styles = createStyles(colors);
+  if (!events.length) return null;
+  const text = copy[locale];
   return <View style={styles.wrap}><View style={styles.header}><Text style={styles.title}>{text.title}</Text><Pressable accessibilityRole="button" accessibilityLabel={text.clear} onPress={onClear} style={({ pressed }) => [styles.clear, pressed && styles.pressed]}><Text style={styles.clearText}>{text.clear}</Text></Pressable></View>{events.map((event) => <View key={event.id} style={styles.row}><MaterialIcons name={event.kind === "sync-succeeded" ? "cloud-done" : event.kind.includes("alert") ? "notifications-none" : "bookmark-border"} size={16} color={colors.primary} /><View style={styles.meta}><Text style={styles.event}>{eventTitle(event, locale)}</Text><Text numberOfLines={1} style={styles.label}>{event.label}</Text></View><Text style={styles.date}>{new Intl.DateTimeFormat(locale, { day: "2-digit", month: "short" }).format(new Date(event.occurredAt))}</Text></View>)}</View>;
 }
 

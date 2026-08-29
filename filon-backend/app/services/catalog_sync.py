@@ -107,6 +107,28 @@ async def finish_run(
     return _summary(run)
 
 
+def _degraded_reason(merchants: int, ingest: dict[str, Any]) -> str | None:
+    """Retourne un code neutre lorsqu'un cycle n'a pas rafraîchi tout son scope."""
+
+    feeds = int(ingest.get("feeds") or 0)
+    offers = int(ingest.get("offers") or 0)
+    skipped = int(ingest.get("skipped") or 0)
+    shadow_failures = int((ingest.get("shadow") or {}).get("failures") or 0)
+    if merchants <= 0:
+        return "no_merchants"
+    if feeds <= 0:
+        return "no_feeds"
+    if skipped >= feeds:
+        return "all_feeds_skipped"
+    if offers <= 0:
+        return "no_offers"
+    if skipped > 0:
+        return "feeds_skipped"
+    if shadow_failures > 0:
+        return "shadow_failures"
+    return None
+
+
 async def run_catalog_sync(
     session,
     *,
@@ -123,19 +145,32 @@ async def run_catalog_sync(
 
     try:
         merchants = await awin_catalog.sync_merchants(session)
-        ingest = await awin_catalog.ingest_feeds(session, limit_override=limit_override)
+        ingest = await awin_catalog.ingest_feeds(
+            session,
+            limit_override=limit_override,
+            sync_run_id=run.id,
+        )
         grouping = await catalog_grouping.rebuild_products(session)
+        degraded_reason = _degraded_reason(merchants, ingest)
         completed = await finish_run(
             session,
             run,
-            status="succeeded",
+            status="degraded" if degraded_reason else "succeeded",
             merchants=merchants,
             feeds=int(ingest.get("feeds") or 0),
             offers=int(ingest.get("offers") or 0),
             skipped_feeds=int(ingest.get("skipped") or 0),
+            failure_reason=degraded_reason,
         )
         completed["grouping"] = grouping
-        log.info("Synchronisation catalogue réussie : %s", completed)
+        if degraded_reason:
+            log.warning(
+                "Synchronisation catalogue dégradée (reason=%s) : %s",
+                degraded_reason,
+                completed,
+            )
+        else:
+            log.info("Synchronisation catalogue réussie : %s", completed)
         return {"started": True, "run": completed}
     except Exception as exc:  # pragma: no cover - réseau, compte ou base réelle
         await session.rollback()
@@ -191,14 +226,22 @@ async def health(session, *, interval_hours: int) -> dict[str, Any]:
                 "source": "price_readings",
             }
         return {
-            "status": "degraded" if latest and latest.status == "failed" else "unknown",
+            "status": (
+                "degraded"
+                if latest and latest.status in {"failed", "degraded"}
+                else "unknown"
+            ),
             "last_success": None,
             "age_hours": None,
         }
 
     age_hours = max(0, int((now - (success.finished_at or success.started_at)).total_seconds() // 3600))
     state = "fresh" if age_hours <= freshness_limit else "stale"
-    if latest and latest.status == "failed" and latest.started_at > success.started_at:
+    if (
+        latest
+        and latest.status in {"failed", "degraded"}
+        and latest.started_at > success.started_at
+    ):
         state = "degraded"
     return {
         "status": state,

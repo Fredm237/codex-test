@@ -10,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/tarifs",
   title: "Tarifs",
   description:
-    "FILON est gratuit, pour tout le monde, pour toujours. Sans abonnement, sans carte bancaire, sans revente de vos données.",
+    "L'accès public actuel à FILON est à 0 € et ne demande pas de carte bancaire. Cette page décrit l'offre actuellement publiée.",
 });
 
 const INCLUS_FR = [
@@ -19,8 +19,8 @@ const INCLUS_FR = [
   "Le contexte utile pour comparer avant d’acheter",
   "Des alternatives comparables, lorsqu’elles sont disponibles",
   "La page de présentation de l’extension Chrome",
-  "Une expérience sans abonnement ni carte bancaire",
-  "Vos données restent chez vous · RGPD",
+  "Un accès actuel sans paiement ni carte bancaire",
+  "Une politique de confidentialité et des droits documentés",
 ];
 
 const INCLUS_NL = [
@@ -29,8 +29,8 @@ const INCLUS_NL = [
   "Nuttige context om te vergelijken vóór je koopt",
   "Vergelijkbare alternatieven, wanneer ze beschikbaar zijn",
   "De presentatiepagina van de Chrome-extensie",
-  "Een ervaring zonder abonnement of bankkaart",
-  "Je gegevens blijven van jou · AVG",
+  "Huidige toegang zonder betaling of bankkaart",
+  "Een gedocumenteerd privacybeleid en rechten",
 ];
 
 const INCLUS_EN = [
@@ -39,29 +39,29 @@ const INCLUS_EN = [
   "Useful context to compare before you buy",
   "Comparable alternatives, when they are available",
   "The Chrome extension presentation page",
-  "An experience with no subscription or credit card",
-  "Your data stays yours · GDPR",
+  "Current access with no payment or card",
+  "A documented privacy policy and rights",
 ];
 
 const FAQ_FR = [
-  { q: "FILON est-il vraiment 100 % gratuit ?", a: "Oui. Tout est gratuit, pour tout le monde, sans abonnement ni carte bancaire. Il n'y a pas de version payante." },
-  { q: "La recommandation est-elle neutre ?", a: "Oui. Elle est calculée sur votre seul intérêt. Aucune marque ne peut acheter sa place dans un conseil FILON." },
-  { q: "Vais-je devoir payer un jour ?", a: "Non. FILON est gratuit, et le restera." },
-  { q: "Mes données sont-elles revendues ?", a: "Jamais. Pas de profil publicitaire, pas de revente à des tiers. Conforme RGPD par défaut." },
+  { q: "Quel est le tarif actuel ?", a: "L'accès public affiché sur cette page est actuellement à 0 € et ne demande pas de carte bancaire." },
+  { q: "La commission influence-t-elle le score actuel ?", a: "Non : le taux de commission n'est pas un champ du score actuel. Le classement reste borné aux offres éligibles et aux preuves disponibles." },
+  { q: "Le tarif peut-il évoluer ?", a: "Oui. Cette page et les conditions publiées constituent la référence si l'offre change." },
+  { q: "Comment mes données sont-elles traitées ?", a: "La politique de confidentialité décrit les données traitées, les destinataires éventuels et vos droits." },
 ];
 
 const FAQ_NL = [
-  { q: "Is FILON echt 100 % gratis ?", a: "Ja. Alles is gratis, voor iedereen, zonder abonnement of bankkaart. Er is geen betaalversie." },
-  { q: "Is de aanbeveling neutraal ?", a: "Ja. Ze wordt berekend op jouw belang alleen. Geen enkel merk kan zijn plaats kopen in een FILON-advies." },
-  { q: "Zal ik ooit moeten betalen ?", a: "Nee. FILON is gratis, en blijft dat." },
-  { q: "Worden mijn gegevens doorverkocht ?", a: "Nooit. Geen advertentieprofiel, geen doorverkoop aan derden. AVG-conform standaard." },
+  { q: "Wat is het huidige tarief ?", a: "De publieke toegang op deze pagina kost momenteel 0 € en vraagt geen bankkaart." },
+  { q: "Beïnvloedt commissie de huidige score ?", a: "Nee: het commissietarief is geen veld van de huidige score. De rangschikking blijft beperkt tot geschikte aanbiedingen en beschikbaar bewijs." },
+  { q: "Kan het tarief veranderen ?", a: "Ja. Deze pagina en de gepubliceerde voorwaarden zijn de referentie als het aanbod verandert." },
+  { q: "Hoe worden mijn gegevens verwerkt ?", a: "Het privacybeleid beschrijft verwerkte gegevens, mogelijke ontvangers en je rechten." },
 ];
 
 const FAQ_EN = [
-  { q: "Is FILON really 100% free ?", a: "Yes. Everything is free, for everyone, with no subscription or credit card. There is no paid version." },
-  { q: "Is the recommendation neutral ?", a: "Yes. It's calculated on your interest alone. No brand can buy its place in a FILON recommendation." },
-  { q: "Will I have to pay one day ?", a: "No. FILON is free, and will stay that way." },
-  { q: "Is my data resold ?", a: "Never. No advertising profile, no reselling to third parties. GDPR-compliant by default." },
+  { q: "What is the current price ?", a: "Public access shown on this page currently costs €0 and requires no payment card." },
+  { q: "Does commission influence the current score ?", a: "No: commission rate is not a field in the current score. Ranking remains bounded to eligible offers and available evidence." },
+  { q: "Can pricing change ?", a: "Yes. This page and the published terms are the reference if the offering changes." },
+  { q: "How is my data processed ?", a: "The privacy policy describes processed data, possible recipients and your rights." },
 ];
 
 function Plan({ tag, price, lede, items, chromeLabel }: { tag: string; price: React.ReactNode; lede: string; items: string[]; chromeLabel: string }) {
@@ -94,31 +94,30 @@ function TarifsFR() {
     <>
       <ContentHero
         eyebrow="Tarifs"
-        title={<>Gratuit. Pour tout le monde. <span className="it">Pour toujours.</span></>}
-        intro="Pas d'abonnement, pas de version premium, pas de carte bancaire. FILON est entièrement gratuit, et le restera."
+        title={<>Accès public actuel. <span className="it">0 €.</span></>}
+        intro="La version publique affichée aujourd'hui ne demande ni paiement ni carte bancaire. Cette page reste la référence si l'offre évolue."
         breadcrumb={[{ name: "Tarifs", path: "/tarifs" }]}
       />
       <Plan
-        tag="Le seul plan qui existe"
-        price={<>0€ <small>/ pour toujours · sans carte bancaire</small></>}
+        tag="Offre publique actuelle"
+        price={<>0€ <small>/ aujourd'hui · sans carte bancaire</small></>}
         lede="Tout FILON. Décrivez un besoin, parcourez les offres indexées et consultez le verdict lorsque les données disponibles le permettent."
         items={INCLUS_FR}
         chromeLabel="Découvrir l’extension"
       />
       <p style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13.5, marginTop: -20 }}>
-        Le prix chez le marchand est le même avec ou sans FILON. Vous ne payez jamais.
+        Le taux de commission n'entre pas dans le score actuel. Confirmez le prix, les frais et le total chez le marchand.
       </p>
-      <ProseBlock heading={<>Gratuit, sans <span className="it">arrière-pensée</span>.</>} alt>
+      <ProseBlock heading={<>Un tarif actuel <span className="it">explicite</span>.</>} alt>
         <p>
-          Gratuit ne veut pas dire au rabais. FILON est complet, sans version payante cachée, sans publicité. Vous ne
-          payez jamais.
+          L'accès public actuel est proposé à 0 €. Une évolution future doit être publiée sur cette page et dans les conditions applicables.
         </p>
         <p>
-          Et vos données ne sont pas à vendre. Le conseil que vous recevez ne sert qu&apos;une chose : votre intérêt.
+          Certains liens peuvent générer une commission. Cette commission n'entre pas dans les dimensions du score actuel.
         </p>
       </ProseBlock>
       <FaqBlock items={FAQ_FR} eyebrow="Tarifs · FAQ" title="Ce que « gratuit » veut vraiment dire." />
-      <ClosingCta title={<>Commencez, c&apos;est <span className="it">gratuit</span>.</>} sub="Sans abonnement ni carte bancaire. Vraiment." />
+      <ClosingCta title={<>Consultez l&apos;offre <span className="it">actuelle</span>.</>} sub="L'accès public est actuellement à 0 € et sans carte bancaire." />
     </>
   );
 }
@@ -128,31 +127,30 @@ function TarifsNL() {
     <>
       <ContentHero
         eyebrow="Tarieven"
-        title={<>Gratis. Voor iedereen. <span className="it">Voor altijd.</span></>}
-        intro="Geen abonnement, geen premiumversie, geen bankkaart. FILON is volledig gratis, en blijft dat."
+        title={<>Huidige publieke toegang. <span className="it">0 €.</span></>}
+        intro="De huidige publieke versie vraagt geen betaling of bankkaart. Deze pagina blijft de referentie als het aanbod verandert."
         breadcrumb={[{ name: "Tarieven", path: "/tarifs" }]}
       />
       <Plan
-        tag="Het enige plan dat bestaat"
-        price={<>0€ <small>/ voor altijd · zonder bankkaart</small></>}
+        tag="Huidig publiek aanbod"
+        price={<>0€ <small>/ vandaag · zonder bankkaart</small></>}
         lede="Heel FILON. Beschrijf een behoefte, bekijk geïndexeerde aanbiedingen en raadpleeg het oordeel wanneer de beschikbare gegevens dit toelaten."
         items={INCLUS_NL}
         chromeLabel="Ontdek de extensie"
       />
       <p style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13.5, marginTop: -20 }}>
-        De prijs bij de winkel is dezelfde met of zonder FILON. Je betaalt nooit.
+        Het commissietarief telt niet mee in de huidige score. Bevestig prijs, kosten en totaal bij de winkel.
       </p>
-      <ProseBlock heading={<>Gratis, zonder <span className="it">bijbedoeling</span>.</>} alt>
+      <ProseBlock heading={<>Een expliciet huidig <span className="it">tarief</span>.</>} alt>
         <p>
-          Gratis betekent niet minderwaardig. FILON is volledig, zonder verborgen betaalversie, zonder reclame. Je
-          betaalt nooit.
+          De huidige publieke toegang kost 0 €. Een toekomstige wijziging moet op deze pagina en in de toepasselijke voorwaarden worden gepubliceerd.
         </p>
         <p>
-          En je gegevens staan niet te koop. Het advies dat je krijgt dient maar één ding : jouw belang.
+          Sommige links kunnen een commissie opleveren. Die commissie is geen dimensie van de huidige score.
         </p>
       </ProseBlock>
       <FaqBlock items={FAQ_NL} eyebrow="Tarieven · FAQ" title="Wat « gratis » echt betekent." />
-      <ClosingCta title={<>Begin, het is <span className="it">gratis</span>.</>} sub="Zonder abonnement of bankkaart. Echt." />
+      <ClosingCta title={<>Bekijk het huidige <span className="it">aanbod</span>.</>} sub="De publieke toegang kost momenteel 0 € en vraagt geen bankkaart." />
     </>
   );
 }
@@ -162,31 +160,30 @@ function TarifsEN() {
     <>
       <ContentHero
         eyebrow="Pricing"
-        title={<>Free. For everyone. <span className="it">Forever.</span></>}
-        intro="No subscription, no premium version, no credit card. FILON is entirely free, and will stay that way."
+        title={<>Current public access. <span className="it">€0.</span></>}
+        intro="The current public version requires no payment or card. This page remains the reference if the offering changes."
         breadcrumb={[{ name: "Pricing", path: "/tarifs" }]}
       />
       <Plan
-        tag="The only plan there is"
-        price={<>€0 <small>/ forever · no credit card</small></>}
+        tag="Current public offering"
+        price={<>€0 <small>/ today · no payment card</small></>}
         lede="All of FILON. Describe a need, browse indexed offers and consult the verdict when the available data supports it."
         items={INCLUS_EN}
         chromeLabel="Discover the extension"
       />
       <p style={{ textAlign: "center", color: "var(--ink-3)", fontSize: 13.5, marginTop: -20 }}>
-        The price at the merchant is the same with or without FILON. You never pay.
+        Commission rate is not part of the current score. Confirm price, fees and total with the merchant.
       </p>
-      <ProseBlock heading={<>Free, with no <span className="it">ulterior motive</span>.</>} alt>
+      <ProseBlock heading={<>An explicit current <span className="it">price</span>.</>} alt>
         <p>
-          Free doesn&apos;t mean second-rate. FILON is complete, with no hidden paid version, no advertising. You
-          never pay.
+          Current public access costs €0. A future change must be published on this page and in the applicable terms.
         </p>
         <p>
-          And your data isn&apos;t for sale. The advice you receive serves one thing only: your interest.
+          Some links may generate a commission. That commission is not a dimension of the current score.
         </p>
       </ProseBlock>
       <FaqBlock items={FAQ_EN} eyebrow="Pricing · FAQ" title="What « free » really means." />
-      <ClosingCta title={<>Get started, it&apos;s <span className="it">free</span>.</>} sub="No subscription or credit card. Really." />
+      <ClosingCta title={<>See the current <span className="it">offering</span>.</>} sub="Public access currently costs €0 and requires no payment card." />
     </>
   );
 }

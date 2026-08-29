@@ -1,0 +1,12 @@
+# Propriétaire par défaut ; les lignes explicites rendent les frontières
+# critiques visibles dans les revues et la future protection de branche.
+* @Fredm237
+
+/contracts/ @Fredm237
+/quality/ @Fredm237
+/docs/architecture/ @Fredm237
+/docs/adr/ @Fredm237
+/filon-backend/alembic/ @Fredm237
+/filon-backend/app/db/ @Fredm237
+/filon-backend/app/observations/ @Fredm237
+/.github/workflows/ @Fredm237

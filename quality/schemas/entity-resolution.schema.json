@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FILON Quality Lab Entity Resolution Record v0.5",
+  "type": "object",
+  "required": [
+    "record_version",
+    "dataset",
+    "case_id",
+    "group_id",
+    "split",
+    "split_policy_version",
+    "input",
+    "gold",
+    "annotations",
+    "source_pack_fingerprints",
+    "schema_fingerprint",
+    "case_fingerprint"
+  ],
+  "properties": {
+    "record_version": { "const": "0.5.0" },
+    "dataset": { "const": "entity_resolution" },
+    "case_id": { "$ref": "#/$defs/nonblank_id" },
+    "group_id": { "$ref": "#/$defs/nonblank_id" },
+    "split": { "enum": ["train", "dev", "test"] },
+    "split_policy_version": { "const": "sha256-prefix32-mod100-70-15-15-v1" },
+    "input": { "$ref": "#/$defs/input" },
+    "gold": { "$ref": "#/$defs/label" },
+    "annotations": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/annotation" }
+    },
+    "adjudication": { "$ref": "#/$defs/adjudication" },
+    "source_pack_fingerprints": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sha256" }
+    },
+    "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+    "case_fingerprint": { "$ref": "#/$defs/sha256" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonblank_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\s)[\\s\\S]*\\S(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "observation": {
+      "type": "object",
+      "required": ["source_ref", "name"],
+      "properties": {
+        "source_ref": { "$ref": "#/$defs/nonblank_id" },
+        "name": { "type": "string" },
+        "brand": { "type": ["string", "null"] },
+        "identifiers": { "type": "object" },
+        "attributes": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "required": ["strata", "left", "right"],
+      "properties": {
+        "strata": { "$ref": "#/$defs/strata" },
+        "left": { "$ref": "#/$defs/observation" },
+        "right": { "$ref": "#/$defs/observation" }
+      },
+      "additionalProperties": false
+    },
+    "strata": {
+      "type": "object",
+      "required": ["scenario_type", "language", "vertical"],
+      "properties": {
+        "scenario_type": {
+          "enum": ["exact_product", "generic_product", "use_case", "constraint_heavy", "accessory", "replacement_part", "variant_sensitive", "multi_product", "ambiguous", "no_match"]
+        },
+        "language": { "enum": ["fr", "nl", "en"] },
+        "vertical": { "enum": ["smartphones", "laptops", "tv", "headphones_audio", "appliances"] }
+      },
+      "additionalProperties": false
+    },
+    "label": {
+      "type": "object",
+      "required": ["product_relation", "variant_relation"],
+      "properties": {
+        "product_relation": { "enum": ["same", "different", "ambiguous"] },
+        "variant_relation": {
+          "enum": ["same", "different", "not_applicable", "ambiguous"]
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "product_relation": { "const": "different" } },
+            "required": ["product_relation"]
+          },
+          "then": {
+            "properties": {
+              "variant_relation": { "const": "not_applicable" }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "product_relation": { "const": "same" } },
+            "required": ["product_relation"]
+          },
+          "then": {
+            "properties": {
+              "variant_relation": {
+                "enum": ["same", "different", "ambiguous"]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": { "product_relation": { "const": "ambiguous" } },
+            "required": ["product_relation"]
+          },
+          "then": {
+            "properties": {
+              "variant_relation": { "const": "ambiguous" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "annotation": {
+      "type": "object",
+      "required": ["annotator_id", "label", "confidence"],
+      "properties": {
+        "annotator_id": { "$ref": "#/$defs/nonblank_id" },
+        "label": { "$ref": "#/$defs/label" },
+        "confidence": { "enum": ["certain", "probable", "unknown"] }
+      },
+      "additionalProperties": false
+    },
+    "adjudication": {
+      "type": "object",
+      "required": ["adjudicator_id", "label", "confidence", "rationale"],
+      "properties": {
+        "adjudicator_id": { "$ref": "#/$defs/nonblank_id" },
+        "label": { "$ref": "#/$defs/label" },
+        "confidence": { "enum": ["certain", "probable", "unknown"] },
+        "rationale": { "$ref": "#/$defs/nonblank_id" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

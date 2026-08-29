@@ -1,27 +1,47 @@
-name: Qualité catalogue backend
+name: Phase 0 — quality gates
 
 on:
   pull_request:
-    paths:
-      - "filon-backend/**"
-      - ".github/workflows/backend-catalog-quality.yml"
   push:
     branches: [main]
-    paths:
-      - "filon-backend/**"
-      - ".github/workflows/backend-catalog-quality.yml"
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: phase-0-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   backend-tests:
-    name: Régressions taxonomie et contrat API
+    name: Backend, contrats et Quality Lab
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: filon
+          POSTGRES_PASSWORD: filon
+          POSTGRES_DB: filon_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U filon -d filon_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      TEST_POSTGRES_URL: postgresql+asyncpg://filon:filon@127.0.0.1:5432/filon_test
     defaults:
       run:
         working-directory: filon-backend
     steps:
       - name: Récupérer le dépôt
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Installer Python
         uses: actions/setup-python@v5
@@ -33,5 +53,140 @@ jobs:
       - name: Installer les dépendances
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
+      - name: Déterminer si le moteur de décision a changé
+        id: quality-scope
+        env:
+          QUALITY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [[ -z "$QUALITY_BASE_SHA" || "$QUALITY_BASE_SHA" =~ ^0+$ ]]; then
+            echo "quality_gate_required=true" >> "$GITHUB_OUTPUT"
+            echo "quality_gate_path_count=unknown" >> "$GITHUB_OUTPUT"
+          else
+            git diff --name-only "$QUALITY_BASE_SHA" "$GITHUB_SHA" \
+              | python -m quality_lab.ci_scope >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Tester baseline, stamp, drift et restauration Alembic
+        run: >-
+          python -m pytest -q
+          tests/test_migrations.py
+          tests/test_migrations_postgresql.py
+
       - name: Exécuter les régressions catalogue
         run: python -m pytest -q
+
+      - name: Produire la readiness du Quality Lab
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.evaluate
+          --manifest ../quality/manifest.json
+          --output ../quality-readiness-report.json
+
+      - name: Bloquer un changement moteur sans benchmark humain prêt
+        if: ${{ !cancelled() && steps.quality-scope.outputs.quality_gate_required == 'true' }}
+        run: >-
+          python -m quality_lab.evaluate
+          --manifest ../quality/manifest.json
+          --strict
+          --output ../quality-readiness-report.json
+
+      - name: Publier le rapport Quality Lab
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: quality-readiness-${{ github.sha }}
+          path: ${{ github.workspace }}/quality-readiness-report.json
+          if-no-files-found: warn
+          retention-days: 14
+
+  web-tests:
+    name: Web — contrats, tests et build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: filon-web
+    env:
+      NEXT_PUBLIC_FILON_API: http://127.0.0.1:9
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: filon-web/package-lock.json
+
+      - name: Installer les dépendances verrouillées
+        run: npm ci
+
+      - name: Tester les contrats et composants
+        run: npm test
+
+      - name: Construire le web sans dépendre de la production
+        run: npm run build
+
+  mobile-tests:
+    name: Mobile — types, lint et tests hermétiques
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: filon-mobile
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: filon-mobile/pnpm-lock.yaml
+
+      - name: Installer les dépendances verrouillées
+        run: pnpm install --frozen-lockfile
+
+      - name: Vérifier les types
+        run: pnpm check
+
+      - name: Vérifier les règles React
+        run: pnpm lint
+
+      - name: Exécuter les tests hermétiques
+        run: pnpm test
+
+  extension-tests:
+    name: Extension — contrat, manifeste et syntaxe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: filon-extension
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Vérifier le contrat v1
+        run: node tests/contract-v1.mjs
+
+      - name: Vérifier les scripts Manifest V3
+        run: |
+          node --check background.js
+          node --check content.js
+          node --check popup.js
+
+      - name: Vérifier le manifeste
+        run: node -e 'const m=require("./manifest.json"); if(m.manifest_version!==3) process.exit(1)'

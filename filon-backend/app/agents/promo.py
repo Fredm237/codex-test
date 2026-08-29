@@ -13,8 +13,9 @@ async def run(state: AdviseState) -> AdviseState:
     enriched = state.setdefault("enriched", {})
     for product in state.get("candidates", []):
         pid = product["product_id"]
+        entry = enriched.setdefault(pid, {})
         promos = product.get("promos", [])
         best = max(promos, key=lambda p: p["amount"]) if promos else None
-        enriched[pid]["promo"] = best
+        entry["promo"] = best
     state.setdefault("trace", []).append("promo: meilleurs codes retenus")
     return state

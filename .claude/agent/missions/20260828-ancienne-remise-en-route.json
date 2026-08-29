@@ -1,0 +1,168 @@
+{
+  "titre": "FILON — remise en route",
+  "objectif": "Catalogue rangé en production, refonte design livrée, agent outillé",
+  "cree": "2026-08-09T14:07:54+00:00",
+  "maj": "2026-08-09T14:09:49+00:00",
+  "contraintes": [
+    "La base de production ne répond pas : SELECT 1 dépasse 2 s, tous les endpoints catalogue rendent 500",
+    "Le navigateur local ne sort pas (politique d'egress) — passer par Firecrawl, Apify ou le sandbox distant"
+  ],
+  "taches": [
+    {
+      "id": "t1",
+      "objectif": "Fusionner 68df403 et déployer",
+      "statut": "fait",
+      "depend": [],
+      "outil": "github",
+      "attendu": null,
+      "obtenu": "PR #101 fusionnée dans main",
+      "verification": "uptime_seconds retombé de 398289 à 108 ; 342 tests backend au vert",
+      "tentatives": 0
+    },
+    {
+      "id": "t2",
+      "objectif": "Rétablir la base de production",
+      "statut": "a_faire",
+      "depend": [],
+      "outil": null,
+      "attendu": "SELECT 1 sous 2 s, /api/catalog/categories en 200",
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
+    },
+    {
+      "id": "t3",
+      "objectif": "reclassify puis realign en simulation",
+      "statut": "a_faire",
+      "depend": [
+        "t2"
+      ],
+      "outil": null,
+      "attendu": "détail par marchand, présenté avant toute écriture",
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
+    },
+    {
+      "id": "t4",
+      "objectif": "Écrire le realign après accord",
+      "statut": "a_faire",
+      "depend": [
+        "t3"
+      ],
+      "outil": null,
+      "attendu": null,
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
+    },
+    {
+      "id": "t5",
+      "objectif": "Corriger /health : degrader aussi sur slow",
+      "statut": "fait",
+      "depend": [],
+      "outil": null,
+      "attendu": "status degraded quand la base ne répond pas",
+      "obtenu": "health.py corrigé",
+      "verification": "342 tests backend au vert ; degraded désormais déclenché aussi sur slow",
+      "tentatives": 0
+    },
+    {
+      "id": "t6",
+      "objectif": "Finir la refonte : catalogue en profondeur, home en chapitres",
+      "statut": "a_faire",
+      "depend": [],
+      "outil": "filon-web",
+      "attendu": null,
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
+    },
+    {
+      "id": "t7",
+      "objectif": "Vérifier la scène 3D avec de vraies données",
+      "statut": "a_faire",
+      "depend": [
+        "t2",
+        "t6"
+      ],
+      "outil": null,
+      "attendu": null,
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
+    }
+  ],
+  "journal": [
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "mission_creee",
+      "detail": "FILON — remise en route"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "contrainte",
+      "detail": "La base de production ne répond pas : SELECT 1 dépasse 2 s, tous les endpoints catalogue rendent 500"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "contrainte",
+      "detail": "Le navigateur local ne sort pas (politique d'egress) — passer par Firecrawl, Apify ou le sandbox distant"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "t1 — Fusionner 68df403 et déployer"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "verification",
+      "detail": "t1 — uptime_seconds retombé de 398289 à 108 ; 342 tests backend au vert"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_faite",
+      "detail": "t1 — PR #101 fusionnée dans main"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "t2 — Rétablir la base de production"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "t3 — reclassify puis realign en simulation"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "t4 — Écrire le realign après accord"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "t5 — Corriger /health : degrader aussi sur slow"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "t6 — Finir la refonte : catalogue en profondeur, home en chapitres"
+    },
+    {
+      "ts": "2026-08-09T14:07:54+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "t7 — Vérifier la scène 3D avec de vraies données"
+    },
+    {
+      "ts": "2026-08-09T14:09:49+00:00",
+      "evenement": "verification",
+      "detail": "t5 — 342 tests backend au vert ; degraded désormais déclenché aussi sur slow"
+    },
+    {
+      "ts": "2026-08-09T14:09:49+00:00",
+      "evenement": "tache_faite",
+      "detail": "t5 — health.py corrigé"
+    }
+  ]
+}

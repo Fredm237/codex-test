@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FILON Quality Lab Run Manifest v1",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "run_id",
+    "system_version",
+    "evaluator_version",
+    "gold_manifest_sha256",
+    "adapters",
+    "datasets"
+  ],
+  "properties": {
+    "schema_version": { "const": "quality-run/v1" },
+    "run_id": { "$ref": "#/$defs/nonblank_string" },
+    "system_version": { "$ref": "#/$defs/nonblank_string" },
+    "evaluator_version": { "const": "0.5.0" },
+    "gold_manifest_sha256": { "$ref": "#/$defs/sha256" },
+    "adapters": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "taxonomy": { "$ref": "#/$defs/adapter_config" },
+        "entity_resolution": { "$ref": "#/$defs/adapter_config" },
+        "variant_resolution": { "$ref": "#/$defs/adapter_config" },
+        "offer_attachment": { "$ref": "#/$defs/adapter_config" },
+        "offer_truth": { "$ref": "#/$defs/adapter_config" },
+        "retrieval": { "$ref": "#/$defs/adapter_config" },
+        "decision": { "$ref": "#/$defs/adapter_config" }
+      },
+      "additionalProperties": false
+    },
+    "datasets": {
+      "type": "object",
+      "required": [
+        "taxonomy",
+        "entity_resolution",
+        "variant_resolution",
+        "offer_attachment",
+        "offer_truth",
+        "retrieval",
+        "decision"
+      ],
+      "properties": {
+        "taxonomy": { "$ref": "#/$defs/dataset_config" },
+        "entity_resolution": { "$ref": "#/$defs/dataset_config" },
+        "variant_resolution": { "$ref": "#/$defs/dataset_config" },
+        "offer_attachment": { "$ref": "#/$defs/dataset_config" },
+        "offer_truth": { "$ref": "#/$defs/dataset_config" },
+        "retrieval": { "$ref": "#/$defs/dataset_config" },
+        "decision": { "$ref": "#/$defs/dataset_config" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonblank_string": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\s)[\\s\\S]*\\S(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "adapter_config": {
+      "type": "object",
+      "required": ["engine_id", "engine_version"],
+      "properties": {
+        "engine_id": { "$ref": "#/$defs/nonblank_string" },
+        "engine_version": { "$ref": "#/$defs/nonblank_string" }
+      },
+      "additionalProperties": false
+    },
+    "dataset_config": {
+      "type": "object",
+      "required": ["path", "sha256"],
+      "properties": {
+        "path": { "$ref": "#/$defs/nonblank_string" },
+        "sha256": { "$ref": "#/$defs/sha256" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

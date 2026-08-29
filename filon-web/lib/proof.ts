@@ -9,6 +9,8 @@
 // plutôt que d'afficher un zéro, qui mentirait dans l'autre sens.
 
 import { API } from "@/lib/api";
+import { isFreshObservation, positiveFinitePrice } from "@/components/filon/product-copy";
+import { normalizeSupportedCurrency } from "@/lib/currency";
 
 export type ProofStats = {
   merchants: number;
@@ -54,9 +56,13 @@ async function getJson(path: string, revalidate: number): Promise<any | null> {
  *  l'écart de prix est mesurable. Sans écart il ne prouve rien — on l'écarte. */
 function pickProduct(items: any[]): ProofProduct | null {
   for (const p of items) {
-    const min = typeof p.price_min === "number" ? p.price_min : null;
-    const max = typeof p.price_max === "number" ? p.price_max : null;
-    if (min === null || max === null || max <= min) continue;
+    const min = positiveFinitePrice(p.price_min) ? p.price_min : null;
+    const max = positiveFinitePrice(p.price_max) ? p.price_max : null;
+    const currency = normalizeSupportedCurrency(p.currency);
+    // Un agrégat legacy ne suffit pas : la vitrine exige que le serveur ait
+    // rapproché ses bornes des offres et relevés actuels dans une même devise.
+    if (p.evidence_current !== true || !isFreshObservation(p.observed_at)) continue;
+    if (min === null || max === null || max <= min || currency === null) continue;
     if ((p.merchants_count || 0) < 2) continue;
     return {
       ean: String(p.ean),
@@ -65,7 +71,7 @@ function pickProduct(items: any[]): ProofProduct | null {
       image: p.image ?? null,
       priceMin: min,
       priceMax: max,
-      currency: p.currency || "EUR",
+      currency,
       merchants: Number(p.merchants_count),
     };
   }

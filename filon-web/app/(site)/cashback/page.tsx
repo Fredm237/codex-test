@@ -8,28 +8,28 @@ export const metadata: Metadata = buildMetadata({
   path: "/cashback",
   title: "Cashback : de l'argent qui revient",
   description:
-    "Avec FILON, récupérez le maximum sur vos achats, automatiquement. Sans chercher, sans comparer.",
+    "FILON affiche un cashback lorsqu'un avantage indexé documente son taux et ses conditions. La validation finale appartient à la plateforme concernée.",
 });
 
 const FAQ_FR = [
-  { q: "Le cashback, c'est quoi au juste ?", a: "Une partie de votre achat qui vous revient après coup. Avec FILON, vous obtenez le maximum, sans rien faire." },
-  { q: "Dois-je comparer moi-même ?", a: "Non. FILON trouve la meilleure offre du moment à votre place, et vous y emmène." },
-  { q: "C'est cumulable avec une promo ?", a: "Souvent oui. FILON vous indique simplement le meilleur prix final." },
-  { q: "Quand est-ce que je le reçois ?", a: "Selon la boutique, de quelques jours à quelques semaines. FILON vous indique les conditions avant que vous ne décidiez." },
+  { q: "Le cashback, c'est quoi au juste ?", a: "Un avantage conditionnel versé après un achat éligible. Son taux, son délai et sa validation dépendent de la plateforme et du marchand." },
+  { q: "FILON compare-t-il toutes les plateformes ?", a: "Non. FILON ne peut montrer que les avantages présents dans ses sources indexées. Le périmètre disponible doit rester visible." },
+  { q: "C'est cumulable avec une promo ?", a: "Cela dépend des conditions de l'avantage. Une compatibilité inconnue n'est pas présentée comme acquise." },
+  { q: "Quand est-ce que je le reçois ?", a: "Le délai et la validation sont fixés par la plateforme concernée. Vérifiez ses conditions avant l'achat." },
 ];
 
 const FAQ_NL = [
-  { q: "Wat is cashback precies ?", a: "Een deel van je aankoop dat je achteraf terugkrijgt. Met FILON krijg je het maximum, zonder iets te doen." },
-  { q: "Moet ik zelf vergelijken ?", a: "Nee. FILON vindt de beste aanbieding van het moment in jouw plaats, en brengt je erheen." },
-  { q: "Is het te combineren met een promo ?", a: "Vaak wel. FILON toont je gewoon de beste eindprijs." },
-  { q: "Wanneer krijg ik het ?", a: "Afhankelijk van de winkel, van enkele dagen tot enkele weken. FILON toont de voorwaarden voordat je beslist." },
+  { q: "Wat is cashback precies ?", a: "Een voorwaardelijk voordeel dat na een in aanmerking komende aankoop wordt uitbetaald. Tarief, termijn en validatie hangen af van platform en winkel." },
+  { q: "Vergelijkt FILON alle platforms ?", a: "Nee. FILON kan alleen voordelen tonen die in zijn geïndexeerde bronnen staan. Het beschikbare bereik moet zichtbaar blijven." },
+  { q: "Is het te combineren met een promo ?", a: "Dat hangt af van de voorwaarden. Een onbekende combinatie wordt niet als geldig voorgesteld." },
+  { q: "Wanneer krijg ik het ?", a: "Termijn en validatie worden door het betrokken platform bepaald. Controleer de voorwaarden voor de aankoop." },
 ];
 
 const FAQ_EN = [
-  { q: "What exactly is cashback ?", a: "A part of your purchase that comes back to you afterwards. With FILON, you get the maximum, without doing anything." },
-  { q: "Do I have to compare myself ?", a: "No. FILON finds the best offer of the moment for you, and takes you there." },
-  { q: "Can it be combined with a promo ?", a: "Often yes. FILON simply shows you the best final price." },
-  { q: "When do I receive it ?", a: "Depending on the shop, from a few days to a few weeks. FILON shows you the conditions before you decide." },
+  { q: "What exactly is cashback ?", a: "A conditional benefit paid after an eligible purchase. Its rate, timing and validation depend on the platform and merchant." },
+  { q: "Does FILON compare every platform ?", a: "No. FILON can only show benefits present in its indexed sources. The available scope must remain visible." },
+  { q: "Can it be combined with a promo ?", a: "That depends on the benefit terms. An unknown combination is not presented as valid." },
+  { q: "When do I receive it ?", a: "Timing and validation are set by the relevant platform. Check its terms before buying." },
 ];
 
 function CashbackFR() {
@@ -37,8 +37,8 @@ function CashbackFR() {
     <>
       <ContentHero
         eyebrow="Cashback"
-        title={<>De l&apos;argent qui revient. À chaque <span className="it">achat</span>.</>}
-        intro="Sur beaucoup d'achats, une partie de la somme peut vous revenir. FILON récupère le maximum pour vous, automatiquement. Vous n'avez rien à chercher."
+        title={<>Un avantage conditionnel, lorsqu&apos;il est <span className="it">documenté</span>.</>}
+        intro="Sur certains achats éligibles, une partie de la somme peut revenir après validation. FILON affiche l'avantage uniquement lorsqu'il est présent dans une source indexée."
         breadcrumb={[{ name: "Cashback", path: "/cashback" }]}
         photo="/img/video-cashback-poster.webp"
         video="/video/cashback-coin.mp4"
@@ -49,12 +49,13 @@ function CashbackFR() {
           c&apos;est évitable.
         </p>
         <p>
-          FILON s&apos;en occupe. Au bon moment, il vous obtient la meilleure offre et vous encaissez plus. Vous gardez
-          vos habitudes, vous payez moins.
+          FILON peut signaler un avantage documenté avec son périmètre. Le taux,
+          le cumul, l&apos;éligibilité et le versement restent soumis aux conditions
+          de la plateforme concernée.
         </p>
       </ProseBlock>
       <FaqBlock items={FAQ_FR} eyebrow="Cashback · FAQ" title="Le cashback, sans zone d'ombre." />
-      <ClosingCta title={<>Ne cliquez plus jamais « payer » <span className="it">sans</span> FILON.</>} sub="Il s'en occupe pour vous, gratuitement, à chaque achat." />
+      <ClosingCta title={<>Vérifiez les <span className="it">conditions</span> avant de payer.</>} sub="FILON montre les avantages indexés lorsqu'ils sont documentés." />
     </>
   );
 }
@@ -64,8 +65,8 @@ function CashbackNL() {
     <>
       <ContentHero
         eyebrow="Cashback"
-        title={<>Geld dat terugkomt. Bij elke <span className="it">aankoop</span>.</>}
-        intro="Bij veel aankopen kan een deel van het bedrag naar jou terugvloeien. FILON haalt het maximum voor je binnen, automatisch. Jij hoeft niets te zoeken."
+        title={<>Een voorwaardelijk voordeel, wanneer het is <span className="it">gedocumenteerd</span>.</>}
+        intro="Bij sommige in aanmerking komende aankopen kan een deel na validatie terugkomen. FILON toont het voordeel alleen wanneer het in een geïndexeerde bron staat."
         breadcrumb={[{ name: "Cashback", path: "/cashback" }]}
         photo="/img/video-cashback-poster.webp"
         video="/video/cashback-coin.mp4"
@@ -75,12 +76,13 @@ function CashbackNL() {
           Veel mensen laten dat geld liggen, gewoon door tijdgebrek. Zonde, en vermijdbaar.
         </p>
         <p>
-          FILON regelt het. Op het juiste moment krijg je de beste aanbieding en houd je meer over. Je behoudt je
-          gewoontes, je betaalt minder.
+          FILON kan een gedocumenteerd voordeel met zijn bereik tonen. Tarief,
+          combinatie, geschiktheid en uitbetaling blijven onderworpen aan de
+          voorwaarden van het betrokken platform.
         </p>
       </ProseBlock>
       <FaqBlock items={FAQ_NL} eyebrow="Cashback · FAQ" title="Cashback, zonder grijze zones." />
-      <ClosingCta title={<>Klik nooit meer op « betalen » <span className="it">zonder</span> FILON.</>} sub="Hij regelt het voor jou, gratis, bij elke aankoop." />
+      <ClosingCta title={<>Controleer de <span className="it">voorwaarden</span> voordat je betaalt.</>} sub="FILON toont geïndexeerde voordelen wanneer ze gedocumenteerd zijn." />
     </>
   );
 }
@@ -90,8 +92,8 @@ function CashbackEN() {
     <>
       <ContentHero
         eyebrow="Cashback"
-        title={<>Money that comes back. On every <span className="it">purchase</span>.</>}
-        intro="On many purchases, part of the sum can come back to you. FILON recovers the maximum for you, automatically. You have nothing to search for."
+        title={<>A conditional benefit, when it is <span className="it">documented</span>.</>}
+        intro="On some eligible purchases, part of the amount may return after validation. FILON shows a benefit only when it is present in an indexed source."
         breadcrumb={[{ name: "Cashback", path: "/cashback" }]}
         photo="/img/video-cashback-poster.webp"
         video="/video/cashback-coin.mp4"
@@ -102,12 +104,12 @@ function CashbackEN() {
           avoidable.
         </p>
         <p>
-          FILON takes care of it. At the right moment, it gets you the best offer and you pocket more. You keep your
-          habits, you pay less.
+          FILON can flag a documented benefit with its scope. Rate, combination,
+          eligibility and payment remain subject to the relevant platform&apos;s terms.
         </p>
       </ProseBlock>
       <FaqBlock items={FAQ_EN} eyebrow="Cashback · FAQ" title="Cashback, with no grey areas." />
-      <ClosingCta title={<>Never click « pay » <span className="it">without</span> FILON again.</>} sub="It takes care of it for you, free, on every purchase." />
+      <ClosingCta title={<>Check the <span className="it">terms</span> before you pay.</>} sub="FILON shows indexed benefits when they are documented." />
     </>
   );
 }

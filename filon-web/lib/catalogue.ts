@@ -98,12 +98,11 @@ export type CatalogueQuery = {
 // EN comme en FR.
 export const SORTS = [
   { value: "relevance", labelKey: "cat.sortRelevance" },
-  { value: "price_asc", labelKey: "cat.sortPriceAsc" },
-  { value: "price_desc", labelKey: "cat.sortPriceDesc" },
   { value: "name", labelKey: "cat.sortName" },
 ] as const;
 
 export const PER_PAGE = [24, 48, 96] as const;
+const MAX_CATALOGUE_PAGE = Math.floor(Number.MAX_SAFE_INTEGER / Math.max(...PER_PAGE));
 
 const TIMEOUT = 8000;
 
@@ -125,6 +124,7 @@ export type PulsePayload = {
   lastReading: string | null;
   readings24h: number;
   drops24h: number;
+  dropsComparable: boolean;
 } | null;
 
 /** Le battement du catalogue. Fenêtre de cache courte : c'est précisément ce
@@ -132,11 +132,18 @@ export type PulsePayload = {
 export async function getPulse(): Promise<PulsePayload> {
   const data = await getJson("/api/catalog/pulse", 120);
   if (!data?.live) return null;
+  const readings24h = typeof data.readings_24h === "number" && Number.isInteger(data.readings_24h) && data.readings_24h >= 0
+    ? data.readings_24h
+    : 0;
+  const drops24h = typeof data.drops_24h === "number" && Number.isInteger(data.drops_24h) && data.drops_24h >= 0
+    ? data.drops_24h
+    : 0;
   return {
     live: true,
-    lastReading: data.last_reading ?? null,
-    readings24h: Number(data.readings_24h || 0),
-    drops24h: Number(data.drops_24h || 0),
+    lastReading: typeof data.last_reading === "string" ? data.last_reading : null,
+    readings24h,
+    drops24h,
+    dropsComparable: data.drops_comparable === true,
   };
 }
 
@@ -181,7 +188,7 @@ export function pageSize(query: CatalogueQuery): number {
 
 export function pageNumber(query: CatalogueQuery): number {
   const n = Number(query.page);
-  return Number.isFinite(n) && n >= 1 ? Math.floor(n) : 1;
+  return Number.isSafeInteger(n) && n >= 1 && n <= MAX_CATALOGUE_PAGE ? n : 1;
 }
 
 export function sortValue(query: CatalogueQuery): string {
@@ -209,15 +216,14 @@ export async function getOffers(
   if (resolved.category) params.set("category", resolved.category.name);
   if (resolved.subcategory) params.set("subcategory", resolved.subcategory);
   if (query.brand) params.set("brand", query.brand);
-  if (query.min) params.set("price_min", query.min);
-  if (query.max) params.set("price_max", query.max);
 
   const data = await getJson(`/api/catalog/offers?${params.toString()}`, 300);
   if (!data) return null;
   const items = (data.items || []) as Offer[];
   const visibleItems = items.filter((offer) => isVisibleInSelectedSubcategory(offer, resolved.subcategory));
+  const rawTotal = Number(data.total);
   return {
-    total: Number(data.total || 0),
+    total: Number.isSafeInteger(rawTotal) && rawTotal >= 0 ? rawTotal : 0,
     items: visibleItems,
     withheld_for_evidence: resolved.subcategory === "Smartphones" && items.length > 0 && visibleItems.length === 0,
   };
@@ -228,6 +234,10 @@ export async function getOffers(
 export function href(query: CatalogueQuery, patch: Partial<CatalogueQuery>): string {
   const next: Record<string, string> = {};
   for (const [k, v] of Object.entries({ ...query, ...patch })) {
+    // Sans devise de filtrage explicite dans le contrat API, une borne
+    // numérique comparerait EUR, GBP, USD… comme s'ils étaient interchangeables.
+    if (k === "min" || k === "max") continue;
+    if (k === "sort" && !SORTS.some((sort) => sort.value === v)) continue;
     if (v != null && v !== "") next[k] = String(v);
   }
   if (!("page" in patch)) delete next.page;

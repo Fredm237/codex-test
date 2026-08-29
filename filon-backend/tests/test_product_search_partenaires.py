@@ -12,8 +12,6 @@ un prix que nous n'avons pas mesuré.
 
 from __future__ import annotations
 
-from unittest.mock import patch
-
 import pytest
 
 from app.agents import product_search
@@ -39,8 +37,7 @@ async def test_sans_resultat_reel_on_ne_propose_rien(monkeypatch):
         return []
 
     monkeypatch.setattr(product_search, "search_products", _rien)
-    with patch.object(product_search.db, "is_enabled", return_value=True):
-        out = await product_search.run(_state())
+    out = await product_search.run(_state())
 
     assert out["candidates"] == []
     assert any("partenaires" in line for line in out["trace"])
@@ -54,21 +51,19 @@ async def test_le_catalogue_reel_est_toujours_prefere(monkeypatch):
         return reel
 
     monkeypatch.setattr(product_search, "search_products", _reel)
-    with patch.object(product_search.db, "is_enabled", return_value=True):
-        out = await product_search.run(_state())
+    out = await product_search.run(_state())
 
     assert out["candidates"] == reel
 
 
 @pytest.mark.anyio
-async def test_la_demonstration_ne_sert_que_sans_base(monkeypatch):
-    """Le jeu de démonstration reste utile en développement local — et
-    seulement là, où DATABASE_URL n'est pas défini."""
+async def test_la_demonstration_ne_sert_jamais_de_reponse_api(monkeypatch):
+    """L'absence de base n'autorise pas une recommandation commerciale fictive."""
     async def _rien(*a, **kw):
         return []
 
     monkeypatch.setattr(product_search, "search_products", _rien)
-    with patch.object(product_search.db, "is_enabled", return_value=False):
-        out = await product_search.run(_state())
+    out = await product_search.run(_state())
 
-    assert any("démonstration" in line for line in out["trace"])
+    assert out["candidates"] == []
+    assert all("démonstration" not in line for line in out["trace"])

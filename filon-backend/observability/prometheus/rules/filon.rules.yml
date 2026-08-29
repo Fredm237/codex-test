@@ -1,0 +1,73 @@
+groups:
+  - name: filon-rollups-v1
+    interval: 30s
+    limit: 100
+    rules:
+      - record: filon:http_request_rate5m
+        expr: >-
+          sum by (environment, cluster)
+          (rate(filon_http_requests_total{job="filon-backend"}[5m]))
+      - record: filon:http_5xx_ratio5m
+        expr: >-
+          sum by (environment, cluster)
+          (rate(filon_http_responses_total{job="filon-backend",status_group="5xx"}[5m]))
+          /
+          clamp_min(
+            sum by (environment, cluster)
+            (rate(filon_http_requests_total{job="filon-backend"}[5m])),
+            1e-9
+          )
+      - record: filon:recommendation_rate5m
+        expr: >-
+          sum by (environment, cluster)
+          (rate(filon_recommendation_responses_total{job="filon-backend"}[5m]))
+      - record: filon:recommendation_abstention_ratio5m
+        expr: >-
+          sum by (environment, cluster)
+          (rate(filon_recommendation_outcome_total{job="filon-backend",outcome="abstained"}[5m]))
+          /
+          clamp_min(
+            sum by (environment, cluster)
+            (rate(filon_recommendation_responses_total{job="filon-backend"}[5m])),
+            1e-9
+          )
+      - record: filon:assistant_timeout_ratio5m
+        expr: >-
+          sum by (environment, cluster)
+          (rate(filon_recommendation_delivery_total{job="filon-backend",delivery="timeout"}[5m]))
+          /
+          clamp_min(
+            sum by (environment, cluster)
+            (rate(filon_recommendation_responses_total{job="filon-backend"}[5m])),
+            1e-9
+          )
+      - record: filon:pipeline_execution_rate5m
+        expr: >-
+          sum by (environment, cluster, stage)
+          (rate(filon_pipeline_executions_total{job="filon-backend"}[5m]))
+      - record: filon:pipeline_error_ratio5m
+        expr: >-
+          sum by (environment, cluster, stage)
+          (rate(filon_pipeline_outcomes_total{job="filon-backend",outcome="error"}[5m]))
+          /
+          clamp_min(
+            sum by (environment, cluster, stage)
+            (rate(filon_pipeline_executions_total{job="filon-backend"}[5m])),
+            1e-9
+          )
+      - record: filon:decision_rate5m
+        expr: >-
+          sum by (environment, cluster)
+          (rate(filon_decision_evaluations_total{job="filon-backend"}[5m]))
+      - record: filon:buy_card_rate5m
+        expr: >-
+          sum by (environment, cluster)
+          (rate(filon_recommendation_buy_cards_total{job="filon-backend"}[5m]))
+      - record: filon:missing_dimension_rate5m
+        expr: >-
+          sum by (environment, cluster, dimension)
+          (rate(filon_decision_missing_dimension_total{job="filon-backend"}[5m]))
+      - record: filon:decision_exclusion_rate5m
+        expr: >-
+          sum by (environment, cluster, reason)
+          (rate(filon_decision_exclusion_total{job="filon-backend"}[5m]))

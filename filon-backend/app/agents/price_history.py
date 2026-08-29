@@ -13,11 +13,15 @@ async def run(state: AdviseState) -> AdviseState:
     enriched = state.setdefault("enriched", {})
     for product in state.get("candidates", []):
         pid = product["product_id"]
+        entry = enriched.setdefault(pid, {})
+        if "best_offer" not in entry:
+            entry["history"] = None
+            continue
         hist = product.get("price_history")
         if not hist:
-            enriched[pid]["history"] = None
+            entry["history"] = None
             continue
-        current = enriched[pid]["best_offer"]["price"]
+        current = entry["best_offer"]["price"]
         avg = hist["average_90d"]
         low = hist["min_90d"]
 
@@ -30,7 +34,7 @@ async def run(state: AdviseState) -> AdviseState:
         else:
             trend, signal, reason = ("stable", "acheter", "Prix stable, proche de la moyenne.")
 
-        enriched[pid]["history"] = {
+        entry["history"] = {
             "current": current,
             "average_90d": avg,
             "min_90d": low,

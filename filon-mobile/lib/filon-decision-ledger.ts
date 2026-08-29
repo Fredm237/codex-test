@@ -1,9 +1,10 @@
 import type { RecommendationTrace } from "./filon-intelligence";
+import type { OutfitPublicMessage } from "./filon-outfit-i18n";
 
 export type DecisionLedger = {
-  constraints: string[];
-  catalogue: { considered: number; eligible: number; unavailable: number; unsafe: number };
-  policy: string[];
+  constraints: OutfitPublicMessage[];
+  catalogue: { considered: number; eligible: number; nonEligible: number; unsafe: number };
+  policy: OutfitPublicMessage[];
 };
 
 /**
@@ -11,12 +12,12 @@ export type DecisionLedger = {
  * cachée. Aucune commission, préférence partenaire ou donnée non observée n’y
  * est admise.
  */
-export function buildDecisionLedger(trace: RecommendationTrace, solutionConstraints: string[]): DecisionLedger {
+export function buildDecisionLedger(trace: RecommendationTrace, solutionConstraints: OutfitPublicMessage[]): DecisionLedger {
   const constraints = [...solutionConstraints];
-  if (trace.intent.request.trim()) constraints.unshift(`Intention : ${trace.intent.request.trim().slice(0, 160)}`);
+  if (trace.intent.request.trim()) constraints.unshift({ code: "ledger.intent", value: trace.intent.request.trim().slice(0, 160) });
   return {
     constraints,
-    catalogue: { considered: trace.considered, eligible: trace.eligible, unavailable: trace.excludedUnavailable, unsafe: trace.excludedUnsafe },
-    policy: ["Les offres sont filtrées selon leur disponibilité et la validité de leur lien partenaire.", "Les décisions n’utilisent ni commission, ni priorité commerciale, ni prix inventé."],
+    catalogue: { considered: trace.considered, eligible: trace.eligible, nonEligible: trace.excludedNonEligible, unsafe: trace.excludedUnsafe },
+    policy: [{ code: "ledger.policy.offer_classification" }, { code: "ledger.policy.no_commercial_priority" }],
   };
 }

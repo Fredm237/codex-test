@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
+from app.core.observability import product_intelligence_metrics
 from app.services.decision import compute_decision
 
 BASE = datetime(2026, 8, 1, 12, 0)
@@ -24,6 +25,7 @@ def test_best_observed_price_keeps_delivery_unknown_visible():
         history=_history([100, 98, 95, 92, 90, 88, 85, 80]),
         cheapest_elsewhere=80.0,
         comparison_currency="EUR",
+        history_currency="EUR",
         merchants_count=5,
         offers_count=8,
         in_stock=True,
@@ -31,9 +33,9 @@ def test_best_observed_price_keeps_delivery_unknown_visible():
         now=BASE + timedelta(days=7, hours=2),
     )
     assert d["recommendation_scope"] == "meilleur_prix_observe"
-    # Huit jours suffisent pour un verdict exploitable, mais pas pour une
-    # confiance élevée : celle-ci exige 30 relevés sur 30 jours.
-    assert d["confidence"] == "moyenne"
+    assert d["confidence"] == "not_calibrated"
+    assert "score_observed" not in d
+    assert "score_possible" not in d
     assert {"shipping_cost", "delivery_destination", "return_policy"}.issubset(d["missing"])
     assert any(s["key"] == "comparison" and s["is_best_observed"] for s in d["signals"])
     evidence = {item["key"]: item for item in d["evidence"]}
@@ -61,7 +63,7 @@ def test_stock_absent_is_not_presented_as_in_stock():
     assert "availability" in d["missing"]
     availability = next(s for s in d["signals"] if s["key"] == "availability")
     assert availability["status"] == "unknown"
-    assert d["confidence"] != "elevee"
+    assert d["confidence"] == "not_calibrated"
 
 
 def test_cross_currency_is_never_used_for_a_best_price_claim():
@@ -81,6 +83,7 @@ def test_cross_currency_is_never_used_for_a_best_price_claim():
 
 
 def test_out_of_stock_offer_is_never_recommended():
+    product_intelligence_metrics.reset()
     d = compute_decision(
         price=50.0,
         currency="EUR",
@@ -93,6 +96,10 @@ def test_out_of_stock_offer_is_never_recommended():
         now=BASE + timedelta(days=7, hours=2),
     )
     assert d["recommendation_scope"] == "non_recommandee"
+    metrics = product_intelligence_metrics.snapshot()["decision_evaluations"]
+    assert metrics["scopes"] == {"non_recommandee": 1}
+    assert metrics["exclusions"] == {"out_of_stock": 1}
+    assert metrics["missing_dimensions"]["shipping_cost"] == 1
 
 
 def test_stale_price_has_a_visible_warning_not_a_hidden_penalty():
@@ -100,6 +107,7 @@ def test_stale_price_has_a_visible_warning_not_a_hidden_penalty():
         price=100.0,
         currency="EUR",
         history=[(100.0, BASE)],
+        history_currency="EUR",
         in_stock=True,
         updated_at=BASE + timedelta(days=44),
         now=BASE + timedelta(days=45),
@@ -174,13 +182,17 @@ def test_four_day_old_price_is_explicitly_marked_for_confirmation():
         price=100.0,
         currency="EUR",
         history=[(100.0, BASE)],
+        history_currency="EUR",
         in_stock=True,
         now=BASE + timedelta(days=4),
     )
     freshness = next(s for s in d["signals"] if s["key"] == "freshness")
     assert freshness["status"] == "warning"
     assert freshness["age_hours"] == 4 * 24
-    assert d["score_observed"] == 20  # disponibilité + fraîcheur réduite
+    evidence = {item["key"]: item for item in d["evidence"]}
+    assert evidence["availability"]["state"] == "observed"
+    assert evidence["freshness"]["state"] == "missing"
+    assert d["recommendation_scope"] == "a_verifier"
 
 
 def test_three_day_old_price_remains_recently_observed():
@@ -188,13 +200,16 @@ def test_three_day_old_price_remains_recently_observed():
         price=100.0,
         currency="EUR",
         history=[(100.0, BASE)],
+        history_currency="EUR",
         in_stock=True,
         now=BASE + timedelta(hours=72),
     )
     freshness = next(s for s in d["signals"] if s["key"] == "freshness")
     assert freshness["status"] == "positive"
     assert freshness["age_hours"] == 72
-    assert d["score_observed"] == 30  # disponibilité + fraîcheur complète
+    evidence = {item["key"]: item for item in d["evidence"]}
+    assert evidence["availability"]["state"] == "observed"
+    assert evidence["freshness"]["state"] == "observed"
 
 
 def test_eight_day_old_price_no_longer_adds_freshness_points():
@@ -202,10 +217,13 @@ def test_eight_day_old_price_no_longer_adds_freshness_points():
         price=100.0,
         currency="EUR",
         history=[(100.0, BASE)],
+        history_currency="EUR",
         in_stock=True,
         now=BASE + timedelta(days=8),
     )
     freshness = next(s for s in d["signals"] if s["key"] == "freshness")
     assert freshness["status"] == "warning"
     assert freshness["age_hours"] == 8 * 24
-    assert d["score_observed"] == 15  # seule la disponibilité reste observée
+    evidence = {item["key"]: item for item in d["evidence"]}
+    assert evidence["availability"]["state"] == "observed"
+    assert evidence["freshness"]["state"] == "missing"

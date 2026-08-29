@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import math
 from dataclasses import asdict, dataclass
 from datetime import datetime
 from typing import Literal
+
+from app.services.currency import normalize_currency_code
+from app.services.freshness import offer_observation_is_fresh
 
 KnowledgeStatus = Literal["verified", "inferred", "unknown"]
 Availability = Literal["in_stock", "out_of_stock", "unknown"]
@@ -19,7 +23,9 @@ class Evidence:
     status: KnowledgeStatus
     source_type: str
     source_ref: str
-    confidence: float
+    # Conservé pour compatibilité de schéma, mais jamais rempli par une
+    # probabilité artificielle avant calibration sur un jeu indépendant.
+    confidence: float | None
     observed_at: str
 
     def as_dict(self) -> dict[str, object]:
@@ -49,36 +55,49 @@ class CoreOfferSnapshot:
 
     @property
     def price_evidence(self) -> Evidence:
-        if self.price is None or not self.currency:
+        currency = normalize_currency_code(self.currency)
+        if (
+            self.price is None
+            or isinstance(self.price, bool)
+            or not math.isfinite(self.price)
+            or self.price <= 0
+            or currency is None
+            or not offer_observation_is_fresh(self.observed_at)
+        ):
             return Evidence(
                 field="price",
                 value="unknown",
                 status="unknown",
                 source_type="core",
                 source_ref=f"offer:{self.offer_id}",
-                confidence=0.0,
+                confidence=None,
                 observed_at=self._observed_at_iso,
             )
         return Evidence(
             field="price",
-            value=f"{self.price:.2f} {self.currency}",
+            value=f"{self.price:.2f} {currency}",
             status="verified",
             source_type="core",
             source_ref=f"offer:{self.offer_id}",
-            confidence=1.0,
+            confidence=None,
             observed_at=self._observed_at_iso,
         )
 
     @property
     def availability_evidence(self) -> Evidence:
-        status: KnowledgeStatus = "verified" if self.availability != "unknown" else "unknown"
+        status: KnowledgeStatus = (
+            "verified"
+            if self.availability != "unknown"
+            and offer_observation_is_fresh(self.observed_at)
+            else "unknown"
+        )
         return Evidence(
             field="availability",
-            value=self.availability,
+            value=self.availability if status == "verified" else "unknown",
             status=status,
             source_type="core",
             source_ref=f"offer:{self.offer_id}",
-            confidence=1.0 if status == "verified" else 0.0,
+            confidence=None,
             observed_at=self._observed_at_iso,
         )
 

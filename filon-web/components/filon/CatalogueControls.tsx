@@ -15,7 +15,7 @@ function Hidden({ query, except }: { query: CatalogueQuery; except: string[] }) 
   return (
     <>
       {Object.entries(query)
-        .filter(([k, v]) => v && !except.includes(k))
+        .filter(([k, v]) => v && !except.includes(k) && (k !== "sort" || SORTS.some((sort) => sort.value === v)))
         .map(([k, v]) => (
           <input type="hidden" name={k} value={String(v)} key={k} />
         ))}
@@ -29,7 +29,7 @@ export function CatalogueSearch({ query }: { query: CatalogueQuery }) {
     <form className="fx-catalogue-search" action="/catalogue/" method="get" role="search">
       {/* La page repart à 1 : rester en page 7 après une nouvelle recherche
           affichait une page vide. */}
-      <Hidden query={query} except={["q", "page"]} />
+      <Hidden query={query} except={["q", "page", "min", "max"]} />
       <div className="fx-field">
         <svg viewBox="0 0 24 24" aria-hidden="true" width="19" height="19" className="fx-field-icon">
           <circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" strokeWidth="1.8" />
@@ -64,8 +64,6 @@ export function CatalogueControls({
   const active: Array<[string, string, string]> = [];
   if (query.q) active.push(["q", `« ${query.q} »`, href(query, { q: undefined })]);
   if (query.brand) active.push(["brand", query.brand, href(query, { brand: undefined })]);
-  if (query.min) active.push(["min", `${t("cat.from")} ${query.min} €`, href(query, { min: undefined })]);
-  if (query.max) active.push(["max", `${t("cat.upTo")} ${query.max} €`, href(query, { max: undefined })]);
 
   return (
     <div className="fx-catalogue-controls">
@@ -94,15 +92,6 @@ export function CatalogueControls({
         </summary>
         <form className="fx-catalogue-form" action="/catalogue/" method="get">
         <Hidden query={query} except={["min", "max", "sort", "per", "page"]} />
-
-        <label className="fx-inline-field">
-          <span>{t("cat.min")}</span>
-          <input type="number" name="min" min="0" step="1" defaultValue={query.min || ""} inputMode="numeric" />
-        </label>
-        <label className="fx-inline-field">
-          <span>{t("cat.max")}</span>
-          <input type="number" name="max" min="0" step="1" defaultValue={query.max || ""} inputMode="numeric" />
-        </label>
         <label className="fx-inline-field">
           <span>{t("cat.sort")}</span>
           <select name="sort" defaultValue={sort}>

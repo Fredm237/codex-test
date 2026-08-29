@@ -6,6 +6,8 @@ chemise, puis des pages entières du même marchand.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -60,17 +62,37 @@ async def _seed(s):
     m = models.Merchant(awin_mid=1, name="Overhemden - NL", slug="overhemden")
     s.add(m)
     await s.flush()
+    seeded_offers = []
     for i, size in enumerate(("S", "M", "L", "XL")):
-        s.add(models.Offer(
+        offer = models.Offer(
             merchant_id=m.id, awin_product_id=f"g{i}",
             name=f"GANT Regular Fit shirt green, Chequered - Size {size}",
-            brand="GANT", price=100.0 + i, currency="EUR",
+            brand="GANT", price=100.0 + i, currency="EUR", in_stock=True,
             image_url="https://example.test/i.jpg",
-        ))
-    s.add(models.Offer(
+        )
+        seeded_offers.append(offer)
+        s.add(offer)
+    blue = models.Offer(
         merchant_id=m.id, awin_product_id="blue", name="GANT Regular Fit shirt blue",
-        brand="GANT", price=95.0, currency="EUR", image_url="https://example.test/i.jpg",
-    ))
+        brand="GANT", price=95.0, currency="EUR", in_stock=True,
+        image_url="https://example.test/i.jpg",
+    )
+    seeded_offers.append(blue)
+    s.add(blue)
+    await s.flush()
+    captured_at = datetime.now(UTC).replace(tzinfo=None)
+    s.add_all(
+        [
+            models.PriceSnapshot(
+                offer_id=offer.id,
+                price=offer.price,
+                currency="EUR",
+                in_stock=True,
+                captured_at=captured_at,
+            )
+            for offer in seeded_offers
+        ]
+    )
     await s.commit()
 
 

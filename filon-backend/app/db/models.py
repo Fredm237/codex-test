@@ -234,5 +234,8 @@ class PriceSnapshot(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     offer_id: Mapped[int] = mapped_column(ForeignKey("offers.id"), index=True)
     price: Mapped[float] = mapped_column(Float)
+    # Nullable pour les relevés historiques antérieurs à la migration. Une
+    # valeur absente ne peut jamais être reconstruite depuis l'offre courante.
+    currency: Mapped[str | None] = mapped_column(String(8), nullable=True)
     in_stock: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
     captured_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())

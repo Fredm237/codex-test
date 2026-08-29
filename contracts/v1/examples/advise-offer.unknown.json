@@ -1,0 +1,11 @@
+{
+  "merchant": "Marchand partenaire",
+  "price": 59.9,
+  "currency": "EUR",
+  "observed_at": null,
+  "delivery_days": null,
+  "delivery_cost": null,
+  "warranty_months": null,
+  "in_stock": null,
+  "affiliate_network": "Awin"
+}

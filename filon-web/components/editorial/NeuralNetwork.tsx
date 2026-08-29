@@ -12,8 +12,8 @@ import { useEffect, useRef } from "react";
 type Variant = "merchants" | "graph";
 
 const LABELS: Record<Variant, string[]> = {
-  merchants: ["Amazon", "Fnac", "Cdiscount", "Back Market", "Boulanger", "Darty", "Rakuten", "Decathlon", "Zalando", "Leroy Merlin", "Micromania", "Nike"],
-  graph: ["Prix historique", "Fiabilité marque", "Réparabilité", "Durée de vie", "Coût total", "Avis analysés", "Garantie", "Disponibilité"],
+  merchants: ["Marchand indexé 01", "Marchand indexé 02", "Marchand indexé 03", "Marchand indexé 04", "Marchand indexé 05", "Marchand indexé 06", "Marchand indexé 07", "Marchand indexé 08"],
+  graph: ["Prix observé", "Historique disponible", "Nombre de marchands", "Disponibilité", "Fraîcheur", "Périmètre", "Données manquantes", "Confiance"],
 };
 
 export function NeuralNetwork({ variant = "merchants", className }: { variant?: Variant; className?: string }) {

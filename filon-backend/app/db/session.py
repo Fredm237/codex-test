@@ -16,6 +16,10 @@ log = get_logger("db")
 _engine = None
 _sessionmaker = None
 
+# Doit avancer avec la tête Alembic. Un test empêche qu'une nouvelle révision
+# soit ajoutée sans mettre à jour le garde-fou runtime.
+CURRENT_SCHEMA_REVISION = "3a7f9c2e5b61"
+
 
 def _normalize_async_url(url: str) -> str:
     """Force le driver async asyncpg.
@@ -57,8 +61,8 @@ def is_enabled() -> bool:
     return _sessionmaker is not None
 
 
-async def _migrate() -> None:
-    """Migrations légères et idempotentes (le projet n'utilise pas Alembic).
+async def _legacy_migrate() -> None:
+    """Ancien rattrapage idempotent, réservé aux diagnostics locaux.
 
     `create_all` crée les tables manquantes mais ne modifie jamais une table
     existante : une colonne ajoutée à un modèle déjà déployé doit donc l'être
@@ -91,6 +95,7 @@ async def _migrate() -> None:
         "CREATE INDEX IF NOT EXISTS ix_offers_is_canonical ON offers (is_canonical)",
         "ALTER TABLE offers ADD COLUMN IF NOT EXISTS is_adult BOOLEAN DEFAULT FALSE",
         "CREATE INDEX IF NOT EXISTS ix_offers_is_adult ON offers (is_adult)",
+        "ALTER TABLE price_snapshots ADD COLUMN IF NOT EXISTS currency VARCHAR(8)",
         # Index trigramme : sans lui, une recherche par sous-chaîne impose un
         # parcours complet des 795 000 lignes. L'extension peut être refusée
         # selon les droits — la migration le tolère et trace un avertissement.
@@ -107,10 +112,14 @@ async def _migrate() -> None:
                 await conn.execute(text(sql))
         except Exception as exc:  # pragma: no cover - dépend de l'état réel
             # Une migration qui échoue ne doit jamais empêcher le démarrage.
-            log.warning("Migration ignorée (%s…) : %s", sql[:40], exc)
+            log.warning(
+                "Migration legacy ignorée (error_type=%s)",
+                type(exc).__name__,
+            )
 
 
 async def create_all() -> None:
+    """Crée/rattrape l'ancien schéma lorsque le mode ``legacy`` est explicite."""
     _init()
     if _engine is None:
         return
@@ -121,11 +130,50 @@ async def create_all() -> None:
     # sont parallèles : leur présence n'altère aucune table du Core.
     from app.db import models  # noqa: F401
     from app.intelligence import models as intelligence_models  # noqa: F401
+    from app.observations import models as observation_models  # noqa: F401
 
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    # Hors de la transaction précédente : voir _migrate.
-    await _migrate()
+    # Hors de la transaction précédente : voir _legacy_migrate.
+    await _legacy_migrate()
+
+
+async def assert_schema_current() -> None:
+    """Refuse une base non versionnée ou en retard en mode Alembic."""
+    _init()
+    if _engine is None:
+        return
+
+    from sqlalchemy import text
+
+    try:
+        async with _engine.connect() as conn:
+            result = await conn.execute(text("SELECT version_num FROM alembic_version"))
+            revisions = {row[0] for row in result}
+    except Exception as exc:
+        raise RuntimeError(
+            "Schéma non versionné : exécutez le runbook Alembic avant le service."
+        ) from exc
+
+    if revisions != {CURRENT_SCHEMA_REVISION}:
+        actual = ", ".join(sorted(revisions)) or "aucune"
+        raise RuntimeError(
+            "Révision Alembic inattendue "
+            f"({actual}) ; attendue : {CURRENT_SCHEMA_REVISION}."
+        )
+
+
+async def prepare_schema() -> None:
+    """Valide le schéma, sans DDL implicite sauf diagnostic ``legacy`` local."""
+    mode = get_settings().database_schema_mode
+    if mode == "legacy":
+        log.warning(
+            "DATABASE_SCHEMA_MODE=legacy : DDL historique local actif ; "
+            "ce mode est interdit en staging/production."
+        )
+        await create_all()
+        return
+    await assert_schema_current()
 
 
 async def get_session() -> AsyncIterator:

@@ -1,0 +1,223 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FILON Quality Lab Retrieval Record v0.5",
+  "type": "object",
+  "required": [
+    "record_version",
+    "dataset",
+    "case_id",
+    "group_id",
+    "split",
+    "split_policy_version",
+    "input",
+    "gold",
+    "annotations",
+    "source_pack_fingerprints",
+    "schema_fingerprint",
+    "case_fingerprint"
+  ],
+  "properties": {
+    "record_version": { "const": "0.5.0" },
+    "dataset": { "const": "retrieval" },
+    "case_id": { "$ref": "#/$defs/nonblank_id" },
+    "group_id": { "$ref": "#/$defs/nonblank_id" },
+    "split": { "enum": ["train", "dev", "test"] },
+    "split_policy_version": { "const": "sha256-prefix32-mod100-70-15-15-v1" },
+    "input": { "$ref": "#/$defs/input" },
+    "gold": { "$ref": "#/$defs/label" },
+    "annotations": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/annotation" }
+    },
+    "adjudication": { "$ref": "#/$defs/adjudication" },
+    "source_pack_fingerprints": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sha256" }
+    },
+    "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+    "case_fingerprint": { "$ref": "#/$defs/sha256" }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "input": {
+            "properties": {
+              "strata": {
+                "properties": {
+                  "scenario_type": { "const": "exact_product" }
+                },
+                "required": ["scenario_type"]
+              }
+            },
+            "required": ["strata"]
+          },
+          "gold": {
+            "properties": { "resolution": { "const": "matched" } },
+            "required": ["resolution"]
+          }
+        },
+        "required": ["input", "gold"]
+      },
+      "then": {
+        "properties": {
+          "gold": {
+            "properties": { "exact_product_ids": { "minItems": 1 } }
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "gold": {
+            "properties": { "exact_product_ids": { "maxItems": 0 } }
+          }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "nonblank_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\s)[\\s\\S]*\\S(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "input": {
+      "type": "object",
+      "required": ["strata", "locale", "query", "hard_constraints"],
+      "properties": {
+        "strata": { "$ref": "#/$defs/strata" },
+        "locale": { "enum": ["fr", "nl", "en"] },
+        "query": { "$ref": "#/$defs/nonblank_id" },
+        "hard_constraints": { "type": "object" }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "strata": {
+                "properties": { "language": { "const": "fr" } },
+                "required": ["language"]
+              }
+            },
+            "required": ["strata"]
+          },
+          "then": { "properties": { "locale": { "const": "fr" } } }
+        },
+        {
+          "if": {
+            "properties": {
+              "strata": {
+                "properties": { "language": { "const": "nl" } },
+                "required": ["language"]
+              }
+            },
+            "required": ["strata"]
+          },
+          "then": { "properties": { "locale": { "const": "nl" } } }
+        },
+        {
+          "if": {
+            "properties": {
+              "strata": {
+                "properties": { "language": { "const": "en" } },
+                "required": ["language"]
+              }
+            },
+            "required": ["strata"]
+          },
+          "then": { "properties": { "locale": { "const": "en" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "strata": {
+      "type": "object",
+      "required": ["scenario_type", "language", "vertical"],
+      "properties": {
+        "scenario_type": {
+          "enum": ["exact_product", "generic_product", "use_case", "constraint_heavy", "accessory", "replacement_part", "variant_sensitive", "multi_product", "ambiguous", "no_match"]
+        },
+        "language": { "enum": ["fr", "nl", "en"] },
+        "vertical": { "enum": ["smartphones", "laptops", "tv", "headphones_audio", "appliances"] }
+      },
+      "additionalProperties": false
+    },
+    "label": {
+      "type": "object",
+      "required": [
+        "resolution",
+        "relevant_product_ids",
+        "exact_product_ids",
+        "constraint_violating_product_ids"
+      ],
+      "properties": {
+        "resolution": {
+          "enum": ["matched", "no_match", "ambiguous"]
+        },
+        "relevant_product_ids": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank_id" }
+        },
+        "exact_product_ids": {
+          "type": "array",
+          "maxItems": 50,
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank_id" }
+        },
+        "constraint_violating_product_ids": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "$ref": "#/$defs/nonblank_id" }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": { "resolution": { "const": "matched" } },
+            "required": ["resolution"]
+          },
+          "then": {
+            "properties": { "relevant_product_ids": { "minItems": 1 } }
+          },
+          "else": {
+            "properties": { "relevant_product_ids": { "maxItems": 0 } }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "annotation": {
+      "type": "object",
+      "required": ["annotator_id", "label", "confidence"],
+      "properties": {
+        "annotator_id": { "$ref": "#/$defs/nonblank_id" },
+        "label": { "$ref": "#/$defs/label" },
+        "confidence": { "enum": ["certain", "probable", "unknown"] }
+      },
+      "additionalProperties": false
+    },
+    "adjudication": {
+      "type": "object",
+      "required": ["adjudicator_id", "label", "confidence", "rationale"],
+      "properties": {
+        "adjudicator_id": { "$ref": "#/$defs/nonblank_id" },
+        "label": { "$ref": "#/$defs/label" },
+        "confidence": { "enum": ["certain", "probable", "unknown"] },
+        "rationale": { "$ref": "#/$defs/nonblank_id" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

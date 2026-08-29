@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { API } from "@/lib/api";
+import { normalizeSupportedCurrency } from "@/lib/currency";
 import { useLocale, type Locale } from "@/lib/i18n";
 import "./outfit-studio.css";
 
@@ -12,9 +13,10 @@ type OutfitItem = {
   offer_id: number;
   name: string;
   brand: string | null;
-  price: number | null;
-  currency: string | null;
-  availability: "in_stock" | "out_of_stock" | "unknown";
+  price: number;
+  currency: string;
+  availability: "in_stock";
+  observed_at: string;
   image_url: string | null;
   deep_link: string | null;
   role: "base" | "footwear" | "accessory";
@@ -24,8 +26,8 @@ type OutfitItem = {
 type OutfitSolution = {
   decision: "recommend" | "abstain";
   style_score: number | null;
-  confidence_score: number;
-  confidence_band: "high" | "medium" | "low";
+  confidence_score: number | null;
+  confidence_band: "not_calibrated";
   total_known_price: { amount: number; currency: string; scope: "items_only" } | null;
   delivery: "unknown";
   items: OutfitItem[];
@@ -39,6 +41,124 @@ type OutfitResponse = {
   candidates_considered: number;
   solution: OutfitSolution;
 };
+
+const OFFER_TTL_MS = 72 * 60 * 60 * 1000;
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function isFreshObservation(value: unknown) {
+  if (typeof value !== "string") return false;
+  const timestamp = Date.parse(value);
+  if (!Number.isFinite(timestamp)) return false;
+  const age = Date.now() - timestamp;
+  return age >= 0 && age <= OFFER_TTL_MS;
+}
+
+function isOutfitItem(value: unknown): value is OutfitItem {
+  if (!isRecord(value) || !isRecord(value.merchant)) return false;
+  return Number.isInteger(value.offer_id)
+    && (value.offer_id as number) > 0
+    && typeof value.name === "string"
+    && value.name.trim().length > 0
+    && typeof value.price === "number"
+    && Number.isFinite(value.price)
+    && value.price > 0
+    && typeof value.currency === "string"
+    && normalizeSupportedCurrency(value.currency) === value.currency
+    && value.availability === "in_stock"
+    && isFreshObservation(value.observed_at)
+    && ["base", "footwear", "accessory"].includes(String(value.role))
+    && typeof value.merchant.name === "string"
+    && value.merchant.name.trim().length > 0;
+}
+
+function stringList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function failClosedResponse(
+  traceId: string,
+  candidates: number,
+  reason: string,
+  unknowns: string[] = [],
+): OutfitResponse {
+  return {
+    trace_id: traceId,
+    candidates_considered: candidates,
+    solution: {
+      decision: "abstain",
+      style_score: null,
+      confidence_score: null,
+      confidence_band: "not_calibrated",
+      total_known_price: null,
+      delivery: "unknown",
+      items: [],
+      rationale_keys: ["abstention", reason],
+      unknowns: Array.from(new Set(["confidence_not_calibrated", ...unknowns])),
+      rejection_reason: reason,
+    },
+  };
+}
+
+function sanitizeOutfitResponse(raw: unknown, request: string): OutfitResponse | null {
+  if (!isRecord(raw) || !isRecord(raw.solution)) return null;
+  const traceId = typeof raw.trace_id === "string" ? raw.trace_id : "";
+  const candidates = Number.isInteger(raw.candidates_considered) && (raw.candidates_considered as number) >= 0
+    ? raw.candidates_considered as number
+    : 0;
+  const solution = raw.solution;
+  if (solution.decision === "abstain") {
+    return failClosedResponse(
+      traceId,
+      candidates,
+      typeof solution.rejection_reason === "string" ? solution.rejection_reason : "invalid_evidence_contract",
+      stringList(solution.unknowns),
+    );
+  }
+  if (solution.decision !== "recommend" || !Array.isArray(solution.items) || !isRecord(solution.total_known_price)) {
+    return null;
+  }
+  const items = solution.items;
+  const total = solution.total_known_price;
+  const validatedItems = items.filter(isOutfitItem);
+  const validItems = items.length > 0 && validatedItems.length === items.length;
+  const currencies = new Set(validatedItems.map((item) => item.currency));
+  const sum = validItems
+    ? validatedItems.reduce((value, item) => value + item.price, 0)
+    : Number.NaN;
+  const validTotal = typeof total.amount === "number"
+    && Number.isFinite(total.amount)
+    && total.amount > 0
+    && typeof total.currency === "string"
+    && currencies.size === 1
+    && currencies.has(total.currency)
+    && total.scope === "items_only"
+    && Math.abs(sum - total.amount) <= 0.01;
+  const confidenceUnknown = solution.style_score === null
+    && solution.confidence_score === null
+    && solution.confidence_band === "not_calibrated";
+  if (!validItems || !validTotal || !confidenceUnknown) {
+    return failClosedResponse(traceId, candidates, "invalid_evidence_contract", stringList(solution.unknowns));
+  }
+  const response: OutfitResponse = {
+    trace_id: traceId,
+    candidates_considered: candidates,
+    solution: {
+      decision: "recommend",
+      style_score: null,
+      confidence_score: null,
+      confidence_band: "not_calibrated",
+      total_known_price: { amount: total.amount as number, currency: total.currency as string, scope: "items_only" },
+      delivery: "unknown",
+      items: validatedItems,
+      rationale_keys: stringList(solution.rationale_keys),
+      unknowns: stringList(solution.unknowns),
+      rejection_reason: null,
+    },
+  };
+  return abstainForIncompatibleSolution(response, request);
+}
 
 type Copy = {
   eyebrow: string;
@@ -60,6 +180,7 @@ type Copy = {
   delivery: string;
   confidence: string;
   style: string;
+  notMeasured: string;
   why: string;
   unknowns: string;
   noSolution: string;
@@ -96,6 +217,7 @@ const COPY: Record<Locale, Copy> = {
     delivery: "Livraison à vérifier",
     confidence: "Confiance des preuves",
     style: "Couverture documentée",
+    notMeasured: "Non mesuré",
     why: "Pourquoi cette proposition",
     unknowns: "À vérifier",
     noSolution: "FILON s’abstient plutôt que de proposer une sélection insuffisamment documentée.",
@@ -137,6 +259,7 @@ const COPY: Record<Locale, Copy> = {
     delivery: "Levering controleren",
     confidence: "Bewijsvertrouwen",
     style: "Gedocumenteerde dekking",
+    notMeasured: "Niet gemeten",
     why: "Waarom dit voorstel",
     unknowns: "Te controleren",
     noSolution: "FILON onthoudt zich liever dan een onvoldoende onderbouwde selectie voor te stellen.",
@@ -178,6 +301,7 @@ const COPY: Record<Locale, Copy> = {
     delivery: "Delivery to check",
     confidence: "Evidence confidence",
     style: "Documented coverage",
+    notMeasured: "Not measured",
     why: "Why this proposal",
     unknowns: "To check",
     noSolution: "FILON abstains rather than suggesting an insufficiently documented selection.",
@@ -270,10 +394,20 @@ function humanize(key: string, locale: Locale): string {
     occasion_not_specified: { fr: "L’occasion n’a pas été précisée", nl: "De gelegenheid is niet opgegeven", en: "The occasion was not specified" },
     occasion_not_verified: { fr: "La compatibilité avec l’occasion n’est pas vérifiée", nl: "De compatibiliteit met de gelegenheid is niet geverifieerd", en: "Compatibility with the occasion is not verified" },
     style_compatibility_not_verified: { fr: "La compatibilité de style et de coupe n’est pas vérifiée", nl: "De stijl- en pasvormcompatibiliteit is niet geverifieerd", en: "Style and fit compatibility are not verified" },
+    confidence_not_calibrated: { fr: "La confiance n’est pas encore mesurée sur un jeu indépendant", nl: "Het vertrouwen is nog niet gemeten op een onafhankelijke dataset", en: "Confidence has not yet been measured on an independent dataset" },
     budget_unreachable: { fr: "Le budget connu ne permet pas une proposition vérifiable", nl: "Het bekende budget laat geen verifieerbaar voorstel toe", en: "The known budget does not allow a verifiable proposal" },
     no_verified_base: { fr: "Aucune pièce principale vérifiable n’est disponible", nl: "Er is geen verifieerbaar hoofditem beschikbaar", en: "No verifiable main piece is available" },
     no_verified_requested_item: { fr: "Aucune offre ne prouve la pièce explicitement demandée", nl: "Geen aanbieding bewijst het expliciet gevraagde item", en: "No offer proves that the explicitly requested item is available" },
     no_verified_outfit_item: { fr: "Une pièce de la tenue n’est pas un article vestimentaire vérifiable", nl: "Een onderdeel van de outfit is geen verifieerbaar kledingartikel", en: "An item in the outfit is not a verifiable fashion item" },
+    invalid_evidence_contract: { fr: "Les preuves reçues sont incomplètes ou incohérentes", nl: "Het ontvangen bewijs is onvolledig of tegenstrijdig", en: "The received evidence is incomplete or inconsistent" },
+    taxonomy_resolved: { fr: "La catégorie de chaque article a été identifiée", nl: "De categorie van elk artikel is vastgesteld", en: "Each item category was identified" },
+    constraints_checked: { fr: "Les contraintes explicites ont été contrôlées", nl: "De expliciete beperkingen zijn gecontroleerd", en: "The explicit constraints were checked" },
+    cross_item_compatibility_not_verified: { fr: "La compatibilité entre les articles n’est pas vérifiée", nl: "De onderlinge compatibiliteit van de artikelen is niet geverifieerd", en: "Compatibility between items is not verified" },
+    intent_not_resolved: { fr: "Le besoin demandé n’a pas pu être identifié avec certitude", nl: "De gevraagde behoefte kon niet met zekerheid worden vastgesteld", en: "The requested need could not be resolved with certainty" },
+    no_verified_scope: { fr: "Aucun périmètre d’offres vérifiables n’a été trouvé", nl: "Er is geen bereik met verifieerbare aanbiedingen gevonden", en: "No scope of verifiable offers was found" },
+    no_eligible_offer: { fr: "Aucune offre ne satisfait les preuves requises", nl: "Geen aanbod voldoet aan de vereiste bewijzen", en: "No offer meets the required evidence" },
+    currency_not_comparable: { fr: "Les prix ne partagent pas une devise comparable", nl: "De prijzen delen geen vergelijkbare valuta", en: "The prices do not share a comparable currency" },
+    non_finite_total: { fr: "Le total des prix n’est pas calculable de façon fiable", nl: "Het prijstotaal kan niet betrouwbaar worden berekend", en: "The price total cannot be calculated reliably" },
   };
   return labels[key]?.[locale] ?? key;
 }
@@ -308,11 +442,6 @@ export function OutfitStudio() {
     return () => controller.abort();
   }, []);
 
-  const scoreLabel = useMemo(() => {
-    if (!result?.solution) return null;
-    return `${result.solution.confidence_score}/100`;
-  }, [result]);
-
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const trimmed = request.trim();
@@ -335,8 +464,9 @@ export function OutfitStudio() {
         if (body?.detail?.code === "feature_disabled") setFeature("disabled");
         throw new Error("analyse_failed");
       }
-      const response = (await res.json()) as OutfitResponse;
-      setResult(abstainForIncompatibleSolution(response, trimmed));
+      const response = sanitizeOutfitResponse(await res.json(), trimmed);
+      if (!response) throw new Error("invalid_evidence_contract");
+      setResult(response);
     } catch {
       setError(copy.unavailable);
     } finally {
@@ -435,8 +565,8 @@ function OutfitResult({ result, copy, locale, feedback, onFeedback }: { result: 
       <header className="os-result-head">
         <div><p className="os-kicker">{copy.resultEyebrow}</p><h2>{solution.items.length} {solution.items.length > 1 ? copy.itemPlural : copy.itemSingular}</h2></div>
         <div className="os-scores">
-          <span><b>{solution.style_score}/100</b>{copy.style}</span>
-          <span><b>{solution.confidence_score}/100</b>{copy.confidence}</span>
+          <span><b>{copy.notMeasured}</b>{copy.style}</span>
+          <span><b>{copy.notMeasured}</b>{copy.confidence}</span>
         </div>
       </header>
 
@@ -448,8 +578,8 @@ function OutfitResult({ result, copy, locale, feedback, onFeedback }: { result: 
               <span className="os-role">{copy.roles[item.role]}</span>
               <h3>{item.name}</h3>
               {item.brand && <p>{item.brand}</p>}
-              <div className="os-item-meta"><strong>{item.price?.toFixed(2)} {item.currency}</strong><span>{item.merchant.name}</span></div>
-              <small>{item.availability === "in_stock" ? copy.inStock : copy.availabilityUnknown}</small>
+              <div className="os-item-meta"><strong>{item.price.toFixed(2)} {item.currency}</strong><span>{item.merchant.name}</span></div>
+              <small>{copy.inStock}</small>
               {item.deep_link && <a href={item.deep_link} target="_blank" rel="noreferrer">{copy.viewOffer} <span aria-hidden="true">↗</span></a>}
             </div>
           </article>

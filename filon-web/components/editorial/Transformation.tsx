@@ -3,34 +3,35 @@
 import { useEffect, useRef } from "react";
 import { useLocale } from "@/lib/i18n";
 
-const FROM = 499;
-const TO = 365;
-
 // Discount sources orbit the LOWER half of the orb (never near the title) and
-// get absorbed as you scroll, morphing the price to the real one.
+// get absorbed as you scroll. No amount is simulated: each condition remains
+// qualitative until a real offer documents it.
 const CHIPS = [
-  { id: "cashback", v: "−6,5 %", ang: 22, r: 1.0, tIn: 0.18, tSpan: 0.16 },
-  { id: "promo", v: "−15 €", ang: 90, r: 1.12, tIn: 0.4, tSpan: 0.16 },
-  { id: "refurb", v: "−94 €", ang: 158, r: 1.0, tIn: 0.62, tSpan: 0.16 },
+  { id: "cashback", v: "si documenté", ang: 22, r: 1.0, tIn: 0.18, tSpan: 0.16 },
+  { id: "promo", v: "si applicable", ang: 90, r: 1.12, tIn: 0.4, tSpan: 0.16 },
+  { id: "refurb", v: "offre distincte", ang: 158, r: 1.0, tIn: 0.62, tSpan: 0.16 },
 ];
 
 const L = {
   fr: {
-    eye: "Le même achat. Deux prix.",
-    h1: "Le prix affiché n'est pas le ", h2: "vrai", h3: " prix.",
-    cap: "votre prix réel · −134 € · le filon",
+    eye: "Une offre. Plusieurs conditions.",
+    h1: "Le prix affiché n'est pas toujours le ", h2: "total", h3: " connu.",
+    start: "Prix observé", end: "Total à confirmer",
+    cap: "livraison · promotion · éligibilité",
     labels: { cashback: "Cashback", promo: "Code promo", refurb: "Reconditionné" } as Record<string, string>,
   },
   nl: {
-    eye: "Dezelfde aankoop. Twee prijzen.",
-    h1: "De getoonde prijs is niet de ", h2: "echte", h3: " prijs.",
-    cap: "je echte prijs · −134 € · gevonden",
+    eye: "Eén aanbieding. Meerdere voorwaarden.",
+    h1: "De getoonde prijs is niet altijd het bekende ", h2: "totaal", h3: ".",
+    start: "Bekeken prijs", end: "Totaal te bevestigen",
+    cap: "levering · promotie · geschiktheid",
     labels: { cashback: "Cashback", promo: "Kortingscode", refurb: "Refurbished" } as Record<string, string>,
   },
   en: {
-    eye: "Same purchase. Two prices.",
-    h1: "The listed price isn't the ", h2: "real", h3: " price.",
-    cap: "your real price · −€134 · the find",
+    eye: "One offer. Several conditions.",
+    h1: "The listed price is not always the known ", h2: "total", h3: ".",
+    start: "Observed price", end: "Total to confirm",
+    cap: "shipping · promotion · eligibility",
     labels: { cashback: "Cashback", promo: "Promo code", refurb: "Refurbished" } as Record<string, string>,
   },
 };
@@ -57,8 +58,9 @@ export function Transformation() {
 
     const apply = (prog: number) => {
       const p = clamp01(prog);
-      const val = Math.round(FROM - (FROM - TO) * easeInOut(p));
-      if (priceRef.current) priceRef.current.textContent = `${val} €`;
+      if (priceRef.current) {
+        priceRef.current.textContent = p < 0.86 ? x.start : x.end;
+      }
       if (coreRef.current) {
         coreRef.current.style.setProperty("--glow", `${0.4 + p * 0.6}`);
         coreRef.current.style.setProperty("--coreScale", `${1 + p * 0.14}`);
@@ -100,7 +102,7 @@ export function Transformation() {
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(raf);
     };
-  }, []);
+  }, [x.end, x.start]);
 
   return (
     <section className="ed-gravity" id="transform" ref={secRef}>
@@ -114,7 +116,7 @@ export function Transformation() {
 
         <div className="ed-grav-stage" aria-hidden="true">
           <div className="core" ref={coreRef}>
-            <span className="price mono" ref={priceRef}>499 €</span>
+            <span className="price mono" ref={priceRef}>{x.start}</span>
             <span className="cap" ref={capRef}>{x.cap}</span>
           </div>
           {CHIPS.map((c, i) => (

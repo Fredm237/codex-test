@@ -11,6 +11,7 @@ import json
 import re
 from dataclasses import dataclass
 
+from app.core.observability import decision_trace_event
 from app.llm.base import Message
 from app.llm.router import get_router
 from app.services import taxonomy
@@ -181,6 +182,16 @@ def _semantic_scopes(raw: str, payload: object) -> tuple[IntentScope, ...]:
     return tuple(scopes)
 
 
+def _trace_intent(intent: GeneralIntent, *, semantic_used: bool) -> GeneralIntent:
+    decision_trace_event(
+        "intent",
+        outcome="resolved" if intent.resolved else "unresolved",
+        counts={"scopes_count": len(intent.scopes)},
+        flags={"semantic_used": semantic_used},
+    )
+    return intent
+
+
 async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> GeneralIntent:
     """Résout d’abord sans modèle, puis utilise un choix taxonomique contraint.
 
@@ -204,7 +215,7 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
         or any(len(scope.query_terms) <= 2 for scope in deterministic.scopes)
     )
     if not needs_semantic_check:
-        return deterministic
+        return _trace_intent(deterministic, semantic_used=False)
     allowed = _allowed_scopes()
     choices = [
         {"category": category, "subcategories": sorted(value for value in subcategories if value is not None)}
@@ -225,7 +236,7 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
     try:
         provider = get_router().for_task("default")
         if provider.name == "mock":
-            return deterministic
+            return _trace_intent(deterministic, semantic_used=False)
         raw = await asyncio.wait_for(provider.complete_json(messages, temperature=0.0), timeout=8.0)
         scopes = _semantic_scopes(raw_request, _parse_semantic_payload(raw))
     except (asyncio.TimeoutError, ValueError, TypeError, json.JSONDecodeError):
@@ -233,7 +244,7 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
     except Exception:
         scopes = ()
     if not scopes:
-        return deterministic
+        return _trace_intent(deterministic, semantic_used=False)
     if deterministic.resolved:
         # Un seul remplacement d’un scope lexical large est admissible : il peut
         # lever une ambiguïté réelle (p. ex. « machine à café » mal rangée dans
@@ -276,13 +287,17 @@ async def resolve_intent_with_fallback(raw_request: str, locale: str = "fr") -> 
                 )
                 refined.append(semantic or original)
             scopes = tuple(refined)
-    return GeneralIntent(
+    resolved = GeneralIntent(
         raw_request=deterministic.raw_request,
         locale=deterministic.locale,
         scopes=scopes,
         terms=deterministic.terms,
         required_title_phrases=deterministic.required_title_phrases,
         budget_eur=deterministic.budget_eur,
+    )
+    return _trace_intent(
+        resolved,
+        semantic_used=resolved.scopes != deterministic.scopes,
     )
 
 

@@ -24,7 +24,10 @@ class VectorStore:
 
                 self._client = QdrantClient(url=url)
             except Exception as exc:  # pragma: no cover
-                log.warning("Qdrant indisponible (%s) → mémoire IA désactivée", exc)
+                log.warning(
+                    "Qdrant indisponible (error_type=%s) → mémoire IA désactivée",
+                    type(exc).__name__,
+                )
 
     @property
     def enabled(self) -> bool:

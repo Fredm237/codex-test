@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 
 const expoToken = process.env.EXPO_TOKEN;
 
-describe("Expo authentication", () => {
+// Smoke test externe : la suite hermétique ne doit ni exiger un secret ni
+// contacter Expo. La CI de déploiement l'active explicitement avec EXPO_TOKEN.
+describe.skipIf(!expoToken)("Expo authentication", () => {
   it("authenticates the configured token against the Expo GraphQL identity endpoint", async () => {
     expect(expoToken).toMatch(/^\S{20,}$/);
     const response = await fetch("https://api.expo.dev/graphql", {

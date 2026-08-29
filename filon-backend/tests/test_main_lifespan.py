@@ -15,15 +15,33 @@ async def test_lifespan_does_not_wait_for_schema_initialization(monkeypatch):
         started.set()
         await release.wait()
 
-    monkeypatch.setattr(main.db if hasattr(main, "db") else __import__("app.db.session", fromlist=["session"]), "is_enabled", lambda: True)
+    session_module = __import__("app.db.session", fromlist=["session"])
+    monkeypatch.setattr(session_module, "is_enabled", lambda: True)
     monkeypatch.setattr(main, "_prepare_schema", slow_schema)
-
-    from app.ingest import scheduler
-
-    monkeypatch.setattr(scheduler, "maybe_start", lambda: None)
 
     async with main.lifespan(FastAPI()):
         await asyncio.wait_for(started.wait(), timeout=0.2)
         assert not release.is_set()
 
     release.set()
+
+
+@pytest.mark.asyncio
+async def test_lifespan_never_executes_the_catalog_scheduler(monkeypatch):
+    from app.ingest import scheduler
+
+    called = False
+
+    async def forbidden_scheduler() -> str:
+        nonlocal called
+        called = True
+        raise AssertionError("the web process must not run the scheduler")
+
+    session_module = __import__("app.db.session", fromlist=["session"])
+    monkeypatch.setattr(session_module, "is_enabled", lambda: False)
+    monkeypatch.setattr(scheduler, "run_once", forbidden_scheduler)
+
+    async with main.lifespan(FastAPI()):
+        await asyncio.sleep(0)
+
+    assert called is False

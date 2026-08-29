@@ -10,9 +10,9 @@ type Props = {
 };
 
 const copy = {
-  fr: { skip: "Passer l’introduction", scroll: "Faites avancer la scène", observed: "6,98 € · Babubas", alternative: "6,99 € · Bazta", availability: "Disponibles dans le dernier flux", score: "Score FILON : prix, marchand, disponibilité" },
-  nl: { skip: "Intro overslaan", scroll: "Beweeg door de scène", observed: "€ 6,98 · Babubas", alternative: "€ 6,99 · Bazta", availability: "Beschikbaar in de laatste feed", score: "FILON-score: prijs, verkoper, beschikbaarheid" },
-  en: { skip: "Skip introduction", scroll: "Move through the scene", observed: "€6.98 · Babubas", alternative: "€6.99 · Bazta", availability: "Available in the latest feed", score: "FILON Score: price, merchant, availability" },
+  fr: { skip: "Passer l’introduction", scroll: "Faites avancer la scène", observed: "Même produit requis", alternative: "Devise commune requise", availability: "Disponibilité à confirmer", score: "Décision fondée sur les preuves disponibles" },
+  nl: { skip: "Intro overslaan", scroll: "Beweeg door de scène", observed: "Hetzelfde product vereist", alternative: "Gemeenschappelijke valuta vereist", availability: "Beschikbaarheid te bevestigen", score: "Beslissing op basis van beschikbare bewijzen" },
+  en: { skip: "Skip introduction", scroll: "Move through the scene", observed: "Same product required", alternative: "Common currency required", availability: "Availability to confirm", score: "Decision based on available evidence" },
 } satisfies Record<Locale, Record<string, string>>;
 
 export function CinematicOverlay({ locale, timeline, onSkip }: Props) {

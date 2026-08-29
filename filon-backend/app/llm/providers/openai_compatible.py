@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import httpx
 
+from app.core.observability import outbound_trace_headers, traced_dependency
 from app.llm.base import LLMProvider, Message
 
 
@@ -37,12 +38,16 @@ class OpenAICompatibleProvider(LLMProvider):
             "messages": [{"role": m.role, "content": m.content} for m in messages],
         }
         headers = {"Authorization": f"Bearer {self._api_key}"}
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
-            resp = await client.post(
-                f"{self._base_url}/chat/completions", json=payload, headers=headers
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        async with traced_dependency("llm", "complete"):
+            # Les en-têtes sont recalculés dans le span afin que ``traceparent``
+            # porte exactement le span_id journalisé pour cette dépendance.
+            headers.update(outbound_trace_headers())
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                resp = await client.post(
+                    f"{self._base_url}/chat/completions", json=payload, headers=headers
+                )
+                resp.raise_for_status()
+                data = resp.json()
         return data["choices"][0]["message"]["content"]
 
     async def complete_json(
@@ -56,10 +61,12 @@ class OpenAICompatibleProvider(LLMProvider):
             "messages": [{"role": m.role, "content": m.content} for m in messages],
         }
         headers = {"Authorization": f"Bearer {self._api_key}"}
-        async with httpx.AsyncClient(timeout=self._timeout) as client:
-            resp = await client.post(
-                f"{self._base_url}/chat/completions", json=payload, headers=headers
-            )
-            resp.raise_for_status()
-            data = resp.json()
+        async with traced_dependency("llm", "complete_json"):
+            headers.update(outbound_trace_headers())
+            async with httpx.AsyncClient(timeout=self._timeout) as client:
+                resp = await client.post(
+                    f"{self._base_url}/chat/completions", json=payload, headers=headers
+                )
+                resp.raise_for_status()
+                data = resp.json()
         return data["choices"][0]["message"]["content"]

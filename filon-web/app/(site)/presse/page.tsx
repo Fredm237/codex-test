@@ -23,8 +23,8 @@ function PresseFR() {
 
       <ProseBlock heading={<>En une <span className="it">phrase</span>.</>}>
         <p>
-          <b>FILON est un assistant d&apos;achat.</b> Vous lui dites ce que vous cherchez, il vous dit quoi acheter, où,
-          et si c&apos;est le bon moment. Avant chaque achat, en quelques secondes.
+          <b>FILON est un assistant de comparaison.</b> Vous décrivez un besoin ; il classe les offres indexées,
+          expose les preuves disponibles et s&apos;abstient lorsque les données ne suffisent pas.
         </p>
       </ProseBlock>
 
@@ -35,12 +35,12 @@ function PresseFR() {
           </div>
           <InfoGrid
             items={[
-              { n: "◆", h: "Ce que c'est", p: "Un assistant d'achat qui recommande la meilleure décision, pas une simple liste de prix." },
+              { n: "◆", h: "Ce que c'est", p: "Un assistant qui compare le périmètre indexé et nomme les informations manquantes." },
               { n: "◆", h: "Pour qui", p: "Toute personne qui veut acheter mieux, sans y passer des heures." },
-              { n: "◆", h: "Prix", p: "100 % gratuit. Sans abonnement, sans carte bancaire." },
+              { n: "◆", h: "Prix", p: "Accès public actuel à 0 €, sans carte bancaire ; la page Tarifs fait foi." },
               { n: "◆", h: "Marché", p: "Belgique francophone d'abord, puis France et francophonie européenne." },
               { n: "◆", h: "Basé à", p: `${site.city}.` },
-              { n: "◆", h: "Statut", p: "En phase de lancement, extension puis application et assistant." },
+              { n: "◆", h: "Statut", p: "Catalogue et assistant web accessibles ; extension Chrome en attente de publication." },
             ]}
           />
         </div>
@@ -70,8 +70,8 @@ function PresseNL() {
 
       <ProseBlock heading={<>In één <span className="it">zin</span>.</>}>
         <p>
-          <b>FILON is een koopassistent.</b> Je zegt hem wat je zoekt, hij zegt je wat te kopen, waar, en of het het
-          juiste moment is. Vóór elke aankoop, in enkele seconden.
+          <b>FILON is een vergelijkingsassistent.</b> Je beschrijft een behoefte; FILON rangschikt geïndexeerde
+          aanbiedingen, toont beschikbaar bewijs en onthoudt zich bij onvoldoende gegevens.
         </p>
       </ProseBlock>
 
@@ -82,12 +82,12 @@ function PresseNL() {
           </div>
           <InfoGrid
             items={[
-              { n: "◆", h: "Wat het is", p: "Een koopassistent die de beste beslissing aanbeveelt, geen simpele prijslijst." },
+              { n: "◆", h: "Wat het is", p: "Een assistent die het geïndexeerde bereik vergelijkt en ontbrekende informatie benoemt." },
               { n: "◆", h: "Voor wie", p: "Iedereen die beter wil kopen, zonder er uren aan te besteden." },
-              { n: "◆", h: "Prijs", p: "100 % gratis. Zonder abonnement, zonder bankkaart." },
+              { n: "◆", h: "Prijs", p: "Huidige publieke toegang voor 0 € zonder bankkaart; Tarieven is de referentie." },
               { n: "◆", h: "Markt", p: "Franstalig België eerst, daarna Frankrijk en de Europese francofonie." },
               { n: "◆", h: "Gevestigd te", p: `${site.city}.` },
-              { n: "◆", h: "Status", p: "In lanceringsfase, extensie daarna applicatie en assistent." },
+              { n: "◆", h: "Status", p: "Webcatalogus en assistent toegankelijk; Chrome-extensie wacht op publicatie." },
             ]}
           />
         </div>
@@ -117,8 +117,8 @@ function PresseEN() {
 
       <ProseBlock heading={<>In one <span className="it">sentence</span>.</>}>
         <p>
-          <b>FILON is a shopping assistant.</b> You tell it what you&apos;re looking for, it tells you what to buy,
-          where, and whether it&apos;s the right time. Before every purchase, in a few seconds.
+          <b>FILON is a comparison assistant.</b> You describe a need; it ranks indexed offers, exposes available
+          evidence and abstains when the data is insufficient.
         </p>
       </ProseBlock>
 
@@ -129,12 +129,12 @@ function PresseEN() {
           </div>
           <InfoGrid
             items={[
-              { n: "◆", h: "What it is", p: "A shopping assistant that recommends the best decision, not just a list of prices." },
+              { n: "◆", h: "What it is", p: "An assistant that compares the indexed scope and names missing information." },
               { n: "◆", h: "For whom", p: "Anyone who wants to buy better, without spending hours on it." },
-              { n: "◆", h: "Price", p: "100% free. No subscription, no credit card." },
+              { n: "◆", h: "Price", p: "Current public access at €0 with no payment card; Pricing is the reference." },
               { n: "◆", h: "Market", p: "French-speaking Belgium first, then France and the European francophonie." },
               { n: "◆", h: "Based in", p: `${site.city}.` },
-              { n: "◆", h: "Status", p: "In launch phase, extension then app and assistant." },
+              { n: "◆", h: "Status", p: "Web catalogue and assistant accessible; Chrome extension awaiting publication." },
             ]}
           />
         </div>

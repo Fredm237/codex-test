@@ -8,7 +8,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/carrieres",
   title: "Carrières",
   description:
-    "FILON construit le copilote d'achat IA de référence en francophonie. Nous cherchons des personnes exigeantes et curieuses pour bâtir le produit, la donnée et la marque. Candidatures spontanées bienvenues.",
+    "FILON construit un copilote d'achat fondé sur les offres indexées et les preuves disponibles. Nous cherchons des personnes exigeantes et curieuses pour bâtir le produit, la donnée et la marque.",
 });
 
 function CarrieresFR() {
@@ -16,16 +16,15 @@ function CarrieresFR() {
     <>
       <ContentHero
         eyebrow="Carrières"
-        title={<>Construisez le <span className="it">réflexe</span> de millions d&apos;acheteurs.</>}
-        intro="FILON en est à ses débuts, le meilleur moment pour rejoindre. Nous bâtissons un copilote d'achat qui fait gagner du temps et de l'argent à tout le monde, avec la transparence pour boussole."
+        title={<>Construisez un <span className="it">réflexe</span> d&apos;achat plus informé.</>}
+        intro="FILON en est à ses débuts. Nous bâtissons un copilote d'achat qui rend visibles les offres indexées, leurs preuves et leurs limites."
         breadcrumb={[{ name: "Carrières", path: "/carrieres" }]}
       />
 
       <ProseBlock heading={<>Ce que nous <span className="it">construisons</span>.</>}>
         <p>
-          Pas un énième comparateur, mais une <b>intelligence d&apos;achat</b> : une IA qui recommande la bonne décision,
-          présente au bon moment. C&apos;est un projet technique et éditorial ambitieux, avec un impact concret sur le
-          portefeuille des gens.
+          Pas un énième comparateur, mais une <b>intelligence d&apos;achat</b> : un système qui organise les offres
+          indexées, documente ses signaux et sait s&apos;abstenir lorsque les preuves manquent.
         </p>
         <p>
           Nous croyons à une petite équipe exigeante, à l&apos;autonomie et à un produit soigné jusqu&apos;au dernier détail.
@@ -40,12 +39,12 @@ function CarrieresFR() {
           </div>
           <InfoGrid
             items={[
-              { n: "01", h: "Produit & IA", p: "Ingénierie, data et modèles : bâtir l'intelligence qui recommande le bon achat." },
-              { n: "02", h: "Extension & front", p: "Une extension navigateur ultra-fluide, présente sans jamais gêner." },
+              { n: "01", h: "Produit & IA", p: "Ingénierie, data et modèles : bâtir une aide à la décision fondée sur les preuves." },
+              { n: "02", h: "Extension & front", p: "Une extension navigateur fluide et conçue pour rester discrète." },
               { n: "03", h: "Contenu & marque média", p: "Vidéo, newsletter « Le Filon », réseaux : faire de FILON une marque qu'on suit." },
               { n: "04", h: "Growth & partenariats", p: "Nouer les intégrations marchands et plateformes, faire grandir l'audience." },
               { n: "05", h: "Design", p: "Une exécution de niveau, du micro-détail à l'expérience globale." },
-              { n: "06", h: "Ops & confiance", p: "Conformité RGPD, qualité de la donnée, relation utilisateur irréprochable." },
+              { n: "06", h: "Ops & confiance", p: "Vie privée, qualité de la donnée et relation utilisateur." },
             ]}
           />
         </div>
@@ -72,16 +71,15 @@ function CarrieresNL() {
     <>
       <ContentHero
         eyebrow="Vacatures"
-        title={<>Bouw de <span className="it">reflex</span> van miljoenen kopers.</>}
-        intro="FILON staat aan het begin, het beste moment om aan te sluiten. We bouwen een koopcopiloot die iedereen tijd en geld doet besparen, met transparantie als kompas."
+        title={<>Bouw een beter geïnformeerde <span className="it">koopreflex</span>.</>}
+        intro="FILON staat aan het begin. We bouwen een koopcopiloot die geïndexeerde aanbiedingen, hun bewijs en hun beperkingen zichtbaar maakt."
         breadcrumb={[{ name: "Vacatures", path: "/carrieres" }]}
       />
 
       <ProseBlock heading={<>Wat we <span className="it">bouwen</span>.</>}>
         <p>
-          Niet de zoveelste vergelijker, maar een <b>koopintelligentie</b> : een AI die de juiste beslissing aanbeveelt,
-          aanwezig op het juiste moment. Het is een ambitieus technisch en redactioneel project, met een concrete impact
-          op de portemonnee van mensen.
+          Niet de zoveelste vergelijker, maar een <b>koopintelligentie</b>: een systeem dat geïndexeerde aanbiedingen
+          ordent, zijn signalen documenteert en zich onthoudt wanneer bewijs ontbreekt.
         </p>
         <p>
           We geloven in een klein en veeleisend team, in autonomie en in een product verzorgd tot in het laatste detail.
@@ -96,12 +94,12 @@ function CarrieresNL() {
           </div>
           <InfoGrid
             items={[
-              { n: "01", h: "Product & AI", p: "Engineering, data en modellen : de intelligentie bouwen die de juiste aankoop aanbeveelt." },
-              { n: "02", h: "Extensie & front", p: "Een ultravloeiende browserextensie, aanwezig zonder ooit te storen." },
+              { n: "01", h: "Product & AI", p: "Engineering, data en modellen: beslissingsondersteuning bouwen op basis van bewijs." },
+              { n: "02", h: "Extensie & front", p: "Een vloeiende browserextensie die ontworpen is om discreet te blijven." },
               { n: "03", h: "Content & mediamerk", p: "Video, nieuwsbrief « Le Filon », sociale media : van FILON een merk maken dat men volgt." },
               { n: "04", h: "Growth & partnerschappen", p: "De integraties met winkels en platforms smeden, het publiek doen groeien." },
               { n: "05", h: "Design", p: "Een uitvoering van niveau, van het microdetail tot de globale ervaring." },
-              { n: "06", h: "Ops & vertrouwen", p: "GDPR-conformiteit, datakwaliteit, onberispelijke gebruikersrelatie." },
+              { n: "06", h: "Ops & vertrouwen", p: "Privacy, datakwaliteit en gebruikersrelatie." },
             ]}
           />
         </div>
@@ -128,16 +126,15 @@ function CarrieresEN() {
     <>
       <ContentHero
         eyebrow="Careers"
-        title={<>Build the <span className="it">reflex</span> of millions of shoppers.</>}
-        intro="FILON is at its beginnings, the best moment to join. We're building a shopping copilot that saves everyone time and money, with transparency as our compass."
+        title={<>Build a better-informed shopping <span className="it">reflex</span>.</>}
+        intro="FILON is at its beginnings. We are building a shopping copilot that makes indexed offers, their evidence and their limits visible."
         breadcrumb={[{ name: "Careers", path: "/carrieres" }]}
       />
 
       <ProseBlock heading={<>What we&apos;re <span className="it">building</span>.</>}>
         <p>
-          Not yet another comparison site, but a <b>shopping intelligence</b>: an AI that recommends the right
-          decision, present at the right moment. It&apos;s an ambitious technical and editorial project, with a
-          concrete impact on people&apos;s wallets.
+          Not yet another comparison site, but a <b>shopping intelligence</b>: a system that organises indexed
+          offers, documents its signals and abstains when evidence is missing.
         </p>
         <p>
           We believe in a small, exacting team, in autonomy and in a product polished down to the last detail. The
@@ -152,12 +149,12 @@ function CarrieresEN() {
           </div>
           <InfoGrid
             items={[
-              { n: "01", h: "Product & AI", p: "Engineering, data and models: building the intelligence that recommends the right purchase." },
-              { n: "02", h: "Extension & front", p: "An ultra-smooth browser extension, present without ever getting in the way." },
+              { n: "01", h: "Product & AI", p: "Engineering, data and models: building evidence-based decision support." },
+              { n: "02", h: "Extension & front", p: "A smooth browser extension designed to remain discreet." },
               { n: "03", h: "Content & media brand", p: "Video, the « Le Filon » newsletter, social: making FILON a brand people follow." },
               { n: "04", h: "Growth & partnerships", p: "Forging merchant and platform integrations, growing the audience." },
               { n: "05", h: "Design", p: "Top-tier execution, from the micro-detail to the overall experience." },
-              { n: "06", h: "Ops & trust", p: "GDPR compliance, data quality, an impeccable user relationship." },
+              { n: "06", h: "Ops & trust", p: "Privacy, data quality and the user relationship." },
             ]}
           />
         </div>

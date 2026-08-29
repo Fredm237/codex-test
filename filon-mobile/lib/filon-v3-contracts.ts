@@ -1,4 +1,4 @@
-import type { FilonOffer } from "./filon-api";
+import { currentFilonStock, isFilonObservationFresh, normalizeFilonObservedAt, type FilonOffer } from "./filon-api";
 
 export type V3EvidenceStatus = "verified" | "inferred" | "unknown";
 export type V3Confidence = "high" | "medium" | "low";
@@ -17,11 +17,18 @@ export type V3BenchmarkCase = { id: string; version: string; expectedStatus: "so
 export type V3PipelineStage = "INTENT" | "CONSTRAINTS" | "RETRIEVAL" | "FILTERING" | "UNDERSTANDING" | "COMPOSITION" | "CRITIC" | "RANKING" | "OPTIMIZATION" | "CONFIDENCE" | "RESPONSE";
 export type V3PipelineTrace = { traceId: string; stages: Array<{ stage: V3PipelineStage; status: "completed" | "skipped" | "abstained"; reason: string }> };
 
-export function snapshotCoreOffer(offer: FilonOffer, observedAt: string | null = null): V3CoreOffer {
-  const availability: V3Evidence<boolean> = offer.inStock === null
-    ? { value: null, status: "unknown", confidence: "low", source: "unavailable", rationale: "Disponibilité absente dans le catalogue Core.", observedAt }
-    : { value: offer.inStock, status: "verified", confidence: "high", source: "catalogue_partner", rationale: "Disponibilité fournie par le catalogue Core.", observedAt };
-  return { offerId: offer.id, name: offer.name, price: { value: offer.price, status: "verified", confidence: "high", source: "catalogue_partner", rationale: "Prix fourni par le catalogue Core.", observedAt }, currency: offer.currency, availability, merchantName: offer.merchantName, merchantSlug: offer.merchantSlug, imageUrl: offer.imageUrl, link: offer.link };
+export function snapshotCoreOffer(offer: FilonOffer, observedAt: string | null = offer.observedAt ?? null, now: number | Date = Date.now()): V3CoreOffer {
+  const normalizedObservedAt = normalizeFilonObservedAt(observedAt);
+  const evidenceCurrent = offer.evidenceCurrent === true && isFilonObservationFresh(normalizedObservedAt, now);
+  const currentStock = currentFilonStock({ ...offer, observedAt: normalizedObservedAt }, now);
+  const unknown = { value: null, status: "unknown" as const, confidence: "low" as const, source: "unavailable" as const, observedAt: normalizedObservedAt };
+  const availability: V3Evidence<boolean> = currentStock === null
+    ? { ...unknown, rationale: "Disponibilité sans snapshot courant explicite dans le catalogue Core." }
+    : { value: currentStock, status: "verified", confidence: "high", source: "catalogue_partner", rationale: "Disponibilité reliée au snapshot Core courant.", observedAt: normalizedObservedAt };
+  const price: V3Evidence<number> = evidenceCurrent
+    ? { value: offer.price, status: "verified", confidence: "high", source: "catalogue_partner", rationale: "Prix relié au snapshot Core courant.", observedAt: normalizedObservedAt }
+    : { ...unknown, rationale: "Prix sans snapshot courant explicite dans le catalogue Core." };
+  return { offerId: offer.id, name: offer.name, price, currency: offer.currency, availability, merchantName: offer.merchantName, merchantSlug: offer.merchantSlug, imageUrl: offer.imageUrl, link: offer.link };
 }
 
 export function createV3PipelineTrace(traceId: string): V3PipelineTrace {

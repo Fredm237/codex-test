@@ -1,0 +1,20 @@
+[
+  {"id": "E001", "name": "WRONG_CATEGORY", "wire_value": "E001_WRONG_CATEGORY", "domain": "classification", "origin": "mandate"},
+  {"id": "E002", "name": "WRONG_PRODUCT_ROLE", "wire_value": "E002_WRONG_PRODUCT_ROLE", "domain": "classification", "origin": "mandate"},
+  {"id": "E003", "name": "FALSE_PRODUCT_MERGE", "wire_value": "E003_FALSE_PRODUCT_MERGE", "domain": "identity", "origin": "mandate"},
+  {"id": "E004", "name": "FALSE_PRODUCT_SPLIT", "wire_value": "E004_FALSE_PRODUCT_SPLIT", "domain": "identity", "origin": "mandate"},
+  {"id": "E005", "name": "WRONG_VARIANT", "wire_value": "E005_WRONG_VARIANT", "domain": "identity", "origin": "mandate"},
+  {"id": "E006", "name": "IRRELEVANT_RETRIEVAL", "wire_value": "E006_IRRELEVANT_RETRIEVAL", "domain": "retrieval", "origin": "mandate"},
+  {"id": "E007", "name": "HARD_CONSTRAINT_VIOLATION", "wire_value": "E007_HARD_CONSTRAINT_VIOLATION", "domain": "constraint", "origin": "mandate"},
+  {"id": "E008", "name": "WRONG_PRICE", "wire_value": "E008_WRONG_PRICE", "domain": "offer", "origin": "mandate"},
+  {"id": "E009", "name": "STALE_PRICE", "wire_value": "E009_STALE_PRICE", "domain": "offer", "origin": "mandate"},
+  {"id": "E010", "name": "WRONG_STOCK", "wire_value": "E010_WRONG_STOCK", "domain": "offer", "origin": "mandate"},
+  {"id": "E011", "name": "WRONG_SHIPPING", "wire_value": "E011_WRONG_SHIPPING", "domain": "offer", "origin": "mandate"},
+  {"id": "E012", "name": "UNSUPPORTED_CLAIM", "wire_value": "E012_UNSUPPORTED_CLAIM", "domain": "evidence", "origin": "mandate"},
+  {"id": "E013", "name": "WRONG_VERDICT", "wire_value": "E013_WRONG_VERDICT", "domain": "decision", "origin": "mandate"},
+  {"id": "E014", "name": "OVERCONFIDENT_DECISION", "wire_value": "E014_OVERCONFIDENT_DECISION", "domain": "decision", "origin": "mandate"},
+  {"id": "E015", "name": "DUPLICATE_PRODUCT", "wire_value": "E015_DUPLICATE_PRODUCT", "domain": "identity", "origin": "mandate"},
+  {"id": "E016", "name": "SCHEMA_INVALID", "wire_value": "E016_SCHEMA_INVALID", "domain": "ingestion", "origin": "filon_ingestion_extension"},
+  {"id": "E017", "name": "INVALID_IDENTIFIER", "wire_value": "E017_INVALID_IDENTIFIER", "domain": "ingestion", "origin": "filon_ingestion_extension"},
+  {"id": "E018", "name": "CURRENCY_MISMATCH", "wire_value": "E018_CURRENCY_MISMATCH", "domain": "ingestion", "origin": "filon_ingestion_extension"}
+]

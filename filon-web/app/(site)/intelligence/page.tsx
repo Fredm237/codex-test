@@ -8,7 +8,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/intelligence",
   title: "L'intelligence FILON",
   description:
-    "Le prix le plus bas n'est pas toujours le meilleur achat. FILON regarde ce qui compte vraiment : le bon produit, au bon moment, qui dure.",
+    "FILON expose les signaux disponibles pour une offre : prix observé, historique, stock, fraîcheur, périmètre et inconnues.",
 });
 
 function IntelligenceFR() {
@@ -40,7 +40,7 @@ function IntelligenceFR() {
             items={[
               { n: "€", h: "Le prix affiché", p: "Le prix indiqué par le marchand dans le catalogue ; il peut évoluer avant votre commande." },
               { n: "◷", h: "Le contexte de prix", p: "Lorsqu'un historique ou un score est disponible, FILON l'affiche avec ses limites de données." },
-              { n: "★", h: "Le marchand", p: "Le nom, la région et le secteur du partenaire quand ces informations sont renseignées." },
+              { n: "★", h: "Le marchand", p: "Le nom, la région et le secteur de la source marchande quand ces informations sont renseignées." },
               { n: "⌁", h: "Le cashback", p: "Le cashback et ses conditions lorsqu'ils sont transmis pour l'offre concernée." },
               { n: <IcChat />, h: "Les codes promo", p: "Les codes ou avantages disponibles lorsqu'ils sont indiqués dans les données de l'offre." },
               { n: "✓", h: "Les alternatives", p: "D'autres offres correspondant à votre recherche, sans promettre un classement universel." },
@@ -48,7 +48,7 @@ function IntelligenceFR() {
           />
         </div>
       </section>
-      <ClosingCta title={<>L&apos;intelligence au service de <span className="it">votre</span> choix.</>} sub="Un point de départ clair avant votre décision. L'accès est gratuit." />
+      <ClosingCta title={<>Les preuves au service de <span className="it">votre</span> choix.</>} sub="Un point de départ borné avant votre décision. Consultez la page Tarifs pour l'accès actuel." />
     </>
   );
 }
@@ -82,7 +82,7 @@ function IntelligenceNL() {
             items={[
               { n: "€", h: "De getoonde prijs", p: "De prijs die de winkel in de catalogus aangeeft; die kan vóór je bestelling veranderen." },
               { n: "◷", h: "Prijscontext", p: "Wanneer een historiek of score beschikbaar is, toont FILON die met de beperkingen van de gegevens." },
-              { n: "★", h: "De winkel", p: "De naam, regio en sector van de partner wanneer die informatie vermeld is." },
+              { n: "★", h: "De winkel", p: "Naam, regio en sector van de winkelbron wanneer die informatie vermeld is." },
               { n: "⌁", h: "Cashback", p: "Cashback en voorwaarden wanneer ze voor het betrokken aanbod worden doorgestuurd." },
               { n: <IcChat />, h: "Kortingscodes", p: "Beschikbare codes of voordelen wanneer ze in de aanbodgegevens staan." },
               { n: "✓", h: "Alternatieven", p: "Andere aanbiedingen die bij je zoekopdracht passen, zonder een universele rangschikking te beloven." },
@@ -90,7 +90,7 @@ function IntelligenceNL() {
           />
         </div>
       </section>
-      <ClosingCta title={<>Intelligentie ten dienste van <span className="it">jouw</span> keuze.</>} sub="Een helder vertrekpunt vóór je beslist. De toegang is gratis." />
+      <ClosingCta title={<>Bewijs ten dienste van <span className="it">jouw</span> keuze.</>} sub="Een afgebakend vertrekpunt vóór je beslist. Raadpleeg Tarieven voor de huidige toegang." />
     </>
   );
 }
@@ -121,7 +121,7 @@ function IntelligenceEN() {
             items={[
               { n: "€", h: "The displayed price", p: "The price listed by the merchant in the catalogue; it can change before you order." },
               { n: "◷", h: "Price context", p: "When a history or score is available, FILON shows it with its data limitations." },
-              { n: "★", h: "The merchant", p: "The partner's name, region and sector when this information is listed." },
+              { n: "★", h: "The merchant", p: "The merchant source's name, region and sector when this information is listed." },
               { n: "⌁", h: "Cashback", p: "Cashback and its terms when they are supplied for the relevant offer." },
               { n: <IcChat />, h: "Promo codes", p: "Available codes or benefits when they are listed in the offer data." },
               { n: "✓", h: "Alternatives", p: "Other offers matching your search, without promising a universal ranking." },
@@ -129,7 +129,7 @@ function IntelligenceEN() {
           />
         </div>
       </section>
-      <ClosingCta title={<>Intelligence in service of <span className="it">your</span> choice.</>} sub="A clear starting point before you decide. Access is free." />
+      <ClosingCta title={<>Evidence in service of <span className="it">your</span> choice.</>} sub="A bounded starting point before you decide. See Pricing for current access." />
     </>
   );
 }

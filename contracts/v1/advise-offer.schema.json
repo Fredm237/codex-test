@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/v1/advise-offer.schema.json",
+  "title": "FILON Advise Offer v1",
+  "type": "object",
+  "required": ["merchant", "price", "delivery_days", "delivery_cost", "warranty_months", "in_stock", "affiliate_network"],
+  "properties": {
+    "merchant": { "type": "string", "minLength": 1 },
+    "price": { "type": "number", "exclusiveMinimum": 0 },
+    "currency": {
+      "type": ["string", "null"],
+      "minLength": 3,
+      "maxLength": 8,
+      "description": "devise observée du prix article"
+    },
+    "observed_at": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "horodatage de l'observation prix/stock, null si absent"
+    },
+    "delivery_days": { "type": ["integer", "null"], "minimum": 0 },
+    "delivery_cost": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "description": "null signifie coût non fourni ; il ne doit pas être interprété comme livraison gratuite"
+    },
+    "warranty_months": { "type": ["integer", "null"], "minimum": 0 },
+    "in_stock": {
+      "type": ["boolean", "null"],
+      "description": "null signifie disponibilité non fournie ; il ne doit pas être interprété comme en stock"
+    },
+    "affiliate_network": { "type": ["string", "null"] }
+  },
+  "additionalProperties": true
+}

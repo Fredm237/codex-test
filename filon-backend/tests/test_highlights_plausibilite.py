@@ -59,7 +59,8 @@ def _now():
 async def _offer(s, merchant, pid, name, price, brand="Marque"):
     o = models.Offer(
         merchant_id=merchant.id, awin_product_id=pid, name=name, brand=brand,
-        price=price, currency="EUR", image_url="https://example.test/i.jpg",
+        price=price, currency="EUR", in_stock=True,
+        image_url="https://example.test/i.jpg",
     )
     s.add(o)
     await s.flush()
@@ -71,7 +72,7 @@ async def _history(s, offer, prices):
     base = _now() - timedelta(hours=len(prices))
     for i, p in enumerate(prices):
         s.add(models.PriceSnapshot(
-            offer_id=offer.id, price=p,
+            offer_id=offer.id, price=p, currency="EUR",
             in_stock=True, captured_at=base + timedelta(hours=i),
         ))
     await s.flush()
@@ -170,6 +171,49 @@ async def test_aucune_remise_invraisemblable_dans_les_rails(session):
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+async def test_agregat_historique_ne_melange_jamais_deux_devises(session):
+    merchants = await _merchants(session)
+    await _fill_credible(session, merchants)
+    offer = await _offer(
+        session,
+        merchants[0],
+        "mixed-currency",
+        "Historique Multidevise",
+        80.0,
+    )
+    base = _now() - timedelta(hours=3)
+    session.add_all(
+        [
+            models.PriceSnapshot(
+                offer_id=offer.id,
+                price=100.0,
+                currency="GBP",
+                in_stock=True,
+                captured_at=base,
+            ),
+            models.PriceSnapshot(
+                offer_id=offer.id,
+                price=100.0,
+                currency="GBP",
+                in_stock=True,
+                captured_at=base + timedelta(hours=1),
+            ),
+            models.PriceSnapshot(
+                offer_id=offer.id,
+                price=80.0,
+                currency="EUR",
+                in_stock=True,
+                captured_at=base + timedelta(hours=2),
+            ),
+        ]
+    )
+    await session.commit()
+
+    rails = await _rails(session)
+    names = [item["name"] for item in rails.get("drops", [])]
+    assert "Historique Multidevise" not in names
+
+
 # 2. Ne pas jeter le bébé : les vraies promotions restent
 # ─────────────────────────────────────────────────────────────────────────────
 

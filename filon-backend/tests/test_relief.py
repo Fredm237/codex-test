@@ -8,11 +8,14 @@ qualification honnête de la confiance.
 
 from __future__ import annotations
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.api.routes.catalog import RELIEF_MAX_COLUMNS, RELIEF_MIN_SAMPLES, _confiance
+from app.api.routes.catalog import RELIEF_MAX_COLUMNS, RELIEF_MIN_SAMPLES, _confiance, relief
+from app.db import models
+from app.db.base import Base
 
 
 class TestConfiance:
@@ -246,3 +249,84 @@ class TestGardeFousReutilises:
         assert MAX_PLAUSIBLE_DROP_PCT == 85.0
         assert MIN_HIGH_OBSERVATIONS == 2
         assert MIN_HIGH_SHARE == 0.15
+
+
+@pytest.fixture
+async def relief_session():
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    async with maker() as session:
+        yield session
+    await engine.dispose()
+
+
+async def _seed_relief_offer(session, *, category: str, snapshot_currencies: list[str | None]):
+    merchant = models.Merchant(
+        awin_mid=901,
+        name=f"Boutique {category}",
+        slug=f"boutique-{category}",
+    )
+    session.add(merchant)
+    await session.flush()
+    offer = models.Offer(
+        merchant_id=merchant.id,
+        awin_product_id=f"relief-{category}",
+        name=f"Produit {category}",
+        price=80.0,
+        currency="EUR",
+        in_stock=True,
+        is_canonical=True,
+        is_adult=False,
+        filon_category=category,
+        image_url="https://example.test/relief.jpg",
+    )
+    session.add(offer)
+    await session.flush()
+    now = datetime.now(UTC).replace(tzinfo=None)
+    prices = [100.0, 100.0, 80.0]
+    for index, (price, currency) in enumerate(zip(prices, snapshot_currencies, strict=True)):
+        session.add(
+            models.PriceSnapshot(
+                offer_id=offer.id,
+                price=price,
+                currency=currency,
+                in_stock=True,
+                captured_at=now - timedelta(days=3 - index),
+            )
+        )
+    await session.commit()
+
+
+async def test_relief_publie_une_devise_explicitement_prouvee(relief_session):
+    category = "truth-valid"
+    await _seed_relief_offer(
+        relief_session,
+        category=category,
+        snapshot_currencies=["EUR", " eur ", "EUR"],
+    )
+    result = await relief(
+        limit=12,
+        window_days=21,
+        category=category,
+        session=relief_session,
+    )
+    assert result["count"] == 1
+    assert result["columns"][0]["currency"] == "EUR"
+
+
+async def test_relief_ne_melange_jamais_deux_devises(relief_session):
+    category = "truth-mixed"
+    await _seed_relief_offer(
+        relief_session,
+        category=category,
+        snapshot_currencies=["GBP", "GBP", "EUR"],
+    )
+    result = await relief(
+        limit=12,
+        window_days=21,
+        category=category,
+        session=relief_session,
+    )
+    assert result["columns"] == []
