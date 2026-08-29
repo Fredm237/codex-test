@@ -116,13 +116,15 @@ hexadécimaux.
 
 Le volume PostgreSQL est `READY` à **7 855,56 Mio sur 20 000 Mio**, soit
 **39,28 %**. Les logs historiques du 28 août 2026 contiennent cependant des
-échecs `No space left on device` sur des fichiers temporaires PostgreSQL. Une
-alerte de capacité et une politique de sauvegarde planifiée restent requises ;
-un audit API ultérieur a confirmé **zéro planning**, deux sauvegardes manuelles
+échecs `No space left on device` sur des fichiers temporaires PostgreSQL. Un
+audit API ultérieur a d'abord confirmé zéro planning, deux sauvegardes manuelles
 sans expiration et aucun dashboard/moniteur Railway dans l'environnement.
-L'export OpenMetrics direct de production a en revanche passé son contrat
-d'authentification, de format et de cardinalité. Les mesures expurgées figurent
-dans le [reçu observabilité et résilience](PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md).
+Après autorisation explicite, les plannings `DAILY`, `WEEKLY` et `MONTHLY` ont
+été activés et relus ; le volume est resté `READY` au même taux d'occupation.
+L'alerte de capacité reste requise. L'export OpenMetrics direct de production a
+également passé son contrat d'authentification, de format et de cardinalité.
+Les mesures expurgées figurent dans le
+[reçu observabilité et résilience](PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md).
 
 Le rollback opérationnel reste applicatif : les déploiements précédents sont
 conservés dans l'historique, la nouvelle structure est compatible avec

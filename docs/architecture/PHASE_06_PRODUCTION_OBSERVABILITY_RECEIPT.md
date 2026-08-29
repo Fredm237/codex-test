@@ -1,7 +1,7 @@
 # FILON — reçu production OpenMetrics et résilience Railway
 
 - Date : **29 août 2026**
-- Fenêtre de contrôle : **16:10–16:18 CEST**
+- Fenêtre de contrôle : **16:10–16:29 CEST**
 - Environnement : `production`
 - Service applicatif : `web`
 - Déploiement contrôlé : `c832d1c8-e50f-4fac-94b3-8b59bb6cfff1`
@@ -38,25 +38,34 @@ un reset observé, un dashboard importé ou un pager.
 
 ## Sauvegardes du volume PostgreSQL
 
-L'API Railway retourne **zéro planning** de sauvegarde pour l'instance de
-volume production. Deux sauvegardes manuelles sans expiration sont présentes :
+Après autorisation explicite du coût incrémental, les trois cadences ont été
+activées atomiquement le 29 août 2026 à 14:28:16 UTC, puis relues via l'API :
+
+| Cadence | Cron Railway UTC | Rétention API |
+|---|---|---:|
+| `DAILY` | `54 13 * * *` | 518 400 s — 6 jours |
+| `WEEKLY` | `33 19 * * 6` | 2 332 800 s — 27 jours |
+| `MONTHLY` | `21 7 1 * *` | 7 689 600 s — 89 jours |
+
+Les horaires ont été générés par Railway. Les deux sauvegardes manuelles sans
+expiration restent présentes :
 
 | Sauvegarde | Date UTC | Planning | Données propres rapportées |
 |---|---|---|---:|
 | `Online resize to 20000MB` | 12 août 2026 | aucun | 3 734 Mio |
 | `FILON pre-core-deploy 2026-08-29` | 29 août 2026 | aucun | 310 Mio |
 
-Railway décrit les snapshots comme incrémentaux et Copy-on-Write. Les cadences
-disponibles sont quotidienne, hebdomadaire et mensuelle, conservées
-respectivement 6 jours, 1 mois et 3 mois. Leur stockage incrémental est facturé
-au tarif du stockage de volume. Références officielles :
+Railway décrit les snapshots comme incrémentaux et Copy-on-Write. Sa
+documentation résume les rétentions comme 6 jours, 1 mois et 3 mois ; l'API
+fournit ci-dessus les durées exactes effectivement appliquées. Leur stockage
+incrémental est facturé au tarif du stockage de volume. Références officielles :
 [sauvegardes](https://docs.railway.com/volumes/backups) et
 [tarification](https://docs.railway.com/pricing).
 
-Aucune cadence n'a été activée pendant cet audit : il s'agirait d'une mutation
-récurrente avec impact de facturation. La politique recommandée pour une base
-production est **DAILY + WEEKLY + MONTHLY**, à activer après autorisation
-explicite du coût incrémental.
+La mutation a seulement géré les plannings de l'instance de volume PostgreSQL.
+Elle n'a déclenché ni déploiement, ni restauration, ni écriture applicative.
+Juste après activation, `GET /health/live` et `GET /health/ready` sont restés
+verts ; la base est `ok` et la révision demeure `f4c81a9d2e70`.
 
 ## Capacité et alerte plateforme
 
@@ -76,7 +85,7 @@ résilience stockage terminée.
 - endpoint OpenMetrics production : **QUALIFIÉ** ;
 - authentification et non-fuite du secret : **QUALIFIÉES** ;
 - sauvegarde manuelle et restore drill : **QUALIFIÉS** ;
-- sauvegardes planifiées : **ABSENTES** ;
+- sauvegardes planifiées `DAILY + WEEKLY + MONTHLY` : **QUALIFIÉES** ;
 - alerte de capacité Railway : **ABSENTE** ;
 - agrégateur, rétention, dashboard, pager et trafic représentatif : **NON
   PROUVÉS**.
