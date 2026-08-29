@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 0 Product Intelligence Core",
   "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
   "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-29T13:17:00+02:00",
+  "maj": "2026-08-29T13:52:40+02:00",
   "contraintes": [
     "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
     "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
@@ -43,8 +43,8 @@
       ],
       "outil": "quality lab",
       "attendu": "Entity, Variant, Offer, Retrieval et Decision mesurés avec intervalles",
-      "obtenu": "Manifest v0.5 fermé à sept datasets et 27 gates ; schémas, packs aveugles, identifiants distincts, adjudication, anti-fuite, provenance, identité de run et empreinte exacte du holdout ; Wilson, Bernstein empirique et bootstrap déterministe ; publication atomique sans remplacement et comparaison fail-closed ; cinq adaptateurs applicatifs réels dont Decision déterministe et sourcé ; collecte humaine indépendante et deux adaptateurs Graph encore absents",
-      "verification": "Commit 161d630 : 359/359 tests Quality verts et backend complet 1944 réussis + 1 ignoré. Decision impose requête fermée, temps ISO avec offset, candidats ordonnés et preuves inventoriées. Rapport 2026-08-29 integrity_valid=true, ready=false, status=not_ready, zéro cas dans chacun des sept datasets, fingerprint sha256:e949de01a819a5b5ef4fb0b53b5efd15241bc514b71831d32c7b1146b491262f ; mode normal exit 0, strict exit 1. Aucune métrique métier ni régression n'est mesurable avant collecte et adjudication humaines.",
+      "obtenu": "Manifest v0.5 fermé à sept datasets et 27 gates ; schémas, packs aveugles, identifiants distincts, adjudication, anti-fuite, provenance, identité de run et empreinte exacte du holdout ; Wilson, Bernstein empirique et bootstrap déterministe ; publication atomique sans remplacement et comparaison fail-closed ; cinq adaptateurs applicatifs réels dont Decision déterministe et sourcé ; inventaire public immuable de 1 000 candidats sans labels moteur ; collecte humaine indépendante et deux adaptateurs Graph encore absents",
+      "verification": "Commit 161d630 : 359/359 tests Quality historiques. Inventaire catalogue du 2026-08-29 : 200 lignes sur chacune de cinq strates, ready_for_annotation=false, empreinte sha256:dee650b3140755022b37890f74f4d1fc61e1265f22b3621366c44462cb9131c8, vérificateur et 15 tests ciblés verts ; Quality cœur 257/257 et backend complet courant 2035 réussis + 1 ignoré sous Python 3.12. Decision impose requête fermée, temps ISO avec offset, candidats ordonnés et preuves inventoriées. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
       "tentatives": 1
     },
     {
@@ -110,8 +110,8 @@
       ],
       "outil": "backend observability",
       "attendu": "Corrélation bout en bout, percentiles, unknown/freshness/abstentions, dashboards et alertes testés",
-      "obtenu": "Request ID opaque généré côté serveur, corrélation HTTP vers catalogue/retrieval/decision/ingestion/observation y compris 429/500, huit jalons fermés intent/retrieval/candidats/filtrage/classement/sélection/preuves/décision, spans applicatifs PostgreSQL/Redis/Awin/SerpAPI/LLM et traceparent W3C vers les dépendances HTTP sans donnée métier libre ; latences P50/P95/P99 et cardinalité bornées, probes DB/révision fail-closed, compteurs versionnés unknown/freshness/exclusions/abstentions, ingestion degraded, cycle SSE maîtrisé et logs ciblés nettoyés sans payload ; moteur local canonique de cinq règles provisoires, hystérésis, replay/conflict fail-closed, silence borné et runbook livrés ; front door HMAC, fenêtre glissante, plafond strict, buckets 429 et confiance proxy explicite livrés ; téléchargement Awin en flux avec spool disque après 8 MiB, plafonds compressé/décompressé et limite dure de 250 000 lignes ; ordonnanceur d'ingestion autonome et journalisé disponible mais non déployé ; export OpenMetrics 1.0 authentifié et fail-closed ; pack Prometheus/Grafana avec inventaire vide, secret-file, labels fermés, 11 rollups multi-réplica et dashboard descriptif sans SLO ; contrats JSON, compilateur d’inventaire atomique et vérificateur HTTPS produisant un reçu expurgé livrés ; backend de traces, CIDR Railway, WAF, déploiement agrégateur/dashboard, reçu réel, pager et trafic représentatif encore absents",
-      "verification": "Commits ee13023, f6efcd0 et dfe9098 : corrélation décisionnelle/dépendances, isolation concurrente, erreurs sans message, listes fermées, traceparent LLM et tous chemins Awin, transactions PostgreSQL Awin en lot, absence de donnée métier libre et mémoire de feed bornée prouvées. Commit 10a1866 : 49 tests d’activation et 227 tests observabilité ciblés ; Prometheus/promtool 3.13.2 LTS valide la configuration, lint les 11 règles et réussit leur scénario officiel à deux réplicas. Suite locale finale : backend 2020 réussis + 1 ignoré ; GitHub Actions #343 : 2021/2021 verts. Production maintenue NO-GO sans backend de traces ni agrégateur réellement déployé, scrapes/rétention, reçu, pager, CIDR et WAF.",
+      "obtenu": "Request ID opaque généré côté serveur, corrélation HTTP vers catalogue/retrieval/decision/ingestion/observation y compris 429/500, huit jalons fermés intent/retrieval/candidats/filtrage/classement/sélection/preuves/décision, spans applicatifs PostgreSQL/Redis/Awin/SerpAPI/LLM et traceparent W3C vers les dépendances HTTP sans donnée métier libre ; latences P50/P95/P99 et cardinalité bornées, probes DB/révision fail-closed, compteurs versionnés unknown/freshness/exclusions/abstentions, ingestion degraded, cycle SSE maîtrisé et logs ciblés nettoyés sans payload ; moteur local canonique de cinq règles provisoires, hystérésis, replay/conflict fail-closed, silence borné et runbook livrés ; front door HMAC, fenêtre glissante, plafond strict, buckets 429 et confiance proxy explicite livrés ; téléchargement Awin en flux avec spool disque après 8 MiB, plafonds compressé/décompressé et limite dure de 250 000 lignes ; ordonnanceur d'ingestion autonome et journalisé disponible mais non déployé ; export OpenMetrics 1.0 authentifié et fail-closed ; pack Prometheus/Grafana avec inventaire vide, secret-file, labels fermés, 11 rollups multi-réplica et dashboard descriptif sans SLO ; contrats JSON, compilateur d’inventaire atomique et vérificateur HTTPS produisant un reçu expurgé livrés ; accès Railway production et provenance Config as Code confirmés en lecture ; backend de traces, CIDR Railway, WAF, déploiement agrégateur/dashboard, reçu réel, pager et trafic représentatif encore absents",
+      "verification": "Commits ee13023, f6efcd0 et dfe9098 : corrélation décisionnelle/dépendances, isolation concurrente, erreurs sans message, listes fermées, traceparent LLM et tous chemins Awin, transactions PostgreSQL Awin en lot, absence de donnée métier libre et mémoire de feed bornée prouvées. Commit 10a1866 : 49 tests d’activation et 227 tests observabilité ciblés ; Prometheus/promtool 3.13.2 LTS valide la configuration, lint les 11 règles et réussit leur scénario officiel à deux réplicas. Suite locale courante : backend 2035 réussis + 1 ignoré ; GitHub Actions #343 : 2021/2021 verts. Préflight Railway authentifié sans lecture de variable protégée ni mutation : services web/Postgres, domaine actif, source GitHub, root directory et configFile legacy confirmés ; runtime actif encore RAILPACK/uvicorn sans preDeploy/readiness. Production NO-GO avant backup/restore drill, déploiement, agrégateur, scrapes/rétention, pager, CIDR et WAF.",
       "tentatives": 1
     },
     {
@@ -374,6 +374,21 @@
       "ts": "2026-08-29T13:17:00+02:00",
       "evenement": "tache_faite",
       "detail": "p0_g — ruleset GitHub 21798272 active et limitée à main : PR obligatoire, conversations résolues, branche à jour, suppression et force-push interdits, quatre jobs Phase 0 requis depuis GitHub Actions, aucun bypass"
+    },
+    {
+      "ts": "2026-08-29T13:25:45+02:00",
+      "evenement": "verification",
+      "detail": "p0_c — inventaire public immuable de 1 000 candidats collecté sur cinq strates, sans labels ni champs moteur favorables ; sampling_vertical séparé de la curation humaine ; empreinte dee650b3…31c8 et 14 tests ciblés verts ; readiness toujours not_ready avec 0 cas humain"
+    },
+    {
+      "ts": "2026-08-29T13:37:32+02:00",
+      "evenement": "verification",
+      "detail": "p0_i — jeton projet Railway validé en lecture ; production web/Postgres, source, domaine, root directory et chemin Config as Code confirmés ; runtime actif legacy identifié ; aucune variable protégée lue et aucune mutation ; backup/restore drill requis avant déploiement"
+    },
+    {
+      "ts": "2026-08-29T13:52:40+02:00",
+      "evenement": "verification",
+      "detail": "lot inventaire + préflight — Quality cœur 257/257 ; inventaire immuable vérifié ; backend complet 2035 réussis + 1 ignoré sous Python 3.12 et dépendances déclarées ; aucun fichier utilisateur protégé modifié par le lot"
     }
   ]
 }

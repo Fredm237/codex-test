@@ -99,8 +99,10 @@ et claims non supportés gardent une tolérance nulle.
 - suites ciblées du workflow humain, des schémas, de la readiness, des
   métriques, du scorecard, du runner, de la provenance et de la régression
   v0.5 : **359/359** ;
-- suite backend complète courante : **2 012 réussis, 1 ignoré**, 4 warnings
-  `datetime.utcnow()` historiques ;
+- suite Quality sans dépendance réseau : **257 réussis** sur le collecteur,
+  l'intégrité, les schémas et la scorecard ;
+- suite backend complète courante sous Python 3.12 et les dépendances déclarées :
+  **2 035 réussis, 1 ignoré** en 109,18 s ;
 - archive propre du HEAD `a78401a`, qui contient le lot Quality `6e12386`,
   suite backend complète : **1 907 réussis, 1 ignoré**, 7 avertissements
   `datetime.utcnow()` historiques, en **370,53 s** ;
@@ -114,6 +116,10 @@ et claims non supportés gardent une tolérance nulle.
   avec **0 cas humain** sur les sept jeux ;
 - un run incomplet, incohérent ou sous-support reste `not_measurable`, jamais
   partiellement « pass ».
+- un collecteur d'inventaire réel, borné et immuable ajoute **15 tests ciblés
+  verts** ; son vérificateur recalcule chaque empreinte, refuse les champs
+  moteur ajoutés, les sources non canoniques, les comptes altérés, les
+  doublons inter-strates et toute curation préremplie.
 
 ## Contrat CLI et CI
 
@@ -126,11 +132,28 @@ Le commit `45e7768` sépare l'intégrité du gate de lancement :
 | Rapport intègre et `ready=false` | `--strict` | 1 |
 | Manifeste, schéma, dataset, empreinte, invariant ou bootstrap invalide | normal ou `--strict` | 2 |
 
-Le workflow local emploie le mode normal : le NO-GO attendu faute de cas
-humains reste visible sans masquer une invalidité, qui échoue avec le code 2.
-Il écrit `quality-readiness-report.json` et tente toujours de publier l'artefact
-GitHub Actions `quality-readiness-<commit>`, conservé 14 jours. Ce workflow
-n'est pas encore publié ni requis sur une branche distante protégée.
+Le workflow emploie le mode normal pour produire le rapport, puis le mode
+strict pour fermer la promotion. GitHub Actions #343 a publié l'artefact
+`quality-readiness-e04dfc2c18ef58177d4182acbb67c966058ff9c0`, conservé 14
+jours. Les quatre jobs sont requis sur `main` par la ruleset `21798272`. Le job
+backend reste volontairement rouge sur le code 1 tant que les cas humains sont
+absents ; une invalidité technique sortirait avec le code 2.
+
+## Inventaire réel initial
+
+Le 29 août 2026, une première collecte publique a figé **1 000 observations** :
+200 par filtre d'échantillonnage `appliances`, `headphones_audio`, `laptops`,
+`smartphones` et `tv`. Le JSONL et son reçu sont publiés sous
+[`quality/candidates`](../../quality/candidates/README.md), avec l'empreinte
+d'inventaire
+`sha256:dee650b3140755022b37890f74f4d1fc61e1265f22b3621366c44462cb9131c8`.
+
+Le lot ne contient aucun label et reste `ready_for_annotation=false`. Prix,
+devise, stock, fraîcheur, type d'offre, catégorie/sous-catégorie FILON, image et
+lien affilié sont exclus. Le contrôle du contenu a révélé des catégories source
+incompatibles avec certains filtres FILON ; `sampling_vertical` n'est donc
+jamais copié dans `curation.vertical`. Cette anomalie réelle confirme que la
+curation humaine est une condition de vérité, pas une formalité.
 
 ## État des données
 
@@ -150,7 +173,10 @@ indépendants.
 
 ## Procédure de collecte
 
-1. Extraire des cas réels bornés et anonymisés dans `quality/candidates/`.
+1. Extraire des cas réels bornés et sans donnée personnelle dans
+   `quality/candidates/`. Un premier inventaire catalogue de 1 000 lignes est
+   acquis ; il doit encore être curé et complété par des requêtes réelles
+   anonymisées pour Retrieval/Decision.
 2. Pour Decision, joindre l'inventaire de provenance autorisé à chaque entrée.
 3. Générer un pack aveugle distinct pour chaque annotateur.
 4. Faire annoter sans sortie moteur visible et conserver les packs complétés

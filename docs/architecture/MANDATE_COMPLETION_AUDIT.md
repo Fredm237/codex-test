@@ -44,8 +44,9 @@ Les trois conditions qui empêchent encore un GO sont :
 
 1. les sept datasets Quality Lab contiennent chacun **0 cas humain** ;
 2. Product/Variant Graph n'existe pas encore et ne peut pas être évalué sans ces datasets ;
-3. l'infrastructure de production n'est pas qualifiée : le backend public reste
-   un ancien processus `env=dev`, sans preuve de collecte/traces/WAF/pager.
+3. l'accès Railway et sa topologie sont maintenant qualifiés en lecture, mais le
+   backend public reste un ancien processus `env=dev`, sans backup/restore drill
+   ni preuve de collecte/traces/WAF/pager.
 
 Depuis la coupure initiale, l'intégration catalogue/Assistant/MegaMenu est
 acquise, la branche est publique et byte-identique, Actions #343 a exécuté les
@@ -111,7 +112,7 @@ ne doit donc être lancé.
 | Architecture proposée | **PROUVÉ COMME CIBLE** | [Architecture cible](TARGET_ARCHITECTURE.md) |
 | Fichiers et ownership | **PROUVÉ DANS LE LOT P0** | Cartographie, [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) et ruleset distante sans bypass |
 | Migration et rollback | **PROUVÉ LOCALEMENT** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md) |
-| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local : backend 2 020 + 1 ignoré, web 17/17, typecheck/build ; Actions #343 : migrations 12/12, backend 2 021/2 021 et trois clients verts |
+| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 035 + 1 ignoré, web 17/17, typecheck/build ; Actions #343 : migrations 12/12, backend 2 021/2 021 et trois clients verts |
 | Benchmarks | **EXTERNE NON MESURABLE** | Holdout humain absent |
 | Before/after metrics | **EXTERNE NON MESURABLE** | Aucun scorecard métier éligible ni trafic représentatif |
 | Known limitations | **PROUVÉ** | Ce document, le registre des preuves et les rapports P0 |
@@ -140,7 +141,9 @@ Les commits `4a95a42` et `90246b2` sont intégrés et qualifiés à distance.
 
 La collecte doit être indépendante, aveugle, stratifiée, adjudicable et liée à
 sa provenance. Les données synthétiques ou auto-annotées ne peuvent pas remplir
-ce gate.
+ce gate. Un inventaire public initial de 1 000 candidats est désormais figé et
+vérifiable, mais il conserve volontairement 0 label et ne change aucun zéro du
+tableau.
 
 ### 3. GitHub et CI distante — acquis
 
@@ -152,8 +155,11 @@ force-push sont interdits, sans bypass.
 
 ### 4. Production
 
-Le GO exige encore une preuve sur l'environnement réel : CIDR proxy Railway,
-WAF/limitation distribuée, ordonnanceur effectivement déployé, scrapes
+Le préflight Railway authentifié a confirmé le service web, Postgres et le
+chemin Config as Code, sans lire de secret ni muter la production. Le GO exige
+encore un backup logique avec restore drill, puis une preuve sur
+l'environnement réel : CIDR proxy Railway, WAF/limitation distribuée,
+ordonnanceur effectivement déployé, scrapes
 OpenMetrics de chaque replica vers l'agrégateur, reçu du vérificateur,
 dashboards, canal/pager, canary et trafic représentatif. Une suite locale ne
 peut pas attester ces propriétés.
@@ -163,8 +169,9 @@ peut pas attester ces propriétés.
 **NO-GO Phase 1. NO-GO Immersive.**
 
 Les actions locales et de gouvernance disponibles sont épuisées pour ce gate.
-La prochaine entrée métier est la réception des datasets humains indépendants ;
-la prochaine entrée production est l'accès/configuration Railway et à
-l'infrastructure de collecte/alerting. Avant ces preuves, commencer Product
-Graph, Fashion, Personal Commerce ou la bible immersive violerait directement
-l'ordre de dépendances des mandats.
+La prochaine entrée métier est la curation et l'annotation indépendante de
+l'inventaire réel ; la prochaine entrée production est l'autorisation de
+charger temporairement les variables PostgreSQL pour le backup/restore drill,
+puis le déploiement et l'infrastructure de collecte/alerting. Avant ces preuves,
+commencer Product Graph, Fashion, Personal Commerce ou la bible immersive
+violerait directement l'ordre de dépendances des mandats.

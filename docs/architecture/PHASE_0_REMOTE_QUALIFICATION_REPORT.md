@@ -1,6 +1,7 @@
 # FILON — qualification distante de la Phase 0
 
-- Date de coupure : **29 août 2026, 13:15 CEST**
+- Date de coupure initiale : **29 août 2026, 13:15 CEST**
+- Préflight Railway authentifié : **29 août 2026, 13:37 CEST**
 - Branche : `codex/filon-phase-0-core`
 - Dépôt public : `Fredm237/codex-test`
 - Décision : **code techniquement qualifié ; lancement et Phase 1 NO-GO**
@@ -83,6 +84,20 @@ confirme au contraire l'absence de preuve production pour le scheduler, la
 collecte OpenMetrics multi-réplica, le backend de traces, le WAF, le CIDR proxy,
 le pager et le trafic représentatif.
 
+Un préflight authentifié en lecture a ensuite confirmé la topologie
+`production` (`web` + `Postgres`), la source `Fredm237/codex-test`, le répertoire
+racine `/filon-backend`, ainsi que le rattachement réel du service à
+`/filon-backend/railway.json`. Le déploiement actif reste celui de `main` au
+commit `af08f9089e9cc20acfd2cdf692714ec2847634cf`, daté du 20 août 2026. Sa
+configuration effective est encore RAILPACK/uvicorn, sans pré-déploiement
+Alembic ni healthcheck Railway ; elle diffère donc matériellement de la cible
+versionnée.
+
+La CLI officielle v5.30.1 a été qualifiée par checksum, mais aucune variable
+protégée, mutation, sauvegarde ou publication n'a été effectuée. Le rapport
+[préflight Railway](PHASE_0_RAILWAY_PREFLIGHT.md) impose un `pg_dump` et un
+restore drill sur base distincte avant tout déploiement.
+
 ## 5. Protection de `main`
 
 La ruleset GitHub `21798272`, **Phase 0 — protect main**, est active et limitée
@@ -106,7 +121,7 @@ pas seulement configurée dans un formulaire.
 Le code de Phase 0 est publié, byte-identique et techniquement qualifié sur les
 quatre surfaces. La CI prouve aussi que son gate métier ferme correctement la
 promotion. Les conditions suivantes restent bloquantes : datasets humains
-indépendants, Product/Variant Graph mesuré, qualification production et
-protection `main` effectivement enregistrée. Le lot CI/gouvernance est acquis ;
-les trois premiers blocages restent ouverts. Le verdict reste **NO-GO Phase 1,
-NO-GO production, NO-GO immersive**.
+indépendants, Product/Variant Graph mesuré et qualification production après
+backup/restore. Le lot CI/gouvernance et l'accès Railway sont acquis ; ils ne
+remplacent pas ces preuves. Le verdict reste **NO-GO Phase 1, NO-GO production,
+NO-GO immersive**.

@@ -18,11 +18,13 @@ Ce dossier traduit les mandats Product Intelligence Core, Execution Governance e
 Les raisons bloquantes sont factuelles : absence de Product/Variant Graph
 canonique et de holdout humain, argent encore stocké en flottants dans le
 modèle historique, sources de vérité concurrentes, données Quality de
-lancement vides, production non qualifiée et branche principale non protégée.
+lancement sans aucun cas humain et production non qualifiée.
 La CI distante existe désormais et ferme volontairement la promotion tant que
 ces données humaines sont absentes. Les chemins
 de décision durcis localement conservent désormais les inconnus au lieu de les
 transformer en avantages favorables ; cela ne vaut pas preuve de production.
+La branche principale est désormais protégée ; l'accès Railway est confirmé en
+lecture, mais aucun déploiement n'est autorisé avant backup et restore drill.
 
 Progression : P0.a (audit), P0.b (contrats/unknown), P0.d
 (baseline Alembic/rollback) et P0.e
@@ -53,7 +55,9 @@ réels sont branchés ; variante et attachement restent refusés tant que le Gra
 n'existe pas. Les **359 tests Quality** locaux et le run distant sont verts sur
 l'intégrité. Le rapport reste `integrity_valid=true`, `ready=false`,
 `status=not_ready` avec **0 cas humain**. Le gate strict bloque donc honnêtement
-le Product/Variant Graph P0.f.
+le Product/Variant Graph P0.f. Un inventaire public de 1 000 candidats sans
+label est maintenant figé pour démarrer la curation ; il ne modifie pas la
+readiness.
 
 P0.g (CI) est terminé : la branche publique est byte-identique au HEAD local,
 le run GitHub Actions #343 prouve 12 migrations, 2 021 tests backend, le web,
@@ -74,6 +78,7 @@ et extension.
 - [Registre canonique des preuves Phase 0](PHASE_0_EVIDENCE_REGISTER.md)
 - [Audit canonique de complétude des trois mandats](MANDATE_COMPLETION_AUDIT.md)
 - [Qualification distante Phase 0](PHASE_0_REMOTE_QUALIFICATION_REPORT.md)
+- [Préflight Railway de production](PHASE_0_RAILWAY_PREFLIGHT.md)
 - [ADR-001 — baseline Alembic](ADR-001-ALEMBIC-BASELINE.md)
 - [Runbook migrations et rollback](DATABASE_MIGRATION_RUNBOOK.md)
 - [Rapport P0.e — Observation shadow](PHASE_0E_OBSERVATION_REPORT.md)

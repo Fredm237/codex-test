@@ -93,6 +93,23 @@ auto-attestation du système ne compte jamais comme preuve.
 
 ## Workflow humain
 
+### 0. Collecte réelle sans label
+
+Avant les packs, `quality_lab.candidate_inventory` peut figer un inventaire
+public du catalogue. Il ne crée ni requête utilisateur, ni gold, ni strate de
+langue/scénario. Les champs favorables produits par FILON (prix, stock,
+catégorie, fraîcheur et lien affilié) sont exclus afin de ne pas biaiser les
+humains. Le JSONL et son reçu sont publiés sans écrasement et leurs empreintes se
+revérifient avec la commande documentée dans `candidates/README.md`.
+
+Cette collecte ne compte jamais dans la readiness. Un curateur humain doit
+encore confirmer l'inclusion, la vraie verticale, la langue et le scénario ;
+la verticale utilisée pour l'échantillonnage n'est pas une vérité. Deux autres
+humains indépendants remplissent ensuite seulement `annotation.label` et
+`annotation.confidence`. Retrieval et Decision exigent des requêtes réelles
+anonymisées issues d'une source externe autorisée : un nom produit transformé
+automatiquement en requête serait une donnée synthétique non éligible.
+
 Depuis `filon-backend`, créer un pack séparé par annotateur :
 
 ```bash
