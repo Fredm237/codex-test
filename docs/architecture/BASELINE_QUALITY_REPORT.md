@@ -10,9 +10,9 @@ La copie locale contenait avant l'audit sept changements utilisateur non commit�
 
 La vieille virtualenv backend utilisait Python 3.9 et provoquait 37 erreurs de collecte sur des syntaxes/types nécessitant une version récente. Ce n'est pas classé comme régression produit : la mesure officielle a été reprise dans un environnement temporaire Python 3.12.13, conforme au workflow et au `pyproject.toml` local.
 
-Les sections 2 à 12 conservent les mesures historiques au moment où elles ont
-été prises. Le contrôle client le plus récent est consigné en section 13 ; il
-ne transforme pas les résultats antérieurs et ne vaut pas preuve distante.
+Les sections 2 à 15 conservent les mesures historiques au moment où elles ont
+été prises. La qualification distante courante est consignée en section 16 ;
+elle ne réécrit pas les résultats antérieurs.
 
 ## 2. Résultats reproductibles
 
@@ -61,7 +61,7 @@ Conclusion : **vert technique, qualité produit inconnue**. Aucun pourcentage de
 
 | Invariant du mandat | Observation | Sévérité |
 |---|---|---|
-| Unknown est une valeur de premier rang | À la baseline, les valeurs absentes de livraison et de stock recevaient des défauts positifs. Le Core, l'Assistant et les clients mobiles/web sont désormais fail-closed sur preuve, fraîcheur et devise ; `catalog.py` et `SearchAssistant.tsx` restent à intégrer sous autorisation | Critique ; invariant principal durci, invariant système encore ouvert |
+| Unknown est une valeur de premier rang | À la baseline, les valeurs absentes de livraison et de stock recevaient des défauts positifs. Le Core, le catalogue, l'Assistant et les clients mobiles/web sont désormais intégrés fail-closed sur preuve, fraîcheur, devise et stock | Critique à la baseline ; invariant technique acquis dans `4a95a42` et `90246b2`, qualité métier encore non mesurée |
 | Money n'est jamais un float naïf | Prix/coûts en `Float`/`number` dans DB et contrats | Critique |
 | Toute décision s'appuie sur evidence | L'Assistant exige le marqueur explicite et revalide ses cartes depuis `1a167dc` ; le backend catalogue protégé ne satisfait pas encore tout le contrat client | Critique |
 | Un Product Graph canonique existe | `catalog_products` est un regroupement EAN, sans Family/Model/Variant | Critique |
@@ -329,3 +329,25 @@ suite Quality courante passe **359/359** et le backend complet **2 012 réussis
 emplacements sans moteur compatible. Le holdout contient toujours **0 cas
 humain** : cette avancée technique ne change donc pas le NO-GO et ne produit
 aucune mesure métier.
+
+## 16. Qualification distante courante — intégration, CI et protection
+
+Mesure du 29 août 2026 après les autorisations ciblées et la publication :
+
+| Surface | Preuve | Résultat |
+|---|---|---|
+| Identité Git applicative avant ce rapport | Local `7026f4a`, distant consolidé `9beeda8` | Arbre commun `fcac4bb28bd2c26835afbc74949eaa37a96b8ab6` |
+| Contrat vérité | `4a95a42` + `90246b2` | Catalogue, agrégats, Assistant et MegaMenu intégrés fail-closed |
+| Backend local | Pytest complet | **2 020 réussis + 1 ignoré** |
+| Web local | Suite, typecheck, build | **17/17**, TypeScript vert, 42 pages |
+| GitHub Actions #343 | Migrations, backend et trois clients | **12/12** migrations, **2 021/2 021** backend, web/mobile/extension verts |
+| Quality strict | 7 datasets / 27 gates | Échec attendu : `integrity_valid=true`, `ready=false`, `status=not_ready`, 0 cas humain |
+| Artefact | `9713798390` | Rapport téléversé, digest `sha256:4806919878e3baccb939aba8db1c6b39e5ea078a4eb45e943c63db69bf5675dd` |
+| Vercel | Statuts GitHub sur `e04dfc2` et `9beeda8` | Preview construite avec succès ; production non promue |
+| Protection `main` | Ruleset `21798272` | Active, PR et quatre jobs requis, branche à jour, aucun bypass, suppression/force-push interdits |
+
+Le backend Railway public reste un ancien processus `env=dev`, Redis local et
+Qdrant désactivé ; il ne prouve ni le nouveau déploiement ni la collecte, les
+traces, le WAF ou le pager. Le lot CI/gouvernance est acquis, mais les datasets
+humains et la production restent NO-GO. Voir le
+[rapport de qualification distante](PHASE_0_REMOTE_QUALIFICATION_REPORT.md).

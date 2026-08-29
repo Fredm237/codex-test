@@ -24,9 +24,9 @@ Service pour qu'un prix récent renforce une décision. Il est désormais partag
 par le comparateur historique et le planificateur général. Pour les
 consommateurs Core déjà durcis, `offers.updated_at` n’est plus une preuve : le
 prix, la devise et le stock doivent correspondre à un `PriceSnapshot`
-append-only. L’extension de ce contrat aux endpoints publics du catalogue est
-prévalidée mais reste soumise à l’autorisation d’intégrer `catalog.py` ; voir la
-[prévalidation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md).
+append-only. Ce contrat est maintenant appliqué aux endpoints publics du
+catalogue par le commit `4a95a42` ; l'intégration et ses preuves sont consignées
+dans la [prévalidation devenue post-validation](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md).
 
 Cette règle ne prétend pas que prix et stock ont naturellement le même TTL. Le
 mandat cible des durées distinctes — stock très court, prix court, identité et

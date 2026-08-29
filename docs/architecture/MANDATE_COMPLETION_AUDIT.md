@@ -1,8 +1,10 @@
 # FILON — audit canonique de complétude des trois mandats
 
-- Date de coupure : **29 août 2026, 10:03 CEST**
+- Date de coupure initiale : **29 août 2026, 10:03 CEST**
+- Dernière qualification : **29 août 2026, 13:17 CEST**
 - Branche locale : `codex/filon-phase-0-core`
-- Référence locale auditée avant ce document : `d40bde0`
+- Référence applicative locale auditée : `7026f4a`
+- Référence applicative distante auditée : `9beeda8`, arbre commun `fcac4bb28bd2c26835afbc74949eaa37a96b8ab6`
 - Dépôt distant : `Fredm237/codex-test`, public
 - `main` distant : `57724c72e77c50ca54aaf64338f838dda3be2747`
 - Décision : **MANDAT INCOMPLET — PHASE 0 NO-GO — PHASE 1 ET IMMERSIVE INTERDITES PAR GATE**
@@ -38,12 +40,18 @@ courant, mais le mandat complet n'est pas fini. Les tests techniques verts ne
 remplacent ni un benchmark humain indépendant, ni un run GitHub Actions, ni une
 preuve de production.
 
-Les quatre conditions qui empêchent un GO sont :
+Les trois conditions qui empêchent encore un GO sont :
 
 1. les sept datasets Quality Lab contiennent chacun **0 cas humain** ;
 2. Product/Variant Graph n'existe pas encore et ne peut pas être évalué sans ces datasets ;
-3. l'intégration catalogue/Assistant/MegaMenu est seulement prévalidée parce que les fichiers concernés appartiennent déjà au travail local de l'utilisateur ;
-4. la branche locale n'est pas publiée, aucun run CI distant n'existe pour elle et `main` n'a ni ruleset ni protection classique.
+3. l'infrastructure de production n'est pas qualifiée : le backend public reste
+   un ancien processus `env=dev`, sans preuve de collecte/traces/WAF/pager.
+
+Depuis la coupure initiale, l'intégration catalogue/Assistant/MegaMenu est
+acquise, la branche est publique et byte-identique, Actions #343 a exécuté les
+quatre surfaces, Vercel a construit la preview et la ruleset `21798272` protège
+`main` sans bypass. Le [rapport distant](PHASE_0_REMOTE_QUALIFICATION_REPORT.md)
+est l'autorité de ces preuves.
 
 La clause d'entrée de la bible immersive exige Product Graph, Offer Graph,
 recherche, evidence layer, decision engine et Core UX qualifiés. Cette clause
@@ -74,7 +82,7 @@ ne doit donc être lancé.
 | 75–90 | Audit-first, repository/source maps, contracts, unknown, provenance, reproductibilité, ADR, erreurs, scorecard, éligibilité | **PARTIEL** | Cartes, contrats v1, taxonomie, ADR, scorecard et provenance shadow existent ; couverture système et données réelles incomplètes |
 | 91–124 | Recherche/ranking/personnalisation, Fashion knowledge, contexte temps/coût, reviews, explications, UX, no dark patterns, neutralité | **PARTIEL / INTERDIT PAR GATE** | Les invariants de vérité et de neutralité sont bornés ; le Graph, les benchmarks et les moteurs de personnalisation restent interdits |
 | 125–136 | Expérimentation, North Star, coûts, routing, cache, fraîcheur, fallback, failure modes, corruption, quarantaine, merchant feedback | **PARTIEL** | Fraîcheur provisoire 72 h, cache, abstention et quarantaine prouvés localement ; expérimentation et feedback production non mesurés |
-| 137–147 | Release, canary, shadow evaluation, rapports, ownership, logique domaine, versioning, compatibilité, migrations, backfill, zéro perte | **PARTIEL** | CI et migrations locales existent ; aucun canary, run distant, branche protégée ou backfill Graph qualifié |
+| 137–147 | Release, canary, shadow evaluation, rapports, ownership, logique domaine, versioning, compatibilité, migrations, backfill, zéro perte | **PARTIEL** | CI distante, branche protégée et migrations sont prouvées ; aucun canary production ni backfill Graph qualifié |
 | 148–168 | Gate Fashion, multimodal, Recreate, try-on, composition/budget, commerce graph, moat/flywheel, audits réels, i18n/pays | **INTERDIT PAR GATE** | Gate Fashion et gate Product Graph non passées ; aucun claim de conformité n'est permis |
 | 169–172 | Types monétaires, quantités, sémantique prix, évolution de schéma | **PARTIEL** | Devise/provenance additives et comparaison monodevise ; modèles historiques en flottants et schéma v2 non migrés |
 | 173–184 | Documentation, dead code/archive, frontend canonique, design/motion/homepage et cinq moments | **PARTIEL / INTERDIT PAR GATE** | Documentation Phase 0 présente ; archive/refonte créative gelées |
@@ -101,9 +109,9 @@ ne doit donc être lancé.
 | Evidence et sources de vérité | **PARTIEL** | [Registre des preuves](PHASE_0_EVIDENCE_REGISTER.md), [Source map](CURRENT_SYSTEM_MAP.md) |
 | Root causes et dette | **PROUVÉ** | [Baseline qualité](BASELINE_QUALITY_REPORT.md), [Keep/Refactor/Rewrite/Delete](KEEP_REFACTOR_REWRITE_DELETE.md) |
 | Architecture proposée | **PROUVÉ COMME CIBLE** | [Architecture cible](TARGET_ARCHITECTURE.md) |
-| Fichiers et ownership | **PARTIEL** | Cartographie + [prévalidation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) ; ownership distant non imposé |
+| Fichiers et ownership | **PROUVÉ DANS LE LOT P0** | Cartographie, [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) et ruleset distante sans bypass |
 | Migration et rollback | **PROUVÉ LOCALEMENT** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md) |
-| Tests | **PROUVÉ DANS LE PÉRIMÈTRE LOCAL** | Backend courant 2 012 + 1 ignoré ; web isolé 17/17 ; typecheck et build 42 pages ; Quality courant 359/359 |
+| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local : backend 2 020 + 1 ignoré, web 17/17, typecheck/build ; Actions #343 : migrations 12/12, backend 2 021/2 021 et trois clients verts |
 | Benchmarks | **EXTERNE NON MESURABLE** | Holdout humain absent |
 | Before/after metrics | **EXTERNE NON MESURABLE** | Aucun scorecard métier éligible ni trafic représentatif |
 | Known limitations | **PROUVÉ** | Ce document, le registre des preuves et les rapports P0 |
@@ -111,13 +119,12 @@ ne doit donc être lancé.
 
 ## Conditions de levée du NO-GO
 
-### 1. Intégration protégée
+### 1. Intégration protégée — acquise
 
-Les textes d'autorisation exacts, les fichiers concernés, les validations et le
-rollback sont consignés dans la
-[prévalidation de vérité prix](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md).
-L'autorisation générale de continuer ou le mode automatique ne remplace pas ces
-consentements ciblés.
+Les consentements ciblés ont été reçus. Les fichiers, validations et rollback
+sont consignés dans la
+[post-validation de vérité prix](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md).
+Les commits `4a95a42` et `90246b2` sont intégrés et qualifiés à distance.
 
 ### 2. Datasets humains indépendants
 
@@ -135,19 +142,13 @@ La collecte doit être indépendante, aveugle, stratifiée, adjudicable et liée
 sa provenance. Les données synthétiques ou auto-annotées ne peuvent pas remplir
 ce gate.
 
-### 3. GitHub et CI distante
+### 3. GitHub et CI distante — acquis
 
-Le 29 août 2026, le connecteur GitHub et la page d'administration confirment :
-
-- dépôt public `Fredm237/codex-test` ;
-- `main` au commit `57724c72e77c50ca54aaf64338f838dda3be2747` ;
-- branche `codex/filon-phase-0-core` absente à distance ;
-- aucun ruleset ;
-- aucune protection classique de branche.
-
-Il faut une autorisation séparée avant de publier la branche. Après
-publication : observer tous les jobs, corriger les échecs sans masquer les
-gates, puis configurer les checks requis et la protection de `main`.
+La branche publique pointe sur `9beeda8` avec le même arbre que le HEAD local.
+Actions #343 prouve les quatre surfaces et publie l'artefact Quality. La ruleset
+`21798272` est active sur `main`, exige les quatre jobs GitHub Actions, la PR,
+la résolution des conversations et une branche à jour ; suppression et
+force-push sont interdits, sans bypass.
 
 ### 4. Production
 
@@ -161,8 +162,9 @@ peut pas attester ces propriétés.
 
 **NO-GO Phase 1. NO-GO Immersive.**
 
-La prochaine action locale autorisée dépend soit d'un consentement ciblé pour
-les fichiers protégés, soit de la réception des datasets humains. La prochaine
-action distante dépend de l'autorisation de push public. Jusqu'à l'une de ces
-entrées, commencer Product Graph, Fashion, Personal Commerce ou la bible
-immersive violerait directement l'ordre de dépendances des mandats.
+Les actions locales et de gouvernance disponibles sont épuisées pour ce gate.
+La prochaine entrée métier est la réception des datasets humains indépendants ;
+la prochaine entrée production est l'accès/configuration Railway et à
+l'infrastructure de collecte/alerting. Avant ces preuves, commencer Product
+Graph, Fashion, Personal Commerce ou la bible immersive violerait directement
+l'ordre de dépendances des mandats.

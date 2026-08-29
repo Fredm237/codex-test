@@ -1,9 +1,18 @@
 # FILON — prévalidation de l’intégration protégée « vérité prix »
 
+> **Statut au 29 août 2026 : intégré et publié.** Les consentements ciblés ont
+> été reçus. `catalog.py` et SearchAssistant ont été intégrés dans `4a95a42` ;
+> MegaMenu et son test ont été intégrés conjointement dans `90246b2`. La suite
+> locale passe 2 020 tests backend + 1 ignoré, 17/17 web, typecheck et build 42
+> pages. GitHub Actions #343 confirme 2 021 tests backend et les quatre surfaces.
+> La branche publique est byte-identique au HEAD local ; voir le
+> [rapport de qualification distante](PHASE_0_REMOTE_QUALIFICATION_REPORT.md).
+
 - Date de coupure : **29 août 2026**
 - Branche locale : `codex/filon-phase-0-core`
 - Référence locale non protégée : `56de1cf`
-- Statut : **prévalidation verte, intégration non autorisée, NO-GO**
+- Statut historique à la coupure : **prévalidation verte** ; statut courant :
+  **intégration et publication acquises, Phase 1 toujours NO-GO**
 
 ## Décision
 

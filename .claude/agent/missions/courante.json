@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 0 Product Intelligence Core",
   "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
   "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-29T13:06:00+02:00",
+  "maj": "2026-08-29T13:17:00+02:00",
   "contraintes": [
     "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
     "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
@@ -91,14 +91,14 @@
     {
       "id": "p0_g",
       "objectif": "Étendre la CI à toutes les surfaces et protéger main",
-      "statut": "en_cours",
+      "statut": "fait",
       "depend": [
         "p0_a"
       ],
       "outil": "GitHub",
       "attendu": "Backend, web, mobile, extension, contrats, migrations et quality lab requis",
-      "obtenu": "Workflow multi-surfaces publié avec backend, Postgres/Alembic, contrats, Quality, web, mobile et extension ; branche publique codex/filon-phase-0-core publiée avec un arbre byte-identique au HEAD local ; run manuel réel exécuté et rapport readiness téléversé ; protection main restante",
-      "verification": "Publication GitHub consolidée e04dfc2c18ef58177d4182acbb67c966058ff9c0, arbre 77ca57dbd92a028dc693de66b5f3e00d381f1115 identique au HEAD local 90246b2. Actions #343 : migrations 12/12, backend 2021/2021, web tests/build, mobile types/lint/tests et extension contrats/manifeste/syntaxe verts. Le seul échec est le gate strict attendu : rapport intègre, 27 gates techniques passées, status=not_ready car les sept datasets humains sont vides ; artefact 9713798390 publié. Aucun ruleset détecté ; protection classique non vérifiable par l'intégration.",
+      "obtenu": "Workflow multi-surfaces publié avec backend, Postgres/Alembic, contrats, Quality, web, mobile et extension ; branche publique codex/filon-phase-0-core byte-identique au HEAD local ; run réel et artefact readiness exécutés ; ruleset active limitée à main avec PR, résolution des conversations, branche à jour, suppression/force-push interdits et quatre checks GitHub Actions requis sans bypass",
+      "verification": "Publication GitHub consolidée e04dfc2 puis 9beeda8, arbre distant fcac4bb28bd2c26835afbc74949eaa37a96b8ab6 identique au HEAD local 7026f4a. Actions #343 : migrations 12/12, backend 2021/2021, web tests/build, mobile types/lint/tests et extension contrats/manifeste/syntaxe verts. Le seul échec est le gate strict attendu : rapport intègre, 27 gates techniques passées, status=not_ready car les sept datasets humains sont vides ; artefact 9713798390 publié. Ruleset GitHub 21798272 active sur ~DEFAULT_BRANCH, quatre contexts liés à GitHub Actions, strict=true, bypass_actors=[] et current_user_can_bypass=never.",
       "tentatives": 1
     },
     {
@@ -369,6 +369,11 @@
       "ts": "2026-08-29T13:06:00+02:00",
       "evenement": "verification",
       "detail": "p0_g — branche publique codex/filon-phase-0-core publiée via e04dfc2 avec arbre identique au HEAD local ; Actions #343 : migrations, 2021 tests backend, web, mobile et extension verts ; gate strict correctement rouge sur readiness not_ready, 27 gates techniques passées, sept datasets humains vides, artefact 9713798390"
+    },
+    {
+      "ts": "2026-08-29T13:17:00+02:00",
+      "evenement": "tache_faite",
+      "detail": "p0_g — ruleset GitHub 21798272 active et limitée à main : PR obligatoire, conversations résolues, branche à jour, suppression et force-push interdits, quatre jobs Phase 0 requis depuis GitHub Actions, aucun bypass"
     }
   ]
 }
