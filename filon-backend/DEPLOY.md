@@ -71,17 +71,24 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    ```
    REDIS_URL=<référence privée vers Redis Railway>
    RATE_LIMIT_BACKEND=redis
+   RATE_LIMIT_IDENTITY_SOURCE=railway
    RATE_LIMIT_IDENTITY_SECRET=<secret partagé distinct, 32-256 caractères ASCII>
    RATE_LIMIT_REDIS_TIMEOUT_SECONDS=0.25
    ```
 
    Tous les réplicas doivent recevoir le même secret afin de produire le même
-   pseudonyme réseau sans stocker l'adresse brute. En mode `redis`, une erreur,
-   un timeout ou une décision illisible ferme les routes protégées avec `503` ;
-   FILON ne retombe jamais sur un compteur local qui rouvrirait le quota. Le
-   seul `GET`/`HEAD /health/live` reste exempt pour diagnostiquer le processus.
-   Conserver `local` tant que Redis n'est pas créé et qualifié ; la présence du
-   code seule ne prouve pas une protection distribuée en production.
+   pseudonyme réseau sans stocker l'adresse brute. Railway injecte
+   `RAILWAY_ENVIRONMENT_ID` et `RAILWAY_SERVICE_ID` ; FILON exige leurs UUID
+   canoniques avant d'accepter la source `railway`, puis lit exactement un
+   `X-Real-IP` canonique conformément aux
+   [spécifications réseau Railway](https://docs.railway.com/networking/public-networking/specs-and-limits).
+   Un en-tête absent, dupliqué ou invalide ferme la requête avec `503` sans
+   atteindre la route. En mode `redis`, une erreur, un timeout ou une décision
+   illisible produit le même refus ; FILON ne retombe jamais sur un compteur
+   local qui rouvrirait le quota. Le seul `GET`/`HEAD /health/live` reste exempt
+   pour diagnostiquer le processus. Conserver `local` tant que Redis n'est pas
+   créé et qualifié ; la présence du code seule ne prouve pas une protection
+   distribuée en production.
 5. Avant de déployer, exécuter intégralement le
    [runbook d'adoption et de rollback](../docs/architecture/DATABASE_MIGRATION_RUNBOOK.md) :
    sauvegarde, restauration test et adoption Alembic précèdent la migration

@@ -6,6 +6,7 @@ import json
 from functools import lru_cache
 from typing import Literal, Self
 from urllib.parse import urlsplit
+from uuid import UUID
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -85,6 +86,28 @@ class Settings(BaseSettings):
                 errors.append(
                     "RATE_LIMIT_IDENTITY_SECRET is required for distributed rate limiting"
                 )
+            if self.is_production and self.rate_limit_identity_source != "railway":
+                errors.append(
+                    "RATE_LIMIT_IDENTITY_SOURCE must be railway for distributed "
+                    "rate limiting in production"
+                )
+
+        if self.rate_limit_identity_source == "railway":
+            if not self.is_production:
+                errors.append(
+                    "Railway rate limit identity is only valid in a deployed environment"
+                )
+            for name, value in (
+                ("RAILWAY_ENVIRONMENT_ID", self.railway_environment_id),
+                ("RAILWAY_SERVICE_ID", self.railway_service_id),
+            ):
+                try:
+                    parsed_identifier = UUID(value or "")
+                except ValueError:
+                    errors.append(f"{name} must be a canonical UUID")
+                    continue
+                if str(parsed_identifier) != value:
+                    errors.append(f"{name} must be a canonical UUID")
 
         if not self.is_production:
             if errors:
@@ -139,12 +162,19 @@ class Settings(BaseSettings):
     # Le compteur local préserve la compatibilité. Le mode Redis doit être un
     # opt-in complet : URL, secret partagé et aucune dégradation locale.
     rate_limit_backend: Literal["local", "redis"] = Field(default="local")
+    rate_limit_identity_source: Literal["asgi", "railway"] = Field(
+        default="asgi"
+    )
     rate_limit_identity_secret: str | None = Field(default=None)
     rate_limit_redis_timeout_seconds: float = Field(
         default=0.25,
         ge=0.05,
         le=2.0,
     )
+    # Variables injectées par Railway. Elles ne sont jamais renvoyées ni
+    # journalisées ; leur présence borne l'usage de X-Real-IP à la plateforme.
+    railway_environment_id: str | None = Field(default=None)
+    railway_service_id: str | None = Field(default=None)
     # Secret dédié au scrape OpenMetrics. Sans valeur, l'export standard est
     # désactivé et répond 503 ; le snapshot JSON historique reste inchangé.
     metrics_export_token: str | None = Field(default=None)

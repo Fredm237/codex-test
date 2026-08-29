@@ -35,18 +35,19 @@ documents sources restent l'autorité lorsqu'une règle plus détaillée s'appli
 
 ## Verdict exécutif
 
-Le travail automatique a épuisé les actions locales sûres et utiles du lot
-courant, mais le mandat complet n'est pas fini. Les tests techniques verts ne
-remplacent ni un benchmark humain indépendant, ni un run GitHub Actions, ni une
-preuve de production.
+Le travail automatique continue sur les lots techniques et d'infrastructure
+qui ne dépendent pas d'une annotation humaine. Le mandat complet n'est pas
+fini : les tests techniques verts ne remplacent ni un benchmark indépendant,
+ni une preuve de production.
 
 Les trois conditions qui empêchent encore un GO global sont :
 
 1. les sept datasets Quality Lab contiennent chacun **0 cas humain** ;
 2. Product/Variant Graph n'existe pas encore et ne peut pas être évalué sans ces datasets ;
 3. le backend Core Railway, son backup/restore drill et sa migration sont
-   qualifiés, mais l'agrégateur, les traces, le WAF ou la limite distribuée, le
-   pager et les SLO sur trafic représentatif ne le sont pas.
+   qualifiés ; la limite Redis et l'identité Railway sont qualifiées localement,
+   mais leur activation, l'agrégateur, les traces, le WAF, le pager et les SLO
+   sur trafic représentatif ne le sont pas.
 
 Depuis la coupure initiale, l'intégration catalogue/Assistant/MegaMenu est
 acquise, la branche est publique et byte-identique, Actions #344 a exécuté les
@@ -67,7 +68,7 @@ ne doit donc être lancé.
 | 5–12 | Product Graph, entity/variant resolution, rôles, ontologie, Raw Offer, Offer Graph, Merchant Intelligence | **INTERDIT PAR GATE** | Observation shadow est prouvée, mais Product/Variant Graph et Offer Graph sont absents ; Quality reste vide |
 | 13–22 | Recherche, intent, contraintes, ranking, score, confiance, evidence, Buy/Wait, abstention | **PARTIEL / INTERDIT PAR GATE** | Les parcours v1 ont des garde-fous fail-closed et Decision est branché au benchmark sourcé ; la qualité end-to-end et les moteurs v2 ne sont pas mesurables |
 | 23–27 | Quality Lab, benchmark, métriques, gates et funnel | **PARTIEL + EXTERNE NON MESURABLE** | Infrastructure v0.5, 7 datasets, 27 gates et 359 tests ; 0 cas humain et 2 adaptateurs Graph absents |
-| 28–29 | Observabilité et opérations | **PARTIEL** | Corrélation des huit jalons décisionnels, spans PostgreSQL/Redis/Awin/SerpAPI/LLM, propagation W3C HTTP, probes, métriques, front door locale et Redis atomique opt-in, scheduler, alertes locales, OpenMetrics, pack Prometheus/Grafana et activation fail-closed validés ; backend de traces, activation Redis production ou WAF, déploiement agrégateur/dashboard, reçu réel, pager, CIDR Railway et trafic représentatif manquent |
+| 28–29 | Observabilité et opérations | **PARTIEL** | Corrélation des huit jalons décisionnels, spans PostgreSQL/Redis/Awin/SerpAPI/LLM, propagation W3C HTTP, probes, métriques, front door locale, identité `X-Real-IP` fermée et Redis atomique opt-in, scheduler, alertes locales, OpenMetrics, pack Prometheus/Grafana et activation fail-closed validés ; backend de traces, preuve `X-Real-IP` réelle, activation Redis production ou WAF, déploiement agrégateur/dashboard, reçu, pager et trafic représentatif manquent |
 | 30–35 | Web canonique, homepage, loading, extension, mobile, barcode | **PARTIEL** | Durcissement web/mobile/extension validé ; aucune nouvelle feature n'est qualifiée et le freeze reste actif |
 | 36–50 | Personnalisation, Fashion, Style/Taste/Wardrobe, commerce personnel, marketing truth, neutralité, sécurité | **INTERDIT PAR GATE** | Les garde-fous de neutralité et de confidentialité sont partiels ; toutes les capacités produit nouvelles restent gelées |
 | 51–54 | Processus, old/new, non-régression, verticales | **PARTIEL** | Processus, CI locale et compatibilité sont documentés ; non-régression distante et métriques métier absentes |

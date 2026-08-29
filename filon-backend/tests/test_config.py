@@ -228,6 +228,63 @@ def test_distributed_rate_limit_accepts_a_bounded_redis_configuration() -> None:
     assert settings.rate_limit_redis_timeout_seconds == 0.2
 
 
+def test_production_redis_requires_the_railway_identity_source() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="RATE_LIMIT_IDENTITY_SOURCE must be railway",
+    ):
+        _production(
+            rate_limit_backend="redis",
+            redis_url="redis://redis.internal:6379/0",
+            rate_limit_identity_secret="s" * 32,
+        )
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        (
+            {"env": "test"},
+            "only valid in a deployed environment",
+        ),
+        (
+            {"railway_environment_id": None},
+            "RAILWAY_ENVIRONMENT_ID must be a canonical UUID",
+        ),
+        (
+            {"railway_service_id": "NOT-A-UUID"},
+            "RAILWAY_SERVICE_ID must be a canonical UUID",
+        ),
+    ],
+)
+def test_railway_identity_source_rejects_an_unbound_platform(
+    overrides,
+    message,
+) -> None:
+    values = {
+        "rate_limit_identity_source": "railway",
+        "railway_environment_id": "b843980b-13e3-414b-8568-890a953310ed",
+        "railway_service_id": "d68db2c1-3ff8-45ca-a329-c89b4e81fab9",
+    }
+    values.update(overrides)
+
+    with pytest.raises(ValidationError, match=message):
+        _production(**values)
+
+
+def test_production_redis_accepts_canonical_railway_identity() -> None:
+    settings = _production(
+        rate_limit_backend="redis",
+        rate_limit_identity_source="railway",
+        rate_limit_identity_secret="s" * 32,
+        redis_url="redis://redis.internal:6379/0",
+        railway_environment_id="b843980b-13e3-414b-8568-890a953310ed",
+        railway_service_id="d68db2c1-3ff8-45ca-a329-c89b4e81fab9",
+    )
+
+    assert settings.rate_limit_identity_source == "railway"
+
+
 def test_awin_feed_limits_are_finite_by_default() -> None:
     settings = Settings(_env_file=None, env="test")
 

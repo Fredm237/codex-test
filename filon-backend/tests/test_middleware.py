@@ -516,6 +516,131 @@ async def test_x_forwarded_for_forge_ne_permet_pas_de_tourner_le_quota(caplog):
 
 
 @pytest.mark.asyncio
+async def test_x_real_ip_railway_separe_les_clients_d_un_meme_pair_asgi():
+    app = FastAPI()
+    app.add_middleware(
+        RateLimitMiddleware,
+        general_limit=1,
+        trusted_client_header="x-real-ip",
+    )
+
+    @app.get("/ordinary")
+    async def ordinary() -> dict:
+        return {"ok": True}
+
+    transport = httpx.ASGITransport(
+        app=app,
+        client=("10.42.0.7", 12345),
+    )
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://test",
+    ) as client:
+        first = await client.get(
+            "/ordinary",
+            headers={"x-real-ip": "198.51.100.10"},
+        )
+        second = await client.get(
+            "/ordinary",
+            headers={"x-real-ip": "198.51.100.11"},
+        )
+        first_again = await client.get(
+            "/ordinary",
+            headers={
+                "x-real-ip": "198.51.100.10",
+                "x-forwarded-for": "203.0.113.250",
+            },
+        )
+
+    assert [first.status_code, second.status_code, first_again.status_code] == [
+        200,
+        200,
+        429,
+    ]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "headers",
+    [
+        [],
+        [("x-real-ip", "not-an-ip")],
+        [("x-real-ip", "198.51.100.10:443")],
+        [
+            ("x-real-ip", "198.51.100.10"),
+            ("x-real-ip", "198.51.100.11"),
+        ],
+    ],
+)
+async def test_identite_railway_absente_ambigue_ou_invalide_echoue_fermee(
+    headers,
+):
+    app = FastAPI()
+    route_calls = 0
+    app.add_middleware(
+        RateLimitMiddleware,
+        trusted_client_header="x-real-ip",
+    )
+
+    @app.get("/ordinary")
+    async def ordinary() -> dict:
+        nonlocal route_calls
+        route_calls += 1
+        return {"ok": True}
+
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://test",
+    ) as client:
+        response = await client.get("/ordinary", headers=headers)
+
+    assert response.status_code == 503
+    assert response.json() == {"error": "rate_limit_unavailable"}
+    assert route_calls == 0
+
+
+@pytest.mark.asyncio
+async def test_x_real_ip_est_pseudonymise_avant_redis():
+    app = FastAPI()
+    redis_client = _RedisDecisionClient()
+    app.add_middleware(
+        RateLimitMiddleware,
+        distributed_client=redis_client,
+        identity_secret=b"s" * 32,
+        trusted_client_header="x-real-ip",
+    )
+
+    @app.get("/ordinary")
+    async def ordinary() -> dict:
+        return {"ok": True}
+
+    transport = httpx.ASGITransport(
+        app=app,
+        client=("10.42.0.7", 12345),
+    )
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://test",
+    ) as client:
+        await client.get(
+            "/ordinary",
+            headers={"x-real-ip": "198.51.100.10"},
+        )
+        await client.get(
+            "/ordinary",
+            headers={"x-real-ip": "198.51.100.11"},
+        )
+
+    assert len(redis_client.calls) == 2
+    assert redis_client.calls[0][7] != redis_client.calls[1][7]
+    serialized_calls = repr(redis_client.calls)
+    assert "198.51.100.10" not in serialized_calls
+    assert "198.51.100.11" not in serialized_calls
+    assert "10.42.0.7" not in serialized_calls
+
+
+@pytest.mark.asyncio
 async def test_un_lookalike_health_reste_observe(caplog):
     app = FastAPI()
     app.add_middleware(RequestLoggingMiddleware)
@@ -795,11 +920,18 @@ async def test_create_app_branche_et_ferme_le_client_redis(monkeypatch):
 
     settings = Settings(
         _env_file=None,
-        env="test",
+        env="production",
+        debug=False,
+        cors_origins='["https://filon.be"]',
+        database_url="postgresql://filon:secret@postgres/filon",
+        database_schema_mode="alembic",
         rate_limit_backend="redis",
+        rate_limit_identity_source="railway",
         redis_url="redis://redis.internal:6379/0",
         rate_limit_identity_secret="s" * 32,
         rate_limit_redis_timeout_seconds=0.2,
+        railway_environment_id="b843980b-13e3-414b-8568-890a953310ed",
+        railway_service_id="d68db2c1-3ff8-45ca-a329-c89b4e81fab9",
     )
     monkeypatch.setattr(app_main, "get_settings", lambda: settings)
     monkeypatch.setattr(app_main, "Redis", FakeRedis)
@@ -814,6 +946,7 @@ async def test_create_app_branche_et_ferme_le_client_redis(monkeypatch):
     assert app.state.rate_limit_redis_client is redis_client
     assert rate_limit_middleware.kwargs["distributed_client"] is redis_client
     assert rate_limit_middleware.kwargs["identity_secret"] == b"s" * 32
+    assert rate_limit_middleware.kwargs["trusted_client_header"] == "x-real-ip"
     assert factory_calls == [
         (
             "redis://redis.internal:6379/0",

@@ -64,7 +64,10 @@ réplicas. Il utilise l'horloge Redis, un HMAC partagé qui ne transmet jamais
 l'adresse brute, un registre expirant borné à 10 000 couples actifs et les
 mêmes classes de quota. URL, secret et timeout sont validés au démarrage. Une
 panne ou une réponse Redis invalide ferme les routes avec `503` sans recréer de
-budget local ; le client est fermé avec le cycle de vie FastAPI. Ce mode est
+budget local ; le client est fermé avec le cycle de vie FastAPI. En production,
+ce mode exige la source `railway` : UUID de plateforme canoniques puis exactement
+un `X-Real-IP` IPv4/IPv6 sans port, dupliqué ni liste avant pseudonymisation.
+L'en-tête est celui que Railway documente pour l'adresse distante. Ce mode est
 qualifié par tests mais n'est pas encore activé sur le service Railway.
 
 ### Métriques bornées
@@ -241,10 +244,11 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
   avertissements historiques `datetime.utcnow()` ;
 - deux relectures indépendantes supplémentaires et un fuzz de fenêtre
   glissante/concurrence : aucun P0, P1 ou P2 restant dans la front door ;
-- lot limite distribuée Redis du 29 août 2026 : **127 tests ciblés réussis** et
-  suite backend complète **2 054 réussis + 2 ignorés** sous Python 3.12.14 ;
-  concurrence, panne fail-closed, plafond partagé, confidentialité, validation
-  de configuration et fermeture du client sont couverts ;
+- lot limite distribuée Redis + identité Railway du 29 août 2026 : **138 tests
+  ciblés réussis** et suite backend complète **2 065 réussis + 2 ignorés** sous
+  Python 3.12.14 ; concurrence, panne fail-closed, plafond partagé, séparation
+  de deux IP derrière le même pair, en-tête absent/dupliqué/invalide,
+  confidentialité, configuration et fermeture du client sont couverts ;
 - la preuve détaillée se trouve dans `LOCAL_ALERT_EVALUATION_REPORT.md` ;
 - build web isolé du parent `922766e`, inchangé par ce commit backend/docs :
   compilation, types et 42 routes verts ; contrats v1 et claims verts ;
@@ -281,8 +285,9 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
    travers les redémarrages, les resets sous charge ou une période de trafic
    représentatif.
 9. `FORWARDED_ALLOW_IPS` est fermé à `127.0.0.1` en production, sans wildcard.
-   La chaîne de pairs réellement présentée par le proxy Railway doit encore
-   être vérifiée avant de déclarer la front door entièrement qualifiée.
+   Le mode d'identité Railway ne dépend pas de XFF et exige `X-Real-IP`, mais sa
+   présence et son unicité doivent encore être capturées sur le déploiement réel
+   avant de déclarer la front door entièrement qualifiée.
 10. Le besoin Assistant reste transporté dans `q=` par le flux SSE actuel ; les
     logs applicatifs sont propres, mais un proxy ou une plateforme amont peut
     encore observer l'URL avant FILON.
@@ -304,5 +309,5 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 - brancher l'instance canonique à un ordonnanceur contrôlé, puis tester son
   export, son canal, ses silences et son rollback hors production ;
 - mesurer sur trafic représentatif avant de ratifier un SLO ;
-- vérifier/configurer les pairs proxy Railway, puis activer et tester le mode
-  Redis privé ou ajouter un WAF avant de revendiquer une barrière DDoS.
+- vérifier sur Railway l'unique `X-Real-IP`, puis activer et tester le mode Redis
+  privé ou ajouter un WAF avant de revendiquer une barrière DDoS.

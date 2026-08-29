@@ -9,9 +9,11 @@ Redis et le proxy réels ne sont pas qualifiés en production**
 La front door du backend applique une défense locale, déterministe et
 fail-closed contre les abus ordinaires. Le middleware ne lit jamais directement
 `X-Forwarded-For` : Uvicorn ne peut l'utiliser qu'après validation du pair TCP
-par une allowlist explicite. La front door borne strictement sa mémoire et évite
-de journaliser les termes de recherche encore transportés dans les query
-strings.
+par une allowlist explicite. Sur Railway uniquement, un opt-in distinct lit
+l'unique `X-Real-IP` canonique documenté par la plateforme après avoir exigé les
+UUID d'environnement et de service injectés par Railway. La front door borne
+strictement sa mémoire et évite de journaliser les termes de recherche encore
+transportés dans les query strings.
 
 Le compteur Redis atomique est désormais disponible en opt-in pour coordonner
 les réplicas. Ce socle ne remplace ni un WAF, ni une politique réseau de
@@ -33,8 +35,18 @@ activé mais ne peut plus rendre une décision fiable, `503` sans fallback local
 
 ## Frontière de confiance proxy
 
-Le middleware lit exclusivement `request.client.host`, déjà présent dans le
-scope ASGI. Il ne lit jamais un en-tête `Forwarded` ou `X-Forwarded-For`.
+En mode `asgi`, le middleware lit exclusivement `request.client.host`, déjà
+présent dans le scope ASGI. Il ne lit jamais un en-tête `Forwarded` ou
+`X-Forwarded-For`.
+
+En mode explicite `railway`, autorisé seulement pour `staging`/`production`, la
+configuration exige des valeurs UUID canoniques pour `RAILWAY_ENVIRONMENT_ID`
+et `RAILWAY_SERVICE_ID`. Le middleware accepte alors exactement une occurrence
+ASCII de `X-Real-IP`, la parse comme adresse IPv4 ou IPv6 sans port ni liste,
+puis la pseudonymise avant tout accès Redis. Absence, doublon ou format invalide
+répondent `503` sans exécuter la route. Railway documente `X-Real-IP` comme
+l'en-tête identifiant l'adresse distante dans ses
+[spécifications réseau](https://docs.railway.com/networking/public-networking/specs-and-limits).
 
 Uvicorn peut réécrire cette adresse seulement si le pair TCP direct appartient
 à `FORWARDED_ALLOW_IPS`. Cette variable accepte une liste explicite d'adresses
@@ -96,6 +108,8 @@ les fenêtres locales par un script Lua atomique :
   un timeout entre 50 ms et 2 s sont obligatoires pour activer ce mode ;
 - erreur réseau, timeout, réponse invalide ou plafond global donnent une
   décision fermée ; le plafond répond `429`, l'indisponibilité Redis `503`.
+- en production, `redis` exige la source d'identité `railway` ; deux visiteurs
+  derrière le même pair ASGI conservent donc des budgets distincts.
 
 Le mode historique `local` reste la valeur par défaut. Il n'existe aucun
 fallback automatique de `redis` vers `local`, car chaque réplica retrouverait
@@ -137,8 +151,9 @@ observés. Railway utilise cette liveness bon marché plutôt que `/health`.
    clients et du composant `SearchAssistant` protégé.
 5. Les diagnostics du grand module catalogue protégé ne font pas partie de ce
    lot et restent consignés comme dette de confidentialité P2.
-6. Aucune adresse proxy Railway, règle WAF, activation Redis production ou
-   mesure de trafic représentatif n'est validée par cette preuve locale.
+6. Le contrat `X-Real-IP` Railway est couvert localement, mais aucune capture de
+   trafic Railway, règle WAF, activation Redis production ou mesure de trafic
+   représentatif n'est encore validée par une preuve distante.
 
 ## Vérification et rollback
 
@@ -152,6 +167,12 @@ tests backend** réussis, avec 7 avertissements historiques
 `datetime.utcnow()`. Deux relectures indépendantes, complétées par fuzzing de la
 fenêtre glissante et concurrence multithread, ne trouvent plus aucun P0, P1 ou
 P2 dans ce périmètre.
+
+Le lot Redis + identité Railway du 29 août 2026 passe **138 tests ciblés** et la
+suite backend complète **2 065 réussis + 2 ignorés** sous Python 3.12.14. Il
+couvre deux IP derrière un même pair ASGI, l'en-tête absent/dupliqué/invalide,
+la non-conservation des trois adresses brutes, la panne Redis, le plafond global
+et la fermeture du client.
 
 Le changement ne crée ni migration, ni endpoint, ni schéma de payload, ni donnée
 persistée. Il ajoute toutefois la réponse opérationnelle `429` aux lectures

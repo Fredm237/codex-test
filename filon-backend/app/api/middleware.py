@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import hashlib
 import hmac
+import ipaddress
 import secrets
 import threading
 import time
@@ -48,6 +49,10 @@ class _RateWindow:
 class _RateLimitLogWindow:
     last_log: float
     suppressed: int = 0
+
+
+class _ClientNetworkIdentityUnavailable(ValueError):
+    """La plateforme n'a pas fourni une identité réseau canonique."""
 
 
 class RequestLoggingMiddleware(BaseHTTPMiddleware):
@@ -235,6 +240,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         clock: Callable[[], float] | None = None,
         distributed_client: RedisEvalClient | None = None,
         identity_secret: bytes | None = None,
+        trusted_client_header: str | None = None,
     ):
         super().__init__(app)
         if expensive_limit < 1 or general_limit < 1:
@@ -250,6 +256,9 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         self._identity_secret = secrets.token_bytes(32)
         self._windows: OrderedDict[str, _RateWindow] = OrderedDict()
         self._lock = threading.Lock()
+        if trusted_client_header not in {None, "x-real-ip"}:
+            raise ValueError("En-tête d'identité réseau inconnu")
+        self._trusted_client_header = trusted_client_header
         if (distributed_client is None) != (identity_secret is None):
             raise ValueError(
                 "Le client distribué et son secret doivent être fournis ensemble"
@@ -296,10 +305,41 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 return f"<rate-limit:{prefix}>"
         return "<rate-limit:general>"
 
+    def _get_client_address(self, request: Request) -> str:
+        """Lit le pair ASGI ou l'unique X-Real-IP Railway explicitement activé."""
+        if self._trusted_client_header is None:
+            return request.client.host if request.client else "unknown"
+
+        header_name = self._trusted_client_header.encode("ascii")
+        raw_values = [
+            value
+            for name, value in request.scope.get("headers", [])
+            if name.lower() == header_name
+        ]
+        if len(raw_values) != 1:
+            raise _ClientNetworkIdentityUnavailable(
+                "Identité réseau Railway absente ou dupliquée"
+            )
+        try:
+            raw_address = raw_values[0].decode("ascii")
+            address = ipaddress.ip_address(raw_address)
+        except (UnicodeDecodeError, ValueError) as exc:
+            raise _ClientNetworkIdentityUnavailable(
+                "Identité réseau Railway invalide"
+            ) from exc
+        return str(address)
+
     @staticmethod
-    def _get_client_address(request: Request) -> str:
-        """Lit seulement l'adresse déjà validée dans le scope ASGI."""
-        return request.client.host if request.client else "unknown"
+    def _unavailable_response(limit: int) -> Response:
+        return Response(
+            content='{"error": "rate_limit_unavailable"}',
+            status_code=503,
+            media_type="application/json",
+            headers={
+                "Retry-After": "1",
+                "X-RateLimit-Limit": str(limit),
+            },
+        )
 
     def _identity_key(self, client_address: str, policy_class: str) -> str:
         digest = hmac.new(
@@ -397,12 +437,16 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         if self._is_exempt(request.method, path):
             return await call_next(request)
 
-        client_address = self._get_client_address(request)
-
         # Limite plus stricte pour les endpoints coûteux
         policy_class = self._policy_class(path)
         is_expensive = policy_class == "expensive"
         limit = self._expensive_limit if is_expensive else self._general_limit
+
+        try:
+            client_address = self._get_client_address(request)
+        except _ClientNetworkIdentityUnavailable:
+            request.scope["filon.rate_limit_bucket"] = self._policy_bucket(path)
+            return self._unavailable_response(limit)
 
         try:
             if self._distributed_limiter is None:
@@ -418,15 +462,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
                 )
         except DistributedRateLimitUnavailable:
             request.scope["filon.rate_limit_bucket"] = self._policy_bucket(path)
-            return Response(
-                content='{"error": "rate_limit_unavailable"}',
-                status_code=503,
-                media_type="application/json",
-                headers={
-                    "Retry-After": "1",
-                    "X-RateLimit-Limit": str(limit),
-                },
-            )
+            return self._unavailable_response(limit)
 
         if limited:
             request.scope["filon.rate_limit_bucket"] = self._policy_bucket(path)

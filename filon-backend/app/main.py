@@ -76,6 +76,8 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     rate_limit_options: dict[str, object] = {}
+    if settings.rate_limit_identity_source == "railway":
+        rate_limit_options["trusted_client_header"] = "x-real-ip"
     if settings.rate_limit_backend == "redis":
         rate_limit_client = Redis.from_url(
             settings.redis_url or "",
@@ -84,12 +86,14 @@ def create_app() -> FastAPI:
             retry_on_timeout=False,
         )
         app.state.rate_limit_redis_client = rate_limit_client
-        rate_limit_options = {
-            "distributed_client": rate_limit_client,
-            "identity_secret": (
-                settings.rate_limit_identity_secret or ""
-            ).encode("ascii"),
-        }
+        rate_limit_options.update(
+            {
+                "distributed_client": rate_limit_client,
+                "identity_secret": (
+                    settings.rate_limit_identity_secret or ""
+                ).encode("ascii"),
+            }
+        )
 
     # Starlette exécute le dernier middleware ajouté en premier : CORS reste
     # extérieur, puis Logging corrèle aussi les 429 produits par RateLimit.

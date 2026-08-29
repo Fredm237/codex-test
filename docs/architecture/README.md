@@ -40,12 +40,13 @@ La fondation P0.6 d'observabilité, de readiness fail-closed et d'évaluation
 locale de cinq alertes provisoires est verte au commit isolé `8b6be85`. Sa front
 door pseudonymisée, bornée et anti-spoofing est prouvée au commit isolé
 `7cbb81d`. Un mode Redis atomique opt-in, pseudonymisé, borné et sans fallback
-local passe 127 tests ciblés ; la suite backend compte 2 054 réussis et 2
-ignorés. L'export OpenMetrics et un pack Prometheus/Grafana sans cible ni SLO
+local et lié à `X-Real-IP` Railway passe 138 tests ciblés ; la suite backend
+compte 2 065 réussis et 2 ignorés. L'export OpenMetrics et un pack
+Prometheus/Grafana sans cible ni SLO
 par défaut sont validés localement. Un compilateur atomique refuse les
 inventaires partiels et un vérificateur HTTPS peut produire un reçu sans hôte
 ni secret ; aucun reçu de production n’existe encore. P0.6 reste donc NO-GO
-faute de CIDR proxy Railway vérifié, activation Redis ou WAF, agrégateur
+faute de preuve distante `X-Real-IP`, activation Redis ou WAF, agrégateur
 réellement déployé, scrapes, rétention, pager et mesures distribuées réelles.
 
 L'infrastructure P0.c (Quality Lab) applique le contrat v0.5 fermé à sept
