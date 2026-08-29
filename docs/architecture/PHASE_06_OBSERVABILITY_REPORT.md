@@ -26,6 +26,11 @@ restore drill. `/health/live` et `/health/ready` répondent HTTP 200, la base es
 limites de cette qualification sont dans le
 [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md).
 
+La capacité PostgreSQL dispose aussi de trois plannings de sauvegarde et de deux
+moniteurs Railway natifs : `DISK_USAGE_GB above 14 GB` et `above 17 GB`, ciblés
+uniquement sur le volume production. Cette protection stockage est distincte du
+dashboard applicatif Prometheus/Grafana et de son pager, qui restent à déployer.
+
 ## Périmètre livré
 
 ### Corrélation
@@ -253,9 +258,11 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
    `traceparent` par les services tiers n'est donc pas prouvée à distance.
 5. Aucun seuil P95/P99 n'est validé sur trafic représentatif. Les valeurs du
    plan restent des cibles proposées, pas des performances mesurées.
-6. Le moteur d'alerte et le runbook sont locaux seulement : le dashboard est
-   versionné mais non importé, et aucun sink ou pager ne le relie encore à
-   l'export standard dans un environnement distant.
+6. Les deux moniteurs Railway de capacité volume sont actifs, mais leur
+   notification n'a pas été provoquée artificiellement. Le moteur d'alerte
+   applicatif et son runbook restent locaux : le dashboard Grafana est versionné
+   mais non importé, et aucun sink ou pager ne le relie encore à l'export
+   standard dans un environnement distant.
 7. Les compteurs de décision portent sur des évaluations d'offre, pas sur des
    utilisateurs uniques ; une page peut en produire plusieurs.
 8. Le contrôle direct valide un instant du contrat, pas la conservation à

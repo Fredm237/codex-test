@@ -1,7 +1,7 @@
 # FILON — reçu production OpenMetrics et résilience Railway
 
 - Date : **29 août 2026**
-- Fenêtre de contrôle : **16:10–16:29 CEST**
+- Fenêtre de contrôle : **16:10–16:44 CEST**
 - Environnement : `production`
 - Service applicatif : `web`
 - Déploiement contrôlé : `c832d1c8-e50f-4fac-94b3-8b59bb6cfff1`
@@ -70,15 +70,27 @@ verts ; la base est `ok` et la révision demeure `f4c81a9d2e70`.
 ## Capacité et alerte plateforme
 
 Le volume est `READY` à **7 855,56 Mio sur 20 000 Mio**, soit **39,28 %** et
-environ **12 144,44 Mio libres**. Aucun dashboard Railway Observability et donc
-aucun moniteur de seuil associé n'est configuré dans l'environnement
-production.
+environ **12 144,44 Mio libres**. Un dashboard Railway Observability natif a
+été créé avec deux blocs `VOLUME_METRICS_ITEM`, chacun mesurant
+`DISK_USAGE_GB` et ciblant exclusivement `postgres-volume` :
 
-La marge instantanée est correcte, mais le risque n'est pas fermé : les logs du
-28 août 2026 ont déjà montré `No space left on device` pendant la création de
-fichiers temporaires PostgreSQL. Une alerte de capacité indépendante et un
-test périodique de restauration restent obligatoires avant de déclarer la
-résilience stockage terminée.
+| Bloc | Condition | Seuil | État lors de la relecture |
+|---|---|---:|---|
+| `FILON PostgreSQL Disk Warning (70%)` | `above` | 14 GB | aucune alerte active |
+| `FILON PostgreSQL Disk Critical (85%)` | `above` | 17 GB | aucune alerte active |
+
+Railway limite un bloc à un moniteur ; les deux niveaux sont donc séparés et
+lisibles. L'interface confirme que chaque déclenchement produit une
+notification du compte Railway. La configuration, les cibles et les seuils ont
+été relus par API. La livraison d'une notification en situation réelle n'a pas
+été forcée : cela aurait exigé de dépasser ou d'abaisser artificiellement un
+seuil de production.
+
+Les logs du 28 août 2026 avaient montré `No space left on device` pendant la
+création de fichiers temporaires PostgreSQL. La surveillance de capacité et les
+sauvegardes planifiées sont désormais actives ; un test périodique de
+restauration et la vérification du canal lors d'un véritable déclenchement
+restent nécessaires pour déclarer la résilience stockage entièrement terminée.
 
 ## Verdict borné
 
@@ -86,9 +98,11 @@ résilience stockage terminée.
 - authentification et non-fuite du secret : **QUALIFIÉES** ;
 - sauvegarde manuelle et restore drill : **QUALIFIÉS** ;
 - sauvegardes planifiées `DAILY + WEEKLY + MONTHLY` : **QUALIFIÉES** ;
-- alerte de capacité Railway : **ABSENTE** ;
-- agrégateur, rétention, dashboard, pager et trafic représentatif : **NON
-  PROUVÉS**.
+- deux moniteurs de capacité Railway : **QUALIFIÉS ET INACTIFS AU NIVEAU
+  COURANT** ;
+- livraison de notification lors d'un dépassement réel : **NON TESTÉE** ;
+- agrégateur OpenMetrics, rétention, dashboard applicatif, pager et trafic
+  représentatif : **NON PROUVÉS**.
 
 P0.6 reste donc `en_cours`. Ce reçu ne lève pas le NO-GO Phase 1, également
 maintenu par l'absence de datasets humains Quality Lab.

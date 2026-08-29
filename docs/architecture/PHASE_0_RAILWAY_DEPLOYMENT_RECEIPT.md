@@ -121,9 +121,12 @@ audit API ultérieur a d'abord confirmé zéro planning, deux sauvegardes manuel
 sans expiration et aucun dashboard/moniteur Railway dans l'environnement.
 Après autorisation explicite, les plannings `DAILY`, `WEEKLY` et `MONTHLY` ont
 été activés et relus ; le volume est resté `READY` au même taux d'occupation.
-L'alerte de capacité reste requise. L'export OpenMetrics direct de production a
-également passé son contrat d'authentification, de format et de cardinalité.
-Les mesures expurgées figurent dans le
+Deux blocs Railway Observability ciblant exclusivement le volume ont ensuite
+été créés : avertissement au-dessus de 14 GB et critique au-dessus de 17 GB,
+avec notifications natives. L'API confirme `DISK_USAGE_GB`, les deux seuils et
+aucune alerte active au niveau courant. L'export OpenMetrics direct de
+production a également passé son contrat d'authentification, de format et de
+cardinalité. Les mesures expurgées figurent dans le
 [reçu observabilité et résilience](PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md).
 
 Le rollback opérationnel reste applicatif : les déploiements précédents sont
