@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 0 Product Intelligence Core",
   "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
   "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-29T13:52:40+02:00",
+  "maj": "2026-08-29T14:00:48+02:00",
   "contraintes": [
     "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
     "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
@@ -98,7 +98,7 @@
       "outil": "GitHub",
       "attendu": "Backend, web, mobile, extension, contrats, migrations et quality lab requis",
       "obtenu": "Workflow multi-surfaces publié avec backend, Postgres/Alembic, contrats, Quality, web, mobile et extension ; branche publique codex/filon-phase-0-core byte-identique au HEAD local ; run réel et artefact readiness exécutés ; ruleset active limitée à main avec PR, résolution des conversations, branche à jour, suppression/force-push interdits et quatre checks GitHub Actions requis sans bypass",
-      "verification": "Publication GitHub consolidée e04dfc2 puis 9beeda8, arbre distant fcac4bb28bd2c26835afbc74949eaa37a96b8ab6 identique au HEAD local 7026f4a. Actions #343 : migrations 12/12, backend 2021/2021, web tests/build, mobile types/lint/tests et extension contrats/manifeste/syntaxe verts. Le seul échec est le gate strict attendu : rapport intègre, 27 gates techniques passées, status=not_ready car les sept datasets humains sont vides ; artefact 9713798390 publié. Ruleset GitHub 21798272 active sur ~DEFAULT_BRANCH, quatre contexts liés à GitHub Actions, strict=true, bypass_actors=[] et current_user_can_bypass=never.",
+      "verification": "Publication GitHub courante 7f914b2, arbre distant 822edf543e8ba43943372cdbeff09357bc3e82fa identique au commit local 2cf314c. Actions #344 : migrations 12/12, backend 2036/2036, web tests/build, mobile types/lint/tests et extension contrats/manifeste/syntaxe verts. Le seul échec est le gate strict attendu : rapport intègre, 27 gates techniques passées, status=not_ready car les sept datasets humains sont vides ; artefact 9714475518 publié ; Vercel vert. Ruleset GitHub 21798272 active sur ~DEFAULT_BRANCH, quatre contexts liés à GitHub Actions, strict=true, bypass_actors=[] et current_user_can_bypass=never.",
       "tentatives": 1
     },
     {
@@ -111,7 +111,7 @@
       "outil": "backend observability",
       "attendu": "Corrélation bout en bout, percentiles, unknown/freshness/abstentions, dashboards et alertes testés",
       "obtenu": "Request ID opaque généré côté serveur, corrélation HTTP vers catalogue/retrieval/decision/ingestion/observation y compris 429/500, huit jalons fermés intent/retrieval/candidats/filtrage/classement/sélection/preuves/décision, spans applicatifs PostgreSQL/Redis/Awin/SerpAPI/LLM et traceparent W3C vers les dépendances HTTP sans donnée métier libre ; latences P50/P95/P99 et cardinalité bornées, probes DB/révision fail-closed, compteurs versionnés unknown/freshness/exclusions/abstentions, ingestion degraded, cycle SSE maîtrisé et logs ciblés nettoyés sans payload ; moteur local canonique de cinq règles provisoires, hystérésis, replay/conflict fail-closed, silence borné et runbook livrés ; front door HMAC, fenêtre glissante, plafond strict, buckets 429 et confiance proxy explicite livrés ; téléchargement Awin en flux avec spool disque après 8 MiB, plafonds compressé/décompressé et limite dure de 250 000 lignes ; ordonnanceur d'ingestion autonome et journalisé disponible mais non déployé ; export OpenMetrics 1.0 authentifié et fail-closed ; pack Prometheus/Grafana avec inventaire vide, secret-file, labels fermés, 11 rollups multi-réplica et dashboard descriptif sans SLO ; contrats JSON, compilateur d’inventaire atomique et vérificateur HTTPS produisant un reçu expurgé livrés ; accès Railway production et provenance Config as Code confirmés en lecture ; backend de traces, CIDR Railway, WAF, déploiement agrégateur/dashboard, reçu réel, pager et trafic représentatif encore absents",
-      "verification": "Commits ee13023, f6efcd0 et dfe9098 : corrélation décisionnelle/dépendances, isolation concurrente, erreurs sans message, listes fermées, traceparent LLM et tous chemins Awin, transactions PostgreSQL Awin en lot, absence de donnée métier libre et mémoire de feed bornée prouvées. Commit 10a1866 : 49 tests d’activation et 227 tests observabilité ciblés ; Prometheus/promtool 3.13.2 LTS valide la configuration, lint les 11 règles et réussit leur scénario officiel à deux réplicas. Suite locale courante : backend 2035 réussis + 1 ignoré ; GitHub Actions #343 : 2021/2021 verts. Préflight Railway authentifié sans lecture de variable protégée ni mutation : services web/Postgres, domaine actif, source GitHub, root directory et configFile legacy confirmés ; runtime actif encore RAILPACK/uvicorn sans preDeploy/readiness. Production NO-GO avant backup/restore drill, déploiement, agrégateur, scrapes/rétention, pager, CIDR et WAF.",
+      "verification": "Commits ee13023, f6efcd0 et dfe9098 : corrélation décisionnelle/dépendances, isolation concurrente, erreurs sans message, listes fermées, traceparent LLM et tous chemins Awin, transactions PostgreSQL Awin en lot, absence de donnée métier libre et mémoire de feed bornée prouvées. Commit 10a1866 : 49 tests d’activation et 227 tests observabilité ciblés ; Prometheus/promtool 3.13.2 LTS valide la configuration, lint les 11 règles et réussit leur scénario officiel à deux réplicas. Suite locale courante : backend 2035 réussis + 1 ignoré ; GitHub Actions #344 : 2036/2036 verts. Préflight Railway authentifié sans lecture de variable protégée ni mutation : services web/Postgres, domaine actif, source GitHub, root directory et configFile legacy confirmés ; runtime actif encore RAILPACK/uvicorn sans preDeploy/readiness. Production NO-GO avant backup/restore drill, déploiement, agrégateur, scrapes/rétention, pager, CIDR et WAF.",
       "tentatives": 1
     },
     {
@@ -389,6 +389,11 @@
       "ts": "2026-08-29T13:52:40+02:00",
       "evenement": "verification",
       "detail": "lot inventaire + préflight — Quality cœur 257/257 ; inventaire immuable vérifié ; backend complet 2035 réussis + 1 ignoré sous Python 3.12 et dépendances déclarées ; aucun fichier utilisateur protégé modifié par le lot"
+    },
+    {
+      "ts": "2026-08-29T14:00:48+02:00",
+      "evenement": "verification",
+      "detail": "p0_g — publication distante 7f914b2, arbre 822edf… byte-identique au local 2cf314c ; Actions #344 : migrations 12/12, backend 2036/2036 et trois clients verts ; seul gate strict not_ready rouge attendu ; artefact 9714475518 et statut Vercel vert"
     }
   ]
 }

@@ -1,10 +1,10 @@
 # FILON — audit canonique de complétude des trois mandats
 
 - Date de coupure initiale : **29 août 2026, 10:03 CEST**
-- Dernière qualification : **29 août 2026, 13:17 CEST**
+- Dernière qualification : **29 août 2026, 14:00 CEST**
 - Branche locale : `codex/filon-phase-0-core`
-- Référence applicative locale auditée : `7026f4a`
-- Référence applicative distante auditée : `9beeda8`, arbre commun `fcac4bb28bd2c26835afbc74949eaa37a96b8ab6`
+- Référence applicative locale auditée : `2cf314c`
+- Référence applicative distante auditée : `7f914b2`, arbre commun `822edf543e8ba43943372cdbeff09357bc3e82fa`
 - Dépôt distant : `Fredm237/codex-test`, public
 - `main` distant : `57724c72e77c50ca54aaf64338f838dda3be2747`
 - Décision : **MANDAT INCOMPLET — PHASE 0 NO-GO — PHASE 1 ET IMMERSIVE INTERDITES PAR GATE**
@@ -49,7 +49,7 @@ Les trois conditions qui empêchent encore un GO sont :
    ni preuve de collecte/traces/WAF/pager.
 
 Depuis la coupure initiale, l'intégration catalogue/Assistant/MegaMenu est
-acquise, la branche est publique et byte-identique, Actions #343 a exécuté les
+acquise, la branche est publique et byte-identique, Actions #344 a exécuté les
 quatre surfaces, Vercel a construit la preview et la ruleset `21798272` protège
 `main` sans bypass. Le [rapport distant](PHASE_0_REMOTE_QUALIFICATION_REPORT.md)
 est l'autorité de ces preuves.
@@ -112,7 +112,7 @@ ne doit donc être lancé.
 | Architecture proposée | **PROUVÉ COMME CIBLE** | [Architecture cible](TARGET_ARCHITECTURE.md) |
 | Fichiers et ownership | **PROUVÉ DANS LE LOT P0** | Cartographie, [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) et ruleset distante sans bypass |
 | Migration et rollback | **PROUVÉ LOCALEMENT** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md) |
-| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 035 + 1 ignoré, web 17/17, typecheck/build ; Actions #343 : migrations 12/12, backend 2 021/2 021 et trois clients verts |
+| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 035 + 1 ignoré, web 17/17, typecheck/build ; Actions #344 : migrations 12/12, backend 2 036/2 036 et trois clients verts |
 | Benchmarks | **EXTERNE NON MESURABLE** | Holdout humain absent |
 | Before/after metrics | **EXTERNE NON MESURABLE** | Aucun scorecard métier éligible ni trafic représentatif |
 | Known limitations | **PROUVÉ** | Ce document, le registre des preuves et les rapports P0 |
@@ -147,8 +147,8 @@ tableau.
 
 ### 3. GitHub et CI distante — acquis
 
-La branche publique pointe sur `9beeda8` avec le même arbre que le HEAD local.
-Actions #343 prouve les quatre surfaces et publie l'artefact Quality. La ruleset
+La branche publique pointe sur `7f914b2` avec le même arbre que le commit local
+`2cf314c`. Actions #344 prouve les quatre surfaces et publie l'artefact Quality. La ruleset
 `21798272` est active sur `main`, exige les quatre jobs GitHub Actions, la PR,
 la résolution des conversations et une branche à jour ; suppression et
 force-push sont interdits, sans bypass.

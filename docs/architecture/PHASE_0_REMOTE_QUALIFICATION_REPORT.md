@@ -2,6 +2,7 @@
 
 - Date de coupure initiale : **29 août 2026, 13:15 CEST**
 - Préflight Railway authentifié : **29 août 2026, 13:37 CEST**
+- Requalification du lot inventaire : **29 août 2026, 14:00 CEST**
 - Branche : `codex/filon-phase-0-core`
 - Dépôt public : `Fredm237/codex-test`
 - Décision : **code techniquement qualifié ; lancement et Phase 1 NO-GO**
@@ -55,10 +56,24 @@ Le rapport a été publié malgré ce NO-GO :
 | Digest | `sha256:4806919878e3baccb939aba8db1c6b39e5ea078a4eb45e943c63db69bf5675dd` |
 | Expiration | 12 septembre 2026 |
 
+Le lot suivant a été republié sous le commit distant
+`7f914b2bbfd28396a70319892477c3789f75b4c7`. Son arbre
+`822edf543e8ba43943372cdbeff09357bc3e82fa` est exactement celui du commit local
+`2cf314c9a5f53c956fc26377eefc03c464a21919` : l'inventaire réel, son collecteur
+et le préflight Railway sont donc byte-identiques.
+
+Le workflow manuel **#344** (`33251328350`) a requalifié cet arbre : migrations
+**12/12**, backend **2 036/2 036**, web, mobile et extension verts. Le backend
+est rouge uniquement sur le gate strict `not_ready` attendu ; les 27 gates
+techniques passent et les sept datasets humains restent à zéro. L'artefact
+`quality-readiness-7f914b2bbfd28396a70319892477c3789f75b4c7`, ID `9714475518`,
+fait 1 785 octets, expire le 12 septembre 2026 et porte le digest
+`sha256:3d0f2b97f003d2edd3a27e0489ac1d8268da348f6a0d68171413db9357d42250`.
+
 ## 3. Vercel
 
-L'intégration GitHub Vercel a construit avec succès les commits `e04dfc2` et
-`9beeda8`. La preview de branche est protégée par l'authentification Vercel ;
+L'intégration GitHub Vercel a construit avec succès les commits `e04dfc2`,
+`9beeda8` et `7f914b2`. La preview de branche est protégée par l'authentification Vercel ;
 son succès est attesté par le statut de déploiement GitHub et non par un test
 public anonyme. Aucun jeton copié dans la conversation n'a été utilisé.
 

@@ -133,8 +133,8 @@ Le commit `45e7768` sépare l'intégrité du gate de lancement :
 | Manifeste, schéma, dataset, empreinte, invariant ou bootstrap invalide | normal ou `--strict` | 2 |
 
 Le workflow emploie le mode normal pour produire le rapport, puis le mode
-strict pour fermer la promotion. GitHub Actions #343 a publié l'artefact
-`quality-readiness-e04dfc2c18ef58177d4182acbb67c966058ff9c0`, conservé 14
+strict pour fermer la promotion. GitHub Actions #344 a publié l'artefact
+`quality-readiness-7f914b2bbfd28396a70319892477c3789f75b4c7`, conservé 14
 jours. Les quatre jobs sont requis sur `main` par la ruleset `21798272`. Le job
 backend reste volontairement rouge sur le code 1 tant que les cas humains sont
 absents ; une invalidité technique sortirait avec le code 2.
