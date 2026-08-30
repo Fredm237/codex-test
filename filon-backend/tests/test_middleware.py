@@ -84,6 +84,8 @@ class TestExemptions:
         [
             ("GET", "/health/live"),
             ("HEAD", "/health/live"),
+            ("GET", "/health/ready"),
+            ("HEAD", "/health/ready"),
         ],
     )
     def test_seules_les_lectures_de_sante_sont_exemptees(self, method, path):
@@ -106,7 +108,6 @@ class TestExemptions:
             ("GET", "/api/catalogue"),
             ("GET", "/healthcheck"),
             ("GET", "/health"),
-            ("GET", "/health/ready"),
             ("GET", "/health/metrics"),
             ("GET", "/health/live/extra"),
             ("GET", "/api/advise/stream"),
@@ -905,6 +906,40 @@ async def test_redis_indisponible_ferme_les_routes_mais_pas_la_liveness():
     assert protected_response.headers["retry-after"] == "1"
     assert protected_calls == 0
     assert len(client.calls) == 1
+
+
+@pytest.mark.asyncio
+async def test_railway_sonde_ready_sans_identite_mais_ferme_les_routes_metier():
+    app = FastAPI()
+    protected_calls = 0
+    app.add_middleware(
+        RateLimitMiddleware,
+        trusted_client_header="x-real-ip",
+    )
+
+    @app.get("/health/ready")
+    async def ready() -> dict:
+        return {"status": "ready"}
+
+    @app.get("/ordinary")
+    async def protected() -> dict:
+        nonlocal protected_calls
+        protected_calls += 1
+        return {"ok": True}
+
+    transport = httpx.ASGITransport(app=app)
+    async with httpx.AsyncClient(
+        transport=transport,
+        base_url="http://test",
+    ) as http_client:
+        ready_response = await http_client.get("/health/ready")
+        protected_response = await http_client.get("/ordinary")
+
+    assert ready_response.status_code == 200
+    assert ready_response.json() == {"status": "ready"}
+    assert protected_response.status_code == 503
+    assert protected_response.json() == {"error": "rate_limit_unavailable"}
+    assert protected_calls == 0
 
 
 @pytest.mark.asyncio

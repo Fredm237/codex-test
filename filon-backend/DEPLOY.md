@@ -85,10 +85,12 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    Un en-tête absent, dupliqué ou invalide ferme la requête avec `503` sans
    atteindre la route. En mode `redis`, une erreur, un timeout ou une décision
    illisible produit le même refus ; FILON ne retombe jamais sur un compteur
-   local qui rouvrirait le quota. Le seul `GET`/`HEAD /health/live` reste exempt
-   pour diagnostiquer le processus. Conserver `local` tant que Redis n'est pas
-   créé et qualifié ; la présence du code seule ne prouve pas une protection
-   distribuée en production.
+   local qui rouvrirait le quota. Les seuls `GET`/`HEAD /health/live` et
+   `/health/ready` restent exempts : Railway appelle sa sonde directement dans
+   le conteneur, sans le `X-Real-IP` de son proxy HTTP public. Les métriques,
+   `/health`, les lookalikes et toutes les routes métier restent protégés.
+   Conserver `local` tant que Redis n'est pas créé et qualifié ; la présence du
+   code seule ne prouve pas une protection distribuée en production.
 5. Avant de déployer, exécuter intégralement le
    [runbook d'adoption et de rollback](../docs/architecture/DATABASE_MIGRATION_RUNBOOK.md) :
    sauvegarde, restauration test et adoption Alembic précèdent la migration

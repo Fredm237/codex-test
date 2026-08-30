@@ -205,7 +205,12 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
     # coûteux, mais aucune lecture catalogue n'est illimitée : certaines
     # agrégations balayent des millions de lignes quand leur cache est froid.
     _READ_METHODS = frozenset({"GET", "HEAD"})
-    _LIVENESS_PATH = "/health/live"
+    # Les sondes de déploiement sont appelées directement par Railway, sans
+    # passer par son proxy HTTP public et donc sans ``X-Real-IP``. Elles ne
+    # consomment aucune ressource métier et doivent pouvoir décider si le
+    # conteneur est promouvable. La liste reste exacte : les métriques et tout
+    # lookalike demeurent protégés.
+    _EXEMPT_HEALTH_PATHS = frozenset({"/health/live", "/health/ready"})
     _EXPENSIVE_PREFIXES = (
         "/health",
         "/api/advise",
@@ -283,7 +288,7 @@ class RateLimitMiddleware(BaseHTTPMiddleware):
         """Exempte seulement les sondes de santé en lecture."""
         if method.upper() not in cls._READ_METHODS:
             return False
-        return path == cls._LIVENESS_PATH
+        return path in cls._EXEMPT_HEALTH_PATHS
 
     @classmethod
     def _policy_class(cls, path: str) -> str:
