@@ -69,7 +69,7 @@ ne doit donc être lancé.
 | 5–12 | Product Graph, entity/variant resolution, rôles, ontologie, Raw Offer, Offer Graph, Merchant Intelligence | **PARTIEL / INTERDIT PAR GATE** | Product/Variant, Offer Graph et mesure Merchant Intelligence sont livrés en shadows locaux ; Brand/Family/Model ne sont pas enrichis, les dimensions marchandes après clic/achat restent non mesurables et Quality reste vide |
 | 13–22 | Recherche, intent, contraintes, ranking, score, confiance, evidence, Buy/Wait, abstention | **PARTIEL / INTERDIT PAR GATE** | Les parcours v1 ont des garde-fous fail-closed ; l'Evidence Engine shadow enregistre les faits atomiques et refuse explicitement Buy/Wait, confiance et superlatifs sans prérequis ; la qualité end-to-end et les moteurs v2 ne sont pas mesurables |
 | 23–27 | Quality Lab, benchmark, métriques, gates et funnel | **PARTIEL + EXTERNE NON MESURABLE** | Infrastructure v0.5, curation catalogue traçable, 7 datasets, 27 gates, 7 adaptateurs réels et 386 tests ; funnel article 27 interne et fail-closed livré, mais interrompu à `CORRECTLY_CLASSIFIED` ; 0 cas humain, donc aucune métrique métier publiable |
-| 28–29 | Observabilité et opérations | **PARTIEL** | Corrélation des huit jalons décisionnels, spans PostgreSQL/Redis/Awin/SerpAPI/LLM, propagation W3C HTTP, probes, métriques, identité `X-Real-IP` Railway réelle et anti-spoofing qualifiés, Redis atomique opt-in, scheduler, alertes locales, OpenMetrics, pack Prometheus/Grafana et activation fail-closed validés ; backend de traces, activation Redis production ou WAF, déploiement agrégateur/dashboard, reçu, pager et trafic représentatif manquent |
+| 28–29 | Observabilité et opérations | **PARTIEL** | Corrélation des huit jalons décisionnels, spans PostgreSQL/Redis/Awin/SerpAPI/LLM, propagation W3C HTTP, probes, métriques, identité `X-Real-IP` Railway réelle et anti-spoofing qualifiés, Redis atomique opt-in, scheduler mono-exécution et préflight non-écrivant, alertes locales, OpenMetrics, pack Prometheus/Grafana et activation fail-closed validés ; service Cron, backend de traces, activation Redis production ou WAF, déploiement agrégateur/dashboard, reçu, pager et trafic représentatif manquent |
 | 30–35 | Web canonique, homepage, loading, extension, mobile, barcode | **PARTIEL** | Durcissement web/mobile/extension validé ; aucune nouvelle feature n'est qualifiée et le freeze reste actif |
 | 36–50 | Personnalisation, Fashion, Style/Taste/Wardrobe, commerce personnel, marketing truth, neutralité, sécurité | **INTERDIT PAR GATE** | Les garde-fous de neutralité et de confidentialité sont partiels ; toutes les capacités produit nouvelles restent gelées |
 | 51–54 | Processus, old/new, non-régression, verticales | **PARTIEL** | Processus, CI locale et compatibilité sont documentés ; non-régression distante et métriques métier absentes |
@@ -165,7 +165,8 @@ logique restauré hors production, fenêtre sans écrivain, adoption Alembic,
 déploiement Docker et readiness réelle. Le
 [reçu de déploiement](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) en est l'autorité.
 Le GO P0.6 complet exige encore une preuve sur l'environnement réel : WAF ou
-limitation distribuée, ordonnanceur effectivement déployé, scrapes
+limitation distribuée, ordonnanceur effectivement déployé après son préflight
+local qualifié, scrapes
 OpenMetrics de chaque replica vers l'agrégateur, reçu du vérificateur,
 dashboards, canal/pager, canary et trafic représentatif. Une suite locale ne
 peut pas attester ces propriétés.

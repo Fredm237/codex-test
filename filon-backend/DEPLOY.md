@@ -171,6 +171,14 @@ compressée et ne relever aucun plafond sans mesure de mémoire et de disque.
 L'activation de ce service reste un changement externe séparé, après adoption
 de la base.
 
+Avant d'activer la cadence, lancer une occurrence manuelle avec la commande
+`python -m app.ingest.scheduler --check`. Ce préflight est strictement
+non-écrivant : il valide les identifiants sans les afficher, les plafonds, la
+connexion, la révision Alembic et l'état du catalogue, puis émet un unique reçu
+JSON expurgé. Un code `0` et `"status":"ready"` autorisent uniquement
+l'activation de la cadence ; ils ne prouvent pas qu'une synchronisation réelle
+a réussi. Toute autre sortie maintient le service Cron désactivé.
+
 ### Product/Variant et Offer Graph shadows
 
 Les migrations créent les tables `graph_*` sans backfill et sans lecteur public.
