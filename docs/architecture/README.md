@@ -113,6 +113,7 @@ et extension.
 - [Rapport P0.c — Quality Lab](PHASE_0C_QUALITY_REPORT.md)
 - [Rapport P0.c.1 — workflow de curation humaine](PHASE_0C_CURATION_WORKFLOW_REPORT.md)
 - [Rapport P0.6 — Observabilité](PHASE_06_OBSERVABILITY_REPORT.md)
+- [Export de traces OTLP/HTTP fail-closed](PHASE_06_OTLP_TRACE_EXPORT_REPORT.md)
 - [Qualification du préflight scheduler](PHASE_06_SCHEDULER_PREFLIGHT_REPORT.md)
 - [Politique de sécurité de la front door](FRONT_DOOR_SECURITY_POLICY.md)
 - [Contrat des métriques locales](OBSERVABILITY_METRICS_CONTRACT.md)

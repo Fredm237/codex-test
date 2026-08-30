@@ -163,15 +163,20 @@ montant, devise, pays, URL ou texte de justification n'est admissible.
 Les dépendances sont fermées à `postgres`, `redis`, `awin`, `llm` et `serpapi` ;
 leurs opérations sont également bornées. Chaque span émet seulement le
 trace-id, un span-id opaque, la dépendance, l'opération, la sortie, la durée et,
-en erreur, le nom de classe de l'exception. Les appels HTTP sortants reçoivent
-`traceparent: 00-<trace-id>-<span-id>-01` et `X-Request-Id`. Les valeurs sont
+en erreur, le nom de classe de l'exception dans le seul journal local. Les
+appels HTTP sortants reçoivent
+`traceparent: 00-<trace-id>-<span-id>-<flags>` et `X-Request-Id`, avec `flags`
+égal à `01` si la trace est échantillonnée et `00` sinon. Les valeurs sont
 créées par FILON ; l'en-tête client entrant reste ignoré. PostgreSQL et Redis
 ne reçoivent ni commentaire SQL par requête ni clé enrichie : leur corrélation
 reste applicative afin de préserver les requêtes préparées et les clés cache.
 
-Ces journaux ne constituent pas un backend de traces, une métrique exposée, un
-SLO ou une preuve de conservation par un fournisseur externe. Leur collecte,
-rétention, accès et suppression doivent être approuvés avant production.
+Un exporteur OTLP/HTTP officiel est disponible derrière un opt-in complet. Il
+n'exporte que les noms, dimensions et outcomes fermés ci-dessus, sans message
+d'exception ni ressource de processus. Sa présence ne constitue pas un backend
+de traces, un SLO ou une preuve de conservation par un fournisseur externe.
+Collecteur, rétention, accès et suppression doivent être approuvés avant
+activation.
 
 `ok` signifie que la fonction instrumentée a rendu normalement, pas qu'une
 offre a nécessairement été trouvée. Une absence documentée reste donc un

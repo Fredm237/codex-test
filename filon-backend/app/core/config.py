@@ -117,6 +117,38 @@ class Settings(BaseSettings):
                     "rate limiting in production"
                 )
 
+        trace_endpoint = (self.otlp_traces_endpoint or "").strip()
+        trace_token = self.otlp_trace_export_token
+        if self.trace_export_backend == "disabled":
+            if trace_endpoint or trace_token is not None:
+                errors.append(
+                    "OTLP trace settings require TRACE_EXPORT_BACKEND=otlp_http"
+                )
+        else:
+            if not trace_endpoint:
+                errors.append("OTLP_TRACES_ENDPOINT is required for trace export")
+            else:
+                parsed_trace_endpoint = urlsplit(trace_endpoint)
+                local_http = (
+                    not self.is_production
+                    and parsed_trace_endpoint.scheme == "http"
+                    and parsed_trace_endpoint.hostname in {"localhost", "127.0.0.1", "::1"}
+                )
+                if (
+                    (parsed_trace_endpoint.scheme != "https" and not local_http)
+                    or not parsed_trace_endpoint.hostname
+                    or parsed_trace_endpoint.username is not None
+                    or parsed_trace_endpoint.password is not None
+                    or parsed_trace_endpoint.query
+                    or parsed_trace_endpoint.fragment
+                    or not parsed_trace_endpoint.path.endswith("/v1/traces")
+                ):
+                    errors.append(
+                        "OTLP_TRACES_ENDPOINT must be a safe OTLP/HTTP traces endpoint"
+                    )
+            if trace_token is None:
+                errors.append("OTLP_TRACE_EXPORT_TOKEN is required for trace export")
+
         if self.rate_limit_identity_source == "railway":
             if not self.is_production:
                 errors.append(
@@ -203,6 +235,15 @@ class Settings(BaseSettings):
     # Secret dédié au scrape OpenMetrics. Sans valeur, l'export standard est
     # désactivé et répond 503 ; le snapshot JSON historique reste inchangé.
     metrics_export_token: str | None = Field(default=None)
+    # Export de traces strictement opt-in vers un collecteur OTLP/HTTP. Les
+    # noms et attributs exportés restent fermés dans ``app.core.tracing``.
+    trace_export_backend: Literal["disabled", "otlp_http"] = Field(
+        default="disabled"
+    )
+    otlp_traces_endpoint: str | None = Field(default=None, max_length=2048)
+    otlp_trace_export_token: str | None = Field(default=None)
+    trace_export_sample_ratio: float = Field(default=0.1, gt=0.0, le=1.0)
+    trace_export_timeout_seconds: float = Field(default=2.0, ge=0.1, le=5.0)
 
     @field_validator("metrics_export_token")
     @classmethod
@@ -217,6 +258,22 @@ class Settings(BaseSettings):
         ):
             raise ValueError(
                 "METRICS_EXPORT_TOKEN must be 32-256 printable non-whitespace ASCII characters"
+            )
+        return value
+
+    @field_validator("otlp_trace_export_token")
+    @classmethod
+    def validate_otlp_trace_export_token(cls, value: str | None) -> str | None:
+        if value is None or value == "":
+            return None
+        if (
+            value != value.strip()
+            or not 32 <= len(value) <= 512
+            or not value.isascii()
+            or any(character.isspace() or not character.isprintable() for character in value)
+        ):
+            raise ValueError(
+                "OTLP_TRACE_EXPORT_TOKEN must be 32-512 printable non-whitespace ASCII characters"
             )
         return value
 

@@ -132,6 +132,50 @@ def test_metrics_export_token_rejects_weak_or_ambiguous_values(token: str) -> No
         Settings(_env_file=None, env="test", metrics_export_token=token)
 
 
+def test_otlp_trace_export_is_disabled_without_dangling_configuration() -> None:
+    settings = Settings(_env_file=None, env="test")
+
+    assert settings.trace_export_backend == "disabled"
+    assert settings.otlp_traces_endpoint is None
+
+    with pytest.raises(ValidationError, match="TRACE_EXPORT_BACKEND=otlp_http"):
+        Settings(
+            _env_file=None,
+            env="test",
+            otlp_traces_endpoint="http://localhost:4318/v1/traces",
+        )
+
+
+def test_production_otlp_trace_export_requires_https_token_and_exact_path() -> None:
+    token = "t" * 32
+    settings = _production(
+        trace_export_backend="otlp_http",
+        otlp_traces_endpoint="https://otel.example.com/v1/traces",
+        otlp_trace_export_token=token,
+    )
+
+    assert settings.trace_export_sample_ratio == 0.1
+
+    for endpoint in (
+        "http://otel.example.com/v1/traces",
+        "https://user:password@otel.example.com/v1/traces",
+        "https://otel.example.com/v1/metrics",
+        "https://otel.example.com/v1/traces?secret=value",
+    ):
+        with pytest.raises(ValidationError, match="safe OTLP/HTTP"):
+            _production(
+                trace_export_backend="otlp_http",
+                otlp_traces_endpoint=endpoint,
+                otlp_trace_export_token=token,
+            )
+
+    with pytest.raises(ValidationError, match="OTLP_TRACE_EXPORT_TOKEN"):
+        _production(
+            trace_export_backend="otlp_http",
+            otlp_traces_endpoint="https://otel.example.com/v1/traces",
+        )
+
+
 def test_metrics_export_token_accepts_an_explicit_strong_value() -> None:
     token = "metrics-export-token-32-characters-minimum"
 

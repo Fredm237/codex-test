@@ -45,3 +45,26 @@ async def test_lifespan_never_executes_the_catalog_scheduler(monkeypatch):
         await asyncio.sleep(0)
 
     assert called is False
+
+
+@pytest.mark.asyncio
+async def test_lifespan_configures_and_closes_trace_export(monkeypatch):
+    configured = []
+    closed = []
+    session_module = __import__("app.db.session", fromlist=["session"])
+    monkeypatch.setattr(session_module, "is_enabled", lambda: False)
+    monkeypatch.setattr(
+        main,
+        "configure_trace_export",
+        lambda settings: configured.append(settings.env) or True,
+    )
+    monkeypatch.setattr(
+        main,
+        "shutdown_trace_export",
+        lambda: closed.append(True),
+    )
+
+    async with main.lifespan(FastAPI()):
+        assert configured == ["test"]
+
+    assert closed == [True]

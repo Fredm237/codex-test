@@ -271,9 +271,10 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 3. La mesure middleware couvre l'obtention de la réponse, pas la consommation
    intégrale du corps d'un flux SSE.
 4. Le trace-id est propagé aux appels HTTP Awin, SerpAPI et LLM et corrèle les
-   spans applicatifs PostgreSQL/Redis, mais aucun backend OTLP ni agent de
-   collecte de traces n'est déployé ; l'acceptation ou la conservation du
-   `traceparent` par les services tiers n'est donc pas prouvée à distance.
+   spans applicatifs PostgreSQL/Redis. L'exporteur OTLP/HTTP officiel est
+   qualifié localement et désactivé par défaut ; aucun collecteur n'est
+   déployé. L'acceptation ou la conservation du `traceparent` n'est donc pas
+   prouvée à distance.
 5. Aucun seuil P95/P99 n'est validé sur trafic représentatif. Les valeurs du
    plan restent des cibles proposées, pas des performances mesurées.
 6. Les deux moniteurs Railway de capacité volume sont actifs, mais leur
@@ -303,8 +304,9 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 - déployer le pack OpenMetrics sur une plateforme d'agrégation approuvée,
   compiler atomiquement l'inventaire avec le compte de plateforme, vérifier
   chaque replica puis conserver le reçu expurgé ;
-- déployer un backend de traces approuvé, vérifier la réception des
-  `traceparent` et relier sa rétention aux règles de confidentialité ;
+- déployer un backend de traces approuvé, activer l'exporteur sur un canary,
+  vérifier la réception des `traceparent` et relier sa rétention aux règles de
+  confidentialité ;
 - vérifier via l'agrégateur le contrat versionné unknown, fraîcheur, exclusions
   et abstentions sur une période représentative ;
 - importer le dashboard, vérifier les rollups et percentiles locaux, puis

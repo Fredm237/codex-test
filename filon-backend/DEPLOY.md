@@ -56,6 +56,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    FORWARDED_ALLOW_IPS=<IP/CIDR exacts et vérifiés du proxy Railway>
    METRICS_EXPORT_TOKEN=<secret aléatoire distinct, 32-256 caractères ASCII>
    RATE_LIMIT_BACKEND=local
+   TRACE_EXPORT_BACKEND=disabled
    ```
 
    `DATABASE_URL` est obligatoire : le pre-deploy doit pouvoir migrer la base
@@ -94,6 +95,25 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    `/health`, les lookalikes et toutes les routes métier restent protégés.
    Conserver `local` tant que Redis n'est pas créé et qualifié ; la présence du
    code seule ne prouve pas une protection distribuée en production.
+
+   L'export de traces constitue un opt-in distinct. Conserver
+   `TRACE_EXPORT_BACKEND=disabled` tant qu'un collecteur, sa région, son coût,
+   sa rétention et sa suppression ne sont pas approuvés. Pour un canary
+   autorisé, ajouter simultanément :
+
+   ```
+   TRACE_EXPORT_BACKEND=otlp_http
+   OTLP_TRACES_ENDPOINT=https://<collecteur>/v1/traces
+   OTLP_TRACE_EXPORT_TOKEN=<secret dédié, 32-512 caractères ASCII>
+   TRACE_EXPORT_SAMPLE_RATIO=0.1
+   TRACE_EXPORT_TIMEOUT_SECONDS=2
+   ```
+
+   L'endpoint de production doit être HTTPS et ne contenir ni identifiants, ni
+   query string. Le jeton est transmis dans l'en-tête Authorization et ne doit
+   jamais être ajouté à l'URL. Une configuration partielle empêche le
+   démarrage ; le rollback remet le backend à `disabled` et retire endpoint et
+   jeton sans migration.
 5. Avant de déployer, exécuter intégralement le
    [runbook d'adoption et de rollback](../docs/architecture/DATABASE_MIGRATION_RUNBOOK.md) :
    sauvegarde, restauration test et adoption Alembic précèdent la migration

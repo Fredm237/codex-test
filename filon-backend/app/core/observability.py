@@ -15,6 +15,8 @@ from dataclasses import dataclass, field
 from functools import wraps
 from typing import Any, Awaitable, Callable, TypeVar
 
+from app.core.tracing import exported_span
+
 
 _MAX_ROUTES = 100
 _MAX_GLOBAL_SAMPLES = 5_000
@@ -141,6 +143,10 @@ _dependency_span_context: ContextVar[str | None] = ContextVar(
     "filon_dependency_span_id",
     default=None,
 )
+_dependency_trace_flags_context: ContextVar[str | None] = ContextVar(
+    "filon_dependency_trace_flags",
+    default=None,
+)
 
 
 def normalize_request_id(value: str | None) -> str:
@@ -199,8 +205,11 @@ def outbound_trace_headers() -> dict[str, str]:
         or any(character not in "0123456789abcdef" for character in span_id)
     ):
         span_id = _new_span_id()
+    trace_flags = _dependency_trace_flags_context.get()
+    if trace_flags not in {"00", "01"}:
+        trace_flags = "01"
     return {
-        "traceparent": f"00-{request_id}-{span_id}-01",
+        "traceparent": f"00-{request_id}-{span_id}-{trace_flags}",
         "x-request-id": request_id,
     }
 
@@ -266,48 +275,67 @@ async def traced_dependency(
         request_id = uuid.uuid4().hex
         owned_request_token = request_id_context.set(_RequestTrace(request_id))
     span_id = _new_span_id()
-    span_token = _dependency_span_context.set(span_id)
     dependency_log = logging.getLogger(
         f"filon.dependency.{dependency_label.lower()}"
     )
     started = time.monotonic()
-    dependency_log.info(
-        "request_id=%s span_id=%s dependency=%s operation=%s event=start",
-        request_id,
-        span_id,
-        dependency_label,
-        operation_label,
-    )
-    try:
-        yield
-    except BaseException as exc:
-        outcome = "error" if isinstance(exc, Exception) else "cancelled"
-        dependency_log.warning(
-            "request_id=%s span_id=%s dependency=%s operation=%s "
-            "event=finish outcome=%s error_type=%s elapsed_ms=%.1f",
-            request_id,
-            span_id,
-            dependency_label,
-            operation_label,
-            outcome,
-            type(exc).__name__,
-            (time.monotonic() - started) * 1000,
+    with exported_span(
+        f"filon.dependency.{dependency_label.lower()}.{operation_label.lower()}",
+        request_id=request_id,
+        parent_span_id=_dependency_span_context.get(),
+        attributes={
+            "filon.span.kind": "dependency",
+            "filon.dependency": dependency_label,
+            "filon.operation": operation_label,
+        },
+    ) as exported:
+        if exported.span_id is not None:
+            span_id = exported.span_id
+        span_token = _dependency_span_context.set(span_id)
+        trace_flags_token = _dependency_trace_flags_context.set(
+            "01" if exported.sampled is not False else "00"
         )
-        raise
-    else:
         dependency_log.info(
             "request_id=%s span_id=%s dependency=%s operation=%s "
-            "event=finish outcome=ok elapsed_ms=%.1f",
+            "event=start",
             request_id,
             span_id,
             dependency_label,
             operation_label,
-            (time.monotonic() - started) * 1000,
         )
-    finally:
-        _dependency_span_context.reset(span_token)
-        if owned_request_token is not None:
-            request_id_context.reset(owned_request_token)
+        try:
+            yield
+        except BaseException as exc:
+            outcome = "error" if isinstance(exc, Exception) else "cancelled"
+            exported.finish(outcome=outcome)
+            dependency_log.warning(
+                "request_id=%s span_id=%s dependency=%s operation=%s "
+                "event=finish outcome=%s error_type=%s elapsed_ms=%.1f",
+                request_id,
+                span_id,
+                dependency_label,
+                operation_label,
+                outcome,
+                type(exc).__name__,
+                (time.monotonic() - started) * 1000,
+            )
+            raise
+        else:
+            exported.finish(outcome="ok")
+            dependency_log.info(
+                "request_id=%s span_id=%s dependency=%s operation=%s "
+                "event=finish outcome=ok elapsed_ms=%.1f",
+                request_id,
+                span_id,
+                dependency_label,
+                operation_label,
+                (time.monotonic() - started) * 1000,
+            )
+        finally:
+            _dependency_trace_flags_context.reset(trace_flags_token)
+            _dependency_span_context.reset(span_token)
+            if owned_request_token is not None:
+                request_id_context.reset(owned_request_token)
 
 
 def _percentile(samples: deque[float], percentile: float) -> float | None:
@@ -761,62 +789,72 @@ def traced_pipeline_stage(
                 request_id = uuid.uuid4().hex
                 owned_token = request_id_context.set(_RequestTrace(request_id))
             started = time.monotonic()
-            stage_log.info("request_id=%s stage=%s event=start", request_id, stage_label)
-            try:
-                result = await function(*args, **kwargs)
-            except BaseException as exc:
-                elapsed_ms = (time.monotonic() - started) * 1000
-                outcome = "error" if isinstance(exc, Exception) else "cancelled"
-                product_intelligence_metrics.record_stage(
-                    stage=stage_label,
-                    outcome=outcome,
-                    elapsed_ms=elapsed_ms,
-                )
-                # Seul le type est journalisé : le message d'exception peut
-                # contenir une URL signée, une requête ou une valeur source.
-                stage_log.warning(
-                    "request_id=%s stage=%s event=finish outcome=%s error_type=%s elapsed_ms=%.1f",
-                    request_id,
-                    stage_label,
-                    outcome,
-                    type(exc).__name__,
-                    elapsed_ms,
-                )
-                raise
-            else:
-                elapsed_ms = (time.monotonic() - started) * 1000
-                outcome = "ok"
-                if result_outcome is not None:
-                    try:
-                        outcome = _bounded_label(result_outcome(result), _PIPELINE_OUTCOMES)
-                    except Exception as exc:
-                        # Une erreur d'instrumentation ne doit jamais modifier
-                        # le résultat métier. La mesure devient explicitement
-                        # dégradée, sans exposer le message de l'exception.
-                        outcome = "degraded"
-                        stage_log.warning(
-                            "request_id=%s stage=%s event=outcome_resolution "
-                            "outcome=degraded error_type=%s",
-                            request_id,
-                            stage_label,
-                            type(exc).__name__,
-                        )
-                product_intelligence_metrics.record_stage(
-                    stage=stage_label,
-                    outcome=outcome,
-                    elapsed_ms=elapsed_ms,
-                )
-                stage_log.info(
-                    "request_id=%s stage=%s event=finish outcome=%s elapsed_ms=%.1f",
-                    request_id,
-                    stage_label,
-                    outcome,
-                    elapsed_ms,
-                )
-                return result
-            finally:
-                if owned_token is not None:
-                    request_id_context.reset(owned_token)
+            with exported_span(
+                f"filon.pipeline.{stage_label.lower()}",
+                request_id=request_id,
+                attributes={
+                    "filon.span.kind": "pipeline",
+                    "filon.stage": stage_label,
+                },
+            ) as exported:
+                stage_log.info("request_id=%s stage=%s event=start", request_id, stage_label)
+                try:
+                    result = await function(*args, **kwargs)
+                except BaseException as exc:
+                    elapsed_ms = (time.monotonic() - started) * 1000
+                    outcome = "error" if isinstance(exc, Exception) else "cancelled"
+                    exported.finish(outcome=outcome)
+                    product_intelligence_metrics.record_stage(
+                        stage=stage_label,
+                        outcome=outcome,
+                        elapsed_ms=elapsed_ms,
+                    )
+                    # Seul le type est journalisé : le message d'exception peut
+                    # contenir une URL signée, une requête ou une valeur source.
+                    stage_log.warning(
+                        "request_id=%s stage=%s event=finish outcome=%s error_type=%s elapsed_ms=%.1f",
+                        request_id,
+                        stage_label,
+                        outcome,
+                        type(exc).__name__,
+                        elapsed_ms,
+                    )
+                    raise
+                else:
+                    elapsed_ms = (time.monotonic() - started) * 1000
+                    outcome = "ok"
+                    if result_outcome is not None:
+                        try:
+                            outcome = _bounded_label(result_outcome(result), _PIPELINE_OUTCOMES)
+                        except Exception as exc:
+                            # Une erreur d'instrumentation ne doit jamais modifier
+                            # le résultat métier. La mesure devient explicitement
+                            # dégradée, sans exposer le message de l'exception.
+                            outcome = "degraded"
+                            stage_log.warning(
+                                "request_id=%s stage=%s event=outcome_resolution "
+                                "outcome=degraded error_type=%s",
+                                request_id,
+                                stage_label,
+                                type(exc).__name__,
+                            )
+                    exported.finish(outcome=outcome)
+                    product_intelligence_metrics.record_stage(
+                        stage=stage_label,
+                        outcome=outcome,
+                        elapsed_ms=elapsed_ms,
+                    )
+                    stage_log.info(
+                        "request_id=%s stage=%s event=finish outcome=%s elapsed_ms=%.1f",
+                        request_id,
+                        stage_label,
+                        outcome,
+                        elapsed_ms,
+                    )
+                    return result
+                finally:
+                    if owned_token is not None:
+                        request_id_context.reset(owned_token)
 
         return wrapped
 

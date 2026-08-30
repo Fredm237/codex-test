@@ -12,6 +12,7 @@ from redis.asyncio import Redis
 from app import __version__
 from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
+from app.core.tracing import configure_trace_export, shutdown_trace_export
 from app.api.routes import advise, catalog, chat, health, intelligence, stream
 from app.api.middleware import RequestLoggingMiddleware, RateLimitMiddleware
 
@@ -40,15 +41,19 @@ async def _prepare_schema() -> None:
 async def lifespan(app: FastAPI):
     settings = get_settings()
     configure_logging(settings.debug)
+    trace_export_enabled = configure_trace_export(settings)
     log.info("Démarrage %s v%s (env=%s)", settings.app_name, __version__, settings.env)
+    if trace_export_enabled:
+        log.info("Export de traces OTLP/HTTP activé")
 
-    # La disponibilité du service et la validation du schéma sont distinctes.
-    # Les migrations sont appliquées par une étape de déploiement explicite.
-    from app.db import session as db
-
-    schema_task = asyncio.create_task(_prepare_schema()) if db.is_enabled() else None
-
+    schema_task = None
     try:
+        # La disponibilité du service et la validation du schéma sont distinctes.
+        # Les migrations sont appliquées par une étape de déploiement explicite.
+        from app.db import session as db
+
+        if db.is_enabled():
+            schema_task = asyncio.create_task(_prepare_schema())
         yield
     finally:
         if schema_task is not None and not schema_task.done():
@@ -64,6 +69,7 @@ async def lifespan(app: FastAPI):
         )
         if rate_limit_client is not None:
             await rate_limit_client.aclose()
+        await asyncio.to_thread(shutdown_trace_export)
         log.info("Arrêt de %s", settings.app_name)
 
 
