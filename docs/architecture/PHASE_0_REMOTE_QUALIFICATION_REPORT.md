@@ -128,8 +128,8 @@ n'est pas utilisée comme preuve de cette branche et n'a pas été redéployée.
 
 Le backend Core est désormais réellement déployé en `production`, région
 `EU West (Amsterdam, Netherlands)`, depuis la branche
-`codex/filon-phase-0-core`. Le déploiement actif
-`cd88cf30-354d-4be0-8206-493a829432f9` est `SUCCESS` avec un réplica. Il utilise
+`codex/filon-phase-0-core`. Le déploiement observé lors de cette qualification,
+`cd88cf30-354d-4be0-8206-493a829432f9`, était `SUCCESS` avec un réplica. Il utilisait
 le Dockerfile, `alembic upgrade head`, `python -m app` et le healthcheck
 `/health/ready`.
 
@@ -146,7 +146,7 @@ Repères d'exploitation publics autorisés :
 Ces UUID ne sont pas des secrets. Aucun jeton, mot de passe, URL privée ou
 valeur de variable n'est publié.
 
-Les contrôles publics postérieurs au déploiement actif prouvent :
+Les contrôles publics postérieurs à ce déploiement prouvent :
 
 - `/health/ready` HTTP 200, `ready=true`, PostgreSQL `ok`, révision
   `e8c3f6a0b5d2` ;
