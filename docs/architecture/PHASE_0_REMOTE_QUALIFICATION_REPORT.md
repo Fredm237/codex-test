@@ -6,6 +6,7 @@
 - Requalification du workflow de curation : **30 août 2026, 21:27 CEST**
 - Requalification du Catalog Quality Funnel : **30 août 2026, 22:00 CEST**
 - Correction des douze étapes et requalification de production : **30 août 2026**
+- Qualification OTLP fail-closed : **30 août 2026**
 - Branche : `codex/filon-phase-0-core`
 - Dépôt public : `Fredm237/codex-test`
 - Décision : **code techniquement qualifié ; lancement et Phase 1 NO-GO**
@@ -19,8 +20,8 @@ prouvée par l'arbre Git :
 
 | Autorité | Commit | Arbre |
 |---|---|---|
-| Référence applicative locale courante | `594f51fc91651eb6e067dc9497b0b4337d0e57bc` | `9534214815bc6af2630bbf523fffb5c76f64980c` |
-| Référence applicative distante courante | `9d8ade3ad671afe98f28be9c6f1fd5bf69fae414` | `9534214815bc6af2630bbf523fffb5c76f64980c` |
+| Référence applicative locale courante | `0bd6bad860031cbc87a99d1afaa8db817966c8c3` | `11e0956e1caa96c8df3300c5705ba03aee3c83e6` |
+| Référence applicative distante courante | `216f38be5c5c6f8e5cd0ce6ec0425a86bfc9df0c` | `11e0956e1caa96c8df3300c5705ba03aee3c83e6` |
 
 Le commit distant `e04dfc2c18ef58177d4182acbb67c966058ff9c0`
 porte l'arbre applicatif validé
@@ -112,6 +113,16 @@ La correction finale qui restitue explicitement la douzième étape
 régressions backend et la readiness normale. Le gate humain strict reste le
 seul échec attendu. L'artefact `9738202431` porte le digest
 `sha256:b2bdbd23cd83f6c7372e81987af4af3619f2aeae56215b8b79eefe73b951b50a`.
+
+Le lot OTLP fail-closed a enfin été publié sous la référence distante
+`216f38be5c5c6f8e5cd0ce6ec0425a86bfc9df0c`, arbre
+`11e0956e1caa96c8df3300c5705ba03aee3c83e6` byte-identique au commit local
+`0bd6bad860031cbc87a99d1afaa8db817966c8c3`. Actions **#364**
+(`33336304758`) valide Web, Mobile, Extension, Alembic, les **2 131**
+régressions backend et la readiness normale. Le seul échec est le gate humain
+strict attendu. L'artefact `9739162091`, nommé
+`quality-readiness-7e282136a33ab27f2f9941e4136b63882b0d269c`, porte le digest
+`sha256:6b7c1ec0fb0db1b2cc81c7789e1686695381743f9c3e361448c17482b58a0efb`.
 
 ## 3. Vercel
 

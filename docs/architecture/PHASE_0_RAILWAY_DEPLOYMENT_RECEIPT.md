@@ -213,6 +213,27 @@ l'image qualifiée, mais aucun troisième service Railway n'a été créé : la
 topologie reste strictement `web` + `Postgres`. Aucune exécution scheduler,
 cadence Cron ou ingestion Awin n'est revendiquée par ce reçu.
 
+## Exporteur OTLP désactivé dans l'image web — 30 août 2026
+
+Le lot applicatif OTLP a été publié sous la référence distante
+`216f38be5c5c6f8e5cd0ce6ec0425a86bfc9df0c`, arbre
+`11e0956e1caa96c8df3300c5705ba03aee3c83e6` identique à celui du commit
+local `0bd6bad860031cbc87a99d1afaa8db817966c8c3`.
+
+Le déploiement automatique
+`b591c7cd-bc8b-43e6-a7a7-efe8de8f6b5a` est affiché
+**Deployment successful**, en EU West avec un réplica. Les sondes publiques
+ont confirmé `alive=true`, `ready=true`, PostgreSQL `ok` et la révision
+`e8c3f6a0b5d2`. Actions #364 (`33336304758`) valide les trois clients,
+Alembic, les **2 131** régressions backend et la readiness normale ; seul le
+gate humain strict échoue comme attendu. L'artefact Quality est `9739162091`,
+digest
+`sha256:6b7c1ec0fb0db1b2cc81c7789e1686695381743f9c3e361448c17482b58a0efb`.
+
+L'exporteur est présent mais `TRACE_EXPORT_BACKEND=disabled`. Aucun endpoint
+ni jeton OTLP n'a été ajouté, aucun span n'est envoyé et aucun collecteur n'a
+été créé. La topologie Railway reste `web` + `Postgres`.
+
 ## Capacité, rollback et risques résiduels
 
 Le volume PostgreSQL est `READY` à **7 855,56 Mio sur 20 000 Mio**, soit

@@ -2,7 +2,7 @@
 
 - Date : **30 août 2026**
 - Lot : **P0.6 / traces distribuées**
-- Statut : **exporteur qualifié localement ; collecteur non déployé**
+- Statut : **exporteur qualifié localement, en CI et dans l'image de production ; collecteur non déployé**
 - Production : **`TRACE_EXPORT_BACKEND=disabled` ; aucun envoi**
 - Décision : **GO technique du chemin d'export ; GO production interdit sans collecteur, rétention et reçu**
 
@@ -64,13 +64,42 @@ l'exporteur.
 ## Preuves locales
 
 - configuration, cycle de vie, observabilité et export : **88/88** ;
-- backend complet : **2 131 réussis, 2 ignorés** en 99,96 s ;
+- backend complet : **2 131 réussis, 2 ignorés** en 64,41 s ;
 - `pip check` : aucune dépendance cassée ;
 - compilation Python et `git diff --check` : verts.
 
 Les tests utilisent l'exporteur mémoire officiel. Ils prouvent la concordance
 trace/span avec `traceparent`, l'échantillonnage, l'absence d'exception et de
 payload, le refus d'une double configuration et la fermeture à l'arrêt.
+
+## Preuves distantes et production désactivée
+
+Le commit local `0bd6bad860031cbc87a99d1afaa8db817966c8c3` et le commit
+distant `216f38be5c5c6f8e5cd0ce6ec0425a86bfc9df0c` portent exactement
+l'arbre `11e0956e1caa96c8df3300c5705ba03aee3c83e6`. La comparaison GitHub
+confirme un seul commit en avance, sans divergence et avec les seize fichiers
+attendus seulement.
+
+GitHub Actions **#364** (`33336304758`) a terminé avec :
+
+- Web, Mobile et Extension : **succès** ;
+- baseline, stamp, drift et restauration Alembic : **succès** ;
+- **2 131** régressions backend : **succès** ;
+- readiness Quality normale : **succès** ;
+- gate humain strict : **échec attendu**, les sept datasets restant à zéro.
+
+L'artefact `9739162091`, nommé
+`quality-readiness-7e282136a33ab27f2f9941e4136b63882b0d269c`, fait
+1 785 octets, porte le digest
+`sha256:6b7c1ec0fb0db1b2cc81c7789e1686695381743f9c3e361448c17482b58a0efb`
+et expire le 13 septembre 2026.
+
+Railway a déployé l'image sous l'identifiant
+`b591c7cd-bc8b-43e6-a7a7-efe8de8f6b5a` avec le statut
+`Deployment successful`, en EU West et avec un réplica. Les sondes publiques
+ont retourné `alive=true`, `ready=true`, PostgreSQL `ok` et la révision
+`e8c3f6a0b5d2`. La variable reste `TRACE_EXPORT_BACKEND=disabled` : ce reçu
+prouve la compatibilité de l'image, pas un envoi OTLP.
 
 ## Activation et preuve encore requises
 
