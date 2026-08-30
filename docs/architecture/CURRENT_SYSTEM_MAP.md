@@ -87,6 +87,7 @@ Sans activation sur un lot réel, sa couverture production reste à mesurer.
 | Offre | PostgreSQL `offers` ; `graph_offer_observations` append-only en shadow local | DTO Python, TypeScript web et mobile dupliqués ; aucun lecteur public Graph | KEEP + MIGRATE + SHADOW | `Offer` versionnée, argent décimal, stock tri-state, provenance et fraîcheur |
 | Payload source Awin | `raw_source_records` en shadow, flag off | Aucun lecteur public | KEEP SHADOW | Raw immuable, rétention approuvée et replay versionné |
 | Observation champ | `observations` en shadow | Aucun lecteur public | KEEP SHADOW | Evidence/claim eligibility après benchmark |
+| Claim et éligibilité | `evidence_claim_records` + `decision_eligibility_records` en shadow local | Aucun lecteur public ; plafond v1 à `RANKABLE` | KEEP SHADOW | Evidence Store et policy ratifiée après couverture, calibration et holdout humain |
 | Anomalie ingestion | `quarantine_records` en shadow + `ProductErrorCode`/`contracts/taxonomies/v1` | Seuls E008, E010 et E016–E018 ont un producteur ; revue interne à construire | KEEP SHADOW | Workflow humain de release/discard, instrumentation des treize codes restants et régression |
 | Prix courant | `offers.price` en float, avec devise conservée dans le parcours `/advise` agents | Snapshots et clients en `number` ; budget public en EUR, aucun moteur FX ; certains callers historiques infèrent encore EUR | REWRITE | `Money{amount_decimal,currency}` + observation horodatée ; conversion sourcée avant comparaison multidevise |
 | Historique prix | `price_snapshots` | Relief/verdict | KEEP + HARDEN | Série d'observations sourcées et règle d'éligibilité |
@@ -116,6 +117,8 @@ Sans activation sur un lot réel, sa couverture production reste à mesurer.
   `graph_offer_variant_links`.
 - Offer Graph shadow : `graph_offer_observations`.
 - Merchant Intelligence shadow : `merchant_quality_snapshots`.
+- Evidence Engine shadow : `evidence_claim_records`,
+  `decision_eligibility_records`.
 
 ### Mobile MySQL
 

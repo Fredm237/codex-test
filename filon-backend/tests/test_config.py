@@ -167,6 +167,7 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     assert settings.product_graph_shadow_enabled is False
     assert settings.offer_graph_shadow_enabled is False
     assert settings.merchant_intelligence_shadow_enabled is False
+    assert settings.evidence_engine_shadow_enabled is False
 
     with pytest.raises(
         ValidationError,
@@ -224,6 +225,30 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
         merchant_intelligence_shadow_enabled=True,
     )
     assert merchant_enabled.merchant_intelligence_shadow_enabled is True
+
+    with pytest.raises(
+        ValidationError,
+        match="EVIDENCE_ENGINE_SHADOW_ENABLED requires all prior shadows",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            observation_shadow_enabled=True,
+            product_graph_shadow_enabled=True,
+            offer_graph_shadow_enabled=True,
+            evidence_engine_shadow_enabled=True,
+        )
+
+    evidence_enabled = Settings(
+        _env_file=None,
+        env="test",
+        observation_shadow_enabled=True,
+        product_graph_shadow_enabled=True,
+        offer_graph_shadow_enabled=True,
+        merchant_intelligence_shadow_enabled=True,
+        evidence_engine_shadow_enabled=True,
+    )
+    assert evidence_enabled.evidence_engine_shadow_enabled is True
 
 
 @pytest.mark.parametrize(

@@ -24,6 +24,7 @@ from app.observations import models as observation_models  # noqa: F401
 from app.product_graph import models as product_graph_models  # noqa: F401
 from app.offer_graph import models as offer_graph_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_models  # noqa: F401
+from app.evidence_engine import models as evidence_models  # noqa: F401
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
@@ -41,13 +42,18 @@ GRAPH_SHADOW_TABLES = {
 }
 OFFER_GRAPH_TABLES = {"graph_offer_observations"}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
+EVIDENCE_ENGINE_TABLES = {
+    "evidence_claim_records",
+    "decision_eligibility_records",
+}
 BASELINE_REVISION = "b9db07b15986"
 SHADOW_REVISION = "d75faf1f6a94"
 CURRENCY_REVISION = "3a7f9c2e5b61"
 OFFER_FLAGS_REVISION = "f4c81a9d2e70"
 PRODUCT_GRAPH_REVISION = "8b2f4c7d9a10"
 OFFER_GRAPH_REVISION = "c6a1d4e8f2b3"
-HEAD_REVISION = "d7b2e5f9a4c1"
+MERCHANT_INTELLIGENCE_REVISION = "d7b2e5f9a4c1"
+HEAD_REVISION = "e8c3f6a0b5d2"
 
 
 @pytest.fixture(autouse=True)
@@ -118,7 +124,9 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
 
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == OFFER_GRAPH_REVISION
+    assert scripts.get_revision(HEAD_REVISION).down_revision == (
+        MERCHANT_INTELLIGENCE_REVISION
+    )
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):
@@ -284,6 +292,7 @@ def test_existing_baseline_is_stamped_then_expanded_without_data_loss(
         | GRAPH_SHADOW_TABLES
         | OFFER_GRAPH_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
+        | EVIDENCE_ENGINE_TABLES
         <= set(inspect(engine).get_table_names())
     )
     assert "currency" in {
@@ -314,12 +323,14 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
     assert rollback_settings.product_graph_shadow_enabled is False
     assert rollback_settings.offer_graph_shadow_enabled is False
     assert rollback_settings.merchant_intelligence_shadow_enabled is False
+    assert rollback_settings.evidence_engine_shadow_enabled is False
     tables = set(inspect(engine).get_table_names())
     assert (
         SHADOW_TABLES
         | GRAPH_SHADOW_TABLES
         | OFFER_GRAPH_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
+        | EVIDENCE_ENGINE_TABLES
         <= tables
     )
     with engine.connect() as connection:
@@ -356,6 +367,7 @@ def test_graph_expand_downgrade_is_reversible_without_touching_core_data(
             GRAPH_SHADOW_TABLES
             | OFFER_GRAPH_TABLES
             | MERCHANT_INTELLIGENCE_TABLES
+            | EVIDENCE_ENGINE_TABLES
         )
         & tables
     )
@@ -375,6 +387,7 @@ def test_graph_expand_downgrade_is_reversible_without_touching_core_data(
         GRAPH_SHADOW_TABLES
         | OFFER_GRAPH_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
+        | EVIDENCE_ENGINE_TABLES
         <= set(inspect(engine).get_table_names())
     )
     with engine.connect() as connection:

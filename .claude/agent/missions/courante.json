@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 0 Product Intelligence Core",
   "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
   "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-31T00:30:00+02:00",
+  "maj": "2026-08-31T01:15:00+02:00",
   "contraintes": [
     "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
     "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
@@ -44,7 +44,7 @@
       "outil": "quality lab",
       "attendu": "Entity, Variant, Offer, Retrieval et Decision mesurés avec intervalles",
       "obtenu": "Manifest v0.5 fermé à sept datasets et 27 gates ; schémas, packs aveugles, identifiants distincts, adjudication, anti-fuite, provenance, identité de run et empreinte exacte du holdout ; Wilson, Bernstein empirique et bootstrap déterministe ; publication atomique sans remplacement et comparaison fail-closed ; sept adaptateurs applicatifs réels, dont Decision déterministe et sourcé et trois adaptateurs Graph exacts-GTIN ; inventaire public immuable de 1 000 candidats sans labels moteur ; collecte humaine indépendante encore absente",
-      "verification": "Quality 377/377 et backend complet 2091 réussis + 2 ignorés sous Python 3.12. Les adaptateurs Graph s'abstiennent sans GTIN unique, valide et non conflictuel et conservent une confiance non calibrée. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
+      "verification": "Quality 377/377 et backend complet 2097 réussis + 2 ignorés sous Python 3.12. Les adaptateurs Graph s'abstiennent sans GTIN unique, valide et non conflictuel et conservent une confiance non calibrée. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
       "tentatives": 1
     },
     {
@@ -76,7 +76,7 @@
     },
     {
       "id": "p0_f",
-      "objectif": "Construire Product/Variant et Offer Graph en shadows",
+      "objectif": "Construire Product/Variant, Offer, Merchant et Evidence en shadows",
       "statut": "en_cours",
       "depend": [
         "p0_c",
@@ -84,8 +84,8 @@
       ],
       "outil": "catalog core",
       "attendu": "Faux merges/splits et attachement offre mesurés au-dessus des gates",
-      "obtenu": "Shadows techniques : dix tables d'expansion, migrations Alembic 8b2f4c7d9a10, c6a1d4e8f2b3 et d7b2e5f9a4c1, resolver exact-GTIN, argent décimal, stock tri-state, lien HTTPS public strict et mesures marchand sans score ; writers isolés, backfills dry-run/apply bornés et idempotents, quatre flags off par défaut et sept adaptateurs Quality réels ; aucune lecture v1 modifiée",
-      "verification": "81 tests Product/Offer/Merchant, migration et configuration ciblés ; Quality 377/377 ; backend complet 2091 réussis + 2 ignorés en 72,74 s ; readiness intègre mais not_ready avec 0 cas humain ; aucun backfill ni déploiement Graph/Merchant Intelligence production",
+      "obtenu": "Shadows techniques : douze tables d'expansion, migrations Alembic 8b2f4c7d9a10, c6a1d4e8f2b3, d7b2e5f9a4c1 et e8c3f6a0b5d2, resolver exact-GTIN, argent décimal, stock tri-state, lien HTTPS public strict, mesures marchand sans score et registre de 11 claims fail-closed ; writers isolés, backfills dry-run/apply bornés et idempotents, cinq flags off par défaut et sept adaptateurs Quality réels ; aucune lecture v1 modifiée",
+      "verification": "68 tests Evidence/configuration/migration ciblés et 36 tests de chaîne Observation/Product/Offer/Merchant/Evidence ; Quality 377/377 ; backend complet 2097 réussis + 2 ignorés en 68,08 s ; readiness intègre mais not_ready avec 0 cas humain ; aucun backfill ni déploiement Graph/Merchant/Evidence production, aucun claim fort ni DECISION_ELIGIBLE",
       "tentatives": 1
     },
     {
@@ -449,6 +449,11 @@
       "ts": "2026-08-31T00:30:00+02:00",
       "evenement": "verification",
       "detail": "p0_f — Merchant Intelligence shadow livré localement : migration d7b2e5f9a4c1, compteurs/dénominateurs, statut AFFILIATED précis, horloge explicite et dimensions non mesurables sans score ; 81 ciblés, Quality 377/377, backend 2091 + 2 ignorés ; aucun snapshot ni effet ranking production"
+    },
+    {
+      "ts": "2026-08-31T01:15:00+02:00",
+      "evenement": "verification",
+      "detail": "p0_f — Evidence Engine et Claim Eligibility shadow livrés localement : migration e8c3f6a0b5d2, 4 faits atomiques sourcés, 7 claims forts inéligibles et plafond RANKABLE ; 68 ciblés, Quality 377/377, backend 2097 + 2 ignorés ; aucun backfill, lecteur public, claim fort ou verdict production"
     }
   ]
 }

@@ -115,7 +115,8 @@ Le LLM peut analyser une intention ou formuler une explication à partir de fait
 4. Contrat API versionné et génération des SDK.
 5. Raw retention, PII, durées de conservation et droit à l'effacement.
 6. Stratégie retrieval lexical/hybride et protocole d'évaluation.
-7. Policy de claim eligibility et seuils d'abstention.
+7. Policy de claim eligibility et seuils d'abstention :
+   [ADR-005 proposé et implémenté en shadow](ADR-005-EVIDENCE-CLAIM-ELIGIBILITY-SHADOW.md).
 8. Mesure et statut marchand :
    [ADR-004 proposé et implémenté en shadow](ADR-004-MERCHANT-INTELLIGENCE-MEASUREMENT-SHADOW.md).
 

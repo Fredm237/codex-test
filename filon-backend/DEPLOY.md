@@ -102,7 +102,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    Railway fournit ensuite une URL publique, par exemple
    `https://filon-backend-production.up.railway.app`.
 7. Vérifier : ouvrir `https://<url>/health/ready` → HTTP 200 avec la révision
-   `d7b2e5f9a4c1` attendue. Railway exige ce 200 avant de basculer le trafic.
+   `e8c3f6a0b5d2` attendue. Railway exige ce 200 avant de basculer le trafic.
    `/health/live` reste un diagnostic de processus et `/health` un diagnostic
    détaillé des dépendances. Enfin,
    `https://<url>/api/advise/stream?q=un%20pc%20portable%20800€` doit renvoyer un flux SSE.
@@ -176,7 +176,7 @@ de la base.
 Les migrations créent les tables `graph_*` sans backfill et sans lecteur public.
 Le writer Graph ne peut être activé seul : il exige simultanément
 `OBSERVATION_SHADOW_ENABLED=true` et `PRODUCT_GRAPH_SHADOW_ENABLED=true` sur le
-worker d'ingestion. Le service web conserve les quatre flags shadow à `false`.
+worker d'ingestion. Le service web conserve les cinq flags shadow à `false`.
 
 Avant toute écriture, exécuter un lot en lecture seule :
 
@@ -221,6 +221,17 @@ Cette commande ne produit aucun score et laisse livraison, retours, garantie,
 support, paiement, shipping et exactitude prix comme non mesurables. Son
 `--apply` exige les quatre flags shadow ; le service web les conserve off.
 
+Construire ensuite le registre Evidence en lecture seule :
+
+```bash
+python -m app.evidence_engine.backfill \
+  --evaluated-at 2026-08-31T00:00:00+02:00 \
+  --after-raw-id 0 --limit 1000
+```
+
+Les claims forts et toute décision restent inéligibles sans leurs prérequis.
+L'option `--apply` exige les cinq flags shadow et n'active aucun lecteur public.
+
 ### Service existant déjà opt-in Config as Code
 
 Le `railway.json` du dépôt reste le contrat legacy exact d'un service dont les
@@ -256,8 +267,9 @@ En cas de régression, remettre la version applicative précédente,
 `PRODUCT_GRAPH_SHADOW_ENABLED=false` et
 `OFFER_GRAPH_SHADOW_ENABLED=false`,
 `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false`,
+`EVIDENCE_ENGINE_SHADOW_ENABLED=false`,
 `OBSERVATION_SHADOW_ENABLED=false`, tout en conservant le schéma à la tête
-`d7b2e5f9a4c1`.
+`e8c3f6a0b5d2`.
 Ne jamais downgrader vers la baseline. Le downgrade technique
 `3a7f9c2e5b61` → `d75faf1f6a94` supprime la colonne de devise et les valeurs
 qu'elle contient ; une suppression structurelle exige une migration
