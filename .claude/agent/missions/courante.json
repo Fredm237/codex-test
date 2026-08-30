@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 0 Product Intelligence Core",
   "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
   "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-30T23:05:00+02:00",
+  "maj": "2026-08-31T00:30:00+02:00",
   "contraintes": [
     "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
     "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
@@ -44,7 +44,7 @@
       "outil": "quality lab",
       "attendu": "Entity, Variant, Offer, Retrieval et Decision mesurés avec intervalles",
       "obtenu": "Manifest v0.5 fermé à sept datasets et 27 gates ; schémas, packs aveugles, identifiants distincts, adjudication, anti-fuite, provenance, identité de run et empreinte exacte du holdout ; Wilson, Bernstein empirique et bootstrap déterministe ; publication atomique sans remplacement et comparaison fail-closed ; sept adaptateurs applicatifs réels, dont Decision déterministe et sourcé et trois adaptateurs Graph exacts-GTIN ; inventaire public immuable de 1 000 candidats sans labels moteur ; collecte humaine indépendante encore absente",
-      "verification": "Quality 377/377 et backend complet 2086 réussis + 2 ignorés sous Python 3.12. Les adaptateurs Graph s'abstiennent sans GTIN unique, valide et non conflictuel et conservent une confiance non calibrée. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
+      "verification": "Quality 377/377 et backend complet 2091 réussis + 2 ignorés sous Python 3.12. Les adaptateurs Graph s'abstiennent sans GTIN unique, valide et non conflictuel et conservent une confiance non calibrée. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
       "tentatives": 1
     },
     {
@@ -84,8 +84,8 @@
       ],
       "outil": "catalog core",
       "attendu": "Faux merges/splits et attachement offre mesurés au-dessus des gates",
-      "obtenu": "Shadows techniques : neuf tables graph_* expand-only, migrations Alembic 8b2f4c7d9a10 et c6a1d4e8f2b3, resolver exact-GTIN, argent décimal, stock tri-state, lien HTTPS public strict, writers Awin isolés par savepoint, backfills dry-run/apply bornés et idempotents, trois flags off par défaut et sept adaptateurs Quality réels ; aucune lecture v1 modifiée",
-      "verification": "76 tests Product/Offer Graph, migration et configuration ciblés ; Quality 377/377 ; backend complet 2086 réussis + 2 ignorés en 67,97 s ; readiness intègre mais not_ready avec 0 cas humain ; aucun backfill ni déploiement Graph production",
+      "obtenu": "Shadows techniques : dix tables d'expansion, migrations Alembic 8b2f4c7d9a10, c6a1d4e8f2b3 et d7b2e5f9a4c1, resolver exact-GTIN, argent décimal, stock tri-state, lien HTTPS public strict et mesures marchand sans score ; writers isolés, backfills dry-run/apply bornés et idempotents, quatre flags off par défaut et sept adaptateurs Quality réels ; aucune lecture v1 modifiée",
+      "verification": "81 tests Product/Offer/Merchant, migration et configuration ciblés ; Quality 377/377 ; backend complet 2091 réussis + 2 ignorés en 72,74 s ; readiness intègre mais not_ready avec 0 cas humain ; aucun backfill ni déploiement Graph/Merchant Intelligence production",
       "tentatives": 1
     },
     {
@@ -444,6 +444,11 @@
       "ts": "2026-08-30T23:05:00+02:00",
       "evenement": "verification",
       "detail": "p0_f — Offer Graph shadow livré localement : migration c6a1d4e8f2b3, observation append-only, Money décimal, stock tri-state, URL HTTPS publique, éligibilité motivée, writer/savepoint et backfill borné ; 76 ciblés, Quality 377/377, backend 2086 + 2 ignorés ; aucun writer, backfill ou lecteur v2 activé"
+    },
+    {
+      "ts": "2026-08-31T00:30:00+02:00",
+      "evenement": "verification",
+      "detail": "p0_f — Merchant Intelligence shadow livré localement : migration d7b2e5f9a4c1, compteurs/dénominateurs, statut AFFILIATED précis, horloge explicite et dimensions non mesurables sans score ; 81 ciblés, Quality 377/377, backend 2091 + 2 ignorés ; aucun snapshot ni effet ranking production"
     }
   ]
 }

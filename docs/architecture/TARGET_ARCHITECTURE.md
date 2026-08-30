@@ -116,5 +116,7 @@ Le LLM peut analyser une intention ou formuler une explication à partir de fait
 5. Raw retention, PII, durées de conservation et droit à l'effacement.
 6. Stratégie retrieval lexical/hybride et protocole d'évaluation.
 7. Policy de claim eligibility et seuils d'abstention.
+8. Mesure et statut marchand :
+   [ADR-004 proposé et implémenté en shadow](ADR-004-MERCHANT-INTELLIGENCE-MEASUREMENT-SHADOW.md).
 
 Ces ADR sont `proposed` tant que les mesures Phase 0 ne permettent pas de les accepter.

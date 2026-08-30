@@ -23,6 +23,7 @@ from app.intelligence import models as intelligence_models  # noqa: F401
 from app.observations import models as observation_models  # noqa: F401
 from app.product_graph import models as product_graph_models  # noqa: F401
 from app.offer_graph import models as offer_graph_models  # noqa: F401
+from app.merchant_intelligence import models as merchant_models  # noqa: F401
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
@@ -39,12 +40,14 @@ GRAPH_SHADOW_TABLES = {
     "graph_offer_variant_links",
 }
 OFFER_GRAPH_TABLES = {"graph_offer_observations"}
+MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
 BASELINE_REVISION = "b9db07b15986"
 SHADOW_REVISION = "d75faf1f6a94"
 CURRENCY_REVISION = "3a7f9c2e5b61"
 OFFER_FLAGS_REVISION = "f4c81a9d2e70"
 PRODUCT_GRAPH_REVISION = "8b2f4c7d9a10"
-HEAD_REVISION = "c6a1d4e8f2b3"
+OFFER_GRAPH_REVISION = "c6a1d4e8f2b3"
+HEAD_REVISION = "d7b2e5f9a4c1"
 
 
 @pytest.fixture(autouse=True)
@@ -115,7 +118,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
 
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == PRODUCT_GRAPH_REVISION
+    assert scripts.get_revision(HEAD_REVISION).down_revision == OFFER_GRAPH_REVISION
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):
@@ -276,8 +279,12 @@ def test_existing_baseline_is_stamped_then_expanded_without_data_loss(
     command.check(config)
 
     engine = create_engine(_sync_url(database_path))
-    assert SHADOW_TABLES | GRAPH_SHADOW_TABLES | OFFER_GRAPH_TABLES <= set(
-        inspect(engine).get_table_names()
+    assert (
+        SHADOW_TABLES
+        | GRAPH_SHADOW_TABLES
+        | OFFER_GRAPH_TABLES
+        | MERCHANT_INTELLIGENCE_TABLES
+        <= set(inspect(engine).get_table_names())
     )
     assert "currency" in {
         column["name"] for column in inspect(engine).get_columns("price_snapshots")
@@ -306,8 +313,15 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
     assert rollback_settings.observation_shadow_enabled is False
     assert rollback_settings.product_graph_shadow_enabled is False
     assert rollback_settings.offer_graph_shadow_enabled is False
+    assert rollback_settings.merchant_intelligence_shadow_enabled is False
     tables = set(inspect(engine).get_table_names())
-    assert SHADOW_TABLES | GRAPH_SHADOW_TABLES | OFFER_GRAPH_TABLES <= tables
+    assert (
+        SHADOW_TABLES
+        | GRAPH_SHADOW_TABLES
+        | OFFER_GRAPH_TABLES
+        | MERCHANT_INTELLIGENCE_TABLES
+        <= tables
+    )
     with engine.connect() as connection:
         assert connection.scalar(text("SELECT currency FROM price_snapshots")) == "EUR"
         assert (
@@ -337,7 +351,14 @@ def test_graph_expand_downgrade_is_reversible_without_touching_core_data(
     command.downgrade(config, OFFER_FLAGS_REVISION)
     engine = create_engine(_sync_url(database_path))
     tables = set(inspect(engine).get_table_names())
-    assert not ((GRAPH_SHADOW_TABLES | OFFER_GRAPH_TABLES) & tables)
+    assert not (
+        (
+            GRAPH_SHADOW_TABLES
+            | OFFER_GRAPH_TABLES
+            | MERCHANT_INTELLIGENCE_TABLES
+        )
+        & tables
+    )
     with engine.connect() as connection:
         assert connection.scalar(text("SELECT email FROM users")) == (
             "graph-rollback@filon.test"
@@ -350,8 +371,11 @@ def test_graph_expand_downgrade_is_reversible_without_touching_core_data(
     command.upgrade(config, "head")
     command.check(config)
     engine = create_engine(_sync_url(database_path))
-    assert GRAPH_SHADOW_TABLES | OFFER_GRAPH_TABLES <= set(
-        inspect(engine).get_table_names()
+    assert (
+        GRAPH_SHADOW_TABLES
+        | OFFER_GRAPH_TABLES
+        | MERCHANT_INTELLIGENCE_TABLES
+        <= set(inspect(engine).get_table_names())
     )
     with engine.connect() as connection:
         assert connection.scalar(text("SELECT email FROM users")) == (

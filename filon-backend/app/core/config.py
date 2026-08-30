@@ -79,6 +79,14 @@ class Settings(BaseSettings):
             errors.append(
                 "OFFER_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
             )
+        if self.merchant_intelligence_shadow_enabled and not (
+            self.observation_shadow_enabled
+            and self.product_graph_shadow_enabled
+            and self.offer_graph_shadow_enabled
+        ):
+            errors.append(
+                "MERCHANT_INTELLIGENCE_SHADOW_ENABLED requires all Graph shadows"
+            )
         if self.rate_limit_backend == "redis":
             redis_url = (self.redis_url or "").strip()
             if not redis_url:
@@ -261,6 +269,8 @@ class Settings(BaseSettings):
     # Projection append-only des preuves offre. Elle accepte une identité
     # produit non résolue, mais ne la rend jamais éligible.
     offer_graph_shadow_enabled: bool = Field(default=False)
+    # Mesures agrégées append-only, sans score ni confiance synthétique.
+    merchant_intelligence_shadow_enabled: bool = Field(default=False)
 
     # Données produits réelles (Google Shopping via SerpApi)
     serpapi_api_key: str | None = Field(default=None)

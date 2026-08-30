@@ -21,6 +21,7 @@ from app.intelligence import models as intelligence_models  # noqa: F401
 from app.observations import models as observation_models  # noqa: F401
 from app.product_graph import models as product_graph_models  # noqa: F401
 from app.offer_graph import models as offer_graph_models  # noqa: F401
+from app.merchant_intelligence import models as merchant_intelligence_models  # noqa: F401
 
 
 config = context.config
