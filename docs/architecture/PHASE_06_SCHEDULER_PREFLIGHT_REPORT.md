@@ -2,7 +2,7 @@
 
 - Date : **30 août 2026**
 - Lot : **P0.6 / ordonnanceur catalogue autonome**
-- Statut : **qualifié localement ; service Cron Railway non créé**
+- Statut : **qualifié localement et à distance ; service Cron Railway non créé**
 - Décision : **GO technique du préflight ; activation production encore NO-GO**
 
 ## Objet
@@ -56,6 +56,40 @@ Les tests prouvent que `--check` consulte l'état courant sans jamais appeler
 la synchronisation, produit du JSON interprétable et refuse les arguments
 inconnus. Le linter Ruff n'est pas installé dans l'environnement local ; ce
 contrôle n'est donc pas revendiqué par ce rapport.
+
+## Preuves distantes et production web
+
+Le commit applicatif local `8594bd84fd4e60166dc852637807f130da752213`
+et le commit distant
+`5ab3c3c0da28c2df6433d773d897f1a29e6f12ec` portent exactement le même
+arbre `e2124704b30d405f5d7215f4acc95bc5246dc570`. La branche publique
+`codex/filon-phase-0-core` pointe sur cette référence distante.
+
+GitHub Actions #362 (`33334944805`) a qualifié :
+
+- Web, Mobile et Extension : **succès** ;
+- baseline, stamp, drift et restauration Alembic : **succès** ;
+- régressions backend, y compris le scheduler : **succès** ;
+- readiness Quality normale : **succès** ;
+- gate humain strict : **échec attendu**, exclusivement parce que les sept
+  datasets humains restent vides.
+
+L'artefact Quality `9738761749`, nommé
+`quality-readiness-4edf53447cd19a7ab3be67d1215e867d9959f598`, porte le
+digest
+`sha256:751ccb0860009fcad22a12c2fddae8b6dc1fc36b2c58ac2f51df4456f10298a9`
+et expire le 13 septembre 2026.
+
+Railway a automatiquement déployé ce commit sur le **service web existant**,
+sous l'identifiant `d1e17b10-fce8-4f16-90d9-68aadbac4747`, avec le statut
+`Deployment successful`, en EU West et avec un réplica. Après déploiement :
+
+- `/health/live` a retourné `alive=true` ;
+- `/health/ready` a retourné `ready=true`, PostgreSQL `ok` et la révision
+  `e8c3f6a0b5d2`.
+
+Ce déploiement rend le binaire de préflight disponible dans l'image commune ;
+il ne crée pas et n'exécute pas un service scheduler.
 
 ## Procédure d'activation future
 

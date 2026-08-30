@@ -190,6 +190,29 @@ L'environnement contient actuellement les seuls services `web` et
 n'est présent. Le quota distribué reste donc non activé et aucune preuve
 multi-réplica n'est revendiquée.
 
+## Préflight scheduler dans l'image web — 30 août 2026
+
+Le lot applicatif scheduler a été publié sur la branche de production sous la
+référence distante
+`5ab3c3c0da28c2df6433d773d897f1a29e6f12ec`, arbre
+`e2124704b30d405f5d7215f4acc95bc5246dc570` identique à l'arbre local du
+commit `8594bd84fd4e60166dc852637807f130da752213`.
+
+Le déploiement web automatique
+`d1e17b10-fce8-4f16-90d9-68aadbac4747` est affiché **Deployment successful**,
+en EU West avec un réplica. Les sondes publiques ont confirmé `alive=true`,
+`ready=true`, PostgreSQL `ok` et la révision `e8c3f6a0b5d2`.
+
+Actions #362 (`33334944805`) a validé les trois clients, Alembic, les
+régressions backend et la readiness normale. Le seul échec reste le gate
+humain strict attendu. Son artefact Quality `9738761749` porte le digest
+`sha256:751ccb0860009fcad22a12c2fddae8b6dc1fc36b2c58ac2f51df4456f10298a9`.
+
+La commande `python -m app.ingest.scheduler --check` est donc présente dans
+l'image qualifiée, mais aucun troisième service Railway n'a été créé : la
+topologie reste strictement `web` + `Postgres`. Aucune exécution scheduler,
+cadence Cron ou ingestion Awin n'est revendiquée par ce reçu.
+
 ## Capacité, rollback et risques résiduels
 
 Le volume PostgreSQL est `READY` à **7 855,56 Mio sur 20 000 Mio**, soit

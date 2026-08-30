@@ -6,8 +6,8 @@ Phase 0 non autorisée tant que les gates P0 ouvertes ne sont pas satisfaites**.
 Référence de baseline : `Fredm237/codex-test`, branche distante `main`, commit
 `57724c72e77c50ca54aaf64338f838dda3be2747`, le 28 août 2026. État de travail
 qualifié : branche publique `codex/filon-phase-0-core`, référence applicative
-locale `34a4f85`, référence distante consolidée `7a39348`, arbre commun
-`1706a0be2418173a6fb68782c01ae38b2e1f12d2`, le 30 août 2026.
+locale `8594bd8`, référence distante consolidée `5ab3c3c`, arbre commun
+`e2124704b30d405f5d7215f4acc95bc5246dc570`, le 30 août 2026.
 
 Ce dossier traduit les mandats Product Intelligence Core, Execution Governance et Immersive Experience en décisions vérifiables. Le troisième mandat est volontairement traité comme une bible de production future : ses travaux 3D/cinématiques restent gelés jusqu'à validation du Product Graph, de l'Offer Graph, de la recherche, de l'evidence layer, du decision engine et de la Core UX.
 
