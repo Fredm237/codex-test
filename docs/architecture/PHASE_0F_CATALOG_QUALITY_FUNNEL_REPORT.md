@@ -76,6 +76,15 @@ commun `1706a0be2418173a6fb68782c01ae38b2e1f12d2`. Actions #356
 (`33332272585`) confirme les trois clients, Alembic, les régressions backend et
 la readiness normale. Seul le gate strict humain échoue comme attendu.
 
+La correction finale rend explicite la douzième étape
+`HIGH_CONFIDENCE_DECISION`, toujours strictement bloquée et sans score de
+confiance fabriqué. Le commit local
+`594f51fc91651eb6e067dc9497b0b4337d0e57bc` et le commit distant
+`9d8ade3ad671afe98f28be9c6f1fd5bf69fae414` partagent l'arbre
+`9534214815bc6af2630bbf523fffb5c76f64980c`. Actions #358
+(`33332958611`) a requalifié les quatre surfaces et publié l'artefact
+`9738202431`; seul le gate humain strict reste rouge comme prévu.
+
 ## Limites et sortie du NO-GO
 
 Ce rapport ne mesure ni la justesse de taxonomie, ni les faux merges/splits, ni

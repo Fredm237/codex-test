@@ -5,6 +5,7 @@
 - Requalification du lot inventaire : **29 août 2026, 14:00 CEST**
 - Requalification du workflow de curation : **30 août 2026, 21:27 CEST**
 - Requalification du Catalog Quality Funnel : **30 août 2026, 22:00 CEST**
+- Correction des douze étapes et requalification de production : **30 août 2026**
 - Branche : `codex/filon-phase-0-core`
 - Dépôt public : `Fredm237/codex-test`
 - Décision : **code techniquement qualifié ; lancement et Phase 1 NO-GO**
@@ -18,8 +19,8 @@ prouvée par l'arbre Git :
 
 | Autorité | Commit | Arbre |
 |---|---|---|
-| Référence applicative locale courante | `34a4f856c47b73220950134271a3e904b29a67f8` | `1706a0be2418173a6fb68782c01ae38b2e1f12d2` |
-| Référence applicative distante courante | `7a39348804e4a9106bbd0d31317c756d56dc623b` | `1706a0be2418173a6fb68782c01ae38b2e1f12d2` |
+| Référence applicative locale courante | `594f51fc91651eb6e067dc9497b0b4337d0e57bc` | `9534214815bc6af2630bbf523fffb5c76f64980c` |
+| Référence applicative distante courante | `9d8ade3ad671afe98f28be9c6f1fd5bf69fae414` | `9534214815bc6af2630bbf523fffb5c76f64980c` |
 
 Le commit distant `e04dfc2c18ef58177d4182acbb67c966058ff9c0`
 porte l'arbre applicatif validé
@@ -102,6 +103,16 @@ strict humain échoue avec les sept datasets toujours vides. L'artefact
 expire le 13 septembre 2026 et porte le digest
 `sha256:a1f5349879a8db7b7b05339c354317240b54eb3f220c1df29aa10faf79d1e10e`.
 
+La correction finale qui restitue explicitement la douzième étape
+`HIGH_CONFIDENCE_DECISION` a été publiée au commit distant
+`9d8ade3ad671afe98f28be9c6f1fd5bf69fae414`, byte-identique au commit local
+`594f51fc91651eb6e067dc9497b0b4337d0e57bc` par leur arbre commun
+`9534214815bc6af2630bbf523fffb5c76f64980c`. Le run **#358**
+(`33332958611`) valide Web, Mobile, Extension, Alembic, les **2 118**
+régressions backend et la readiness normale. Le gate humain strict reste le
+seul échec attendu. L'artefact `9738202431` porte le digest
+`sha256:b2bdbd23cd83f6c7372e81987af4af3619f2aeae56215b8b79eefe73b951b50a`.
+
 ## 3. Vercel
 
 L'intégration GitHub Vercel a construit avec succès les commits `e04dfc2`,
@@ -118,21 +129,37 @@ n'est pas utilisée comme preuve de cette branche et n'a pas été redéployée.
 Le backend Core est désormais réellement déployé en `production`, région
 `EU West (Amsterdam, Netherlands)`, depuis la branche
 `codex/filon-phase-0-core`. Le déploiement actif
-`03be13dc-e20f-4f62-8119-c27d84176b47` est `SUCCESS` avec un réplica. Il utilise
+`cd88cf30-354d-4be0-8206-493a829432f9` est `SUCCESS` avec un réplica. Il utilise
 le Dockerfile, `alembic upgrade head`, `python -m app` et le healthcheck
 `/health/ready`.
 
-Les contrôles publics du 30 août 2026 prouvent :
+Repères d'exploitation publics autorisés :
 
-- `/health/ready` HTTP 200, PostgreSQL `ok`, révision `f4c81a9d2e70` ;
-- `/health/live` HTTP 200 ;
+| Ressource | Identifiant |
+|---|---|
+| Projet `feisty-rejoicing` | `d5f2a738-67b2-4634-ae5f-efb9f540c283` |
+| Environnement `production` | `b843980b-13e3-414b-8568-890a953310ed` |
+| Service `web` | `db05c3f5-e8d3-4034-ba9e-a96c3eb6b391` |
+| Service `Postgres` | `d68db2c1-3ff8-45ca-a329-c89b4e81fab9` |
+| Volume PostgreSQL | `e4ebe095-06e2-492a-99b5-06ddf79d5065` |
+
+Ces UUID ne sont pas des secrets. Aucun jeton, mot de passe, URL privée ou
+valeur de variable n'est publié.
+
+Les contrôles publics postérieurs au déploiement actif prouvent :
+
+- `/health/ready` HTTP 200, `ready=true`, PostgreSQL `ok`, révision
+  `e8c3f6a0b5d2` ;
+- `/health/live` HTTP 200, `alive=true` ;
 - `/health` HTTP 200 avec `env=production` et Python 3.12.14 ;
 - `/health`, qui n'est pas exemptée du quota, reste HTTP 200 après injection
   cliente d'un `X-Real-IP` invalide puis de deux valeurs dupliquées. FILON
   aurait répondu 503 si l'application avait reçu ces valeurs : l'edge fournit
   donc exactement une identité canonique.
 
-Le quota actif reste `local_only`. Cette preuve ne qualifie donc ni Redis
+Les seuls services présents dans l'environnement sont `web` et `Postgres` ;
+aucun Redis n'est actuellement créé. Le quota actif reste `local_only`. Cette
+preuve ne qualifie donc ni Redis
 multi-réplica, ni WAF, ni agrégateur OpenMetrics, ni backend de traces, pager ou
 trafic représentatif. Le reçu complet, y compris sauvegarde, restore drill,
 migration et rollback, est dans

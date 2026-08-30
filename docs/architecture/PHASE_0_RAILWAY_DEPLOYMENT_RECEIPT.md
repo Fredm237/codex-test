@@ -3,7 +3,12 @@
 - Fenêtre d'exécution : **29 août 2026, 13:50–13:59 UTC**
 - Environnement : `production`
 - Projet Railway : `feisty-rejoicing`
+- Identifiant projet Railway : `d5f2a738-67b2-4634-ae5f-efb9f540c283`
+- Identifiant environnement Railway : `b843980b-13e3-414b-8568-890a953310ed`
 - Service applicatif : `web`
+- Identifiant service applicatif : `db05c3f5-e8d3-4034-ba9e-a96c3eb6b391`
+- Service PostgreSQL : `d68db2c1-3ff8-45ca-a329-c89b4e81fab9`
+- Volume PostgreSQL : `e4ebe095-06e2-492a-99b5-06ddf79d5065`
 - Référence locale déployée : `6717b39eb922d1dab3fc42242ecf17fc784b2e26`
 - Référence distante de même arbre : `7896c6dd3922386e5f1ee7ea4d8e9911820ccc93`
 - Arbre applicatif commun : `04560737a72825928612ae00fb52eef4eb7e009f`
@@ -12,6 +17,10 @@
 
 Ce reçu ne contient ni jeton, ni mot de passe, ni chaîne de connexion, ni
 valeur de variable protégée.
+
+Les identifiants Railway ci-dessus sont publiés comme repères d'exploitation,
+avec autorisation explicite du propriétaire le 30 août 2026. Ils ne sont pas
+des secrets et ne donnent aucun accès sans authentification Railway.
 
 ## Sauvegarde et restauration prouvée
 
@@ -149,6 +158,37 @@ Le correctif passe **180 tests ciblés** et la suite backend complète
 Alembic, les régressions backend, Web, Mobile et Extension ; son unique échec
 est le gate humain strict volontairement rouge sur les sept datasets vides.
 L'artefact Quality associé est `9736128514`.
+
+## Redéploiement automatique qualifié — 30 août 2026
+
+Railway a ensuite redéployé automatiquement la correction finale du Catalog
+Quality Funnel depuis la même branche publique. Le déploiement
+`cd88cf30-354d-4be0-8206-493a829432f9` est affiché **Deployment successful**,
+en `EU West`, avec un réplica. Il remplace le déploiement actif précédent sans
+supprimer son historique de rollback.
+
+La référence distante `9d8ade3ad671afe98f28be9c6f1fd5bf69fae414`
+et la référence locale `594f51fc91651eb6e067dc9497b0b4337d0e57bc`
+portent exactement l'arbre
+`9534214815bc6af2630bbf523fffb5c76f64980c`. La qualification GitHub Actions
+#358 (`33332958611`) a validé Web, Mobile, Extension, Alembic, les **2 118**
+régressions backend et la readiness normale. Le seul échec est le gate humain
+strict attendu sur les sept datasets vides. Son artefact `9738202431`, nommé
+`quality-readiness-417c4f5db118a1e9445f56539cc492f5342a6cbc`, porte le digest
+`sha256:b2bdbd23cd83f6c7372e81987af4af3619f2aeae56215b8b79eefe73b951b50a`.
+
+Les sondes publiques du backend Railway
+`https://web-production-c6842.up.railway.app` ont répondu après ce
+redéploiement :
+
+- `GET /health/ready` : HTTP 200, `ready=true`, PostgreSQL `ok`, révision
+  `e8c3f6a0b5d2` ;
+- `GET /health/live` : HTTP 200, `alive=true`.
+
+L'environnement contient actuellement les seuls services `web` et
+`Postgres`. Aucun service Redis, agrégateur Prometheus ou backend de traces
+n'est présent. Le quota distribué reste donc non activé et aucune preuve
+multi-réplica n'est revendiquée.
 
 ## Capacité, rollback et risques résiduels
 
