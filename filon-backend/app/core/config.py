@@ -71,6 +71,10 @@ class Settings(BaseSettings):
     def reject_unsafe_production_configuration(self) -> Self:
         origins = self.cors_origins_list
         errors: list[str] = []
+        if self.product_graph_shadow_enabled and not self.observation_shadow_enabled:
+            errors.append(
+                "PRODUCT_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
+            )
         if self.rate_limit_backend == "redis":
             redis_url = (self.redis_url or "").strip()
             if not redis_url:
@@ -247,6 +251,9 @@ class Settings(BaseSettings):
     # Double écriture append-only de l'ingestion vers RawSource/Observation.
     # Désactivée tant que P0.e n'a pas été validé sur un lot réel borné.
     observation_shadow_enabled: bool = Field(default=False)
+    # Projection Product/Variant Graph strictement shadow. Elle exige la preuve
+    # RawSource/Observation et ne change jamais les lectures catalogue v1.
+    product_graph_shadow_enabled: bool = Field(default=False)
 
     # Données produits réelles (Google Shopping via SerpApi)
     serpapi_api_key: str | None = Field(default=None)

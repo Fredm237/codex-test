@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 0 Product Intelligence Core",
   "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
   "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-30T19:36:00+02:00",
+  "maj": "2026-08-30T22:10:00+02:00",
   "contraintes": [
     "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
     "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
@@ -43,8 +43,8 @@
       ],
       "outil": "quality lab",
       "attendu": "Entity, Variant, Offer, Retrieval et Decision mesurés avec intervalles",
-      "obtenu": "Manifest v0.5 fermé à sept datasets et 27 gates ; schémas, packs aveugles, identifiants distincts, adjudication, anti-fuite, provenance, identité de run et empreinte exacte du holdout ; Wilson, Bernstein empirique et bootstrap déterministe ; publication atomique sans remplacement et comparaison fail-closed ; cinq adaptateurs applicatifs réels dont Decision déterministe et sourcé ; inventaire public immuable de 1 000 candidats sans labels moteur ; collecte humaine indépendante et deux adaptateurs Graph encore absents",
-      "verification": "Commit 161d630 : 359/359 tests Quality historiques. Inventaire catalogue du 2026-08-29 : 200 lignes sur chacune de cinq strates, ready_for_annotation=false, empreinte sha256:dee650b3140755022b37890f74f4d1fc61e1265f22b3621366c44462cb9131c8, vérificateur et 15 tests ciblés verts ; Quality cœur 257/257 et backend complet courant 2035 réussis + 1 ignoré sous Python 3.12. Decision impose requête fermée, temps ISO avec offset, candidats ordonnés et preuves inventoriées. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
+      "obtenu": "Manifest v0.5 fermé à sept datasets et 27 gates ; schémas, packs aveugles, identifiants distincts, adjudication, anti-fuite, provenance, identité de run et empreinte exacte du holdout ; Wilson, Bernstein empirique et bootstrap déterministe ; publication atomique sans remplacement et comparaison fail-closed ; sept adaptateurs applicatifs réels, dont Decision déterministe et sourcé et trois adaptateurs Graph exacts-GTIN ; inventaire public immuable de 1 000 candidats sans labels moteur ; collecte humaine indépendante encore absente",
+      "verification": "Quality 377/377 et backend complet 2078 réussis + 2 ignorés sous Python 3.12. Les adaptateurs Graph s'abstiennent sans GTIN unique, valide et non conflictuel et conservent une confiance non calibrée. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
       "tentatives": 1
     },
     {
@@ -77,16 +77,16 @@
     {
       "id": "p0_f",
       "objectif": "Construire Product/Variant Graph en shadow",
-      "statut": "a_faire",
+      "statut": "en_cours",
       "depend": [
         "p0_c",
         "p0_e"
       ],
       "outil": "catalog core",
       "attendu": "Faux merges/splits et attachement offre mesurés au-dessus des gates",
-      "obtenu": null,
-      "verification": null,
-      "tentatives": 0
+      "obtenu": "Shadow technique exact-GTIN : huit tables graph_* expand-only, migration Alembic 8b2f4c7d9a10, resolver conservateur versionné, writer Awin isolé par savepoint, backfill dry-run/apply borné et idempotent, deux flags off par défaut et sept adaptateurs Quality réels ; aucune lecture v1 modifiée",
+      "verification": "125 tests Graph/migration/configuration ciblés réussis + 2 PostgreSQL opt-in ignorés ; Quality 377/377 ; backend complet 2078 réussis + 2 ignorés en 91,01 s ; readiness intègre mais not_ready avec 0 cas humain ; aucun backfill ni déploiement Graph production",
+      "tentatives": 1
     },
     {
       "id": "p0_g",
@@ -429,6 +429,16 @@
       "ts": "2026-08-30T19:36:00+02:00",
       "evenement": "verification",
       "detail": "p0_i+p0_g — correctif healthcheck borné publié : local 04fe05b, distant 2725a464, arbre commun de9cc894 ; 180 ciblés et backend 2067 réussis + 2 ignorés ; Railway 03be13dc ACTIVE/SUCCESS en EU West avec ready/live/health 200, Alembic f4c81a9d2e70 et X-Real-IP edge prouvé contre valeurs forgées ; Actions #352 vert hors gate humain strict attendu, artefact 9736128514"
+    },
+    {
+      "ts": "2026-08-30T21:40:00+02:00",
+      "evenement": "tache_demarree",
+      "detail": "p0_f (tentative 1) — mandat spécial : avancer la couche technique sans transformer l'absence de données humaines en preuve métier"
+    },
+    {
+      "ts": "2026-08-30T22:10:00+02:00",
+      "evenement": "verification",
+      "detail": "p0_f — Product/Variant Graph shadow exact-GTIN livré localement : 8 tables, migration 8b2f4c7d9a10, writer/savepoint, backfill borné, 7 adaptateurs ; 125 ciblés + 2 ignorés, Quality 377/377, backend 2078 + 2 ignorés ; readiness toujours not_ready avec 0 cas humain, aucune promotion ni donnée fabriquée"
     }
   ]
 }

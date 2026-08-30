@@ -20,6 +20,8 @@ from quality_lab.runner import (
     AwinOfferTruthAdapter,
     CatalogRetrievalAdapter,
     EanEntityResolutionAdapter,
+    ExactGtinOfferAttachmentAdapter,
+    ExactGtinVariantResolutionAdapter,
     GeneralDecisionAdapter,
     QualityAdapter,
     QualityRunnerError,
@@ -350,7 +352,7 @@ async def test_taxonomy_adapter_calls_current_taxonomy_and_product_role_engines(
 
 
 @pytest.mark.asyncio
-async def test_ean_entity_adapter_abstains_on_variant_and_missing_identity():
+async def test_entity_adapter_proves_same_variant_and_abstains_on_different_gtins():
     adapter = EanEntityResolutionAdapter()
     same = await adapter.predict(
         {
@@ -369,11 +371,11 @@ async def test_ean_entity_adapter_abstains_on_variant_and_missing_identity():
     )
     assert same.prediction == {
         "product_relation": "same",
-        "variant_relation": "ambiguous",
+        "variant_relation": "same",
     }
     assert different.prediction == {
-        "product_relation": "different",
-        "variant_relation": "not_applicable",
+        "product_relation": "ambiguous",
+        "variant_relation": "ambiguous",
     }
     assert ambiguous.prediction == {
         "product_relation": "ambiguous",
@@ -500,18 +502,100 @@ async def test_general_decision_adapter_refuses_candidate_or_evidence_drift():
         await GeneralDecisionAdapter().predict(unknown_evidence)
 
 
-def test_builtin_adapters_include_real_decision_but_not_graph_placeholders():
+def test_builtin_adapters_cover_all_seven_real_engines():
     adapters = builtin_adapters()
 
-    assert set(adapters) == {
-        "taxonomy",
-        "entity_resolution",
-        "offer_truth",
-        "retrieval",
-        "decision",
+    assert set(adapters) == set(DATASETS)
+    assert adapters["variant_resolution"].engine_version == (
+        adapters["offer_attachment"].engine_version
+    )
+
+
+@pytest.mark.asyncio
+async def test_graph_adapters_resolve_and_attach_only_one_exact_gtin():
+    variant = await ExactGtinVariantResolutionAdapter().predict(
+        {
+            "observation": {
+                "identifiers": {"ean": "4006381333931"},
+                "attributes": {"color": " black ", "unknown": None},
+            }
+        }
+    )
+    assert variant.prediction == {
+        "expected_variant": {
+            "variant_key": "gtin:4006381333931",
+            "attributes": {"color": "black"},
+            "resolution": "resolved",
+        }
     }
-    assert "variant_resolution" not in adapters
-    assert "offer_attachment" not in adapters
+    assert variant.confidence == 0.0
+
+    attached = await ExactGtinOfferAttachmentAdapter().predict(
+        {
+            "offer": {
+                "identifiers": {"gtin": "4006381333931"},
+                "variant_candidates": [
+                    {
+                        "variant_id": "variant-other",
+                        "identifiers": {"gtin": "9780201379624"},
+                    },
+                    {
+                        "variant_id": "variant-xm6",
+                        "identifiers": {"ean": "4006381333931"},
+                    },
+                ],
+            }
+        }
+    )
+    assert attached.prediction == {
+        "expected_variant_id": "variant-xm6",
+        "eligibility": "eligible",
+    }
+
+
+@pytest.mark.asyncio
+async def test_graph_adapters_quarantine_unknown_or_conflicting_identity():
+    ambiguous = await ExactGtinVariantResolutionAdapter().predict(
+        {
+            "observation": {
+                "identifiers": {
+                    "ean": "4006381333931",
+                    "gtin": "9780201379624",
+                }
+            }
+        }
+    )
+    assert ambiguous.prediction["expected_variant"] == {
+        "variant_key": None,
+        "attributes": {},
+        "resolution": "ambiguous",
+    }
+
+    quarantined = await ExactGtinOfferAttachmentAdapter().predict(
+        {
+            "offer": {
+                "identifiers": {},
+                "variant_candidates": [
+                    {
+                        "variant_id": "variant-xm6",
+                        "identifiers": {"ean": "4006381333931"},
+                    }
+                ],
+            }
+        }
+    )
+    assert quarantined.prediction == {
+        "expected_variant_id": None,
+        "eligibility": "quarantine",
+    }
+
+
+@pytest.mark.asyncio
+async def test_offer_attachment_refuses_missing_candidate_inventory():
+    with pytest.raises(QualityRunnerError, match="variant_candidates"):
+        await ExactGtinOfferAttachmentAdapter().predict(
+            {"offer": {"identifiers": {"ean": "4006381333931"}}}
+        )
 
 
 @pytest.mark.asyncio

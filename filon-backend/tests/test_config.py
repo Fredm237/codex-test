@@ -161,6 +161,30 @@ def test_rate_limit_remains_local_without_an_explicit_opt_in() -> None:
     assert settings.rate_limit_identity_secret is None
 
 
+def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> None:
+    settings = Settings(_env_file=None, env="test")
+    assert settings.observation_shadow_enabled is False
+    assert settings.product_graph_shadow_enabled is False
+
+    with pytest.raises(
+        ValidationError,
+        match="PRODUCT_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            product_graph_shadow_enabled=True,
+        )
+
+    enabled = Settings(
+        _env_file=None,
+        env="test",
+        observation_shadow_enabled=True,
+        product_graph_shadow_enabled=True,
+    )
+    assert enabled.product_graph_shadow_enabled is True
+
+
 @pytest.mark.parametrize(
     ("overrides", "message"),
     [

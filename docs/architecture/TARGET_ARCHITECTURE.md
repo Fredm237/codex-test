@@ -107,7 +107,8 @@ Le LLM peut analyser une intention ou formuler une explication à partir de fait
 
 ## 9. ADR à ouvrir avant implémentation
 
-1. Identité Product/Model/Variant et politique de merge.
+1. Identité Product/Model/Variant et politique de merge :
+   [ADR-002 proposé et implémenté en shadow exact-GTIN](ADR-002-PRODUCT-GRAPH-IDENTITY-SHADOW.md).
 2. Money, availability, shipping et représentation de `unknown`.
 3. Ownership Profile entre backend historique et mobile.
 4. Contrat API versionné et génération des SDK.

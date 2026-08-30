@@ -11,9 +11,10 @@ projet et l'environnement n'ont pas été confirmés par l'opérateur.
 | Baseline historique | `b9db07b15986` | Adopte les 14 tables Core/Intelligence historiques |
 | Expansion shadow | `d75faf1f6a94` | Ajoute `raw_source_records`, `observations` et `quarantine_records` |
 | Devise observée | `3a7f9c2e5b61` | Ajoute `price_snapshots.currency`, nullable et sans backfill inventé |
-| Tête réelle | `f4c81a9d2e70` | Normalise fail-closed les deux drapeaux historiques d'`offers` |
+| Normalisation Core | `f4c81a9d2e70` | Normalise fail-closed les deux drapeaux historiques d'`offers` |
+| Tête Graph shadow | `8b2f4c7d9a10` | Ajoute huit tables `graph_*`, sans backfill ni lecteur v2 |
 
-La seule tête attendue est `f4c81a9d2e70`. La colonne de devise reste
+La seule tête attendue est `8b2f4c7d9a10`. La colonne de devise reste
 `NULL` pour les relevés antérieurs : la devise d'un montant historique n'est
 pas déductible de l'offre courante.
 
@@ -131,7 +132,7 @@ python -m pip install -r requirements.txt
 alembic heads
 ```
 
-Résultat attendu : une seule tête, `f4c81a9d2e70`. Confirmer ensuite hors log
+Résultat attendu : une seule tête, `8b2f4c7d9a10`. Confirmer ensuite hors log
 le projet, l'environnement et l'hôte visés. Pour PostgreSQL, `pg_dump` et
 `pg_restore` reçoivent une URL native `postgresql://`, pas le suffixe
 SQLAlchemy `+asyncpg`.
@@ -162,7 +163,7 @@ alembic current
 alembic check
 ```
 
-La révision courante doit être `f4c81a9d2e70 (head)` et le check doit afficher
+La révision courante doit être `8b2f4c7d9a10 (head)` et le check doit afficher
 `No new upgrade operations detected.`.
 
 ### 3B. Base existante à la baseline ou variante legacy couverte
@@ -193,18 +194,18 @@ alembic current
 alembic check
 ```
 
-L'upgrade ajoute les trois tables shadow puis la colonne de devise, et
-normalise les deux drapeaux couverts sans modifier les valeurs historiques ni
-fabriquer de devise.
+L'upgrade ajoute les trois tables Observation, la colonne de devise, normalise
+les deux drapeaux couverts puis crée les huit tables Graph. Il ne modifie aucune
+valeur historique, ne fabrique aucune devise et ne lance aucun backfill.
 
 ### 3C. Base existante exactement identique à la tête
 
-Si les 17 tables, contraintes, index et colonnes correspondent déjà
+Si les 25 tables, contraintes, index et colonnes correspondent déjà
 exactement aux modèles et aux migrations de tête, une adoption directe est
 possible après la même sauvegarde et une comparaison exhaustive :
 
 ```bash
-alembic stamp f4c81a9d2e70
+alembic stamp 8b2f4c7d9a10
 alembic current
 alembic check
 ```
@@ -225,8 +226,9 @@ Avant tout premier déploiement avec migration automatique :
 2. terminer le chemin d'adoption correspondant ;
 3. configurer `ENV=production`, `DATABASE_SCHEMA_MODE=alembic` et une
    `DATABASE_URL` confirmée ;
-4. garder `OBSERVATION_SHADOW_ENABLED=false` ;
-5. obtenir `f4c81a9d2e70 (head)` avec `alembic current` et un `alembic check`
+4. garder `OBSERVATION_SHADOW_ENABLED=false` et
+   `PRODUCT_GRAPH_SHADOW_ENABLED=false` ;
+5. obtenir `8b2f4c7d9a10 (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -237,7 +239,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `f4c81a9d2e70` ;
+  `8b2f4c7d9a10` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -251,6 +253,7 @@ Le rollback opérationnel est le feature flag :
 
 ```text
 OBSERVATION_SHADOW_ENABLED=false
+PRODUCT_GRAPH_SHADOW_ENABLED=false
 ```
 
 Redéployer avec ce flag désactivé. Les tables shadow restent en place et les
@@ -260,7 +263,7 @@ baseline.**
 ### Régression applicative
 
 Remettre la version applicative précédente, conserver le schéma à
-`f4c81a9d2e70` et garder le shadow désactivé. Les structures d'expansion sont
+`8b2f4c7d9a10` et garder les deux shadows désactivés. Les structures d'expansion sont
 compatibles avec l'ancien lecteur, qui les ignore. Un rollback applicatif ne
 justifie ni un downgrade ni `DATABASE_SCHEMA_MODE=legacy`.
 

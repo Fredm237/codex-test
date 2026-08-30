@@ -55,14 +55,13 @@ L'infrastructure P0.c (Quality Lab) applique le contrat v0.5 fermé à sept
 datasets et 27 gates. Elle lie chaque gold aux packs humains complétés, impose
 provenance, identité de run, empreinte exacte du holdout et publication
 atomique, puis compare les scorecards fail-closed. Wilson, Bernstein empirique
-et bootstrap déterministe bornent les métriques. Cinq adaptateurs applicatifs
-réels sont branchés ; variante et attachement restent refusés tant que le Graph
-n'existe pas. Les **359 tests Quality** locaux et le run distant sont verts sur
-l'intégrité. Le rapport reste `integrity_valid=true`, `ready=false`,
+et bootstrap déterministe bornent les métriques. Les sept adaptateurs
+applicatifs sont désormais branchés, dont variante et attachement exact-GTIN.
+Leur confiance reste non calibrée et le Graph demeure shadow. Le rapport reste
+`integrity_valid=true`, `ready=false`,
 `status=not_ready` avec **0 cas humain**. Le gate strict bloque donc honnêtement
-le Product/Variant Graph P0.f. Un inventaire public de 1 000 candidats sans
-label est maintenant figé pour démarrer la curation ; il ne modifie pas la
-readiness.
+son cutover. Un inventaire public de 1 000 candidats sans label est maintenant
+figé pour démarrer la curation ; il ne modifie pas la readiness.
 
 P0.g (CI) est terminé : la branche publique est byte-identique au HEAD local,
 le run GitHub Actions #344 prouve 12 migrations, 2 036 tests backend, le web,
@@ -85,8 +84,10 @@ et extension.
 - [Qualification distante Phase 0](PHASE_0_REMOTE_QUALIFICATION_REPORT.md)
 - [Préflight Railway de production](PHASE_0_RAILWAY_PREFLIGHT.md)
 - [ADR-001 — baseline Alembic](ADR-001-ALEMBIC-BASELINE.md)
+- [ADR-002 — identité Product/Variant Graph shadow](ADR-002-PRODUCT-GRAPH-IDENTITY-SHADOW.md)
 - [Runbook migrations et rollback](DATABASE_MIGRATION_RUNBOOK.md)
 - [Rapport P0.e — Observation shadow](PHASE_0E_OBSERVATION_REPORT.md)
+- [Rapport P0.f — Product/Variant Graph shadow](PHASE_0F_PRODUCT_GRAPH_SHADOW_REPORT.md)
 - [Rapport P0.c — Quality Lab](PHASE_0C_QUALITY_REPORT.md)
 - [Rapport P0.6 — Observabilité](PHASE_06_OBSERVABILITY_REPORT.md)
 - [Politique de sécurité de la front door](FRONT_DOOR_SECURITY_POLICY.md)

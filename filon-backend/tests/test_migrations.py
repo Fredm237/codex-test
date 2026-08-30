@@ -21,15 +21,27 @@ from app.db import session as db_session
 from app.db.base import Base
 from app.intelligence import models as intelligence_models  # noqa: F401
 from app.observations import models as observation_models  # noqa: F401
+from app.product_graph import models as product_graph_models  # noqa: F401
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 APPLICATION_TABLES = set(Base.metadata.tables)
 SHADOW_TABLES = {"raw_source_records", "observations", "quarantine_records"}
+GRAPH_SHADOW_TABLES = {
+    "graph_brands",
+    "graph_brand_aliases",
+    "graph_product_families",
+    "graph_product_models",
+    "graph_variants",
+    "graph_identifiers",
+    "graph_identifier_evidence",
+    "graph_offer_variant_links",
+}
 BASELINE_REVISION = "b9db07b15986"
 SHADOW_REVISION = "d75faf1f6a94"
 CURRENCY_REVISION = "3a7f9c2e5b61"
-HEAD_REVISION = "f4c81a9d2e70"
+OFFER_FLAGS_REVISION = "f4c81a9d2e70"
+HEAD_REVISION = "8b2f4c7d9a10"
 
 
 @pytest.fixture(autouse=True)
@@ -100,7 +112,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
 
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == CURRENCY_REVISION
+    assert scripts.get_revision(HEAD_REVISION).down_revision == OFFER_FLAGS_REVISION
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):
@@ -261,7 +273,9 @@ def test_existing_baseline_is_stamped_then_expanded_without_data_loss(
     command.check(config)
 
     engine = create_engine(_sync_url(database_path))
-    assert SHADOW_TABLES <= set(inspect(engine).get_table_names())
+    assert SHADOW_TABLES | GRAPH_SHADOW_TABLES <= set(
+        inspect(engine).get_table_names()
+    )
     assert "currency" in {
         column["name"] for column in inspect(engine).get_columns("price_snapshots")
     }
@@ -287,13 +301,55 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
 
     rollback_settings = Settings(observation_shadow_enabled=False)
     assert rollback_settings.observation_shadow_enabled is False
+    assert rollback_settings.product_graph_shadow_enabled is False
     tables = set(inspect(engine).get_table_names())
-    assert SHADOW_TABLES <= tables
+    assert SHADOW_TABLES | GRAPH_SHADOW_TABLES <= tables
     with engine.connect() as connection:
         assert connection.scalar(text("SELECT currency FROM price_snapshots")) == "EUR"
         assert (
             connection.scalar(text("SELECT version_num FROM alembic_version"))
             == HEAD_REVISION
+        )
+    engine.dispose()
+
+
+def test_graph_expand_downgrade_is_reversible_without_touching_core_data(
+    tmp_path,
+    monkeypatch,
+):
+    database_path = tmp_path / "graph-rollback.sqlite"
+    config = _config(database_path, monkeypatch)
+    command.upgrade(config, "head")
+    engine = create_engine(_sync_url(database_path))
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO users (email, hashed_password) "
+                "VALUES ('graph-rollback@filon.test', 'hash')"
+            )
+        )
+    engine.dispose()
+
+    command.downgrade(config, OFFER_FLAGS_REVISION)
+    engine = create_engine(_sync_url(database_path))
+    tables = set(inspect(engine).get_table_names())
+    assert not (GRAPH_SHADOW_TABLES & tables)
+    with engine.connect() as connection:
+        assert connection.scalar(text("SELECT email FROM users")) == (
+            "graph-rollback@filon.test"
+        )
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == (
+            OFFER_FLAGS_REVISION
+        )
+    engine.dispose()
+
+    command.upgrade(config, "head")
+    command.check(config)
+    engine = create_engine(_sync_url(database_path))
+    assert GRAPH_SHADOW_TABLES <= set(inspect(engine).get_table_names())
+    with engine.connect() as connection:
+        assert connection.scalar(text("SELECT email FROM users")) == (
+            "graph-rollback@filon.test"
         )
     engine.dispose()
 

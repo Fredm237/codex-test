@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_REVISION = "b9db07b15986"
-HEAD_REVISION = "f4c81a9d2e70"
+HEAD_REVISION = "8b2f4c7d9a10"
 MIGRATION_LOCK_ID = 0x46494C4F4E
 
 
@@ -186,12 +186,34 @@ async def test_postgresql_upgrade_drift_extensions_indexes_and_lock() -> None:
                     )
                 )
             }
+            graph_tables = {
+                row.name
+                for row in (
+                    await connection.execute(
+                        text(
+                            "SELECT table_name AS name FROM information_schema.tables "
+                            "WHERE table_schema = 'public' "
+                            "AND table_name LIKE 'graph_%'"
+                        )
+                    )
+                )
+            }
 
         assert revision == HEAD_REVISION
         assert extension == "pg_trgm"
         assert currency_nullable == "YES"
         assert set(indexes) == {"ix_offers_name_trgm", "ix_offers_brand_trgm"}
         assert all("USING gin" in definition for definition in indexes.values())
+        assert graph_tables == {
+            "graph_brands",
+            "graph_brand_aliases",
+            "graph_product_families",
+            "graph_product_models",
+            "graph_variants",
+            "graph_identifiers",
+            "graph_identifier_evidence",
+            "graph_offer_variant_links",
+        }
 
         drift = await asyncio.to_thread(_run_alembic, url, "check")
         assert drift.returncode == 0, "Alembic PostgreSQL check a détecté un drift"

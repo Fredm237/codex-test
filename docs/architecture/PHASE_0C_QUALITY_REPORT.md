@@ -8,7 +8,8 @@ mesurés le 29 août 2026.
 ## Phase et statut
 
 **P0.c — infrastructure locale v0.5 : verte. Datasets indépendants : EN COURS
-/ NO-GO. Product/Variant Graph : toujours bloqué.**
+/ NO-GO. Product/Variant Graph : shadow technique local livré, qualification
+métier bloquée.**
 
 Le contrat v0.5 sait préparer, fusionner, contrôler, exécuter aveuglément et
 comparer deux mesures d'un holdout humain indépendant. Les sept fichiers gold
@@ -45,9 +46,10 @@ intègre, mais aucun score produit n'est publiable.
   avant chaque appel moteur. Il branche les moteurs applicatifs réels de
   taxonomie/rôle produit, EAN, projection Awin, recherche catalogue et décision
   générale ; la requête Decision est fermée, son horloge est figée et ses
-  claims de sélection réutilisent uniquement les preuves inventoriées. Les deux
-  surfaces sans interface compatible (`variant_resolution`,
-  `offer_attachment`) échouent fermé au premier cas non vide ;
+  claims de sélection réutilisent uniquement les preuves inventoriées. Les
+  adaptateurs `entity_resolution`, `variant_resolution` et `offer_attachment`
+  appellent le resolver Graph `exact-gtin-shadow-v1` et échouent fermé sans
+  GTIN unique, valide et non conflictuel ;
 - l'identité canonique du run engage la version système, l'évaluateur, le
   manifeste gold, le roster/version des adaptateurs et le contenu exact des
   sept sorties. La publication est transactionnelle, atomique et
@@ -98,11 +100,11 @@ et claims non supportés gardent une tolérance nulle.
 
 - suites ciblées du workflow humain, des schémas, de la readiness, des
   métriques, du scorecard, du runner, de la provenance et de la régression
-  v0.5 : **359/359** ;
+  v0.5 avec les sept adaptateurs : **377/377** ;
 - suite Quality sans dépendance réseau : **257 réussis** sur le collecteur,
   l'intégrité, les schémas et la scorecard ;
 - suite backend complète courante sous Python 3.12 et les dépendances déclarées :
-  **2 035 réussis, 1 ignoré** en 109,18 s ;
+  **2 078 réussis, 2 ignorés** en 91,01 s ;
 - archive propre du HEAD `a78401a`, qui contient le lot Quality `6e12386`,
   suite backend complète : **1 907 réussis, 1 ignoré**, 7 avertissements
   `datetime.utcnow()` historiques, en **370,53 s** ;

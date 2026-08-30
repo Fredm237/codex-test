@@ -444,7 +444,12 @@ async def _upsert_offer(
 
 def _ingestion_stage_outcome(result: dict) -> str:
     shadow = result.get("shadow") or {}
-    if result.get("skipped") or shadow.get("failures"):
+    graph_shadow = result.get("graph_shadow") or {}
+    if (
+        result.get("skipped")
+        or shadow.get("failures")
+        or graph_shadow.get("failures")
+    ):
         return "degraded"
     if not result.get("feeds"):
         return "degraded"
@@ -505,6 +510,12 @@ async def ingest_feeds(
     shadow_observations = 0
     shadow_quarantine = 0
     shadow_failures = 0
+    graph_variants = 0
+    graph_identifiers = 0
+    graph_evidence = 0
+    graph_links = 0
+    graph_quarantine = 0
+    graph_failures = 0
     # Déduplique uniquement les relevés identiques d'un même cycle. Les offres
     # elles-mêmes restent toutes lues : une variante linguistique peut enrichir
     # le libellé, mais elle ne doit pas compter comme une nouvelle observation.
@@ -562,6 +573,49 @@ async def ingest_feeds(
                             "Shadow observation ignorée (error_type=%s)",
                             type(exc).__name__,
                         )
+                    else:
+                        if s.product_graph_shadow_enabled:
+                            # Le Graph possède son propre savepoint : une
+                            # projection v2 invalide conserve RawSource et les
+                            # observations déjà qualifiées.
+                            try:
+                                from app.product_graph.resolution import (
+                                    persist_awin_graph_projection,
+                                    project_awin_variant,
+                                )
+
+                                async with session.begin_nested():
+                                    graph_capture = await persist_awin_graph_projection(
+                                        session,
+                                        projection=project_awin_variant(row),
+                                        raw_source_record_id=(
+                                            captured.raw_source_record_id
+                                        ),
+                                        offer_id=offer_id,
+                                        source_ref=f"awin-feed:{f.feed_id}",
+                                        observed_at=feed_observed_at,
+                                    )
+                                graph_variants += int(
+                                    graph_capture.variant_created
+                                )
+                                graph_identifiers += int(
+                                    graph_capture.identifier_created
+                                )
+                                graph_evidence += int(
+                                    graph_capture.evidence_created
+                                )
+                                graph_links += int(graph_capture.link_created)
+                                graph_quarantine += int(
+                                    graph_capture.link_created
+                                    and graph_capture.resolution == "quarantine"
+                                )
+                            except Exception as exc:  # pragma: no cover - base réelle
+                                graph_failures += 1
+                                log.warning(
+                                    "Shadow Product Graph ignoré "
+                                    "(error_type=%s)",
+                                    type(exc).__name__,
+                                )
                 n += 1
                 if n % 200 == 0:  # commit périodique → progression visible dans /stats
                     await session.commit()
@@ -580,5 +634,14 @@ async def ingest_feeds(
             "observations": shadow_observations,
             "quarantine": shadow_quarantine,
             "failures": shadow_failures,
+        },
+        "graph_shadow": {
+            "enabled": s.product_graph_shadow_enabled,
+            "variants": graph_variants,
+            "identifiers": graph_identifiers,
+            "evidence": graph_evidence,
+            "links": graph_links,
+            "quarantine": graph_quarantine,
+            "failures": graph_failures,
         },
     }

@@ -90,8 +90,8 @@ Sans activation sur un lot réel, sa couverture production reste à mesurer.
 | Anomalie ingestion | `quarantine_records` en shadow + `ProductErrorCode`/`contracts/taxonomies/v1` | Seuls E008, E010 et E016–E018 ont un producteur ; revue interne à construire | KEEP SHADOW | Workflow humain de release/discard, instrumentation des treize codes restants et régression |
 | Prix courant | `offers.price` en float, avec devise conservée dans le parcours `/advise` agents | Snapshots et clients en `number` ; budget public en EUR, aucun moteur FX ; certains callers historiques infèrent encore EUR | REWRITE | `Money{amount_decimal,currency}` + observation horodatée ; conversion sourcée avant comparaison multidevise |
 | Historique prix | `price_snapshots` | Relief/verdict | KEEP + HARDEN | Série d'observations sourcées et règle d'éligibilité |
-| Produit | `catalog_products`, groupé par EAN | Ancienne table `products`, logique grouping, DTO mobiles | REWRITE | Product Graph : Brand → Family → Model → Variant |
-| Variante | Pas de source canonique | Déductions dans titres/taxonomie | MISSING | `Variant` et attributs discriminants avec confidence |
+| Produit | `catalog_products`, groupé par EAN ; huit tables `graph_*` en shadow local | Ancienne table `products`, logique grouping, DTO mobiles ; aucun lecteur public Graph | REWRITE + SHADOW | Product Graph : Brand → Family → Model → Variant, après qualification indépendante |
+| Variante | `graph_variants` en shadow exact-GTIN, flags off | Aucun consommateur v2 ; titre/marque/catégorie interdits comme preuve d'identité | KEEP SHADOW | `Variant` et attributs discriminants avec confiance calibrée ; unknown explicite |
 | Taxonomie | `services/taxonomy.py` + colonnes d'offre | Règles et correctifs marchands | REWRITE | Taxonomie versionnée, règles déclaratives, evidence |
 | Disponibilité | `offers.in_stock` nullable ; `schemas/advise.py` conserve `None` | `/advise` agents et le planificateur général exigent `in_stock is True` et une fraîcheur de **72 h provisoire** ; couverture des callers historiques encore ouverte | KEEP + HARDEN | `unknown/in_stock/out_of_stock`, provenance et politique de fraîcheur mesurée ; jamais de défaut positif |
 | Livraison | Absente des feeds principaux ; `schemas/advise.py` conserve `None` | Dans `/advise` agents, aucun total livré complet, économie moyenne ou écart en euros n'est affirmé sans coût observé ; couverture des autres moteurs encore à prouver | KEEP + HARDEN | Unknown explicite ou observation sourcée ; jamais « gratuit » par défaut et comparabilité fail-closed |
@@ -110,6 +110,10 @@ Sans activation sur un lot réel, sa couverture production reste à mesurer.
 - Catalogue : `merchants`, `catalog_sync_runs`, `catalog_products`, `offers`, `price_snapshots`.
 - Intelligence : `intelligence_product_facts`, `intelligence_relations`, `intelligence_traces`, `intelligence_feedback`, `intelligence_benchmarks`.
 - Observation shadow : `raw_source_records`, `observations`, `quarantine_records`.
+- Product/Variant Graph shadow : `graph_brands`, `graph_brand_aliases`,
+  `graph_product_families`, `graph_product_models`, `graph_variants`,
+  `graph_identifiers`, `graph_identifier_evidence`,
+  `graph_offer_variant_links`.
 
 ### Mobile MySQL
 

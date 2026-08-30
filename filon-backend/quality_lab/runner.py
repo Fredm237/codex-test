@@ -7,11 +7,9 @@ franchissent donc pas la frontiere moteur.
 
 Les adaptateurs fournis ici correspondent uniquement aux moteurs qui existent
 effectivement dans l'application : taxonomie/role produit, regroupement EAN,
-projection des faits Awin, recherche catalogue et decision generale. Les jeux
-de variantes et d'attachement a une variante n'ont pas encore d'interface
-applicative compatible avec leur contrat Quality Lab ; un cas non vide pour
-l'un de ces jeux fait echouer le run au lieu de recopier le gold ou d'inventer
-une prediction.
+resolution conservative de variantes, attachement exact d'offres, projection
+des faits Awin, recherche catalogue et decision generale. Le Graph reste
+shadow et non calibre : sa presence ne rend aucun dataset humain eligible.
 """
 
 from __future__ import annotations
@@ -42,6 +40,13 @@ from app.intelligence.contracts import CoreOfferSnapshot
 from app.intelligence.general_decision import compose_general_plan
 from app.intelligence.intent_resolution import resolve_intent
 from app.observations.awin import project_awin_row
+from app.product_graph.resolution import (
+    ProductGraphResolutionError,
+    RESOLVER_VERSION,
+    attach_offer_to_candidates,
+    resolve_entity_pair,
+    resolve_variant_observation,
+)
 from app.services import product_role, taxonomy
 from app.services.catalog_grouping import normalize_ean
 from app.services.catalog_search import search_internal_products
@@ -201,61 +206,61 @@ class TaxonomyProductRoleAdapter(QualityAdapter):
         )
 
 
-_EAN_KEYS = ("ean", "gtin", "ean13", "upc")
-
-
-def _observed_eans(observation: Mapping[str, Any]) -> frozenset[str]:
-    identifiers = observation.get("identifiers")
-    if identifiers is None:
-        return frozenset()
-    mapping = _require_mapping(identifiers, "entity identifiers")
-    values: set[str] = set()
-    for key in _EAN_KEYS:
-        raw = mapping.get(key)
-        if raw is None:
-            continue
-        if not isinstance(raw, (str, int)) or isinstance(raw, bool):
-            raise QualityRunnerError(f"entity identifier {key} is invalid")
-        normalized = normalize_ean(str(raw))
-        if normalized is not None:
-            values.add(normalized)
-    return frozenset(values)
-
-
 class EanEntityResolutionAdapter(QualityAdapter):
-    """Expose exactement la politique d'identite actuelle : regroupement EAN."""
+    """Expose l'identite Graph conservative : meme variante ou abstention."""
 
     dataset = "entity_resolution"
-    engine_id = "app.services.catalog_grouping.normalize_ean"
-    engine_version = "catalog-product-ean-grouping-v1"
+    engine_id = "app.product_graph.resolution.resolve_entity_pair"
+    engine_version = RESOLVER_VERSION
 
     async def predict(self, engine_input: Mapping[str, Any]) -> AdapterPrediction:
         left = _require_mapping(engine_input.get("left"), "entity left observation")
         right = _require_mapping(
             engine_input.get("right"), "entity right observation"
         )
-        left_eans = _observed_eans(left)
-        right_eans = _observed_eans(right)
-        # Plusieurs identifiants valides mais contradictoires dans une seule
-        # observation interdisent toute fusion automatique.
-        if len(left_eans) != 1 or len(right_eans) != 1:
-            prediction = {
-                "product_relation": "ambiguous",
-                "variant_relation": "ambiguous",
-            }
-        elif left_eans == right_eans:
-            # Le Core regroupe le produit mais ne possede pas encore de moteur
-            # de variantes : cette seconde relation reste donc inconnue.
-            prediction = {
-                "product_relation": "same",
-                "variant_relation": "ambiguous",
-            }
-        else:
-            prediction = {
-                "product_relation": "different",
-                "variant_relation": "not_applicable",
-            }
-        return AdapterPrediction(prediction=prediction)
+        try:
+            relation = resolve_entity_pair(left, right)
+        except ProductGraphResolutionError as exc:
+            raise QualityRunnerError(str(exc)) from None
+        return AdapterPrediction(prediction=relation.prediction())
+
+
+class ExactGtinVariantResolutionAdapter(QualityAdapter):
+    """Expose le resolver Graph v1, sans similarite textuelle ni confiance."""
+
+    dataset = "variant_resolution"
+    engine_id = "app.product_graph.resolution.resolve_variant_observation"
+    engine_version = RESOLVER_VERSION
+
+    async def predict(self, engine_input: Mapping[str, Any]) -> AdapterPrediction:
+        observation = _require_mapping(
+            engine_input.get("observation"),
+            "variant observation",
+        )
+        try:
+            resolution = resolve_variant_observation(observation)
+        except ProductGraphResolutionError as exc:
+            raise QualityRunnerError(str(exc)) from None
+        return AdapterPrediction(prediction=resolution.prediction())
+
+
+class ExactGtinOfferAttachmentAdapter(QualityAdapter):
+    """Attache une offre uniquement a un candidat portant le meme GTIN."""
+
+    dataset = "offer_attachment"
+    engine_id = "app.product_graph.resolution.attach_offer_to_candidates"
+    engine_version = RESOLVER_VERSION
+
+    async def predict(self, engine_input: Mapping[str, Any]) -> AdapterPrediction:
+        offer = _require_mapping(
+            engine_input.get("offer"),
+            "offer attachment input",
+        )
+        try:
+            attachment = attach_offer_to_candidates(offer)
+        except ProductGraphResolutionError as exc:
+            raise QualityRunnerError(str(exc)) from None
+        return AdapterPrediction(prediction=attachment.prediction())
 
 
 def _parse_observed_at(value: Any) -> datetime | None:
@@ -703,11 +708,13 @@ class GeneralDecisionAdapter(QualityAdapter):
 
 
 def builtin_adapters() -> dict[str, QualityAdapter]:
-    """Retourne seulement les cinq branchements applicatifs disponibles."""
+    """Retourne les sept branchements applicatifs reels et non calibres."""
 
     adapters: tuple[QualityAdapter, ...] = (
         TaxonomyProductRoleAdapter(),
         EanEntityResolutionAdapter(),
+        ExactGtinVariantResolutionAdapter(),
+        ExactGtinOfferAttachmentAdapter(),
         AwinOfferTruthAdapter(),
         CatalogRetrievalAdapter(),
         GeneralDecisionAdapter(),

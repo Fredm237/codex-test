@@ -1,0 +1,242 @@
+"""Modèles expand-only du Product/Variant Graph shadow.
+
+Les nœuds v2 vivent à côté de ``catalog_products`` et ``offers``. Une
+identité forte peut donc être observée et rejouée sans modifier les lectures
+Core v1 ni transformer une hypothèse en vérité publique.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any
+
+from sqlalchemy import (
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    JSON,
+    String,
+    UniqueConstraint,
+    func,
+)
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.base import Base
+
+
+class GraphBrand(Base):
+    """Marque canonique créée seulement à partir d'une preuve forte future."""
+
+    __tablename__ = "graph_brands"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    brand_key: Mapped[str] = mapped_column(String(96), unique=True, index=True)
+    canonical_name: Mapped[str] = mapped_column(String(191))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+
+class GraphBrandAlias(Base):
+    """Alias sourcé ; un libellé seul ne crée jamais une marque."""
+
+    __tablename__ = "graph_brand_aliases"
+    __table_args__ = (
+        UniqueConstraint(
+            "brand_id",
+            "raw_source_record_id",
+            "normalized_alias",
+            name="uq_graph_brand_alias_evidence",
+        ),
+        Index("ix_graph_brand_alias_normalized", "normalized_alias"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    brand_id: Mapped[int] = mapped_column(
+        ForeignKey("graph_brands.id"),
+        index=True,
+    )
+    raw_source_record_id: Mapped[int] = mapped_column(
+        ForeignKey("raw_source_records.id"),
+        index=True,
+    )
+    alias: Mapped[str] = mapped_column(String(191))
+    normalized_alias: Mapped[str] = mapped_column(String(191))
+    source_ref: Mapped[str] = mapped_column(String(255))
+    observed_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+class GraphProductFamily(Base):
+    """Gamme d'une marque ; aucune famille n'est déduite du titre marchand."""
+
+    __tablename__ = "graph_product_families"
+    __table_args__ = (
+        UniqueConstraint("brand_id", "family_key", name="uq_graph_family_brand_key"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    family_key: Mapped[str] = mapped_column(String(128), index=True)
+    brand_id: Mapped[int] = mapped_column(
+        ForeignKey("graph_brands.id"),
+        index=True,
+    )
+    canonical_name: Mapped[str] = mapped_column(String(255))
+    category: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+
+
+class GraphProductModel(Base):
+    """Modèle produit ; ``family_id`` peut rester inconnu sans fallback."""
+
+    __tablename__ = "graph_product_models"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    model_key: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    family_id: Mapped[int | None] = mapped_column(
+        ForeignKey("graph_product_families.id"),
+        nullable=True,
+        index=True,
+    )
+    canonical_name: Mapped[str] = mapped_column(String(255))
+    model_code: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+
+
+class GraphVariant(Base):
+    """Variante canonique issue d'un identifiant global exact."""
+
+    __tablename__ = "graph_variants"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('shadow', 'reviewed', 'retired')",
+            name="ck_graph_variant_status",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    variant_key: Mapped[str] = mapped_column(String(128), unique=True, index=True)
+    model_id: Mapped[int | None] = mapped_column(
+        ForeignKey("graph_product_models.id"),
+        nullable=True,
+        index=True,
+    )
+    attributes_json: Mapped[dict[str, Any]] = mapped_column(JSON)
+    status: Mapped[str] = mapped_column(String(16), default="shadow", index=True)
+    resolver_version: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+
+
+class GraphIdentifier(Base):
+    """Identifiant normalisé, scoped et relié à une seule variante."""
+
+    __tablename__ = "graph_identifiers"
+    __table_args__ = (
+        UniqueConstraint(
+            "namespace",
+            "scope",
+            "normalized_value",
+            name="uq_graph_identifier_scope_value",
+        ),
+        CheckConstraint(
+            "namespace IN ('gtin')",
+            name="ck_graph_identifier_namespace_v1",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    variant_id: Mapped[int] = mapped_column(
+        ForeignKey("graph_variants.id"),
+        index=True,
+    )
+    namespace: Mapped[str] = mapped_column(String(24))
+    scope: Mapped[str] = mapped_column(String(96))
+    normalized_value: Mapped[str] = mapped_column(String(191), index=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+
+
+class GraphIdentifierEvidence(Base):
+    """Provenance append-only d'un identifiant de variante."""
+
+    __tablename__ = "graph_identifier_evidence"
+    __table_args__ = (
+        UniqueConstraint(
+            "identifier_id",
+            "raw_source_record_id",
+            name="uq_graph_identifier_raw_evidence",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    identifier_id: Mapped[int] = mapped_column(
+        ForeignKey("graph_identifiers.id"),
+        index=True,
+    )
+    raw_source_record_id: Mapped[int] = mapped_column(
+        ForeignKey("raw_source_records.id"),
+        index=True,
+    )
+    source_type: Mapped[str] = mapped_column(String(48))
+    source_ref: Mapped[str] = mapped_column(String(255))
+    observed_at: Mapped[datetime] = mapped_column(DateTime)
+
+
+class GraphOfferVariantLink(Base):
+    """Résolution versionnée d'une offre vers une variante, jamais servie v1."""
+
+    __tablename__ = "graph_offer_variant_links"
+    __table_args__ = (
+        UniqueConstraint(
+            "raw_source_record_id",
+            "resolver_version",
+            name="uq_graph_offer_resolution_version",
+        ),
+        CheckConstraint(
+            "resolution IN ('resolved', 'quarantine', 'rejected')",
+            name="ck_graph_offer_resolution",
+        ),
+        CheckConstraint(
+            "reason_code IN ('exact_gtin', 'missing_gtin', 'invalid_gtin', "
+            "'conflicting_gtin', 'candidate_mismatch')",
+            name="ck_graph_offer_resolution_reason",
+        ),
+        CheckConstraint(
+            "(resolution = 'resolved' AND variant_id IS NOT NULL) OR "
+            "(resolution <> 'resolved' AND variant_id IS NULL)",
+            name="ck_graph_offer_resolution_variant",
+        ),
+        Index("ix_graph_offer_resolution_state", "resolution", "reason_code"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    raw_source_record_id: Mapped[int] = mapped_column(
+        ForeignKey("raw_source_records.id"),
+        index=True,
+    )
+    offer_id: Mapped[int] = mapped_column(ForeignKey("offers.id"), index=True)
+    variant_id: Mapped[int | None] = mapped_column(
+        ForeignKey("graph_variants.id"),
+        nullable=True,
+        index=True,
+    )
+    resolution: Mapped[str] = mapped_column(String(16), index=True)
+    reason_code: Mapped[str] = mapped_column(String(32))
+    resolver_version: Mapped[str] = mapped_column(String(64))
+    observed_at: Mapped[datetime] = mapped_column(DateTime)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )

@@ -320,15 +320,16 @@ run GitHub observé, `main` n'est pas protégée, et l'infrastructure réelle
 
 ## 15. Avancée locale postérieure — adaptateur Decision
 
-Le Quality Lab courant branche maintenant cinq moteurs réels sur ses entrées
-aveugles. Decision rejoue l'intent et le plan général à une date de référence
-explicite, refuse les dérives d'identité ou de provenance et ne publie qu'un
-claim `selected_candidate:<candidate_id>` relié aux preuves de l'offre. La
-suite Quality courante passe **359/359** et le backend complet **2 012 réussis
-+ 1 ignoré**. `variant_resolution` et `offer_attachment` restent les deux seuls
-emplacements sans moteur compatible. Le holdout contient toujours **0 cas
-humain** : cette avancée technique ne change donc pas le NO-GO et ne produit
-aucune mesure métier.
+Le Quality Lab courant branche maintenant les sept moteurs réels sur ses
+entrées aveugles. Decision rejoue l'intent et le plan général à une date de
+référence explicite, refuse les dérives d'identité ou de provenance et ne
+publie qu'un claim `selected_candidate:<candidate_id>` relié aux preuves de
+l'offre. Entity, Variant et Offer Attachment appellent le resolver Graph
+conservateur `exact-gtin-shadow-v1` : un GTIN manquant, invalide ou conflictuel
+produit abstention ou quarantaine, jamais une similarité inventée. La suite
+Quality courante passe **377/377** et le backend complet **2 078 réussis + 2
+ignorés**. Le holdout contient toujours **0 cas humain** : cette avancée
+technique ne change donc pas le NO-GO et ne produit aucune mesure métier.
 
 ## 16. Qualification distante courante — intégration, CI et protection
 

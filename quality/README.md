@@ -181,17 +181,25 @@ provenance `{engine_id, engine_version}` de chaque adaptateur. Le scorecard
 recalcule cette identité : modifier une sortie ou sa provenance sans produire
 un nouveau run rend l'artefact invalide.
 
-Les cinq adaptateurs intégrés actuellement sont Taxonomy/Product Role, Entity
-Resolution par EAN, Offer Truth Awin, Retrieval catalogue et Decision général.
-Decision rejoue `resolve_intent` puis `compose_general_plan` à
+Les sept adaptateurs intégrés appellent maintenant un moteur applicatif réel :
+Taxonomy/Product Role, Entity Resolution conservative, Variant Resolution
+exact-GTIN, Offer Attachment exact-GTIN, Offer Truth Awin, Retrieval catalogue
+et Decision général. Decision rejoue `resolve_intent` puis
+`compose_general_plan` à
 `reference_time` fixe ; une recommandation expose uniquement des claims
 `selected_candidate:<candidate_id>` reliés aux preuves de l'offre sélectionnée,
-et la confiance reste explicitement non calibrée à `0.0`. Variant Resolution et
-Offer Attachment n'ont pas encore d'interface moteur compatible avec leur
-contrat v0.5. Un seul cas sélectionné sur l'un de ces deux jeux fait donc
-échouer le runner ; aucun gold n'est recopié et aucune prédiction de
-remplacement n'est inventée. Pour Retrieval, les identifiants retournés
-appartiennent explicitement aux espaces `ean:<GTIN>` ou `offer:<id>`.
+et toutes les confiances restent explicitement non calibrées à `0.0`. Le
+resolver Graph ne fusionne aucun titre : un seul GTIN valide prouve une
+variante ; deux GTIN différents restent ambigus au niveau produit. L'adaptateur
+d'attachement exige dans l'entrée aveugle un roster non vide de candidats et
+ne rend `eligible` que pour un unique GTIN exact. L'absence de roster fait
+échouer le cas au lieu de signifier artificiellement « aucun match ». Pour
+Retrieval, les identifiants retournés appartiennent explicitement aux espaces
+`ean:<GTIN>` ou `offer:<id>`.
+
+Ces branchements rendent les deux datasets Graph techniquement exécutables ;
+ils ne créent aucun gold et ne changent pas la readiness. Sans annotations
+indépendantes, aucun score de variante ou d'attachement n'est mesurable.
 
 Le manifeste de run engage le digest exact du manifeste gold et de chacun des
 sept fichiers de prédictions. Le scorecard joint exactement les `case_id` du

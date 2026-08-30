@@ -49,6 +49,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    DATABASE_URL=<référence privée vers le service PostgreSQL Railway>
    DATABASE_SCHEMA_MODE=alembic
    OBSERVATION_SHADOW_ENABLED=false
+   PRODUCT_GRAPH_SHADOW_ENABLED=false
    CORS_ORIGINS=["https://filon.be","https://www.filon.be"]
    FORWARDED_ALLOW_IPS=<IP/CIDR exacts et vérifiés du proxy Railway>
    METRICS_EXPORT_TOKEN=<secret aléatoire distinct, 32-256 caractères ASCII>
@@ -99,7 +100,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    Railway fournit ensuite une URL publique, par exemple
    `https://filon-backend-production.up.railway.app`.
 7. Vérifier : ouvrir `https://<url>/health/ready` → HTTP 200 avec la révision
-   `f4c81a9d2e70` attendue. Railway exige ce 200 avant de basculer le trafic.
+   `8b2f4c7d9a10` attendue. Railway exige ce 200 avant de basculer le trafic.
    `/health/live` reste un diagnostic de processus et `/health` un diagnostic
    détaillé des dépendances. Enfin,
    `https://<url>/api/advise/stream?q=un%20pc%20portable%20800€` doit renvoyer un flux SSE.
@@ -168,6 +169,26 @@ compressée et ne relever aucun plafond sans mesure de mémoire et de disque.
 L'activation de ce service reste un changement externe séparé, après adoption
 de la base.
 
+### Product/Variant Graph shadow
+
+La migration crée les tables `graph_*` sans backfill et sans lecteur public.
+Le writer Graph ne peut être activé seul : il exige simultanément
+`OBSERVATION_SHADOW_ENABLED=true` et `PRODUCT_GRAPH_SHADOW_ENABLED=true` sur le
+worker d'ingestion. Le service web conserve les deux flags à `false`.
+
+Avant toute écriture, exécuter un lot en lecture seule :
+
+```bash
+python -m app.product_graph.backfill --after-raw-id 0 --limit 1000
+```
+
+La commande n'écrit rien sans `--apply`, refuse plus de 10 000 raws par lot et
+retourne uniquement des compteurs ainsi que `last_raw_source_id`. Après revue
+du dry-run et activation des deux flags, rejouer exactement la commande avec
+`--apply`, puis reprendre au dernier identifiant. Aucun titre, marque ou
+similarité ne remplace un GTIN exact. Une identité absente, invalide ou
+contradictoire reste en quarantaine.
+
 ### Service existant déjà opt-in Config as Code
 
 Le `railway.json` du dépôt reste le contrat legacy exact d'un service dont les
@@ -199,9 +220,10 @@ aucune suppression inattendue avant l'apply. L'ajout de `.railway/` et le
 retrait ultérieur du contrat legacy seront un changement séparé, fondé sur cet
 import live.
 
-En cas de régression, remettre la version applicative précédente et
+En cas de régression, remettre la version applicative précédente,
+`PRODUCT_GRAPH_SHADOW_ENABLED=false` et
 `OBSERVATION_SHADOW_ENABLED=false`, tout en conservant le schéma à la tête
-`f4c81a9d2e70`.
+`8b2f4c7d9a10`.
 Ne jamais downgrader vers la baseline. Le downgrade technique
 `3a7f9c2e5b61` → `d75faf1f6a94` supprime la colonne de devise et les valeurs
 qu'elle contient ; une suppression structurelle exige une migration

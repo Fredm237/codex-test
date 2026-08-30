@@ -19,6 +19,7 @@ from app.db.base import Base
 from app.db import models as core_models  # noqa: F401
 from app.intelligence import models as intelligence_models  # noqa: F401
 from app.observations import models as observation_models  # noqa: F401
+from app.product_graph import models as product_graph_models  # noqa: F401
 
 
 config = context.config
