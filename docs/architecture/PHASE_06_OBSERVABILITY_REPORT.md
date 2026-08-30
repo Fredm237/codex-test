@@ -55,7 +55,8 @@ dashboard applicatif Prometheus/Grafana et de son pager, qui restent à déploye
   couples pseudonyme/classe et rejette toute nouvelle clé à saturation ;
 - toutes les lectures catalogue sont limitées ; Assistant, Outfit, agrégats
   lourds, admin/debug/sync et probes de dépendances ont le quota strict ;
-- seul `GET`/`HEAD /health/live` est exempt, et Railway utilise cette sonde ;
+- seuls les exacts `GET`/`HEAD /health/live` et `/health/ready` sont exemptés ;
+  Railway utilise la readiness, qui reste journalisée et mesurée ;
 - les 429 sont agrégés par bucket fermé et journalisés au plus une fois par
   minute et par bucket, sans perdre leurs compteurs métriques.
 
@@ -244,11 +245,12 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
   avertissements historiques `datetime.utcnow()` ;
 - deux relectures indépendantes supplémentaires et un fuzz de fenêtre
   glissante/concurrence : aucun P0, P1 ou P2 restant dans la front door ;
-- lot limite distribuée Redis + identité Railway du 29 août 2026 : **138 tests
-  ciblés réussis** et suite backend complète **2 065 réussis + 2 ignorés** sous
-  Python 3.12.14 ; concurrence, panne fail-closed, plafond partagé, séparation
+- lot limite distribuée Redis + identité Railway, complété le 30 août 2026 :
+  **180 tests ciblés réussis** et suite backend complète **2 067 réussis + 2
+  ignorés** sous Python 3.12 ; concurrence, panne fail-closed, plafond partagé, séparation
   de deux IP derrière le même pair, en-tête absent/dupliqué/invalide,
-  confidentialité, configuration et fermeture du client sont couverts ;
+  confidentialité, configuration, healthchecks internes et fermeture du client
+  sont couverts ; le déploiement `03be13dc…` confirme l'identité edge réelle ;
 - la preuve détaillée se trouve dans `LOCAL_ALERT_EVALUATION_REPORT.md` ;
 - build web isolé du parent `922766e`, inchangé par ce commit backend/docs :
   compilation, types et 42 routes verts ; contrats v1 et claims verts ;
@@ -285,9 +287,10 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
    travers les redémarrages, les resets sous charge ou une période de trafic
    représentatif.
 9. `FORWARDED_ALLOW_IPS` est fermé à `127.0.0.1` en production, sans wildcard.
-   Le mode d'identité Railway ne dépend pas de XFF et exige `X-Real-IP`, mais sa
-   présence et son unicité doivent encore être capturées sur le déploiement réel
-   avant de déclarer la front door entièrement qualifiée.
+   Le mode d'identité Railway ne dépend pas de XFF et exige `X-Real-IP`. Sa
+   présence canonique et l'écrasement de valeurs clientes forgées ont été
+   vérifiés sur le déploiement `03be13dc…` ; cette preuve ne couvre pas Redis
+   multi-réplica.
 10. Le besoin Assistant reste transporté dans `q=` par le flux SSE actuel ; les
     logs applicatifs sont propres, mais un proxy ou une plateforme amont peut
     encore observer l'URL avant FILON.
@@ -309,5 +312,5 @@ respectivement consignés dans `LOCAL_ALERT_POLICY.md`,
 - brancher l'instance canonique à un ordonnanceur contrôlé, puis tester son
   export, son canal, ses silences et son rollback hors production ;
 - mesurer sur trafic représentatif avant de ratifier un SLO ;
-- vérifier sur Railway l'unique `X-Real-IP`, puis activer et tester le mode Redis
-  privé ou ajouter un WAF avant de revendiquer une barrière DDoS.
+- activer et tester le mode Redis privé ou ajouter un WAF avant de revendiquer
+  une protection distribuée ou une barrière DDoS.

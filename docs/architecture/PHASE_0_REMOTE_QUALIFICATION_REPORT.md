@@ -70,6 +70,13 @@ techniques passent et les sept datasets humains restent à zéro. L'artefact
 fait 1 785 octets, expire le 12 septembre 2026 et porte le digest
 `sha256:3d0f2b97f003d2edd3a27e0489ac1d8268da348f6a0d68171413db9357d42250`.
 
+La qualification courante est le run **#352** (`33325481242`) sur le commit
+distant `2725a464e046c3790ed20eb0533068760922a524`. Son arbre
+`de9cc8944e82f42ae28361f43f5fa49791d6b1e1` est byte-identique au commit local
+`04fe05bc7cc841e54b23341ef5208d4f0f61518e`. Web, Mobile, Extension, Alembic
+et les régressions backend sont verts. Le seul échec reste le gate humain
+strict attendu ; l'artefact Quality `9736128514` a été publié.
+
 ## 3. Vercel
 
 L'intégration GitHub Vercel a construit avec succès les commits `e04dfc2`,
@@ -83,35 +90,28 @@ n'est pas utilisée comme preuve de cette branche et n'a pas été redéployée.
 
 ## 4. Railway et production backend
 
-Le `GET /health` public de
-`https://web-production-c6842.up.railway.app` répond, mais décrit encore un
-processus antérieur :
+Le backend Core est désormais réellement déployé en `production`, région
+`EU West (Amsterdam, Netherlands)`, depuis la branche
+`codex/filon-phase-0-core`. Le déploiement actif
+`03be13dc-e20f-4f62-8119-c27d84176b47` est `SUCCESS` avec un réplica. Il utilise
+le Dockerfile, `alembic upgrade head`, `python -m app` et le healthcheck
+`/health/ready`.
 
-- `status=ok`, version `0.1.0` ;
-- `env=dev` ;
-- uptime observé : `772307` secondes ;
-- PostgreSQL `ok`, Redis `local_only` ;
-- Qdrant `disabled` ;
-- edge Railway à Bruxelles.
+Les contrôles publics du 30 août 2026 prouvent :
 
-Cette réponse prouve la joignabilité, pas le déploiement du nouveau core. Elle
-confirme au contraire l'absence de preuve production pour le scheduler, la
-collecte OpenMetrics multi-réplica, le backend de traces, le WAF, le CIDR proxy,
-le pager et le trafic représentatif.
+- `/health/ready` HTTP 200, PostgreSQL `ok`, révision `f4c81a9d2e70` ;
+- `/health/live` HTTP 200 ;
+- `/health` HTTP 200 avec `env=production` et Python 3.12.14 ;
+- `/health`, qui n'est pas exemptée du quota, reste HTTP 200 après injection
+  cliente d'un `X-Real-IP` invalide puis de deux valeurs dupliquées. FILON
+  aurait répondu 503 si l'application avait reçu ces valeurs : l'edge fournit
+  donc exactement une identité canonique.
 
-Un préflight authentifié en lecture a ensuite confirmé la topologie
-`production` (`web` + `Postgres`), la source `Fredm237/codex-test`, le répertoire
-racine `/filon-backend`, ainsi que le rattachement réel du service à
-`/filon-backend/railway.json`. Le déploiement actif reste celui de `main` au
-commit `af08f9089e9cc20acfd2cdf692714ec2847634cf`, daté du 20 août 2026. Sa
-configuration effective est encore RAILPACK/uvicorn, sans pré-déploiement
-Alembic ni healthcheck Railway ; elle diffère donc matériellement de la cible
-versionnée.
-
-La CLI officielle v5.30.1 a été qualifiée par checksum, mais aucune variable
-protégée, mutation, sauvegarde ou publication n'a été effectuée. Le rapport
-[préflight Railway](PHASE_0_RAILWAY_PREFLIGHT.md) impose un `pg_dump` et un
-restore drill sur base distincte avant tout déploiement.
+Le quota actif reste `local_only`. Cette preuve ne qualifie donc ni Redis
+multi-réplica, ni WAF, ni agrégateur OpenMetrics, ni backend de traces, pager ou
+trafic représentatif. Le reçu complet, y compris sauvegarde, restore drill,
+migration et rollback, est dans
+[PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md).
 
 ## 5. Protection de `main`
 
@@ -134,9 +134,9 @@ pas seulement configurée dans un formulaire.
 ## 6. Verdict
 
 Le code de Phase 0 est publié, byte-identique et techniquement qualifié sur les
-quatre surfaces. La CI prouve aussi que son gate métier ferme correctement la
-promotion. Les conditions suivantes restent bloquantes : datasets humains
-indépendants, Product/Variant Graph mesuré et qualification production après
-backup/restore. Le lot CI/gouvernance et l'accès Railway sont acquis ; ils ne
-remplacent pas ces preuves. Le verdict reste **NO-GO Phase 1, NO-GO production,
-NO-GO immersive**.
+quatre surfaces. Le backend Core, sa migration et son identité Railway sont
+qualifiés en production. La CI prouve aussi que son gate métier ferme
+correctement la promotion. Les conditions suivantes restent bloquantes pour la
+Phase 1 : datasets humains indépendants, Product/Variant Graph mesuré et sorties
+d'observabilité distribuée restantes. Le verdict est **GO backend Core ; NO-GO
+Phase 1 et NO-GO immersive**.

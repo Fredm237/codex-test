@@ -74,10 +74,12 @@ réseau falsifiable. Aucun CIDR de production n'est inventé dans le dépôt.
 Les budgets `expensive` et `general` sont séparés. Une route est reconnue par
 frontière exacte : le chemin est égal au préfixe ou commence par `préfixe/`.
 
-Seuls `GET` et `HEAD` sur l'exact `/health/live` sont exemptés. `/health`,
-`/health/ready` et `/health/metrics` sont limités avec le budget strict, car les
-deux premiers interrogent des dépendances. Toutes les lectures catalogue sont
-limitées. Les agrégats `categories`, `facets`,
+Seuls `GET` et `HEAD` sur les chemins exacts `/health/live` et
+`/health/ready` sont exemptés. La sonde interne Railway n'envoie pas
+`X-Real-IP` ; cette exemption minimale permet donc le contrôle de disponibilité
+sans ouvrir `/health`, `/health/metrics` ni aucun chemin ressemblant. La
+readiness reste journalisée et mesurée, puisqu'elle interroge les dépendances.
+Toutes les lectures catalogue sont limitées. Les agrégats `categories`, `facets`,
 `highlights`, `pulse`, `relief`, `sitemap/products` et `stats`, ainsi que les
 sous-arbres `admin`, `debug` et `sync`, utilisent le quota strict. Les chemins
 ressemblants comme `/healthcheck` et `/api/catalogue` restent limités et
@@ -135,15 +137,16 @@ Le canal `uvicorn.access` est désactivé dans la configuration des logs et
 `uvicorn.run(..., access_log=False)`, car son format inclut la query string.
 Seul l'exact `GET`/`HEAD /health/live` est exclu du bruit ; les probes de
 dépendances, leurs erreurs et un lookalike comme `/healthcheck` restent
-observés. Railway utilise cette liveness bon marché plutôt que `/health`.
+observés. Railway utilise `/health/ready` pour valider le service ; cette sonde
+est exemptée du quota mais reste journalisée et mesurée.
 
 ## Limites et travaux restants
 
 1. La production reste configurée en mode local tant qu'un Redis privé n'a pas
    été créé, relié et testé ; le quota actif repart donc encore à zéro au
    redémarrage et ne se coordonne pas entre réplicas.
-2. Il ne protège pas à lui seul la bande passante, les sockets, la sonde de
-   liveness exemptée ou l'infrastructure en amont du processus.
+2. Il ne protège pas à lui seul la bande passante, les sockets, les sondes
+   `live`/`ready` exemptées ou l'infrastructure en amont du processus.
 3. Les utilisateurs partageant une même adresse validée partagent un quota.
 4. Le proxy, le navigateur ou une plateforme en amont peuvent encore observer
    le paramètre `q=` avant FILON. Une future migration vers un corps `POST` ou
@@ -151,9 +154,10 @@ observés. Railway utilise cette liveness bon marché plutôt que `/health`.
    clients et du composant `SearchAssistant` protégé.
 5. Les diagnostics du grand module catalogue protégé ne font pas partie de ce
    lot et restent consignés comme dette de confidentialité P2.
-6. Le contrat `X-Real-IP` Railway est couvert localement, mais aucune capture de
-   trafic Railway, règle WAF, activation Redis production ou mesure de trafic
-   représentatif n'est encore validée par une preuve distante.
+6. Le contrat `X-Real-IP` Railway est désormais prouvé sur le déploiement réel,
+   y compris face à une valeur cliente invalide ou dupliquée. Aucune règle WAF,
+   activation Redis production ou mesure de trafic représentatif n'est encore
+   validée.
 
 ## Vérification et rollback
 
@@ -168,11 +172,13 @@ tests backend** réussis, avec 7 avertissements historiques
 fenêtre glissante et concurrence multithread, ne trouvent plus aucun P0, P1 ou
 P2 dans ce périmètre.
 
-Le lot Redis + identité Railway du 29 août 2026 passe **138 tests ciblés** et la
-suite backend complète **2 065 réussis + 2 ignorés** sous Python 3.12.14. Il
+Le lot Redis + identité Railway, complété par le healthcheck Railway le 30 août
+2026, passe **180 tests ciblés** et la suite backend complète **2 067 réussis +
+2 ignorés** sous Python 3.12. Il
 couvre deux IP derrière un même pair ASGI, l'en-tête absent/dupliqué/invalide,
 la non-conservation des trois adresses brutes, la panne Redis, le plafond global
-et la fermeture du client.
+et la fermeture du client. Le déploiement `03be13dc…` et les probes publiques
+prouvent en outre l'injection réelle d'une adresse canonique par l'edge.
 
 Le changement ne crée ni migration, ni endpoint, ni schéma de payload, ni donnée
 persistée. Il ajoute toutefois la réponse opérationnelle `429` aux lectures

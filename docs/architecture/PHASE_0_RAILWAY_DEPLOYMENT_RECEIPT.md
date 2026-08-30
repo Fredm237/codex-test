@@ -112,6 +112,44 @@ désactivé, URL PostgreSQL privée, deux origines CORS HTTPS sans wildcard,
 confiance proxy limitée à la boucle locale et token métriques de 64 caractères
 hexadécimaux.
 
+## Activation de l'identité Railway — 30 août 2026
+
+La branche de production est désormais `codex/filon-phase-0-core`, dans la
+région `EU West (Amsterdam, Netherlands)`, avec un réplica. La configuration a
+activé `RATE_LIMIT_IDENTITY_SOURCE=railway` tout en conservant
+`RATE_LIMIT_BACKEND=local` : cette étape qualifie la frontière d'identité sans
+revendiquer une coordination Redis encore absente.
+
+Le premier essai `f63024eb-e6d9-48ff-a59b-6aa78454c657` a correctement échoué
+au healthcheck : les sondes internes Railway n'empruntent pas le proxy HTTP
+public et n'ont donc pas de `X-Real-IP`. L'ancien déploiement est resté actif.
+Le correctif borne l'exemption aux seuls `GET`/`HEAD /health/live` et
+`/health/ready` ; `/health`, les métriques, les lookalikes et toutes les routes
+métier restent soumis à l'identité et au quota.
+
+Le commit distant `2725a464e046c3790ed20eb0533068760922a524`, arbre
+`de9cc8944e82f42ae28361f43f5fa49791d6b1e1` byte-identique au commit local
+`04fe05bc7cc841e54b23341ef5208d4f0f61518e`, a produit le déploiement
+`03be13dc-e20f-4f62-8119-c27d84176b47`, désormais `ACTIVE` et `SUCCESS`.
+Les journaux montrent le pré-déploiement Alembic, le démarrage Python 3.12.14,
+la validation de la révision et `GET /health/ready → 200`.
+
+Les contrôles publics datés ont ensuite établi :
+
+- `GET /health/ready` : HTTP 200, base `ok`, révision `f4c81a9d2e70` ;
+- `GET /health/live` : HTTP 200 ;
+- `GET /health` : HTTP 200 alors que cette route n'est pas exemptée ;
+- le même `GET /health` avec un `X-Real-IP` client invalide, puis deux valeurs
+  forgées dupliquées : HTTP 200 dans les deux cas. Comme FILON répondrait 503
+  à une valeur absente, invalide ou dupliquée, l'edge a remplacé/normalisé ces
+  entrées avant de livrer exactement une adresse canonique à l'application.
+
+Le correctif passe **180 tests ciblés** et la suite backend complète
+**2 067 réussis + 2 ignorés** sous Python 3.12. GitHub Actions #352 confirme
+Alembic, les régressions backend, Web, Mobile et Extension ; son unique échec
+est le gate humain strict volontairement rouge sur les sept datasets vides.
+L'artefact Quality associé est `9736128514`.
+
 ## Capacité, rollback et risques résiduels
 
 Le volume PostgreSQL est `READY` à **7 855,56 Mio sur 20 000 Mio**, soit
