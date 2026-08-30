@@ -17,6 +17,7 @@ from sqlalchemy.exc import IntegrityError
 from app.core.logging import get_logger
 from app.db import models
 from app.services import awin_catalog, catalog_grouping
+from app.services.freshness import format_utc_timestamp
 
 log = get_logger("catalog_sync")
 
@@ -36,8 +37,8 @@ def _summary(run: models.CatalogSyncRun) -> dict[str, Any]:
         "id": run.id,
         "trigger": run.trigger,
         "status": run.status,
-        "started_at": run.started_at.isoformat() if run.started_at else None,
-        "finished_at": run.finished_at.isoformat() if run.finished_at else None,
+        "started_at": format_utc_timestamp(run.started_at),
+        "finished_at": format_utc_timestamp(run.finished_at),
         "merchants": run.merchants_count or 0,
         "feeds": run.feeds_count or 0,
         "offers": run.offers_count or 0,
@@ -220,7 +221,7 @@ async def health(session, *, interval_hours: int) -> dict[str, Any]:
             return {
                 "status": "fresh" if age_hours <= freshness_limit else "stale",
                 "last_success": None,
-                "last_reading": last_reading.isoformat(),
+                "last_reading": format_utc_timestamp(last_reading),
                 "age_hours": age_hours,
                 "freshness_limit_hours": freshness_limit,
                 "source": "price_readings",

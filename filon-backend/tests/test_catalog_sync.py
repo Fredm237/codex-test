@@ -43,6 +43,12 @@ async def test_a_single_running_sync_is_allowed_and_a_completed_one_becomes_fres
             assert state["status"] == "fresh"
             assert state["last_success"]["offers"] == 120
             assert state["last_success"]["trigger"] == "scheduler"
+            assert datetime.fromisoformat(
+                state["last_success"]["started_at"]
+            ).utcoffset() == UTC.utcoffset(None)
+            assert datetime.fromisoformat(
+                state["last_success"]["finished_at"]
+            ).utcoffset() == UTC.utcoffset(None)
     finally:
         await engine.dispose()
 

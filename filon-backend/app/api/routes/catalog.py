@@ -37,7 +37,10 @@ from app.services import (
     taxonomy,
 )
 from app.services.currency import normalize_currency_code
-from app.services.freshness import offer_observation_is_fresh
+from app.services.freshness import (
+    format_utc_timestamp,
+    offer_observation_is_fresh,
+)
 from app.services.verdict import compute_verdict
 
 log = get_logger("catalog")
@@ -180,7 +183,7 @@ async def pulse(session=Depends(db.get_session)) -> dict:
 
     return {
         "live": True,
-        "last_reading": last.isoformat() if last else None,
+        "last_reading": format_utc_timestamp(last),
         "readings_24h": int(readings or 0),
         "drops_24h": int(drops or 0),
         "drops_comparable": True,
@@ -402,7 +405,7 @@ async def offers(
                 "price": offer.price if evidence_current else None,
                 "currency": evidence.currency if evidence_current else None,
                 "in_stock": True if evidence_current else None,
-                "observed_at": observed_at.isoformat() if observed_at else None,
+                "observed_at": format_utc_timestamp(observed_at),
                 "evidence_current": evidence_current,
                 "image": offer.image_url,
                 "link": offer.deep_link,
@@ -718,7 +721,7 @@ def _card(
         "price": o.price,
         "currency": currency,
         "in_stock": o.in_stock,
-        "observed_at": observed_at.isoformat(),
+        "observed_at": format_utc_timestamp(observed_at),
         "evidence_current": True,
         "image": o.image_url,
         "link": o.deep_link,
@@ -1105,7 +1108,7 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         "price": current_price,
         "currency": current_currency,
         "in_stock": current_stock,
-        "observed_at": observed_at.isoformat() if observed_at else None,
+        "observed_at": format_utc_timestamp(observed_at),
         "evidence_current": current_evidence is not None,
         "image": o.image_url,
         "link": o.deep_link,
@@ -1114,7 +1117,7 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
             {
                 "price": price,
                 "currency": history_currency,
-                "at": captured_at.isoformat(),
+                "at": format_utc_timestamp(captured_at),
                 "in_stock": True,
             }
             for price, captured_at in hist
@@ -1315,7 +1318,7 @@ async def sitemap_products(
     return {
         "total": int(total or 0),
         "items": [
-            {"ean": ean, "updated": updated.isoformat() if updated else None}
+            {"ean": ean, "updated": format_utc_timestamp(updated)}
             for (ean, updated) in rows
         ],
     }
@@ -1410,7 +1413,9 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
                 "currency": verified_by_id[o.id].currency if o.id in verified_by_id else None,
                 "in_stock": True if o.id in verified_by_id else None,
                 "observed_at": (
-                    verified_by_id[o.id].current_observed_at.isoformat()
+                    format_utc_timestamp(
+                        verified_by_id[o.id].current_observed_at
+                    )
                     if o.id in verified_by_id
                     else None
                 ),
@@ -2381,7 +2386,7 @@ async def relief(
 
     charge = {
         "live": True,
-        "generated_at": datetime.now(UTC).isoformat(),
+        "generated_at": format_utc_timestamp(datetime.now(UTC)),
         "window_days": window_days,
         "count": len(colonnes),
         "columns": colonnes,

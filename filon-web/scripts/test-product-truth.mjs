@@ -35,6 +35,9 @@ const siteUrls = loadTypeScript("lib/site-url.ts", { "./site": siteModule });
 const catalogue = loadTypeScript("lib/catalogue.ts", {
   "@/lib/api": { API: "https://api.example.com" },
 });
+const assistantCatalogueUrl = loadTypeScript("lib/catalogue-assistant-url.ts", {
+  "@/lib/catalogue": catalogue,
+});
 
 assert.equal(siteUrls.siteUrl(), "https://www.filon.be/");
 assert.equal(siteUrls.siteUrl("/catalogue"), "https://www.filon.be/catalogue/");
@@ -44,6 +47,16 @@ for (const page of ["2.5", "1e100", "9007199254740991", "0", "-1", "NaN"]) {
   assert.equal(catalogue.pageNumber({ page }), 1, `page catalogue non sûre : ${page}`);
 }
 assert.equal(catalogue.href({ page: "9", brand: "Acme" }, { page: "3" }), "/catalogue/?page=3&brand=Acme");
+assert.equal(
+  assistantCatalogueUrl.catalogueAssistantHref("Un casque sous 300 €"),
+  catalogue.href({}, { dept: "high-tech", cat: "tv-son", sub: "Casques audio" }),
+  "l'Assistant et le catalogue doivent partager le même constructeur d'URL",
+);
+assert.equal(
+  assistantCatalogueUrl.catalogueAssistantHref("Thermos robuste 100 EUR"),
+  catalogue.href({}, { q: "thermos robuste" }),
+  "une recherche libre doit utiliser l'encodage canonique du catalogue",
+);
 
 const hostileJsonLd = jsonLd.serializeJsonLd({
   name: "</script><script>alert(1)</script>",
@@ -236,6 +249,15 @@ assert.match(pulseProxySource, /headers: \{ ["']Cache-Control["']: ["']no-store[
 assert.doesNotMatch(pulseProxySource, /stale-while-revalidate/i, "une panne ne doit pas resservir un succès périmé");
 
 const assistantSource = readFileSync(join(webRoot, "components/editorial/SearchAssistant.tsx"), "utf8");
+assert.ok(
+  assistantSource.includes("catalogueAssistantHref"),
+  "tous les retours Assistant doivent utiliser l'URL catalogue canonique",
+);
+assert.doesNotMatch(
+  assistantSource,
+  /`\/catalogue\/\?q=\$\{encodeURIComponent/,
+  "l'Assistant ne doit plus construire une URL catalogue parallèle",
+);
 assert.ok(assistantSource.includes("normalizeSupportedMoney"), "les cartes Assistant doivent valider montant et devise");
 assert.ok(assistantSource.includes("formatSupportedMoney"), "l'Assistant doit formater sans symbole de secours");
 assert.ok(assistantSource.includes("hasCurrentOfferEvidence"), "l'Assistant doit exiger une preuve prix/stock récente");

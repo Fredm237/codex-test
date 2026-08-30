@@ -9,6 +9,7 @@ from app.api.routes import catalog
 from app.db import models
 from app.db import session as db
 from app.db.base import Base
+from app.services.freshness import format_utc_timestamp
 
 
 async def _offers(session):
@@ -27,6 +28,16 @@ async def _offers(session):
         offset=0,
         session=session,
     )
+
+
+def test_public_catalogue_timestamp_is_always_explicit_utc():
+    naive = datetime(2026, 8, 30, 12, 0)
+    assert format_utc_timestamp(naive) == "2026-08-30T12:00:00+00:00"
+    assert (
+        format_utc_timestamp("2026-08-30T14:00:00+02:00")
+        == "2026-08-30T12:00:00+00:00"
+    )
+    assert format_utc_timestamp(None) is None
 
 
 @pytest.fixture

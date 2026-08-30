@@ -21,9 +21,22 @@ def parse_observed_at(value: object) -> datetime | None:
             return None
     else:
         return None
-    if observed.tzinfo is None:
+    if observed.tzinfo is None or observed.utcoffset() is None:
         return observed.replace(tzinfo=UTC)
     return observed.astimezone(UTC)
+
+
+def format_utc_timestamp(value: object) -> str | None:
+    """Sérialise un instant public avec un décalage UTC explicite.
+
+    Les colonnes SQL historiques restent volontairement UTC naïves pour leur
+    compatibilité avec asyncpg. Cette convention de stockage ne doit jamais
+    franchir le contrat HTTP : un client ne peut pas deviner le fuseau d'une
+    chaîne ISO sans offset.
+    """
+
+    observed = parse_observed_at(value)
+    return observed.isoformat() if observed is not None else None
 
 
 def offer_observation_is_fresh(

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
 import { API } from "@/lib/api";
+import { catalogueAssistantHref } from "@/lib/catalogue-assistant-url";
 import { formatSupportedMoney, normalizeSupportedMoney } from "@/lib/currency";
 import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
 import { hasCurrentOfferEvidence, isSafeExternalOfferUrl } from "@/components/filon/product-copy";
@@ -171,55 +172,6 @@ type Ev =
 const isGoogleShoppingUrl = (value?: string | null) =>
   Boolean(value && /(^|\.)google\.[^/]+\/search/i.test(value) && /(?:[?&]tbm=shop|[?&]ibp=oshop)/i.test(value));
 
-// Une demande conversationnelle (« un casque sous 300 € ») ne doit pas être
-// envoyée telle quelle au moteur catalogue. Ce dernier cherche des noms de
-// produit ; cette extraction courte préserve l’intention sans promettre de
-// compréhension artificielle.
-function catalogueSearchTerm(input: string) {
-  const normalized = input
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-  const concepts: Array<[RegExp, string]> = [
-    [/casque|headphone|koptelefoon|noise.?cancell?/, "casque"],
-    [/ecouteur|earbud|oortje/, "ecouteurs"],
-    [/smartphone|telephone|telefoon|iphone|android/, "smartphone"],
-    [/ordinateur|laptop|portable|pc\b|computer/, "ordinateur"],
-    [/montre|watch|horloge/, "montre"],
-    [/television|televiseur|tv\b/, "television"],
-    [/aspirateur|vacuum|stofzuiger/, "aspirateur"],
-    [/sneaker|basket|chaussure|shoe/, "chaussures"],
-  ];
-  const match = concepts.find(([pattern]) => pattern.test(normalized));
-  if (match) return match[1];
-
-  const terms = normalized
-    .replace(/\b(?:un|une|des|le|la|les|de|du|pour|avec|sous|moins|budget|euro|euros|eur|a|au|en|the|a|an|and|with|under|voor|met|onder)\b/g, " ")
-    .replace(/\b\d+[\d\s,.]*\b/g, " ")
-    .split(/[^a-z0-9]+/)
-    .filter((term) => term.length > 2)
-    .slice(0, 3);
-  return terms.join(" ") || input.trim();
-}
-
-function catalogueHref(input: string) {
-  const normalized = input
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
-  const routes: Array<[RegExp, string]> = [
-    [/casque|headphone|koptelefoon|noise.?cancell?/, "/catalogue/?dept=high-tech&cat=tv-son&sub=Casques%20audio"],
-    [/ecouteur|earbud|oortje/, "/catalogue/?dept=high-tech&cat=telephonie&sub=%C3%89couteurs"],
-    [/smartphone|telephone|telefoon|iphone|android/, "/catalogue/?dept=high-tech&cat=telephonie&sub=Smartphones"],
-    [/ordinateur|laptop|portable|pc\b|computer/, "/catalogue/?dept=high-tech&cat=informatique&sub=Ordinateurs%20portables"],
-    [/television|televiseur|tv\b/, "/catalogue/?dept=high-tech&cat=tv-son&sub=T%C3%A9l%C3%A9viseurs"],
-    [/aspirateur|vacuum|stofzuiger/, "/catalogue/?dept=maison&cat=electromenager&sub=Aspirateurs"],
-    [/sneaker|basket|chaussure|shoe/, "/catalogue/?dept=mode-accessoires&cat=chaussures&sub=Baskets%20%26%20Sneakers"],
-  ];
-  return routes.find(([pattern]) => pattern.test(normalized))?.[1]
-    ?? `/catalogue/?q=${encodeURIComponent(catalogueSearchTerm(input))}`;
-}
-
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
@@ -262,7 +214,7 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
   const hasMerchantLink = isSafeExternalOfferUrl(c.link) && !isGoogleShoppingUrl(c.link);
   const offerUrl = hasMerchantLink
     ? (c.link as string)
-    : `/catalogue/?q=${encodeURIComponent(q || c.name)}`;
+    : catalogueAssistantHref(q || c.name);
   const showImg = c.image && imgOk;
   const displayedPrice = hasCurrentOfferEvidence(c) && c.in_stock === true
     ? formatSupportedMoney(c.price, c.currency, locale)
@@ -554,7 +506,7 @@ export function SearchAssistant() {
                   <p className="sa-failed-title">{blockedExternal ? S.sourceTitle : S.failedTitle}</p>
                   <p className="sa-failed-body">{blockedExternal ? S.sourceBody : S.failedBody}</p>
                   {blockedExternal ? (
-                    <a className="sa-failed-retry" href={catalogueHref(asked)}>
+                    <a className="sa-failed-retry" href={catalogueAssistantHref(asked)}>
                       {S.catalogue}
                     </a>
                   ) : (

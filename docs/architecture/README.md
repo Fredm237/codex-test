@@ -93,6 +93,7 @@ et extension.
 - [Baseline qualité et gates](BASELINE_QUALITY_REPORT.md)
 - [Architecture cible et stratégie de migration](TARGET_ARCHITECTURE.md)
 - [Plan d'exécution Phase 0](PHASE_0_EXECUTION_PLAN.md)
+- [Durcissement final du contrat catalogue v1](PHASE_0B_CATALOG_CONTRACT_HARDENING_REPORT.md)
 - [Registre canonique des preuves Phase 0](PHASE_0_EVIDENCE_REGISTER.md)
 - [Audit canonique de complétude des trois mandats](MANDATE_COMPLETION_AUDIT.md)
 - [Qualification distante Phase 0](PHASE_0_REMOTE_QUALIFICATION_REPORT.md)

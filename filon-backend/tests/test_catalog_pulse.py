@@ -107,7 +107,9 @@ async def test_rend_la_date_du_dernier_releve(session):
     res = await call(pulse_endpoint, session=session)
     assert res["last_reading"] is not None
     # Le dernier relevé est celui d'il y a vingt minutes, pas le plus ancien.
-    assert datetime.fromisoformat(res["last_reading"]) > datetime.now(UTC).replace(tzinfo=None) - timedelta(hours=1)
+    last_reading = datetime.fromisoformat(res["last_reading"])
+    assert last_reading.utcoffset() == timedelta(0)
+    assert last_reading > datetime.now(UTC) - timedelta(hours=1)
 
 
 async def test_sans_base_on_ne_pretend_rien():

@@ -149,6 +149,10 @@ async def test_product_detail_lists_offers_cheapest_first(session):
     assert prices[0] == 119.0
     assert all(offer["evidence_current"] is True for offer in detail["offers"])
     assert all(offer["observed_at"] is not None for offer in detail["offers"])
+    assert all(
+        datetime.fromisoformat(offer["observed_at"]).utcoffset() == UTC.utcoffset(None)
+        for offer in detail["offers"]
+    )
     assert detail["merchants_count"] == 2
 
 
@@ -287,6 +291,10 @@ async def test_sitemap_only_lists_products_worth_indexing(session):
     # Le seuil reste réglable, et la pagination est cohérente avec le total.
     everything = await sitemap_products(limit=5000, offset=0, min_merchants=1, session=session)
     assert everything["total"] == 2
+    assert all(
+        datetime.fromisoformat(item["updated"]).utcoffset() == UTC.utcoffset(None)
+        for item in everything["items"]
+    )
     page_two = await sitemap_products(limit=1, offset=1, min_merchants=1, session=session)
     assert len(page_two["items"]) == 1
     assert page_two["items"][0]["ean"] != everything["items"][0]["ean"]
