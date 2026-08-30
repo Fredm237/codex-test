@@ -63,14 +63,17 @@ l'exporteur.
 
 ## Preuves locales
 
-- configuration, cycle de vie, observabilité et export : **88/88** ;
-- backend complet : **2 131 réussis, 2 ignorés** en 64,41 s ;
+- configuration, cycle de vie, observabilité et export : **89/89** ;
+- backend complet : **2 132 réussis, 2 ignorés** en 65,89 s ;
 - `pip check` : aucune dépendance cassée ;
 - compilation Python et `git diff --check` : verts.
 
-Les tests utilisent l'exporteur mémoire officiel. Ils prouvent la concordance
-trace/span avec `traceparent`, l'échantillonnage, l'absence d'exception et de
-payload, le refus d'une double configuration et la fermeture à l'arrêt.
+Les tests utilisent l'exporteur mémoire officiel et un récepteur OTLP/HTTP
+loopback réel. Ils prouvent la concordance trace/span avec `traceparent`,
+l'échantillonnage, le Bearer dédié, le chemin et le type protobuf, le décodage
+des ressources/spans, l'absence du payload, de la classe d'exception et du
+jeton dans le corps, le refus d'une double configuration et la fermeture à
+l'arrêt.
 
 ## Preuves distantes et production désactivée
 
