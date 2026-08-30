@@ -168,12 +168,12 @@ Les contrôles publics postérieurs à ce déploiement prouvent :
   aurait répondu 503 si l'application avait reçu ces valeurs : l'edge fournit
   donc exactement une identité canonique.
 
-Les seuls services présents dans l'environnement sont `web` et `Postgres` ;
-aucun Redis n'est actuellement créé. Le quota actif reste `local_only`. Cette
-preuve ne qualifie donc ni Redis
-multi-réplica, ni WAF, ni agrégateur OpenMetrics, ni backend de traces, pager ou
-trafic représentatif. Le reçu complet, y compris sauvegarde, restore drill,
-migration et rollback, est dans
+À la date de ce contrôle, les seuls services présents étaient `web` et
+`Postgres` et le quota était `local_only`. Le 31 août 2026, Redis privé et le
+Cron catalogue ont ensuite été activés et qualifiés dans le
+[reçu dédié](PHASE_06_REDIS_CRON_ACTIVATION_REPORT.md). Agrégateur OpenMetrics,
+backend de traces, pager et trafic représentatif restent non qualifiés. Le reçu
+complet, y compris sauvegarde, restore drill, migration et rollback, est dans
 [PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md).
 
 ## 5. Protection de `main`

@@ -232,7 +232,29 @@ digest
 
 L'exporteur est présent mais `TRACE_EXPORT_BACKEND=disabled`. Aucun endpoint
 ni jeton OTLP n'a été ajouté, aucun span n'est envoyé et aucun collecteur n'a
-été créé. La topologie Railway reste `web` + `Postgres`.
+été créé. À cette date, la topologie Railway restait `web` + `Postgres`.
+
+## Redis privé et Cron catalogue — 31 août 2026
+
+Après autorisation explicite des coûts Railway, la topologie a été étendue sans
+modifier PostgreSQL :
+
+- Redis privé `11201b89-a758-4969-9068-955855af5cda`, volume
+  `97caf82b-2557-40b3-aa09-b52c0b6d624c` ;
+- Cron privé `filon-catalog-cron`, service
+  `b45d89cd-7be9-4e0e-b40e-0983fdf32c0e`, EU West, sans domaine public.
+
+Le web a activé Redis sous le déploiement
+`f8fdf3d6-8a77-4101-818a-7603c624d00d`. La sonde complète a retourné Redis
+`ok`, une lecture réussie et zéro erreur ; live, readiness, PostgreSQL et la
+révision `e8c3f6a0b5d2` sont restés verts.
+
+Le préflight Cron `712c31cf-dff3-4f08-8fc4-d4956611c93c` s'est terminé
+`ready`. L'image active `88cd96b7-6311-441b-8192-ae58e846c60d` porte la
+cadence `0 */6 * * *` UTC. Le premier cycle réel, journal `16`, était encore
+`running` au dernier contrôle et écrivait des relevés périodiques sans rendre
+le web indisponible. Les détails et la limite explicite de ce reçu figurent
+dans le [rapport d'activation Redis/Cron](PHASE_06_REDIS_CRON_ACTIVATION_REPORT.md).
 
 ## Capacité, rollback et risques résiduels
 
@@ -258,8 +280,8 @@ nullable ni default en downgrade. La sauvegarde native et le dump restauré
 restent les recours de restauration de données en cas d'incident explicite.
 
 La production Core ne lève pas les autres gates : l'endpoint OpenMetrics direct
-est qualifié, mais agrégateur, rétention, backend de traces, WAF ou limite
-distribuée, pager, trafic représentatif et SLO restent non prouvés. Les sept
+et la limite Redis distribuée sont qualifiés, mais agrégateur, rétention,
+backend de traces, pager, trafic représentatif et SLO restent non prouvés. Les sept
 datasets humains Quality Lab restent vides ; Product Graph, Phase 1 et
 Immersive demeurent donc **NO-GO**.
 

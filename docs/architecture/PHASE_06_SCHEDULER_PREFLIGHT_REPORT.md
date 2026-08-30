@@ -2,8 +2,8 @@
 
 - Date : **30 août 2026**
 - Lot : **P0.6 / ordonnanceur catalogue autonome**
-- Statut : **qualifié localement et à distance ; service Cron Railway non créé**
-- Décision : **GO technique du préflight ; activation production encore NO-GO**
+- Statut : **qualifié localement et à distance ; service Cron Railway activé**
+- Décision : **GO technique du préflight et GO activation ; premier cycle réel en cours**
 
 ## Objet
 
@@ -91,7 +91,17 @@ sous l'identifiant `d1e17b10-fce8-4f16-90d9-68aadbac4747`, avec le statut
 Ce déploiement rend le binaire de préflight disponible dans l'image commune ;
 il ne crée pas et n'exécute pas un service scheduler.
 
-## Procédure d'activation future
+## Activation exécutée le 31 août 2026
+
+La procédure ci-dessous a été exécutée sur le service privé
+`filon-catalog-cron` (`b45d89cd-7be9-4e0e-b40e-0983fdf32c0e`). Le préflight
+Railway `712c31cf-dff3-4f08-8fc4-d4956611c93c` a rendu `status=ready`,
+`due=true`, l'intervalle 6 h et la révision `e8c3f6a0b5d2`, sans écriture.
+L'image active `88cd96b7-6311-441b-8192-ae58e846c60d` exécute maintenant le
+scheduler à la cadence `0 */6 * * *` UTC. Le premier cycle réel est suivi dans
+le [reçu Redis/Cron](PHASE_06_REDIS_CRON_ACTIVATION_REPORT.md).
+
+## Procédure d'activation appliquée
 
 Après confirmation explicite du coût Railway :
 
@@ -112,7 +122,8 @@ préflight est additif et l'ancienne commande mono-exécution reste inchangée.
 
 ## Limites
 
-Ce rapport ne prouve ni la création du service, ni un run Awin réel, ni une
-cadence Railway. Redis, agrégateur, backend de traces, pager et trafic
-représentatif restent également ouverts. Le NO-GO global et le gate humain
-Quality restent inchangés.
+Le service, la cadence et un run Awin réel sont désormais prouvés. Le premier
+cycle du nouveau service reste actif au moment de cette mise à jour : ses
+compteurs terminaux ne sont pas encore revendiqués. Agrégateur, backend de
+traces, pager, trafic représentatif et données humaines restent ouverts. Le
+NO-GO global et le gate humain Quality restent inchangés.
