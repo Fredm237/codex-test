@@ -3,6 +3,7 @@
 - Date de coupure initiale : **29 août 2026, 13:15 CEST**
 - Préflight Railway authentifié : **29 août 2026, 13:37 CEST**
 - Requalification du lot inventaire : **29 août 2026, 14:00 CEST**
+- Requalification du workflow de curation : **30 août 2026, 21:27 CEST**
 - Branche : `codex/filon-phase-0-core`
 - Dépôt public : `Fredm237/codex-test`
 - Décision : **code techniquement qualifié ; lancement et Phase 1 NO-GO**
@@ -76,6 +77,17 @@ distant `2725a464e046c3790ed20eb0533068760922a524`. Son arbre
 `04fe05bc7cc841e54b23341ef5208d4f0f61518e`. Web, Mobile, Extension, Alembic
 et les régressions backend sont verts. Le seul échec reste le gate humain
 strict attendu ; l'artefact Quality `9736128514` a été publié.
+
+Le workflow de curation humaine a ensuite été publié au commit distant
+`6a793ac5ac92951ff39f8a032ebc4af0cd747bdd`. Son arbre
+`2a377adf6808bd5e7eafb6756d8949c2ce0b1e30` est exactement celui du commit
+local `b1a18f2455bbb806cdf90b9a3135405bdde17131`. Le run **#354**
+(`33330784097`) confirme : Web, Mobile, Extension, Alembic, régressions backend
+et production de la readiness sont verts. Seul le gate strict
+`Bloquer un changement moteur sans benchmark humain prêt` échoue comme prévu
+avec zéro cas humain. L'artefact `9737603091`, conservé jusqu'au 13 septembre
+2026, porte le digest
+`sha256:30c3453c9c88bee3cf160c771cdb16a139b77624c4515fdee28d352fe7a334b0`.
 
 ## 3. Vercel
 

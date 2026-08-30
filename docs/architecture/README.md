@@ -6,8 +6,8 @@ Phase 0 non autorisée tant que les gates P0 ouvertes ne sont pas satisfaites**.
 Référence de baseline : `Fredm237/codex-test`, branche distante `main`, commit
 `57724c72e77c50ca54aaf64338f838dda3be2747`, le 28 août 2026. État de travail
 qualifié : branche publique `codex/filon-phase-0-core`, référence applicative
-locale `2cf314c`, référence distante consolidée `7f914b2`, arbre commun
-`822edf543e8ba43943372cdbeff09357bc3e82fa`, le 29 août 2026.
+locale `b1a18f2`, référence distante consolidée `6a793ac`, arbre commun
+`2a377adf6808bd5e7eafb6756d8949c2ce0b1e30`, le 30 août 2026.
 
 Ce dossier traduit les mandats Product Intelligence Core, Execution Governance et Immersive Experience en décisions vérifiables. Le troisième mandat est volontairement traité comme une bible de production future : ses travaux 3D/cinématiques restent gelés jusqu'à validation du Product Graph, de l'Offer Graph, de la recherche, de l'evidence layer, du decision engine et de la Core UX.
 
@@ -71,7 +71,7 @@ fail-closed, permet désormais à un humain de produire des candidats Taxonomy e
 Variant encore sans gold ; il ne modifie pas la readiness.
 
 P0.g (CI) est terminé : la branche publique est byte-identique au HEAD local,
-le run GitHub Actions #344 prouve 12 migrations, 2 036 tests backend, le web,
+le run GitHub Actions #354 prouve les migrations, les régressions backend, le web,
 le mobile et l'extension. Le seul échec est le gate strict attendu sur les sept
 datasets humains vides ; l'artefact Quality a été publié. Vercel a construit la
 preview. La ruleset GitHub `21798272` est active sur `main`, sans bypass, avec

@@ -1,10 +1,10 @@
 # FILON — audit canonique de complétude des trois mandats
 
 - Date de coupure initiale : **29 août 2026, 10:03 CEST**
-- Dernière qualification : **29 août 2026, 16:00 CEST**
+- Dernière qualification : **30 août 2026, 21:27 CEST**
 - Branche locale : `codex/filon-phase-0-core`
-- Référence applicative locale auditée : `6717b39`
-- Référence applicative distante auditée : `7896c6d`, arbre commun `04560737a72825928612ae00fb52eef4eb7e009f`
+- Référence applicative locale auditée : `b1a18f2`
+- Référence applicative distante auditée : `6a793ac`, arbre commun `2a377adf6808bd5e7eafb6756d8949c2ce0b1e30`
 - Dépôt distant : `Fredm237/codex-test`, public
 - `main` distant : `57724c72e77c50ca54aaf64338f838dda3be2747`
 - Décision : **MANDAT INCOMPLET — PHASE 0 NO-GO — PHASE 1 ET IMMERSIVE INTERDITES PAR GATE**
@@ -114,7 +114,7 @@ ne doit donc être lancé.
 | Architecture proposée | **PROUVÉ COMME CIBLE** | [Architecture cible](TARGET_ARCHITECTURE.md) |
 | Fichiers et ownership | **PROUVÉ DANS LE LOT P0** | Cartographie, [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) et ruleset distante sans bypass |
 | Migration et rollback | **PROUVÉ LOCALEMENT ET EN PRODUCTION** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) |
-| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 106 réussis + 2 ignorés, Quality 386/386, web 17/17, typecheck/build ; Actions #353 : migrations et régressions backend vertes, trois clients verts, échec final attendu du seul gate Quality humain vide |
+| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 106 réussis + 2 ignorés, Quality 386/386, web 17/17, typecheck/build ; Actions #354 : migrations, régressions backend et readiness vertes, trois clients verts, échec final attendu du seul gate Quality humain vide |
 | Benchmarks | **EXTERNE NON MESURABLE** | Holdout humain absent |
 | Before/after metrics | **EXTERNE NON MESURABLE** | Aucun scorecard métier éligible ni trafic représentatif |
 | Known limitations | **PROUVÉ** | Ce document, le registre des preuves et les rapports P0 |
