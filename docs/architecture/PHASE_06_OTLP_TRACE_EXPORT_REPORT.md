@@ -77,28 +77,28 @@ l'arrêt.
 
 ## Preuves distantes et production désactivée
 
-Le commit local `0bd6bad860031cbc87a99d1afaa8db817966c8c3` et le commit
-distant `216f38be5c5c6f8e5cd0ce6ec0425a86bfc9df0c` portent exactement
-l'arbre `11e0956e1caa96c8df3300c5705ba03aee3c83e6`. La comparaison GitHub
+Le commit local `1b2541cfafce32e0d0a78b75e2b934d106d6e73f` et le commit
+distant `160d89fe8cdec295e61c2e32a3bc7c70d7931192` portent exactement
+l'arbre `f653c8c975e30c1e1ae3383c2202a3fdc2b6e8af`. La comparaison GitHub
 confirme un seul commit en avance, sans divergence et avec les seize fichiers
-attendus seulement.
+applicatifs initiaux, puis les cinq fichiers de qualification attendus.
 
-GitHub Actions **#364** (`33336304758`) a terminé avec :
+GitHub Actions **#366** (`33337020943`) a terminé avec :
 
 - Web, Mobile et Extension : **succès** ;
 - baseline, stamp, drift et restauration Alembic : **succès** ;
-- **2 131** régressions backend : **succès** ;
+- **2 132** régressions backend : **succès** ;
 - readiness Quality normale : **succès** ;
 - gate humain strict : **échec attendu**, les sept datasets restant à zéro.
 
-L'artefact `9739162091`, nommé
-`quality-readiness-7e282136a33ab27f2f9941e4136b63882b0d269c`, fait
+L'artefact `9739367304`, nommé
+`quality-readiness-be3e83fba6a039e5f5967dfacba1aaceff0ee5ef`, fait
 1 785 octets, porte le digest
-`sha256:6b7c1ec0fb0db1b2cc81c7789e1686695381743f9c3e361448c17482b58a0efb`
+`sha256:c8e3e9a3d725fc5efe1123e4247f801252b9b2af8674dbf42574f4602328e9d3`
 et expire le 13 septembre 2026.
 
 Railway a déployé l'image sous l'identifiant
-`b591c7cd-bc8b-43e6-a7a7-efe8de8f6b5a` avec le statut
+`6eb242cc-efca-46f4-987f-ab4e503e3459` avec le statut
 `Deployment successful`, en EU West et avec un réplica. Les sondes publiques
 ont retourné `alive=true`, `ready=true`, PostgreSQL `ok` et la révision
 `e8c3f6a0b5d2`. La variable reste `TRACE_EXPORT_BACKEND=disabled` : ce reçu

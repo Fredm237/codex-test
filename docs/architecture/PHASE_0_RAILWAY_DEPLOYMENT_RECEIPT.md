@@ -215,20 +215,20 @@ cadence Cron ou ingestion Awin n'est revendiquée par ce reçu.
 
 ## Exporteur OTLP désactivé dans l'image web — 30 août 2026
 
-Le lot applicatif OTLP a été publié sous la référence distante
-`216f38be5c5c6f8e5cd0ce6ec0425a86bfc9df0c`, arbre
-`11e0956e1caa96c8df3300c5705ba03aee3c83e6` identique à celui du commit
-local `0bd6bad860031cbc87a99d1afaa8db817966c8c3`.
+Le lot applicatif OTLP et son transport loopback ont été publiés sous la
+référence distante `160d89fe8cdec295e61c2e32a3bc7c70d7931192`, arbre
+`f653c8c975e30c1e1ae3383c2202a3fdc2b6e8af` identique à celui du commit
+local `1b2541cfafce32e0d0a78b75e2b934d106d6e73f`.
 
 Le déploiement automatique
-`b591c7cd-bc8b-43e6-a7a7-efe8de8f6b5a` est affiché
+`6eb242cc-efca-46f4-987f-ab4e503e3459` est affiché
 **Deployment successful**, en EU West avec un réplica. Les sondes publiques
 ont confirmé `alive=true`, `ready=true`, PostgreSQL `ok` et la révision
-`e8c3f6a0b5d2`. Actions #364 (`33336304758`) valide les trois clients,
-Alembic, les **2 131** régressions backend et la readiness normale ; seul le
-gate humain strict échoue comme attendu. L'artefact Quality est `9739162091`,
+`e8c3f6a0b5d2`. Actions #366 (`33337020943`) valide les trois clients,
+Alembic, les **2 132** régressions backend et la readiness normale ; seul le
+gate humain strict échoue comme attendu. L'artefact Quality est `9739367304`,
 digest
-`sha256:6b7c1ec0fb0db1b2cc81c7789e1686695381743f9c3e361448c17482b58a0efb`.
+`sha256:c8e3e9a3d725fc5efe1123e4247f801252b9b2af8674dbf42574f4602328e9d3`.
 
 L'exporteur est présent mais `TRACE_EXPORT_BACKEND=disabled`. Aucun endpoint
 ni jeton OTLP n'a été ajouté, aucun span n'est envoyé et aucun collecteur n'a
