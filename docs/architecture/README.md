@@ -70,6 +70,13 @@ figé pour démarrer la curation. Un workflow séparé, lié à l'inventaire et
 fail-closed, permet désormais à un humain de produire des candidats Taxonomy et
 Variant encore sans gold ; il ne modifie pas la readiness.
 
+Le Catalog Quality Funnel de l'article 27 est maintenant exécutable en lecture
+interne. Il mesure seulement Raw, Active, Valid Price et Valid Merchant. Il
+marque `CORRECTLY_CLASSIFIED` `not_measurable`, bloque toutes les étapes strictes
+suivantes et isole les résolutions Graph, comparabilité, historique et
+éligibilité comme simples signaux techniques. Le coût rendu complet reste non
+supporté et `launch_gate_eligible` reste faux.
+
 P0.g (CI) est terminé : la branche publique est byte-identique au HEAD local,
 le run GitHub Actions #354 prouve les migrations, les régressions backend, le web,
 le mobile et l'extension. Le seul échec est le gate strict attendu sur les sept
@@ -101,6 +108,7 @@ et extension.
 - [Rapport P0.f.b — Offer Graph shadow](PHASE_0F_OFFER_GRAPH_SHADOW_REPORT.md)
 - [Rapport P0.f.c — Merchant Intelligence shadow](PHASE_0F_MERCHANT_INTELLIGENCE_REPORT.md)
 - [Rapport P0.f.d — Evidence Engine shadow](PHASE_0F_EVIDENCE_ENGINE_REPORT.md)
+- [Rapport P0.f.e — Catalog Quality Funnel shadow](PHASE_0F_CATALOG_QUALITY_FUNNEL_REPORT.md)
 - [Rapport P0.c — Quality Lab](PHASE_0C_QUALITY_REPORT.md)
 - [Rapport P0.c.1 — workflow de curation humaine](PHASE_0C_CURATION_WORKFLOW_REPORT.md)
 - [Rapport P0.6 — Observabilité](PHASE_06_OBSERVABILITY_REPORT.md)
