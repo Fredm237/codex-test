@@ -75,6 +75,10 @@ class Settings(BaseSettings):
             errors.append(
                 "PRODUCT_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
             )
+        if self.offer_graph_shadow_enabled and not self.observation_shadow_enabled:
+            errors.append(
+                "OFFER_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
+            )
         if self.rate_limit_backend == "redis":
             redis_url = (self.redis_url or "").strip()
             if not redis_url:
@@ -254,6 +258,9 @@ class Settings(BaseSettings):
     # Projection Product/Variant Graph strictement shadow. Elle exige la preuve
     # RawSource/Observation et ne change jamais les lectures catalogue v1.
     product_graph_shadow_enabled: bool = Field(default=False)
+    # Projection append-only des preuves offre. Elle accepte une identité
+    # produit non résolue, mais ne la rend jamais éligible.
+    offer_graph_shadow_enabled: bool = Field(default=False)
 
     # Données produits réelles (Google Shopping via SerpApi)
     serpapi_api_key: str | None = Field(default=None)

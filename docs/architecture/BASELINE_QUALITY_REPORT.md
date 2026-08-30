@@ -327,7 +327,7 @@ publie qu'un claim `selected_candidate:<candidate_id>` relié aux preuves de
 l'offre. Entity, Variant et Offer Attachment appellent le resolver Graph
 conservateur `exact-gtin-shadow-v1` : un GTIN manquant, invalide ou conflictuel
 produit abstention ou quarantaine, jamais une similarité inventée. La suite
-Quality courante passe **377/377** et le backend complet **2 078 réussis + 2
+Quality courante passe **377/377** et le backend complet **2 086 réussis + 2
 ignorés**. Le holdout contient toujours **0 cas humain** : cette avancée
 technique ne change donc pas le NO-GO et ne produit aucune mesure métier.
 

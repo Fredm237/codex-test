@@ -165,6 +165,7 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     settings = Settings(_env_file=None, env="test")
     assert settings.observation_shadow_enabled is False
     assert settings.product_graph_shadow_enabled is False
+    assert settings.offer_graph_shadow_enabled is False
 
     with pytest.raises(
         ValidationError,
@@ -183,6 +184,24 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
         product_graph_shadow_enabled=True,
     )
     assert enabled.product_graph_shadow_enabled is True
+
+    with pytest.raises(
+        ValidationError,
+        match="OFFER_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            offer_graph_shadow_enabled=True,
+        )
+
+    offer_enabled = Settings(
+        _env_file=None,
+        env="test",
+        observation_shadow_enabled=True,
+        offer_graph_shadow_enabled=True,
+    )
+    assert offer_enabled.offer_graph_shadow_enabled is True
 
 
 @pytest.mark.parametrize(

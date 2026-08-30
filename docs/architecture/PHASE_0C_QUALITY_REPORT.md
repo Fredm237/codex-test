@@ -104,7 +104,7 @@ et claims non supportés gardent une tolérance nulle.
 - suite Quality sans dépendance réseau : **257 réussis** sur le collecteur,
   l'intégrité, les schémas et la scorecard ;
 - suite backend complète courante sous Python 3.12 et les dépendances déclarées :
-  **2 078 réussis, 2 ignorés** en 91,01 s ;
+  **2 086 réussis, 2 ignorés** en 67,97 s ;
 - archive propre du HEAD `a78401a`, qui contient le lot Quality `6e12386`,
   suite backend complète : **1 907 réussis, 1 ignoré**, 7 avertissements
   `datetime.utcnow()` historiques, en **370,53 s** ;

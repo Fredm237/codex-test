@@ -445,10 +445,12 @@ async def _upsert_offer(
 def _ingestion_stage_outcome(result: dict) -> str:
     shadow = result.get("shadow") or {}
     graph_shadow = result.get("graph_shadow") or {}
+    offer_graph_shadow = result.get("offer_graph_shadow") or {}
     if (
         result.get("skipped")
         or shadow.get("failures")
         or graph_shadow.get("failures")
+        or offer_graph_shadow.get("failures")
     ):
         return "degraded"
     if not result.get("feeds"):
@@ -516,6 +518,12 @@ async def ingest_feeds(
     graph_links = 0
     graph_quarantine = 0
     graph_failures = 0
+    offer_graph_observations = 0
+    offer_graph_eligible = 0
+    offer_graph_unknown = 0
+    offer_graph_ineligible = 0
+    offer_graph_quarantine = 0
+    offer_graph_failures = 0
     # Déduplique uniquement les relevés identiques d'un même cycle. Les offres
     # elles-mêmes restent toutes lues : une variante linguistique peut enrichir
     # le libellé, mais elle ne doit pas compter comme une nouvelle observation.
@@ -616,6 +624,47 @@ async def ingest_feeds(
                                     "(error_type=%s)",
                                     type(exc).__name__,
                                 )
+                        if s.offer_graph_shadow_enabled:
+                            # Cette projection reste utile même si l'identité
+                            # Graph est absente : elle est alors quarantinée,
+                            # jamais promue comme offre éligible.
+                            try:
+                                from app.offer_graph.projection import (
+                                    persist_awin_offer_projection,
+                                    project_awin_offer,
+                                )
+
+                                async with session.begin_nested():
+                                    offer_capture = (
+                                        await persist_awin_offer_projection(
+                                            session,
+                                            projection=project_awin_offer(row),
+                                            raw_source_record_id=(
+                                                captured.raw_source_record_id
+                                            ),
+                                            offer_id=offer_id,
+                                            observed_at=feed_observed_at,
+                                        )
+                                    )
+                                offer_graph_observations += int(
+                                    offer_capture.created
+                                )
+                                if offer_capture.created:
+                                    if offer_capture.eligibility == "eligible":
+                                        offer_graph_eligible += 1
+                                    elif offer_capture.eligibility == "unknown":
+                                        offer_graph_unknown += 1
+                                    elif offer_capture.eligibility == "ineligible":
+                                        offer_graph_ineligible += 1
+                                    else:
+                                        offer_graph_quarantine += 1
+                            except Exception as exc:  # pragma: no cover - base réelle
+                                offer_graph_failures += 1
+                                log.warning(
+                                    "Shadow Offer Graph ignoré "
+                                    "(error_type=%s)",
+                                    type(exc).__name__,
+                                )
                 n += 1
                 if n % 200 == 0:  # commit périodique → progression visible dans /stats
                     await session.commit()
@@ -643,5 +692,14 @@ async def ingest_feeds(
             "links": graph_links,
             "quarantine": graph_quarantine,
             "failures": graph_failures,
+        },
+        "offer_graph_shadow": {
+            "enabled": s.offer_graph_shadow_enabled,
+            "observations": offer_graph_observations,
+            "eligible": offer_graph_eligible,
+            "unknown": offer_graph_unknown,
+            "ineligible": offer_graph_ineligible,
+            "quarantine": offer_graph_quarantine,
+            "failures": offer_graph_failures,
         },
     }

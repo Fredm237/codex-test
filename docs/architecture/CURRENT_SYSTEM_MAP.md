@@ -84,7 +84,7 @@ Sans activation sur un lot réel, sa couverture production reste à mesurer.
 | Concept | Source actuelle | Conflits / consommateurs | Verdict | Source cible |
 |---|---|---|---|---|
 | Marchand | PostgreSQL `merchants` | Profils calculés dans route catalogue ; frontend remappe | KEEP | `Merchant` + `MerchantObservation`, statut et fraîcheur |
-| Offre | PostgreSQL `offers` ; le contrat `/advise` conserve maintenant la devise et l'horodatage observés | DTO Python, TypeScript web et mobile dupliqués | KEEP + MIGRATE | `Offer` versionnée, argent décimal, stock tri-state, provenance et fraîcheur |
+| Offre | PostgreSQL `offers` ; `graph_offer_observations` append-only en shadow local | DTO Python, TypeScript web et mobile dupliqués ; aucun lecteur public Graph | KEEP + MIGRATE + SHADOW | `Offer` versionnée, argent décimal, stock tri-state, provenance et fraîcheur |
 | Payload source Awin | `raw_source_records` en shadow, flag off | Aucun lecteur public | KEEP SHADOW | Raw immuable, rétention approuvée et replay versionné |
 | Observation champ | `observations` en shadow | Aucun lecteur public | KEEP SHADOW | Evidence/claim eligibility après benchmark |
 | Anomalie ingestion | `quarantine_records` en shadow + `ProductErrorCode`/`contracts/taxonomies/v1` | Seuls E008, E010 et E016–E018 ont un producteur ; revue interne à construire | KEEP SHADOW | Workflow humain de release/discard, instrumentation des treize codes restants et régression |
@@ -114,6 +114,7 @@ Sans activation sur un lot réel, sa couverture production reste à mesurer.
   `graph_product_families`, `graph_product_models`, `graph_variants`,
   `graph_identifiers`, `graph_identifier_evidence`,
   `graph_offer_variant_links`.
+- Offer Graph shadow : `graph_offer_observations`.
 
 ### Mobile MySQL
 

@@ -15,10 +15,11 @@ Ce dossier traduit les mandats Product Intelligence Core, Execution Governance e
 
 **NO-GO pour le rebuild produit et pour toute extension immersive. GO limité à la Phase 0 : contrats, mesure, gouvernance, observabilité et préparation des migrations.**
 
-Les raisons bloquantes sont factuelles : absence de Product/Variant Graph
-canonique et de holdout humain, argent encore stocké en flottants dans le
-modèle historique, sources de vérité concurrentes, données Quality de
-lancement sans aucun cas humain et production non qualifiée.
+Les raisons bloquantes sont factuelles : Product/Variant et Offer Graph existent
+seulement en shadows locaux non qualifiés, le holdout humain est absent,
+l'argent reste stocké en flottants dans le modèle historique, les sources de
+vérité restent concurrentes et les données Quality de lancement ne contiennent
+aucun cas humain.
 La CI distante existe désormais et ferme volontairement la promotion tant que
 ces données humaines sont absentes. Les chemins
 de décision durcis localement conservent désormais les inconnus au lieu de les
@@ -57,7 +58,8 @@ provenance, identité de run, empreinte exacte du holdout et publication
 atomique, puis compare les scorecards fail-closed. Wilson, Bernstein empirique
 et bootstrap déterministe bornent les métriques. Les sept adaptateurs
 applicatifs sont désormais branchés, dont variante et attachement exact-GTIN.
-Leur confiance reste non calibrée et le Graph demeure shadow. Le rapport reste
+Leur confiance reste non calibrée. Product/Variant et Offer Graph demeurent
+shadows, avec argent décimal, stock tri-state et quarantaine fail-closed. Le rapport reste
 `integrity_valid=true`, `ready=false`,
 `status=not_ready` avec **0 cas humain**. Le gate strict bloque donc honnêtement
 son cutover. Un inventaire public de 1 000 candidats sans label est maintenant
@@ -85,9 +87,11 @@ et extension.
 - [Préflight Railway de production](PHASE_0_RAILWAY_PREFLIGHT.md)
 - [ADR-001 — baseline Alembic](ADR-001-ALEMBIC-BASELINE.md)
 - [ADR-002 — identité Product/Variant Graph shadow](ADR-002-PRODUCT-GRAPH-IDENTITY-SHADOW.md)
+- [ADR-003 — preuves Offer Graph shadow](ADR-003-OFFER-GRAPH-EVIDENCE-SHADOW.md)
 - [Runbook migrations et rollback](DATABASE_MIGRATION_RUNBOOK.md)
 - [Rapport P0.e — Observation shadow](PHASE_0E_OBSERVATION_REPORT.md)
 - [Rapport P0.f — Product/Variant Graph shadow](PHASE_0F_PRODUCT_GRAPH_SHADOW_REPORT.md)
+- [Rapport P0.f.b — Offer Graph shadow](PHASE_0F_OFFER_GRAPH_SHADOW_REPORT.md)
 - [Rapport P0.c — Quality Lab](PHASE_0C_QUALITY_REPORT.md)
 - [Rapport P0.6 — Observabilité](PHASE_06_OBSERVABILITY_REPORT.md)
 - [Politique de sécurité de la front door](FRONT_DOOR_SECURITY_POLICY.md)

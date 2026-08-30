@@ -50,6 +50,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    DATABASE_SCHEMA_MODE=alembic
    OBSERVATION_SHADOW_ENABLED=false
    PRODUCT_GRAPH_SHADOW_ENABLED=false
+   OFFER_GRAPH_SHADOW_ENABLED=false
    CORS_ORIGINS=["https://filon.be","https://www.filon.be"]
    FORWARDED_ALLOW_IPS=<IP/CIDR exacts et vérifiés du proxy Railway>
    METRICS_EXPORT_TOKEN=<secret aléatoire distinct, 32-256 caractères ASCII>
@@ -100,7 +101,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    Railway fournit ensuite une URL publique, par exemple
    `https://filon-backend-production.up.railway.app`.
 7. Vérifier : ouvrir `https://<url>/health/ready` → HTTP 200 avec la révision
-   `8b2f4c7d9a10` attendue. Railway exige ce 200 avant de basculer le trafic.
+   `c6a1d4e8f2b3` attendue. Railway exige ce 200 avant de basculer le trafic.
    `/health/live` reste un diagnostic de processus et `/health` un diagnostic
    détaillé des dépendances. Enfin,
    `https://<url>/api/advise/stream?q=un%20pc%20portable%20800€` doit renvoyer un flux SSE.
@@ -169,12 +170,12 @@ compressée et ne relever aucun plafond sans mesure de mémoire et de disque.
 L'activation de ce service reste un changement externe séparé, après adoption
 de la base.
 
-### Product/Variant Graph shadow
+### Product/Variant et Offer Graph shadows
 
-La migration crée les tables `graph_*` sans backfill et sans lecteur public.
+Les migrations créent les tables `graph_*` sans backfill et sans lecteur public.
 Le writer Graph ne peut être activé seul : il exige simultanément
 `OBSERVATION_SHADOW_ENABLED=true` et `PRODUCT_GRAPH_SHADOW_ENABLED=true` sur le
-worker d'ingestion. Le service web conserve les deux flags à `false`.
+worker d'ingestion. Le service web conserve les trois flags shadow à `false`.
 
 Avant toute écriture, exécuter un lot en lecture seule :
 
@@ -188,6 +189,24 @@ du dry-run et activation des deux flags, rejouer exactement la commande avec
 `--apply`, puis reprendre au dernier identifiant. Aucun titre, marque ou
 similarité ne remplace un GTIN exact. Une identité absente, invalide ou
 contradictoire reste en quarantaine.
+
+`OFFER_GRAPH_SHADOW_ENABLED=true` exige également
+`OBSERVATION_SHADOW_ENABLED=true`. Il projette chaque raw Awin vers un relevé
+append-only : argent décimal, devise explicite, stock tri-state, lien marchand
+HTTPS public et éligibilité motivée. Sans lien de variante résolu, le relevé
+est quarantiné ; prix, devise, stock ou lien insuffisant produisent
+`unknown`/`ineligible`, jamais un claim favorable. Ce shadow n'est pas lu par
+les endpoints v1.
+
+Qualifier ensuite l'Offer Graph en lecture seule, après le lot Product Graph :
+
+```bash
+python -m app.offer_graph.backfill --after-raw-id 0 --limit 1000
+```
+
+L'option `--apply` exige les flags Observation et Offer Graph. Reprendre au
+`last_raw_source_id` et ne jamais confondre les compteurs techniques avec une
+mesure Quality Lab.
 
 ### Service existant déjà opt-in Config as Code
 
@@ -222,8 +241,9 @@ import live.
 
 En cas de régression, remettre la version applicative précédente,
 `PRODUCT_GRAPH_SHADOW_ENABLED=false` et
+`OFFER_GRAPH_SHADOW_ENABLED=false`,
 `OBSERVATION_SHADOW_ENABLED=false`, tout en conservant le schéma à la tête
-`8b2f4c7d9a10`.
+`c6a1d4e8f2b3`.
 Ne jamais downgrader vers la baseline. Le downgrade technique
 `3a7f9c2e5b61` → `d75faf1f6a94` supprime la colonne de devise et les valeurs
 qu'elle contient ; une suppression structurelle exige une migration

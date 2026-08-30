@@ -43,8 +43,8 @@ ni une preuve de production.
 Les trois conditions qui empêchent encore un GO global sont :
 
 1. les sept datasets Quality Lab contiennent chacun **0 cas humain** ;
-2. Product/Variant Graph existe en shadow technique local, mais ne peut pas
-   être qualifié ni promu sans ces datasets ;
+2. Product/Variant et Offer Graph existent en shadows techniques locaux, mais
+   ne peuvent pas être qualifiés ni promus sans ces datasets ;
 3. le backend Core Railway, son backup/restore drill et sa migration sont
    qualifiés ; la limite Redis et l'identité Railway sont qualifiées localement,
    mais leur activation, l'agrégateur, les traces, le WAF, le pager et les SLO
@@ -66,7 +66,7 @@ ne doit donc être lancé.
 | Articles | Objet canonique | Statut | Preuve ou condition manquante |
 |---|---|---|---|
 | 0–4 | Mission, principes, état actuel, interdictions, architecture cible | **PARTIEL** | Freeze, cartographie, causes racines et cible sont documentés ; la cible n'est pas encore réalisée |
-| 5–12 | Product Graph, entity/variant resolution, rôles, ontologie, Raw Offer, Offer Graph, Merchant Intelligence | **PARTIEL / INTERDIT PAR GATE** | Product/Variant Graph exact-GTIN est livré en shadow local avec migration et backfill borné ; Brand/Family/Model ne sont pas enrichis, Offer Graph reste absent et Quality reste vide |
+| 5–12 | Product Graph, entity/variant resolution, rôles, ontologie, Raw Offer, Offer Graph, Merchant Intelligence | **PARTIEL / INTERDIT PAR GATE** | Product/Variant et Offer Graph sont livrés en shadows locaux avec migrations et backfills bornés ; Brand/Family/Model ne sont pas enrichis, Merchant Intelligence reste absente et Quality reste vide |
 | 13–22 | Recherche, intent, contraintes, ranking, score, confiance, evidence, Buy/Wait, abstention | **PARTIEL / INTERDIT PAR GATE** | Les parcours v1 ont des garde-fous fail-closed et Decision est branché au benchmark sourcé ; la qualité end-to-end et les moteurs v2 ne sont pas mesurables |
 | 23–27 | Quality Lab, benchmark, métriques, gates et funnel | **PARTIEL + EXTERNE NON MESURABLE** | Infrastructure v0.5, 7 datasets, 27 gates, 7 adaptateurs réels et 377 tests ; 0 cas humain, donc aucune métrique métier publiable |
 | 28–29 | Observabilité et opérations | **PARTIEL** | Corrélation des huit jalons décisionnels, spans PostgreSQL/Redis/Awin/SerpAPI/LLM, propagation W3C HTTP, probes, métriques, identité `X-Real-IP` Railway réelle et anti-spoofing qualifiés, Redis atomique opt-in, scheduler, alertes locales, OpenMetrics, pack Prometheus/Grafana et activation fail-closed validés ; backend de traces, activation Redis production ou WAF, déploiement agrégateur/dashboard, reçu, pager et trafic représentatif manquent |
