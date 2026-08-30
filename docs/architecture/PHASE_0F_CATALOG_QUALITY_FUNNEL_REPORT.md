@@ -23,7 +23,7 @@ public.
 | `VALID_PRICE` | `measured` | Montant décimal positif et devise explicite valide |
 | `VALID_MERCHANT` | `measured` | Marchand joint et lien public HTTPS déjà validé par l'Offer Graph |
 | `CORRECTLY_CLASSIFIED` | `not_measurable` | Aucun gold humain indépendant n'est joint au rapport |
-| `RESOLVED_PRODUCT` → `DECISION_ELIGIBLE` | `blocked` | La chaîne stricte ne franchit pas une classification non mesurable |
+| `RESOLVED_PRODUCT` → `HIGH_CONFIDENCE_DECISION` | `blocked` | La chaîne stricte ne franchit pas une classification non mesurable ; une confiance non calibrée n'est jamais qualifiée de haute |
 
 Chaque étape porte son numérateur, son dénominateur et un code de raison.
 Après la frontière humaine, numérateur et dénominateur restent `null` : un
@@ -65,7 +65,7 @@ sont pas modélisées ensemble.
 - tests ciblés du funnel : **12/12** ;
 - tests combinés Funnel, Product Graph, Offer Graph, Evidence Engine et
   vérité devise : **67/67** ;
-- suite backend complète : **2 118 réussis, 2 ignorés** en 164,98 s ;
+- suite backend complète : **2 118 réussis, 2 ignorés** en 64,33 s ;
 - replay identique à entrée et instant identiques ;
 - cas vide, fenêtre invalide, timestamp interne ambigu, offre obsolète,
   rupture de stock, identité manquante et observation remplacée couverts.

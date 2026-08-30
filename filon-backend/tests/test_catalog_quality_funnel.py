@@ -190,6 +190,7 @@ async def test_funnel_measures_only_technical_truth_and_blocks_human_dependent_s
             signals = _by_code(report.technical_signals)
 
             assert tuple(stages) == FUNNEL_STAGES
+            assert tuple(stages)[-1] == "HIGH_CONFIDENCE_DECISION"
             assert (
                 stages["RAW_OFFERS"].qualified_count,
                 stages["RAW_OFFERS"].denominator_count,
@@ -214,6 +215,9 @@ async def test_funnel_measures_only_technical_truth_and_blocks_human_dependent_s
                 and stage.qualified_count is None
                 and stage.denominator_count is None
                 for stage in report.stages[5:]
+            )
+            assert stages["HIGH_CONFIDENCE_DECISION"].reason_code == (
+                "upstream_correct_classification_not_measurable"
             )
 
             assert signals["OFFER_GRAPH_OBSERVED"].observed_count == 5
