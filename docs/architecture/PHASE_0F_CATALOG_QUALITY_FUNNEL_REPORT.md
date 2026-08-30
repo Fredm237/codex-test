@@ -70,8 +70,11 @@ sont pas modélisées ensemble.
 - cas vide, fenêtre invalide, timestamp interne ambigu, offre obsolète,
   rupture de stock, identité manquante et observation remplacée couverts.
 
-La qualification distante doit encore être consignée après publication de la
-branche.
+La publication distante associe le commit local `34a4f856c47b73220950134271a3e904b29a67f8`
+au commit GitHub `7a39348804e4a9106bbd0d31317c756d56dc623b` par leur arbre
+commun `1706a0be2418173a6fb68782c01ae38b2e1f12d2`. Actions #356
+(`33332272585`) confirme les trois clients, Alembic, les régressions backend et
+la readiness normale. Seul le gate strict humain échoue comme attendu.
 
 ## Limites et sortie du NO-GO
 

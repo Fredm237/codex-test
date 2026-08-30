@@ -4,6 +4,7 @@
 - Préflight Railway authentifié : **29 août 2026, 13:37 CEST**
 - Requalification du lot inventaire : **29 août 2026, 14:00 CEST**
 - Requalification du workflow de curation : **30 août 2026, 21:27 CEST**
+- Requalification du Catalog Quality Funnel : **30 août 2026, 22:00 CEST**
 - Branche : `codex/filon-phase-0-core`
 - Dépôt public : `Fredm237/codex-test`
 - Décision : **code techniquement qualifié ; lancement et Phase 1 NO-GO**
@@ -17,8 +18,8 @@ prouvée par l'arbre Git :
 
 | Autorité | Commit | Arbre |
 |---|---|---|
-| Référence applicative locale avant ce rapport | `7026f4a9864720c201119e264dc9283c8b831e74` | `fcac4bb28bd2c26835afbc74949eaa37a96b8ab6` |
-| Référence applicative distante avant ce rapport | `9beeda8c6f694d8a797cdc580e8d048752bb8e42` | `fcac4bb28bd2c26835afbc74949eaa37a96b8ab6` |
+| Référence applicative locale courante | `34a4f856c47b73220950134271a3e904b29a67f8` | `1706a0be2418173a6fb68782c01ae38b2e1f12d2` |
+| Référence applicative distante courante | `7a39348804e4a9106bbd0d31317c756d56dc623b` | `1706a0be2418173a6fb68782c01ae38b2e1f12d2` |
 
 Le commit distant `e04dfc2c18ef58177d4182acbb67c966058ff9c0`
 porte l'arbre applicatif validé
@@ -71,7 +72,7 @@ techniques passent et les sept datasets humains restent à zéro. L'artefact
 fait 1 785 octets, expire le 12 septembre 2026 et porte le digest
 `sha256:3d0f2b97f003d2edd3a27e0489ac1d8268da348f6a0d68171413db9357d42250`.
 
-La qualification courante est le run **#352** (`33325481242`) sur le commit
+Une qualification intermédiaire est le run **#352** (`33325481242`) sur le commit
 distant `2725a464e046c3790ed20eb0533068760922a524`. Son arbre
 `de9cc8944e82f42ae28361f43f5fa49791d6b1e1` est byte-identique au commit local
 `04fe05bc7cc841e54b23341ef5208d4f0f61518e`. Web, Mobile, Extension, Alembic
@@ -88,6 +89,18 @@ et production de la readiness sont verts. Seul le gate strict
 avec zéro cas humain. L'artefact `9737603091`, conservé jusqu'au 13 septembre
 2026, porte le digest
 `sha256:30c3453c9c88bee3cf160c771cdb16a139b77624c4515fdee28d352fe7a334b0`.
+
+Le Catalog Quality Funnel fail-closed a ensuite été publié au commit distant
+`7a39348804e4a9106bbd0d31317c756d56dc623b`. Son arbre
+`1706a0be2418173a6fb68782c01ae38b2e1f12d2` est exactement celui du commit
+local `34a4f856c47b73220950134271a3e904b29a67f8`. Le run **#356**
+(`33332272585`) confirme : Web, Mobile, Extension, Alembic, les **2 118**
+régressions backend et la production de readiness sont verts. Seul le gate
+strict humain échoue avec les sept datasets toujours vides. L'artefact
+`9738018876`, nommé
+`quality-readiness-50a4796db383af540b7d156e6c701031191e299e`, fait 1 785 octets,
+expire le 13 septembre 2026 et porte le digest
+`sha256:a1f5349879a8db7b7b05339c354317240b54eb3f220c1df29aa10faf79d1e10e`.
 
 ## 3. Vercel
 

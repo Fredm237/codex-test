@@ -1,10 +1,10 @@
 # FILON — audit canonique de complétude des trois mandats
 
 - Date de coupure initiale : **29 août 2026, 10:03 CEST**
-- Dernière qualification : **30 août 2026, 21:27 CEST**
+- Dernière qualification : **30 août 2026, 22:00 CEST**
 - Branche locale : `codex/filon-phase-0-core`
-- Référence applicative locale auditée : `b1a18f2`
-- Référence applicative distante auditée : `6a793ac`, arbre commun `2a377adf6808bd5e7eafb6756d8949c2ce0b1e30`
+- Référence applicative locale auditée : `34a4f85`
+- Référence applicative distante auditée : `7a39348`, arbre commun `1706a0be2418173a6fb68782c01ae38b2e1f12d2`
 - Dépôt distant : `Fredm237/codex-test`, public
 - `main` distant : `57724c72e77c50ca54aaf64338f838dda3be2747`
 - Décision : **MANDAT INCOMPLET — PHASE 0 NO-GO — PHASE 1 ET IMMERSIVE INTERDITES PAR GATE**
@@ -51,7 +51,7 @@ Les trois conditions qui empêchent encore un GO global sont :
    sur trafic représentatif ne le sont pas.
 
 Depuis la coupure initiale, l'intégration catalogue/Assistant/MegaMenu est
-acquise, la branche est publique et byte-identique, Actions #344 a exécuté les
+acquise, la branche est publique et byte-identique, Actions #356 a exécuté les
 quatre surfaces, Vercel a construit la preview et la ruleset `21798272` protège
 `main` sans bypass. Le [rapport distant](PHASE_0_REMOTE_QUALIFICATION_REPORT.md)
 est l'autorité de ces preuves.
@@ -114,7 +114,7 @@ ne doit donc être lancé.
 | Architecture proposée | **PROUVÉ COMME CIBLE** | [Architecture cible](TARGET_ARCHITECTURE.md) |
 | Fichiers et ownership | **PROUVÉ DANS LE LOT P0** | Cartographie, [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) et ruleset distante sans bypass |
 | Migration et rollback | **PROUVÉ LOCALEMENT ET EN PRODUCTION** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) |
-| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 118 réussis + 2 ignorés, Quality 386/386, web 17/17, typecheck/build ; Actions #354 : migrations, régressions backend et readiness vertes, trois clients verts, échec final attendu du seul gate Quality humain vide |
+| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 118 réussis + 2 ignorés, Quality 386/386, web 17/17, typecheck/build ; Actions #356 : migrations, 2 118 régressions backend et readiness normale vertes, trois clients verts, échec final attendu du seul gate Quality humain vide |
 | Benchmarks | **EXTERNE NON MESURABLE** | Holdout humain absent |
 | Before/after metrics | **EXTERNE NON MESURABLE** | Aucun scorecard métier éligible ni trafic représentatif |
 | Known limitations | **PROUVÉ** | Ce document, le registre des preuves et les rapports P0 |
@@ -150,10 +150,10 @@ conserve donc volontairement 0 label et ne change aucun zéro du tableau.
 
 ### 3. GitHub et CI distante — acquis
 
-La référence applicative distante `7f914b2` possède le même arbre que le commit
-local `2cf314c` ; la tête de branche est un descendant documentaire sans
-modification applicative. Actions #344 prouve les quatre surfaces et publie
-l'artefact Quality. La ruleset
+La référence applicative distante `7a39348` possède le même arbre que le commit
+local `34a4f85`. Actions #356 prouve les quatre surfaces, Alembic, les 2 118
+régressions backend, la readiness normale et publie l'artefact Quality
+`9738018876`. La ruleset
 `21798272` est active sur `main`, exige les quatre jobs GitHub Actions, la PR,
 la résolution des conversations et une branche à jour ; suppression et
 force-push sont interdits, sans bypass.
