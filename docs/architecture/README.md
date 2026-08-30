@@ -66,7 +66,9 @@ marchand synthétique. Le rapport reste
 `integrity_valid=true`, `ready=false`,
 `status=not_ready` avec **0 cas humain**. Le gate strict bloque donc honnêtement
 son cutover. Un inventaire public de 1 000 candidats sans label est maintenant
-figé pour démarrer la curation ; il ne modifie pas la readiness.
+figé pour démarrer la curation. Un workflow séparé, lié à l'inventaire et
+fail-closed, permet désormais à un humain de produire des candidats Taxonomy et
+Variant encore sans gold ; il ne modifie pas la readiness.
 
 P0.g (CI) est terminé : la branche publique est byte-identique au HEAD local,
 le run GitHub Actions #344 prouve 12 migrations, 2 036 tests backend, le web,
@@ -100,6 +102,7 @@ et extension.
 - [Rapport P0.f.c — Merchant Intelligence shadow](PHASE_0F_MERCHANT_INTELLIGENCE_REPORT.md)
 - [Rapport P0.f.d — Evidence Engine shadow](PHASE_0F_EVIDENCE_ENGINE_REPORT.md)
 - [Rapport P0.c — Quality Lab](PHASE_0C_QUALITY_REPORT.md)
+- [Rapport P0.c.1 — workflow de curation humaine](PHASE_0C_CURATION_WORKFLOW_REPORT.md)
 - [Rapport P0.6 — Observabilité](PHASE_06_OBSERVABILITY_REPORT.md)
 - [Politique de sécurité de la front door](FRONT_DOOR_SECURITY_POLICY.md)
 - [Contrat des métriques locales](OBSERVABILITY_METRICS_CONTRACT.md)

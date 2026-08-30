@@ -68,7 +68,7 @@ ne doit donc être lancé.
 | 0–4 | Mission, principes, état actuel, interdictions, architecture cible | **PARTIEL** | Freeze, cartographie, causes racines et cible sont documentés ; la cible n'est pas encore réalisée |
 | 5–12 | Product Graph, entity/variant resolution, rôles, ontologie, Raw Offer, Offer Graph, Merchant Intelligence | **PARTIEL / INTERDIT PAR GATE** | Product/Variant, Offer Graph et mesure Merchant Intelligence sont livrés en shadows locaux ; Brand/Family/Model ne sont pas enrichis, les dimensions marchandes après clic/achat restent non mesurables et Quality reste vide |
 | 13–22 | Recherche, intent, contraintes, ranking, score, confiance, evidence, Buy/Wait, abstention | **PARTIEL / INTERDIT PAR GATE** | Les parcours v1 ont des garde-fous fail-closed ; l'Evidence Engine shadow enregistre les faits atomiques et refuse explicitement Buy/Wait, confiance et superlatifs sans prérequis ; la qualité end-to-end et les moteurs v2 ne sont pas mesurables |
-| 23–27 | Quality Lab, benchmark, métriques, gates et funnel | **PARTIEL + EXTERNE NON MESURABLE** | Infrastructure v0.5, 7 datasets, 27 gates, 7 adaptateurs réels et 377 tests ; 0 cas humain, donc aucune métrique métier publiable |
+| 23–27 | Quality Lab, benchmark, métriques, gates et funnel | **PARTIEL + EXTERNE NON MESURABLE** | Infrastructure v0.5, curation catalogue traçable, 7 datasets, 27 gates, 7 adaptateurs réels et 386 tests ; 0 cas humain, donc aucune métrique métier publiable |
 | 28–29 | Observabilité et opérations | **PARTIEL** | Corrélation des huit jalons décisionnels, spans PostgreSQL/Redis/Awin/SerpAPI/LLM, propagation W3C HTTP, probes, métriques, identité `X-Real-IP` Railway réelle et anti-spoofing qualifiés, Redis atomique opt-in, scheduler, alertes locales, OpenMetrics, pack Prometheus/Grafana et activation fail-closed validés ; backend de traces, activation Redis production ou WAF, déploiement agrégateur/dashboard, reçu, pager et trafic représentatif manquent |
 | 30–35 | Web canonique, homepage, loading, extension, mobile, barcode | **PARTIEL** | Durcissement web/mobile/extension validé ; aucune nouvelle feature n'est qualifiée et le freeze reste actif |
 | 36–50 | Personnalisation, Fashion, Style/Taste/Wardrobe, commerce personnel, marketing truth, neutralité, sécurité | **INTERDIT PAR GATE** | Les garde-fous de neutralité et de confidentialité sont partiels ; toutes les capacités produit nouvelles restent gelées |
@@ -114,7 +114,7 @@ ne doit donc être lancé.
 | Architecture proposée | **PROUVÉ COMME CIBLE** | [Architecture cible](TARGET_ARCHITECTURE.md) |
 | Fichiers et ownership | **PROUVÉ DANS LE LOT P0** | Cartographie, [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md) et ruleset distante sans bypass |
 | Migration et rollback | **PROUVÉ LOCALEMENT ET EN PRODUCTION** | [ADR Alembic](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) |
-| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 035 réussis + 2 ignorés, web 17/17, typecheck/build ; Actions #345 : migrations et régressions backend vertes, trois clients verts, échec final attendu du seul gate Quality humain vide |
+| Tests | **PROUVÉ LOCALEMENT ET À DISTANCE** | Local courant : backend 2 106 réussis + 2 ignorés, Quality 386/386, web 17/17, typecheck/build ; Actions #353 : migrations et régressions backend vertes, trois clients verts, échec final attendu du seul gate Quality humain vide |
 | Benchmarks | **EXTERNE NON MESURABLE** | Holdout humain absent |
 | Before/after metrics | **EXTERNE NON MESURABLE** | Aucun scorecard métier éligible ni trafic représentatif |
 | Known limitations | **PROUVÉ** | Ce document, le registre des preuves et les rapports P0 |
@@ -144,8 +144,9 @@ Les commits `4a95a42` et `90246b2` sont intégrés et qualifiés à distance.
 La collecte doit être indépendante, aveugle, stratifiée, adjudicable et liée à
 sa provenance. Les données synthétiques ou auto-annotées ne peuvent pas remplir
 ce gate. Un inventaire public initial de 1 000 candidats est désormais figé et
-vérifiable, mais il conserve volontairement 0 label et ne change aucun zéro du
-tableau.
+vérifiable. Le workflow de curation humaine séparé peut en produire des cas
+Taxonomy/Variant sans gold, mais aucun humain ne l'a encore exécuté : il
+conserve donc volontairement 0 label et ne change aucun zéro du tableau.
 
 ### 3. GitHub et CI distante — acquis
 

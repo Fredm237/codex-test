@@ -28,7 +28,10 @@ python -m quality_lab.candidate_inventory verify \
 ```
 
 Les champs `curation` nuls ne doivent pas être remplis par le moteur. Le passage
-vers les packs v0.5 exige une curation humaine documentée, puis le workflow
-décrit dans `../README.md`. Les requêtes Retrieval et Decision doivent provenir
-d'un export de trafic réel anonymisé ; elles ne sont pas inventées depuis les
-noms du catalogue.
+vers les packs v0.5 utilise `quality_lab.curation_workflow` dans un fichier
+séparé. Il lie l'inventaire, le curateur et le roster complet, puis ne produit
+que des cas `taxonomy` ou `variant_resolution` encore sans gold. Le protocole
+et les commandes sont décrits dans `../README.md`. Les paires d'entités, les
+rosters de variantes, les vérités d'offre et les requêtes Retrieval/Decision
+exigent des collectes dédiées ; elles ne sont jamais inventées depuis les noms
+du catalogue.

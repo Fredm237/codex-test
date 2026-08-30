@@ -110,6 +110,53 @@ humains indépendants remplissent ensuite seulement `annotation.label` et
 anonymisées issues d'une source externe autorisée : un nom produit transformé
 automatiquement en requête serait une donnée synthétique non éligible.
 
+### 1. Curation humaine de l'inventaire
+
+Le curateur travaille dans un fichier séparé : l'inventaire brut et son reçu
+restent immuables. `curator_id` doit être un pseudonyme d'audit stable, jamais
+un nom, un e-mail ou une autre donnée personnelle. Depuis `filon-backend`,
+préparer le roster complet :
+
+```bash
+python -m quality_lab.curation_workflow prepare \
+  --inventory ../quality/candidates/catalog-public-2026-08-29.jsonl \
+  --inventory-receipt ../quality/candidates/catalog-public-2026-08-29.receipt.json \
+  --output ../quality/curation/catalog-human-a.jsonl \
+  --receipt ../quality/curation/catalog-human-a.receipt.json \
+  --curator-id human-curator-a
+```
+
+Le curateur remplit uniquement `decision`. Une exclusion doit laisser toutes
+les strates nulles et `datasets=[]`. Une inclusion exige une langue, un type de
+scénario, la vraie verticale et un sous-ensemble trié de `taxonomy` et
+`variant_resolution`. Le filtre `sampling_vertical` n'est jamais recopié
+automatiquement. Puis produire, sans gold, un fichier candidat annotable :
+
+```bash
+python -m quality_lab.curation_workflow finalize \
+  --inventory ../quality/candidates/catalog-public-2026-08-29.jsonl \
+  --inventory-receipt ../quality/candidates/catalog-public-2026-08-29.receipt.json \
+  --input ../quality/curation/catalog-human-a.jsonl \
+  --dataset taxonomy \
+  --output ../quality/candidates/taxonomy-curated.jsonl \
+  --receipt ../quality/candidates/taxonomy-curated.receipt.json
+```
+
+Le workflow exige le roster complet, lie chaque tâche et l'affectation du
+curateur à l'empreinte de l'inventaire, refuse toute altération de
+l'observation et publie sans écrasement. Son reçu reste
+`labels_present=false` et `blocked_on=["independent_human_annotation"]`.
+L'identité humaine et l'indépendance organisationnelle du curateur demeurent
+une preuve de processus externe, jamais une inférence du code.
+
+L'inventaire public actuel ne contient ni paire d'entités, ni roster de
+variantes, ni vérité transactionnelle, ni requête réelle. Le workflow refuse
+donc de fabriquer `entity_resolution`, `offer_attachment`, `offer_truth`,
+`retrieval` ou `decision`. Ces jeux exigent leurs propres collectes réelles et
+autorisées.
+
+### 2. Double annotation et adjudication
+
 Depuis `filon-backend`, créer un pack séparé par annotateur :
 
 ```bash

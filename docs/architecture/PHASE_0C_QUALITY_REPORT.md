@@ -72,6 +72,10 @@ intègre, mais aucun score produit n'est publiable.
   adaptateurs et 27 gates canoniques. Un holdout modifié, un roster tronqué,
   une provenance incohérente ou une scorecard invalide produit
   `not_measurable`, jamais un faux vert.
+- un workflow de curation séparé vérifie l'inventaire public immuable, lie le
+  roster complet à un `curator_id`, refuse de promouvoir la verticale
+  d'échantillonnage et ne produit que des candidats Taxonomy/Variant sans gold ;
+  les cinq autres datasets restent bloqués sur leurs collectes réelles propres.
 
 ## Contrat de mesure
 
@@ -100,11 +104,11 @@ et claims non supportés gardent une tolérance nulle.
 
 - suites ciblées du workflow humain, des schémas, de la readiness, des
   métriques, du scorecard, du runner, de la provenance et de la régression
-  v0.5 avec les sept adaptateurs : **377/377** ;
+  v0.5 avec les sept adaptateurs et le workflow de curation : **386/386** ;
 - suite Quality sans dépendance réseau : **257 réussis** sur le collecteur,
   l'intégrité, les schémas et la scorecard ;
 - suite backend complète courante sous Python 3.12 et les dépendances déclarées :
-  **2 091 réussis, 2 ignorés** en 72,74 s ;
+  **2 106 réussis, 2 ignorés** en 82,79 s ;
 - archive propre du HEAD `a78401a`, qui contient le lot Quality `6e12386`,
   suite backend complète : **1 907 réussis, 1 ignoré**, 7 avertissements
   `datetime.utcnow()` historiques, en **370,53 s** ;
@@ -122,6 +126,10 @@ et claims non supportés gardent une tolérance nulle.
   verts** ; son vérificateur recalcule chaque empreinte, refuse les champs
   moteur ajoutés, les sources non canoniques, les comptes altérés, les
   doublons inter-strates et toute curation préremplie.
+- le [workflow de curation](PHASE_0C_CURATION_WORKFLOW_REPORT.md) ajoute **9
+  tests ciblés verts** : roster complet, affectation et source immuables,
+  strates fermées, absence de gold, reçu vérifiable et publication sans
+  écrasement.
 
 ## Contrat CLI et CI
 
@@ -179,26 +187,28 @@ indépendants.
    `quality/candidates/`. Un premier inventaire catalogue de 1 000 lignes est
    acquis ; il doit encore être curé et complété par des requêtes réelles
    anonymisées pour Retrieval/Decision.
-2. Pour Decision, joindre l'inventaire de provenance autorisé à chaque entrée.
-3. Générer un pack aveugle distinct pour chaque annotateur.
-4. Faire annoter sans sortie moteur visible et conserver les packs complétés
+2. Faire curer l'inventaire catalogue avec `curation_workflow`, sans toucher à
+   l'artefact brut ni transformer `sampling_vertical` en vérité.
+3. Pour Decision, joindre l'inventaire de provenance autorisé à chaque entrée.
+4. Générer un pack aveugle distinct pour chaque annotateur.
+5. Faire annoter sans sortie moteur visible et conserver les packs complétés
    comme artefacts immuables.
-5. Fusionner atomiquement les accords et envoyer les divergences en
+6. Fusionner atomiquement les accords et envoyer les divergences en
    adjudication humaine.
-6. Relancer d'abord la readiness normale pour distinguer toute invalidité
+7. Relancer d'abord la readiness normale pour distinguer toute invalidité
    (exit 2), puis la readiness stricte ; elle vérifie volumes, strates, splits,
    empreintes, invariants de labels et absence de fuite.
-7. Exécuter les sept adaptateurs applicatifs sur l'entrée aveugle, figer le
+8. Exécuter les sept adaptateurs applicatifs sur l'entrée aveugle, figer le
    manifeste du run et les sept digests de prédictions, puis produire le
    scorecard fail-closed.
-8. Comparer baseline/candidat uniquement si l'empreinte du holdout et le contrat
+9. Comparer baseline/candidat uniquement si l'empreinte du holdout et le contrat
    canonique complet sont identiques.
 
 ## Next gate
 
-Obtenir les sept jeux humains aux volumes et supports minimaux, avec provenance
-Decision, double annotation réellement indépendante, adjudications tracées et
-holdout figé. Brancher ensuite des interfaces applicatives réelles pour les
-deux datasets encore volontairement refusés par le runner. P0.c reste
-`en_cours` et P0.f reste NO-GO jusqu'à deux scorecards mesurables sur le même
-holdout et une comparaison conforme aux 27 gates.
+Faire exécuter la curation catalogue par un humain, puis obtenir les sept jeux
+humains aux volumes et supports minimaux, avec provenance Decision, double
+annotation réellement indépendante, adjudications tracées et holdout figé. Les
+sept adaptateurs sont déjà branchés. P0.c reste `en_cours` et P0.f reste NO-GO
+jusqu'à deux scorecards mesurables sur le même holdout et une comparaison
+conforme aux 27 gates.
