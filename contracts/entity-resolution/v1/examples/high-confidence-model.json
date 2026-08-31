@@ -1,0 +1,40 @@
+{
+  "contract_version": "1.0.0",
+  "subject_type": "product_model",
+  "resolution": "HIGH_CONFIDENCE",
+  "canonical_id": 77,
+  "candidate_ids": [77],
+  "confidence_score": 0.97,
+  "reason_codes": ["brand_scoped_mpn", "structured_model_agreement"],
+  "resolver_version": "entity-resolution-shadow-v1",
+  "policy_version": "entity-resolution-policy-v1",
+  "evidence": [
+    {
+      "raw_source_record_id": 20,
+      "source_type": "manufacturer_feed",
+      "source_ref": "manufacturer:brand-12",
+      "observed_at": "2026-09-01T00:00:00Z",
+      "signal": "mpn",
+      "field": "mpn",
+      "normalized_value": "WH1000XM6",
+      "strength": "strong",
+      "role": "primary",
+      "transformation": "normalize_brand_scoped_mpn",
+      "transformation_version": "v1"
+    },
+    {
+      "raw_source_record_id": 21,
+      "source_type": "awin_feed",
+      "source_ref": "awin-feed:42",
+      "observed_at": "2026-09-01T00:01:00Z",
+      "signal": "model",
+      "field": "model_code",
+      "normalized_value": "WH1000XM6",
+      "strength": "strong",
+      "role": "corroborating",
+      "transformation": "extract_structured_model",
+      "transformation_version": "v1"
+    }
+  ],
+  "conflicts": []
+}

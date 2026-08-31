@@ -39,6 +39,28 @@ Variant passe sous son seuil, si la borne haute du faux merge dépasse 0,5 %,
 si une verticale disparaît ou si la limitation
 `NO_EXTERNAL_HUMAN_GROUND_TRUTH` est altérée.
 
+## Gate Phase 2 — Entity Resolution
+
+Le benchmark multi-signal est piloté par
+[`entity-resolution-manifest.json`](entity-resolution-manifest.json), avec les
+régressions statiques de
+[`entity-resolution-regressions.json`](entity-resolution-regressions.json).
+Il sépare les gates de sécurité des gates de couverture : le baseline
+exact-GTIN est `SAFE_INCOMPLETE` et reste non promouvable tant qu'il s'abstient
+sur tous les positifs structurés non-GTIN.
+
+Depuis `filon-backend` :
+
+```bash
+python -m quality_lab.entity_resolution \
+  --manifest ../quality/entity-resolution-manifest.json \
+  --output ../quality-entity-resolution-report.json
+```
+
+Ajouter `--require-promotion` rend la commande bloquante pour P2G. Elle échoue
+actuellement par conception : le benchmark est ratifié, mais le resolver
+multi-signal n'est pas encore qualifié.
+
 ## Historique conservé — contrat externe v0.5 remplacé
 
 Le contrat ci-dessous décrivait un holdout humain indépendant. Il reste utile

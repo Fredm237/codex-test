@@ -1,0 +1,244 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/entity-resolution/v1/entity-resolution-decision.schema.json",
+  "title": "FILON Entity Resolution Decision v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "subject_type",
+    "resolution",
+    "canonical_id",
+    "candidate_ids",
+    "confidence_score",
+    "reason_codes",
+    "resolver_version",
+    "policy_version",
+    "evidence",
+    "conflicts"
+  ],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "subject_type": { "enum": ["product_model", "variant"] },
+    "resolution": {
+      "enum": [
+        "EXACT_VERIFIED",
+        "HIGH_CONFIDENCE",
+        "PROBABLE",
+        "AMBIGUOUS",
+        "UNRESOLVED"
+      ]
+    },
+    "canonical_id": { "type": ["integer", "null"], "minimum": 1 },
+    "candidate_ids": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 },
+      "uniqueItems": true,
+      "maxItems": 100
+    },
+    "confidence_score": {
+      "type": ["number", "null"],
+      "minimum": 0,
+      "maximum": 1
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "exact_global_identifier",
+          "brand_scoped_mpn",
+          "structured_model_agreement",
+          "structured_variant_agreement",
+          "identifier_conflict",
+          "model_conflict",
+          "variant_attribute_conflict",
+          "scope_mismatch",
+          "multiple_candidates",
+          "candidate_generation_only",
+          "insufficient_evidence",
+          "missing_signal",
+          "invalid_signal"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1
+    },
+    "resolver_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "policy_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" },
+      "minItems": 1,
+      "maxItems": 64
+    },
+    "conflicts": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/conflict" },
+      "maxItems": 32
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": [
+        "raw_source_record_id",
+        "source_type",
+        "source_ref",
+        "observed_at",
+        "signal",
+        "field",
+        "normalized_value",
+        "strength",
+        "role",
+        "transformation",
+        "transformation_version"
+      ],
+      "properties": {
+        "raw_source_record_id": { "type": "integer", "minimum": 1 },
+        "source_type": { "type": "string", "minLength": 1, "maxLength": 48 },
+        "source_ref": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "signal": {
+          "enum": [
+            "gtin",
+            "mpn",
+            "brand",
+            "model",
+            "variant_attribute",
+            "merchant_sku",
+            "source_product_id",
+            "taxonomy",
+            "title",
+            "image",
+            "merchant_metadata",
+            "semantic_similarity"
+          ]
+        },
+        "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+        "normalized_value": { "type": "string", "minLength": 1, "maxLength": 191 },
+        "strength": { "enum": ["exact", "strong", "weak"] },
+        "role": { "enum": ["primary", "corroborating", "candidate_only"] },
+        "transformation": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "transformation_version": { "type": "string", "minLength": 1, "maxLength": 64 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "strength": { "const": "exact" } } },
+          "then": { "properties": { "signal": { "const": "gtin" } } }
+        },
+        {
+          "if": {
+            "properties": {
+              "signal": { "enum": ["title", "image", "semantic_similarity"] }
+            }
+          },
+          "then": {
+            "properties": {
+              "strength": { "const": "weak" },
+              "role": { "enum": ["corroborating", "candidate_only"] }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "conflict": {
+      "type": "object",
+      "required": ["field", "reason_code", "evidence_raw_source_ids"],
+      "properties": {
+        "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+        "reason_code": {
+          "enum": [
+            "identifier_conflict",
+            "model_conflict",
+            "variant_attribute_conflict",
+            "scope_mismatch"
+          ]
+        },
+        "evidence_raw_source_ids": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "uniqueItems": true,
+          "minItems": 1
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "resolution": { "const": "EXACT_VERIFIED" } } },
+      "then": {
+        "properties": {
+          "canonical_id": { "type": "integer", "minimum": 1 },
+          "candidate_ids": { "minItems": 1 },
+          "confidence_score": { "const": 1 },
+          "reason_codes": { "contains": { "const": "exact_global_identifier" } },
+          "evidence": {
+            "contains": {
+              "properties": {
+                "signal": { "const": "gtin" },
+                "strength": { "const": "exact" }
+              },
+              "required": ["signal", "strength"]
+            }
+          },
+          "conflicts": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "resolution": { "const": "HIGH_CONFIDENCE" } } },
+      "then": {
+        "properties": {
+          "canonical_id": { "type": "integer", "minimum": 1 },
+          "candidate_ids": { "minItems": 1 },
+          "confidence_score": { "type": "number", "exclusiveMinimum": 0, "maximum": 1 },
+          "evidence": {
+            "minItems": 2,
+            "contains": { "properties": { "strength": { "const": "strong" } }, "required": ["strength"] },
+            "not": { "contains": { "properties": { "strength": { "const": "exact" } }, "required": ["strength"] } }
+          },
+          "conflicts": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "resolution": { "const": "PROBABLE" } } },
+      "then": {
+        "properties": {
+          "canonical_id": { "type": "null" },
+          "candidate_ids": { "minItems": 1 },
+          "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
+          "evidence": {
+            "not": { "contains": { "properties": { "strength": { "const": "exact" } }, "required": ["strength"] } }
+          },
+          "conflicts": { "maxItems": 0 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "resolution": { "const": "AMBIGUOUS" } } },
+      "then": {
+        "properties": {
+          "canonical_id": { "type": "null" },
+          "candidate_ids": { "minItems": 2 },
+          "conflicts": { "minItems": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "resolution": { "const": "UNRESOLVED" } } },
+      "then": {
+        "properties": {
+          "canonical_id": { "type": "null" },
+          "candidate_ids": { "maxItems": 0 },
+          "evidence": {
+            "not": { "contains": { "properties": { "strength": { "const": "exact" } }, "required": ["strength"] } }
+          },
+          "conflicts": { "maxItems": 0 }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

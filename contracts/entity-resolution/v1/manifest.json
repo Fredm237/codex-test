@@ -1,0 +1,19 @@
+{
+  "contract_version": "1.0.0",
+  "status": "draft_for_shadow",
+  "opened_at": "2026-09-01",
+  "public_reader_compatible": true,
+  "false_merge_policy": "false_merge_is_worse_than_false_split",
+  "unknown_policy": "ambiguous_and_unresolved_never_become_favorable",
+  "score_policy": "score_never_overrides_evidence_or_conflict",
+  "artifacts": {
+    "decision": "entity-resolution-decision.schema.json"
+  },
+  "examples": {
+    "exact_variant": "examples/exact-variant.json",
+    "high_confidence_model": "examples/high-confidence-model.json",
+    "probable_variant": "examples/probable-variant.json",
+    "ambiguous_variant": "examples/ambiguous-variant.json",
+    "unresolved_model": "examples/unresolved-model.json"
+  }
+}

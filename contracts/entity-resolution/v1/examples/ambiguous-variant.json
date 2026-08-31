@@ -1,0 +1,46 @@
+{
+  "contract_version": "1.0.0",
+  "subject_type": "variant",
+  "resolution": "AMBIGUOUS",
+  "canonical_id": null,
+  "candidate_ids": [401, 402],
+  "confidence_score": null,
+  "reason_codes": ["variant_attribute_conflict", "multiple_candidates"],
+  "resolver_version": "entity-resolution-shadow-v1",
+  "policy_version": "entity-resolution-policy-v1",
+  "evidence": [
+    {
+      "raw_source_record_id": 40,
+      "source_type": "merchant_api",
+      "source_ref": "merchant:7",
+      "observed_at": "2026-09-01T00:03:00Z",
+      "signal": "variant_attribute",
+      "field": "storage",
+      "normalized_value": "128gb",
+      "strength": "strong",
+      "role": "primary",
+      "transformation": "normalize_storage",
+      "transformation_version": "v1"
+    },
+    {
+      "raw_source_record_id": 41,
+      "source_type": "merchant_api",
+      "source_ref": "merchant:8",
+      "observed_at": "2026-09-01T00:04:00Z",
+      "signal": "variant_attribute",
+      "field": "storage",
+      "normalized_value": "256gb",
+      "strength": "strong",
+      "role": "corroborating",
+      "transformation": "normalize_storage",
+      "transformation_version": "v1"
+    }
+  ],
+  "conflicts": [
+    {
+      "field": "storage",
+      "reason_code": "variant_attribute_conflict",
+      "evidence_raw_source_ids": [40, 41]
+    }
+  ]
+}
