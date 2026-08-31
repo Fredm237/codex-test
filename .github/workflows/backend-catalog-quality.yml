@@ -90,6 +90,8 @@ jobs:
         run: >-
           python -m quality_lab.entity_resolution
           --manifest ../quality/entity-resolution-manifest.json
+          --adapter multi
+          --require-promotion
           --output ../quality-entity-resolution-report.json
 
       - name: Publier les rapports Quality Lab

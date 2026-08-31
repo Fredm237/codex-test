@@ -1,0 +1,43 @@
+{
+  "contract_version": "1.0.0",
+  "raw_source_record_id": 42,
+  "source_type": "awin_feed",
+  "source_ref": "awin-feed:7",
+  "observed_at": "2026-09-01T00:00:00+00:00",
+  "extractor_version": "awin-entity-signals/v1",
+  "signals": [
+    {
+      "signal": "brand",
+      "status": "observed",
+      "source_fields": ["brand_name"],
+      "normalized_values": ["sony"],
+      "strength": "weak",
+      "role": "corroborating",
+      "reason_code": "observed_structured",
+      "transformation": "entity_signal_extraction",
+      "transformation_version": "awin-entity-signals/v1"
+    },
+    {
+      "signal": "mpn",
+      "status": "observed",
+      "source_fields": ["mpn"],
+      "normalized_values": ["WH1000XM5B"],
+      "strength": "strong",
+      "role": "primary",
+      "reason_code": "observed_structured",
+      "transformation": "entity_signal_extraction",
+      "transformation_version": "awin-entity-signals/v1"
+    },
+    {
+      "signal": "storage",
+      "status": "unknown",
+      "source_fields": [],
+      "normalized_values": [],
+      "strength": "none",
+      "role": "none",
+      "reason_code": "missing_signal",
+      "transformation": "entity_signal_extraction",
+      "transformation_version": "awin-entity-signals/v1"
+    }
+  ]
+}

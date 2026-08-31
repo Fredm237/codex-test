@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 2 Entity Resolution",
   "objectif": "Augmenter la couverture au-delà du GTIN exact par un resolver multi-signal shadow, mesuré et abstentionniste, sans dépasser le target de faux merge",
   "cree": "2026-08-31T22:41:21+00:00",
-  "maj": "2026-09-01T00:32:00+00:00",
+  "maj": "2026-08-31T23:15:00+00:00",
   "contraintes": [
     "FALSE MERGE IS WORSE THAN FALSE SPLIT",
     "Les preuves exactes de Phase 1 restent prioritaires et ne peuvent pas être affaiblies par un score probabiliste",
@@ -49,35 +49,35 @@
     {
       "id": "p2_d",
       "objectif": "Construire les extracteurs de modèle et d'attributs variante en shadow",
-      "statut": "en_cours",
+      "statut": "fait",
       "depend": ["p2_a", "p2_b"],
       "outil": "backend",
       "attendu": "Faits versionnés et sourcés pour MPN, modèle, capacité, couleur, taille et génération, avec unknown explicite",
-      "obtenu": null,
-      "verification": null,
+      "obtenu": "Extracteur shadow pur de seize signaux avec états observed/candidate_only/unknown/invalid/conflict, provenance et version ; aucun MPN ou modèle inventé depuis le titre",
+      "verification": "JSON Schema et deux exemples ; 62 tests ciblés verts ; alias structurés contradictoires bloqués ; attributs lexicaux faibles ; raw actuel maintenu unknown pour les preuves absentes",
       "tentatives": 1
     },
     {
       "id": "p2_e",
       "objectif": "Construire la génération de candidats et le resolver multi-signal hiérarchique",
-      "statut": "a_faire",
+      "statut": "fait",
       "depend": ["p2_c", "p2_d"],
       "outil": "backend",
       "attendu": "GTIN/MPN/modèle/attributs/taxonomie/merchant metadata ordonnés, conflits bloquants et scores explicables",
-      "obtenu": null,
-      "verification": null,
-      "tentatives": 0
+      "obtenu": "Candidate generator et resolver hiérarchique shadow : GTIN autoritatif, deux types de preuves fortes pour HIGH_CONFIDENCE, conflits et candidats multiples en abstention, score non autoritaire",
+      "verification": "Benchmark multi-signal 6 730/6 730, 0/3 844 faux merges, 965/965 positifs structurés, 2 884/2 884 conflits et 961/961 faibles en abstention ; 79 tests ciblés verts ; evaluation 00f3594a...",
+      "tentatives": 1
     },
     {
       "id": "p2_f",
       "objectif": "Exécuter un shadow replay réel borné",
-      "statut": "a_faire",
+      "statut": "en_cours",
       "depend": ["p2_e"],
       "outil": "catalog core",
       "attendu": "Lot réel idempotent, sans lecteur public, avec décisions et provenance persistées",
       "obtenu": null,
       "verification": null,
-      "tentatives": 0
+      "tentatives": 1
     },
     {
       "id": "p2_g",
@@ -134,34 +134,64 @@
       "detail": "p2_b (tentative 1)"
     },
     {
-      "ts": "2026-09-01T00:18:00+00:00",
+      "ts": "2026-08-31T22:55:00+00:00",
       "evenement": "verification",
       "detail": "p2_b — 1 000 raws : 330 EAN et 670 abstentions ; aucun champ structuré MPN/modèle/variante ; treize verticales Core bornées auditées ; signaux lexicaux maintenus candidate-only"
     },
     {
-      "ts": "2026-09-01T00:18:00+00:00",
+      "ts": "2026-08-31T22:55:00+00:00",
       "evenement": "tache_faite",
       "detail": "p2_b — audit de disponibilité des signaux réels documenté sans écriture production ni promotion publique"
     },
     {
-      "ts": "2026-09-01T00:18:00+00:00",
+      "ts": "2026-08-31T22:55:00+00:00",
       "evenement": "tache_demarree",
       "detail": "p2_c (tentative 1)"
     },
     {
-      "ts": "2026-09-01T00:32:00+00:00",
+      "ts": "2026-08-31T23:04:00+00:00",
       "evenement": "verification",
       "detail": "p2_c — 6 730 cas ; 0/3 844 faux merges (Wilson haut 0,100 %) ; exact 960/960 ; conflits 2 884/2 884 abstention ; positifs structurés 0/965 résolus au baseline"
     },
     {
-      "ts": "2026-09-01T00:32:00+00:00",
+      "ts": "2026-08-31T23:04:00+00:00",
       "evenement": "tache_faite",
       "detail": "p2_c — benchmark, target faux merge 0,5 %, hard negatives et budget d'abstention ratifiés ; baseline SAFE_INCOMPLETE non promouvable"
     },
     {
-      "ts": "2026-09-01T00:32:00+00:00",
+      "ts": "2026-08-31T23:04:00+00:00",
       "evenement": "tache_demarree",
       "detail": "p2_d (tentative 1)"
+    },
+    {
+      "ts": "2026-08-31T23:08:00+00:00",
+      "evenement": "verification",
+      "detail": "p2_d — seize signaux explicites par raw ; MPN/modèle jamais extraits d'un titre ; structured/unknown/invalid/conflict versionnés ; 62 tests ciblés verts"
+    },
+    {
+      "ts": "2026-08-31T23:08:00+00:00",
+      "evenement": "tache_faite",
+      "detail": "p2_d — extracteurs shadow et contrat de provenance terminés localement, sans writer ni lecteur public"
+    },
+    {
+      "ts": "2026-08-31T23:08:00+00:00",
+      "evenement": "tache_demarree",
+      "detail": "p2_e (tentative 1)"
+    },
+    {
+      "ts": "2026-08-31T23:15:00+00:00",
+      "evenement": "verification",
+      "detail": "p2_e — benchmark multi 6 730/6 730 ; 0 faux merge ; exact 960/960 ; structurés 965/965 ; conflits et faibles 100 % abstention ; 79 tests ciblés verts"
+    },
+    {
+      "ts": "2026-08-31T23:15:00+00:00",
+      "evenement": "tache_faite",
+      "detail": "p2_e — resolver hiérarchique shadow terminé localement, sans lecteur public ni score contournant un veto"
+    },
+    {
+      "ts": "2026-08-31T23:15:00+00:00",
+      "evenement": "tache_demarree",
+      "detail": "p2_f (tentative 1)"
     }
   ]
 }

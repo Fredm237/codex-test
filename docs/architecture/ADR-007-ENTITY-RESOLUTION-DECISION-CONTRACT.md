@@ -24,7 +24,7 @@ scope, ni les conflits. Elle ne peut donc pas gouverner une fusion.
 | `EXACT_VERIFIED` | GTIN global exact, valide, sourcé, sans conflit | requis | shadow |
 | `HIGH_CONFIDENCE` | au moins deux preuves structurées fortes, sans preuve exacte ni conflit | requis | shadow |
 | `PROBABLE` | candidat utile mais preuve insuffisante | interdit | candidat seulement |
-| `AMBIGUOUS` | plusieurs candidats et conflit explicite | interdit | abstention |
+| `AMBIGUOUS` | au moins un candidat contredit, ou plusieurs candidats non départageables | interdit | abstention |
 | `UNRESOLVED` | aucun candidat suffisamment prouvé | interdit | abstention |
 
 Un `canonical_id` doit appartenir à la liste bornée `candidate_ids`. Cette
@@ -56,7 +56,7 @@ Une fusion favorable est interdite si l'un de ces conflits subsiste :
   édition ou quantité de pack contradictoire ;
 - produit principal contre accessoire, consommable, bundle ou pièce ;
 - scope d'identifiant incompatible ;
-- plusieurs candidats non départageables.
+- un candidat contredit ou plusieurs candidats non départageables.
 
 Un score élevé ne contourne jamais un veto. La sortie devient `AMBIGUOUS` ou
 `UNRESOLVED` et reste sans identité canonique.
@@ -76,8 +76,12 @@ jamais plus permissif sans ADR et preuve nouvelles.
 ### 5. Provenance
 
 Chaque élément de preuve porte raw, source, horodatage, signal, champ, valeur
-normalisée, force, rôle, transformation et version. Une décision sans preuve
-est invalide. Un conflit cite ses raws concernés et n'écrase aucune valeur.
+normalisée, force, rôle, transformation et version. Une décision favorable ou
+probable sans preuve est invalide. `AMBIGUOUS` peut s'appuyer uniquement sur
+son conflit sourcé lorsqu'une valeur invalide ne fournit aucune valeur
+normalisable. `UNRESOLVED` peut conserver une liste vide lorsque le raw ne
+porte littéralement aucun signal exploitable. Un conflit cite ses raws
+concernés et n'écrase aucune valeur.
 
 ### 6. Compatibilité et rollback
 

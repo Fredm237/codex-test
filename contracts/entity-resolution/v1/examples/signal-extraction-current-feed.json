@@ -1,0 +1,43 @@
+{
+  "contract_version": "1.0.0",
+  "raw_source_record_id": 43,
+  "source_type": "awin_feed",
+  "source_ref": "awin-feed:7",
+  "observed_at": "2026-09-01T00:01:00+00:00",
+  "extractor_version": "awin-entity-signals/v1",
+  "signals": [
+    {
+      "signal": "mpn",
+      "status": "unknown",
+      "source_fields": [],
+      "normalized_values": [],
+      "strength": "none",
+      "role": "none",
+      "reason_code": "missing_signal",
+      "transformation": "entity_signal_extraction",
+      "transformation_version": "awin-entity-signals/v1"
+    },
+    {
+      "signal": "color",
+      "status": "candidate_only",
+      "source_fields": ["product_name"],
+      "normalized_values": ["black"],
+      "strength": "weak",
+      "role": "candidate_only",
+      "reason_code": "lexical_candidate",
+      "transformation": "entity_signal_extraction",
+      "transformation_version": "awin-entity-signals/v1"
+    },
+    {
+      "signal": "title",
+      "status": "candidate_only",
+      "source_fields": ["product_name"],
+      "normalized_values": ["wireless headphones black"],
+      "strength": "weak",
+      "role": "candidate_only",
+      "reason_code": "weak_source_field",
+      "transformation": "entity_signal_extraction",
+      "transformation_version": "awin-entity-signals/v1"
+    }
+  ]
+}

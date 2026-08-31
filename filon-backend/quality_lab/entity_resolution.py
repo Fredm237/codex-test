@@ -15,10 +15,16 @@ import json
 import math
 import random
 from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Mapping, Sequence
 
 from .integrity import atomic_write_text, canonical_json
+from app.product_graph.entity_resolution import (
+    RESOLVER_VERSION as MULTI_SIGNAL_RESOLVER_VERSION,
+    resolve_entity_candidates,
+)
+from app.product_graph.entity_signals import project_entity_signals
 
 
 SCHEMA_VERSION = "entity-resolution-benchmark/v1"
@@ -400,8 +406,51 @@ def _regression_cases(manifest_path: Path, manifest: Mapping[str, Any]) -> list[
     return cases
 
 
-def _evaluate(case: BenchmarkCase) -> CaseResult:
-    actual = exact_gtin_baseline(case.left, case.right)
+def _resolver_profile(observation: Mapping[str, Any], *, raw_id: int, candidate_id: int | None = None) -> dict[str, Any]:
+    row: dict[str, Any] = {}
+    for key in ("brand", "mpn", "model", "product_role", "image"):
+        if key in observation:
+            row["brand_name" if key == "brand" else key] = observation[key]
+    title = observation.get("title", observation.get("name"))
+    if title is not None:
+        row["product_name"] = title
+    attributes = observation.get("attributes", {})
+    if isinstance(attributes, Mapping):
+        row.update(attributes)
+    projection = project_entity_signals(
+        row,
+        raw_source_record_id=raw_id,
+        source_type="quality_holdout",
+        source_ref=f"quality-holdout:{raw_id}",
+        observed_at=datetime(2026, 9, 1, tzinfo=timezone.utc),
+    ).as_contract()
+    profile = {
+        "raw_source_record_id": raw_id,
+        "source_type": projection["source_type"],
+        "source_ref": projection["source_ref"],
+        "observed_at": projection["observed_at"],
+        "identifiers": dict(observation.get("identifiers", {})),
+        "signals": projection["signals"],
+    }
+    if candidate_id is not None:
+        profile["candidate_id"] = candidate_id
+    return profile
+
+
+def multi_signal_prediction(case: BenchmarkCase) -> str:
+    subject = _resolver_profile(case.left, raw_id=1)
+    candidate = _resolver_profile(case.right, raw_id=2, candidate_id=1)
+    decision = resolve_entity_candidates(subject, [candidate], subject_type="variant")
+    return "same" if decision.resolution in {"EXACT_VERIFIED", "HIGH_CONFIDENCE"} else "abstain"
+
+
+def _evaluate(case: BenchmarkCase, *, adapter: str) -> CaseResult:
+    if adapter == "exact":
+        actual = exact_gtin_baseline(case.left, case.right)
+    elif adapter == "multi":
+        actual = multi_signal_prediction(case)
+    else:
+        raise EntityResolutionBenchmarkError("benchmark adapter is invalid")
     return CaseResult(
         case_id=case.case_id,
         vertical=case.vertical,
@@ -413,14 +462,14 @@ def _evaluate(case: BenchmarkCase) -> CaseResult:
     )
 
 
-def build_report(manifest_path: str | Path) -> dict[str, Any]:
+def build_report(manifest_path: str | Path, *, adapter: str = "exact") -> dict[str, Any]:
     path = Path(manifest_path).resolve()
     manifest = _load_manifest(path)
     cases = _regression_cases(path, manifest)
     generator = manifest["generator"]
     for seed in generator["seeds"]:
         cases.extend(_generated_cases(seed=seed, samples=generator["samples_per_vertical_seed"]))
-    results = [_evaluate(case) for case in cases]
+    results = [_evaluate(case, adapter=adapter) for case in cases]
 
     exact = [result for result in results if result.kind == "exact_positive"]
     structured = [result for result in results if result.kind == "structured_positive"]
@@ -478,7 +527,7 @@ def build_report(manifest_path: str | Path) -> dict[str, Any]:
         "benchmark_version": manifest["benchmark_version"],
         "limitation": LIMITATION,
         "quality_status": "DETERMINISTIC_ORACLE_WITHOUT_EXTERNAL_HUMAN_GROUND_TRUTH",
-        "baseline_version": BASELINE_VERSION,
+        "baseline_version": BASELINE_VERSION if adapter == "exact" else MULTI_SIGNAL_RESOLVER_VERSION,
         "generator": generator,
         "verticals": list(VERTICALS),
         "summary": {
@@ -520,6 +569,7 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Benchmark Entity Resolution FILON")
     parser.add_argument("--manifest", required=True)
     parser.add_argument("--output")
+    parser.add_argument("--adapter", choices=("exact", "multi"), default="exact")
     parser.add_argument("--require-promotion", action="store_true")
     return parser
 
@@ -527,7 +577,7 @@ def _parser() -> argparse.ArgumentParser:
 def main(argv: Sequence[str] | None = None) -> int:
     args = _parser().parse_args(argv)
     try:
-        report = build_report(args.manifest)
+        report = build_report(args.manifest, adapter=args.adapter)
     except EntityResolutionBenchmarkError as exc:
         print(json.dumps({"status": "INVALID", "error": str(exc)}))
         return 2

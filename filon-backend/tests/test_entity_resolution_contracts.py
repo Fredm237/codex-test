@@ -13,6 +13,7 @@ from jsonschema import Draft202012Validator
 ROOT = Path(__file__).resolve().parents[2]
 CONTRACT_ROOT = ROOT / "contracts" / "entity-resolution" / "v1"
 SCHEMA = CONTRACT_ROOT / "entity-resolution-decision.schema.json"
+SIGNAL_SCHEMA = CONTRACT_ROOT / "entity-resolution-signal-extraction.schema.json"
 
 
 def _json(path: Path):
@@ -25,6 +26,7 @@ def _errors(payload: dict) -> list:
 
 def test_entity_resolution_schema_is_valid_draft_2020_12():
     Draft202012Validator.check_schema(_json(SCHEMA))
+    Draft202012Validator.check_schema(_json(SIGNAL_SCHEMA))
 
 
 @pytest.mark.parametrize(
@@ -90,7 +92,7 @@ def test_weak_similarity_signals_can_never_be_exact_or_primary(signal: str):
     assert _errors(payload) != []
 
 
-def test_ambiguous_requires_multiple_candidates_and_a_conflict():
+def test_ambiguous_requires_at_least_one_candidate_and_a_conflict():
     original = _json(CONTRACT_ROOT / "examples" / "ambiguous-variant.json")
     without_conflict = deepcopy(original)
     without_conflict["conflicts"] = []
@@ -98,7 +100,11 @@ def test_ambiguous_requires_multiple_candidates_and_a_conflict():
 
     one_candidate = deepcopy(original)
     one_candidate["candidate_ids"] = [401]
-    assert _errors(one_candidate) != []
+    assert _errors(one_candidate) == []
+
+    no_candidate = deepcopy(original)
+    no_candidate["candidate_ids"] = []
+    assert _errors(no_candidate) != []
 
 
 def test_unresolved_cannot_keep_a_favorable_candidate():
@@ -131,16 +137,43 @@ def test_manifest_references_every_checked_artifact():
     assert (CONTRACT_ROOT / manifest["artifacts"]["decision"]).is_file()
     assert {
         (CONTRACT_ROOT / path).name for path in manifest["examples"].values()
-    } == {
+    } >= {
         "exact-variant.json",
         "high-confidence-model.json",
         "probable-variant.json",
         "ambiguous-variant.json",
         "unresolved-model.json",
     }
+    assert (CONTRACT_ROOT / manifest["artifacts"]["signal_extraction"]).is_file()
 
 
 def test_decision_requires_versioned_provenance():
     payload = _json(CONTRACT_ROOT / "examples" / "exact-variant.json")
     del payload["evidence"][0]["raw_source_record_id"]
     assert _errors(payload) != []
+
+
+@pytest.mark.parametrize(
+    "example_name",
+    ["signal-extraction-structured.json", "signal-extraction-current-feed.json"],
+)
+def test_signal_extraction_examples_validate(example_name: str):
+    validator = Draft202012Validator(_json(SIGNAL_SCHEMA))
+    payload = _json(CONTRACT_ROOT / "examples" / example_name)
+    assert list(validator.iter_errors(payload)) == []
+
+
+def test_unknown_signal_cannot_carry_a_favorable_value():
+    payload = _json(CONTRACT_ROOT / "examples" / "signal-extraction-structured.json")
+    unknown = payload["signals"][2]
+    unknown["normalized_values"] = ["128gb"]
+    validator = Draft202012Validator(_json(SIGNAL_SCHEMA))
+    assert list(validator.iter_errors(payload)) != []
+
+
+def test_candidate_signal_cannot_be_promoted_to_strong_or_primary():
+    payload = _json(CONTRACT_ROOT / "examples" / "signal-extraction-current-feed.json")
+    candidate = payload["signals"][1]
+    candidate.update(strength="strong", role="primary")
+    validator = Draft202012Validator(_json(SIGNAL_SCHEMA))
+    assert list(validator.iter_errors(payload)) != []

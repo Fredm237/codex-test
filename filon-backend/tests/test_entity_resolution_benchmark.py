@@ -87,6 +87,18 @@ def test_entity_resolution_benchmark_is_reproducible():
     assert first["metrics"] == second["metrics"]
 
 
+def test_multi_signal_resolver_passes_the_ratified_synthetic_holdout():
+    report = build_report(MANIFEST, adapter="multi")
+    summary = report["summary"]
+    assert summary["benchmark_status"] == "RATIFIED"
+    assert summary["baseline_status"] == "QUALIFIED"
+    assert summary["promotion_eligible"] is True
+    assert all(summary["safety_gate_results"].values())
+    assert all(summary["coverage_gate_results"].values())
+    assert report["metrics"]["false_merge_rate"]["false_merges"] == 0
+    assert report["metrics"]["known_structured_positive_resolution"]["successes"] >= 900
+
+
 @pytest.mark.parametrize(
     "mutation, message",
     [

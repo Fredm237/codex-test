@@ -54,12 +54,14 @@ Depuis `filon-backend` :
 ```bash
 python -m quality_lab.entity_resolution \
   --manifest ../quality/entity-resolution-manifest.json \
+  --adapter multi \
+  --require-promotion \
   --output ../quality-entity-resolution-report.json
 ```
 
-Ajouter `--require-promotion` rend la commande bloquante pour P2G. Elle échoue
-actuellement par conception : le benchmark est ratifié, mais le resolver
-multi-signal n'est pas encore qualifié.
+L'adaptateur `exact` conserve le baseline P2C `SAFE_INCOMPLETE`. L'adaptateur
+`multi` est bloquant pour P2G et doit passer toutes les gates de sécurité et
+de couverture sans modifier le holdout.
 
 ## Historique conservé — contrat externe v0.5 remplacé
 

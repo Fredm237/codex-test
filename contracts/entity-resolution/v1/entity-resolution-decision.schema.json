@@ -67,7 +67,7 @@
     "evidence": {
       "type": "array",
       "items": { "$ref": "#/$defs/evidence" },
-      "minItems": 1,
+      "minItems": 0,
       "maxItems": 64
     },
     "conflicts": {
@@ -151,7 +151,8 @@
             "identifier_conflict",
             "model_conflict",
             "variant_attribute_conflict",
-            "scope_mismatch"
+            "scope_mismatch",
+            "multiple_candidates"
           ]
         },
         "evidence_raw_source_ids": {
@@ -210,6 +211,7 @@
           "candidate_ids": { "minItems": 1 },
           "confidence_score": { "type": "number", "minimum": 0, "maximum": 1 },
           "evidence": {
+            "minItems": 1,
             "not": { "contains": { "properties": { "strength": { "const": "exact" } }, "required": ["strength"] } }
           },
           "conflicts": { "maxItems": 0 }
@@ -221,7 +223,7 @@
       "then": {
         "properties": {
           "canonical_id": { "type": "null" },
-          "candidate_ids": { "minItems": 2 },
+          "candidate_ids": { "minItems": 1 },
           "conflicts": { "minItems": 1 }
         }
       }
