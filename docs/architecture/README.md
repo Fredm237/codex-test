@@ -1,6 +1,6 @@
 # FILON — dossier d'architecture Phase 0
 
-Statut : **PHASE 0 = GO ; PHASE 1 — PRODUCT IDENTITY OUVERTE ; premier
+Statut : **PHASE 0 = GO ; PHASE 1 = GO ; PHASE 2 — ENTITY RESOLUTION OUVERTE ; premier
 événement GitHub `schedule` classé `EXTERNAL_PROVIDER_PENDING /
 NON_BLOCKING` ; Immersive reste NO-GO**.
 
@@ -14,7 +14,7 @@ Ce dossier traduit les mandats Product Intelligence Core, Execution Governance e
 
 ## Décision exécutive
 
-**PHASE 0 = GO ; Phase 1 ouverte ; NO-GO Immersive inchangé. Aucun blocker
+**PHASE 0 = GO ; Phase 1 = GO ; Phase 2 ouverte ; NO-GO Immersive inchangé. Aucun blocker
 humain : le Quality Lab autonome reste la gate active.**
 
 Le cycle catalogue réel, la migration heartbeat, les checkpoints de reprise,
@@ -89,6 +89,9 @@ et extension.
 - [ADR-006 — frontières Product Identity v1](ADR-006-PRODUCT-IDENTITY-V1-BOUNDARIES.md)
 - [Rapport Phase 1C — benchmark exact-product](PHASE_1C_EXACT_PRODUCT_BENCHMARK_REPORT.md)
 - [Rapport Phase 1D — assertions Product Identity shadow](PHASE_1D_PRODUCT_IDENTITY_SHADOW_REPORT.md)
+- [Rapport Phase 1E — backfill réel borné et idempotence](PHASE_1E_PRODUCT_IDENTITY_BACKFILL_REPORT.md)
+- [Rapport Phase 1F — qualification Product Identity](PHASE_1F_PRODUCT_IDENTITY_QUALIFICATION_REPORT.md)
+- [Reçu final Phase 1](PHASE_1_FINAL_RECEIPT.md)
 - [Décision de timebox et sortie de Phase 0](PHASE_0_TIMEBOX_AND_EXIT_DECISION.md)
 - [Backlog de durcissement post-Phase 0](POST_PHASE_0_HARDENING.md)
 - [Durcissement final du contrat catalogue v1](PHASE_0B_CATALOG_CONTRACT_HARDENING_REPORT.md)

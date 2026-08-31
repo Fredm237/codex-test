@@ -2,7 +2,7 @@
   "titre": "FILON — Phase 1 Product Identity",
   "objectif": "Construire Brand, ProductFamily, ProductModel, Variant, identifiers et provenance en shadow réversible jusqu’au passage du benchmark exact-product",
   "cree": "2026-08-31T16:17:45+00:00",
-  "maj": "2026-08-31T17:55:36+00:00",
+  "maj": "2026-08-31T22:30:00+00:00",
   "contraintes": [
     "Conserver les lectures publiques v1 inchangées jusqu’au passage des gates Product Identity",
     "Aucun unknown ne devient une correspondance favorable ; provenance et abstention obligatoires",
@@ -64,42 +64,42 @@
     {
       "id": "p1_e",
       "objectif": "Exécuter un backfill réel borné en dry-run puis shadow",
-      "statut": "en_cours",
+      "statut": "fait",
       "depend": [
         "p1_c",
         "p1_d"
       ],
       "outil": "catalog core",
       "attendu": "Rapport de collisions/quarantaine, zéro faux merge implicite et rollback prouvé",
-      "obtenu": null,
-      "verification": null,
+      "obtenu": "Lot production de 1 000 raws appliqué puis rejoué sans aucune création supplémentaire",
+      "verification": "Dry-run puis apply : 330 résolus, 670 quarantaines, 2 330 assertions, 1 000 liens et 321 variantes ; replay : 0 création, 2 330 assertions et 1 000 liens reconnus ; schéma b3e1a7c4d9f2 et sondes vertes",
       "tentatives": 1
     },
     {
       "id": "p1_f",
       "objectif": "Qualifier Product Identity sur ses gates",
-      "statut": "a_faire",
+      "statut": "fait",
       "depend": [
         "p1_e"
       ],
       "outil": "tests + benchmark + CI",
       "attendu": "Exact-product benchmark vert, faux merges/splits mesurés et limites publiées",
-      "obtenu": null,
-      "verification": null,
-      "tentatives": 0
+      "obtenu": "Benchmark exact-product et invariants du corpus réel qualifiés sans faux merge ni faux split observé",
+      "verification": "CI 33425556598 verte ; benchmark 10 565/10 565 ; production : 0 GTIN split, 0 variante à GTIN contradictoires, 0 variante orpheline, 0 lien résolu sans variante",
+      "tentatives": 1
     },
     {
       "id": "p1_g",
       "objectif": "Tenir la revue de sortie vers Phase 2",
-      "statut": "a_faire",
+      "statut": "fait",
       "depend": [
         "p1_f"
       ],
       "outil": "architecture review",
       "attendu": "Reçu Phase 1 et décision GO/NO-GO vers Entity Resolution",
-      "obtenu": null,
-      "verification": null,
-      "tentatives": 0
+      "obtenu": "Phase 1 fermée GO et Phase 2 Entity Resolution ouverte sans promotion des lecteurs Product Graph",
+      "verification": "PHASE_1_FINAL_RECEIPT.md consolide contrats, benchmark, CI, backfill/replay production, limites et décision de passage",
+      "tentatives": 1
     }
   ],
   "journal": [
@@ -232,6 +232,46 @@
       "ts": "2026-08-31T17:55:36+00:00",
       "evenement": "tache_demarree",
       "detail": "p1_e (tentative 1)"
+    },
+    {
+      "ts": "2026-08-31T22:23:01+00:00",
+      "evenement": "verification",
+      "detail": "p1_e — Dry-run puis apply : 330 résolus, 670 quarantaines, 2 330 assertions, 1 000 liens et 321 variantes ; replay : 0 création, 2 330 assertions et 1 000 liens reconnus ; schéma b3e1a7c4d9f2 et sondes vertes"
+    },
+    {
+      "ts": "2026-08-31T22:23:01+00:00",
+      "evenement": "tache_faite",
+      "detail": "p1_e — Lot production de 1 000 raws appliqué puis rejoué sans aucune création supplémentaire"
+    },
+    {
+      "ts": "2026-08-31T22:23:01+00:00",
+      "evenement": "tache_demarree",
+      "detail": "p1_f (tentative 1)"
+    },
+    {
+      "ts": "2026-08-31T22:30:00+00:00",
+      "evenement": "verification",
+      "detail": "p1_f — CI 33425556598 verte ; benchmark 10 565/10 565 ; production : 0 GTIN split, 0 variante à GTIN contradictoires, 0 variante orpheline, 0 lien résolu sans variante"
+    },
+    {
+      "ts": "2026-08-31T22:30:00+00:00",
+      "evenement": "tache_faite",
+      "detail": "p1_f — Benchmark exact-product et invariants du corpus réel qualifiés sans faux merge ni faux split observé"
+    },
+    {
+      "ts": "2026-08-31T22:30:00+00:00",
+      "evenement": "tache_demarree",
+      "detail": "p1_g (tentative 1)"
+    },
+    {
+      "ts": "2026-08-31T22:30:00+00:00",
+      "evenement": "verification",
+      "detail": "p1_g — PHASE_1_FINAL_RECEIPT.md consolide contrats, benchmark, CI, backfill/replay production, limites et décision de passage"
+    },
+    {
+      "ts": "2026-08-31T22:30:00+00:00",
+      "evenement": "tache_faite",
+      "detail": "p1_g — Phase 1 fermée GO et Phase 2 Entity Resolution ouverte sans promotion des lecteurs Product Graph"
     }
   ]
 }

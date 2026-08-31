@@ -1,7 +1,7 @@
 # FILON — Phase 1 Product Identity Execution Plan
 
 - Ouverture : **31 août 2026**
-- Statut : **OUVERTE**
+- Statut : **FERMÉE — GO**
 - Entrée : [PHASE 0 = GO](PHASE_0_FINAL_RECEIPT.md)
 - Gate de sortie : **exact-product benchmark passes**
 - Immersive : **NO-GO inchangé**
@@ -70,9 +70,10 @@ production pendant cette phase.
 | P1A — baseline réelle | **terminé** | [couverture, collisions et verticales](PHASE_1A_PRODUCT_IDENTITY_BASELINE.md) |
 | P1B — frontières d'identité | **terminé** | [ADR-006](ADR-006-PRODUCT-IDENTITY-V1-BOUNDARIES.md) + contrats JSON v1 |
 | P1C — benchmark exact-product | **terminé** | [10 565 checks, cinq gates verts](PHASE_1C_EXACT_PRODUCT_BENCHMARK_REPORT.md) |
-| P1D — schéma/writers shadow | **qualifié localement** | [migration, assertions et rollback](PHASE_1D_PRODUCT_IDENTITY_SHADOW_REPORT.md) |
-| P1E — backfill réel borné | en cours | CI/PostgreSQL, migration puis dry-run et lot shadow |
-| P1F–P1G | à faire | gates finaux puis revue de sortie |
+| P1D — schéma/writers shadow | **qualifié en production** | [migration, assertions et rollback](PHASE_1D_PRODUCT_IDENTITY_SHADOW_REPORT.md), schéma `b3e1a7c4d9f2` |
+| P1E — backfill réel borné | **terminé** | [dry-run, application, replay idempotent et totaux PostgreSQL](PHASE_1E_PRODUCT_IDENTITY_BACKFILL_REPORT.md) |
+| P1F — qualification des gates | **terminé** | [benchmark, invariants réels et CI](PHASE_1F_PRODUCT_IDENTITY_QUALIFICATION_REPORT.md) |
+| P1G — revue de sortie | **terminé — GO** | [reçu final Phase 1](PHASE_1_FINAL_RECEIPT.md) ; Phase 2 ouverte |
 
 Le durcissement SRE post-Phase 0 et la surveillance du premier événement
 GitHub `schedule` continuent parallèlement. Ils ne bloquent pas Product

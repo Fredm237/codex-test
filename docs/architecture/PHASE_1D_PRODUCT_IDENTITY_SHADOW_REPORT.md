@@ -1,7 +1,7 @@
 # FILON — Phase 1D Product Identity Shadow Report
 
 - Date : **31 août 2026**
-- Statut : **QUALIFIÉ LOCALEMENT — NON DÉPLOYÉ**
+- Statut : **QUALIFIÉ EN PRODUCTION**
 - Révision Alembic : `b3e1a7c4d9f2`
 - Lecteurs publics : **inchangés**
 - Flag : writer couvert par `PRODUCT_GRAPH_SHADOW_ENABLED`, faux par défaut
@@ -75,16 +75,17 @@ la table pour audit. Un ancien binaire ignore l'expansion. Le downgrade
 technique vers `a2d7e9f4c1b6` supprime uniquement les assertions shadow ; il
 n'est pas la procédure normale de production.
 
+## Qualification de production
+
+La migration est déployée sous la révision `b3e1a7c4d9f2`. Le lot P1E a
+persisté 2 330 assertions sur 1 000 raws, puis reconnu les 2 330 assertions au
+replay sans en créer de nouvelle. Les lecteurs Core v1 sont restés inchangés.
+La preuve détaillée est publiée dans
+[PHASE_1E_PRODUCT_IDENTITY_BACKFILL_REPORT](PHASE_1E_PRODUCT_IDENTITY_BACKFILL_REPORT.md).
+
 ## Limites et gate suivant
 
-Ce lot ne prouve pas encore la distribution des assertions sur les raws de
-production. P1E doit :
-
-1. publier et faire passer la CI, dont PostgreSQL ;
-2. appliquer la migration dans une fenêtre sans writer ;
-3. exécuter un dry-run réel borné ;
-4. examiner GTIN résolus/quarantaines, marques observées, SKU scopés et
-   contextes manquants ;
-5. appliquer un seul lot shadow borné, rejouer le même lot et prouver zéro
-   duplication ;
-6. conserver les lecteurs v1 inchangés.
+La distribution complète du catalogue reste inconnue. Le lot réel borné
+qualifie le writer et son replay, mais pas la couverture des quelque 190
+feeds. L'extension appartient à Entity Resolution et doit conserver les
+lecteurs v1 tant que ses propres gates ne sont pas satisfaites.
