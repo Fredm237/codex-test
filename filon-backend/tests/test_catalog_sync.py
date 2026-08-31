@@ -203,3 +203,50 @@ async def test_run_marks_an_all_skipped_ingestion_degraded(monkeypatch):
             )
     finally:
         await engine.dispose()
+
+
+async def test_run_marks_a_cooperative_feed_stop_interrupted(monkeypatch):
+    engine, maker = await _session()
+    monkeypatch.setattr(
+        catalog_sync.awin_catalog,
+        "sync_merchants",
+        AsyncMock(return_value=3),
+    )
+    monkeypatch.setattr(
+        catalog_sync.awin_catalog,
+        "ingest_feeds",
+        AsyncMock(
+            return_value={
+                "feeds": 1,
+                "offers": 20_000,
+                "skipped": 0,
+                "stopped_after_feed": True,
+            }
+        ),
+    )
+    rebuild = AsyncMock(return_value={"products": 0})
+    monkeypatch.setattr(catalog_sync.catalog_grouping, "rebuild_products", rebuild)
+    try:
+        async with maker() as session:
+            result = await catalog_sync.run_catalog_sync(
+                session,
+                trigger="scheduler",
+                stop_after_current_feed=True,
+            )
+
+            catalog_sync.awin_catalog.ingest_feeds.assert_awaited_once()
+            assert (
+                catalog_sync.awin_catalog.ingest_feeds.await_args.kwargs[
+                    "stop_after_current_feed"
+                ]
+                is True
+            )
+
+            assert result["started"] is True
+            assert result["run"]["status"] == "interrupted"
+            assert result["run"]["failure_reason"] == "stop_after_current_feed"
+            assert result["run"]["feeds"] == 1
+            assert result["run"]["offers"] == 20_000
+            rebuild.assert_not_awaited()
+    finally:
+        await engine.dispose()

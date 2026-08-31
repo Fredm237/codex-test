@@ -79,7 +79,7 @@ async def preflight() -> dict[str, object]:
     }
 
 
-async def _run_if_due(hours: int) -> str:
+async def _run_if_due(hours: int, *, stop_after_current_feed: bool = False) -> str:
     async with db.session_scope() as session:
         if session is None:
             raise RuntimeError("catalog scheduler database session unavailable")
@@ -91,7 +91,11 @@ async def _run_if_due(hours: int) -> str:
                 state.get("age_hours"),
             )
             return str(state["status"])
-        result = await catalog_sync.run_catalog_sync(session, trigger="scheduler")
+        result = await catalog_sync.run_catalog_sync(
+            session,
+            trigger="scheduler",
+            stop_after_current_feed=stop_after_current_feed,
+        )
         log.info("Synchronisation catalogue terminée : %s", result)
         if result.get("started") is False:
             return str(result.get("status") or "not_started")
@@ -101,18 +105,24 @@ async def _run_if_due(hours: int) -> str:
         return "succeeded"
 
 
-async def run_once() -> str:
+async def run_once(*, stop_after_current_feed: bool = False) -> str:
     """Valide la configuration et exécute au plus un cycle dû."""
 
     hours = _validated_interval()
     await db.prepare_schema()
-    return await _run_if_due(hours)
+    return await _run_if_due(
+        hours,
+        stop_after_current_feed=stop_after_current_feed,
+    )
 
 
 def main(argv: Sequence[str] = ()) -> int:
     arguments = tuple(argv)
-    if arguments not in {(), ("--check",)}:
-        log.error("Usage: python -m app.ingest.scheduler [--check]")
+    if arguments not in {(), ("--check",), ("--stop-after-current-feed",)}:
+        log.error(
+            "Usage: python -m app.ingest.scheduler "
+            "[--check|--stop-after-current-feed]"
+        )
         return 2
     try:
         settings = get_settings()
@@ -121,7 +131,12 @@ def main(argv: Sequence[str] = ()) -> int:
             receipt = asyncio.run(preflight())
             print(json.dumps(receipt, separators=(",", ":"), sort_keys=True))
             return 0
-        outcome = asyncio.run(run_once())
+        outcome = asyncio.run(
+            run_once(
+                stop_after_current_feed=arguments
+                == ("--stop-after-current-feed",),
+            )
+        )
     except Exception as exc:  # pragma: no cover - dépendances réelles
         log.error("Job catalogue en échec (error_type=%s)", type(exc).__name__)
         return 1

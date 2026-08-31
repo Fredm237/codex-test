@@ -859,3 +859,130 @@ async def test_ingestion_resumes_after_a_succeeded_feed_checkpoint(monkeypatch):
             ]
     finally:
         await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_ingestion_stops_cooperatively_after_a_committed_feed(monkeypatch):
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            session.add(
+                core_models.Merchant(
+                    awin_mid=77,
+                    name="Marchand test",
+                    slug="marchand-test",
+                )
+            )
+            await session.commit()
+
+            settings = Settings(
+                observation_shadow_enabled=False,
+                awin_regions="BE",
+                awin_max_rows_per_feed=0,
+                awin_feed_limit=0,
+            )
+
+            async def feeds():
+                return [
+                    awin_catalog.FeedInfo("41", 77, "Marchand test", "BE", 1),
+                    awin_catalog.FeedInfo("42", 77, "Marchand test", "BE", 1),
+                ]
+
+            downloaded: list[str] = []
+
+            async def rows(feed_ids, *, max_rows=0):
+                downloaded.extend(feed_ids)
+                return [VALID_ROW]
+
+            async def legacy_upsert(*_args, **_kwargs):
+                return None
+
+            monkeypatch.setattr(awin_catalog, "get_settings", lambda: settings)
+            monkeypatch.setattr(awin_catalog, "list_feeds", feeds)
+            monkeypatch.setattr(awin_catalog, "_download_feed_rows", rows)
+            monkeypatch.setattr(awin_catalog, "_upsert_offer", legacy_upsert)
+
+            result = await awin_catalog.ingest_feeds(
+                session,
+                stop_after_current_feed=True,
+            )
+
+            assert downloaded == ["41"]
+            assert result["feeds"] == 1
+            assert result["selected_feeds"] == 2
+            assert result["offers"] == 1
+            assert result["stopped_after_feed"] is True
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_bounded_resume_counts_only_selected_checkpoint_offers(monkeypatch):
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            merchant = core_models.Merchant(
+                awin_mid=77,
+                name="Marchand test",
+                slug="marchand-test",
+            )
+            run = core_models.CatalogSyncRun(
+                trigger="scheduler",
+                status="running",
+                heartbeat_at=datetime.now(UTC).replace(tzinfo=None),
+            )
+            session.add_all([merchant, run])
+            await session.flush()
+            session.add_all(
+                [
+                    core_models.CatalogSyncFeedCheckpoint(
+                        sync_run_id=run.id,
+                        feed_id="41",
+                        status="succeeded",
+                        rows_count=3,
+                    ),
+                    core_models.CatalogSyncFeedCheckpoint(
+                        sync_run_id=run.id,
+                        feed_id="42",
+                        status="succeeded",
+                        rows_count=7,
+                    ),
+                ]
+            )
+            await session.commit()
+
+            settings = Settings(
+                observation_shadow_enabled=False,
+                awin_regions="BE",
+                awin_max_rows_per_feed=0,
+                awin_feed_limit=1,
+            )
+
+            async def feeds():
+                return [
+                    awin_catalog.FeedInfo("41", 77, "Marchand test", "BE", 3),
+                    awin_catalog.FeedInfo("42", 77, "Marchand test", "BE", 7),
+                ]
+
+            async def should_not_download(*_args, **_kwargs):
+                raise AssertionError("a succeeded checkpoint must not be downloaded")
+
+            monkeypatch.setattr(awin_catalog, "get_settings", lambda: settings)
+            monkeypatch.setattr(awin_catalog, "list_feeds", feeds)
+            monkeypatch.setattr(
+                awin_catalog,
+                "_download_feed_rows",
+                should_not_download,
+            )
+
+            result = await awin_catalog.ingest_feeds(
+                session,
+                sync_run_id=run.id,
+            )
+
+            assert result["feeds"] == 1
+            assert result["selected_feeds"] == 1
+            assert result["offers"] == 3
+            assert result["stopped_after_feed"] is False
+    finally:
+        await engine.dispose()

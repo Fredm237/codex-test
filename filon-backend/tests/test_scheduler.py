@@ -139,7 +139,11 @@ async def test_scheduler_runs_one_due_cycle_then_exits(monkeypatch) -> None:
 
     assert await scheduler.run_once() == "succeeded"
     prepare.assert_awaited_once_with()
-    run.assert_awaited_once_with(session, trigger="scheduler")
+    run.assert_awaited_once_with(
+        session,
+        trigger="scheduler",
+        stop_after_current_feed=False,
+    )
 
 
 @pytest.mark.asyncio
@@ -160,7 +164,34 @@ async def test_scheduler_runs_when_the_interval_is_due_even_if_health_is_toleran
     monkeypatch.setattr(scheduler.catalog_sync, "run_catalog_sync", run)
 
     assert await scheduler.run_once() == "succeeded"
-    run.assert_awaited_once_with(session, trigger="scheduler")
+    run.assert_awaited_once_with(
+        session,
+        trigger="scheduler",
+        stop_after_current_feed=False,
+    )
+
+
+@pytest.mark.asyncio
+async def test_scheduler_forwards_cooperative_stop_to_one_due_cycle(monkeypatch) -> None:
+    session = object()
+    monkeypatch.setattr(scheduler, "get_settings", lambda: _settings(hours=6))
+    monkeypatch.setattr(scheduler.db, "is_enabled", lambda: True)
+    monkeypatch.setattr(scheduler.db, "prepare_schema", AsyncMock())
+    monkeypatch.setattr(scheduler.db, "session_scope", _session_scope(session))
+    monkeypatch.setattr(
+        scheduler.catalog_sync,
+        "health",
+        AsyncMock(return_value={"status": "stale", "age_hours": 12}),
+    )
+    run = AsyncMock(return_value={"started": True, "run": {"status": "succeeded"}})
+    monkeypatch.setattr(scheduler.catalog_sync, "run_catalog_sync", run)
+
+    assert await scheduler.run_once(stop_after_current_feed=True) == "succeeded"
+    run.assert_awaited_once_with(
+        session,
+        trigger="scheduler",
+        stop_after_current_feed=True,
+    )
 
 
 @pytest.mark.asyncio
@@ -228,6 +259,15 @@ def test_scheduler_main_check_prints_machine_readable_receipt(
 
     assert scheduler.main(("--check",)) == 0
     assert json.loads(capsys.readouterr().out) == receipt
+
+
+def test_scheduler_main_forwards_cooperative_stop(monkeypatch) -> None:
+    run = AsyncMock(return_value="succeeded")
+    monkeypatch.setattr(scheduler, "get_settings", lambda: _settings(hours=6))
+    monkeypatch.setattr(scheduler, "run_once", run)
+
+    assert scheduler.main(("--stop-after-current-feed",)) == 0
+    run.assert_awaited_once_with(stop_after_current_feed=True)
 
 
 def test_scheduler_main_rejects_unknown_arguments() -> None:

@@ -593,7 +593,8 @@ def _ingestion_stage_outcome(result: dict) -> str:
     graph_shadow = result.get("graph_shadow") or {}
     offer_graph_shadow = result.get("offer_graph_shadow") or {}
     if (
-        result.get("skipped")
+        result.get("stopped_after_feed")
+        or result.get("skipped")
         or shadow.get("failures")
         or graph_shadow.get("failures")
         or offer_graph_shadow.get("failures")
@@ -612,6 +613,7 @@ async def ingest_feeds(
     sync_run_id: int | None = None,
     resume_from_run_id: int | None = None,
     progress: Callable[[], Awaitable[None]] | None = None,
+    stop_after_current_feed: bool = False,
 ) -> dict:
     """Ingestion des feeds des marchands inscrits, régions ciblées.
 
@@ -663,11 +665,14 @@ async def ingest_feeds(
         sync_run_id=sync_run_id,
         resume_from_run_id=resume_from_run_id,
     )
+    selected_feed_ids = {str(feed.feed_id) for feed in selected}
     total_offers = sum(
         checkpoint.rows_count
-        for checkpoint in checkpoints.values()
-        if checkpoint.status == "succeeded"
+        for feed_id, checkpoint in checkpoints.items()
+        if feed_id in selected_feed_ids and checkpoint.status == "succeeded"
     )
+    visited_feeds = 0
+    stopped_after_feed = False
     skipped = 0
     shadow_raw = 0
     shadow_observations = 0
@@ -692,6 +697,7 @@ async def ingest_feeds(
         tuple[int, str, float, str | None, bool | None]
     ] = set()
     for f in selected:
+        visited_feeds += 1
         feed_id = str(f.feed_id)
         checkpoint = checkpoints.get(feed_id)
         if checkpoint is not None and checkpoint.status == "succeeded":
@@ -699,6 +705,10 @@ async def ingest_feeds(
                 "Feed déjà terminé repris depuis checkpoint → %s offres",
                 checkpoint.rows_count,
             )
+            if stop_after_current_feed:
+                stopped_after_feed = True
+                log.warning("Arrêt coopératif demandé après checkpoint de feed")
+                break
             continue
         seen_source_record_keys: set[str] = set()
         if sync_run_id is not None and checkpoint is not None:
@@ -752,6 +762,10 @@ async def ingest_feeds(
                 rows_count=0,
             )
             await session.commit()
+            if stop_after_current_feed:
+                stopped_after_feed = True
+                log.warning("Arrêt coopératif demandé après checkpoint de feed")
+                break
             continue
         await heartbeat()
         await session.commit()
@@ -906,14 +920,26 @@ async def ingest_feeds(
             await session.commit()
         total_offers += n
         log.info("Feed traité → %d offres", n)
+        if stop_after_current_feed:
+            stopped_after_feed = True
+            log.warning("Arrêt coopératif demandé après checkpoint de feed")
+            break
 
     await heartbeat()
     await session.commit()
-    log.info("Ingestion terminée : %d feeds, %d offres, %d ignorés", len(selected), total_offers, skipped)
+    log.info(
+        "Ingestion terminée : %d/%d feeds, %d offres, %d ignorés",
+        visited_feeds,
+        len(selected),
+        total_offers,
+        skipped,
+    )
     return {
-        "feeds": len(selected),
+        "feeds": visited_feeds,
+        "selected_feeds": len(selected),
         "offers": total_offers,
         "skipped": skipped,
+        "stopped_after_feed": stopped_after_feed,
         "shadow": {
             "enabled": s.observation_shadow_enabled,
             "raw_sources": shadow_raw,

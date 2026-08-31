@@ -198,6 +198,7 @@ async def run_catalog_sync(
     *,
     trigger: str,
     limit_override: int | None = None,
+    stop_after_current_feed: bool = False,
 ) -> dict[str, Any]:
     """Synchronise marchands, feeds et regroupements dans un cycle journalisé."""
     if session is None:
@@ -221,9 +222,26 @@ async def run_catalog_sync(
             sync_run_id=run_id,
             resume_from_run_id=run.resumed_from_run_id,
             progress=progress,
+            stop_after_current_feed=stop_after_current_feed,
         )
         await progress()
         await session.commit()
+        if ingest.get("stopped_after_feed"):
+            completed = await finish_run(
+                session,
+                run,
+                status="interrupted",
+                merchants=merchants,
+                feeds=int(ingest.get("feeds") or 0),
+                offers=int(ingest.get("offers") or 0),
+                skipped_feeds=int(ingest.get("skipped") or 0),
+                failure_reason="stop_after_current_feed",
+            )
+            log.warning(
+                "Synchronisation catalogue interrompue après checkpoint : %s",
+                completed,
+            )
+            return {"started": True, "run": completed}
         grouping = await catalog_grouping.rebuild_products(
             session,
             progress=progress,
