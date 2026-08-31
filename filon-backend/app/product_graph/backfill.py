@@ -17,6 +17,10 @@ from app.core.config import get_settings
 from app.core.logging import configure_logging, get_logger
 from app.db import session as db
 from app.observations.models import Observation, RawSourceRecord
+from app.product_graph.identity import (
+    persist_awin_identity_assertions,
+    project_awin_identity_assertions,
+)
 from app.product_graph.resolution import (
     persist_awin_graph_projection,
     project_awin_variant,
@@ -36,6 +40,15 @@ class GraphBackfillReport:
     links_created: int
     links_existing: int
     variants_created: int
+    assertions_created: int
+    assertions_existing: int
+    assertions_projected: int
+    assertions_observed: int
+    assertions_validated: int
+    assertions_quarantined: int
+    brand_normalization_collisions: int
+    scoped_identifier_collisions: int
+    identity_context_missing: int
     missing_offer_links: int
     last_raw_source_id: int | None
 
@@ -96,13 +109,67 @@ async def backfill_batch(
     )
     resolved = quarantined = 0
     links_created = links_existing = variants_created = 0
+    assertions_created = assertions_existing = assertions_quarantined = 0
+    assertions_projected = assertions_observed = assertions_validated = 0
+    identity_context_missing = 0
     missing_offer_links = 0
+    brand_forms: dict[str, set[str]] = {}
+    scoped_identifier_offers: dict[tuple[str, str, str], set[int]] = {}
     for raw in raws:
         offer_id = await _offer_id_for_raw(session, raw.id)
         if offer_id is None:
             missing_offer_links += 1
             continue
         projection = project_awin_variant(raw.payload_json)
+        merchant_id = raw.context_json.get("merchant_id")
+        if (
+            isinstance(merchant_id, bool)
+            or not isinstance(merchant_id, int)
+            or merchant_id <= 0
+        ):
+            identity_context_missing += 1
+            identity_projections = ()
+        else:
+            identity_projections = project_awin_identity_assertions(
+                raw.payload_json,
+                merchant_id=merchant_id,
+            )
+            assertions_projected += len(identity_projections)
+            assertions_observed += sum(
+                assertion.status == "observed"
+                for assertion in identity_projections
+            )
+            assertions_validated += sum(
+                assertion.status == "validated"
+                for assertion in identity_projections
+            )
+            assertions_quarantined += sum(
+                assertion.status == "quarantine"
+                for assertion in identity_projections
+            )
+            for assertion in identity_projections:
+                if (
+                    assertion.subject_type == "brand"
+                    and assertion.normalized_value is not None
+                ):
+                    brand_forms.setdefault(
+                        assertion.normalized_value,
+                        set(),
+                    ).add(str(assertion.value))
+                if (
+                    assertion.identifier_namespace is not None
+                    and assertion.identifier_namespace != "gtin"
+                    and assertion.identifier_scope is not None
+                    and assertion.normalized_value is not None
+                ):
+                    scoped_identifier_offers.setdefault(
+                        (
+                            assertion.identifier_namespace,
+                            assertion.identifier_scope,
+                            assertion.normalized_value,
+                        ),
+                        set(),
+                    ).add(offer_id)
         if projection.resolution == "resolved":
             resolved += 1
         else:
@@ -120,6 +187,16 @@ async def backfill_batch(
         links_created += int(captured.link_created)
         links_existing += int(not captured.link_created)
         variants_created += int(captured.variant_created)
+        identity_capture = await persist_awin_identity_assertions(
+            session,
+            projections=identity_projections,
+            raw_source_record_id=raw.id,
+            offer_id=offer_id,
+            source_ref=raw.source_ref,
+            observed_at=raw.observed_at,
+        )
+        assertions_created += identity_capture.created
+        assertions_existing += identity_capture.existing
 
     if apply:
         await session.commit()
@@ -131,6 +208,20 @@ async def backfill_batch(
         links_created=links_created,
         links_existing=links_existing,
         variants_created=variants_created,
+        assertions_created=assertions_created,
+        assertions_existing=assertions_existing,
+        assertions_projected=assertions_projected,
+        assertions_observed=assertions_observed,
+        assertions_validated=assertions_validated,
+        assertions_quarantined=assertions_quarantined,
+        brand_normalization_collisions=sum(
+            len(raw_forms) > 1 for raw_forms in brand_forms.values()
+        ),
+        scoped_identifier_collisions=sum(
+            len(offer_ids) > 1
+            for offer_ids in scoped_identifier_offers.values()
+        ),
+        identity_context_missing=identity_context_missing,
         missing_offer_links=missing_offer_links,
         last_raw_source_id=raws[-1].id if raws else None,
     )

@@ -1,8 +1,8 @@
-# FILON — Catalog Quality Funnel shadow
+# FILON — Catalog Quality Funnel autonome shadow
 
-- Date : **30 août 2026**
-- Statut : **livré en lecture interne ; NO-GO pour toute promotion produit**
-- Politique : `catalog-quality-funnel-shadow-v1`
+- Date : **31 août 2026**
+- Statut : **P0.5 terminé en shadow ; aucune promotion publique implicite**
+- Politique : `catalog-quality-funnel-autonomous-v2`
 - Unité : lot borné de `raw_source_records` Awin, puis dernière
   `graph_offer_observation` par offre dans ce lot
 
@@ -22,12 +22,19 @@ public.
 | `ACTIVE_OFFERS` | `measured` | Dernière observation de l'offre, non future, ≤ 72 h et `in_stock` |
 | `VALID_PRICE` | `measured` | Montant décimal positif et devise explicite valide |
 | `VALID_MERCHANT` | `measured` | Marchand joint et lien public HTTPS déjà validé par l'Offer Graph |
-| `CORRECTLY_CLASSIFIED` | `not_measurable` | Aucun gold humain indépendant n'est joint au rapport |
-| `RESOLVED_PRODUCT` → `HIGH_CONFIDENCE_DECISION` | `blocked` | La chaîne stricte ne franchit pas une classification non mesurable ; une confiance non calibrée n'est jamais qualifiée de haute |
+| `CORRECTLY_CLASSIFIED` | `provisional` | Champs présents et régressions autonomes vertes ; exactitude humaine non mesurée |
+| `RESOLVED_PRODUCT` | `measured` | Lien modèle après classification provisoire |
+| `RESOLVED_VARIANT` | `measured` | Rattachement exact-GTIN, sans similarité lexicale |
+| `MULTI_MERCHANT_COMPARABLE` | `measured` | Même variante et devise chez au moins deux marchands joints |
+| `30D_HISTORY` | `measured` | Historique de même devise couvrant au moins trente jours |
+| `COMPLETE_LANDED_COST` | `not_supported` | Livraison, taxes et destination ne sont pas modélisées ensemble |
+| `DECISION_ELIGIBLE` | `not_supported` | Le coût rendu complet manque en amont |
+| `HIGH_CONFIDENCE_DECISION` | `not_supported` | Confiance non indépendamment calibrée |
 
-Chaque étape porte son numérateur, son dénominateur et un code de raison.
-Après la frontière humaine, numérateur et dénominateur restent `null` : un
-zéro aurait faussement signifié une mesure.
+Chaque étape porte son numérateur, son dénominateur et un code de raison. Une
+limite subjective n'interrompt plus les mesures déterministes suivantes ; une
+capacité techniquement absente reste en revanche `not_supported`, avec
+numérateur nul plutôt qu'un faux zéro.
 
 ## Signaux techniques séparés
 
@@ -58,7 +65,8 @@ sont pas modélisées ensemble.
 - concordance obligatoire entre observation, offre, raw record et lien de
   variante ;
 - empreinte SHA-256 canonique du rapport ;
-- `launch_gate_eligible=false` constant en v1.
+- `launch_gate_eligible=false` tant que coût rendu et confiance forte ne sont
+  pas supportés ; cette limite n'empêche pas la clôture du lot shadow P0.5.
 
 ## Preuves locales
 
@@ -85,11 +93,15 @@ confiance fabriqué. Le commit local
 (`33332958611`) a requalifié les quatre surfaces et publié l'artefact
 `9738202431`; seul le gate humain strict reste rouge comme prévu.
 
-## Limites et sortie du NO-GO
+## Révision fondatrice et limites restantes
 
-Ce rapport ne mesure ni la justesse de taxonomie, ni les faux merges/splits, ni
-la qualité d'attachement, ni le coût rendu, ni la qualité d'une décision. La
-sortie exige les datasets humains indépendants du Quality Lab, leur adjudication
-et les sources manquantes de livraison/taxes/destination. Tant que ces preuves
-n'existent pas, le funnel strict reste volontairement interrompu à
-`CORRECTLY_CLASSIFIED`.
+L'ancien gate humain est conservé dans l'historique ci-dessus mais remplacé par
+la décision fondateur du 31 août 2026. Le Quality Lab autonome qualifie les
+invariants exact-GTIN, faux merges, rattachements, prix, devises, stock,
+fraîcheur et budget. La classification du lot réel reste `provisional`, jamais
+présentée comme exactitude humaine.
+
+Le funnel s'arrête désormais uniquement sur les limites techniques réelles :
+coût rendu complet, données après clic/achat et calibration indépendante de la
+confiance. P0.5 est terminé en shadow ; ces limites continuent de bloquer les
+claims forts et une activation publique, pas Phase 0 ni Phase 1.

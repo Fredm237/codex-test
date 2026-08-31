@@ -1,134 +1,102 @@
 {
-  "titre": "FILON — Phase 0 Product Intelligence Core",
-  "objectif": "Établir les contrats, mesures, migrations, preuves et gates nécessaires avant tout rebuild produit ou chantier immersif",
-  "cree": "2026-08-28T17:24:12+00:00",
-  "maj": "2026-08-31T01:15:00+02:00",
+  "titre": "FILON — Phase 1 Product Identity",
+  "objectif": "Construire Brand, ProductFamily, ProductModel, Variant, identifiers et provenance en shadow réversible jusqu’au passage du benchmark exact-product",
+  "cree": "2026-08-31T16:17:45+00:00",
+  "maj": "2026-08-31T17:55:36+00:00",
   "contraintes": [
-    "Gel des nouvelles fonctionnalités, de Fashion/Recreate et des travaux visuels/3D jusqu'au passage des gates core",
-    "Aucune valeur favorable ne peut être déduite d'une donnée inconnue",
-    "Aucune migration big bang : expand/contract, shadow, rollback et compatibilité obligatoires",
-    "Les modifications locales utilisateur préexistantes doivent être conservées"
+    "Conserver les lectures publiques v1 inchangées jusqu’au passage des gates Product Identity",
+    "Aucun unknown ne devient une correspondance favorable ; provenance et abstention obligatoires",
+    "Migrations expand-only, flags off, rollback et backfills dry-run/bornés obligatoires",
+    "NO_EXTERNAL_HUMAN_GROUND_TRUTH reste explicite et non bloquant ; aucune validation humaine ne peut être fabriquée",
+    "Immersive, Fashion production et refonte créative restent interdits par leurs gates"
   ],
   "taches": [
     {
-      "id": "p0_a",
-      "objectif": "Cartographier le système, les sources de vérité et la baseline",
+      "id": "p1_a",
+      "objectif": "Auditer les données réelles et établir la baseline Product Identity",
       "statut": "fait",
       "depend": [],
-      "outil": "audit local + GitHub",
-      "attendu": "Current System Map, matrice de décision et rapport qualité versionnés",
-      "obtenu": "Dossier docs/architecture créé",
-      "verification": "Backend 1186/1186 ; web build et 17/17 tests ; mobile 110 réussis, 4 échoués, 1 ignoré, lint 2 erreurs/25 warnings ; extension syntaxe/manifeste valides",
+      "outil": "audit Awin + PostgreSQL en lecture seule",
+      "attendu": "Couverture, collisions, unknowns et verticales prioritaires mesurés sans secret",
+      "obtenu": "Baseline reelle publiee localement ; rosters lexicaux rejetes ; verticales sequentiees",
+      "verification": "Baseline production : 3 200 produits stratifies, 597 846 produits Core, collisions et volumes de 13 sous-categories documentes dans PHASE_1A_PRODUCT_IDENTITY_BASELINE.md",
       "tentatives": 1
     },
     {
-      "id": "p0_b",
-      "objectif": "Figer et tester les contrats v1 et la sémantique unknown",
+      "id": "p1_b",
+      "objectif": "Figer les frontières et contrats Brand/Family/Model/Variant",
       "statut": "fait",
       "depend": [
-        "p0_a"
+        "p1_a"
       ],
-      "outil": "contracts + compatibility suite",
-      "attendu": "Snapshots web/mobile/extension et aucune valeur positive sans preuve",
-      "obtenu": "Registre contracts/v1 et snapshots unknown ; devise/observation additives ; /advise, recherche catalogue et planificateur général durcis sur stock, fraîcheur 72 h, prix, livraison, budget, FX et remises ; primitives de vérité prix partagées ; catalogue, agrégats, cartes, rails, fiches et Assistant s'abstiennent sans preuve courante exacte ; invariance commerciale bornée ; MegaMenu et sa couverture équilibrée intégrés",
-      "verification": "Commits f5ae21b, e152ed0, 4e5755d, 56de1cf, 4a95a42 et 90246b2 : aucun prix, ordre, agrégat, verdict ou carte favorable sans snapshot exact et frais, devise supportée et stock positif ; aucune comparaison inter-devise ; liens Assistant limités au catalogue interne ou à un HTTPS marchand public sûr. Validation locale : 173 tests backend ciblés, 2020 réussis + 1 ignoré au complet, web 17/17, typecheck et build de 42 pages. GitHub Actions #343 confirme 2021 tests backend, web, mobile et extension verts.",
+      "outil": "ADR + contracts",
+      "attendu": "Invariants, provenance, unknown, identifiants et compatibilité v1 versionnés",
+      "obtenu": "Frontieres Brand/Family/Model/Variant, scopes GTIN/MPN/SKU, provenance et unknown figes",
+      "verification": "ADR-006 accepte, deux JSON Schemas et deux exemples valides ; 20 tests Product Identity/Product Graph passent",
       "tentatives": 1
     },
     {
-      "id": "p0_c",
-      "objectif": "Construire le Quality Lab et les datasets indépendants",
+      "id": "p1_c",
+      "objectif": "Construire le benchmark exact-product autonome",
+      "statut": "fait",
+      "depend": [
+        "p1_b"
+      ],
+      "outil": "Quality Lab",
+      "attendu": "Golden set, hard negatives, multi-seed et scorecard reproductible",
+      "obtenu": "Benchmark autonome multi-seed sur cinq verticales, hard negatives et scorecard Wilson",
+      "verification": "Evaluation f71c3f3e : 10 565/10 565 checks, exact-product 960/960, faux merges 0/2 880 (IC95 haut 0,1332 %), 30 tests cibles verts",
+      "tentatives": 1
+    },
+    {
+      "id": "p1_d",
+      "objectif": "Étendre le schéma et les writers Product Identity en shadow",
+      "statut": "fait",
+      "depend": [
+        "p1_b"
+      ],
+      "outil": "Alembic + backend",
+      "attendu": "Migration expand-only réversible, flags off, projection idempotente et provenance conservée",
+      "obtenu": "Schema et writers shadow idempotents, rollback par flag, Core v1 inchange",
+      "verification": "Revision b3e1a7c4d9f2 expand-only ; assertions Brand/GTIN/SKU sourcees ; 121 tests cibles verts, 3 PostgreSQL opt-in ignores localement",
+      "tentatives": 1
+    },
+    {
+      "id": "p1_e",
+      "objectif": "Exécuter un backfill réel borné en dry-run puis shadow",
       "statut": "en_cours",
       "depend": [
-        "p0_a"
-      ],
-      "outil": "quality lab",
-      "attendu": "Entity, Variant, Offer, Retrieval et Decision mesurés avec intervalles",
-      "obtenu": "Manifest v0.5 fermé à sept datasets et 27 gates ; schémas, packs aveugles, identifiants distincts, adjudication, anti-fuite, provenance, identité de run et empreinte exacte du holdout ; Wilson, Bernstein empirique et bootstrap déterministe ; publication atomique sans remplacement et comparaison fail-closed ; sept adaptateurs applicatifs réels, dont Decision déterministe et sourcé et trois adaptateurs Graph exacts-GTIN ; inventaire public immuable de 1 000 candidats sans labels moteur ; collecte humaine indépendante encore absente",
-      "verification": "Quality 377/377 et backend complet 2097 réussis + 2 ignorés sous Python 3.12. Les adaptateurs Graph s'abstiennent sans GTIN unique, valide et non conflictuel et conservent une confiance non calibrée. Rapport readiness integrity_valid=true, ready=false, status=not_ready, zéro cas humain dans chacun des sept datasets ; aucune métrique métier n'est mesurable avant curation, double annotation et adjudication humaines.",
-      "tentatives": 1
-    },
-    {
-      "id": "p0_d",
-      "objectif": "Créer la baseline Alembic et le runbook de rollback",
-      "statut": "fait",
-      "depend": [
-        "p0_b"
-      ],
-      "outil": "database migrations",
-      "attendu": "Upgrade/downgrade sur base éphémère et restauration testée",
-      "obtenu": "Baseline Alembic b9db07b15986, head f4c81a9d2e70, adoption production par stamp, garde-fou runtime sans DDL implicite, ADR, runbook backup/rollback et reçu Railway",
-      "verification": "Backend local 2035 réussis + 2 ignorés ; dump logique restauré sous PostgreSQL 18 avec pg_amcheck ; sauvegarde native Railway ; fenêtre sans écrivain ; stamp b9db07b15986, upgrade f4c81a9d2e70, alembic check sans drift et quatre compteurs métier strictement invariants en production",
-      "tentatives": 1
-    },
-    {
-      "id": "p0_e",
-      "objectif": "Introduire RawSource, Observation et Quarantine en shadow",
-      "statut": "fait",
-      "depend": [
-        "p0_b",
-        "p0_d"
-      ],
-      "outil": "backend",
-      "attendu": "Replay déterministe sans changer les lectures v1",
-      "obtenu": "Trois tables shadow append-only, projection Awin versionnée, unknown fail-closed, quarantaine structurée, replay idempotent, savepoint isolant le Core v1 et taxonomie produit E001–E018 canonique sans rupture des valeurs historiques",
-      "verification": "Commit 7753dffbd99e378b7dcd287cb13ee1d32e379b39 isolé sous Python 3.12.13 : 29 tests taxonomie/observation/contrats et backend 1304/1304 ; Enum/registre/schéma identiques, replay versionné, contrats publics v1 inchangés ; deux relectures sans P0/P1/P2",
-      "tentatives": 1
-    },
-    {
-      "id": "p0_f",
-      "objectif": "Construire Product/Variant, Offer, Merchant et Evidence en shadows",
-      "statut": "en_cours",
-      "depend": [
-        "p0_c",
-        "p0_e"
+        "p1_c",
+        "p1_d"
       ],
       "outil": "catalog core",
-      "attendu": "Faux merges/splits et attachement offre mesurés au-dessus des gates",
-      "obtenu": "Shadows techniques : douze tables d'expansion, migrations Alembic 8b2f4c7d9a10, c6a1d4e8f2b3, d7b2e5f9a4c1 et e8c3f6a0b5d2, resolver exact-GTIN, argent décimal, stock tri-state, lien HTTPS public strict, mesures marchand sans score et registre de 11 claims fail-closed ; writers isolés, backfills dry-run/apply bornés et idempotents, cinq flags off par défaut et sept adaptateurs Quality réels ; aucune lecture v1 modifiée",
-      "verification": "68 tests Evidence/configuration/migration ciblés et 36 tests de chaîne Observation/Product/Offer/Merchant/Evidence ; Quality 377/377 ; backend complet 2097 réussis + 2 ignorés en 68,08 s ; readiness intègre mais not_ready avec 0 cas humain ; aucun backfill ni déploiement Graph/Merchant/Evidence production, aucun claim fort ni DECISION_ELIGIBLE",
+      "attendu": "Rapport de collisions/quarantaine, zéro faux merge implicite et rollback prouvé",
+      "obtenu": null,
+      "verification": null,
       "tentatives": 1
     },
     {
-      "id": "p0_g",
-      "objectif": "Étendre la CI à toutes les surfaces et protéger main",
-      "statut": "fait",
-      "depend": [
-        "p0_a"
-      ],
-      "outil": "GitHub",
-      "attendu": "Backend, web, mobile, extension, contrats, migrations et quality lab requis",
-      "obtenu": "Workflow multi-surfaces publié avec backend, Postgres/Alembic, contrats, Quality, web, mobile et extension ; branche publique codex/filon-phase-0-core byte-identique au HEAD local ; run réel et artefact readiness exécutés ; ruleset active limitée à main avec PR, résolution des conversations, branche à jour, suppression/force-push interdits et quatre checks GitHub Actions requis sans bypass",
-      "verification": "Référence applicative GitHub qualifiée 2725a464e046c3790ed20eb0533068760922a524, arbre distant de9cc8944e82f42ae28361f43f5fa49791d6b1e1 identique au commit local 04fe05bc7cc841e54b23341ef5208d4f0f61518e. Actions 33325481242 (#352) : Alembic, régressions backend, web, mobile et extension verts ; seul le gate strict attendu échoue car les sept datasets humains sont vides ; artefact 9736128514. Ruleset GitHub 21798272 active sur ~DEFAULT_BRANCH, quatre contexts liés à GitHub Actions, strict=true, bypass_actors=[] et current_user_can_bypass=never.",
-      "tentatives": 1
-    },
-    {
-      "id": "p0_i",
-      "objectif": "Rendre les requêtes corrélables, les sondes fail-closed et les performances mesurables",
-      "statut": "en_cours",
-      "depend": [
-        "p0_d"
-      ],
-      "outil": "backend observability",
-      "attendu": "Corrélation bout en bout, percentiles, unknown/freshness/abstentions, dashboards et alertes testés",
-      "obtenu": "Request ID opaque généré côté serveur, corrélation HTTP vers catalogue/retrieval/decision/ingestion/observation y compris 429/500, huit jalons fermés intent/retrieval/candidats/filtrage/classement/sélection/preuves/décision, spans applicatifs PostgreSQL/Redis/Awin/SerpAPI/LLM et traceparent W3C vers les dépendances HTTP sans donnée métier libre ; latences P50/P95/P99 et cardinalité bornées, probes DB/révision fail-closed, compteurs versionnés unknown/freshness/exclusions/abstentions, ingestion degraded, cycle SSE maîtrisé et logs ciblés nettoyés sans payload ; moteur local canonique de cinq règles provisoires, hystérésis, replay/conflict fail-closed, silence borné et runbook livrés ; front door HMAC, fenêtre glissante, plafond strict, buckets 429 et confiance proxy explicite livrés ; mode Redis atomique opt-in avec horloge commune, HMAC partagé, registre global borné et aucun fallback local livré ; source d'identité Railway explicite exigeant UUID de plateforme et exactement un X-Real-IP canonique avant pseudonymisation livrée et qualifiée sur le déploiement réel ; téléchargement Awin en flux avec spool disque après 8 MiB, plafonds compressé/décompressé et limite dure de 250 000 lignes ; ordonnanceur d'ingestion autonome et journalisé disponible mais non déployé ; export OpenMetrics 1.0 authentifié et fail-closed, désormais vérifié directement en production ; pack Prometheus/Grafana avec inventaire vide, secret-file, labels fermés, 11 rollups multi-réplica et dashboard descriptif sans SLO ; contrats JSON, compilateur d’inventaire atomique et vérificateur HTTPS produisant un reçu expurgé livrés ; backend Core Railway déployé par Dockerfile avec preDeploy Alembic, env=production, probes publiques HTTP 200 et révision f4c81a9d2e70 ; sauvegardes Railway DAILY, WEEKLY et MONTHLY actives ; dashboard capacité Railway et moniteurs natifs 14/17 GB actifs ; backend de traces, activation Redis production ou WAF, déploiement agrégateur/dashboard applicatif, pager et trafic représentatif encore absents",
-      "verification": "Commits ee13023, f6efcd0 et dfe9098 : corrélation décisionnelle/dépendances, isolation concurrente, erreurs sans message, listes fermées, traceparent LLM et tous chemins Awin, transactions PostgreSQL Awin en lot, absence de donnée métier libre et mémoire de feed bornée prouvées. Commit 10a1866 : 49 tests d’activation et 227 tests observabilité ciblés ; Prometheus/promtool 3.13.2 LTS valide la configuration, lint les 11 règles et réussit leur scénario officiel à deux réplicas. Lot Redis/Railway : 180 tests configuration/front door/healthchecks réussis ; backend complet 2067 réussis + 2 ignorés sous Python 3.12 ; concurrence, deux IP derrière un pair ASGI, en-tête absent/dupliqué/invalide, panne 503 fail-closed, plafond 429, confidentialité, validation et fermeture du client prouvés. Déploiement Railway 03be13dc-e20f-4f62-8119-c27d84176b47 : ACTIVE/SUCCESS en EU West, /health/live, /health/ready et /health protégé HTTP 200, base ok, révision f4c81a9d2e70 ; valeurs X-Real-IP clientes invalides/dupliquées écrasées par l'edge. Actions #352 confirme Alembic, régressions backend et trois clients verts ; seul le gate humain strict échoue, artefact 9736128514. Export production : auth 401/401/401/200, OpenMetrics 1.0, no-store, 24 familles, 15 labels fermés et aucune fuite de secret. Résilience : deux backups manuels sans expiration ; plannings DAILY 6 jours, WEEKLY 27 jours et MONTHLY 89 jours ; deux blocs VOLUME_METRICS_ITEM ciblent exclusivement postgres-volume avec DISK_USAGE_GB above 14/17 GB, sans alerte active. P0.6 reste en cours jusqu'aux scrapes/rétention, traces, pager, activation Redis ou WAF, livraison réelle des notifications et trafic représentatif.",
-      "tentatives": 1
-    },
-    {
-      "id": "p0_h",
-      "objectif": "Tenir la revue GO/NO-GO vers Phase 1",
+      "id": "p1_f",
+      "objectif": "Qualifier Product Identity sur ses gates",
       "statut": "a_faire",
       "depend": [
-        "p0_b",
-        "p0_c",
-        "p0_d",
-        "p0_e",
-        "p0_f",
-        "p0_g",
-        "p0_i"
+        "p1_e"
+      ],
+      "outil": "tests + benchmark + CI",
+      "attendu": "Exact-product benchmark vert, faux merges/splits mesurés et limites publiées",
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
+    },
+    {
+      "id": "p1_g",
+      "objectif": "Tenir la revue de sortie vers Phase 2",
+      "statut": "a_faire",
+      "depend": [
+        "p1_f"
       ],
       "outil": "architecture review",
-      "attendu": "Gates passées, risques acceptés, ADR et rollback approuvés",
+      "attendu": "Reçu Phase 1 et décision GO/NO-GO vers Entity Resolution",
       "obtenu": null,
       "verification": null,
       "tentatives": 0
@@ -136,324 +104,134 @@
   ],
   "journal": [
     {
-      "ts": "2026-08-28T17:24:12+00:00",
+      "ts": "2026-08-31T16:17:45+00:00",
       "evenement": "mission_creee",
-      "detail": "FILON — Phase 0 Product Intelligence Core"
+      "detail": "FILON — Phase 1 Product Identity"
     },
     {
-      "ts": "2026-08-28T17:24:12+00:00",
-      "evenement": "verification",
-      "detail": "p0_a — baseline locale et GitHub consignée dans docs/architecture"
-    },
-    {
-      "ts": "2026-08-28T17:24:12+00:00",
-      "evenement": "tache_faite",
-      "detail": "p0_a — dossier d'architecture Phase 0 créé"
-    },
-    {
-      "ts": "2026-08-28T17:24:12+00:00",
+      "ts": "2026-08-31T16:17:45+00:00",
       "evenement": "contrainte",
-      "detail": "Bible immersive future-gated ; aucune exécution visuelle avant les gates core"
+      "detail": "Conserver les lectures publiques v1 inchangées jusqu’au passage des gates Product Identity"
     },
     {
-      "ts": "2026-08-28T17:43:00+00:00",
+      "ts": "2026-08-31T16:17:45+00:00",
+      "evenement": "contrainte",
+      "detail": "Aucun unknown ne devient une correspondance favorable ; provenance et abstention obligatoires"
+    },
+    {
+      "ts": "2026-08-31T16:17:46+00:00",
+      "evenement": "contrainte",
+      "detail": "Migrations expand-only, flags off, rollback et backfills dry-run/bornés obligatoires"
+    },
+    {
+      "ts": "2026-08-31T16:17:46+00:00",
+      "evenement": "contrainte",
+      "detail": "NO_EXTERNAL_HUMAN_GROUND_TRUTH reste explicite et non bloquant ; aucune validation humaine ne peut être fabriquée"
+    },
+    {
+      "ts": "2026-08-31T16:17:46+00:00",
+      "evenement": "contrainte",
+      "detail": "Immersive, Fashion production et refonte créative restent interdits par leurs gates"
+    },
+    {
+      "ts": "2026-08-31T16:17:46+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "p1_a — Auditer les données réelles et établir la baseline Product Identity"
+    },
+    {
+      "ts": "2026-08-31T16:17:47+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "p1_b — Figer les frontières et contrats Brand/Family/Model/Variant"
+    },
+    {
+      "ts": "2026-08-31T16:17:47+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "p1_c — Construire le benchmark exact-product autonome"
+    },
+    {
+      "ts": "2026-08-31T16:17:48+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "p1_d — Étendre le schéma et les writers Product Identity en shadow"
+    },
+    {
+      "ts": "2026-08-31T16:17:48+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "p1_e — Exécuter un backfill réel borné en dry-run puis shadow"
+    },
+    {
+      "ts": "2026-08-31T16:17:48+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "p1_f — Qualifier Product Identity sur ses gates"
+    },
+    {
+      "ts": "2026-08-31T16:17:49+00:00",
+      "evenement": "tache_ajoutee",
+      "detail": "p1_g — Tenir la revue de sortie vers Phase 2"
+    },
+    {
+      "ts": "2026-08-31T17:17:43+00:00",
+      "evenement": "tache_demarree",
+      "detail": "p1_a (tentative 1)"
+    },
+    {
+      "ts": "2026-08-31T17:36:31+00:00",
       "evenement": "verification",
-      "detail": "p0_b — backend 1191/1191 ; contrats web/mobile/extension et build/typecheck validés"
+      "detail": "p1_a — Baseline production : 3 200 produits stratifies, 597 846 produits Core, collisions et volumes de 13 sous-categories documentes dans PHASE_1A_PRODUCT_IDENTITY_BASELINE.md"
     },
     {
-      "ts": "2026-08-28T17:43:00+00:00",
+      "ts": "2026-08-31T17:36:31+00:00",
       "evenement": "tache_faite",
-      "detail": "p0_b — contracts/v1 figé, unknown fail-closed et fallback de démonstration supprimé"
+      "detail": "p1_a — Baseline reelle publiee localement ; rosters lexicaux rejetes ; verticales sequentiees"
     },
     {
-      "ts": "2026-08-28T17:51:00+00:00",
+      "ts": "2026-08-31T17:36:31+00:00",
       "evenement": "tache_demarree",
-      "detail": "p0_c (tentative 1)"
+      "detail": "p1_b (tentative 1)"
     },
     {
-      "ts": "2026-08-28T17:51:00+00:00",
+      "ts": "2026-08-31T17:36:31+00:00",
       "evenement": "verification",
-      "detail": "p0_c — intégrité technique locale verte, readiness not_ready avec 0 cas indépendants ; aucune annotation fabriquée"
+      "detail": "p1_b — ADR-006 accepte, deux JSON Schemas et deux exemples valides ; 20 tests Product Identity/Product Graph passent"
     },
     {
-      "ts": "2026-08-28T17:57:00+00:00",
-      "evenement": "tache_demarree",
-      "detail": "p0_g (tentative 1)"
-    },
-    {
-      "ts": "2026-08-28T17:57:00+00:00",
-      "evenement": "verification",
-      "detail": "p0_g — workflow multi-surfaces valide localement ; publication et protection main non effectuées sans branche désignée"
-    },
-    {
-      "ts": "2026-08-28T18:05:00+00:00",
-      "evenement": "tache_demarree",
-      "detail": "p0_d (tentative 1)"
-    },
-    {
-      "ts": "2026-08-28T18:15:20+00:00",
-      "evenement": "verification",
-      "detail": "p0_d — 1204 tests backend verts ; baseline/stamp/drift/downgrade/restauration prouvés sur base éphémère"
-    },
-    {
-      "ts": "2026-08-28T18:15:20+00:00",
+      "ts": "2026-08-31T17:36:31+00:00",
       "evenement": "tache_faite",
-      "detail": "p0_d — baseline Alembic b9db07b15986 et runbook de rollback livrés"
+      "detail": "p1_b — Frontieres Brand/Family/Model/Variant, scopes GTIN/MPN/SKU, provenance et unknown figes"
     },
     {
-      "ts": "2026-08-28T18:18:00+00:00",
+      "ts": "2026-08-31T17:36:31+00:00",
       "evenement": "tache_demarree",
-      "detail": "p0_e (tentative 1)"
+      "detail": "p1_c (tentative 1)"
     },
     {
-      "ts": "2026-08-28T18:46:38+00:00",
+      "ts": "2026-08-31T17:43:49+00:00",
       "evenement": "verification",
-      "detail": "p0_e — 1216 tests backend verts ; replay, idempotence, unknown, quarantaine, isolation v1 et rollback shadow prouvés"
+      "detail": "p1_c — Evaluation f71c3f3e : 10 565/10 565 checks, exact-product 960/960, faux merges 0/2 880 (IC95 haut 0,1332 %), 30 tests cibles verts"
     },
     {
-      "ts": "2026-08-28T18:46:38+00:00",
+      "ts": "2026-08-31T17:43:49+00:00",
       "evenement": "tache_faite",
-      "detail": "p0_e — RawSource, Observation et Quarantine livrés en shadow opt-in"
+      "detail": "p1_c — Benchmark autonome multi-seed sur cinq verticales, hard negatives et scorecard Wilson"
     },
     {
-      "ts": "2026-08-28T19:04:04+00:00",
-      "evenement": "verification",
-      "detail": "p0_c — schémas, packs aveugles, identifiants distincts et empreintes prouvés ; humanité/indépendance à garantir hors code ; backend 1221/1221 ; readiness maintenue not_ready avec 0 annotation fabriquée"
-    },
-    {
-      "ts": "2026-08-28T19:17:31+00:00",
-      "evenement": "verification",
-      "detail": "p0_g — commit ad19e7d isolé : backend/mobile/build web/extension verts ; 5 tests MegaMenu préexistants détectés rouges, non masqués"
-    },
-    {
-      "ts": "2026-08-28T19:57:07+00:00",
+      "ts": "2026-08-31T17:43:49+00:00",
       "evenement": "tache_demarree",
-      "detail": "p0_i (tentative 1)"
+      "detail": "p1_d (tentative 1)"
     },
     {
-      "ts": "2026-08-28T19:57:07+00:00",
+      "ts": "2026-08-31T17:55:36+00:00",
       "evenement": "verification",
-      "detail": "p0_i — fondation locale verte : corrélation, métriques bornées et readiness fail-closed ; 29 tests ciblés verts ; production NO-GO sans export, dashboards ni alertes"
+      "detail": "p1_d — Revision b3e1a7c4d9f2 expand-only ; assertions Brand/GTIN/SKU sourcees ; 121 tests cibles verts, 3 PostgreSQL opt-in ignores localement"
     },
     {
-      "ts": "2026-08-28T19:57:07+00:00",
-      "evenement": "verification",
-      "detail": "truth audit — repli commercial synthétique supprimé et claims web/extension/CGU bornés au catalogue indexé, aux preuves et inconnues disponibles"
-    },
-    {
-      "ts": "2026-08-28T19:57:07+00:00",
-      "evenement": "verification",
-      "detail": "worktree consolidé — backend 1228/1228 ; build web 42 routes ; 17 tests MegaMenu, contrats v1, claims publics et extension verts"
-    },
-    {
-      "ts": "2026-08-28T22:57:20+02:00",
-      "evenement": "verification",
-      "detail": "commit 922766e isolé — backend 1228/1228 ; build web 42 routes, contrats v1, truth claims et extension verts ; npm test rouge sur les 5 tests MegaMenu de baseline, sans masquage"
-    },
-    {
-      "ts": "2026-08-28T23:11:44+02:00",
-      "evenement": "verification",
-      "detail": "commit 0941eae isolé — backend 1230/1230 ; compteurs Product Intelligence bornés et testés sans fuite de requête ni identifiant"
-    },
-    {
-      "ts": "2026-08-29T00:30:53+02:00",
-      "evenement": "verification",
-      "detail": "commit 3a0ecee isolé — backend 1239/1239 ; corrélation HTTP/pipeline, confidentialité des logs, 429/500, ingestion degraded et cycle SSE prouvés"
-    },
-    {
-      "ts": "2026-08-29T00:48:49+02:00",
-      "evenement": "verification",
-      "detail": "commit 987d4b1 isolé — 2 tests d'invariance et backend 1241/1241 ; barèmes synthétiques inversés sans effet sur la clé Core ni le reranker Assistant, liens seuls modifiés"
-    },
-    {
-      "ts": "2026-08-29T01:29:42+02:00",
-      "evenement": "verification",
-      "detail": "commit 8b6be85 isolé — 78 tests ciblés et backend 1294/1294 ; cinq règles locales fail-closed, watermark/replay/conflit, silences monotones, confidentialité et absence de callbacks sous verrou prouvés ; production maintenue NO-GO sans ordonnanceur/export/pager"
-    },
-    {
-      "ts": "2026-08-29T01:49:23+02:00",
-      "evenement": "verification",
-      "detail": "commit 7753dff isolé — 29 tests taxonomie/observation/contrats et backend 1304/1304 ; mapping E001–E018 figé, valeurs et clés historiques inchangées, replay quarantiné versionné, contracts/v1 intact et deux revues sans P0/P1/P2"
-    },
-    {
-      "ts": "2026-08-29T02:25:27+02:00",
-      "evenement": "verification",
-      "detail": "commit 7cbb81d isolé — 104 tests front door/observabilité/lifespan et backend 1370/1370 ; HMAC, fenêtre glissante, cap strict, CIDR/XFF, buckets 429, liveness Railway et confidentialité prouvés ; deux revues et fuzz sans P0/P1/P2 ; production NO-GO sans CIDR Railway vérifié ni WAF"
-    },
-    {
-      "ts": "2026-08-29T02:10:41+00:00",
-      "evenement": "verification",
-      "detail": "p0_c — Commits 5ee87f2 et 45e7768 : 262 tests Quality verts ; archive propre 45e7768, backend 1659/1659 sous Python 3.12.13, 7 warnings historiques ; rapport 2026-08-29 integrity_valid=true, ready=false, 0 cas humains ; invalidité CLI=2, stricte not_ready=1, non-stricte intègre=0."
-    },
-    {
-      "ts": "2026-08-29T02:10:41+00:00",
-      "evenement": "verification",
-      "detail": "p0_g — Commit 45e7768 : Quality CI fail-closed et artefact readiness ; archive propre backend 1659/1659 avec 7 warnings. Workflow distant non publié, protection main absente et HEAD propre conserve 5 échecs MegaMenu ; le worktree utilisateur passe 17/17 mais n'est pas attribué à cette branche."
-    },
-    {
-      "ts": "2026-08-29T02:10:49+00:00",
-      "evenement": "verification",
-      "detail": "p0_b rouvert — Commit f5ae21b : /advise agents et planificateur général fail-closed sur les faits couverts ; recommandations non-abstentionnistes du parcours général null/not_calibrated ; contrats v1 additives currency/observed_at ; 119 tests ciblés et backend 1659/1659. Restent à corriger : fallback devise EUR dans services/recommend.py et catalog_search.py, abstention générale 0/low et score heuristique Fashion."
-    },
-    {
-      "ts": "2026-08-29T04:27:22+02:00",
-      "evenement": "tache_rouverte",
-      "detail": "p0_b — audit indépendant : les contrats v1 et deux parcours f5 sont acquis, mais deux fallbacks devise EUR et deux confiances heuristiques legacy empêchent encore de revendiquer unknown fail-closed à l'échelle système"
-    },
-    {
-      "ts": "2026-08-29T07:24:32+02:00",
-      "evenement": "verification",
-      "detail": "p0_c — Quality Lab v0.4 : 285 tests verts ; no_match/ambiguous rendus explicites et mesurés ; recall/NDCG/ECE bloquent sur leurs bornes à 95 % ; readiness intègre mais NO-GO avec 0 cas humain ; roster taxonomie/offres/strates encore ouvert"
-    },
-    {
-      "ts": "2026-08-29T10:03:27+02:00",
-      "evenement": "verification",
-      "detail": "p0_b — primitives et consommateurs non protégés versionnés ; lot catalogue/Assistant/MegaMenu prévalidé dans une copie isolée avec backend 1928 + 1 ignoré, web 17/17, typecheck et build 42 pages ; intégration réelle toujours soumise aux autorisations ciblées"
-    },
-    {
-      "ts": "2026-08-29T10:03:27+02:00",
-      "evenement": "verification",
-      "detail": "p0_c — Quality Lab v0.5 : 7 datasets, 27 gates et 345 tests verts ; readiness intègre mais not_ready avec 0 cas humain dans les sept jeux ; aucune métrique métier fabriquée"
-    },
-    {
-      "ts": "2026-08-29T10:03:27+02:00",
-      "evenement": "verification",
-      "detail": "p0_g — GitHub public main=57724c72e77c50ca54aaf64338f838dda3be2747 ; branche locale non publiée ; aucun ruleset ni protection classique sur main"
-    },
-    {
-      "ts": "2026-08-29T10:03:27+02:00",
-      "evenement": "audit_completude",
-      "detail": "Les trois mandats sont classés par plages et dépendances : Phase 0 NO-GO, Product Graph non commencé faute de données humaines, bible immersive interdite par sa condition d'entrée"
-    },
-    {
-      "ts": "2026-08-29T10:13:41+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — export OpenMetrics 1.0 authentifié et fail-closed : 182 tests ciblés, backend 1934 réussis + 1 ignoré ; collecte distante, dashboards, pager, CIDR Railway et WAF restent des preuves externes absentes"
-    },
-    {
-      "ts": "2026-08-29T10:39:20+02:00",
-      "evenement": "verification",
-      "detail": "p0_c — commit 161d630 : adaptateur Decision réel, déterministe et sourcé ; Quality 359/359, backend 1944 + 1 ignoré ; readiness intègre mais not_ready avec 0 cas humain ; variante et attachement restent les deux adaptateurs Graph absents"
-    },
-    {
-      "ts": "2026-08-29T10:53:19+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — commit bd13d2b : pack Prometheus/Grafana fail-closed, 11 rollups et dashboard descriptif ; promtool 3.13.2 LTS vert, 189 tests ciblés, backend 1949 + 1 ignoré ; agrégateur live, scrapes, rétention, pager, CIDR et WAF restent externes"
-    },
-    {
-      "ts": "2026-08-29T12:14:39+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — commit 10a1866 : inventaire Prometheus strict compilé atomiquement et reçu HTTPS v1 expurgé ; 49 tests d’activation, 227 tests ciblés, backend 1993 + 1 ignoré ; promtool 3.13.2 LTS vert ; activation réelle, rétention, dashboard, pager, CIDR et WAF restent externes"
-    },
-    {
-      "ts": "2026-08-29T12:28:30+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — commit ee13023 : huit jalons décisionnels fermés, spans PostgreSQL/Redis/Awin/SerpAPI/LLM et traceparent W3C HTTP ; 7 tests ciblés, backend 2000 + 1 ignoré ; confidentialité, concurrence et erreurs prouvées ; backend de traces et validation distante restent externes"
-    },
-    {
-      "ts": "2026-08-29T12:34:09+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — commit f6efcd0 : corrélation étendue aux programmes, listing et téléchargements Awin ainsi qu'aux transactions PostgreSQL d'ingestion bornées à un span par feed ; 8 tests ciblés, backend 2001 + 1 ignoré ; infrastructure de traces distante toujours absente"
-    },
-    {
-      "ts": "2026-08-29T12:43:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — commit dfe9098 : ingestion Awin spoulée après 8 MiB, volumes compressé/décompressé et nombre de lignes bornés, dépassements fail-closed ; backend complet ultérieur 2020 + 1 ignoré"
-    },
-    {
-      "ts": "2026-08-29T12:52:00+02:00",
+      "ts": "2026-08-31T17:55:36+00:00",
       "evenement": "tache_faite",
-      "detail": "p0_b — commits 4a95a42 et 90246b2 : catalogue, agrégats, cartes, Assistant et MegaMenu intégrés sans fallback de devise ni preuve commerciale synthétique ; suite locale complète verte"
+      "detail": "p1_d — Schema et writers shadow idempotents, rollback par flag, Core v1 inchange"
     },
     {
-      "ts": "2026-08-29T13:06:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_g — branche publique codex/filon-phase-0-core publiée via e04dfc2 avec arbre identique au HEAD local ; Actions #343 : migrations, 2021 tests backend, web, mobile et extension verts ; gate strict correctement rouge sur readiness not_ready, 27 gates techniques passées, sept datasets humains vides, artefact 9713798390"
-    },
-    {
-      "ts": "2026-08-29T13:17:00+02:00",
-      "evenement": "tache_faite",
-      "detail": "p0_g — ruleset GitHub 21798272 active et limitée à main : PR obligatoire, conversations résolues, branche à jour, suppression et force-push interdits, quatre jobs Phase 0 requis depuis GitHub Actions, aucun bypass"
-    },
-    {
-      "ts": "2026-08-29T13:25:45+02:00",
-      "evenement": "verification",
-      "detail": "p0_c — inventaire public immuable de 1 000 candidats collecté sur cinq strates, sans labels ni champs moteur favorables ; sampling_vertical séparé de la curation humaine ; empreinte dee650b3…31c8 et 14 tests ciblés verts ; readiness toujours not_ready avec 0 cas humain"
-    },
-    {
-      "ts": "2026-08-29T13:37:32+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — jeton projet Railway validé en lecture ; production web/Postgres, source, domaine, root directory et chemin Config as Code confirmés ; runtime actif legacy identifié ; aucune variable protégée lue et aucune mutation ; backup/restore drill requis avant déploiement"
-    },
-    {
-      "ts": "2026-08-29T13:52:40+02:00",
-      "evenement": "verification",
-      "detail": "lot inventaire + préflight — Quality cœur 257/257 ; inventaire immuable vérifié ; backend complet 2035 réussis + 1 ignoré sous Python 3.12 et dépendances déclarées ; aucun fichier utilisateur protégé modifié par le lot"
-    },
-    {
-      "ts": "2026-08-29T14:00:48+02:00",
-      "evenement": "verification",
-      "detail": "p0_g — publication distante 7f914b2, arbre 822edf… byte-identique au local 2cf314c ; Actions #344 : migrations 12/12, backend 2036/2036 et trois clients verts ; seul gate strict not_ready rouge attendu ; artefact 9714475518 et statut Vercel vert"
-    },
-    {
-      "ts": "2026-08-29T16:11:40+02:00",
-      "evenement": "verification",
-      "detail": "p0_d+p0_i — sauvegarde Railway et dump restauré hors production ; maintenance sans écrivain ; adoption Alembic f4c81a9d2e70 ; compteurs invariants ; backend Docker c832d1c8 RUNNING en production avec live/ready HTTP 200, base ok, shadow off et volume à 39,28 % ; accès temporaires supprimés ; reçu PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md publié byte-identique"
-    },
-    {
-      "ts": "2026-08-29T16:18:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_i — export OpenMetrics direct production qualifié sans fuite : auth 401/401/401/200, format 1.0 no-store, 24 familles et 15 labels fermés ; audit Railway en lecture : volume READY 39,28 %, deux backups manuels, zéro planning et zéro dashboard/moniteur ; aucune mutation récurrente facturable effectuée"
-    },
-    {
-      "ts": "2026-08-29T16:29:00+02:00",
-      "evenement": "activation",
-      "detail": "p0_d+p0_i — après autorisation explicite du coût incrémental, plannings Railway DAILY, WEEKLY et MONTHLY activés atomiquement sur le seul volume PostgreSQL production ; rétentions API 6, 27 et 89 jours ; relecture conforme, volume READY 39,28 %, live/ready verts et révision f4c81a9d2e70 inchangée"
-    },
-    {
-      "ts": "2026-08-29T16:44:00+02:00",
-      "evenement": "activation",
-      "detail": "p0_i — dashboard Railway capacité créé ; blocs Warning 70 % et Critical 85 % ciblés exclusivement sur postgres-volume ; API relue : VOLUME_METRICS_ITEM, DISK_USAGE_GB, condition above, seuils 14/17 GB, aucune alerte active ; live/ready verts, notification réelle non forcée"
-    },
-    {
-      "ts": "2026-08-29T16:58:00+02:00",
-      "evenement": "implementation",
-      "detail": "p0_i — limite Redis atomique opt-in livrée sans activation production : horloge serveur, HMAC partagé sans adresse brute, fenêtre glissante et registre global 10 000, 429 au quota/plafond, 503 sans fallback sur panne ; 127 ciblés et backend 2054 réussis + 2 ignorés sous Python 3.12.14"
-    },
-    {
-      "ts": "2026-08-29T17:10:00+02:00",
-      "evenement": "implementation",
-      "detail": "p0_i — frontière Railway ajoutée avant activation Redis : source explicite réservée aux environnements déployés, UUID Railway canoniques, unique X-Real-IP IPv4/IPv6 sans port/liste, 503 sur absence/doublon/invalide et pseudonymisation avant Redis ; 138 ciblés, backend 2065 réussis + 2 ignorés"
-    },
-    {
-      "ts": "2026-08-30T19:36:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_i+p0_g — correctif healthcheck borné publié : local 04fe05b, distant 2725a464, arbre commun de9cc894 ; 180 ciblés et backend 2067 réussis + 2 ignorés ; Railway 03be13dc ACTIVE/SUCCESS en EU West avec ready/live/health 200, Alembic f4c81a9d2e70 et X-Real-IP edge prouvé contre valeurs forgées ; Actions #352 vert hors gate humain strict attendu, artefact 9736128514"
-    },
-    {
-      "ts": "2026-08-30T21:40:00+02:00",
+      "ts": "2026-08-31T17:55:36+00:00",
       "evenement": "tache_demarree",
-      "detail": "p0_f (tentative 1) — mandat spécial : avancer la couche technique sans transformer l'absence de données humaines en preuve métier"
-    },
-    {
-      "ts": "2026-08-30T22:10:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_f — Product/Variant Graph shadow exact-GTIN livré localement : 8 tables, migration 8b2f4c7d9a10, writer/savepoint, backfill borné, 7 adaptateurs ; 125 ciblés + 2 ignorés, Quality 377/377, backend 2078 + 2 ignorés ; readiness toujours not_ready avec 0 cas humain, aucune promotion ni donnée fabriquée"
-    },
-    {
-      "ts": "2026-08-30T23:05:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_f — Offer Graph shadow livré localement : migration c6a1d4e8f2b3, observation append-only, Money décimal, stock tri-state, URL HTTPS publique, éligibilité motivée, writer/savepoint et backfill borné ; 76 ciblés, Quality 377/377, backend 2086 + 2 ignorés ; aucun writer, backfill ou lecteur v2 activé"
-    },
-    {
-      "ts": "2026-08-31T00:30:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_f — Merchant Intelligence shadow livré localement : migration d7b2e5f9a4c1, compteurs/dénominateurs, statut AFFILIATED précis, horloge explicite et dimensions non mesurables sans score ; 81 ciblés, Quality 377/377, backend 2091 + 2 ignorés ; aucun snapshot ni effet ranking production"
-    },
-    {
-      "ts": "2026-08-31T01:15:00+02:00",
-      "evenement": "verification",
-      "detail": "p0_f — Evidence Engine et Claim Eligibility shadow livrés localement : migration e8c3f6a0b5d2, 4 faits atomiques sourcés, 7 claims forts inéligibles et plafond RANKABLE ; 68 ciblés, Quality 377/377, backend 2097 + 2 ignorés ; aucun backfill, lecteur public, claim fort ou verdict production"
+      "detail": "p1_e (tentative 1)"
     }
   ]
 }

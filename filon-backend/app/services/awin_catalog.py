@@ -682,6 +682,7 @@ async def ingest_feeds(
     graph_identifiers = 0
     graph_evidence = 0
     graph_links = 0
+    graph_assertions = 0
     graph_quarantine = 0
     graph_failures = 0
     offer_graph_observations = 0
@@ -822,6 +823,10 @@ async def ingest_feeds(
                                     persist_awin_graph_projection,
                                     project_awin_variant,
                                 )
+                                from app.product_graph.identity import (
+                                    persist_awin_identity_assertions,
+                                    project_awin_identity_assertions,
+                                )
 
                                 async with session.begin_nested():
                                     graph_capture = await persist_awin_graph_projection(
@@ -834,6 +839,23 @@ async def ingest_feeds(
                                         source_ref=f"awin-feed:{f.feed_id}",
                                         observed_at=feed_observed_at,
                                     )
+                                    identity_capture = (
+                                        await persist_awin_identity_assertions(
+                                            session,
+                                            projections=(
+                                                project_awin_identity_assertions(
+                                                    row,
+                                                    merchant_id=merchant_id,
+                                                )
+                                            ),
+                                            raw_source_record_id=(
+                                                captured.raw_source_record_id
+                                            ),
+                                            offer_id=offer_id,
+                                            source_ref=f"awin-feed:{f.feed_id}",
+                                            observed_at=feed_observed_at,
+                                        )
+                                    )
                                 graph_variants += int(
                                     graph_capture.variant_created
                                 )
@@ -844,6 +866,7 @@ async def ingest_feeds(
                                     graph_capture.evidence_created
                                 )
                                 graph_links += int(graph_capture.link_created)
+                                graph_assertions += identity_capture.created
                                 graph_quarantine += int(
                                     graph_capture.link_created
                                     and graph_capture.resolution == "quarantine"
@@ -953,6 +976,7 @@ async def ingest_feeds(
             "identifiers": graph_identifiers,
             "evidence": graph_evidence,
             "links": graph_links,
+            "assertions": graph_assertions,
             "quarantine": graph_quarantine,
             "failures": graph_failures,
         },

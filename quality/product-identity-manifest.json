@@ -1,0 +1,27 @@
+{
+  "schema_version": "product-identity-benchmark-manifest/v1",
+  "benchmark_version": "1.0.0",
+  "status": "active",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "generator": {
+    "version": "filon-product-identity-holdout/v1",
+    "seeds": [20260831, 31415926, 27182818],
+    "samples_per_vertical_seed": 64,
+    "development_engine_input": false
+  },
+  "verticals": [
+    "smartphones",
+    "laptops",
+    "tv",
+    "headphones_audio",
+    "appliances"
+  ],
+  "regression_ground_truth": "product-identity-regressions.json",
+  "gates": {
+    "exact_product_accuracy_ci95_lower_min": 0.98,
+    "variant_resolution_accuracy_ci95_lower_min": 0.97,
+    "offer_attachment_accuracy_ci95_lower_min": 0.97,
+    "false_merge_rate_ci95_upper_max": 0.005,
+    "blocking_failures_max": 0
+  }
+}

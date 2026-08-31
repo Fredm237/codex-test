@@ -1,0 +1,42 @@
+{
+  "schema_version": "product-identity-regressions/v1",
+  "truth_basis": "REGRESSION_GROUND_TRUTH",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "cases": [
+    {
+      "case_id": "smartphones:exact-gtin",
+      "vertical": "smartphones",
+      "left": {"name": "Apple iPhone 16 128GB Black", "brand": "Apple", "identifiers": {"ean": "4006381333931"}},
+      "right": {"name": "iPhone 16 noir 128 Go", "brand": "APPLE", "identifiers": {"gtin": "4006381333931"}},
+      "expected": {"product_relation": "same", "variant_relation": "same"}
+    },
+    {
+      "case_id": "laptops:different-storage",
+      "vertical": "laptops",
+      "left": {"name": "Laptop Pro 14 512GB", "brand": "Example", "identifiers": {"ean": "9780201379624"}, "attributes": {"storage": "512GB"}},
+      "right": {"name": "Laptop Pro 14 1TB", "brand": "Example", "identifiers": {"ean": "5012345678900"}, "attributes": {"storage": "1TB"}},
+      "expected": {"product_relation": "ambiguous", "variant_relation": "ambiguous"}
+    },
+    {
+      "case_id": "tv:monitor-hard-negative",
+      "vertical": "tv",
+      "left": {"name": "OLED TV 55 inch", "brand": "Example", "identifiers": {"ean": "5901234123457"}},
+      "right": {"name": "OLED monitor 55 inch", "brand": "Example", "identifiers": {"ean": "73513537"}},
+      "expected": {"product_relation": "ambiguous", "variant_relation": "ambiguous"}
+    },
+    {
+      "case_id": "headphones_audio:helmet-hard-negative",
+      "vertical": "headphones_audio",
+      "left": {"name": "Casque audio sans fil", "brand": "Example", "identifiers": {"ean": "4006381333931"}},
+      "right": {"name": "Casque vélo noir", "brand": "Example", "identifiers": {"ean": "9780201379624"}},
+      "expected": {"product_relation": "ambiguous", "variant_relation": "ambiguous"}
+    },
+    {
+      "case_id": "appliances:accessory-hard-negative",
+      "vertical": "appliances",
+      "left": {"name": "Aspirateur sans sac", "brand": "Example", "identifiers": {"ean": "5012345678900"}},
+      "right": {"name": "Filtre pour aspirateur", "brand": "Example", "identifiers": {"ean": "5901234123457"}},
+      "expected": {"product_relation": "ambiguous", "variant_relation": "ambiguous"}
+    }
+  ]
+}

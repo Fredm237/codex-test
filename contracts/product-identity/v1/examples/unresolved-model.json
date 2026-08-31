@@ -1,0 +1,9 @@
+{
+  "contract_version": "1.0.0",
+  "subject_type": "product_model",
+  "resolution": "unresolved",
+  "canonical_id": null,
+  "reason_code": "insufficient_evidence",
+  "resolver_version": "product-identity-v1",
+  "evidence_raw_source_ids": [917]
+}

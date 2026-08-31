@@ -1,9 +1,50 @@
-# FILON Quality Lab v0.5
+# FILON Quality Lab
 
-Le Quality Lab mesure la qualité métier sur un holdout humain indépendant. Son
-état courant reste volontairement **NOT READY** : aucun score de lancement ne
-peut être dérivé des 14 cas historiques, d'annotations synthétiques ou d'un
-lot trop petit pour prouver les seuils.
+Statut courant : **AUTONOMOUS_QUALITY_LAB** avec la limitation permanente
+**NO_EXTERNAL_HUMAN_GROUND_TRUTH**. Par décision fondateur du 31 août 2026,
+l'ancien prérequis d'annotation humaine indépendante ne bloque plus P0.2, la
+fermeture de Phase 0 ni l'ouverture de Phase 1. Il n'est ni supprimé de
+l'historique, ni présenté comme satisfait.
+
+La gate courante est décrite dans
+[AUTONOMOUS_QUALITY_LAB.md](AUTONOMOUS_QUALITY_LAB.md) et pilotée par
+[`autonomous-manifest.json`](autonomous-manifest.json). Elle bloque uniquement
+sur des erreurs objectivement vérifiables : checksums et identifiants exacts,
+prix, devises, stock, fraîcheur, budget, invariants d'abstention, régressions,
+conflits non signalés et protections contre les faux rapprochements. Les
+dimensions subjectives restent `PROVISIONAL` ou
+`NOT_INDEPENDENTLY_VALIDATED`, sans certitude fabriquée.
+
+## Gate Phase 1 — Product Identity
+
+Le benchmark exact-product de Phase 1 est piloté par
+[`product-identity-manifest.json`](product-identity-manifest.json) et conserve
+ses régressions déterministes dans
+[`product-identity-regressions.json`](product-identity-regressions.json).
+Il couvre smartphones, laptops, TV, headphones/audio et appliances avec trois
+seeds, des variations exactes et des hard negatives produit/accessoire,
+stockage, taille, couleur, identifiants invalides et conflits.
+
+Depuis `filon-backend` :
+
+```bash
+python -m quality_lab.product_identity \
+  --manifest ../quality/product-identity-manifest.json \
+  --strict \
+  --output ../quality-product-identity-report.json
+```
+
+Le run strict échoue si la borne basse Wilson de l'exact-product ou de la
+Variant passe sous son seuil, si la borne haute du faux merge dépasse 0,5 %,
+si une verticale disparaît ou si la limitation
+`NO_EXTERNAL_HUMAN_GROUND_TRUTH` est altérée.
+
+## Historique conservé — contrat externe v0.5 remplacé
+
+Le contrat ci-dessous décrivait un holdout humain indépendant. Il reste utile
+comme spécification d'une éventuelle évaluation externe future, mais il n'est
+plus une gate du projet. Son rapport continue d'exposer `ready=false` et zéro
+cas externe : cette limite est vraie, attendue et non bloquante.
 
 ## Contrat de lancement
 

@@ -29,7 +29,7 @@ la preuve correspondante existe dans la réponse et si le périmètre est visibl
 | C-014 | « chaque incident produit de production reçoit un code » | objectif du mandat de gouvernance | registre E001–E018 canonique ; seule la projection Awin émet actuellement E008, E010 et E016–E018 | Ne pas revendiquer la couverture exhaustive avant instrumentation et audit de tous les producteurs |
 | C-015 | « sous votre budget » comme prix final livré | décision générale / Assistant | `f5ae21b` applique le budget EUR comme contrainte dure au total article actuellement calculable, mais la livraison reste `unknown` et le total est explicitement `items_only` | Dire « sous-total articles dans le budget connu » ; ne pas promettre le total livré |
 | C-016 | confiance « haute » ou pourcentage de confiance | décision générale | aucune calibration indépendante ; `f5ae21b` renvoie `confidence_score=null`, `confidence_band=not_calibrated` pour les recommandations ; l'abstention conserve encore le marqueur historique `0`/`low`, qui n'est pas une probabilité calibrée | Ne pas afficher de niveau chiffré ou qualitatif avant calibration sur holdout indépendant ; normaliser aussi l'abstention |
-| C-017 | score, compatibilité ou qualité Outfit chiffrée | Outfit Studio, Lookbook et journal mobile | aucun score Fashion calibré sur cas humains indépendants ; les anciennes valeurs étaient heuristiques | Afficher « Non mesuré » et conserver l'abstention tant que P0.2 n'a pas de holdout humain |
+| C-017 | score, compatibilité ou qualité Outfit chiffrée | Outfit Studio, Lookbook et journal mobile | aucun score Fashion indépendamment calibré ; le Quality Lab autonome ne transforme pas ses oracles déterministes en jugement de goût | Afficher « Non mesuré » ou `PROVISIONAL` et conserver l'abstention ; cette limite ne bloque pas P0.2 ni la progression de phase |
 | C-018 | prix, stock ou bouton marchand « actuel » sans preuve explicite | Assistant, cartes produit web/mobile, favoris, alertes et comparateur | depuis `1a167dc`, l'Assistant exige `evidence_current=true`, revalide les cartes et utilise le cache v4 ; les clients exigent aussi un `observed_at` strict, non futur et âgé d'au plus 72 h. Le backend catalogue protégé n'émet pas encore tous ces champs | Masquer l'action et le claim ; ne jamais inférer la fraîcheur de la simple présence d'un prix ou d'un stock |
 | C-019 | baisse, plus bas ou meilleur prix calculé entre devises différentes ou à partir d'un prix indisponible | détail produit, rails, Pulse et comparaisons mobiles | aucun FX qualifié ; les clients imposent une comparaison mono-devise, une devise explicite, une date non future et `in_stock=true` sur chaque point d'historique | Ne comparer que des observations achetables de même devise ; sinon afficher une information non comparable ou s'abstenir |
 | C-020 | lien marchand « sûr » parce qu'il est seulement présent | CTA web/mobile et partage | les clients refusent les URL non HTTPS, avec identifiants, hôte non qualifié, suffixe local/réservé ou littéral IP, y compris les formes IPv4/IPv6 contournées | Rendre actionnable uniquement une URL HTTPS dotée d'un nom DNS public admissible ; ce contrôle ne certifie pas le marchand |
@@ -98,12 +98,13 @@ locale au commit `f5ae21b` ne prouve ni le total affiché au checkout marchand,
 ni une couverture exhaustive du marché.
 
 La confiance des recommandations générales est également fail-closed : elle
-reste `not_calibrated` tant que les datasets humains indépendants sont vides.
+reste `not_calibrated` faute d'évaluation indépendante de cette dimension.
 L'abstention porte encore `0`/`low`, valeur sentinelle héritée à normaliser et
 non mesure de confiance. Le rapport Quality actuel est intègre
 (`integrity_valid=true`) mais non prêt (`ready=false`, `status=not_ready`, 0 cas
 humain) ; il ne soutient donc aucun pourcentage de qualité ou de confiance
-produit.
+produit. Depuis la décision fondateur du 31 août 2026, cette absence reste une
+limite de claim et non un blocker de P0.2 ou de Phase 1.
 
 La simple présence d'un prix, d'un stock ou d'une date ne suffit plus à rendre
 une offre actionnable. Le marqueur `evidence_current=true` doit être explicite
@@ -146,5 +147,6 @@ ignorés**, le typecheck et ESLint à **0 erreur / 15 avertissements**. L'audit
 indépendant mobile ne relève aucun P0, P1 ou P2. Le `npm test` web complet vert
 reste une preuve de la copie de travail, car il inclut MegaMenu et
 `SearchAssistant.tsx` protégés ; il ne doit pas être attribué à l'archive propre.
-Ces contrôles ne fournissent ni cas humain P0.2, ni calibration Outfit, ni
-qualification de production. Le statut reste **NO-GO** avec **0 cas humain**.
+Ces contrôles ne fournissent ni ground truth externe, ni calibration Outfit,
+ni qualification de production. Le statut P0.2 est désormais autonome et vert ;
+le NO-GO restant dépend uniquement des blockers techniques et de production.

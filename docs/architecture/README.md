@@ -1,7 +1,8 @@
 # FILON — dossier d'architecture Phase 0
 
-Statut : **baseline et contrats v1 établis ; exécution du rebuild au-delà de la
-Phase 0 non autorisée tant que les gates P0 ouvertes ne sont pas satisfaites**.
+Statut : **PHASE 0 = GO ; PHASE 1 — PRODUCT IDENTITY OUVERTE ; premier
+événement GitHub `schedule` classé `EXTERNAL_PROVIDER_PENDING /
+NON_BLOCKING` ; Immersive reste NO-GO**.
 
 Référence de baseline : `Fredm237/codex-test`, branche distante `main`, commit
 `57724c72e77c50ca54aaf64338f838dda3be2747`, le 28 août 2026. État de travail
@@ -13,20 +14,20 @@ Ce dossier traduit les mandats Product Intelligence Core, Execution Governance e
 
 ## Décision exécutive
 
-**NO-GO pour le rebuild produit et pour toute extension immersive. GO limité à la Phase 0 : contrats, mesure, gouvernance, observabilité et préparation des migrations.**
+**PHASE 0 = GO ; Phase 1 ouverte ; NO-GO Immersive inchangé. Aucun blocker
+humain : le Quality Lab autonome reste la gate active.**
 
-Les raisons bloquantes sont factuelles : Product/Variant, Offer Graph,
-Merchant Intelligence et Evidence Engine existent seulement en shadows locaux
-non qualifiés, le holdout humain est absent,
-l'argent reste stocké en flottants dans le modèle historique, les sources de
-vérité restent concurrentes et les données Quality de lancement ne contiennent
-aucun cas humain.
-La CI distante existe désormais et ferme volontairement la promotion tant que
-ces données humaines sont absentes. Les chemins
+Le cycle catalogue réel, la migration heartbeat, les checkpoints de reprise,
+la CI et l'alerting critique minimum sont désormais prouvés. Le workflow
+GitHub planifié est présent, valide et actif ; l'absence actuelle d'une
+occurrence créée par GitHub reste surveillée comme limitation fournisseur non
+bloquante. Collecteur OTLP, agrégateur, rétention, dashboards avancés, pager
+secondaire et trafic représentatif sont des travaux post-Phase 0 non
+bloquants. Les chemins
 de décision durcis localement conservent désormais les inconnus au lieu de les
 transformer en avantages favorables ; cela ne vaut pas preuve de production.
-La branche principale est désormais protégée ; l'accès Railway est confirmé en
-lecture, mais aucun déploiement n'est autorisé avant backup et restore drill.
+La branche principale est protégée ; backup, restore drill, Redis privé, Cron
+et readiness Railway sont acquis dans leurs périmètres.
 
 Progression : P0.a (audit), P0.b (contrats/unknown), P0.d
 (baseline Alembic/rollback) et P0.e
@@ -48,41 +49,30 @@ prouve l'identité edge et les sondes réelles, tandis que le quota reste local.
 L'export OpenMetrics et un pack
 Prometheus/Grafana sans cible ni SLO
 par défaut sont validés localement. Un compilateur atomique refuse les
-inventaires partiels et un vérificateur HTTPS peut produire un reçu sans hôte
-ni secret ; aucun reçu de production n’existe encore. P0.6 reste donc NO-GO
-faute d'activation Redis ou WAF, agrégateur
-réellement déployé, scrapes, rétention, pager et mesures distribuées réelles.
+inventaires partiels et un vérificateur HTTPS produit des preuves expurgées.
+P0.6 est fermé : Redis privé, Cron, run 18 interrompu honnêtement, run 19 repris
+et réussi, heartbeat/checkpoints et moniteur manuel sont qualifiés. Les scrapes,
+rétentions et visualisations supplémentaires ne bloquent plus Phase 1.
 
-L'infrastructure P0.c (Quality Lab) applique le contrat v0.5 fermé à sept
-datasets et 27 gates. Elle lie chaque gold aux packs humains complétés, impose
-provenance, identité de run, empreinte exacte du holdout et publication
-atomique, puis compare les scorecards fail-closed. Wilson, Bernstein empirique
-et bootstrap déterministe bornent les métriques. Les sept adaptateurs
-applicatifs sont désormais branchés, dont variante et attachement exact-GTIN.
-Leur confiance reste non calibrée. Product/Variant, Offer Graph, Merchant
-Intelligence et Evidence Engine demeurent shadows, avec argent décimal, stock
-tri-state, quarantaine fail-closed, claims forts inéligibles et aucune note
-marchand synthétique. Le rapport reste
-`integrity_valid=true`, `ready=false`,
-`status=not_ready` avec **0 cas humain**. Le gate strict bloque donc honnêtement
-son cutover. Un inventaire public de 1 000 candidats sans label est maintenant
-figé pour démarrer la curation. Un workflow séparé, lié à l'inventaire et
-fail-closed, permet désormais à un humain de produire des candidats Taxonomy et
-Variant encore sans gold ; il ne modifie pas la readiness.
+P0.c applique désormais `AUTONOMOUS_QUALITY_LAB` avec la limitation permanente
+`NO_EXTERNAL_HUMAN_GROUND_TRUTH`. Le contrat humain v0.5 et son reçu
+`ready=false` restent historiques, sans être présentés comme satisfaits. La
+gate active exécute 571 oracles déterministes et adversariaux sur golden set,
+GTIN/EAN, rattachement, prix, devise, stock, fraîcheur, budget, abstention et
+conflits multi-source. Les 571 passent ; un conflit reste correctement
+`UNRESOLVED`. Subjectif et confiance restent `PROVISIONAL` ou
+`NOT_INDEPENDENTLY_VALIDATED`, sans bloquer la progression.
 
-Le Catalog Quality Funnel de l'article 27 est maintenant exécutable en lecture
-interne. Il mesure seulement Raw, Active, Valid Price et Valid Merchant. Il
-marque `CORRECTLY_CLASSIFIED` `not_measurable`, bloque toutes les étapes strictes
-suivantes et isole les résolutions Graph, comparabilité, historique et
-éligibilité comme simples signaux techniques. Le coût rendu complet reste non
-supporté et `launch_gate_eligible` reste faux.
+Le Catalog Quality Funnel v2 est exécutable en lecture interne. Il traverse les
+étapes déterministes, marque `CORRECTLY_CLASSIFIED` `provisional`, mesure les
+résolutions Graph, la comparabilité et l'historique, puis s'arrête sur les vrais
+manques : coût rendu complet et confiance non calibrée. P0.5 est terminé en
+shadow ; `launch_gate_eligible` reste faux pour toute promotion publique.
 
-P0.g (CI) est terminé : la branche publique est byte-identique au HEAD local,
-le run GitHub Actions #356 prouve les migrations, les régressions backend, le web,
-le mobile et l'extension. Le seul échec est le gate strict attendu sur les sept
-datasets humains vides ; l'artefact Quality a été publié. Vercel a construit la
-preview. La ruleset GitHub `21798272` est active sur `main`, sans bypass, avec
-les quatre jobs requis, PR obligatoire et branche à jour. Le registre
+P0.g (CI) est acquis : la ruleset GitHub `21798272` est active sur `main`, sans
+bypass, avec les quatre jobs requis, PR obligatoire et branche à jour. La PR
+#385 est fusionnée, le run `33404710182` est vert sur quatre jobs et le
+moniteur manuel `33404840701` est vert. Le registre
 [`contracts/v1`](../../contracts/v1/README.md) fige les formes catalogue, advise
 et extension.
 
@@ -93,6 +83,14 @@ et extension.
 - [Baseline qualité et gates](BASELINE_QUALITY_REPORT.md)
 - [Architecture cible et stratégie de migration](TARGET_ARCHITECTURE.md)
 - [Plan d'exécution Phase 0](PHASE_0_EXECUTION_PLAN.md)
+- [Reçu final Phase 0](PHASE_0_FINAL_RECEIPT.md)
+- [Plan d'exécution Phase 1](PHASE_1_EXECUTION_PLAN.md)
+- [Baseline Product Identity Phase 1A](PHASE_1A_PRODUCT_IDENTITY_BASELINE.md)
+- [ADR-006 — frontières Product Identity v1](ADR-006-PRODUCT-IDENTITY-V1-BOUNDARIES.md)
+- [Rapport Phase 1C — benchmark exact-product](PHASE_1C_EXACT_PRODUCT_BENCHMARK_REPORT.md)
+- [Rapport Phase 1D — assertions Product Identity shadow](PHASE_1D_PRODUCT_IDENTITY_SHADOW_REPORT.md)
+- [Décision de timebox et sortie de Phase 0](PHASE_0_TIMEBOX_AND_EXIT_DECISION.md)
+- [Backlog de durcissement post-Phase 0](POST_PHASE_0_HARDENING.md)
 - [Durcissement final du contrat catalogue v1](PHASE_0B_CATALOG_CONTRACT_HARDENING_REPORT.md)
 - [Registre canonique des preuves Phase 0](PHASE_0_EVIDENCE_REGISTER.md)
 - [Audit canonique de complétude des trois mandats](MANDATE_COMPLETION_AUDIT.md)
@@ -111,6 +109,7 @@ et extension.
 - [Rapport P0.f.d — Evidence Engine shadow](PHASE_0F_EVIDENCE_ENGINE_REPORT.md)
 - [Rapport P0.f.e — Catalog Quality Funnel shadow](PHASE_0F_CATALOG_QUALITY_FUNNEL_REPORT.md)
 - [Rapport P0.c — Quality Lab](PHASE_0C_QUALITY_REPORT.md)
+- [Rapport P0.c autonome — décision fondatrice](PHASE_0C_AUTONOMOUS_QUALITY_REPORT.md)
 - [Rapport P0.c.1 — workflow de curation humaine](PHASE_0C_CURATION_WORKFLOW_REPORT.md)
 - [Rapport P0.6 — Observabilité](PHASE_06_OBSERVABILITY_REPORT.md)
 - [Export de traces OTLP/HTTP fail-closed](PHASE_06_OTLP_TRACE_EXPORT_REPORT.md)

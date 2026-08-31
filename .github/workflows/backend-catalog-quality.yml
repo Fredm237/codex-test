@@ -1,4 +1,4 @@
-name: Phase 0 — quality gates
+name: Core — quality gates
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: phase-0-${{ github.workflow }}-${{ github.ref }}
+  group: core-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -77,6 +77,14 @@ jobs:
           --strict
           --output ../quality-autonomous-report.json
 
+      - name: Exécuter le benchmark Product Identity exact-product
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.product_identity
+          --manifest ../quality/product-identity-manifest.json
+          --strict
+          --output ../quality-product-identity-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -85,6 +93,7 @@ jobs:
           path: |
             ${{ github.workspace }}/quality-autonomous-report.json
             ${{ github.workspace }}/quality-external-ground-truth-limitation.json
+            ${{ github.workspace }}/quality-product-identity-report.json
           if-no-files-found: warn
           retention-days: 14
 

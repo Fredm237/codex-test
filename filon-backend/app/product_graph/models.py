@@ -240,3 +240,92 @@ class GraphOfferVariantLink(Base):
         DateTime,
         server_default=func.now(),
     )
+
+
+class GraphIdentityAssertion(Base):
+    """Fait d'identité sourcé, antérieur à toute promotion canonique.
+
+    Une assertion observée ou validée ne remplit jamais implicitement Brand,
+    Family ou Model. Elle préserve la valeur source, son scope et sa version
+    afin qu'un resolver futur puisse la rejouer ou l'abstenir.
+    """
+
+    __tablename__ = "graph_identity_assertions"
+    __table_args__ = (
+        UniqueConstraint(
+            "assertion_key",
+            name="uq_graph_identity_assertion_key",
+        ),
+        CheckConstraint(
+            "length(assertion_key) = 64",
+            name="ck_graph_identity_assertion_key_sha256",
+        ),
+        CheckConstraint(
+            "subject_type IN ('brand', 'product_family', 'product_model', 'variant')",
+            name="ck_graph_identity_assertion_subject",
+        ),
+        CheckConstraint(
+            "status IN ('observed', 'validated', 'conflict', 'quarantine')",
+            name="ck_graph_identity_assertion_status",
+        ),
+        CheckConstraint(
+            "identifier_namespace IS NULL OR identifier_namespace IN "
+            "('gtin', 'mpn', 'merchant_sku', 'source_product_id')",
+            name="ck_graph_identity_assertion_namespace",
+        ),
+        CheckConstraint(
+            "(identifier_namespace IS NULL AND identifier_scope IS NULL) OR "
+            "(identifier_namespace IS NOT NULL AND identifier_scope IS NOT NULL)",
+            name="ck_graph_identity_assertion_scope",
+        ),
+        Index(
+            "ix_graph_identity_assertion_subject",
+            "subject_type",
+            "subject_ref",
+        ),
+        Index(
+            "ix_graph_identity_assertion_field_status",
+            "field",
+            "status",
+        ),
+        Index(
+            "ix_graph_identity_assertion_identifier",
+            "identifier_namespace",
+            "identifier_scope",
+            "normalized_value",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    assertion_key: Mapped[str] = mapped_column(String(64))
+    raw_source_record_id: Mapped[int] = mapped_column(
+        ForeignKey("raw_source_records.id"),
+        index=True,
+    )
+    offer_id: Mapped[int] = mapped_column(ForeignKey("offers.id"), index=True)
+    subject_type: Mapped[str] = mapped_column(String(32))
+    subject_ref: Mapped[str] = mapped_column(String(255))
+    field: Mapped[str] = mapped_column(String(64))
+    value_json: Mapped[Any] = mapped_column(JSON)
+    normalized_value: Mapped[str | None] = mapped_column(
+        String(191),
+        nullable=True,
+    )
+    identifier_namespace: Mapped[str | None] = mapped_column(
+        String(24),
+        nullable=True,
+    )
+    identifier_scope: Mapped[str | None] = mapped_column(
+        String(191),
+        nullable=True,
+    )
+    status: Mapped[str] = mapped_column(String(16), index=True)
+    source_type: Mapped[str] = mapped_column(String(48))
+    source_ref: Mapped[str] = mapped_column(String(255))
+    observed_at: Mapped[datetime] = mapped_column(DateTime)
+    transformation: Mapped[str] = mapped_column(String(96))
+    transformation_version: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )

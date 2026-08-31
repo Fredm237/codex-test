@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/product-identity/v1/identity-assertion.schema.json",
+  "title": "FILON Product Identity Assertion v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "raw_source_record_id",
+    "source_type",
+    "source_ref",
+    "observed_at",
+    "subject_type",
+    "field",
+    "value",
+    "status",
+    "transformation",
+    "transformation_version"
+  ],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "raw_source_record_id": { "type": "integer", "minimum": 1 },
+    "source_type": { "type": "string", "minLength": 1, "maxLength": 48 },
+    "source_ref": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "subject_type": {
+      "enum": ["brand", "product_family", "product_model", "variant"]
+    },
+    "field": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{0,63}$"
+    },
+    "value": {
+      "type": ["string", "integer", "number", "boolean"],
+      "description": "Une valeur absente n'est pas une assertion et ne doit pas être fabriquée."
+    },
+    "identifier": { "$ref": "#/$defs/identifier" },
+    "status": {
+      "enum": ["observed", "validated", "conflict", "quarantine"]
+    },
+    "transformation": { "type": "string", "minLength": 1, "maxLength": 96 },
+    "transformation_version": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64
+    }
+  },
+  "$defs": {
+    "identifier": {
+      "type": "object",
+      "required": ["namespace", "scope", "normalized_value"],
+      "properties": {
+        "namespace": {
+          "enum": ["gtin", "mpn", "merchant_sku", "source_product_id"]
+        },
+        "scope": { "type": "string", "minLength": 1, "maxLength": 191 },
+        "normalized_value": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 191
+        }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "namespace": { "const": "gtin" } } },
+          "then": { "properties": { "scope": { "const": "global" } } }
+        },
+        {
+          "if": { "properties": { "namespace": { "const": "mpn" } } },
+          "then": { "properties": { "scope": { "pattern": "^brand:[1-9][0-9]*$" } } }
+        },
+        {
+          "if": { "properties": { "namespace": { "const": "merchant_sku" } } },
+          "then": { "properties": { "scope": { "pattern": "^merchant:[1-9][0-9]*$" } } }
+        },
+        {
+          "if": { "properties": { "namespace": { "const": "source_product_id" } } },
+          "then": { "properties": { "scope": { "pattern": "^source:[^:]+:.+$" } } }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
