@@ -26,7 +26,7 @@ export type FashionCritique = {
 };
 
 /**
- * Représentation parallèle des relations de style. Les offres partenaires
+ * Représentation parallèle des relations de style. Les offres du catalogue
  * restent intactes : chaque relation est explicitement qualifiée d’inférence.
  */
 export function buildFashionRelations(pieces: OutfitPiece[], intent: OutfitIntent): FashionRelation[] {
@@ -62,7 +62,7 @@ export function critiqueFashionComposition(pieces: OutfitPiece[], intent: Outfit
   const roles = new Set(pieces.map((piece) => piece.role));
   if (ownedRole) roles.add(ownedRole);
   const findings: FashionCritiqueFinding[] = [];
-  if (!roles.has("structure") && (intent.occasion?.toLocaleLowerCase().includes("mariage") || intent.occasion?.toLocaleLowerCase().includes("travail"))) {
+  if (!roles.has("structure") && (intent.occasion === "wedding" || intent.occasion === "work")) {
     findings.push({ code: "MISSING_STRUCTURE", severity: "advisory" });
   }
   if (!roles.has("accessory")) findings.push({ code: "MISSING_ACCESSORY", severity: "info" });

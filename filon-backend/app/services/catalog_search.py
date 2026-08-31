@@ -7,19 +7,26 @@ Priorité : base interne > SerpApi (fallback).
 """
 from __future__ import annotations
 
-from collections import defaultdict
+import math
+from dataclasses import replace
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import and_, func, not_, or_, select
 
 from app.core.logging import get_logger
+from app.core.observability import traced_dependency, traced_pipeline_stage
 from app.db.session import session_scope
-from app.db.models import CatalogProduct, Merchant, Offer, PriceSnapshot
+from app.db.models import Merchant, Offer
+from app.intelligence.contracts import CoreOfferSnapshot
 from app.intelligence.general_catalog import retrieve_general_offers
 from app.intelligence.general_decision import compose_general_plan
 from app.intelligence.intent_resolution import GeneralIntent, resolve_intent_with_fallback
 from app.services import decision, taxonomy
 from app.services.catalog_paging import fetch_all_offer_rows
+from app.services.currency import normalize_currency_code
+from app.services.freshness import offer_observation_is_fresh
+from app.services.offer_evidence import load_offer_evidence
 from app.services.search import search_clause, terms_of
 
 log = get_logger("catalog_search")
@@ -277,49 +284,136 @@ def _primary_image_url(value: str | None) -> str | None:
     return None
 
 
+@traced_pipeline_stage("decision")
 async def _decisions_for_offers(session, offers: list[Offer]) -> dict[int, dict[str, Any]]:
     """Calcule les décisions des offres assistant à partir des mêmes preuves que les fiches.
 
     Les historiques et produits regroupés sont lus par lots : l'assistant ne doit
     pas déclencher une requête par carte ni posséder ses propres règles de score.
     """
-    offer_ids = [offer.id for offer in offers]
-    if not offer_ids:
+    if not offers:
         return {}
 
+    # `CatalogProduct.price_min/currency/*_count` est une projection legacy qui
+    # mélange potentiellement plusieurs devises. La comparaison est donc
+    # reconstruite en une seule lecture, par produit ET devise normalisée.
     product_ids = {offer.product_id for offer in offers if offer.product_id is not None}
-    grouped_by_id: dict[int, CatalogProduct] = {}
+    comparable_by_product_currency: dict[tuple[int, str], dict[str, Any]] = {}
     if product_ids:
-        grouped = (
-            await session.execute(select(CatalogProduct).where(CatalogProduct.id.in_(product_ids)))
-        ).scalars().all()
-        grouped_by_id = {product.id: product for product in grouped}
+        async with traced_dependency("postgres", "read"):
+            grouped_offers = (
+                await session.execute(
+                    select(Offer).where(
+                        Offer.product_id.in_(product_ids),
+                        Offer.is_canonical.is_(True),
+                        or_(Offer.is_adult.is_(False), Offer.is_adult.is_(None)),
+                    )
+                )
+            ).scalars().all()
+        # La comparaison de groupe n'a besoin que de prouver l'état courant.
+        # L'historique complet est réservé aux offres finales ci-dessous.
+        async with traced_dependency("postgres", "read"):
+            grouped_evidence = await load_offer_evidence(
+                session,
+                list(grouped_offers),
+                current_only=True,
+            )
+        reference = datetime.now(UTC)
+        for grouped_offer in grouped_offers:
+            kind = grouped_offer.offer_kind or taxonomy.classify_offer_kind(
+                grouped_offer.category, grouped_offer.name, grouped_offer.brand
+            )
+            evidence = grouped_evidence.get(grouped_offer.id)
+            if (
+                not taxonomy.is_ean_comparable(kind)
+                or evidence is None
+                or not _offer_is_recommendable(
+                    grouped_offer,
+                    observed_at=evidence.current_observed_at,
+                    now=reference,
+                )
+            ):
+                continue
+            currency = normalize_currency_code(grouped_offer.currency)
+            product_id = grouped_offer.product_id
+            if currency is None or product_id is None:
+                continue
+            key = (product_id, currency)
+            aggregate = comparable_by_product_currency.setdefault(
+                key,
+                {"min_price": float(grouped_offer.price), "merchant_ids": set(), "offer_ids": set()},
+            )
+            aggregate["min_price"] = min(aggregate["min_price"], float(grouped_offer.price))
+            aggregate["merchant_ids"].add(grouped_offer.merchant_id)
+            aggregate["offer_ids"].add(grouped_offer.id)
 
-    histories: dict[int, list[tuple[float | None, Any]]] = defaultdict(list)
-    history_rows = await session.execute(
-        select(PriceSnapshot.offer_id, PriceSnapshot.price, PriceSnapshot.captured_at)
-        .where(PriceSnapshot.offer_id.in_(offer_ids))
-        .order_by(PriceSnapshot.offer_id, PriceSnapshot.captured_at)
-    )
-    for offer_id, price, captured_at in history_rows.all():
-        histories[offer_id].append((price, captured_at))
+    async with traced_dependency("postgres", "read"):
+        evidence_by_offer = await load_offer_evidence(session, list(offers))
 
     decisions: dict[int, dict[str, Any]] = {}
     for offer in offers:
-        grouped = grouped_by_id.get(offer.product_id)
+        currency = normalize_currency_code(offer.currency)
+        evidence = evidence_by_offer.get(offer.id)
+        history = list(evidence.history) if evidence is not None else []
+        aggregate = (
+            comparable_by_product_currency.get((offer.product_id, currency))
+            if offer.product_id is not None and currency is not None
+            else None
+        )
+        merchants_count = len(aggregate["merchant_ids"]) if aggregate else 1
         decisions[offer.id] = decision.compute_decision(
             price=offer.price,
-            currency=offer.currency,
-            history=histories[offer.id],
-            cheapest_elsewhere=grouped.price_min if grouped else None,
-            comparison_currency=grouped.currency if grouped else offer.currency,
-            merchants_count=grouped.merchants_count if grouped else 1,
-            offers_count=grouped.offers_count if grouped else 1,
+            currency=currency,
+            history=history,
+            history_currency=(
+                evidence.currency if evidence is not None and history else None
+            ),
+            cheapest_elsewhere=(
+                aggregate["min_price"]
+                if aggregate is not None and merchants_count >= 2
+                else None
+            ),
+            comparison_currency=currency,
+            merchants_count=merchants_count,
+            offers_count=len(aggregate["offer_ids"]) if aggregate else 1,
             in_stock=offer.in_stock,
             updated_at=offer.updated_at,
             offer_kind=offer.offer_kind or taxonomy.classify_offer_kind(offer.category, offer.name, offer.brand),
         )
     return decisions
+
+
+def _offer_is_recommendable(
+    offer: Offer,
+    *,
+    observed_at: datetime | None = None,
+    now: datetime | None = None,
+) -> bool:
+    """Valide les faits minimaux avant tout arrondi ou comparaison legacy."""
+
+    price = offer.price
+    return (
+        price is not None
+        and not isinstance(price, bool)
+        and math.isfinite(price)
+        and price > 0
+        and normalize_currency_code(offer.currency) is not None
+        and offer.in_stock is True
+        and offer_observation_is_fresh(observed_at, now=now)
+    )
+
+
+def _normalize_general_snapshots(
+    snapshots: list[CoreOfferSnapshot],
+) -> list[CoreOfferSnapshot]:
+    """Normalise la devise dans le snapshot immuable remis au planificateur."""
+
+    normalized: list[CoreOfferSnapshot] = []
+    for snapshot in snapshots:
+        currency = normalize_currency_code(snapshot.currency)
+        if currency is not None:
+            normalized.append(replace(snapshot, currency=currency))
+    return normalized
 
 
 def _planned_general_offer_ids(intent: GeneralIntent, snapshots) -> list[int]:
@@ -335,6 +429,7 @@ def _planned_general_offer_ids(intent: GeneralIntent, snapshots) -> list[int]:
     return [int(item["offer_id"]) for item in plan.get("items", []) if item.get("offer_id") is not None]
 
 
+@traced_pipeline_stage("retrieval")
 async def search_internal_products(
     query: str, budget: float | None, *, limit: int = 20, country: str | None = None
 ) -> list[dict[str, Any]]:
@@ -360,19 +455,30 @@ async def search_internal_products(
             general_intent = await resolve_intent_with_fallback(query)
             from sqlalchemy.orm import joinedload as jl
             if general_intent.resolved:
-                snapshots = await retrieve_general_offers(session, general_intent)
+                snapshots = _normalize_general_snapshots(
+                    await retrieve_general_offers(session, general_intent)
+                )
+                # La couche générale est déjà fail-closed, mais ce filtre
+                # protège ce caller historique contre les placeholders (vide,
+                # ``unknown``, XXX) et propage la valeur normalisée au
+                # planificateur avant tout classement ou budget.
                 if budget is not None:
                     snapshots = [
                         snapshot for snapshot in snapshots
-                        if snapshot.currency == "EUR" and snapshot.price is not None and snapshot.price <= budget
+                        if snapshot.currency == "EUR"
+                        and snapshot.price is not None
+                        and snapshot.price <= budget
                     ]
                 snapshot_ids = _planned_general_offer_ids(general_intent, snapshots)
                 if snapshot_ids:
-                    hydrated = (
-                        await session.execute(
-                            select(Offer).where(Offer.id.in_(snapshot_ids)).options(jl(Offer.merchant))
-                        )
-                    ).scalars().all()
+                    async with traced_dependency("postgres", "read"):
+                        hydrated = (
+                            await session.execute(
+                                select(Offer)
+                                .where(Offer.id.in_(snapshot_ids))
+                                .options(jl(Offer.merchant))
+                            )
+                        ).scalars().all()
                     by_id = {offer.id: offer for offer in hydrated}
                     offers = [by_id[offer_id] for offer_id in snapshot_ids if offer_id in by_id]
                 else:
@@ -393,6 +499,9 @@ async def search_internal_products(
                             Offer.is_adult == False,
                             Offer.price.isnot(None),
                             Offer.price > 0,
+                            Offer.currency.isnot(None),
+                            func.trim(Offer.currency) != "",
+                            Offer.in_stock.is_(True),
                         )
                     )
                     .options(jl(Offer.merchant))
@@ -416,25 +525,68 @@ async def search_internal_products(
                     exact_model_terms = _exact_model_title_terms(anchor, required)
                     if exact_model_terms:
                         stmt = stmt.where(or_(*[lowered_name.contains(term) for term in exact_model_terms]))
-                if budget:
-                    stmt = stmt.where(Offer.price <= budget)
+                if budget is not None:
+                    # Le budget Assistant historique est libellé en EUR. Une
+                    # offre sans devise ou dans une devise étrangère ne peut
+                    # pas le satisfaire sans conversion documentée.
+                    stmt = stmt.where(
+                        func.upper(func.trim(Offer.currency)) == "EUR",
+                        Offer.price <= budget,
+                    )
                 del limit
-                rows = await fetch_all_offer_rows(session.execute, stmt)
+                async with traced_dependency("postgres", "read"):
+                    rows = await fetch_all_offer_rows(session.execute, stmt)
                 offers = [row[0] for row in rows]
+
+            # Revalider après l'hydratation protège aussi la voie résolue si
+            # une offre change entre la lecture du snapshot et celle de la ligne.
+            reference = datetime.now(UTC)
+            async with traced_dependency("postgres", "read"):
+                evidence_by_offer = await load_offer_evidence(
+                    session,
+                    list(offers),
+                    current_only=True,
+                )
+            offers = [
+                offer
+                for offer in offers
+                if (evidence := evidence_by_offer.get(offer.id)) is not None
+                and _offer_is_recommendable(
+                    offer,
+                    observed_at=evidence.current_observed_at,
+                    now=reference,
+                )
+            ]
 
             decisions = await _decisions_for_offers(session, offers)
             products: list[dict[str, Any]] = []
             for offer in offers:
+                currency = normalize_currency_code(offer.currency)
+                evidence = evidence_by_offer.get(offer.id)
+                merchant_name = (
+                    offer.merchant.name.strip()
+                    if offer.merchant is not None
+                    and isinstance(offer.merchant.name, str)
+                    and offer.merchant.name.strip()
+                    else None
+                )
+                if currency is None or evidence is None or merchant_name is None:
+                    # Ultime garde-fou : aucune évolution des requêtes amont ne
+                    # doit réintroduire un remplacement silencieux de devise ou
+                    # de marchand, ni une observation sans horodatage probant.
+                    continue
                 products.append({
                     "offer_id": offer.id,
                     "product_ean": offer.ean if taxonomy.is_ean_comparable(offer.offer_kind) else None,
                     "offer_kind": offer.offer_kind or taxonomy.classify_offer_kind(offer.category, offer.name, offer.brand),
                     "name": offer.name,
-                    "price": int(round(offer.price)),
+                    "price": round(float(offer.price), 2),
                     # La devise est celle de l'offre relevée. Le pays de contexte
                     # choisi par l’utilisateur ne permet pas d'en déduire une autre.
-                    "currency": offer.currency or "EUR",
-                    "merchant": offer.merchant.name if offer.merchant else "marchand",
+                    "currency": currency,
+                    "merchant": merchant_name,
+                    "in_stock": True,
+                    "observed_at": evidence.current_observed_at.isoformat(),
                     "image": _primary_image_url(offer.image_url),
                     "link": offer.deep_link or offer.product_url,
                     "delivery": None,
@@ -445,11 +597,14 @@ async def search_internal_products(
                 })
 
             log.info(
-                "Catalogue Assistant exhaustif : %d offres évaluées pour '%s' (budget=%s)",
-                len(products), query[:40], budget
+                "Catalogue Assistant exhaustif : %d offres évaluées",
+                len(products),
             )
             return products
 
     except Exception as exc:
-        log.warning("Erreur recherche catalogue interne (%s) → fallback SerpApi", exc)
-        return []
+        log.warning(
+            "Erreur recherche catalogue interne (error_type=%s) → repli appelant",
+            type(exc).__name__,
+        )
+        raise

@@ -1,8 +1,15 @@
 """Décision générale partagée par les parcours Assistant et planification de besoins."""
 from __future__ import annotations
 
+import math
+from dataclasses import replace
+from datetime import UTC, datetime
+
+from app.core.observability import decision_trace_event
 from app.intelligence.contracts import CoreOfferSnapshot
 from app.intelligence.intent_resolution import GeneralIntent, IntentScope
+from app.services.currency import normalize_currency_code
+from app.services.freshness import offer_observation_is_fresh
 from app.services import relevance, taxonomy
 
 
@@ -44,6 +51,34 @@ def _rank(
     match = _match_proof(scope, offer, request_terms=request_terms)
     price = offer.price if offer.price is not None else float("inf")
     return (-round(match, 3), price, offer.offer_id)
+
+
+def _normalized_eligible_offer(
+    offer: CoreOfferSnapshot,
+    *,
+    now: datetime | None = None,
+) -> CoreOfferSnapshot | None:
+    """Retourne un snapshot normalisé seulement si ses faits sont admissibles."""
+
+    price = offer.price
+    currency = normalize_currency_code(offer.currency)
+    if not (
+        price is not None
+        and not isinstance(price, bool)
+        and math.isfinite(price)
+        and price > 0
+        and currency is not None
+        and offer.availability == "in_stock"
+        and offer_observation_is_fresh(offer.observed_at, now=now)
+    ):
+        return None
+    return replace(offer, currency=currency)
+
+
+def _is_eligible_offer(offer: CoreOfferSnapshot) -> bool:
+    """Compatibilité interne : aucun appelant ne doit contourner la garde."""
+
+    return _normalized_eligible_offer(offer) is not None
 
 
 def _scope_candidates(
@@ -203,21 +238,96 @@ def _scope_candidates(
     )
 
 
-def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot], *, max_items: int = 3) -> dict[str, object]:
+def compose_general_plan(
+    intent: GeneralIntent,
+    offers: list[CoreOfferSnapshot],
+    *,
+    max_items: int = 3,
+    now: datetime | None = None,
+) -> dict[str, object]:
     """Sélectionne des offres prouvées après lecture exhaustive des scopes.
 
     La fonction ne transforme pas un regroupement d’articles en promesse de style,
     de compatibilité ou de disponibilité future. Elle expose seulement les
     catégories et contraintes que les données observées permettent de vérifier.
     """
-    if not intent.resolved:
-        return _abstention(intent, "intent_not_resolved", offers)
-
     selected: list[dict[str, object]] = []
     selected_ids: set[int] = set()
+    eligible_offers: list[CoreOfferSnapshot] = []
+    ranked_count = 0
+
+    decision_trace_event(
+        "candidate_count",
+        counts={"candidate_count": len(offers)},
+    )
+
+    def traced_abstention(
+        reason: str,
+        *,
+        missing_scope: IntentScope | None = None,
+    ) -> dict[str, object]:
+        decision_trace_event(
+            "product_ranking",
+            counts={
+                "candidate_count": len(eligible_offers),
+                "ranked_count": ranked_count,
+            },
+            flags={"model_used": False},
+        )
+        decision_trace_event(
+            "offer_selection",
+            counts={"selected_count": 0},
+        )
+        decision_trace_event(
+            "evidence",
+            counts={
+                "evidenced_count": len(eligible_offers),
+                "unknown_count": max(0, len(offers) - len(eligible_offers)),
+            },
+        )
+        decision_trace_event("decision", outcome="abstain", reason=reason)
+        return _abstention(
+            intent,
+            reason,
+            offers,
+            missing_scope=missing_scope,
+        )
+
+    if not intent.resolved:
+        decision_trace_event(
+            "filtering",
+            counts={
+                "input_count": len(offers),
+                "eligible_count": 0,
+                "rejected_count": len(offers),
+            },
+        )
+        return traced_abstention("intent_not_resolved")
+
     currency: str | None = None
     total = 0.0
     budget = intent.budget_eur
+    reference = now if now is not None else datetime.now(UTC)
+    eligible_offers = [
+        normalized
+        for offer in offers
+        if (normalized := _normalized_eligible_offer(offer, now=reference)) is not None
+    ]
+    if budget is not None:
+        # Le budget public est exprimé en euros. Sans moteur FX, les offres
+        # étrangères ne doivent ni être comparées, ni rendre une offre EUR
+        # pourtant éligible inutilisable.
+        eligible_offers = [
+            offer for offer in eligible_offers if offer.currency == "EUR"
+        ]
+    decision_trace_event(
+        "filtering",
+        counts={
+            "input_count": len(offers),
+            "eligible_count": len(eligible_offers),
+            "rejected_count": max(0, len(offers) - len(eligible_offers)),
+        },
+    )
 
     ranking_qualifiers = relevance.explicit_qualifier_terms(intent.terms)
     all_scope_terms = tuple(
@@ -232,13 +342,30 @@ def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot],
     for scope in intent.scopes:
         candidates = _scope_candidates(
             scope,
-            offers,
+            eligible_offers,
             budget=budget,
             request_terms=ranking_qualifiers,
             all_scope_terms=all_scope_terms,
         )
+        ranked_count += len(candidates)
         if not candidates:
-            return _abstention(intent, "no_verified_scope", offers, missing_scope=scope)
+            unfiltered_candidates = _scope_candidates(
+                scope,
+                offers,
+                budget=budget,
+                request_terms=ranking_qualifiers,
+                all_scope_terms=all_scope_terms,
+            )
+            reason = "no_eligible_offer" if unfiltered_candidates else "no_verified_scope"
+            return traced_abstention(reason, missing_scope=scope)
+        candidate_currencies = {offer.currency for offer in candidates}
+        if len(candidate_currencies) != 1 or (
+            currency is not None and currency not in candidate_currencies
+        ):
+            return traced_abstention(
+                "currency_not_comparable",
+                missing_scope=scope,
+            )
         # Une demande multi-produits exige un représentant par scope. Une demande
         # à scope unique peut présenter plusieurs sous-rayons distincts, mais pas
         # plusieurs fois le même article sous prétexte de remplir un kit.
@@ -253,9 +380,23 @@ def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot],
                 continue
             if len(intent.scopes) == 1 and offer.filon_subcategory in represented_subcategories:
                 continue
-            if currency is not None and offer.currency != currency:
+            # Le filtre d'éligibilité ci-dessus est répété ici afin que
+            # toute future modification de la sélection reste fail-closed.
+            offer_price = offer.price
+            offer_currency = offer.currency
+            if offer_price is None or not offer_currency or offer.availability != "in_stock":
                 continue
-            if budget is not None and (offer.currency != "EUR" or (offer.price or 0.0) + total > budget):
+            if currency is not None and offer_currency != currency:
+                continue
+            candidate_total = total + offer_price
+            if not math.isfinite(candidate_total):
+                return traced_abstention(
+                    "non_finite_total",
+                    missing_scope=scope,
+                )
+            if budget is not None and (
+                offer_currency != "EUR" or candidate_total > budget
+            ):
                 continue
             item = offer.as_dict()
             item["role"] = _display_role(offer)
@@ -263,30 +404,47 @@ def compose_general_plan(intent: GeneralIntent, offers: list[CoreOfferSnapshot],
             selected.append(item)
             selected_ids.add(offer.offer_id)
             represented_subcategories.add(offer.filon_subcategory)
-            currency = offer.currency
-            total += offer.price or 0.0
+            currency = offer_currency
+            total = candidate_total
             if len(intent.scopes) > 1:
                 break
         if not any(item["plan_scope"]["category"] == scope.category for item in selected):
-            return _abstention(intent, "budget_unreachable", offers, missing_scope=scope)
+            return traced_abstention("budget_unreachable", missing_scope=scope)
 
-    confidence = 55
-    if all(item["availability"] == "in_stock" for item in selected):
-        confidence += 20
-    if budget is not None and total <= budget:
-        confidence += 15
-    if len(selected) > 1:
-        confidence += 10
+    decision_trace_event(
+        "product_ranking",
+        counts={
+            "candidate_count": len(eligible_offers),
+            "ranked_count": ranked_count,
+        },
+        flags={"model_used": False},
+    )
+    decision_trace_event(
+        "offer_selection",
+        counts={"selected_count": len(selected)},
+    )
+    decision_trace_event(
+        "evidence",
+        counts={
+            "evidenced_count": len(eligible_offers),
+            "unknown_count": max(0, len(offers) - len(eligible_offers)),
+        },
+    )
+    decision_trace_event("decision", outcome="recommend", reason="none")
     return {
         "decision": "recommend",
         "style_score": None,
-        "confidence_score": min(confidence, 100),
-        "confidence_band": "high" if confidence >= 80 else "medium",
+        "confidence_score": None,
+        "confidence_band": "not_calibrated",
         "total_known_price": {"amount": round(total, 2), "currency": currency, "scope": "items_only"},
         "delivery": "unknown",
         "items": selected,
         "rationale_keys": ["taxonomy_resolved", "verified_catalog_items", "constraints_checked", *( ["within_known_budget"] if budget is not None and total <= budget else [])],
-        "unknowns": ["delivery_unknown", "cross_item_compatibility_not_verified"],
+        "unknowns": [
+            "delivery_unknown",
+            "cross_item_compatibility_not_verified",
+            "confidence_not_calibrated",
+        ],
         "rejection_reason": None,
     }
 
@@ -301,13 +459,13 @@ def _abstention(
     return {
         "decision": "abstain",
         "style_score": None,
-        "confidence_score": 0,
-        "confidence_band": "low",
+        "confidence_score": None,
+        "confidence_band": "not_calibrated",
         "total_known_price": None,
         "delivery": "unknown",
         "items": [],
         "rationale_keys": ["abstention", reason],
-        "unknowns": ["delivery_unknown"],
+        "unknowns": ["delivery_unknown", "confidence_not_calibrated"],
         "rejection_reason": reason,
         "candidates_considered": len(offers),
         "missing_scope": (

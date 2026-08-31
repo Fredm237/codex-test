@@ -34,15 +34,16 @@ function CguFR() {
 
           <h2>2. Description du service</h2>
           <p>
-            FILON est un service d&apos;<b>aide à la décision d&apos;achat</b>. Il analyse le marché, compare des offres et
-            estime un coût réel, puis propose une recommandation. FILON ne vend aucun produit&nbsp;: l&apos;achat
+            FILON est un service d&apos;<b>aide à la décision d&apos;achat</b>. Il compare les offres indexées et présente
+            les signaux disponibles, avec leurs limites. FILON ne vend aucun produit&nbsp;: l&apos;achat
             s&apos;effectue toujours directement auprès du marchand ou de la plateforme choisie par l&apos;utilisateur.
           </p>
 
-          <h2>3. Accès et gratuité</h2>
+          <h2>3. Accès et offre actuelle</h2>
           <p>
-            L&apos;accès à FILON est <b>entièrement gratuit</b> pour l&apos;utilisateur, sans abonnement ni frais&nbsp;: voir la
-            page <a href="/tarifs">Tarifs</a>. Il n&apos;est jamais facturé à l&apos;utilisateur. L&apos;éditeur s&apos;efforce
+            L&apos;offre publique actuelle de FILON est affichée à <b>0 €</b>, sans abonnement ni carte bancaire&nbsp;:
+            voir la page <a href="/tarifs">Tarifs</a>. Cette offre peut évoluer ; les conditions publiées sur cette page
+            s&apos;appliquent. L&apos;éditeur s&apos;efforce
             d&apos;assurer la disponibilité du service sans pouvoir la garantir de manière ininterrompue.
           </p>
 
@@ -61,11 +62,11 @@ function CguFR() {
             décision d&apos;achat relève de la seule responsabilité de l&apos;utilisateur.
           </p>
 
-          <h2>6. Liens partenaires</h2>
+          <h2>6. Liens affiliés</h2>
           <p>
-            FILON peut contenir des <b>liens partenaires</b>. Les activer <b>n&apos;augmente jamais le prix payé par
-            l&apos;utilisateur</b> et n&apos;influence pas la recommandation, qui vise le meilleur coût réel pour
-            l&apos;utilisateur.
+            FILON peut contenir des <b>liens affiliés</b> susceptibles de générer une commission. Le taux de
+            commission n&apos;est pas une entrée du score actuel. Le prix, les frais et le total final doivent être
+            confirmés sur le site du marchand.
           </p>
 
           <h2>7. Propriété intellectuelle</h2>
@@ -131,15 +132,16 @@ function CguNL() {
 
           <h2>2. Beschrijving van de dienst</h2>
           <p>
-            FILON is een dienst voor <b>hulp bij de aankoopbeslissing</b>. Hij analyseert de markt, vergelijkt
-            aanbiedingen en schat een echte kost, en stelt dan een aanbeveling voor. FILON verkoopt geen enkel
+            FILON is een dienst voor <b>hulp bij de aankoopbeslissing</b>. Hij vergelijkt geïndexeerde aanbiedingen en
+            toont de beschikbare signalen met hun beperkingen. FILON verkoopt geen enkel
             product&nbsp;: de aankoop gebeurt altijd rechtstreeks bij de winkel of het platform gekozen door de gebruiker.
           </p>
 
-          <h2>3. Toegang en kosteloosheid</h2>
+          <h2>3. Toegang en huidig aanbod</h2>
           <p>
-            De toegang tot FILON is <b>volledig gratis</b> voor de gebruiker, zonder abonnement of kosten&nbsp;: zie de
-            pagina <a href="/tarifs">Tarieven</a>. Het wordt nooit aan de gebruiker gefactureerd. De uitgever streeft ernaar
+            Het huidige publieke aanbod van FILON staat op <b>0 €</b>, zonder abonnement of bankkaart&nbsp;: zie de
+            pagina <a href="/tarifs">Tarieven</a>. Dit aanbod kan veranderen; de op die pagina gepubliceerde voorwaarden
+            zijn van toepassing. De uitgever streeft ernaar
             de beschikbaarheid van de dienst te verzekeren zonder ze ononderbroken te kunnen garanderen.
           </p>
 
@@ -158,10 +160,10 @@ function CguNL() {
             de uitsluitende verantwoordelijkheid van de gebruiker.
           </p>
 
-          <h2>6. Partnerlinks</h2>
+          <h2>6. Affiliatielinks</h2>
           <p>
-            FILON kan <b>partnerlinks</b> bevatten. Ze activeren <b>verhoogt nooit de prijs die de gebruiker
-            betaalt</b> en beïnvloedt de aanbeveling niet, die de beste echte kost voor de gebruiker beoogt.
+            FILON kan <b>affiliatielinks</b> bevatten die een commissie kunnen opleveren. Het commissietarief is
+            geen invoerveld van de huidige score. Bevestig prijs, kosten en eindtotaal op de website van de winkel.
           </p>
 
           <h2>7. Intellectuele eigendom</h2>
@@ -226,15 +228,16 @@ function CguEN() {
 
           <h2>2. Description of the service</h2>
           <p>
-            FILON is a <b>purchase-decision aid</b> service. It analyses the market, compares offers and estimates a
-            real cost, then proposes a recommendation. FILON sells no product&nbsp;: the purchase is always made
+            FILON is a <b>purchase-decision aid</b> service. It compares indexed offers and presents the available
+            signals with their limits. FILON sells no product&nbsp;: the purchase is always made
             directly with the merchant or platform chosen by the user.
           </p>
 
-          <h2>3. Access and free of charge</h2>
+          <h2>3. Access and current offering</h2>
           <p>
-            Access to FILON is <b>entirely free</b> for the user, with no subscription or fees&nbsp;: see the{" "}
-            <a href="/tarifs">Pricing</a> page. It is never billed to the user. The publisher strives to ensure the
+            FILON&apos;s current public offering is listed at <b>€0</b>, with no subscription or payment card&nbsp;: see
+            the <a href="/tarifs">Pricing</a> page. This offering may change; the terms published on that page apply.
+            The publisher strives to ensure the
             availability of the service without being able to guarantee it uninterrupted.
           </p>
 
@@ -253,10 +256,10 @@ function CguEN() {
             responsibility.
           </p>
 
-          <h2>6. Partner links</h2>
+          <h2>6. Affiliate links</h2>
           <p>
-            FILON may contain <b>partner links</b>. Activating them <b>never increases the price paid by the
-            user</b> and does not influence the recommendation, which aims at the best real cost for the user.
+            FILON may contain <b>affiliate links</b> that can generate a commission. The commission rate is not an
+            input field in the current score. Confirm price, fees and final total on the merchant&apos;s website.
           </p>
 
           <h2>7. Intellectual property</h2>

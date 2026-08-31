@@ -1,0 +1,37 @@
+global:
+  scrape_interval: 30s
+  scrape_timeout: 10s
+  evaluation_interval: 30s
+
+rule_files:
+  - /etc/prometheus/rules/filon.rules.yml
+
+scrape_configs:
+  - job_name: filon-backend
+    scheme: https
+    metrics_path: /health/metrics/openmetrics
+    honor_labels: false
+    authorization:
+      type: Bearer
+      credentials_file: /run/secrets/filon_metrics_export_token
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/targets/filon.json
+        refresh_interval: 30s
+    relabel_configs:
+      - source_labels:
+          - environment
+          - cluster
+          - replica
+        separator: ;
+        regex: .+;.+;.+
+        action: keep
+    metric_relabel_configs:
+      - action: labelkeep
+        regex: __name__|job|instance|environment|cluster|replica|status_group|statistic|method|route|scope|confidence|offer_kind|status|bucket|dimension|state|reason|outcome|delivery|stage
+    sample_limit: 2500
+    target_limit: 100
+    label_limit: 10
+    label_name_length_limit: 64
+    label_value_length_limit: 256
+    body_size_limit: 1MB

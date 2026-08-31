@@ -7,14 +7,16 @@ matière, une taille ou une silhouette en l’absence de donnée du Core. Il com
 
 from __future__ import annotations
 
-from app.services import relevance
-
+import math
 import re
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
+from datetime import UTC, datetime
 from typing import Literal
 
 from app.intelligence.contracts import CoreOfferSnapshot
-from app.services import taxonomy
+from app.services import relevance, taxonomy
+from app.services.currency import normalize_currency_code
+from app.services.freshness import offer_observation_is_fresh
 
 OutfitMode = Literal["create", "complete", "recreate", "optimize", "compare", "discover"]
 OutfitRole = Literal["base", "footwear", "accessory"]
@@ -263,11 +265,36 @@ def _compatible_currency(items: list[OutfitItem]) -> str | None:
     return next(iter(currencies)) if len(currencies) == 1 else None
 
 
+def _normalized_eligible_offer(
+    offer: CoreOfferSnapshot,
+    *,
+    now: datetime | None = None,
+) -> CoreOfferSnapshot | None:
+    """Ferme la composition aux faits invalides, inconnus ou périmés."""
+
+    price = offer.price
+    currency = normalize_currency_code(offer.currency)
+    if not (
+        price is not None
+        and not isinstance(price, bool)
+        and math.isfinite(price)
+        and price > 0
+        and currency is not None
+        and offer.availability == "in_stock"
+        and offer_observation_is_fresh(offer.observed_at, now=now)
+    ):
+        return None
+    return replace(offer, currency=currency)
+
+
 def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> dict[str, object]:
     """Produit une solution minimale achetable ou une abstention explicable."""
     by_role: dict[OutfitRole, list[CoreOfferSnapshot]] = {"base": [], "footwear": [], "accessory": []}
-    for offer in offers:
-        by_role[role_of(offer)].append(offer)
+    reference = datetime.now(UTC)
+    for raw_offer in offers:
+        offer = _normalized_eligible_offer(raw_offer, now=reference)
+        if offer is not None:
+            by_role[role_of(offer)].append(offer)
     # Correspondance d'abord, prix ensuite.
     #
     # Le tri portait sur le seul prix croissant, et remontait donc l'article le
@@ -392,8 +419,11 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         None,
     )
     if footwear is not None:
+        candidate_total = running_total + (footwear.price or 0.0)
+        if not math.isfinite(candidate_total):
+            return _abstention(intent, "non_finite_total", offers)
         selected.append(OutfitItem(offer=footwear, role="footwear"))
-        running_total += footwear.price or 0.0
+        running_total = candidate_total
 
     accessory = next(
         (
@@ -408,15 +438,20 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
         None,
     )
     if accessory is not None:
+        candidate_total = running_total + (accessory.price or 0.0)
+        if not math.isfinite(candidate_total):
+            return _abstention(intent, "non_finite_total", offers)
         selected.append(OutfitItem(offer=accessory, role="accessory"))
-        running_total += accessory.price or 0.0
+        running_total = candidate_total
 
-    confidence = _confidence(selected, termes)
-    style = _style_score(selected, intent, budget, running_total)
     # Les prix et la disponibilité peuvent être observés. La compatibilité de
     # style, de coupe et d'occasion ne l'est pas dans M1 : elle reste toujours
     # explicitement à confirmer par la personne.
-    unknowns = ["delivery_unknown", "style_compatibility_not_verified"]
+    unknowns = [
+        "delivery_unknown",
+        "style_compatibility_not_verified",
+        "confidence_not_calibrated",
+    ]
     if any(item.offer.availability == "unknown" for item in selected):
         unknowns.append("availability_to_verify")
     if intent.occasion is None:
@@ -426,9 +461,13 @@ def compose_outfit(intent: FashionIntent, offers: list[CoreOfferSnapshot]) -> di
 
     return {
         "decision": "recommend",
-        "style_score": style,
-        "confidence_score": confidence,
-        "confidence_band": "high" if confidence >= 80 else "medium" if confidence >= 55 else "low",
+        # Aucun jeu humain adjudique ne permet encore de calibrer une probabilité
+        # de correction. Le précédent score de style ne mesurait que le nombre de
+        # rôles couverts et le budget : il ne constituait donc pas une mesure de
+        # compatibilité stylistique distincte et supportée.
+        "style_score": None,
+        "confidence_score": None,
+        "confidence_band": "not_calibrated",
         "total_known_price": {"amount": round(running_total, 2), "currency": currency, "scope": "items_only"},
         "delivery": "unknown",
         "items": [item.as_dict() for item in selected],
@@ -442,67 +481,20 @@ def _abstention(intent: FashionIntent, reason: str, offers: list[CoreOfferSnapsh
     return {
         "decision": "abstain",
         "style_score": None,
-        "confidence_score": 0,
-        "confidence_band": "low",
+        "confidence_score": None,
+        "confidence_band": "not_calibrated",
         "total_known_price": None,
         "delivery": "unknown",
         "items": [],
         "rationale_keys": ["abstention", reason],
-        "unknowns": ["delivery_unknown", *intent.missing_inputs],
+        "unknowns": [
+            "delivery_unknown",
+            "confidence_not_calibrated",
+            *intent.missing_inputs,
+        ],
         "rejection_reason": reason,
         "candidates_considered": len(offers),
     }
-
-
-def _confidence(items: list[OutfitItem], termes: list[str] | None = None) -> int:
-    """Confiance dans la solution — documentation ET correspondance.
-
-    Elle ne mesurait que la complétude documentaire : un prix, un marchand, une
-    disponibilité, au moins deux pièces. Une tenue composée d'un régulateur de
-    panneau et d'un sac à 0 € sortait donc à 100 sur 100. Se tromper est
-    réparable ; se tromper en affichant « confiance élevée » ne l'est pas.
-
-    La correspondance la plus faible de la tenue plafonne désormais l'ensemble :
-    une seule pièce hors sujet suffit à faire tomber la confiance, et donc à
-    déclencher l'abstention en amont.
-    """
-    if not items:
-        return 0
-    score = 45  # prix, marchand et catégorie Core de toutes les pièces.
-    score += 20  # toutes les pièces ont un prix et une devise par contrat.
-    if all(item.offer.availability == "in_stock" for item in items):
-        score += 20
-    elif any(item.offer.availability == "unknown" for item in items):
-        score += 5
-    if len(items) >= 2:
-        score += 15
-    score = min(score, 100)
-
-    if termes:
-        pire = min(
-            relevance.score(termes, item.offer.name or "",
-                            offer_kind=getattr(item.offer, "offer_kind", None))
-            for item in items
-        )
-        score = int(round(score * min(1.0, pire / relevance.SEUIL)))
-    return max(0, min(score, 100))
-
-
-def _style_score(items: list[OutfitItem], intent: FashionIntent, budget: float | None, total: float) -> int:
-    """Couverture documentaire, conservée sous le nom de contrat historique.
-
-    Ce score ne mesure pas une compatibilité de style : il indique seulement le
-    nombre de rôles avec données vérifiables et le respect du budget connu.
-    """
-    roles = {item.role for item in items}
-    score = 50  # pièce principale documentée
-    if "footwear" in roles:
-        score += 20
-    if "accessory" in roles:
-        score += 10
-    if budget is not None and total <= budget:
-        score += 20
-    return min(score, 100)
 
 
 def _rationale(items: list[OutfitItem], intent: FashionIntent, budget: float | None, total: float) -> list[str]:

@@ -1,10 +1,13 @@
 # FILON AI — backend
 fastapi>=0.115.0
-uvicorn[standard]>=0.30.0
+uvicorn[standard]>=0.49.0
 pydantic>=2.9.0
 pydantic-settings>=2.5.0
 httpx>=0.27.0
 python-dotenv>=1.0.1
+jsonschema>=4.23.0,<5.0
+opentelemetry-sdk>=1.44.0,<2.0
+opentelemetry-exporter-otlp-proto-http>=1.44.0,<2.0
 
 # Système d'agents
 langgraph>=0.2.0
@@ -12,6 +15,7 @@ langgraph>=0.2.0
 # Mémoire classique (PostgreSQL)
 sqlalchemy[asyncio]>=2.0.30
 asyncpg>=0.29.0
+alembic>=1.13.0,<2.0
 
 # Cache / files
 redis>=5.0.0

@@ -1,5 +1,7 @@
 """Pertinence stricte des recherches assistant à modèle explicite."""
 
+from datetime import UTC, datetime
+
 from app.services import taxonomy
 from app.services.catalog_search import (
     _catalogue_intent,
@@ -147,7 +149,7 @@ def test_assistant_conserve_la_selection_du_planificateur_general():
             offer_kind=taxonomy.PHYSICAL_PRODUCT, price=price, currency="EUR",
             availability="in_stock", image_url="https://example.test/item.jpg",
             deep_link="https://example.test/item", merchant_id=1, merchant_name="Test",
-            merchant_region="BE", observed_at=None,
+            merchant_region="BE", observed_at=datetime.now(UTC),
         )
 
     assert _planned_general_offer_ids(intent, [

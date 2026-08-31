@@ -31,7 +31,9 @@ async def _run(step: str) -> None:
     if not db.is_enabled():
         log.error("DATABASE_URL absent → impossible de synchroniser le catalogue")
         return
-    await db.create_all()
+    # L'ingestion ne doit jamais modifier le schéma implicitement. En mode
+    # Alembic, elle s'arrête si la migration de déploiement n'a pas été appliquée.
+    await db.prepare_schema()
 
     async with db.session_scope() as session:
         if session is None:

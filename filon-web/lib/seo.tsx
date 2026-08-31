@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
 import { site } from "./site";
+import { serializeJsonLd } from "./json-ld";
+import { siteUrl } from "./site-url";
+
+export { siteUrl } from "./site-url";
 
 /** Build page metadata with sensible FILON defaults + Open Graph / Twitter. */
 export function buildMetadata(input: {
@@ -10,7 +14,7 @@ export function buildMetadata(input: {
 }): Metadata {
   const title = input.title ? `${input.title} · ${site.name}` : `${site.name} · ${site.tagline}`;
   const description = input.description ?? site.description;
-  const url = `${site.url}${input.path ?? "/"}`;
+  const url = siteUrl(input.path);
 
   const ogImage = input.image
     ? { url: input.image, alt: input.title ?? site.name }
@@ -63,7 +67,7 @@ export function websiteSchema() {
     inLanguage: "fr",
     potentialAction: {
       "@type": "SearchAction",
-      target: `${site.url}/recherche?q={query}`,
+      target: siteUrl("/recherche?q={query}"),
       "query-input": "required name=query",
     },
   };
@@ -97,7 +101,7 @@ export function articleSchema(a: { title: string; description: string; path: str
     },
     datePublished: a.datePublished,
     dateModified: a.datePublished,
-    mainEntityOfPage: `${site.url}${a.path}`,
+    mainEntityOfPage: siteUrl(a.path),
     image: `${site.url}/og.png`,
     inLanguage: "fr",
   };
@@ -112,17 +116,22 @@ export function breadcrumbSchema(items: { name: string; path: string }[]) {
       "@type": "ListItem",
       position: i + 1,
       name: it.name,
-      item: `${site.url}${it.path}`,
+      item: siteUrl(it.path),
     })),
   };
 }
 
 /** Small helper to render a JSON-LD <script> safely. */
 export function JsonLd({ data }: { data: unknown }) {
+  // Une valeur issue d'un flux peut contenir `</script>`. JSON.stringify seul
+  // ne neutralise pas cette fermeture HTML : encoder `<` empêche toute sortie
+  // du bloc JSON-LD. Les deux séparateurs Unicode restent explicites pour les
+  // parseurs JavaScript historiques.
+  const serialized = serializeJsonLd(data);
   return (
     <script
       type="application/ld+json"
-      dangerouslySetInnerHTML={{ __html: JSON.stringify(data) }}
+      dangerouslySetInnerHTML={{ __html: serialized }}
     />
   );
 }

@@ -9,4 +9,9 @@ describe("collection sync recovery", () => {
     expect(shouldAutoRetryCollectionSync({ authenticated: false, pendingSync: true, internetReachable: true, syncing: false })).toBe(false);
     expect(shouldAutoRetryCollectionSync({ authenticated: true, pendingSync: true, internetReachable: true, syncing: true })).toBe(false);
   });
+
+  it("retries a failed push registration even after local data was already reconciled", () => {
+    expect(shouldAutoRetryCollectionSync({ authenticated: true, pendingSync: false, pushRegistrationFailed: true, internetReachable: true, syncing: false })).toBe(true);
+    expect(shouldAutoRetryCollectionSync({ authenticated: true, pendingSync: false, pushRegistrationFailed: false, internetReachable: true, syncing: false })).toBe(false);
+  });
 });

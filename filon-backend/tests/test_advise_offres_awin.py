@@ -15,6 +15,8 @@ mieux `None` que d'inventer une valeur. Schéma et source se contredisaient.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 from pydantic import ValidationError
 
@@ -26,6 +28,7 @@ class _FakeOffer:
     def __init__(self, price):
         self.price = price
         self.currency = "EUR"
+        self.updated_at = datetime.now(UTC)
         self.deep_link = "https://exemple.test/produit"
         self.in_stock = True
 
@@ -54,7 +57,9 @@ def test_offre_avec_valeurs_reste_valide():
 def test_champs_omis_valent_none():
     offre = Offer(merchant="Fnac", price=100.0)
     assert offre.delivery_days is None
+    assert offre.delivery_cost is None
     assert offre.warranty_months is None
+    assert offre.in_stock is None
 
 
 def test_analyse_complete_avec_offre_awin_reelle():
@@ -69,6 +74,9 @@ def test_analyse_complete_avec_offre_awin_reelle():
     )
     # C'est bien la source qui pose None, pas une hypothèse du test.
     assert produit["offers"][0]["delivery_days"] is None
+    assert produit["offers"][0]["delivery_cost"] is None
+    assert produit["offers"][0]["currency"] == "EUR"
+    assert produit["offers"][0]["observed_at"] is not None
     assert produit["offers"][0]["warranty_months"] is None
     assert produit["rating"] is None
 
@@ -79,7 +87,11 @@ def test_analyse_complete_avec_offre_awin_reelle():
         real_price=59.9,
     )
     assert analyse.best_offer.delivery_days is None
+    assert analyse.best_offer.delivery_cost is None
+    assert analyse.best_offer.currency == "EUR"
+    assert analyse.best_offer.observed_at is not None
     assert analyse.real_price == 59.9
+    assert analyse.shipping_cost_known is False
 
 
 def test_le_prix_reste_obligatoire():

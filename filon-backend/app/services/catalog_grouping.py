@@ -15,6 +15,7 @@ from __future__ import annotations
 import asyncio
 import re
 from collections import Counter, defaultdict
+from collections.abc import Awaitable, Callable
 
 from sqlalchemy import bindparam, func, select, update
 
@@ -194,18 +195,34 @@ def _shard_of(ean: str, shards: int) -> int:
 
 
 async def rebuild_products(
-    session, *, batch: int = 1000, page: int = 5000, shards: int = 4
+    session,
+    *,
+    batch: int = 1000,
+    page: int = 5000,
+    shards: int = 4,
+    progress: Callable[[], Awaitable[None]] | None = None,
 ) -> dict:
     """Regroupe les offres en produits. Ignore l'appel si un run est en cours."""
     if _lock.locked():
         log.warning("Regroupement EAN déjà en cours : appel ignoré")
         return {"skipped": True, "reason": "regroupement déjà en cours"}
     async with _lock:
-        return await _rebuild_products(session, batch=batch, page=page, shards=shards)
+        return await _rebuild_products(
+            session,
+            batch=batch,
+            page=page,
+            shards=shards,
+            progress=progress,
+        )
 
 
 async def _rebuild_products(
-    session, *, batch: int, page: int, shards: int
+    session,
+    *,
+    batch: int,
+    page: int,
+    shards: int,
+    progress: Callable[[], Awaitable[None]] | None,
 ) -> dict:
     """Reconstruit les produits à partir des offres. Idempotent.
 
@@ -244,6 +261,10 @@ async def _rebuild_products(
     grouped_offers = 0
     created = updated = multi_merchant = 0
 
+    async def heartbeat() -> None:
+        if progress is not None:
+            await progress()
+
     for shard in range(shards):
         aggregates: dict[str, _Aggregate] = {}
         async for rows in _iter_offer_pages(session, columns, page=page):
@@ -262,6 +283,8 @@ async def _rebuild_products(
                 if agg is None:
                     agg = aggregates[ean] = _Aggregate()
                 agg.add(r)
+            await heartbeat()
+            await session.commit()
 
         to_create: list[dict] = []
         to_update: list[dict] = []
@@ -276,7 +299,11 @@ async def _rebuild_products(
         )
         for start in range(0, len(to_create), batch):
             await session.execute(insert_stmt, to_create[start : start + batch])
-        await session.commit()
+            await heartbeat()
+            await session.commit()
+        if not to_create:
+            await heartbeat()
+            await session.commit()
 
         if to_update:
             # Table Core : la clé de mise à jour est l'EAN, pas la clé primaire —
@@ -305,7 +332,8 @@ async def _rebuild_products(
                         for row in to_update[start : start + batch]
                     ],
                 )
-            await session.commit()
+                await heartbeat()
+                await session.commit()
 
         created += len(to_create)
         updated += len(to_update)
@@ -343,8 +371,12 @@ async def _rebuild_products(
             # Bulk update par clé primaire : un aller-retour par lot.
             await session.execute(update(models.Offer), mapping[start : start + batch])
         if mapping:
+            await heartbeat()
             await session.commit()
             linked += len(mapping)
+        else:
+            await heartbeat()
+            await session.commit()
 
     summary = {
         "offers_total": total_offers,

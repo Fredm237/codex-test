@@ -1,0 +1,103 @@
+# FILON — Registre canonique des preuves de Phase 0
+
+- Date de coupure : **30 août 2026**
+- Branche locale : `codex/filon-phase-0-core`
+- Référence applicative locale qualifiée : `8594bd8`
+- Référence applicative distante qualifiée : `5ab3c3c`, arbre commun `e2124704b30d405f5d7215f4acc95bc5246dc570`
+- Référence Quality versionnée : artefact Actions `9738761749`
+
+Décision globale : **NO-GO vers la Phase 1**
+
+Ce registre relie les lots du plan aux identifiants de la
+[mission courante](../../.claude/agent/missions/courante.json), aux preuves
+rejouables et aux conditions de sortie encore ouvertes. Un test logiciel prouve
+un contrat technique dans le périmètre testé ; il ne devient ni une annotation
+humaine indépendante, ni une mesure de qualité métier, ni une preuve de
+production. En particulier, les **386 tests Quality Lab verts** ne remplacent
+pas les **0 cas humains** actuellement disponibles.
+
+## Registre
+
+| Lot | Mission | Statut au 29-08-2026 | Commit ou preuve locale connue | Commande ou mesure principale | Artefact canonique | Condition de sortie / blocage |
+|---|---|---|---|---|---|---|
+| P0.0 — Freeze, ownership et baseline | `p0_a` | **AUDIT TERMINÉ** (`p0_a` fait) ; règles de livraison actives | Audit local et GitHub consigné ; run Actions #343 exécuté ; ruleset `21798272` active sur `main` sans bypass | Suites complètes de chaque surface et contrôles distants | [Current System Map](CURRENT_SYSTEM_MAP.md), [baseline qualité](BASELINE_QUALITY_REPORT.md), [qualification distante](PHASE_0_REMOTE_QUALIFICATION_REPORT.md) | La baseline, la CI distante et la protection de `main` sont acquises ; le gel reste applicable jusqu'au GO métier/production |
+| P0.1 — Contrats v1 et `unknown` | `p0_b` | **TERMINÉ** (`p0_b` fait) | Catalogue, agrégats, Assistant et MegaMenu fail-closed ; UTC explicite sur toutes les dates catalogue publiques et constructeur d'URL unique ; local courant : backend **2 119 + 2 ignorés**, web **17/17**, typecheck et build 42 routes | Suites de compatibilité backend/web/mobile/extension ; preuve explicite, `observed_at` valide ≤ 72 h, devise, stock, prix, URL sûre, horodatage RFC 3339 et revalidation Core exigés avant action | [durcissement final du contrat](PHASE_0B_CATALOG_CONTRACT_HARDENING_REPORT.md), [post-validation protégée](PROTECTED_TRUTH_INTEGRATION_PREFLIGHT.md), [registre `contracts/v1`](../../contracts/v1/README.md), [claims non supportés](UNSUPPORTED_CLAIMS_REGISTER.md), [preuve d'invariance](AFFILIATE_INVARIANCE_REPORT.md) | Contrat acquis ; le TTL 72 h reste provisoire et devra être recalibré sur cadence/dérive réelles |
+| P0.2 — Quality Lab | `p0_c` | **EN COURS** ; infrastructure v0.5 locale verte, données **NO-GO** | Le roster reste fermé à 7 datasets/27 gates ; 7 moteurs réels sont branchés, dont les résolutions Graph exactes-GTIN ; la curation catalogue séparée et sans gold est contractuelle ; Quality **386/386**, backend **2 118 + 2 ignorés** ; rapport `integrity_valid: true`, `ready: false` | Suites Quality et backend ; readiness normale exit 0 et stricte exit 1 | [inventaire réel](../../quality/candidates/README.md), [workflow de curation](PHASE_0C_CURATION_WORKFLOW_REPORT.md), [manifeste v0.5](../../quality/manifest.json), [rapport de readiness daté](../../quality/reports/readiness-2026-08-29.json), [rapport P0.c](PHASE_0C_QUALITY_REPORT.md) | Faire exécuter la curation et l'annotation par des humains distincts, puis collecter les sept jeux réellement indépendants avec adjudication, provenance, volumes et supports minimaux ; aujourd'hui : **0 cas humains** et aucune régression métier mesurable |
+| P0.3 — Migrations | `p0_d` | **TERMINÉ ET ACTIVÉ EN PRODUCTION** | Baseline `b9db07b15986`, head `f4c81a9d2e70` ; backend local **2 035 réussis + 2 ignorés** ; restore drill PostgreSQL 18, stamp, upgrade, drift et invariance des quatre compteurs prouvés en production | `alembic current`, `alembic check`, compteurs avant/après, shadow vide et readiness de révision | [ADR baseline](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) | Acquis pour le Core ; rollback applicatif, deux sauvegardes manuelles et plannings `DAILY + WEEKLY + MONTHLY` actifs ; conserver les restore drills périodiques |
+| P0.4 — Observation shadow | `p0_e` | **TERMINÉ EN SHADOW** (`fait`) | `7753dff` ; **29 tests ciblés** et backend **1 304/1 304** ; taxonomie E001–E018, replay et compatibilité v1 prouvés | Suites taxonomie/Observation/contrats et replay idempotent, flag shadow désactivé par défaut | [rapport P0.e](PHASE_0E_OBSERVATION_REPORT.md), [taxonomie d'erreurs](ERROR_TAXONOMY.md) | Garder le shadow opt-in et les lectures v1 inchangées tant que le Product Graph n'a pas passé ses gates |
+| P0.5 — Product/Variant + Offer Graph + Merchant Intelligence + Evidence + Funnel shadows | `p0_f` | **EN COURS — SHADOWS TECHNIQUES LIVRÉS, GATE HUMAIN ROUGE** | Douze tables d'expansion, migrations `8b2f4c7d9a10` + `c6a1d4e8f2b3` + `d7b2e5f9a4c1` + `e8c3f6a0b5d2`, resolver exact-GTIN, argent décimal, stock tri-state, compteurs marchands sans score, 11 claims et funnel article 27 fail-closed | Tests Product/Offer/Merchant/Evidence/Funnel, migration et configuration verts ; Funnel ciblé 12/12, intégration 67/67 ; Quality 386/386 ; readiness stricte exit 1 attendu | [ADR Product Graph](ADR-002-PRODUCT-GRAPH-IDENTITY-SHADOW.md), [ADR Offer Graph](ADR-003-OFFER-GRAPH-EVIDENCE-SHADOW.md), [ADR Merchant Intelligence](ADR-004-MERCHANT-INTELLIGENCE-MEASUREMENT-SHADOW.md), [ADR Evidence](ADR-005-EVIDENCE-CLAIM-ELIGIBILITY-SHADOW.md), [rapports P0.5](PHASE_0F_PRODUCT_GRAPH_SHADOW_REPORT.md), [P0.5b](PHASE_0F_OFFER_GRAPH_SHADOW_REPORT.md), [P0.5c](PHASE_0F_MERCHANT_INTELLIGENCE_REPORT.md), [P0.5d](PHASE_0F_EVIDENCE_ENGINE_REPORT.md) et [P0.5e](PHASE_0F_CATALOG_QUALITY_FUNNEL_REPORT.md) | Aucun backfill ni activation production ; funnel strict interrompu à la classification humaine ; claims forts et décision restent bloqués ; dépend de P0.2, coût rendu, calibration et sources après clic/achat |
+| P0.6 — Observabilité et front door | `p0_i` | **EN COURS** ; backend Core, probes, identité edge, exports opt-in, Redis privé et Cron Railway réels verts ; infrastructures d'observabilité externes encore NO-GO | Identité edge et OpenMetrics 1.0 qualifiés ; exporteur OTLP/HTTP officiel : **89/89 ciblés**, backend logique **2 132 réussis + 2 ignorés** ; Redis `11201b89…` répond `ok` sans fallback ; Cron privé `b45d89cd…`, préflight `ready`, cadence 6 h et premier cycle réel actif | Spans mémoire et transport OTLP loopback concordants avec W3C ; Bearer/protobuf vérifiés ; sonde Redis réelle, préflight expurgé, journal scheduler persistant, premières écritures Awin/PostgreSQL et disponibilité web vérifiés | [rapport P0.6](PHASE_06_OBSERVABILITY_REPORT.md), [export OTLP](PHASE_06_OTLP_TRACE_EXPORT_REPORT.md), [activation Redis/Cron](PHASE_06_REDIS_CRON_ACTIVATION_REPORT.md), [préflight scheduler](PHASE_06_SCHEDULER_PREFLIGHT_REPORT.md), [politique front door](FRONT_DOOR_SECURITY_POLICY.md), [reçu OpenMetrics/résilience](PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md), [pack agrégateur](../../filon-backend/observability/README.md) | Consigner l'état terminal du premier cycle ; déployer le collecteur et l'agrégateur ; qualifier scrapes/rétention/dashboard ; canal/pager et trafic représentatif restent ouverts |
+| P0.7 — CI multi-surfaces et protection | `p0_g` | **TERMINÉ** (`p0_g` fait) | Référence applicative distante `160d89f`, arbre `f653c8c…` identique au commit local `1b2541c` ; PR #385 ; Actions #366 : web/mobile/extension verts, Alembic, 2 132 régressions backend et readiness normale verts ; seul le gate strict Quality échoue comme attendu sur les datasets humains vides ; artefact `9739367304` | Workflow backend/contrats/migrations/Quality, web, mobile et extension ; GitHub Actions réel et protection de `main` | [qualification distante](PHASE_0_REMOTE_QUALIFICATION_REPORT.md), [workflow Phase 0](../../.github/workflows/backend-catalog-quality.yml), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) | Lot acquis ; la conclusion globale reste NO-GO parce que le check backend ferme correctement sur les datasets humains vides |
+| Revue de passage Phase 1 | `p0_h` | **À FAIRE — NO-GO** | Aucune décision GO approuvée | Revue conjointe des gates, risques, ADR, preuves de rollback et conditions de production | Ce registre et le [plan Phase 0](PHASE_0_EXECUTION_PLAN.md) | P0.1, P0.2, P0.5, P0.6 et P0.7 doivent atteindre leurs sorties ; les risques résiduels doivent être explicitement acceptés |
+
+## Preuves transversales à ne pas surinterpréter
+
+- `e152ed0`, `4e5755d` et `56de1cf` ajoutent les primitives de vérité prix ;
+  `4a95a42` et `90246b2` achèvent leur intégration dans catalogue,
+  SearchAssistant et MegaMenu. La preuve est désormais locale et distante :
+  **2 020 tests backend + 1 ignoré** localement, **2 021/2 021** dans Actions,
+  web **17/17**, typecheck et build. Elle reste une preuve technique, jamais
+  une mesure humaine.
+
+- `f5ae21b` ferme `/advise` agents et le planificateur général sur la vérité des
+  offres : prix, devise, disponibilité, livraison et comparaison inconnus ne
+  produisent plus d'avantage favorable ; les recommandations générales
+  n'inventent plus de confiance. Cette preuve n'englobe pas les callers legacy
+  recensés ci-dessus. L'état cumulé `f5ae21b` + `45e7768` est vert à
+  **1 659/1 659** tests backend. Cette preuve renforce P0.1 et les garde-fous
+  offre/décision pré-Graph, sans mesurer P0.2 ni la qualité du Product Graph sur
+  des offres réelles annotées.
+- `1a167dc` ferme l'Assistant sur une preuve explicitement courante : le marqueur
+  `evidence_current=true` est obligatoire, la carte est revalidée et le cache
+  moteur v4 empêche de reprendre une ancienne carte insuffisamment qualifiée.
+  Une archive propre de ce commit passe **1 795 tests**, avec **7 warnings**, en
+  **120,91 s**. Cette preuve ne qualifie pas le backend catalogue protégé.
+- `0c6f674` et `a78401a` — qui inclut le socle mobile `55aaf41` — ferment les
+  parcours produit web/mobile sur une preuve
+  explicitement courante :
+  `evidence_current=true`, `observed_at` strict, non futur et âgé d'au plus
+  72 h, prix positif, devise supportée, stock positif et lien marchand HTTPS
+  avec nom DNS public qualifié. Une URL contenant des identifiants, un hôte
+  local/réservé ou un littéral IP n'est pas actionnable. L'expiration est
+  recalculée dynamiquement ; un rendu ouvert ne transforme donc pas une preuve
+  expirée en preuve courante. Le proxy Pulse web partage un TTL de **120 s**,
+  distinct du TTL de preuve marchande.
+- Sur mobile, les paramètres de deep-link sont display-only. Achat, partage,
+  sauvegarde et alerte exigent une concordance avec le détail Core ; l'alerte
+  revalide encore au submit. Un historique futur, multidevise ou dépourvu de
+  `in_stock=true` explicite est rejeté.
+- Les comparaisons produit sont mono-devise et chaque point d'historique porte
+  sa propre devise ainsi qu'un `in_stock=true` explicite. Les tris/filtres prix ont été retirés lorsque l'API ne
+  fournit aucun scope devise. Les scores Outfit non calibrés n'affichent plus
+  de valeur synthétique et deviennent « Non mesuré ». Ces garde-fous
+  techniques ne mesurent ni la qualité d'une tenue ni celle du futur Graph.
+- L'archive propre du HEAD `a78401a` passe le typecheck, les gates web contrat
+  v1, claims et vérité produit, ainsi que le build de production. La suite web complète
+  passe **12 tests sur 17** ; ses cinq seuls échecs concernent MegaMenu. Les
+  correctifs locaux protégés du composant et du script de test ne sont pas
+  intégrés à l'archive. Cette limite n'est
+  pas transformée en faux vert. Le mobile `a78401a` passe **326 tests**, avec
+  **4 smoke tests ignorés**, son typecheck et ESLint à **0 erreur / 17
+  avertissements** ; la revue indépendante ne relève aucun P0, P1 ou P2.
+- `6e12386` prouve le roster v0.5 fermé à sept datasets, les 27 gates, le runner
+  aveugle, l'identité du run, l'empreinte de contenu du holdout, la publication
+  atomique sans remplacement et la comparaison fail-closed. Il ne rend pas le
+  laboratoire prêt lorsque les fichiers humains sont absents. Le lot courant
+  ajoute le moteur Decision réel ; variante et attachement restent les deux
+  surfaces volontairement refusées.
+- La readiness distingue une entrée valide mais incomplète d'une entrée dont
+  l'intégrité est invalide. Le
+  [rapport du 29-08-2026](../../quality/reports/readiness-2026-08-29.json) reste
+  l'autorité datée : `integrity_valid: true`, `ready: false`,
+  `status: not_ready`, fingerprint
+  `sha256:e949de01a819a5b5ef4fb0b53b5efd15241bc514b71831d32c7b1146b491262f`
+  et zéro cas dans chacun des sept datasets.
+
+Tant que ces zéros persistent, aucune précision, aucun rappel, aucun taux de
+faux merge/split, aucune calibration et aucun claim de qualité produit ne peut
+être déduit des suites techniques. Le backend Core de production est qualifié,
+mais le verdict reste aussi **NO-GO** tant que les sorties d'observabilité et de
+protection distribuée restantes ne sont pas prouvées. Le contrat catalogue
+publie désormais des timestamps UTC explicites et l'Assistant partage son
+constructeur d'URL ; ces deux limites techniques sont fermées sans modifier le
+NO-GO humain ou d'infrastructure.

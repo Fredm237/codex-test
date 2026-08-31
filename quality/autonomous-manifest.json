@@ -1,0 +1,36 @@
+{
+  "schema_version": "autonomous-quality-manifest/v1",
+  "lab_version": "1.0.0",
+  "status": "active",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "policy": {
+    "deterministic_truth_precedes_model_judgment": true,
+    "false_merge_is_worse_than_false_split": true,
+    "source_consensus_is_not_absolute_truth": true,
+    "unresolved_conflicts_remain_unresolved": true,
+    "subjective_dimensions_are_non_blocking": true
+  },
+  "holdout": {
+    "generator_version": "filon-adversarial-holdout/v1",
+    "seeds": [20260831, 31415926, 27182818],
+    "samples_per_seed": 24,
+    "purpose": "seeded_deterministic_adversarial_holdout",
+    "development_engine_input": false
+  },
+  "gates": {
+    "deterministic_checks_pass_rate_min": 1.0,
+    "blocking_failures_max": 0,
+    "source_conflicts_must_remain_unresolved": true
+  },
+  "model_judgment": {
+    "enabled": false,
+    "required_audit_fields": [
+      "judge_model",
+      "judge_version",
+      "prompt",
+      "input",
+      "output",
+      "confidence"
+    ]
+  }
+}

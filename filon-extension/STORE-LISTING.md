@@ -6,7 +6,7 @@
 
 | Champ | Valeur |
 |-------|--------|
-| Nom | FILON — le vrai prix, avant d'acheter |
+| Nom | FILON — les offres observées |
 | Nom court | FILON |
 | Catégorie | Shopping |
 | Langue principale | Français |
@@ -17,23 +17,30 @@
 
 ## Description courte
 
-> Votre copilote d'achat indépendant. Obtenez l'analyse complète des prix, du reconditionné et des codes promo sur chaque produit.
+> Comparez les offres indexées et voyez les prix observés, l'historique disponible et les avantages documentés.
 
 ---
 
 ## Description longue
 
-FILON est votre copilote d'achat indépendant, conçu pour vous aider à trouver le meilleur prix avant de finaliser votre commande.
+FILON est un copilote d'achat conçu pour vous aider à comparer les offres
+indexées avant de finaliser votre commande.
 
-Lorsque vous consultez un produit sur vos boutiques en ligne préférées, FILON identifie l'article et rassemble pour vous toutes les offres disponibles sur le marché. En un seul clic, accédez à une analyse complète : le marchand le plus compétitif du moment, l'équivalent reconditionné garanti, les codes promotionnels vérifiés et le cashback disponible. Tous ces éléments sont calculés pour vous donner un seul indicateur clair : le vrai prix.
+Lorsque vous consultez une fiche prise en charge, FILON repère le nom du
+produit et ouvre une recherche sur filon.be. L'analyse peut présenter les prix
+observés chez les marchands indexés, une alternative reconditionnée, une
+promotion ou un cashback lorsque ces données existent. Le prix, la
+disponibilité et les conditions restent à confirmer chez le marchand.
 
 **Une expérience haut de gamme et transparente :**
 
-— Entièrement gratuit et sans création de compte obligatoire.
-— Totalement indépendant : notre algorithme ne peut être influencé par aucun paiement ou placement sponsorisé.
-— Respect strict de la vie privée : aucune télémétrie, aucune création de profil publicitaire et aucune revente de vos données personnelles.
+— Accès public actuellement à 0 € et sans création de compte obligatoire.
+— Transparence : les offres affichées indiquent leur marchand et leur
+périmètre de comparaison.
+— Vie privée : aucune télémétrie ni profil publicitaire n'est implémenté dans l'extension ; aucune donnée n'est transmise automatiquement depuis les pages marchandes.
 
-FILON ne se base pas sur des estimations, mais sur l'historique réel des prix. Ne surpayez plus jamais vos achats en ligne.
+Lorsque l'historique contient assez de relevés, FILON le montre avec sa durée
+et sa fraîcheur. Sinon, l'absence de preuve reste visible.
 
 ---
 
@@ -55,11 +62,11 @@ FILON ne se base pas sur des estimations, mais sur l'historique réel des prix. 
 
 | Permission | Justification |
 |------------|---------------|
-| `activeTab` | Lire le titre et l'URL de la page uniquement lorsque l'utilisateur clique sur « Analyser ». Aucune lecture automatique. |
+| `activeTab` | Lire le titre de l'onglet actif lorsque l'utilisateur clique sur « Analyser » dans la popup. |
 | `storage` | Mémoriser la préférence de fermeture de l'overlay (12 heures). Stockage local uniquement, aucune donnée personnelle. |
-| `host_permissions` | Limité aux sites marchands supportés. Aucun accès à l'ensemble de la navigation. |
+| `host_permissions` | Détecter localement le nom d'un produit et afficher l'overlay sur les domaines supportés. Aucun accès à l'ensemble de la navigation. |
 
-**Déclaration de données** : aucune donnée collectée, vendue ou transférée à des tiers.
+**Déclaration de données** : l'extension ne transmet aucune donnée automatiquement. Après une action de l'utilisateur, le nom du produit est inclus dans l'URL de recherche ouverte sur `filon.be` ; la politique de confidentialité du site s'applique. La préférence de fermeture reste dans le stockage local du navigateur.
 
 ---
 

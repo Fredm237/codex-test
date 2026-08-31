@@ -8,7 +8,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/a-propos",
   title: "À propos",
   description:
-    "FILON veut devenir le premier réflexe avant chaque achat, en commençant par la Belgique. Notre vision, notre mission.",
+    "FILON veut devenir un réflexe de comparaison en Belgique. Découvrez notre vision, notre mission et les informations que le service réunit.",
 });
 
 const VALUES_FR = [

@@ -26,7 +26,7 @@ const CONFIANCE_FR = [
 const PRODUIT_FR = [
   { q: "Le cashback, ça change quoi pour moi ?", a: "Quand une offre indique du cashback, FILON l'affiche avec les autres informations disponibles. Son attribution et ses conditions dépendent du marchand et du lien utilisé." },
   { q: "Quand l'extension et l'application arrivent-elles ?", a: "Le catalogue et l'assistant sont déjà accessibles sur le site. L'extension Chrome attend sa publication ; toute nouvelle expérience mobile sera annoncée lorsqu'elle sera disponible." },
-  { q: "FILON fonctionne-t-il en dehors de la Belgique ?", a: "Le catalogue rassemble des marchands partenaires actifs dans plusieurs pays. La disponibilité d'une offre dépend toutefois de la zone de livraison et des conditions du marchand." },
+  { q: "FILON fonctionne-t-il en dehors de la Belgique ?", a: "Le catalogue peut contenir des offres de plusieurs pays. Leur disponibilité dépend de la zone de livraison et des conditions du marchand." },
 ];
 
 const GENERAL_NL = [
@@ -44,7 +44,7 @@ const CONFIANCE_NL = [
 const PRODUIT_NL = [
   { q: "Wat verandert de cashback voor mij ?", a: "Wanneer een aanbod cashback vermeldt, toont FILON die naast de andere beschikbare informatie. Toekenning en voorwaarden hangen af van de winkel en de gebruikte link." },
   { q: "Wanneer komen de extensie en de applicatie ?", a: "De catalogus en de assistent zijn al beschikbaar op de website. De Chrome-extensie wacht op publicatie; een nieuwe mobiele ervaring wordt aangekondigd zodra die beschikbaar is." },
-  { q: "Werkt FILON buiten België ?", a: "De catalogus verzamelt partnerwinkels die actief zijn in verschillende landen. De beschikbaarheid van een aanbod hangt echter af van de leveringszone en voorwaarden van de winkel." },
+  { q: "Werkt FILON buiten België ?", a: "De catalogus kan aanbiedingen uit meerdere landen bevatten. De beschikbaarheid hangt af van de leveringszone en voorwaarden van de winkel." },
 ];
 
 const GENERAL_EN = [
@@ -62,7 +62,7 @@ const CONFIANCE_EN = [
 const PRODUIT_EN = [
   { q: "What does cashback change for me ?", a: "When an offer lists cashback, FILON displays it alongside the other available information. Its attribution and conditions depend on the merchant and the link used." },
   { q: "When do the extension and the app arrive ?", a: "The catalogue and assistant are already available on the website. The Chrome extension is awaiting publication; a new mobile experience will be announced when it is available." },
-  { q: "Does FILON work outside Belgium ?", a: "The catalogue includes partner merchants active in several countries. An offer's availability still depends on the merchant's delivery area and terms." },
+  { q: "Does FILON work outside Belgium ?", a: "The catalogue may contain offers from several countries. Availability depends on the merchant's delivery area and terms." },
 ];
 
 function FaqFR() {

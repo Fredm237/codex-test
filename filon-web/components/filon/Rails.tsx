@@ -15,6 +15,9 @@ import { useEffect, useRef } from "react";
 import { ProductCard } from "./ProductCard";
 import type { CardOffer } from "./ProductCard";
 import { useLocale } from "@/lib/i18n";
+import { hasCurrentOfferEvidence, isPurchasableOffer, positiveFinitePrice } from "./product-copy";
+import { normalizeSupportedCurrency } from "@/lib/currency";
+import { useEvidenceNow } from "./use-evidence-now";
 
 export type RailSection = { key: string; items: CardOffer[] };
 
@@ -59,7 +62,38 @@ function Rail({ section }: { section: RailSection }) {
   const { t } = useLocale();
   const keys = TITLES[section.key];
   const ref = useStagger<HTMLElement>();
-  if (!keys || section.items.length === 0) return null;
+  const evidenceNow = useEvidenceNow(section.items.map((offer) => offer.observed_at));
+  const currentItems = section.items.filter((offer) => hasCurrentOfferEvidence(offer, evidenceNow));
+  const items = section.key === "budget"
+    ? currentItems.filter((offer) => normalizeSupportedCurrency(offer.currency) === "EUR"
+      && positiveFinitePrice(offer.price)
+      && offer.price >= 10
+      && offer.price <= 100)
+    : ["drops", "lowest"].includes(section.key)
+      ? currentItems.filter((offer) => {
+        const currency = normalizeSupportedCurrency(offer.currency);
+        const historyCurrency = normalizeSupportedCurrency(offer.history_currency);
+        const price = positiveFinitePrice(offer.price) ? offer.price : null;
+        const high = positiveFinitePrice(offer.price_high) ? offer.price_high : null;
+        const observedDrop = price !== null && high !== null && high > price
+          ? ((high - price) / high) * 100
+          : null;
+        return isPurchasableOffer(offer, evidenceNow)
+          && currency !== null
+          && historyCurrency === currency
+          && high !== null
+          && price !== null
+          && high > price
+          && (section.key !== "lowest" || (
+            positiveFinitePrice(offer.price_low)
+            && offer.price_low <= high
+            && price <= offer.price_low + 0.005
+            && offer.is_lowest === true
+          ))
+          && (section.key !== "drops" || (observedDrop !== null && observedDrop >= 1 && observedDrop <= 100));
+      })
+      : currentItems;
+  if (!keys || items.length === 0) return null;
 
   return (
     <section className="fx-rail fx-stagger" ref={ref}>
@@ -68,7 +102,7 @@ function Rail({ section }: { section: RailSection }) {
         <p className="fx-fine">{t(keys[1])}</p>
       </header>
       <div className="fx-rail-scroll">
-        {section.items.map((offer, i) => (
+        {items.map((offer, i) => (
           <div
             className="fx-rail-item"
             key={`${section.key}-${offer.id}`}

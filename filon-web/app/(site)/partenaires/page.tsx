@@ -17,7 +17,7 @@ function PartenairesFR() {
       <ContentHero
         eyebrow="Partenaires"
         title={<>Travaillons <span className="it">ensemble</span>.</>}
-        intro="FILON aide chaque jour des personnes à mieux acheter. Vous êtes une marque, un marchand ou un média ? Parlons de ce qu'on peut faire ensemble."
+        intro="FILON construit une aide à la comparaison fondée sur les offres indexées. Vous êtes une marque, un marchand ou un média ? Parlons de ce qu'on peut faire ensemble."
         breadcrumb={[{ name: "Partenaires", path: "/partenaires" }]}
       />
 
@@ -43,7 +43,7 @@ function PartenairesNL() {
       <ContentHero
         eyebrow="Partners"
         title={<>Laten we <span className="it">samenwerken</span>.</>}
-        intro="FILON helpt elke dag mensen om beter te kopen. Ben je een merk, een winkel of een medium ? Laten we praten over wat we samen kunnen doen."
+        intro="FILON bouwt vergelijkingsondersteuning op basis van geïndexeerde aanbiedingen. Ben je een merk, een winkel of een medium ? Laten we praten over wat we samen kunnen doen."
         breadcrumb={[{ name: "Partners", path: "/partenaires" }]}
       />
 
@@ -69,7 +69,7 @@ function PartenairesEN() {
       <ContentHero
         eyebrow="Partners"
         title={<>Let&apos;s work <span className="it">together</span>.</>}
-        intro="FILON helps people buy better every day. Are you a brand, a merchant or a media outlet ? Let's talk about what we can do together."
+        intro="FILON is building comparison support based on indexed offers. Are you a brand, a merchant or a media outlet ? Let's talk about what we can do together."
         breadcrumb={[{ name: "Partners", path: "/partenaires" }]}
       />
 

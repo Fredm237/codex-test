@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FILON Quality Lab Offer Truth Record v0.5",
+  "type": "object",
+  "required": [
+    "record_version",
+    "dataset",
+    "case_id",
+    "group_id",
+    "split",
+    "split_policy_version",
+    "input",
+    "gold",
+    "annotations",
+    "source_pack_fingerprints",
+    "schema_fingerprint",
+    "case_fingerprint"
+  ],
+  "properties": {
+    "record_version": { "const": "0.5.0" },
+    "dataset": { "const": "offer_truth" },
+    "case_id": { "$ref": "#/$defs/nonblank_id" },
+    "group_id": { "$ref": "#/$defs/nonblank_id" },
+    "split": { "enum": ["train", "dev", "test"] },
+    "split_policy_version": { "const": "sha256-prefix32-mod100-70-15-15-v1" },
+    "input": { "$ref": "#/$defs/input" },
+    "gold": { "$ref": "#/$defs/label" },
+    "annotations": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": { "$ref": "#/$defs/annotation" }
+    },
+    "adjudication": { "$ref": "#/$defs/adjudication" },
+    "source_pack_fingerprints": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": { "$ref": "#/$defs/sha256" }
+    },
+    "schema_fingerprint": { "$ref": "#/$defs/sha256" },
+    "case_fingerprint": { "$ref": "#/$defs/sha256" }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "nonblank_id": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^(?!\\s)[\\s\\S]*\\S(?![\\s\\S])"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}(?![\\s\\S])"
+    },
+    "https_url": {
+      "type": "string",
+      "pattern": "^https://[^\\s]+(?![\\s\\S])"
+    },
+    "money": {
+      "type": "object",
+      "required": ["amount_minor", "currency"],
+      "properties": {
+        "amount_minor": { "type": "integer", "minimum": 0 },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}(?![\\s\\S])" }
+      },
+      "additionalProperties": false
+    },
+    "known_or_unknown_money": {
+      "anyOf": [
+        { "$ref": "#/$defs/money" },
+        { "type": "null" }
+      ]
+    },
+    "strata": {
+      "type": "object",
+      "required": ["scenario_type", "language", "vertical"],
+      "properties": {
+        "scenario_type": {
+          "enum": ["exact_product", "generic_product", "use_case", "constraint_heavy", "accessory", "replacement_part", "variant_sensitive", "multi_product", "ambiguous", "no_match"]
+        },
+        "language": { "enum": ["fr", "nl", "en"] },
+        "vertical": { "enum": ["smartphones", "laptops", "tv", "headphones_audio", "appliances"] }
+      },
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "required": ["strata", "offer"],
+      "properties": {
+        "strata": { "$ref": "#/$defs/strata" },
+        "offer": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "label": {
+      "type": "object",
+      "required": ["price", "stock", "shipping", "affiliate_link"],
+      "properties": {
+        "price": { "$ref": "#/$defs/known_or_unknown_money" },
+        "stock": { "enum": ["in_stock", "out_of_stock", "preorder", "unknown"] },
+        "shipping": { "$ref": "#/$defs/known_or_unknown_money" },
+        "affiliate_link": {
+          "anyOf": [
+            { "$ref": "#/$defs/https_url" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "annotation": {
+      "type": "object",
+      "required": ["annotator_id", "label", "confidence"],
+      "properties": {
+        "annotator_id": { "$ref": "#/$defs/nonblank_id" },
+        "label": { "$ref": "#/$defs/label" },
+        "confidence": { "enum": ["certain", "probable", "unknown"] }
+      },
+      "additionalProperties": false
+    },
+    "adjudication": {
+      "type": "object",
+      "required": ["adjudicator_id", "label", "confidence", "rationale"],
+      "properties": {
+        "adjudicator_id": { "$ref": "#/$defs/nonblank_id" },
+        "label": { "$ref": "#/$defs/label" },
+        "confidence": { "enum": ["certain", "probable", "unknown"] },
+        "rationale": { "$ref": "#/$defs/nonblank_id" }
+      },
+      "additionalProperties": false
+    }
+  }
+}

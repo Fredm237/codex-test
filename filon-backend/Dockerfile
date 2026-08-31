@@ -9,7 +9,14 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app ./app
+RUN groupadd --system filon \
+    && useradd --system --gid filon --home-dir /nonexistent --shell /usr/sbin/nologin filon
+
+COPY --chown=filon:filon alembic.ini ./alembic.ini
+COPY --chown=filon:filon alembic ./alembic
+COPY --chown=filon:filon app ./app
+
+USER filon
 
 EXPOSE 8000
 

@@ -18,6 +18,7 @@ from typing import Any
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
+from app.core.observability import traced_dependency
 
 log = get_logger("cache")
 
@@ -97,7 +98,10 @@ class Cache:
                 self._client = redis.from_url(url, decode_responses=True)
                 log.info("Cache Redis connecté")
             except Exception as exc:
-                log.warning("Redis indisponible (%s) → cache local LRU", exc)
+                log.warning(
+                    "Redis indisponible (error_type=%s) → cache local LRU",
+                    type(exc).__name__,
+                )
 
     @property
     def enabled(self) -> bool:
@@ -112,13 +116,14 @@ class Cache:
         # Essai Redis d'abord
         if self._client:
             try:
-                raw = await self._client.get(key)
+                async with traced_dependency("redis", "read"):
+                    raw = await self._client.get(key)
                 if raw is not None:
                     self.metrics.hits += 1
                     return json.loads(raw)
             except Exception as exc:
                 self.metrics.errors += 1
-                log.debug("Redis get error (%s): %s", key, exc)
+                log.debug("Redis get error (error_type=%s)", type(exc).__name__)
 
         # Fallback local
         value = self._local.get(key)
@@ -137,27 +142,40 @@ class Cache:
         # Et dans Redis si disponible
         if self._client:
             try:
-                await self._client.set(key, json.dumps(value, ensure_ascii=False), ex=ttl)
+                async with traced_dependency("redis", "write"):
+                    await self._client.set(
+                        key,
+                        json.dumps(value, ensure_ascii=False),
+                        ex=ttl,
+                    )
             except Exception as exc:
                 self.metrics.errors += 1
-                log.debug("Redis set error (%s): %s", key, exc)
+                log.debug("Redis set error (error_type=%s)", type(exc).__name__)
 
     async def invalidate_prefix(self, prefix: str) -> int:
         """Invalide toutes les clés commençant par un préfixe."""
         count = self._local.invalidate_prefix(prefix)
         if self._client:
             try:
-                cursor = 0
-                while True:
-                    cursor, keys = await self._client.scan(cursor, match=f"{prefix}*", count=100)
-                    if keys:
-                        await self._client.delete(*keys)
-                        count += len(keys)
-                    if cursor == 0:
-                        break
+                async with traced_dependency("redis", "invalidate"):
+                    cursor = 0
+                    while True:
+                        cursor, keys = await self._client.scan(
+                            cursor,
+                            match=f"{prefix}*",
+                            count=100,
+                        )
+                        if keys:
+                            await self._client.delete(*keys)
+                            count += len(keys)
+                        if cursor == 0:
+                            break
             except Exception as exc:
                 self.metrics.errors += 1
-                log.debug("Redis invalidate error (%s): %s", prefix, exc)
+                log.debug(
+                    "Redis invalidate error (error_type=%s)",
+                    type(exc).__name__,
+                )
         return count
 
     # Rétro-compatibilité avec l'ancienne API

@@ -9,7 +9,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/securite",
   title: "Sécurité & confiance",
   description:
-    "Comment FILON protège vos données et votre navigation : minimisation des données, aucune revente, chiffrement, conformité RGPD. La confiance n'est pas une option.",
+    "Les mesures de sécurité visibles de FILON, les limites du parcours d'achat et les politiques qui documentent les traitements de données.",
 });
 
 function SecuriteFR() {
@@ -25,21 +25,20 @@ function SecuriteFR() {
         <div className="ed-wrap">
           <InfoGrid
             items={[
-              { n: <IcLock />, h: "Minimisation des données", p: "FILON n'analyse que ce qui est strictement nécessaire à la comparaison. Rien de plus." },
-              { n: <IcNoResale />, h: "Aucune revente", p: "Pas de profil publicitaire, pas de revente à des tiers. Vos données restent les vôtres." },
-              { n: <IcEncrypted />, h: "Connexions chiffrées", p: "Les échanges avec nos services sont chiffrés (HTTPS/TLS) de bout en bout." },
-              { n: <IcShieldCheck />, h: "Conforme RGPD", p: "Traitement conforme au RGPD par défaut, avec des droits que vous pouvez exercer à tout moment." },
-              { n: <IcChartNoCookie />, h: "Mesure sans cookie", p: "Notre audience est mesurée sans cookie et de façon anonyme (Plausible)." },
-              { n: <IcEye />, h: "Sans arrière-pensée", p: "Pas de publicité. La recommandation sert votre intérêt, pas le nôtre." },
+              { n: <IcLock />, h: "Périmètre documenté", p: "Les politiques publiées décrivent les données traitées, leur finalité et vos droits." },
+              { n: <IcNoResale />, h: "Achat chez le marchand", p: "Le parcours public renvoie vers le marchand ; FILON ne demande pas les données de carte bancaire dans ce parcours." },
+              { n: <IcEncrypted />, h: "Transport HTTPS", p: "Le site public est servi en HTTPS. Cela protège le transport, sans remplacer la sécurité propre à chaque prestataire." },
+              { n: <IcShieldCheck />, h: "Droits publiés", p: "La politique de confidentialité indique comment exercer les droits applicables aux traitements décrits." },
+              { n: <IcChartNoCookie />, h: "Mesure configurable", p: "La configuration du site prévoit Plausible ; la politique cookies constitue la référence sur son activation et son périmètre." },
+              { n: <IcEye />, h: "Commission hors score actuel", p: "Le taux de commission n'est pas un champ du score de décision actuellement implémenté." },
             ]}
           />
         </div>
       </section>
-      <ProseBlock heading={<>Ce que FILON ne fait <span className="it">jamais</span>.</>} alt>
+      <ProseBlock heading={<>Les limites du parcours <span className="it">actuel</span>.</>} alt>
         <p>
-          FILON ne revend pas votre navigation, ne construit pas de profil publicitaire, et ne modifie jamais le prix que vous
-          payez chez le marchand. Il ne stocke pas non plus vos moyens de paiement : l&apos;achat se fait chez le marchand,
-          comme d&apos;habitude, FILON vous a seulement mené·e à la meilleure décision.
+          FILON affiche des informations de comparaison puis renvoie vers le marchand. Le prix, les frais, le stock et
+          le total final doivent y être confirmés. Le parcours public actuel ne collecte pas de moyen de paiement.
         </p>
         <p>
           Le détail complet des traitements figure dans notre <a href="/confidentialite">politique de confidentialité</a> et
@@ -53,7 +52,7 @@ function SecuriteFR() {
           attention et reconnaissance.
         </p>
       </ProseBlock>
-      <ClosingCta title={<>Un copilote en qui vous pouvez avoir <span className="it">confiance</span>.</>} sub="Minimisation des données, zéro revente, aucune publicité." />
+      <ClosingCta title={<>Une sécurité à <span className="it">vérifier</span>.</>} sub="Consultez les politiques publiées et signalez tout comportement anormal." />
     </>
   );
 }
@@ -71,21 +70,20 @@ function SecuriteNL() {
         <div className="ed-wrap">
           <InfoGrid
             items={[
-              { n: <IcLock />, h: "Gegevensminimalisatie", p: "FILON analyseert alleen wat strikt nodig is voor de vergelijking. Niets meer." },
-              { n: <IcNoResale />, h: "Geen doorverkoop", p: "Geen advertentieprofiel, geen doorverkoop aan derden. Je gegevens blijven van jou." },
-              { n: <IcEncrypted />, h: "Versleutelde verbindingen", p: "De uitwisselingen met onze diensten zijn end-to-end versleuteld (HTTPS/TLS)." },
-              { n: <IcShieldCheck />, h: "AVG-conform", p: "Verwerking standaard AVG-conform, met rechten die je op elk moment kunt uitoefenen." },
-              { n: <IcChartNoCookie />, h: "Meting zonder cookies", p: "Ons bereik wordt gemeten zonder cookies en anoniem (Plausible)." },
-              { n: <IcEye />, h: "Zonder bijbedoeling", p: "Geen reclame. De aanbeveling dient jouw belang, niet het onze." },
+              { n: <IcLock />, h: "Gedocumenteerde reikwijdte", p: "Gepubliceerde beleidsdocumenten beschrijven verwerkte gegevens, doel en je rechten." },
+              { n: <IcNoResale />, h: "Aankoop bij de winkel", p: "De publieke route stuurt door naar de winkel; FILON vraagt daar geen betaalkaartgegevens." },
+              { n: <IcEncrypted />, h: "HTTPS-transport", p: "De publieke site gebruikt HTTPS. Dat beschermt het transport, maar vervangt niet de beveiliging van elke dienstverlener." },
+              { n: <IcShieldCheck />, h: "Gepubliceerde rechten", p: "Het privacybeleid vermeldt hoe je rechten voor de beschreven verwerkingen kunt uitoefenen." },
+              { n: <IcChartNoCookie />, h: "Configureerbare meting", p: "De siteconfiguratie voorziet Plausible; het cookiebeleid is de referentie voor activatie en bereik." },
+              { n: <IcEye />, h: "Commissie buiten huidige score", p: "Het commissietarief is geen veld van de momenteel geïmplementeerde beslissingsscore." },
             ]}
           />
         </div>
       </section>
-      <ProseBlock heading={<>Wat FILON <span className="it">nooit</span> doet.</>} alt>
+      <ProseBlock heading={<>De grenzen van de <span className="it">huidige route</span>.</>} alt>
         <p>
-          FILON verkoopt je browsegedrag niet door, bouwt geen advertentieprofiel op, en wijzigt nooit de prijs die je bij
-          de winkel betaalt. Het bewaart ook je betaalmiddelen niet : de aankoop gebeurt bij de winkel, zoals gewoonlijk —
-          FILON heeft je enkel naar de beste beslissing geleid.
+          FILON toont vergelijkingsinformatie en stuurt daarna door naar de winkel. Bevestig daar prijs, kosten,
+          voorraad en eindtotaal. De huidige publieke route verzamelt geen betaalmiddel.
         </p>
         <p>
           De volledige details van de verwerkingen staan in ons <a href="/confidentialite">privacybeleid</a> en ons{" "}
@@ -99,7 +97,7 @@ function SecuriteNL() {
           aandacht en dankbaarheid.
         </p>
       </ProseBlock>
-      <ClosingCta title={<>Een copiloot die je kunt <span className="it">vertrouwen</span>.</>} sub="Gegevensminimalisatie, nul doorverkoop, geen reclame." />
+      <ClosingCta title={<>Beveiliging die je kunt <span className="it">controleren</span>.</>} sub="Raadpleeg het gepubliceerde beleid en meld afwijkend gedrag." />
     </>
   );
 }
@@ -117,21 +115,20 @@ function SecuriteEN() {
         <div className="ed-wrap">
           <InfoGrid
             items={[
-              { n: <IcLock />, h: "Data minimisation", p: "FILON analyses only what's strictly necessary for the comparison. Nothing more." },
-              { n: <IcNoResale />, h: "No reselling", p: "No advertising profile, no reselling to third parties. Your data stays yours." },
-              { n: <IcEncrypted />, h: "Encrypted connections", p: "Exchanges with our services are end-to-end encrypted (HTTPS/TLS)." },
-              { n: <IcShieldCheck />, h: "GDPR-compliant", p: "Processing GDPR-compliant by default, with rights you can exercise at any time." },
-              { n: <IcChartNoCookie />, h: "Cookie-free measurement", p: "Our audience is measured cookie-free and anonymously (Plausible)." },
-              { n: <IcEye />, h: "No ulterior motive", p: "No advertising. The recommendation serves your interest, not ours." },
+              { n: <IcLock />, h: "Documented scope", p: "Published policies describe processed data, purpose and your rights." },
+              { n: <IcNoResale />, h: "Purchase at the merchant", p: "The public journey redirects to the merchant; FILON does not request payment-card data in that journey." },
+              { n: <IcEncrypted />, h: "HTTPS transport", p: "The public site is served over HTTPS. This protects transport but does not replace each provider's security." },
+              { n: <IcShieldCheck />, h: "Published rights", p: "The privacy policy explains how to exercise rights applicable to the processing described." },
+              { n: <IcChartNoCookie />, h: "Configurable measurement", p: "Site configuration supports Plausible; the cookie policy is the reference for activation and scope." },
+              { n: <IcEye />, h: "Commission outside current score", p: "Commission rate is not a field in the currently implemented decision score." },
             ]}
           />
         </div>
       </section>
-      <ProseBlock heading={<>What FILON <span className="it">never</span> does.</>} alt>
+      <ProseBlock heading={<>Limits of the <span className="it">current journey</span>.</>} alt>
         <p>
-          FILON doesn&apos;t resell your browsing, doesn&apos;t build an advertising profile, and never changes the
-          price you pay at the merchant. Nor does it store your payment methods: the purchase happens at the
-          merchant, as usual — FILON only led you to the best decision.
+          FILON shows comparison information and then redirects to the merchant. Confirm price, fees, stock and final
+          total there. The current public journey does not collect a payment method.
         </p>
         <p>
           The full detail of the processing is set out in our <a href="/confidentialite">privacy policy</a> and our{" "}
@@ -145,7 +142,7 @@ function SecuriteEN() {
           care and gratitude.
         </p>
       </ProseBlock>
-      <ClosingCta title={<>A copilot you can <span className="it">trust</span>.</>} sub="Data minimisation, zero reselling, no advertising." />
+      <ClosingCta title={<>Security you can <span className="it">verify</span>.</>} sub="Consult the published policies and report abnormal behaviour." />
     </>
   );
 }

@@ -7,5 +7,5 @@ export function deriveObservedPriceSignal(history: ObservedPricePoint[]): Observ
   const previous = points.at(-2)!;
   const latest = points.at(-1)!;
   const delta = latest.price - previous.price;
-  return { kind: delta < 0 ? "down" : delta > 0 ? "up" : "stable", delta: Math.abs(delta), comparedAt: previous.at };
+  return { kind: delta < 0 ? "down" : delta > 0 ? "up" : "stable", delta: Math.abs(delta), comparedAt: latest.at };
 }

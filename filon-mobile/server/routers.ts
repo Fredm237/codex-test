@@ -32,7 +32,7 @@ export const appRouter = router({
   }),
 
   recreate: router({
-    analyze: publicProcedure.input(z.object({ imageUrl: z.string().trim().min(1).max(8_000_000) })).mutation(({ input }) => analyzeRecreateInspiration(input.imageUrl)),
+    analyze: publicProcedure.input(z.object({ imageUrl: z.string().trim().min(1).max(8_000_000), locale: z.enum(["fr", "nl", "en"]) })).mutation(({ input }) => analyzeRecreateInspiration(input.imageUrl, input.locale)),
   }),
 
   // TODO: add feature routers here, e.g.

@@ -30,11 +30,11 @@ type NetworkConnection = {
 const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: string; loading: string; pageTitle: string }> = {
   fr: {
     chapters: [
-      { title: "Est-ce vraiment le bon moment\npour acheter ?", eyebrow: "FILON vous donne la réponse." },
+      { title: "Est-ce vraiment le bon moment\npour acheter ?", eyebrow: "FILON expose les preuves disponibles." },
       { title: "On compare les prix\npour vous." },
-      { title: "Le meilleur prix,\ntrouvé en secondes." },
+      { title: "Le prix le plus bas\nparmi les offres observées." },
       { title: "Décidez avec\nle contexte." },
-      { title: "Prêt à trouver\nle bon prix ?", cta: { label: "Explorer le catalogue", href: "/recherche" } },
+      { title: "Prêt à comparer\nle contexte disponible ?", cta: { label: "Explorer le catalogue", href: "/recherche" } },
     ],
     pageTitle: "FILON — est-ce vraiment le bon moment pour acheter ?",
     scrollHint: "Scrollez pour explorer",
@@ -42,11 +42,11 @@ const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: st
   },
   nl: {
     chapters: [
-      { title: "Is dit echt het juiste moment\nom te kopen?", eyebrow: "FILON geeft je het antwoord." },
+      { title: "Is dit echt het juiste moment\nom te kopen?", eyebrow: "FILON toont het beschikbare bewijs." },
       { title: "Wij vergelijken de prijzen\nvoor jou." },
-      { title: "De beste prijs,\ngevonden in seconden." },
+      { title: "De laagste prijs\nbinnen de bekeken aanbiedingen." },
       { title: "Beslis met\nde juiste context." },
-      { title: "Klaar om de juiste prijs\nte vinden?", cta: { label: "Ontdek de catalogus", href: "/recherche" } },
+      { title: "Klaar om de beschikbare\ncontext te vergelijken?", cta: { label: "Ontdek de catalogus", href: "/recherche" } },
     ],
     pageTitle: "FILON — is dit echt het juiste moment om te kopen?",
     scrollHint: "Scroll om te ontdekken",
@@ -54,11 +54,11 @@ const COPY: Record<"fr" | "nl" | "en", { chapters: ChapterText[]; scrollHint: st
   },
   en: {
     chapters: [
-      { title: "Is this really the right time\nto buy?", eyebrow: "FILON gives you the answer." },
+      { title: "Is this really the right time\nto buy?", eyebrow: "FILON exposes the available evidence." },
       { title: "We compare prices\nfor you." },
-      { title: "The best price,\nfound in seconds." },
+      { title: "The lowest price\namong observed offers." },
       { title: "Decide with\ncontext." },
-      { title: "Ready to find\nthe right price?", cta: { label: "Explore the catalogue", href: "/recherche" } },
+      { title: "Ready to compare\nthe available context?", cta: { label: "Explore the catalogue", href: "/recherche" } },
     ],
     pageTitle: "FILON — is this really the right time to buy?",
     scrollHint: "Scroll to explore",

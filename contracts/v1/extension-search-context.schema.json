@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/v1/extension-search-context.schema.json",
+  "title": "FILON Extension Search Context v1",
+  "type": "object",
+  "required": ["source", "medium"],
+  "properties": {
+    "query": {
+      "type": ["string", "null"],
+      "maxLength": 140,
+      "description": "Titre observé ou saisie utilisateur ; jamais une identité produit certifiée"
+    },
+    "source": { "const": "extension" },
+    "medium": { "enum": ["install", "popup", "fiche"] }
+  },
+  "additionalProperties": false
+}

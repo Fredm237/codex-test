@@ -67,7 +67,7 @@ function ExtensionFR() {
     <>
       <ContentHero
         eyebrow="Extension"
-        title={<>Votre copilote d&apos;achat, <span className="it">partout</span>.</>}
+        title={<>Votre copilote d&apos;achat, sur les pages <span className="it">prises en charge</span>.</>}
         intro="L’extension FILON est conçue pour vous accompagner sur les fiches produit des marchands pris en charge. Lorsqu’elle reconnaît un produit, elle vous aide à vérifier les offres, l’historique de prix et les alternatives disponibles."
         breadcrumb={[{ name: "Extension", path: "/extension" }]}
         photo="/img/video-extension-poster.webp"
@@ -87,17 +87,17 @@ function ExtensionFR() {
           <InfoGrid
             items={[
               { n: "€", h: "Les offres comparables", p: "Les prix disponibles pour le même produit chez les marchands indexés." },
-              { n: "%", h: "Le cashback éligible", p: "Les avantages applicables lorsqu’ils sont vérifiés pour l’achat." },
-              { n: "↻", h: "L’alternative reconditionnée", p: "Un équivalent garanti lorsqu’une offre comparable est indexée." },
+              { n: "%", h: "Le cashback documenté", p: "Les avantages affichés lorsqu’ils sont renseignés pour l’offre concernée." },
+              { n: "↻", h: "L’alternative reconditionnée", p: "Une offre comparable lorsqu’elle est indexée ; état et garantie restent ceux du marchand." },
               { n: "↧", h: "L’historique de prix", p: "Un contexte de prix quand l’historique disponible est suffisant." },
               { n: "★", h: "La fiabilité du vendeur", p: "Réputation et garanties prises en compte lorsque les données sont disponibles." },
-              { n: "✓", h: "Le verdict", p: "Un seul message clair : « acheter maintenant » ou « mieux vaut attendre »." },
+              { n: "✓", h: "La conclusion", p: "Acheter, attendre ou vérifier : FILON peut s'abstenir lorsque les preuves manquent." },
             ]}
           />
         </div>
       </section>
       <FaqBlock items={FAQ_FR} eyebrow="Extension · FAQ" title="L'extension, sans zone d'ombre." />
-      <ClosingCta title={<>Installez le <span className="it">réflexe</span>.</>} sub="Ajoutez FILON à votre navigateur et laissez-le veiller avant chaque achat." />
+      <ClosingCta title={<>Installez le <span className="it">réflexe</span>.</>} sub="Sur une page prise en charge, ouvrez l'analyse FILON puis confirmez les conditions chez le marchand." />
     </>
   );
 }
@@ -107,7 +107,7 @@ function ExtensionNL() {
     <>
       <ContentHero
         eyebrow="Extensie"
-        title={<>Je koopcopiloot, <span className="it">overal</span>.</>}
+        title={<>Je koopcopiloot, op <span className="it">ondersteunde pagina&apos;s</span>.</>}
         intro="De FILON-extensie is ontworpen voor productpagina’s van ondersteunde winkels. Wanneer hij een product herkent, helpt hij je beschikbare aanbiedingen, prijsgeschiedenis en alternatieven te controleren."
         breadcrumb={[{ name: "Extensie", path: "/extension" }]}
         photo="/img/video-extension-poster.webp"
@@ -127,17 +127,17 @@ function ExtensionNL() {
           <InfoGrid
             items={[
               { n: "€", h: "Vergelijkbare aanbiedingen", p: "Beschikbare prijzen voor hetzelfde product bij geïndexeerde winkels." },
-              { n: "%", h: "In aanmerking komende cashback", p: "Voordelen die van toepassing zijn wanneer ze voor de aankoop zijn geverifieerd." },
-              { n: "↻", h: "Het refurbished alternatief", p: "Een gelijkwaardig product met garantie wanneer een vergelijkbare aanbieding is geïndexeerd." },
+              { n: "%", h: "Gedocumenteerde cashback", p: "Voordelen die worden getoond wanneer ze voor het betrokken aanbod vermeld zijn." },
+              { n: "↻", h: "Het refurbished alternatief", p: "Een vergelijkbare aanbieding wanneer ze geïndexeerd is; staat en garantie blijven die van de winkel." },
               { n: "↧", h: "De prijsgeschiedenis", p: "Prijscontext wanneer er voldoende geschiedenis beschikbaar is." },
               { n: "★", h: "Betrouwbaarheid van de verkoper", p: "Reputatie en garanties worden meegenomen wanneer de gegevens beschikbaar zijn." },
-              { n: "✓", h: "Het oordeel", p: "Eén duidelijke boodschap : « nu kopen » of « beter wachten »." },
+              { n: "✓", h: "De conclusie", p: "Kopen, wachten of controleren: FILON kan zich onthouden wanneer bewijs ontbreekt." },
             ]}
           />
         </div>
       </section>
       <FaqBlock items={FAQ_NL} eyebrow="Extensie · FAQ" title="De extensie, zonder grijze zones." />
-      <ClosingCta title={<>Installeer de <span className="it">reflex</span>.</>} sub="Voeg FILON toe aan je browser en laat het waken vóór elke aankoop." />
+      <ClosingCta title={<>Installeer de <span className="it">reflex</span>.</>} sub="Open op een ondersteunde pagina de FILON-analyse en bevestig daarna de voorwaarden bij de winkel." />
     </>
   );
 }
@@ -147,7 +147,7 @@ function ExtensionEN() {
     <>
       <ContentHero
         eyebrow="Extension"
-        title={<>Your shopping copilot, <span className="it">everywhere</span>.</>}
+        title={<>Your shopping copilot, on <span className="it">supported pages</span>.</>}
         intro="The FILON extension is designed for product pages from supported merchants. When it recognises a product, it helps you check available offers, price history and alternatives."
         breadcrumb={[{ name: "Extension", path: "/extension" }]}
         photo="/img/video-extension-poster.webp"
@@ -167,17 +167,17 @@ function ExtensionEN() {
           <InfoGrid
             items={[
               { n: "€", h: "Comparable offers", p: "Available prices for the same product across indexed merchants." },
-              { n: "%", h: "Eligible cashback", p: "Benefits that apply once they have been verified for the purchase." },
-              { n: "↻", h: "The refurbished alternative", p: "A guaranteed equivalent when a comparable offer is indexed." },
+              { n: "%", h: "Documented cashback", p: "Benefits shown when they are listed for the offer concerned." },
+              { n: "↻", h: "The refurbished alternative", p: "A comparable offer when indexed; condition and warranty remain the merchant's terms." },
               { n: "↧", h: "Price history", p: "Price context when sufficient history is available." },
               { n: "★", h: "Merchant reliability", p: "Reputation and warranties are considered when the data is available." },
-              { n: "✓", h: "The verdict", p: "One clear message : « buy now » or « better to wait »." },
+              { n: "✓", h: "The conclusion", p: "Buy, wait or verify: FILON can abstain when evidence is missing." },
             ]}
           />
         </div>
       </section>
       <FaqBlock items={FAQ_EN} eyebrow="Extension · FAQ" title="The extension, with no grey areas." />
-      <ClosingCta title={<>Install the <span className="it">reflex</span>.</>} sub="Add FILON to your browser and let it watch before every purchase." />
+      <ClosingCta title={<>Install the <span className="it">reflex</span>.</>} sub="On a supported page, open the FILON analysis, then confirm the terms with the merchant." />
     </>
   );
 }

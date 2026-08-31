@@ -10,16 +10,25 @@ Améliorations :
 
 from __future__ import annotations
 
-import platform
-import sys
 import asyncio
+import platform
+import secrets
+import sys
 import time
+from typing import Annotated
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Header
+from fastapi.responses import JSONResponse, Response
 from sqlalchemy import text
 
 from app import __version__
 from app.core.config import get_settings
+from app.core.metrics_export import (
+    OPENMETRICS_CONTENT_TYPE,
+    MetricsExportError,
+    render_openmetrics,
+)
+from app.core.observability import product_intelligence_metrics, request_metrics
 from app.db import session as db
 from app.services.cache import get_cache
 from app.services.vectorstore import get_vectorstore
@@ -55,8 +64,12 @@ async def _check_db() -> dict:
         # « lent » n'est pas « mort » : on le distingue pour ne pas déclencher
         # un redémarrage alors que la base répond, en retard.
         return {"status": "slow", "latency_ms": _DB_CHECK_TIMEOUT * 1000}
-    except Exception as exc:
-        return {"status": "error", "error": str(exc)[:100], "latency_ms": 0}
+    except Exception:
+        return {
+            "status": "error",
+            "error_code": "database_probe_failed",
+            "latency_ms": 0,
+        }
 
 
 async def _check_redis() -> dict:
@@ -74,10 +87,10 @@ async def _check_redis() -> dict:
             "latency_ms": round(latency, 1),
             "metrics": cache.metrics.to_dict(),
         }
-    except Exception as exc:
+    except Exception:
         return {
             "status": "error",
-            "error": str(exc)[:100],
+            "error_code": "redis_probe_failed",
             "metrics": cache.metrics.to_dict(),
         }
 
@@ -133,13 +146,40 @@ async def health() -> dict:
 
 
 @router.get("/health/ready")
-async def readiness() -> dict:
-    """Readiness probe pour Kubernetes/Railway.
+async def readiness() -> JSONResponse:
+    """Refuse le trafic si la base ou sa révision ne sont pas prêtes."""
+    settings = get_settings()
+    database = await _check_db()
+    schema: dict[str, object]
 
-    Retourne 200 si le service est prêt à recevoir du trafic.
-    Vérifie uniquement que l'app démarre correctement (pas les dépendances optionnelles).
-    """
-    return {"ready": True, "version": __version__}
+    if database["status"] == "disabled":
+        schema = {"status": "disabled"}
+        ready = settings.env.lower() in {"dev", "development", "local", "test"}
+    elif database["status"] != "ok":
+        schema = {"status": "not_checked"}
+        ready = False
+    else:
+        try:
+            await asyncio.wait_for(
+                db.assert_schema_current(),
+                timeout=_DB_CHECK_TIMEOUT,
+            )
+            schema = {"status": "ok", "revision": db.CURRENT_SCHEMA_REVISION}
+            ready = True
+        except asyncio.TimeoutError:
+            schema = {"status": "slow"}
+            ready = False
+        except Exception:
+            schema = {"status": "error", "error_code": "schema_revision_invalid"}
+            ready = False
+
+    payload = {
+        "ready": ready,
+        "version": __version__,
+        "database": database,
+        "schema": schema,
+    }
+    return JSONResponse(status_code=200 if ready else 503, content=payload)
 
 
 @router.get("/health/live")
@@ -149,3 +189,56 @@ async def liveness() -> dict:
     Retourne 200 tant que le processus est vivant.
     """
     return {"alive": True, "uptime_seconds": round(time.time() - _START_TIME)}
+
+
+@router.get("/health/metrics")
+async def metrics() -> dict:
+    """Métriques agrégées sans requête, payload, IP ni identifiant produit."""
+    snapshot = request_metrics.snapshot()
+    snapshot["product_intelligence"] = product_intelligence_metrics.snapshot()
+    return snapshot
+
+
+@router.get("/health/metrics/openmetrics", include_in_schema=False)
+async def openmetrics(
+    authorization: Annotated[str | None, Header()] = None,
+) -> Response:
+    """Export OpenMetrics authentifié ; désactivé sans secret explicite."""
+    token = get_settings().metrics_export_token
+    if token is None:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "metrics_export_disabled"},
+            headers={"Cache-Control": "no-store"},
+        )
+
+    expected = f"Bearer {token}"
+    if authorization is None or not secrets.compare_digest(authorization, expected):
+        return JSONResponse(
+            status_code=401,
+            content={"error": "unauthorized"},
+            headers={
+                "Cache-Control": "no-store",
+                "WWW-Authenticate": "Bearer",
+            },
+        )
+
+    try:
+        payload = render_openmetrics(
+            request_metrics.snapshot(),
+            product_intelligence_metrics.snapshot(),
+        )
+    except MetricsExportError:
+        return JSONResponse(
+            status_code=503,
+            content={"error": "metrics_export_invalid"},
+            headers={"Cache-Control": "no-store"},
+        )
+
+    return Response(
+        content=payload,
+        headers={
+            "Cache-Control": "no-store",
+            "Content-Type": OPENMETRICS_CONTENT_TYPE,
+        },
+    )

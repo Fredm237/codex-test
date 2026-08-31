@@ -52,7 +52,7 @@ function ArticleFR() {
               <tr><td><b>Hausse juste avant l&apos;offre</b></td><td>Prix monté en octobre pour «&nbsp;baisser&nbsp;» en novembre</td></tr>
               <tr><td><b>«&nbsp;Stock limité&nbsp;», compte à rebours</b></td><td>Pression artificielle pour acheter vite</td></tr>
               <tr><td><b>Modèle «&nbsp;spécial Black Friday&nbsp;»</b></td><td>Version allégée, moins bien équipée</td></tr>
-              <tr><td><b>-70&nbsp;% sur une marque inconnue</b></td><td>Produit dont le vrai prix est déjà bas ailleurs</td></tr>
+              <tr><td><b>-70&nbsp;% sur une marque inconnue</b></td><td>Comparer le prix affiché aux offres observables ailleurs</td></tr>
             </tbody>
           </table>
         </div>
@@ -139,7 +139,7 @@ function ArticleNL() {
               <tr><td><b>Stijging net vóór het aanbod</b></td><td>Prijs verhoogd in oktober om te «&nbsp;verlagen&nbsp;» in november</td></tr>
               <tr><td><b>«&nbsp;Beperkte voorraad&nbsp;», aftelklok</b></td><td>Kunstmatige druk om snel te kopen</td></tr>
               <tr><td><b>Model «&nbsp;speciaal Black Friday&nbsp;»</b></td><td>Uitgeklede versie, minder goed uitgerust</td></tr>
-              <tr><td><b>-70&nbsp;% op een onbekend merk</b></td><td>Product waarvan de echte prijs elders al laag is</td></tr>
+              <tr><td><b>-70&nbsp;% op een onbekend merk</b></td><td>Vergelijk de getoonde prijs met waarneembare aanbiedingen elders</td></tr>
             </tbody>
           </table>
         </div>
@@ -226,7 +226,7 @@ function ArticleEN() {
               <tr><td><b>Rise just before the offer</b></td><td>Price raised in October to «&nbsp;drop&nbsp;» in November</td></tr>
               <tr><td><b>«&nbsp;Limited stock&nbsp;», countdown</b></td><td>Artificial pressure to buy fast</td></tr>
               <tr><td><b>«&nbsp;Special Black Friday&nbsp;» model</b></td><td>Stripped-down version, less well equipped</td></tr>
-              <tr><td><b>-70&nbsp;% on an unknown brand</b></td><td>Product whose real price is already low elsewhere</td></tr>
+              <tr><td><b>-70&nbsp;% on an unknown brand</b></td><td>Compare the displayed price with observable offers elsewhere</td></tr>
             </tbody>
           </table>
         </div>

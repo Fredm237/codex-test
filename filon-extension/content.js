@@ -4,11 +4,11 @@
  * Sur une fiche produit d'un marchand supporté, FILON :
  *   1. détecte le produit (JSON-LD Product → OpenGraph → sélecteurs marchand → <h1>) ;
  *   2. affiche une pastille discrète, non intrusive, en bas à droite ;
- *   3. déroule un panneau qui rappelle les 4 leviers d'économie que FILON vérifie,
+ *   3. déroule un panneau qui rappelle les données que FILON peut rechercher,
  *      puis emmène l'utilisateur vers l'analyse RÉELLE sur filon.be.
  *
- * Principe : aucune économie chiffrée n'est inventée ici. Le vrai prix est calculé
- * côté FILON, sur des données réelles. L'extension ne fait que détecter et relier.
+ * Principe : aucune économie chiffrée n'est inventée ici. L'extension ne fait
+ * que détecter et relier ; filon.be indique son périmètre et ses inconnues.
  */
 (() => {
   "use strict";
@@ -84,10 +84,10 @@
     <circle cx="156" cy="78" r="10.5" fill="#EF9F27"/></svg>`;
 
   const CHECKS = [
-    ["Meilleur marchand", "des dizaines de vendeurs comparés en direct"],
-    ["Reconditionné certifié", "l'équivalent garanti, quand il existe"],
-    ["Code promo vérifié", "testé au paiement, pas de code mort"],
-    ["Cashback maximal", "la meilleure plateforme, réunie au prix"],
+    ["Offres indexées", "prix observés pour le produit reconnu"],
+    ["Alternative reconditionnée", "lorsqu'une offre comparable existe"],
+    ["Promotions disponibles", "lorsqu'une source en fournit les conditions"],
+    ["Cashback connu", "affiché seulement lorsqu'il est documenté"],
   ];
 
   function openFilon(name) {
@@ -100,17 +100,17 @@
 
     const pill = document.createElement("button");
     pill.className = `${PREFIX}-pill`;
-    pill.setAttribute("aria-label", "Ouvrir FILON — voir le vrai prix");
-    pill.innerHTML = `${LOGO}<span>Voir le vrai prix</span>`;
+    pill.setAttribute("aria-label", "Ouvrir l'analyse FILON");
+    pill.innerHTML = `${LOGO}<span>Vérifier avec FILON</span>`;
 
     const panel = document.createElement("aside");
     panel.className = `${PREFIX}-panel`;
     panel.setAttribute("role", "complementary");
-    panel.setAttribute("aria-label", "FILON — le vrai prix");
+    panel.setAttribute("aria-label", "FILON — les offres observées");
     panel.innerHTML = `
       <div class="${PREFIX}-head">
         ${LOGO}
-        <div class="${PREFIX}-brand">FILON<small>Le vrai prix, avant d'acheter</small></div>
+        <div class="${PREFIX}-brand">FILON<small>Les offres observées, avant d'acheter</small></div>
         <button class="${PREFIX}-close" aria-label="Fermer">✕</button>
       </div>
       <div class="${PREFIX}-detected">
@@ -126,8 +126,8 @@
           </div>`
         ).join("")}
       </div>
-      <button class="${PREFIX}-cta">Voir le vrai prix sur FILON →</button>
-      <div class="${PREFIX}-foot">Gratuit · indépendant · vos données ne sont jamais revendues.</div>
+      <button class="${PREFIX}-cta">Voir l'analyse sur FILON →</button>
+      <div class="${PREFIX}-foot">Accès actuel à 0 € · certains liens sont affiliés · conditions à confirmer chez le marchand.</div>
     `;
 
     document.body.appendChild(pill);

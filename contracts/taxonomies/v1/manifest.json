@@ -1,0 +1,24 @@
+{
+  "contract_family": "filon-product-taxonomies",
+  "taxonomy_version": "1.0.0",
+  "status": "active",
+  "scope": "internal_product_quality",
+  "compatibility": {
+    "wire_values": "immutable_within_v1",
+    "renumbering": "forbidden",
+    "reuse": "forbidden",
+    "additive_codes": "require_minor_version_and_consumer_unknown_tests",
+    "breaking_changes": "require_new_major_version_and_explicit_migration",
+    "unknown": "preserve_raw_and_flag_never_remap"
+  },
+  "vocabularies": {
+    "domain": ["classification", "identity", "retrieval", "constraint", "offer", "evidence", "decision", "ingestion"],
+    "origin": ["mandate", "filon_ingestion_extension"]
+  },
+  "artifacts": {
+    "product_error_codes": "product-error-codes.json"
+  },
+  "schemas": {
+    "product_error_code": "product-error-code.schema.json"
+  }
+}

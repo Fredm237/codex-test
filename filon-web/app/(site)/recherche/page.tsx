@@ -6,7 +6,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/recherche",
   title: "L'assistant d'achat",
   description:
-    "Demandez à FILON avant d'acheter : il analyse prix, cashback, reconditionné et codes promo, puis vous conseille en langage clair. L'assistant d'achat intelligent, gratuit.",
+    "Recherchez les offres indexées dans FILON et consultez les prix, avantages et signaux disponibles, avec leurs limites.",
 });
 
 export default function RecherchePage() {

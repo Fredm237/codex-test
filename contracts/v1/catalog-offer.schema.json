@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/v1/catalog-offer.schema.json",
+  "title": "FILON Catalog Offer v1",
+  "type": "object",
+  "required": ["id", "name", "price", "currency", "in_stock", "link", "merchant"],
+  "properties": {
+    "id": { "type": "integer", "minimum": 1 },
+    "name": { "type": "string", "minLength": 1 },
+    "brand": { "type": ["string", "null"] },
+    "category": { "type": ["string", "null"] },
+    "price": { "type": "number", "exclusiveMinimum": 0 },
+    "currency": { "type": ["string", "null"], "pattern": "^[A-Z]{3}$" },
+    "in_stock": {
+      "type": ["boolean", "null"],
+      "description": "null signifie que le dernier flux marchand ne fournit pas la disponibilité"
+    },
+    "image": { "type": ["string", "null"] },
+    "link": { "type": "string", "minLength": 1 },
+    "observed_at": { "type": ["string", "null"], "format": "date-time" },
+    "merchant": {
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "slug": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": true
+}

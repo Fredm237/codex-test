@@ -7,6 +7,8 @@ que les mots se suivent dans cet ordre exact et ne renvoyait rien dès deux mots
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -35,22 +37,39 @@ async def session():
             return models.Offer(
                 merchant_id=m.id, awin_product_id=pid, name=name, brand=brand,
                 price=price, currency="EUR", image_url="https://example.test/i.jpg",
-                is_canonical=True,
+                in_stock=True, is_canonical=True,
             )
 
         # Le libellé du marchand dit « bleu », l'utilisateur tapera « bleue ».
-        s.add(offer("1", "Chemise Regular Fit bleu rayé", "GANT", 89.0))
-        s.add(offer("2", "Chemise Slim Fit verte", "GANT", 79.0))
-        s.add(offer("3", "Pantalon chino beige", "GANT", 99.0))
-        s.add(offer("4", "Casque audio sans fil Bluetooth", "Sony", 299.0))
-        s.add(offer("5", "Apple iPhone 15 128 Go", "Apple", 899.0))
-        s.add(offer("6", "Coque souple Apple iPhone 15", "Apple", 19.0))
-        s.add(offer("7", "Support de bureau pour iPhone 15", "Marque", 12.0))
-        s.add(offer("8", "Lenovo IdeaPad ordinateur portable 15 pouces", "Lenovo", 649.0))
-        s.add(offer("9", "Support pour ordinateur portable 15 pouces", "Marque", 25.0))
-        s.add(offer("10", "Siphon de cuisine inox", "Marque", 99.0))
-        s.add(offer("11", "Plaque PCB iPhone 15", "Marque", 90.0))
-        s.add(offer("12", "Valise avec compartiment ordinateur portable", "Marque", 220.0))
+        seeded_offers = [
+            offer("1", "Chemise Regular Fit bleu rayé", "GANT", 89.0),
+            offer("2", "Chemise Slim Fit verte", "GANT", 79.0),
+            offer("3", "Pantalon chino beige", "GANT", 99.0),
+            offer("4", "Casque audio sans fil Bluetooth", "Sony", 299.0),
+            offer("5", "Apple iPhone 15 128 Go", "Apple", 899.0),
+            offer("6", "Coque souple Apple iPhone 15", "Apple", 19.0),
+            offer("7", "Support de bureau pour iPhone 15", "Marque", 12.0),
+            offer("8", "Lenovo IdeaPad ordinateur portable 15 pouces", "Lenovo", 649.0),
+            offer("9", "Support pour ordinateur portable 15 pouces", "Marque", 25.0),
+            offer("10", "Siphon de cuisine inox", "Marque", 99.0),
+            offer("11", "Plaque PCB iPhone 15", "Marque", 90.0),
+            offer("12", "Valise avec compartiment ordinateur portable", "Marque", 220.0),
+        ]
+        s.add_all(seeded_offers)
+        await s.flush()
+        captured_at = datetime.now(UTC).replace(tzinfo=None)
+        s.add_all(
+            [
+                models.PriceSnapshot(
+                    offer_id=offer_row.id,
+                    price=offer_row.price,
+                    currency="EUR",
+                    in_stock=True,
+                    captured_at=captured_at,
+                )
+                for offer_row in seeded_offers
+            ]
+        )
         await s.commit()
         yield s
     await engine.dispose()

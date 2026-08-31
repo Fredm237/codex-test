@@ -23,6 +23,7 @@ import httpx
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
+from app.core.observability import outbound_trace_headers, traced_dependency
 
 log = get_logger("awin")
 
@@ -66,12 +67,17 @@ async def ensure_advertisers(*, force: bool = False) -> None:
     headers = {"Authorization": f"Bearer {s.awin_api_token}"}
     params = {"relationship": "joined"}
     try:
-        async with httpx.AsyncClient(timeout=s.llm_timeout_seconds) as client:
-            resp = await client.get(url, headers=headers, params=params)
-            resp.raise_for_status()
-            data = resp.json()
+        async with traced_dependency("awin", "programmes"):
+            headers.update(outbound_trace_headers())
+            async with httpx.AsyncClient(timeout=s.llm_timeout_seconds) as client:
+                resp = await client.get(url, headers=headers, params=params)
+                resp.raise_for_status()
+                data = resp.json()
     except Exception as exc:  # pragma: no cover - dépend du réseau/compte
-        log.warning("Awin indisponible ou aucun programme (%s) → liens directs", exc)
+        log.warning(
+            "Awin indisponible ou aucun programme (error_type=%s) → liens directs",
+            type(exc).__name__,
+        )
         _last_sync = time.time()  # évite de marteler l'API en cas d'erreur
         return
 

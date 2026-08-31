@@ -31,9 +31,9 @@ async def _sse(query: str, budget: float | None, country: str | None, locale: st
         async for event in stream_events(query, budget, country, locale):
             yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
     except GeneratorExit:
-        log.info("Client déconnecté pendant le streaming pour '%s'", query[:30])
+        log.info("Client déconnecté pendant le streaming")
     except Exception as exc:
-        log.error("Erreur streaming pour '%s': %s", query[:30], exc)
+        log.error("Erreur streaming (error_type=%s)", type(exc).__name__)
         yield f'data: {{"type": "error", "message": "Erreur interne"}}\n\n'
 
 
@@ -51,7 +51,7 @@ async def advise_stream(
     if locale not in _VALID_LOCALES:
         raise HTTPException(status_code=400, detail=f"Langue non supportée : {locale}")
 
-    log.info("Stream demandé : q='%s' budget=%s country=%s locale=%s", q[:40], budget, country, locale)
+    log.info("Stream assistant demandé")
 
     return StreamingResponse(
         _sse(q, budget, country, locale),

@@ -17,8 +17,21 @@
 
 import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
-import { CARD_COPY, money, type CardCopy } from "./product-copy";
+import {
+  CARD_COPY,
+  currentStockState,
+  hasCurrentOfferEvidence,
+  isFreshObservation,
+  isPurchasableOffer,
+  money,
+  observationAgeHours,
+  observationTimestamp,
+  positiveFinitePrice,
+  type CardCopy,
+} from "./product-copy";
+import { normalizeSupportedCurrency } from "@/lib/currency";
 import { useLocale } from "@/lib/i18n";
+import { useEvidenceNow } from "./use-evidence-now";
 
 export type CardOffer = {
   id: number;
@@ -33,8 +46,12 @@ export type CardOffer = {
   in_stock?: boolean | null;
   /** Date du dernier relevé de prix Core, distincte d’une mise à jour interne. */
   observed_at?: string | null;
+  evidence_current?: boolean | null;
   drop_pct?: number;
   price_high?: number | null;
+  price_low?: number | null;
+  /** Devise explicitement portée par l'historique ayant produit le badge. */
+  history_currency?: string | null;
   is_lowest?: boolean;
 };
 
@@ -55,20 +72,51 @@ export function ProductCard({
 }) {
   const { locale } = useLocale();
   const words = copy ?? CARD_COPY[locale];
-  const drop = offer.drop_pct && offer.drop_pct >= 1 ? Math.round(offer.drop_pct) : null;
+  const evidenceNow = useEvidenceNow([offer.observed_at]);
+  const hasCurrentPrice = hasCurrentOfferEvidence(offer, evidenceNow);
+  const canBuy = isPurchasableOffer(offer, evidenceNow);
+  const offerCurrency = normalizeSupportedCurrency(offer.currency);
+  const historyCurrency = normalizeSupportedCurrency(offer.history_currency);
+  const hasComparableHistory = canBuy
+    && offerCurrency !== null
+    && historyCurrency === offerCurrency
+    && positiveFinitePrice(offer.price_high)
+    && positiveFinitePrice(offer.price)
+    && offer.price_high > offer.price;
+  const observedDrop = hasComparableHistory && positiveFinitePrice(offer.price_high)
+    && positiveFinitePrice(offer.price)
+    ? ((offer.price_high - offer.price) / offer.price_high) * 100
+    : null;
+  const drop = observedDrop !== null && observedDrop >= 1 && observedDrop <= 100
+    ? Math.round(observedDrop)
+    : null;
+  const isLowest = hasComparableHistory
+    && positiveFinitePrice(offer.price_low)
+    && positiveFinitePrice(offer.price)
+    && offer.price_low <= offer.price_high!
+    && offer.price <= offer.price_low + 0.005
+    && offer.is_lowest === true;
   const target = href ?? `/produit/${offer.id}/`;
-  const availability = offer.in_stock === true
+  const stockState = currentStockState(offer, evidenceNow);
+  const availability = stockState === true
     ? { label: words.available, state: "available" }
-    : offer.in_stock === false
+    : stockState === false
       ? { label: words.unavailable, state: "unavailable" }
       : { label: words.availabilityUnknown, state: "unknown" };
   const observed = (() => {
-    const timestamp = offer.observed_at ? Date.parse(offer.observed_at) : Number.NaN;
-    if (!Number.isFinite(timestamp)) return { label: words.observationUnavailable, state: "unknown" };
-    const ageDays = Math.max(0, Math.floor((Date.now() - timestamp) / 86_400_000));
-    if (ageDays === 0) return { label: words.observedToday, state: "fresh" };
-    if (ageDays === 1) return { label: words.observedYesterday, state: "fresh" };
-    if (ageDays < 7) return { label: words.observedDays(ageDays), state: "recent" };
+    if (offer.evidence_current !== true) {
+      return { label: words.observationUnavailable, state: "unknown" };
+    }
+    const timestamp = observationTimestamp(offer.observed_at);
+    if (timestamp === null) return { label: words.observationUnavailable, state: "unknown" };
+    const ageHours = observationAgeHours(offer.observed_at, evidenceNow);
+    if (ageHours === null) return { label: words.observationUnavailable, state: "unknown" };
+    const age = evidenceNow - timestamp;
+    const state = isFreshObservation(offer.observed_at, evidenceNow) ? "fresh" : "old";
+    const ageDays = Math.floor(age / 86_400_000);
+    if (age < 86_400_000) return { label: words.observedToday, state };
+    if (age < 2 * 86_400_000) return { label: words.observedYesterday, state };
+    if (age < 3 * 86_400_000) return { label: words.observedDays(ageDays), state };
     const dateLocale = locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-BE";
     return {
       label: words.observedOn(new Intl.DateTimeFormat(dateLocale, { day: "numeric", month: "short" }).format(new Date(timestamp))),
@@ -109,10 +157,10 @@ export function ProductCard({
         ) : (
           <span className="fx-product-noimage">{words.noImage}</span>
         )}
-        {(drop || offer.is_lowest) && (
+        {(drop || isLowest) && (
           <span className="fx-product-badges">
             {drop && <span className="fx-badge gain">−{drop}&nbsp;%</span>}
-            {offer.is_lowest && <span className="fx-badge brand">{words.lowest}</span>}
+            {isLowest && <span className="fx-badge brand">{words.lowest}</span>}
           </span>
         )}
       </div>
@@ -147,11 +195,11 @@ export function ProductCard({
 
         <div className="fx-product-foot">
           <span className="fx-product-price">
-            <b>{money(offer.price, offer.currency, locale)}</b>
-            {drop && offer.price_high != null && <s>{money(offer.price_high, offer.currency, locale)}</s>}
+            <b>{money(hasCurrentPrice ? offer.price : null, hasCurrentPrice ? offer.currency : null, locale)}</b>
+            {hasCurrentPrice && drop && offer.price_high != null && <s>{money(offer.price_high, offer.currency, locale)}</s>}
           </span>
 
-          {offer.link && (
+          {offer.link && canBuy && (
             <a
               className="fx-product-cta"
               href={offer.link}

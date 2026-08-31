@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 from collections.abc import Callable
+from dataclasses import replace
 
 from sqlalchemy import func, not_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -17,6 +18,7 @@ from app.db import models
 from app.intelligence.contracts import CoreOfferSnapshot
 from app.services import taxonomy
 from app.services.catalog_paging import fetch_all_offer_rows
+from app.services.offer_evidence import load_offer_evidence
 
 
 FASHION_CATEGORIES = frozenset(taxonomy.categories_of_department("Mode & Accessoires"))
@@ -244,7 +246,8 @@ def _snapshot(offer: models.Offer, merchant: models.Merchant) -> CoreOfferSnapsh
         merchant_id=merchant.id,
         merchant_name=merchant.name,
         merchant_region=merchant.region,
-        observed_at=offer.updated_at,
+        # Une mutation technique de l'offre ne constitue pas un relevé source.
+        observed_at=None,
     )
 
 
@@ -300,4 +303,18 @@ async def retrieve_fashion_offers(
                 continue
             seen.add(offer.id)
             snapshots.append(_snapshot(offer, merchant))
-    return snapshots
+    evidence_by_offer = await load_offer_evidence(
+        session,
+        list(snapshots),
+        current_only=True,
+    )
+    return [
+        replace(
+            snapshot,
+            currency=evidence_by_offer.get(snapshot.offer_id).currency,
+            observed_at=evidence_by_offer.get(snapshot.offer_id).current_observed_at,
+        )
+        if snapshot.offer_id in evidence_by_offer
+        else replace(snapshot, currency=None, observed_at=None)
+        for snapshot in snapshots
+    ]

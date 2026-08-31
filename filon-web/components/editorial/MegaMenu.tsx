@@ -28,15 +28,15 @@ const L: Record<Locale, { label: string; all: string; products: (n: number) => s
 };
 
 /** Nombre de sous-rayons montrés sous un rayon détaillé. */
-const SUBS_SHOWN = 3;
+const SUBS_SHOWN = 4;
 
 /** Un méga-menu oriente : chaque département reste atteignable en entier par
  * son titre, mais il n’a pas à reproduire toute son arborescence. */
 const CATEGORIES_SHOWN = 4;
 
-/** Un seul rayon de tête peut exposer ses sous-rayons dans le panneau. Cela
- * préserve la découverte sans produire un mur de liens concurrent avec la page. */
-const DETAILED_PER_DEPT = 1;
+/** Les trois rayons de tête peuvent exposer leurs sous-rayons dans le panneau.
+ * Cela préserve la découverte sans produire un mur de liens concurrent avec la page. */
+const DETAILED_PER_DEPT = 3;
 
 /** Les plus gros sous-rayons, pas les premiers venus.
  *
@@ -80,7 +80,7 @@ export function detailedCategorySlugs(dep: Department, limit = DETAILED_PER_DEPT
  *  remplit la colonne la moins chargée — un ordonnancement glouton, suffisant
  *  pour six éléments et stable d'un rendu à l'autre.
  */
-export function balanceColumns(departments: Department[], columns = 4): Department[][] {
+export function balanceColumns(departments: Department[], columns = 3): Department[][] {
   const cols: Department[][] = Array.from({ length: columns }, () => []);
   const load = new Array(columns).fill(0);
   const cost = (d: Department) => {

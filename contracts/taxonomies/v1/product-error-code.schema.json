@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/taxonomies/v1/product-error-code.schema.json",
+  "title": "FILON Product Error Code v1",
+  "description": "Code stable d'une erreur de qualité de données, de retrieval ou de décision produit.",
+  "type": "string",
+  "enum": [
+    "E001_WRONG_CATEGORY",
+    "E002_WRONG_PRODUCT_ROLE",
+    "E003_FALSE_PRODUCT_MERGE",
+    "E004_FALSE_PRODUCT_SPLIT",
+    "E005_WRONG_VARIANT",
+    "E006_IRRELEVANT_RETRIEVAL",
+    "E007_HARD_CONSTRAINT_VIOLATION",
+    "E008_WRONG_PRICE",
+    "E009_STALE_PRICE",
+    "E010_WRONG_STOCK",
+    "E011_WRONG_SHIPPING",
+    "E012_UNSUPPORTED_CLAIM",
+    "E013_WRONG_VERDICT",
+    "E014_OVERCONFIDENT_DECISION",
+    "E015_DUPLICATE_PRODUCT",
+    "E016_SCHEMA_INVALID",
+    "E017_INVALID_IDENTIFIER",
+    "E018_CURRENCY_MISMATCH"
+  ]
+}

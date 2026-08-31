@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "FILON — le vrai prix, avant d'acheter",
+  "name": "FILON — les offres observées",
   "short_name": "FILON",
-  "description": "Votre copilote d'achat indépendant. Obtenez l'analyse complète des prix, du reconditionné et des codes promo sur chaque produit.",
+  "description": "Repérez un produit et ouvrez les offres indexées, leur fraîcheur et les informations disponibles sur FILON.",
   "version": "1.0.0",
   "default_locale": "fr",
   "icons": {
@@ -12,7 +12,7 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "FILON — voir le vrai prix",
+    "default_title": "FILON — voir les offres observées",
     "default_popup": "popup.html",
     "default_icon": {
       "16": "icons/icon16.png",

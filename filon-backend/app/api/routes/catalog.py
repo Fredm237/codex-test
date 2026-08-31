@@ -6,6 +6,7 @@ Ils dégradent proprement si la base est absente (listes vides).
 
 from __future__ import annotations
 
+import math
 import time
 from collections import Counter
 
@@ -27,7 +28,19 @@ from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.db import models
 from app.db import session as db
-from app.services import catalog_sync, decision, search, taxonomy
+from app.services import (
+    catalog_price_truth,
+    catalog_sync,
+    decision,
+    offer_evidence,
+    search,
+    taxonomy,
+)
+from app.services.currency import normalize_currency_code
+from app.services.freshness import (
+    format_utc_timestamp,
+    offer_observation_is_fresh,
+)
 from app.services.verdict import compute_verdict
 
 log = get_logger("catalog")
@@ -132,9 +145,9 @@ async def pulse(session=Depends(db.get_session)) -> dict:
     if session is None:
         return {"live": False}
 
-    from datetime import datetime, timedelta
+    from datetime import timedelta
 
-    since = datetime.utcnow() - timedelta(hours=24)
+    since = catalog_price_truth.utc_naive_now() - timedelta(hours=24)
     last = await session.scalar(select(func.max(models.PriceSnapshot.captured_at)))
     readings = await session.scalar(
         select(func.count())
@@ -150,7 +163,15 @@ async def pulse(session=Depends(db.get_session)) -> dict:
         .join(models.Offer, models.Offer.id == models.PriceSnapshot.offer_id)
         .where(
             models.PriceSnapshot.captured_at >= since,
+            models.PriceSnapshot.price > 0,
             models.Offer.price.isnot(None),
+            models.Offer.price > 0,
+            catalog_price_truth.comparable_price_evidence_sql(
+                snapshot_currency=models.PriceSnapshot.currency,
+                offer_currency=models.Offer.currency,
+                snapshot_in_stock=models.PriceSnapshot.in_stock,
+                offer_in_stock=models.Offer.in_stock,
+            ),
             models.PriceSnapshot.price > models.Offer.price,
         )
     )
@@ -162,9 +183,10 @@ async def pulse(session=Depends(db.get_session)) -> dict:
 
     return {
         "live": True,
-        "last_reading": last.isoformat() if last else None,
+        "last_reading": format_utc_timestamp(last),
         "readings_24h": int(readings or 0),
         "drops_24h": int(drops or 0),
+        "drops_comparable": True,
         "sync": sync,
     }
 
@@ -252,20 +274,7 @@ async def offers(
 ) -> dict:
     if session is None:
         return {"total": 0, "items": []}
-    # La fraîcheur d’une carte vient du dernier relevé de prix, jamais de
-    # `offers.updated_at` : ce dernier peut être modifié par une correction
-    # interne de taxonomie sans nouvelle observation marchand. La sous-requête
-    # corrélée fait un accès indexé par offre et ne scanne donc pas tout
-    # l’historique pour une page de 24 à 96 cartes.
-    observed_at = (
-        select(models.PriceSnapshot.captured_at)
-        .where(models.PriceSnapshot.offer_id == models.Offer.id)
-        .order_by(models.PriceSnapshot.captured_at.desc())
-        .limit(1)
-        .correlate(models.Offer)
-        .scalar_subquery()
-    )
-    stmt = select(models.Offer, models.Merchant, observed_at.label("observed_at")).join(
+    stmt = select(models.Offer, models.Merchant).join(
         models.Merchant, models.Offer.merchant_id == models.Merchant.id
     )
     blocked = _visible_merchant_clause()
@@ -369,29 +378,43 @@ async def offers(
         if relevance is not None:
             stmt = stmt.order_by(relevance, models.Offer.price.asc().nullslast())
     rows = (await session.execute(stmt.limit(limit).offset(offset))).all()
-    return {
-        "total": int(total or 0),
-        "items": [
+    evidence_by_offer = await offer_evidence.load_offer_evidence(
+        session,
+        [offer for offer, _merchant in rows],
+        current_only=True,
+    )
+    items = []
+    for offer, merchant_row in rows:
+        evidence = _fresh_current_offer_evidence(
+            offer,
+            evidence_by_offer.get(offer.id),
+        )
+        observed_at = evidence.current_observed_at if evidence is not None else None
+        evidence_current = evidence is not None
+        items.append(
             {
-                "id": o.id,
-                "name": o.name,
-                "brand": o.brand,
+                "id": offer.id,
+                "name": offer.name,
+                "brand": offer.brand,
                 # La catégorie publique est FILON. La valeur du marchand reste
                 # disponible séparément pour l’audit, sans piloter la navigation.
-                "category": o.filon_category,
-                "subcategory": o.filon_subcategory,
-                "source_category": o.category,
-                "offer_kind": o.offer_kind,
-                "price": o.price,
-                "currency": o.currency,
-                "in_stock": o.in_stock,
-                "observed_at": observed.isoformat() if observed else None,
-                "image": o.image_url,
-                "link": o.deep_link,
-                "merchant": {"name": m.name, "slug": m.slug},
+                "category": offer.filon_category,
+                "subcategory": offer.filon_subcategory,
+                "source_category": offer.category,
+                "offer_kind": offer.offer_kind,
+                "price": offer.price if evidence_current else None,
+                "currency": evidence.currency if evidence_current else None,
+                "in_stock": True if evidence_current else None,
+                "observed_at": format_utc_timestamp(observed_at),
+                "evidence_current": evidence_current,
+                "image": offer.image_url,
+                "link": offer.deep_link,
+                "merchant": {"name": merchant_row.name, "slug": merchant_row.slug},
             }
-            for (o, m, observed) in rows
-        ],
+        )
+    return {
+        "total": int(total or 0),
+        "items": items,
     }
 
 
@@ -650,16 +673,56 @@ def _visible_merchant_clause():
     return and_(*clauses)
 
 
-def _card(o: models.Offer, m: models.Merchant, **extra) -> dict:
+def _fresh_current_offer_evidence(
+    offer: models.Offer,
+    evidence: offer_evidence.OfferEvidence | None,
+) -> offer_evidence.OfferEvidence | None:
+    """Valide l'unique preuve autorisée à publier le prix d'une offre.
+
+    ``load_offer_evidence(current_only=True)`` rapproche déjà le montant, la
+    devise et le stock avec un snapshot append-only. Cette dernière barrière
+    protège aussi les appels directs et impose le TTL public commun.
+    """
+
+    currency = normalize_currency_code(offer.currency)
+    if (
+        not isinstance(offer.price, (int, float))
+        or isinstance(offer.price, bool)
+        or not math.isfinite(float(offer.price))
+        or float(offer.price) <= 0
+        or offer.in_stock is not True
+        or currency is None
+        or evidence is None
+        or evidence.currency != currency
+        or not offer_observation_is_fresh(evidence.current_observed_at)
+    ):
+        return None
+    return evidence
+
+
+def _card(
+    o: models.Offer,
+    m: models.Merchant,
+    *,
+    evidence: offer_evidence.OfferEvidence | None,
+    **extra,
+) -> dict | None:
     """Charge utile compacte d'une carte produit (rails de la home catalogue)."""
+    currency = normalize_currency_code(o.currency)
+    evidence = _fresh_current_offer_evidence(o, evidence)
+    if evidence is None or currency is None:
+        return None
+    observed_at = evidence.current_observed_at
     return {
         "id": o.id,
         "name": o.name,
         "brand": o.brand,
         "category": o.category,
         "price": o.price,
-        "currency": o.currency,
+        "currency": currency,
         "in_stock": o.in_stock,
+        "observed_at": format_utc_timestamp(observed_at),
+        "evidence_current": True,
         "image": o.image_url,
         "link": o.deep_link,
         "merchant": {"name": m.name, "slug": m.slug},
@@ -723,12 +786,24 @@ async def _rail(session, core, *, limit: int, extra=()):
             )
         ).all()
     }
+    evidence_by_offer = await offer_evidence.load_offer_evidence(
+        session,
+        [offer for offer, _merchant in objects.values()],
+        current_only=True,
+    )
     cards = []
     for r in rows:  # l'ordre du rail fait foi
         pair = objects.get(r["id"])
         if pair:
             o, m = pair
-            cards.append(_card(o, m, **{k: fn(r) for k, fn in extra}))
+            card = _card(
+                o,
+                m,
+                evidence=evidence_by_offer.get(o.id),
+                **{k: fn(r) for k, fn in extra},
+            )
+            if card is not None:
+                cards.append(card)
     return cards
 
 
@@ -754,14 +829,30 @@ async def highlights(
     #
     # `count(*) FILTER (WHERE price = max)` n'est pas exprimable en une passe :
     # on agrège d'abord, puis on rejoint pour compter les occurrences du haut.
+    snapshot_currency = catalog_price_truth.normalized_currency_sql(
+        models.PriceSnapshot.currency
+    )
     agg = (
         select(
             models.PriceSnapshot.offer_id.label("offer_id"),
+            snapshot_currency.label("currency"),
             func.max(models.PriceSnapshot.price).label("high"),
             func.min(models.PriceSnapshot.price).label("low"),
             func.count().label("samples"),
         )
-        .group_by(models.PriceSnapshot.offer_id)
+        .join(models.Offer, models.Offer.id == models.PriceSnapshot.offer_id)
+        .where(
+            models.PriceSnapshot.price > 0,
+            models.Offer.price.isnot(None),
+            models.Offer.price > 0,
+            catalog_price_truth.comparable_price_evidence_sql(
+                snapshot_currency=models.PriceSnapshot.currency,
+                offer_currency=models.Offer.currency,
+                snapshot_in_stock=models.PriceSnapshot.in_stock,
+                offer_in_stock=models.Offer.in_stock,
+            ),
+        )
+        .group_by(models.PriceSnapshot.offer_id, snapshot_currency)
         .having(func.count() > 1)
         .subquery()
     )
@@ -778,6 +869,13 @@ async def highlights(
                 models.PriceSnapshot,
                 (models.PriceSnapshot.offer_id == agg.c.offer_id)
                 & (
+                    catalog_price_truth.normalized_currency_sql(
+                        models.PriceSnapshot.currency
+                    )
+                    == agg.c.currency
+                )
+                & models.PriceSnapshot.in_stock.is_(True)
+                & (
                     func.round(cast(models.PriceSnapshot.price, Numeric(12, 2)), 2)
                     == func.round(cast(agg.c.high, Numeric(12, 2)), 2)
                 ),
@@ -790,6 +888,7 @@ async def highlights(
     snap = (
         select(
             agg.c.offer_id.label("offer_id"),
+            agg.c.currency.label("currency"),
             agg.c.high.label("high"),
             agg.c.low.label("low"),
             agg.c.samples.label("samples"),
@@ -835,6 +934,10 @@ async def highlights(
     visible = [
         models.Offer.price.isnot(None),
         models.Offer.price > 0,
+        models.Offer.in_stock.is_(True),
+        catalog_price_truth.normalized_currency_sql(models.Offer.currency).in_(
+            tuple(sorted(catalog_price_truth.SUPPORTED_CURRENCY_CODES))
+        ),
         models.Offer.image_url.isnot(None),
         # Les anciennes lignes NULL restent visibles pendant le rattrapage ; dès
         # que leur nature est connue, un séjour/service/numérique sort des rails
@@ -858,7 +961,13 @@ async def highlights(
     drops_core = (
         core(drop_pct.desc(), snap.c.high.label("high"), snap.c.low.label("low"),
              drop_pct.label("drop_pct"))
-        .join(snap, snap.c.offer_id == models.Offer.id)
+        .join(
+            snap,
+            (snap.c.offer_id == models.Offer.id)
+            & catalog_price_truth.same_supported_currency_sql(
+                snap.c.currency, models.Offer.currency
+            ),
+        )
         # Une baisse d'un pour cent n'est pas une bonne affaire, c'est du bruit :
         # afficher « -1 % » décrédibilise la rangée entière.
         .where(
@@ -893,7 +1002,13 @@ async def highlights(
             snap.c.high.label("high"),
             snap.c.low.label("low"),
         )
-        .join(snap, snap.c.offer_id == models.Offer.id)
+        .join(
+            snap,
+            (snap.c.offer_id == models.Offer.id)
+            & catalog_price_truth.same_supported_currency_sql(
+                snap.c.currency, models.Offer.currency
+            ),
+        )
         .where(
             *visible,
             *trusted_high,
@@ -959,14 +1074,21 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
     # rattrapage. Ainsi, un séjour ne peut pas recevoir un verdict produit entre
     # le déploiement du schéma et son reclassement par lots.
     offer_kind = o.offer_kind or taxonomy.classify_offer_kind(o.category, o.name, o.brand)
-    hist = (
-        await session.execute(
-            select(models.PriceSnapshot.price, models.PriceSnapshot.captured_at)
-            .where(models.PriceSnapshot.offer_id == offer_id)
-            .order_by(models.PriceSnapshot.captured_at)
-        )
-    ).all()
-    prices = [p for (p, _) in hist if p is not None]
+    evidence = (
+        await offer_evidence.load_offer_evidence(session, [o])
+    ).get(o.id)
+    current_evidence = _fresh_current_offer_evidence(o, evidence)
+    current_price = o.price if current_evidence is not None else None
+    current_currency = current_evidence.currency if current_evidence is not None else None
+    current_stock = True if current_evidence is not None else None
+    observed_at = (
+        current_evidence.current_observed_at
+        if current_evidence is not None
+        else None
+    )
+    hist = list(evidence.history) if evidence is not None else []
+    history_currency = evidence.currency if evidence is not None else None
+    prices = [price for price, _captured_at in hist]
     grouped = (
         await _grouped_product_summary(session, o.product_id)
         if taxonomy.is_ean_comparable(offer_kind)
@@ -983,14 +1105,22 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         "source_category": o.category,
         "offer_kind": offer_kind,
         "ean": o.ean,
-        "price": o.price,
-        "currency": o.currency,
-        "in_stock": o.in_stock,
+        "price": current_price,
+        "currency": current_currency,
+        "in_stock": current_stock,
+        "observed_at": format_utc_timestamp(observed_at),
+        "evidence_current": current_evidence is not None,
         "image": o.image_url,
         "link": o.deep_link,
         "merchant": {"name": m.name, "slug": m.slug, "domain": m.domain, "region": m.region},
         "history": [
-            {"price": p, "at": at.isoformat() if at else None} for (p, at) in hist
+            {
+                "price": price,
+                "currency": history_currency,
+                "at": format_utc_timestamp(captured_at),
+                "in_stock": True,
+            }
+            for price, captured_at in hist
         ],
         "price_min": min(prices) if prices else None,
         "price_max": max(prices) if prices else None,
@@ -999,28 +1129,84 @@ async def offer_detail(offer_id: int, session=Depends(db.get_session)) -> dict:
         "product": grouped,
         "verdict": (
             compute_verdict(
-                price=o.price,
-                currency=o.currency,
+                price=current_price,
+                currency=current_currency,
                 history=hist,
                 cheapest_elsewhere=grouped["price_min"] if grouped else None,
+                comparison_currency=grouped["currency"] if grouped else None,
+                history_currency=history_currency,
                 merchants_count=grouped["merchants_count"] if grouped else 1,
+                in_stock=current_stock,
             )
             if taxonomy.is_ean_comparable(offer_kind)
             else None
         ),
         "decision": decision.compute_decision(
-            price=o.price,
-            currency=o.currency,
+            price=current_price,
+            currency=current_currency,
             history=hist,
             cheapest_elsewhere=grouped["price_min"] if grouped else None,
-            comparison_currency=grouped["currency"] if grouped else o.currency,
+            comparison_currency=grouped["currency"] if grouped else None,
+            history_currency=history_currency,
             merchants_count=grouped["merchants_count"] if grouped else 1,
             offers_count=grouped["offers_count"] if grouped else 1,
-            in_stock=o.in_stock,
-            updated_at=o.updated_at,
+            in_stock=current_stock,
+            updated_at=observed_at,
             offer_kind=offer_kind,
         ),
     }
+
+
+async def _current_product_price_scopes(
+    session,
+    product_ids: list[int],
+) -> dict[int, dict]:
+    """Prix courants comparables, groupés sans jamais traverser une devise."""
+
+    if not product_ids:
+        return {}
+    offers = (
+        await session.execute(
+            select(models.Offer).where(models.Offer.product_id.in_(product_ids))
+        )
+    ).scalars().all()
+    evidence_by_offer = await offer_evidence.load_offer_evidence(
+        session,
+        list(offers),
+        current_only=True,
+    )
+    grouped: dict[int, list[tuple[models.Offer, offer_evidence.OfferEvidence]]] = {}
+    for offer in offers:
+        evidence = _fresh_current_offer_evidence(
+            offer,
+            evidence_by_offer.get(offer.id),
+        )
+        if evidence is None or offer.product_id is None:
+            continue
+        grouped.setdefault(offer.product_id, []).append((offer, evidence))
+
+    scopes: dict[int, dict] = {}
+    for product_id in product_ids:
+        current = grouped.get(product_id, [])
+        currencies = {evidence.currency for _offer, evidence in current}
+        if len(currencies) != 1:
+            scopes[product_id] = {
+                "price_min": None,
+                "price_max": None,
+                "currency": None,
+                "offers_count": 0,
+                "merchants_count": 0,
+            }
+            continue
+        prices = [float(offer.price) for offer, _evidence in current]
+        scopes[product_id] = {
+            "price_min": min(prices),
+            "price_max": max(prices),
+            "currency": next(iter(currencies)),
+            "offers_count": len(current),
+            "merchants_count": len({offer.merchant_id for offer, _evidence in current}),
+        }
+    return scopes
 
 
 async def _grouped_product_summary(session, product_id: int | None) -> dict | None:
@@ -1038,13 +1224,12 @@ async def _grouped_product_summary(session, product_id: int | None) -> dict | No
     ).scalar_one_or_none()
     if p is None or (p.merchants_count or 0) < 2:
         return None
+    scope = (await _current_product_price_scopes(session, [p.id])).get(p.id)
+    if scope is None or scope["merchants_count"] < 2:
+        return None
     return {
         "ean": p.ean,
-        "merchants_count": p.merchants_count,
-        "offers_count": p.offers_count,
-        "price_min": p.price_min,
-        "price_max": p.price_max,
-        "currency": p.currency,
+        **scope,
     }
 
 
@@ -1072,6 +1257,10 @@ async def products(
         models.CatalogProduct.merchants_count.desc(), models.CatalogProduct.id.asc()
     )
     rows = (await session.execute(stmt.limit(limit).offset(offset))).scalars().all()
+    scopes = await _current_product_price_scopes(
+        session,
+        [product.id for product in rows],
+    )
     return {
         "total": int(total or 0),
         "items": [
@@ -1081,11 +1270,13 @@ async def products(
                 "brand": p.brand,
                 "category": p.category,
                 "image": p.image_url,
-                "price_min": p.price_min,
-                "price_max": p.price_max,
-                "currency": p.currency,
+                "price_min": scopes.get(p.id, {}).get("price_min"),
+                "price_max": scopes.get(p.id, {}).get("price_max"),
+                "currency": scopes.get(p.id, {}).get("currency"),
                 "offers_count": p.offers_count,
                 "merchants_count": p.merchants_count,
+                "compared_offers_count": scopes.get(p.id, {}).get("offers_count", 0),
+                "compared_merchants_count": scopes.get(p.id, {}).get("merchants_count", 0),
             }
             for p in rows
         ],
@@ -1127,7 +1318,7 @@ async def sitemap_products(
     return {
         "total": int(total or 0),
         "items": [
-            {"ean": ean, "updated": updated.isoformat() if updated else None}
+            {"ean": ean, "updated": format_utc_timestamp(updated)}
             for (ean, updated) in rows
         ],
     }
@@ -1154,16 +1345,55 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
             .order_by(models.Offer.price.asc().nullslast())
         )
     ).all()
-    best_offer = rows[0][0] if rows else None
-    best_history = []
+    evidence_by_offer = await offer_evidence.load_offer_evidence(
+        session,
+        [offer for offer, _merchant in rows],
+        current_only=True,
+    )
+    current_rows = []
+    for offer, merchant in rows:
+        evidence = _fresh_current_offer_evidence(
+            offer,
+            evidence_by_offer.get(offer.id),
+        )
+        if evidence is not None:
+            current_rows.append((offer, merchant, evidence))
+    currencies = {evidence.currency for _offer, _merchant, evidence in current_rows}
+    comparison_currency = next(iter(currencies)) if len(currencies) == 1 else None
+    comparable_rows = (
+        sorted(current_rows, key=lambda row: (float(row[0].price), row[0].id))
+        if comparison_currency is not None
+        else []
+    )
+    best_offer = comparable_rows[0][0] if comparable_rows else None
+    best_evidence = None
     if best_offer is not None:
-        best_history = (
-            await session.execute(
-                select(models.PriceSnapshot.price, models.PriceSnapshot.captured_at)
-                .where(models.PriceSnapshot.offer_id == best_offer.id)
-                .order_by(models.PriceSnapshot.captured_at)
+        best_evidence = (
+            await offer_evidence.load_offer_evidence(session, [best_offer])
+        ).get(best_offer.id)
+    best_history = list(best_evidence.history) if best_evidence is not None else []
+    history_currency = best_evidence.currency if best_evidence is not None else None
+    verified_by_id = {
+        offer.id: evidence for offer, _merchant, evidence in current_rows
+    }
+    compared_merchants = len({offer.merchant_id for offer, _merchant, _evidence in comparable_rows})
+    compared_offers = len(comparable_rows)
+    compared_prices = [float(offer.price) for offer, _merchant, _evidence in comparable_rows]
+    ordered_rows = (
+        [(offer, merchant) for offer, merchant, _evidence in comparable_rows]
+        + sorted(
+            [(offer, merchant) for offer, merchant in rows if offer.id not in verified_by_id],
+            key=lambda row: row[0].id,
+        )
+        + (
+            sorted(
+                [(offer, merchant) for offer, merchant, _evidence in current_rows],
+                key=lambda row: row[0].id,
             )
-        ).all()
+            if comparison_currency is None
+            else []
+        )
+    )
 
     return {
         "ean": product.ean,
@@ -1171,42 +1401,58 @@ async def product_detail(ean: str, session=Depends(db.get_session)) -> dict:
         "brand": product.brand,
         "category": product.category,
         "image": product.image_url,
-        "price_min": product.price_min,
-        "price_max": product.price_max,
-        "currency": product.currency,
+        "price_min": min(compared_prices) if compared_prices else None,
+        "price_max": max(compared_prices) if compared_prices else None,
+        "currency": comparison_currency,
         "offers_count": product.offers_count,
         "merchants_count": product.merchants_count,
         "offers": [
             {
                 "id": o.id,
-                "price": o.price,
-                "currency": o.currency,
-                "in_stock": o.in_stock,
+                "price": o.price if o.id in verified_by_id else None,
+                "currency": verified_by_id[o.id].currency if o.id in verified_by_id else None,
+                "in_stock": True if o.id in verified_by_id else None,
+                "observed_at": (
+                    format_utc_timestamp(
+                        verified_by_id[o.id].current_observed_at
+                    )
+                    if o.id in verified_by_id
+                    else None
+                ),
+                "evidence_current": o.id in verified_by_id,
                 "link": o.deep_link,
                 "merchant": {"name": m.name, "slug": m.slug, "region": m.region},
             }
-            for (o, m) in rows
+            for (o, m) in ordered_rows
         ],
         # Verdict porté par le meilleur prix du produit : c'est celui que
         # l'utilisateur retiendra, et l'écart entre marchands le nourrit sans
         # dépendre de l'historique.
         "verdict": compute_verdict(
-            price=product.price_min,
-            currency=product.currency,
+            price=best_offer.price if best_offer is not None else None,
+            currency=comparison_currency,
             history=best_history,
             cheapest_elsewhere=None,
-            merchants_count=product.merchants_count or 1,
+            comparison_currency=comparison_currency,
+            history_currency=history_currency,
+            merchants_count=compared_merchants or 1,
+            in_stock=True if best_offer is not None else None,
         ),
         "decision": decision.compute_decision(
-            price=product.price_min,
-            currency=product.currency,
+            price=best_offer.price if best_offer is not None else None,
+            currency=comparison_currency,
             history=best_history,
-            cheapest_elsewhere=product.price_min,
-            comparison_currency=product.currency,
-            merchants_count=product.merchants_count or 1,
-            offers_count=product.offers_count or 1,
-            in_stock=best_offer.in_stock if best_offer else None,
-            updated_at=best_offer.updated_at if best_offer else product.updated_at,
+            cheapest_elsewhere=min(compared_prices) if compared_prices else None,
+            comparison_currency=comparison_currency,
+            history_currency=history_currency,
+            merchants_count=compared_merchants or 1,
+            offers_count=compared_offers or 1,
+            in_stock=True if best_offer is not None else None,
+            updated_at=(
+                best_evidence.current_observed_at
+                if best_evidence is not None
+                else None
+            ),
         ),
     }
 
@@ -1909,7 +2155,7 @@ async def relief(
     if session is None:
         return {"live": False, "columns": []}
 
-    from datetime import datetime, timedelta
+    from datetime import UTC, datetime, timedelta
 
     from app.services.cache import cache_key, get_cache
 
@@ -1917,27 +2163,49 @@ async def relief(
     # qui est disqualifiant pour une page d'accueil. Le relief ne change qu'à
     # chaque collecte de prix, donc rien ne justifie de le recalculer par visite.
     cache = get_cache()
-    cle = cache_key("relief", str(limit), str(window_days), category or "tous")
+    cle = cache_key(
+        "relief",
+        catalog_price_truth.PRICE_TRUTH_CACHE_VERSION,
+        str(limit),
+        str(window_days),
+        category or "tous",
+    )
     en_cache = await cache.get_json(cle)
     if en_cache is not None:
         return {**en_cache, "cached": True}
 
-    depuis = datetime.utcnow() - timedelta(days=window_days)
+    depuis = catalog_price_truth.utc_naive_now() - timedelta(days=window_days)
 
     # Présélection : les offres qui ont bougé dans la fenêtre. On agrège d'abord
     # pour ne rapatrier l'historique détaillé que des colonnes retenues — sortir
     # tous les relevés de 1,29 million d'offres pour n'en garder que 180 serait
     # absurde.
+    snapshot_currency = catalog_price_truth.normalized_currency_sql(
+        models.PriceSnapshot.currency
+    )
     agg = (
         select(
             models.PriceSnapshot.offer_id.label("offer_id"),
+            snapshot_currency.label("currency"),
             func.max(models.PriceSnapshot.price).label("haut"),
             func.min(models.PriceSnapshot.price).label("bas"),
             func.count().label("releves"),
             func.min(models.PriceSnapshot.captured_at).label("debut"),
         )
-        .where(models.PriceSnapshot.captured_at >= depuis)
-        .group_by(models.PriceSnapshot.offer_id)
+        .join(models.Offer, models.Offer.id == models.PriceSnapshot.offer_id)
+        .where(
+            models.PriceSnapshot.captured_at >= depuis,
+            models.PriceSnapshot.price > 0,
+            models.Offer.price.isnot(None),
+            models.Offer.price > 0,
+            catalog_price_truth.comparable_price_evidence_sql(
+                snapshot_currency=models.PriceSnapshot.currency,
+                offer_currency=models.Offer.currency,
+                snapshot_in_stock=models.PriceSnapshot.in_stock,
+                offer_in_stock=models.Offer.in_stock,
+            ),
+        )
+        .group_by(models.PriceSnapshot.offer_id, snapshot_currency)
         .having(func.count() >= RELIEF_MIN_SAMPLES)
         .subquery()
     )
@@ -1956,6 +2224,13 @@ async def relief(
                 models.PriceSnapshot,
                 (models.PriceSnapshot.offer_id == agg.c.offer_id)
                 & (
+                    catalog_price_truth.normalized_currency_sql(
+                        models.PriceSnapshot.currency
+                    )
+                    == agg.c.currency
+                )
+                & models.PriceSnapshot.in_stock.is_(True)
+                & (
                     func.round(cast(models.PriceSnapshot.price, Numeric(12, 2)), 2)
                     == func.round(cast(agg.c.haut, Numeric(12, 2)), 2)
                 ),
@@ -1968,6 +2243,7 @@ async def relief(
     conditions = [
         models.Offer.price.isnot(None),
         models.Offer.price > 0,
+        models.Offer.in_stock.is_(True),
         models.Offer.is_canonical.is_(True),
         models.Offer.is_adult.is_(False),
         models.Offer.filon_category.isnot(None),
@@ -1993,7 +2269,7 @@ async def relief(
             models.Offer.brand,
             models.Offer.filon_category,
             models.Offer.price,
-            models.Offer.currency,
+            agg.c.currency.label("currency"),
             models.Offer.image_url,
             models.Merchant.name.label("marchand"),
             agg.c.haut,
@@ -2003,7 +2279,13 @@ async def relief(
             ampleur,
         )
         .select_from(
-            agg.join(models.Offer, models.Offer.id == agg.c.offer_id)
+            agg.join(
+                models.Offer,
+                (models.Offer.id == agg.c.offer_id)
+                & catalog_price_truth.same_supported_currency_sql(
+                    models.Offer.currency, agg.c.currency
+                ),
+            )
             .join(models.Merchant, models.Merchant.id == models.Offer.merchant_id)
             .outerjoin(hauts, hauts.c.offer_id == agg.c.offer_id)
         )
@@ -2027,9 +2309,17 @@ async def relief(
                 models.PriceSnapshot.price,
                 models.PriceSnapshot.captured_at,
             )
+            .join(models.Offer, models.Offer.id == models.PriceSnapshot.offer_id)
             .where(
                 models.PriceSnapshot.offer_id.in_(ids),
                 models.PriceSnapshot.captured_at >= depuis,
+                models.PriceSnapshot.price > 0,
+                catalog_price_truth.comparable_price_evidence_sql(
+                    snapshot_currency=models.PriceSnapshot.currency,
+                    offer_currency=models.Offer.currency,
+                    snapshot_in_stock=models.PriceSnapshot.in_stock,
+                    offer_in_stock=models.Offer.in_stock,
+                ),
             )
             .order_by(models.PriceSnapshot.offer_id, models.PriceSnapshot.captured_at)
         )
@@ -2082,7 +2372,7 @@ async def relief(
                 "merchant": r.marchand,
                 "category": r.filon_category,
                 "price": round(float(r.price), 2),
-                "currency": r.currency or "EUR",
+                "currency": r.currency,
                 "image": r.image_url,
                 "high": round(haut, 2),
                 "low": round(bas, 2),
@@ -2096,7 +2386,7 @@ async def relief(
 
     charge = {
         "live": True,
-        "generated_at": datetime.utcnow().isoformat(),
+        "generated_at": format_utc_timestamp(datetime.now(UTC)),
         "window_days": window_days,
         "count": len(colonnes),
         "columns": colonnes,

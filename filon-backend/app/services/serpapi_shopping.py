@@ -13,6 +13,7 @@ import httpx
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
+from app.core.observability import outbound_trace_headers, traced_dependency
 
 log = get_logger("serpapi")
 
@@ -53,12 +54,17 @@ async def search_products(
         "num": str(limit),
     }
     try:
-        async with httpx.AsyncClient(timeout=s.llm_timeout_seconds) as client:
-            resp = await client.get(s.serpapi_base_url, params=params)
-            resp.raise_for_status()
-            data = resp.json()
+        async with traced_dependency("serpapi", "search"):
+            async with httpx.AsyncClient(timeout=s.llm_timeout_seconds) as client:
+                resp = await client.get(
+                    s.serpapi_base_url,
+                    params=params,
+                    headers=outbound_trace_headers(),
+                )
+                resp.raise_for_status()
+                data = resp.json()
     except Exception as exc:  # pragma: no cover - dépend du réseau
-        log.warning("SerpApi indisponible (%s) → repli", exc)
+        log.warning("SerpApi indisponible (error_type=%s) → repli", type(exc).__name__)
         return []
 
     results = data.get("shopping_results") or []
@@ -88,5 +94,5 @@ async def search_products(
         within = [p for p in products if p["price"] <= budget * 1.1]
         products = within or products
 
-    log.info("SerpApi : %d produits pour '%s'", len(products), query)
+    log.info("SerpApi : %d produits", len(products))
     return products[:limit]

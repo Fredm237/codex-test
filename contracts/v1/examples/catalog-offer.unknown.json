@@ -1,0 +1,16 @@
+{
+  "id": 7,
+  "name": "Produit observé",
+  "brand": null,
+  "category": null,
+  "price": 99.9,
+  "currency": "EUR",
+  "in_stock": null,
+  "image": null,
+  "link": "https://merchant.example/offer/7",
+  "observed_at": null,
+  "merchant": {
+    "name": "Marchand partenaire",
+    "slug": null
+  }
+}

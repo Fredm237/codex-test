@@ -1,4 +1,5 @@
 import type { OutfitRecommendation } from "./filon-intelligence";
+import type { OutfitPublicMessageCode } from "./filon-outfit-i18n";
 
 export type FashionErrorCode = "WRONG_CATEGORY" | "WRONG_COLOR" | "WRONG_STYLE" | "WRONG_CONTEXT" | "WRONG_PROPORTION" | "WRONG_SEASON" | "WRONG_PRICE" | "WRONG_COMPATIBILITY" | "LOW_CONFIDENCE" | "HALLUCINATION" | "POOR_PERSONALIZATION";
 
@@ -8,7 +9,7 @@ export type FashionBenchmarkCase = {
   expectedStatus: "solution" | "abstain";
   minStyleScore?: number;
   minConfidenceScore?: number;
-  requiredConstraint?: string;
+  requiredConstraint?: OutfitPublicMessageCode;
 };
 
 export type FashionBenchmarkResult = { caseId: string; passed: boolean; reasons: string[] };
@@ -18,9 +19,9 @@ export function evaluateFashionBenchmark(benchmark: FashionBenchmarkCase, recomm
   const reasons: string[] = [];
   if (recommendation.status !== benchmark.expectedStatus) reasons.push(`Statut attendu : ${benchmark.expectedStatus}.`);
   if (recommendation.status === "solution") {
-    if (benchmark.minStyleScore !== undefined && recommendation.solution.styleScore < benchmark.minStyleScore) reasons.push("Style Score inférieur au seuil de référence.");
-    if (benchmark.minConfidenceScore !== undefined && recommendation.solution.confidenceScore < benchmark.minConfidenceScore) reasons.push("Confidence Score inférieur au seuil de référence.");
-    if (benchmark.requiredConstraint && !recommendation.solution.constraints.some((constraint) => constraint.includes(benchmark.requiredConstraint!))) reasons.push("Contrainte de référence absente.");
+    if (benchmark.minStyleScore !== undefined) reasons.push("Style Score non mesuré : aucun seuil ne peut être validé.");
+    if (benchmark.minConfidenceScore !== undefined) reasons.push("Confidence Score non mesuré : aucun seuil ne peut être validé.");
+    if (benchmark.requiredConstraint && !recommendation.solution.constraints.some((constraint) => constraint.code === benchmark.requiredConstraint)) reasons.push("Contrainte de référence absente.");
   }
   return { caseId: benchmark.id, passed: reasons.length === 0, reasons };
 }

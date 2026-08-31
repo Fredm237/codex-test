@@ -12,44 +12,44 @@ const NeuralNetwork = dynamic(() => import("./NeuralNetwork").then((m) => m.Neur
 
 const L = {
   fr: {
-    netEye: "En temps réel",
-    netH1: "Pendant que vous hésitez,", netH2: "FILON a déjà comparé.",
-    netSub: "Il regarde partout, à votre place. Vous n'avez plus qu'à dire oui.",
+    netEye: "Dans le catalogue",
+    netH1: "Pendant que vous hésitez,", netH2: "FILON compare son index.",
+    netSub: "Il montre le périmètre observé et laisse les inconnues visibles.",
     graphEye: "L'intelligence",
-    graphH1: "Il ne compare pas des prix.", graphH2: "Il comprend les produits.",
-    graphSub: "Ce qu'un produit vaut vraiment, et combien de temps il durera. Il l'apprend à chaque achat.",
+    graphH1: "Il ne résume pas la preuve à un prix.", graphH2: "Il relie les signaux disponibles.",
+    graphSub: "Prix observé, historique disponible, stock et fraîcheur : chaque signal garde sa source et sa limite.",
     graphCta: "En savoir plus",
-    finalEye: "Ne payez plus jamais trop cher",
+    finalEye: "Comparez avant de payer",
     finalH1: "Demandez à FILON ", finalH2: "avant d'acheter",
-    finalNote: "Gratuit, pour toujours. Sans carte bancaire. Vos données restent chez vous.",
+    finalNote: "Gratuit dans la version actuelle. Sans carte bancaire. Consultez la politique de confidentialité pour le traitement des données.",
   },
   nl: {
-    netEye: "In realtime",
-    netH1: "Terwijl jij twijfelt,", netH2: "heeft FILON al vergeleken.",
-    netSub: "Hij kijkt overal, in jouw plaats. Jij hoeft alleen ja te zeggen.",
+    netEye: "In de catalogus",
+    netH1: "Terwijl jij twijfelt,", netH2: "vergelijkt FILON zijn index.",
+    netSub: "Hij toont het bekeken bereik en laat onbekenden zichtbaar.",
     graphEye: "De intelligentie",
-    graphH1: "Hij vergelijkt geen prijzen.", graphH2: "Hij begrijpt producten.",
-    graphSub: "Wat een product echt waard is, en hoelang het meegaat. Hij leert het bij elke aankoop.",
+    graphH1: "Hij beperkt bewijs niet tot een prijs.", graphH2: "Hij verbindt beschikbare signalen.",
+    graphSub: "Bekeken prijs, beschikbare historiek, voorraad en actualiteit: elk signaal behoudt bron en grens.",
     graphCta: "Meer weten",
-    finalEye: "Betaal nooit meer te veel",
+    finalEye: "Vergelijk voordat je betaalt",
     finalH1: "Vraag het aan FILON ", finalH2: "voordat je koopt",
-    finalNote: "Gratis, voor altijd. Geen bankkaart. Je gegevens blijven van jou.",
+    finalNote: "Gratis in de huidige versie. Geen bankkaart. Raadpleeg het privacybeleid voor de gegevensverwerking.",
   },
   en: {
-    netEye: "In real time",
-    netH1: "While you hesitate,", netH2: "FILON has already compared.",
-    netSub: "It looks everywhere, for you. All you have to do is say yes.",
+    netEye: "In the catalogue",
+    netH1: "While you hesitate,", netH2: "FILON compares its index.",
+    netSub: "It shows the observed scope and keeps unknowns visible.",
     graphEye: "The intelligence",
-    graphH1: "It doesn't compare prices.", graphH2: "It understands products.",
-    graphSub: "What a product is really worth, and how long it will last. It learns with every purchase.",
+    graphH1: "It does not reduce evidence to a price.", graphH2: "It connects available signals.",
+    graphSub: "Observed price, available history, stock and freshness: each signal keeps its source and limit.",
     graphCta: "Learn more",
-    finalEye: "Never overpay again",
+    finalEye: "Compare before you pay",
     finalH1: "Ask FILON ", finalH2: "before you buy",
-    finalNote: "Free, forever. No credit card. Your data stays yours.",
+    finalNote: "Free in the current version. No credit card. See the privacy policy for data processing details.",
   },
 };
 
-/** Scene — the AI comparing the whole market in real time. */
+/** Scene — comparaison du périmètre actuellement indexé. */
 export function NetworkScene() {
   const { locale } = useLocale();
   const x = L[locale];

@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const KEY = "filon.favorite-collections.v1";
+let favoriteCollectionMutationTail: Promise<void> = Promise.resolve();
 
 export type FavoriteCollection = { id: string; name: string; createdAt: string; updatedAt: string };
 export type CollectionTombstone = { name: string; createdAt: string; deletedAt: string };
@@ -74,6 +75,42 @@ export function mergeRemoteFavoriteCollections(current: FavoriteCollectionState,
   return next;
 }
 
+export function buildFavoriteCollectionSyncPayload(state: FavoriteCollectionState): RemoteFavoriteCollection[] {
+  return [
+    ...state.collections.map((collection) => ({
+      clientId: collection.id,
+      name: collection.name,
+      createdAt: collection.createdAt,
+      updatedAt: collection.updatedAt,
+      deletedAt: null,
+      offerIds: Object.entries(state.memberships)
+        .filter(([, ids]) => ids.includes(collection.id))
+        .map(([offerId]) => Number(offerId))
+        .filter((offerId) => Number.isInteger(offerId) && offerId > 0),
+    })),
+    ...Object.entries(state.tombstones).map(([clientId, value]) => ({
+      clientId,
+      name: value.name,
+      createdAt: value.createdAt,
+      updatedAt: value.deletedAt,
+      deletedAt: value.deletedAt,
+      offerIds: [],
+    })),
+  ];
+}
+
+function collectionSnapshot(items: RemoteFavoriteCollection[]) {
+  return [...items]
+    .map((item) => ({ ...item, offerIds: [...item.offerIds].sort((left, right) => left - right) }))
+    .sort((left, right) => left.clientId.localeCompare(right.clientId));
+}
+
+export function reconcileFavoriteCollectionsAfterSync(current: FavoriteCollectionState, remote: RemoteFavoriteCollection[], syncedPayload: RemoteFavoriteCollection[], at: string): FavoriteCollectionState {
+  const unchanged = JSON.stringify(collectionSnapshot(buildFavoriteCollectionSyncPayload(current))) === JSON.stringify(collectionSnapshot(syncedPayload));
+  if (!unchanged) return markFavoriteCollectionsPending(current);
+  return markFavoriteCollectionsReconciled(mergeRemoteFavoriteCollections(current, remote), at);
+}
+
 export async function readFavoriteCollections(): Promise<FavoriteCollectionState> {
   const raw = await AsyncStorage.getItem(KEY);
   if (!raw) return emptyFavoriteCollectionState;
@@ -84,3 +121,14 @@ export async function readFavoriteCollections(): Promise<FavoriteCollectionState
 }
 
 export async function saveFavoriteCollections(state: FavoriteCollectionState) { await AsyncStorage.setItem(KEY, JSON.stringify(state)); return state; }
+
+export function updateFavoriteCollections(transition: (current: FavoriteCollectionState) => FavoriteCollectionState) {
+  const operation = favoriteCollectionMutationTail.then(async () => {
+    const current = await readFavoriteCollections();
+    const next = transition(current);
+    if (next !== current) await saveFavoriteCollections(next);
+    return next;
+  });
+  favoriteCollectionMutationTail = operation.then(() => undefined, () => undefined);
+  return operation;
+}

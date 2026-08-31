@@ -1,13 +1,14 @@
 # Extension FILON (Chrome / Edge / navigateurs Chromium)
 
 Le réflexe FILON, directement sur les fiches produit. Sur un marchand supporté,
-l'extension **repère le produit** et vous emmène en un clic vers l'analyse réelle
-de FILON : meilleur marchand, reconditionné certifié, code promo vérifié et
-cashback maximal, réunis en un seul **vrai prix**.
+l'extension **repère le produit** et vous emmène en un clic vers l'analyse
+FILON : offres indexées, historique disponible, alternatives et avantages
+documentés. Le périmètre et les inconnues restent visibles.
 
 > Principe : l'extension **ne fabrique aucune économie chiffrée**. Elle détecte
-> le produit et relie à FILON, où le vrai prix est calculé sur des données
-> réelles. Rien n'est collecté en arrière-plan, rien n'est revendu.
+> le produit et relie à FILON, où les prix observés sont présentés avec leur
+> source et leur fraîcheur. Aucune donnée n'est transmise automatiquement
+> depuis les pages marchandes.
 
 ## Contenu
 
@@ -21,11 +22,11 @@ cashback maximal, réunis en un seul **vrai prix**.
 | `icons/` | Icônes 16 / 32 / 48 / 128 (+ 256 pour le store) |
 | `_locales/fr/` | Libellés du store |
 
-## Marchands supportés (v1)
+## Pages prises en charge (v1)
 
-Amazon (.com.be / .fr / .nl), bol.com, Coolblue (.be / .nl), MediaMarkt,
-Krëfel, Vanden Borre, Fnac (.com / .be), Cdiscount, Darty, Boulanger,
-Back Market (.fr / .be). D'autres suivront.
+Les domaines autorisés sont déclarés dans `manifest.json`. Cette autorisation
+technique permet la détection d'une fiche ; elle ne signifie ni partenariat ni
+couverture exhaustive du catalogue du site concerné.
 
 ## Installer en local (mode développeur)
 
@@ -43,6 +44,9 @@ Back Market (.fr / .be). D'autres suivront.
 
 ## Confidentialité
 
-`activeTab` n'est lu que sur action de l'utilisateur (bouton « Analyser la page »).
-Aucun tracking, aucune télémétrie, aucune revente. Le seul appel réseau est
-l'ouverture de `filon.be` quand vous cliquez.
+Le script de contenu lit localement le nom du produit sur les domaines autorisés
+afin d'afficher l'overlay. `activeTab` sert au bouton « Analyser la page » de
+la popup. Aucun tracking ni aucune télémétrie n'est implémenté dans
+l'extension. Le nom du produit n'est ajouté à l'URL de recherche `filon.be`
+qu'après une action de l'utilisateur ; l'accueil FILON s'ouvre aussi lors de
+l'installation. La politique de confidentialité du site s'applique alors.

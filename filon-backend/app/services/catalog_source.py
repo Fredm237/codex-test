@@ -69,10 +69,13 @@ def _shape(
                 "merchant_slug": m.slug,
                 "price": o.price,
                 "currency": o.currency,
+                "observed_at": getattr(o, "updated_at", None),
                 "url": o.deep_link,
                 "in_stock": o.in_stock,
                 # Attendus par les agents, absents des flux Awin : rester à None
-                # plutôt que d'inventer un délai de livraison ou une garantie.
+                # plutôt que d'inventer une livraison gratuite, un délai ou
+                # une garantie.
+                "delivery_cost": None,
                 "delivery_days": None,
                 "warranty_months": None,
                 "affiliate_network": "Awin",
@@ -147,7 +150,7 @@ async def search_products(
             ) >= relevance.SEUIL
         ]
         if not pertinentes:
-            log.info("catalog_search_sans_correspondance", extra={"query": query[:80]})
+            log.info("catalog_search_sans_correspondance")
             return []
         rows = pertinentes
 
@@ -204,9 +207,8 @@ async def search_products(
                            min(o["price"] for o in p["offers"]))
         )
         log.info(
-            "Catalogue exhaustif : %d offres pertinentes, %d produits pour « %s »",
+            "Catalogue exhaustif : %d offres pertinentes, %d produits",
             len(rows),
             len(products),
-            query,
         )
         return products[:limit]

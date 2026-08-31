@@ -9,40 +9,40 @@ export type QA = { q: string; a: string };
 export const HOME_FAQ: QA[] = [
   {
     q: "FILON est-il vraiment gratuit ?",
-    a: "Oui, entièrement. Aucune carte, aucun abonnement, aucune option payante. Et vos données ne sont jamais revendues.",
+    a: "L'accès public actuel ne demande ni paiement ni carte bancaire. Consultez la page Tarifs pour l'offre à jour et la politique de confidentialité pour les données traitées.",
   },
   {
     q: "Puis-je faire confiance à sa recommandation ?",
-    a: "Elle sert votre intérêt, jamais le nôtre. Aucune marque ne peut acheter sa place. FILON vous indique ce qui est vraiment le mieux pour vous.",
+    a: "FILON montre le périmètre comparé, la fraîcheur et les informations manquantes. Une commission n'entre pas dans le score actuel, et FILON s'abstient si les données ne suffisent pas.",
   },
   {
     q: "Le reconditionné proposé est-il fiable ?",
-    a: "Uniquement du reconditionné vérifié, chez des vendeurs certifiés, sous garantie. Vous voyez la garantie et l'économie avant de décider.",
+    a: "Une offre reconditionnée peut apparaître lorsqu'elle est indexée. Son état, sa garantie, son retour et son vendeur restent à vérifier dans les conditions de l'offre.",
   },
   {
     q: "Mes données sont-elles revendues ?",
-    a: "Jamais. Pas de profil publicitaire, pas de revente. FILON en garde le moins possible, et rien d'autre.",
+    a: "La politique de confidentialité décrit les données traitées, les destinataires éventuels et vos droits. Elle constitue la référence à jour.",
   },
   {
     q: "Quand arrivent l'extension et l'application ?",
-    a: "L'extension d'abord, puis l'application mobile et l'assistant. Ajoutez FILON pour être prévenu.",
+    a: "Le catalogue et l'assistant sont accessibles sur le site. L'extension Chrome sera annoncée après sa publication ; les autres surfaces sont annoncées lorsqu'elles deviennent disponibles.",
   },
 ];
 
 const HOME_FAQ_NL: QA[] = [
-  { q: "Is FILON echt gratis?", a: "Ja, volledig. Geen kaart, geen abonnement, geen betaalde opties. En je gegevens worden nooit doorverkocht." },
-  { q: "Kan ik zijn aanbeveling vertrouwen?", a: "Ze dient jouw belang, nooit het onze. Geen enkel merk kan zijn plaats kopen. FILON toont je wat echt het beste is voor jou." },
-  { q: "Is het aangeboden refurbished betrouwbaar?", a: "Alleen geverifieerd refurbished, bij gecertificeerde verkopers, met garantie. Je ziet de garantie en de besparing voordat je beslist." },
-  { q: "Worden mijn gegevens doorverkocht?", a: "Nooit. Geen advertentieprofiel, geen doorverkoop. FILON bewaart zo weinig mogelijk, en niets anders." },
-  { q: "Wanneer komen de extensie en de app?", a: "Eerst de extensie, daarna de mobiele app en de assistent. Voeg FILON toe om verwittigd te worden." },
+  { q: "Is FILON echt gratis?", a: "De huidige publieke toegang vraagt geen betaling of bankkaart. Raadpleeg Tarieven voor het actuele aanbod en het privacybeleid voor verwerkte gegevens." },
+  { q: "Kan ik zijn aanbeveling vertrouwen?", a: "FILON toont het vergeleken bereik, de actualiteit en ontbrekende gegevens. Commissie telt niet mee in de huidige score, en FILON onthoudt zich wanneer bewijs ontbreekt." },
+  { q: "Is het aangeboden refurbished betrouwbaar?", a: "Een refurbished aanbieding kan verschijnen wanneer ze geïndexeerd is. Controleer staat, garantie, retour en verkoper in de voorwaarden van de aanbieding." },
+  { q: "Worden mijn gegevens doorverkocht?", a: "Het privacybeleid beschrijft verwerkte gegevens, mogelijke ontvangers en je rechten. Dat is de actuele referentie." },
+  { q: "Wanneer komen de extensie en de app?", a: "Catalogus en assistent zijn beschikbaar op de site. De Chrome-extensie wordt na publicatie aangekondigd; andere oppervlakken worden aangekondigd wanneer ze beschikbaar zijn." },
 ];
 
 const HOME_FAQ_EN: QA[] = [
-  { q: "Is FILON really free?", a: "Yes, entirely. No card, no subscription, no paid options. And your data is never resold." },
-  { q: "Can I trust its recommendation?", a: "It serves your interest, never ours. No brand can buy its place. FILON shows you what's genuinely best for you." },
-  { q: "Is the refurbished offered reliable?", a: "Only verified refurbished, from certified sellers, under warranty. You see the warranty and the saving before you decide." },
-  { q: "Is my data resold?", a: "Never. No advertising profile, no reselling. FILON keeps as little as possible, and nothing else." },
-  { q: "When do the extension and the app arrive?", a: "The extension first, then the mobile app and the assistant. Add FILON to be notified." },
+  { q: "Is FILON really free?", a: "Current public access requires no payment or card. See Pricing for the current offer and the privacy policy for processed data." },
+  { q: "Can I trust its recommendation?", a: "FILON shows the comparison scope, freshness and missing data. Commission is not part of the current score, and FILON abstains when evidence is insufficient." },
+  { q: "Is the refurbished offered reliable?", a: "A refurbished offer may appear when it is indexed. Check its condition, warranty, returns and seller in the offer terms." },
+  { q: "Is my data resold?", a: "The privacy policy describes processed data, possible recipients and your rights. It is the current reference." },
+  { q: "When do the extension and the app arrive?", a: "The catalogue and assistant are available on the site. The Chrome extension will be announced after publication; other surfaces are announced when available." },
 ];
 
 export function FaqBlock({

@@ -6,6 +6,8 @@ Fashion admissibles, sans modifier les tables ou règles du Core.
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -134,6 +136,15 @@ class TestFashionCatalogAdapter:
             image_url="https://example.test/chaussures.jpg",
         )
         intelligence_session.add_all([eligible, false_positive, service, unavailable])
+        await intelligence_session.flush()
+        intelligence_session.add(
+            models.PriceSnapshot(
+                offer_id=eligible.id,
+                price=eligible.price,
+                currency="EUR",
+                in_stock=True,
+            )
+        )
         await intelligence_session.commit()
 
         snapshots = await retrieve_fashion_offers(intelligence_session, query="veste")
@@ -455,7 +466,7 @@ class TestFashionExpert:
             merchant_id=1,
             merchant_name="Marchand test",
             merchant_region="BE",
-            observed_at=None,
+            observed_at=datetime.now(UTC),
         )
 
     def test_compose_une_solution_sous_budget_avec_offres_reelles(self):

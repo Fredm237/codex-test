@@ -21,18 +21,28 @@ import csv
 import gzip
 import io
 import re
+import tempfile
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
+from datetime import UTC, datetime
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.core.config import get_settings
 from app.core.logging import get_logger
+from app.core.observability import (
+    outbound_trace_headers,
+    traced_dependency,
+    traced_pipeline_stage,
+)
 from app.db import models
 from app.services import taxonomy
 from app.services import safety
+from app.services.currency import normalize_currency_code
 from app.services.dedup import dedup_key
+from app.services.source_normalization import parse_price, parse_tristate_bool
 
 log = get_logger("awin_catalog")
 
@@ -49,6 +59,46 @@ _FEED_COLUMNS = [
     "ean",
     "in_stock",
 ]
+_HARD_MAX_ROWS_PER_FEED = 250_000
+_SPOOL_MEMORY_BYTES = 8 * 1024 * 1024
+
+
+class AwinFeedCompressedLimitError(RuntimeError):
+    """Le corps Awin reçu dépasse la limite compressée configurée."""
+
+
+class AwinFeedDecompressedLimitError(RuntimeError):
+    """Le contenu Awin décompressé dépasse la limite configurée."""
+
+
+class _BoundedBinaryReader(io.RawIOBase):
+    """Adapte un flux binaire en interrompant toute décompression excessive."""
+
+    def __init__(self, source, *, limit: int) -> None:
+        super().__init__()
+        self._source = source
+        self._limit = limit
+        self._read = 0
+
+    def readable(self) -> bool:
+        return True
+
+    def readinto(self, buffer) -> int:
+        remaining = self._limit - self._read
+        chunk = self._source.read(min(len(buffer), max(0, remaining) + 1))
+        if len(chunk) > remaining:
+            raise AwinFeedDecompressedLimitError
+        if not chunk:
+            return 0
+        buffer[: len(chunk)] = chunk
+        self._read += len(chunk)
+        return len(chunk)
+
+    def close(self) -> None:
+        try:
+            self._source.close()
+        finally:
+            super().close()
 
 
 def _slugify(text: str) -> str:
@@ -65,43 +115,11 @@ def _to_float(value: str | None) -> float | None:
     chiffres : « 1.299 » et « 1,299 » valent 1299, pas 1,30 — les lire comme des
     decimales rangeait des produits a 1 299 EUR dans les petits prix.
     """
-    if not value:
-        return None
-    # Retire les espaces (dont insecables/fins) puis tout ce qui n'est ni
-    # chiffre, ni separateur, ni signe : symboles monetaires et codes ISO.
-    cleaned = value.strip()
-    for ws in (" ", "\u00a0", "\u202f", "\u2009"):
-        cleaned = cleaned.replace(ws, "")
-    v = re.sub(r"[^0-9,.\-]", "", cleaned)
-    if not v:
-        return None
-
-    if "," in v and "." in v:
-        # Les deux presents : le *dernier* separateur est le decimal.
-        dec = "," if v.rfind(",") > v.rfind(".") else "."
-        v = v.replace("." if dec == "," else ",", "").replace(dec, ".")
-    elif "," in v or "." in v:
-        sep = "," if "," in v else "."
-        parts = v.split(sep)
-        if len(parts) > 2:
-            # « 1.234.567 » : separateurs de milliers repetes.
-            v = "".join(parts)
-        elif len(parts[1]) == 3 and parts[0].lstrip("-") not in ("", "0"):
-            # « 1.299 » / « 1,299 » : trois chiffres derriere = milliers.
-            v = parts[0] + parts[1]
-        else:
-            v = parts[0] + "." + parts[1]
-
-    try:
-        return round(float(v), 2)
-    except ValueError:
-        return None
+    return parse_price(value)
 
 
 def _to_bool(value: str | None) -> bool | None:
-    if value is None or value == "":
-        return None
-    return value.strip().lower() in {"1", "true", "yes", "y", "in stock", "instock"}
+    return parse_tristate_bool(value)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -118,10 +136,12 @@ async def fetch_joined_programmes() -> list[dict]:
     url = f"{s.awin_api_base}/publishers/{s.awin_publisher_id}/programmes"
     headers = {"Authorization": f"Bearer {s.awin_api_token}"}
     params = {"relationship": "joined"}
-    async with httpx.AsyncClient(timeout=60.0) as client:
-        resp = await client.get(url, headers=headers, params=params)
-        resp.raise_for_status()
-        data = resp.json()
+    async with traced_dependency("awin", "programmes"):
+        headers.update(outbound_trace_headers())
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.get(url, headers=headers, params=params)
+            resp.raise_for_status()
+            data = resp.json()
     return data if isinstance(data, list) else data.get("programmes", [])
 
 
@@ -157,30 +177,31 @@ async def sync_merchants(session) -> int:
         return 0
     programmes = await fetch_joined_programmes()
     count = 0
-    for p in programmes:
-        values = _programme_to_values(p)
-        if not values:
-            continue
-        stmt = (
-            pg_insert(models.Merchant)
-            .values(**values)
-            .on_conflict_do_update(
-                index_elements=["awin_mid"],
-                set_={
-                    "name": values["name"],
-                    "slug": values["slug"],
-                    "domain": values["domain"],
-                    "region": values["region"],
-                    "currency": values["currency"],
-                    "sector": values["sector"],
-                    "logo_url": values["logo_url"],
-                    "joined": True,
-                },
+    async with traced_dependency("postgres", "write"):
+        for p in programmes:
+            values = _programme_to_values(p)
+            if not values:
+                continue
+            stmt = (
+                pg_insert(models.Merchant)
+                .values(**values)
+                .on_conflict_do_update(
+                    index_elements=["awin_mid"],
+                    set_={
+                        "name": values["name"],
+                        "slug": values["slug"],
+                        "domain": values["domain"],
+                        "region": values["region"],
+                        "currency": values["currency"],
+                        "sector": values["sector"],
+                        "logo_url": values["logo_url"],
+                        "joined": True,
+                    },
+                )
             )
-        )
-        await session.execute(stmt)
-        count += 1
-    await session.commit()
+            await session.execute(stmt)
+            count += 1
+        await session.commit()
     log.info("Marchands Awin synchronisés : %d", count)
     return count
 
@@ -206,10 +227,11 @@ async def list_feeds() -> list[FeedInfo]:
         log.warning("AWIN_FEED_API_KEY absent → ingestion des feeds désactivée")
         return []
     url = f"{s.awin_feed_base}/datafeed/list/apikey/{s.awin_feed_api_key}/"
-    async with httpx.AsyncClient(timeout=120.0, follow_redirects=True) as client:
-        resp = await client.get(url)
-        resp.raise_for_status()
-        text = resp.text
+    async with traced_dependency("awin", "feed_list"):
+        async with httpx.AsyncClient(timeout=120.0, follow_redirects=True) as client:
+            resp = await client.get(url, headers=outbound_trace_headers())
+            resp.raise_for_status()
+            text = resp.text
     feeds: list[FeedInfo] = []
     reader = csv.DictReader(io.StringIO(text))
     for row in reader:
@@ -256,39 +278,76 @@ def _download_url(feed_ids: list[str]) -> str:
 async def _download_feed_rows(feed_ids: list[str], *, max_rows: int = 0) -> list[dict]:
     """Télécharge un feed (CSV gzip) et renvoie ses lignes.
 
-    Lecture en flux : on s'arrête à `max_rows` sans matérialiser tout le feed
-    (essentiel pour les gros feeds — évite la saturation mémoire).
+    Le réseau est lu par morceaux dans un spool qui quitte la mémoire après
+    8 MiB. Les volumes compressé et décompressé ainsi que le nombre de lignes
+    sont tous plafonnés. ``max_rows=0`` signifie le plafond dur, jamais illimité.
     """
+    settings = get_settings()
+    compressed_limit = settings.awin_max_download_bytes
+    decompressed_limit = settings.awin_max_decompressed_bytes
+    row_limit = min(
+        max_rows if max_rows > 0 else _HARD_MAX_ROWS_PER_FEED,
+        _HARD_MAX_ROWS_PER_FEED,
+    )
     url = _download_url(feed_ids)
-    async with httpx.AsyncClient(timeout=300.0, follow_redirects=True) as client:
-        resp = await client.get(url)
-        resp.raise_for_status()
-        raw = resp.content
-    try:
-        data = gzip.decompress(raw)
-    except (OSError, EOFError):
-        data = raw  # au cas où la réponse ne serait pas gzip
-    text = data.decode("utf-8", errors="replace")
-    reader = csv.DictReader(io.StringIO(text))
-    rows: list[dict] = []
-    for row in reader:
-        rows.append(row)
-        if max_rows and len(rows) >= max_rows:
-            break
-    return rows
+    with tempfile.SpooledTemporaryFile(
+        max_size=min(_SPOOL_MEMORY_BYTES, compressed_limit),
+        mode="w+b",
+    ) as spool:
+        async with traced_dependency("awin", "feed_download"):
+            async with httpx.AsyncClient(
+                timeout=300.0,
+                follow_redirects=True,
+            ) as client:
+                async with client.stream(
+                    "GET",
+                    url,
+                    headers=outbound_trace_headers(),
+                ) as resp:
+                    resp.raise_for_status()
+                    downloaded = 0
+                    async for chunk in resp.aiter_bytes():
+                        downloaded += len(chunk)
+                        if downloaded > compressed_limit:
+                            raise AwinFeedCompressedLimitError
+                        spool.write(chunk)
+
+        spool.seek(0)
+        magic = spool.read(2)
+        spool.seek(0)
+        source = (
+            gzip.GzipFile(fileobj=spool, mode="rb")
+            if magic == b"\x1f\x8b"
+            else spool
+        )
+        bounded = _BoundedBinaryReader(source, limit=decompressed_limit)
+        rows: list[dict] = []
+        with io.TextIOWrapper(
+            io.BufferedReader(bounded),
+            encoding="utf-8",
+            errors="replace",
+            newline="",
+        ) as text_stream:
+            reader = csv.DictReader(text_stream)
+            for row in reader:
+                rows.append(row)
+                if len(rows) >= row_limit:
+                    break
+        return rows
 
 
 def _should_record_snapshot(
-    snapshot_cache: set[tuple[int, str, float, bool | None]] | None,
+    snapshot_cache: set[tuple[int, str, float, str | None, bool | None]] | None,
     merchant_id: int,
     product_id: str,
     price: float,
+    currency: str | None,
     in_stock: bool | None,
 ) -> bool:
     """Retourne si un relevé est inédit dans le cycle Awin courant."""
     if snapshot_cache is None:
         return True
-    key = (merchant_id, product_id[:191], price, in_stock)
+    key = (merchant_id, product_id[:191], price, currency, in_stock)
     if key in snapshot_cache:
         return False
     snapshot_cache.add(key)
@@ -301,13 +360,15 @@ async def _upsert_offer(
     row: dict,
     *,
     merchant_name: str | None = None,
-    snapshot_cache: set[tuple[int, str, float, bool | None]] | None = None,
-) -> None:
+    snapshot_cache: set[tuple[int, str, float, str | None, bool | None]] | None = None,
+    seen_source_record_keys: set[str] | None = None,
+) -> int | None:
     pid = (row.get("aw_product_id") or "").strip()
     name = (row.get("product_name") or "").strip()
     if not pid or not name:
-        return
+        return None
     price = _to_float(row.get("search_price"))
+    currency = normalize_currency_code(row.get("currency"))
     in_stock = _to_bool(row.get("in_stock"))
     offer_kind = taxonomy.classify_offer_kind(
         row.get("merchant_category"), name, row.get("brand_name"), merchant_name
@@ -337,7 +398,7 @@ async def _upsert_offer(
             brand=row.get("brand_name"),
         ),
         "price": price,
-        "currency": (row.get("currency") or "").strip()[:8] or None,
+        "currency": currency,
         "in_stock": in_stock,
         "image_url": (row.get("merchant_image_url") or "").strip() or None,
         "deep_link": (row.get("aw_deep_link") or "").strip() or None,
@@ -360,7 +421,12 @@ async def _upsert_offer(
     )
     result = await session.execute(stmt)
     offer_id = result.scalar_one_or_none()
-    if offer_id is not None and price is not None:
+    source_record_key = f"{merchant_id}:{pid}"
+    already_seen_in_resumed_feed = bool(
+        seen_source_record_keys is not None
+        and source_record_key in seen_source_record_keys
+    )
+    if offer_id is not None and price is not None and not already_seen_in_resumed_feed:
         # Plusieurs feeds Awin d’un même marchand existent souvent pour les
         # langues FR/NL/EN. Ils peuvent porter le même article dans le même run.
         # Sans garde, chaque variante ajoutait un relevé identique et gonflait
@@ -369,11 +435,186 @@ async def _upsert_offer(
         # Le cache ne vit que le temps d’un cycle : un même prix est toujours
         # relevé au prochain cycle, mais jamais deux fois pour le même article,
         # prix et stock pendant ce cycle.
-        if _should_record_snapshot(snapshot_cache, merchant_id, pid, price, in_stock):
-            session.add(models.PriceSnapshot(offer_id=offer_id, price=price, in_stock=in_stock))
+        if _should_record_snapshot(
+            snapshot_cache, merchant_id, pid, price, currency, in_stock
+        ):
+            session.add(
+                models.PriceSnapshot(
+                    offer_id=offer_id,
+                    price=price,
+                    currency=currency,
+                    in_stock=in_stock,
+                )
+            )
+    return offer_id
 
 
-async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
+def _checkpoint_now() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
+async def _load_or_infer_feed_checkpoints(
+    session,
+    *,
+    sync_run_id: int | None,
+    resume_from_run_id: int | None = None,
+) -> dict[str, models.CatalogSyncFeedCheckpoint]:
+    """Charge les checkpoints et récupère une exécution pré-checkpoint.
+
+    Les feeds sont traités séquentiellement. Pour un cycle historique encore
+    ``running``, tous les ``source_ref`` sauf le plus récent sont donc terminés ;
+    le dernier est rejoué idempotemment car il peut être partiel.
+    """
+
+    if sync_run_id is None:
+        return {}
+    checkpoints = (
+        (
+            await session.execute(
+                select(models.CatalogSyncFeedCheckpoint).where(
+                    models.CatalogSyncFeedCheckpoint.sync_run_id == sync_run_id
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    if checkpoints:
+        return {checkpoint.feed_id: checkpoint for checkpoint in checkpoints}
+
+    if resume_from_run_id is not None:
+        source_checkpoints = await _load_or_infer_feed_checkpoints(
+            session,
+            sync_run_id=resume_from_run_id,
+        )
+        now = _checkpoint_now()
+        resumed: dict[str, models.CatalogSyncFeedCheckpoint] = {}
+        for source in source_checkpoints.values():
+            status = "succeeded" if source.status == "succeeded" else "running"
+            checkpoint = models.CatalogSyncFeedCheckpoint(
+                sync_run_id=sync_run_id,
+                feed_id=source.feed_id,
+                status=status,
+                rows_count=source.rows_count,
+                started_at=source.started_at,
+                heartbeat_at=now,
+                finished_at=source.finished_at if status == "succeeded" else None,
+            )
+            session.add(checkpoint)
+            resumed[source.feed_id] = checkpoint
+        await session.commit()
+        log.warning(
+            "Checkpoints catalogue repris (run_id=%s resumed_from=%s feeds=%s)",
+            sync_run_id,
+            resume_from_run_id,
+            len(resumed),
+        )
+        return resumed
+
+    from app.observations.models import RawSourceRecord
+
+    observed = (
+        await session.execute(
+            select(
+                RawSourceRecord.source_ref,
+                func.min(RawSourceRecord.observed_at),
+                func.count(RawSourceRecord.id),
+            )
+            .where(
+                RawSourceRecord.sync_run_id == sync_run_id,
+                RawSourceRecord.source_type == "awin_feed",
+                RawSourceRecord.source_ref.like("awin-feed:%"),
+            )
+            .group_by(RawSourceRecord.source_ref)
+            .order_by(
+                func.min(RawSourceRecord.observed_at),
+                RawSourceRecord.source_ref,
+            )
+        )
+    ).all()
+    if not observed:
+        return {}
+
+    now = _checkpoint_now()
+    inferred: dict[str, models.CatalogSyncFeedCheckpoint] = {}
+    last_index = len(observed) - 1
+    for index, (source_ref, observed_at, rows_count) in enumerate(observed):
+        feed_id = str(source_ref).removeprefix("awin-feed:")
+        status = "running" if index == last_index else "succeeded"
+        checkpoint = models.CatalogSyncFeedCheckpoint(
+            sync_run_id=sync_run_id,
+            feed_id=feed_id,
+            status=status,
+            rows_count=int(rows_count or 0),
+            started_at=observed_at or now,
+            heartbeat_at=now,
+            finished_at=None if status == "running" else observed_at or now,
+        )
+        session.add(checkpoint)
+        inferred[feed_id] = checkpoint
+    await session.commit()
+    log.warning(
+        "Checkpoints catalogue historiques reconstruits (run_id=%s feeds=%s)",
+        sync_run_id,
+        len(inferred),
+    )
+    return inferred
+
+
+async def _set_feed_checkpoint(
+    session,
+    checkpoints: dict[str, models.CatalogSyncFeedCheckpoint],
+    *,
+    sync_run_id: int | None,
+    feed_id: str,
+    status: str,
+    rows_count: int,
+) -> None:
+    if sync_run_id is None:
+        return
+    now = _checkpoint_now()
+    checkpoint = checkpoints.get(feed_id)
+    if checkpoint is None:
+        checkpoint = models.CatalogSyncFeedCheckpoint(
+            sync_run_id=sync_run_id,
+            feed_id=feed_id,
+            started_at=now,
+        )
+        session.add(checkpoint)
+        checkpoints[feed_id] = checkpoint
+    checkpoint.status = status
+    checkpoint.rows_count = rows_count
+    checkpoint.heartbeat_at = now
+    checkpoint.finished_at = None if status == "running" else now
+
+
+def _ingestion_stage_outcome(result: dict) -> str:
+    shadow = result.get("shadow") or {}
+    graph_shadow = result.get("graph_shadow") or {}
+    offer_graph_shadow = result.get("offer_graph_shadow") or {}
+    if (
+        result.get("stopped_after_feed")
+        or result.get("skipped")
+        or shadow.get("failures")
+        or graph_shadow.get("failures")
+        or offer_graph_shadow.get("failures")
+    ):
+        return "degraded"
+    if not result.get("feeds"):
+        return "degraded"
+    return "ok"
+
+
+@traced_pipeline_stage("ingestion", result_outcome=_ingestion_stage_outcome)
+async def ingest_feeds(
+    session,
+    *,
+    limit_override: int | None = None,
+    sync_run_id: int | None = None,
+    resume_from_run_id: int | None = None,
+    progress: Callable[[], Awaitable[None]] | None = None,
+    stop_after_current_feed: bool = False,
+) -> dict:
     """Ingestion des feeds des marchands inscrits, régions ciblées.
 
     Un feed à la fois (rattachement marchand fiable). `limit_override` borne le
@@ -390,9 +631,16 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
 
     # Marchands inscrits connus en base : le nom est aussi un signal sémantique
     # borné, utilisé uniquement par les règles qui l’exigent explicitement.
-    rows = (await session.execute(
-        select(models.Merchant.id, models.Merchant.awin_mid, models.Merchant.name)
-    )).all()
+    async with traced_dependency("postgres", "read"):
+        rows = (
+            await session.execute(
+                select(
+                    models.Merchant.id,
+                    models.Merchant.awin_mid,
+                    models.Merchant.name,
+                )
+            )
+        ).all()
     mid_to_merchant = {mid: (pk, name) for (pk, mid, name) in rows}
     if not mid_to_merchant:
         log.warning("Aucun marchand en base → lancer sync_merchants d'abord")
@@ -408,33 +656,313 @@ async def ingest_feeds(session, *, limit_override: int | None = None) -> dict:
         selected = selected[:limit]
     log.info("Feeds retenus pour ingestion : %d / %d", len(selected), len(feeds))
 
-    total_offers = 0
+    async def heartbeat() -> None:
+        if progress is not None:
+            await progress()
+
+    checkpoints = await _load_or_infer_feed_checkpoints(
+        session,
+        sync_run_id=sync_run_id,
+        resume_from_run_id=resume_from_run_id,
+    )
+    selected_feed_ids = {str(feed.feed_id) for feed in selected}
+    total_offers = sum(
+        checkpoint.rows_count
+        for feed_id, checkpoint in checkpoints.items()
+        if feed_id in selected_feed_ids and checkpoint.status == "succeeded"
+    )
+    visited_feeds = 0
+    stopped_after_feed = False
     skipped = 0
+    shadow_raw = 0
+    shadow_observations = 0
+    shadow_quarantine = 0
+    shadow_failures = 0
+    graph_variants = 0
+    graph_identifiers = 0
+    graph_evidence = 0
+    graph_links = 0
+    graph_quarantine = 0
+    graph_failures = 0
+    offer_graph_observations = 0
+    offer_graph_eligible = 0
+    offer_graph_unknown = 0
+    offer_graph_ineligible = 0
+    offer_graph_quarantine = 0
+    offer_graph_failures = 0
     # Déduplique uniquement les relevés identiques d'un même cycle. Les offres
     # elles-mêmes restent toutes lues : une variante linguistique peut enrichir
     # le libellé, mais elle ne doit pas compter comme une nouvelle observation.
-    snapshot_cache: set[tuple[int, str, float, bool | None]] = set()
+    snapshot_cache: set[
+        tuple[int, str, float, str | None, bool | None]
+    ] = set()
     for f in selected:
+        visited_feeds += 1
+        feed_id = str(f.feed_id)
+        checkpoint = checkpoints.get(feed_id)
+        if checkpoint is not None and checkpoint.status == "succeeded":
+            log.info(
+                "Feed déjà terminé repris depuis checkpoint → %s offres",
+                checkpoint.rows_count,
+            )
+            if stop_after_current_feed:
+                stopped_after_feed = True
+                log.warning("Arrêt coopératif demandé après checkpoint de feed")
+                break
+            continue
+        seen_source_record_keys: set[str] = set()
+        if sync_run_id is not None and checkpoint is not None:
+            from app.observations.models import RawSourceRecord
+
+            seen_source_record_keys = set(
+                (
+                    await session.execute(
+                        select(RawSourceRecord.source_record_key).where(
+                            RawSourceRecord.sync_run_id.in_(
+                                tuple(
+                                    run_id
+                                    for run_id in (
+                                        sync_run_id,
+                                        resume_from_run_id,
+                                    )
+                                    if run_id is not None
+                                )
+                            ),
+                            RawSourceRecord.source_ref == f"awin-feed:{feed_id}",
+                        )
+                    )
+                ).scalars()
+            )
+        await _set_feed_checkpoint(
+            session,
+            checkpoints,
+            sync_run_id=sync_run_id,
+            feed_id=feed_id,
+            status="running",
+            rows_count=0,
+        )
+        # Le téléchargement est borné à cinq minutes. Un heartbeat avant et
+        # après distingue un flux lent mais vivant d'un conteneur abandonné.
+        await heartbeat()
+        await session.commit()
         try:
             frows = await _download_feed_rows([f.feed_id], max_rows=max_rows)
         except Exception as exc:  # pragma: no cover - réseau/compte
-            log.warning("Feed %s (%s) indisponible (%s)", f.feed_id, f.advertiser_name, exc)
-            skipped += 1
-            continue
-        merchant_id, merchant_name = mid_to_merchant[f.advertiser_id]
-        n = 0
-        for row in frows:
-            await _upsert_offer(
-                session, merchant_id, row,
-                merchant_name=merchant_name,
-                snapshot_cache=snapshot_cache,
+            log.warning(
+                "Feed indisponible (error_type=%s)",
+                type(exc).__name__,
             )
-            n += 1
-            if n % 200 == 0:  # commit périodique → progression visible dans /stats
-                await session.commit()
+            skipped += 1
+            await _set_feed_checkpoint(
+                session,
+                checkpoints,
+                sync_run_id=sync_run_id,
+                feed_id=feed_id,
+                status="skipped",
+                rows_count=0,
+            )
+            await session.commit()
+            if stop_after_current_feed:
+                stopped_after_feed = True
+                log.warning("Arrêt coopératif demandé après checkpoint de feed")
+                break
+            continue
+        await heartbeat()
         await session.commit()
-        total_offers += n
-        log.info("Feed %s (%s) → %d offres", f.feed_id, f.advertiser_name, n)
+        merchant_id, merchant_name = mid_to_merchant[f.advertiser_id]
+        feed_observed_at = datetime.now(UTC).replace(tzinfo=None)
+        n = 0
+        # Un seul span par feed couvre les écritures en lot ; un span par ligne
+        # rendrait les journaux inutilisables et augmenterait leur coût sans
+        # apporter de nouvelle corrélation.
+        async with traced_dependency("postgres", "write"):
+            for row in frows:
+                offer_id = await _upsert_offer(
+                    session,
+                    merchant_id,
+                    row,
+                    merchant_name=merchant_name,
+                    snapshot_cache=snapshot_cache,
+                    seen_source_record_keys=seen_source_record_keys,
+                )
+                if s.observation_shadow_enabled:
+                    # Le savepoint garantit qu'un défaut du shadow ne peut pas
+                    # annuler l'upsert v1 ni contaminer la transaction principale.
+                    try:
+                        from app.observations.awin import capture_awin_row
 
-    log.info("Ingestion terminée : %d feeds, %d offres, %d ignorés", len(selected), total_offers, skipped)
-    return {"feeds": len(selected), "offers": total_offers, "skipped": skipped}
+                        async with session.begin_nested():
+                            captured = await capture_awin_row(
+                                session,
+                                row,
+                                feed_id=f.feed_id,
+                                merchant_id=merchant_id,
+                                merchant_name=merchant_name,
+                                offer_id=offer_id,
+                                sync_run_id=sync_run_id,
+                                resume_from_run_id=resume_from_run_id,
+                                observed_at=feed_observed_at,
+                            )
+                        shadow_raw += int(captured.raw_created)
+                        shadow_observations += captured.observations_created
+                        shadow_quarantine += captured.quarantine_created
+                    except Exception as exc:  # pragma: no cover - base réelle
+                        shadow_failures += 1
+                        log.warning(
+                            "Shadow observation ignorée (error_type=%s)",
+                            type(exc).__name__,
+                        )
+                    else:
+                        if s.product_graph_shadow_enabled:
+                            # Le Graph possède son propre savepoint : une
+                            # projection v2 invalide conserve RawSource et les
+                            # observations déjà qualifiées.
+                            try:
+                                from app.product_graph.resolution import (
+                                    persist_awin_graph_projection,
+                                    project_awin_variant,
+                                )
+
+                                async with session.begin_nested():
+                                    graph_capture = await persist_awin_graph_projection(
+                                        session,
+                                        projection=project_awin_variant(row),
+                                        raw_source_record_id=(
+                                            captured.raw_source_record_id
+                                        ),
+                                        offer_id=offer_id,
+                                        source_ref=f"awin-feed:{f.feed_id}",
+                                        observed_at=feed_observed_at,
+                                    )
+                                graph_variants += int(
+                                    graph_capture.variant_created
+                                )
+                                graph_identifiers += int(
+                                    graph_capture.identifier_created
+                                )
+                                graph_evidence += int(
+                                    graph_capture.evidence_created
+                                )
+                                graph_links += int(graph_capture.link_created)
+                                graph_quarantine += int(
+                                    graph_capture.link_created
+                                    and graph_capture.resolution == "quarantine"
+                                )
+                            except Exception as exc:  # pragma: no cover - base réelle
+                                graph_failures += 1
+                                log.warning(
+                                    "Shadow Product Graph ignoré "
+                                    "(error_type=%s)",
+                                    type(exc).__name__,
+                                )
+                        if s.offer_graph_shadow_enabled:
+                            # Cette projection reste utile même si l'identité
+                            # Graph est absente : elle est alors quarantinée,
+                            # jamais promue comme offre éligible.
+                            try:
+                                from app.offer_graph.projection import (
+                                    persist_awin_offer_projection,
+                                    project_awin_offer,
+                                )
+
+                                async with session.begin_nested():
+                                    offer_capture = (
+                                        await persist_awin_offer_projection(
+                                            session,
+                                            projection=project_awin_offer(row),
+                                            raw_source_record_id=(
+                                                captured.raw_source_record_id
+                                            ),
+                                            offer_id=offer_id,
+                                            observed_at=feed_observed_at,
+                                        )
+                                    )
+                                offer_graph_observations += int(
+                                    offer_capture.created
+                                )
+                                if offer_capture.created:
+                                    if offer_capture.eligibility == "eligible":
+                                        offer_graph_eligible += 1
+                                    elif offer_capture.eligibility == "unknown":
+                                        offer_graph_unknown += 1
+                                    elif offer_capture.eligibility == "ineligible":
+                                        offer_graph_ineligible += 1
+                                    else:
+                                        offer_graph_quarantine += 1
+                            except Exception as exc:  # pragma: no cover - base réelle
+                                offer_graph_failures += 1
+                                log.warning(
+                                    "Shadow Offer Graph ignoré "
+                                    "(error_type=%s)",
+                                    type(exc).__name__,
+                                )
+                n += 1
+                if n % 200 == 0:  # commit périodique → progression visible dans /stats
+                    await _set_feed_checkpoint(
+                        session,
+                        checkpoints,
+                        sync_run_id=sync_run_id,
+                        feed_id=feed_id,
+                        status="running",
+                        rows_count=n,
+                    )
+                    await heartbeat()
+                    await session.commit()
+            await _set_feed_checkpoint(
+                session,
+                checkpoints,
+                sync_run_id=sync_run_id,
+                feed_id=feed_id,
+                status="succeeded",
+                rows_count=n,
+            )
+            await heartbeat()
+            await session.commit()
+        total_offers += n
+        log.info("Feed traité → %d offres", n)
+        if stop_after_current_feed:
+            stopped_after_feed = True
+            log.warning("Arrêt coopératif demandé après checkpoint de feed")
+            break
+
+    await heartbeat()
+    await session.commit()
+    log.info(
+        "Ingestion terminée : %d/%d feeds, %d offres, %d ignorés",
+        visited_feeds,
+        len(selected),
+        total_offers,
+        skipped,
+    )
+    return {
+        "feeds": visited_feeds,
+        "selected_feeds": len(selected),
+        "offers": total_offers,
+        "skipped": skipped,
+        "stopped_after_feed": stopped_after_feed,
+        "shadow": {
+            "enabled": s.observation_shadow_enabled,
+            "raw_sources": shadow_raw,
+            "observations": shadow_observations,
+            "quarantine": shadow_quarantine,
+            "failures": shadow_failures,
+        },
+        "graph_shadow": {
+            "enabled": s.product_graph_shadow_enabled,
+            "variants": graph_variants,
+            "identifiers": graph_identifiers,
+            "evidence": graph_evidence,
+            "links": graph_links,
+            "quarantine": graph_quarantine,
+            "failures": graph_failures,
+        },
+        "offer_graph_shadow": {
+            "enabled": s.offer_graph_shadow_enabled,
+            "observations": offer_graph_observations,
+            "eligible": offer_graph_eligible,
+            "unknown": offer_graph_unknown,
+            "ineligible": offer_graph_ineligible,
+            "quarantine": offer_graph_quarantine,
+            "failures": offer_graph_failures,
+        },
+    }

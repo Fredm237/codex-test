@@ -1,0 +1,20 @@
+{
+  "contract_version": "1.0.0",
+  "status": "frozen",
+  "frozen_at": "2026-08-28",
+  "compatibility": {
+    "unknown": "null_is_not_zero_false_or_true",
+    "additive_changes": "allowed_with_examples_and_consumer_tests",
+    "breaking_changes": "require_new_major_version_and_migration"
+  },
+  "artifacts": {
+    "catalog_offer": "catalog-offer.schema.json",
+    "advise_offer": "advise-offer.schema.json",
+    "extension_search_context": "extension-search-context.schema.json"
+  },
+  "examples": {
+    "catalog_offer_unknown": "examples/catalog-offer.unknown.json",
+    "advise_offer_unknown": "examples/advise-offer.unknown.json",
+    "extension_search_context": "examples/extension-search-context.json"
+  }
+}
