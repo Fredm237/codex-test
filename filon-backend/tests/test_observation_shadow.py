@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from sqlalchemy import select
@@ -35,6 +35,226 @@ VALID_ROW = {
     "ean": "4006381333931",
     "in_stock": "yes",
 }
+
+
+@pytest.mark.asyncio
+async def test_same_source_record_is_idempotent_inside_a_resumed_sync_run():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            now = datetime.now(UTC).replace(tzinfo=None)
+            run = core_models.CatalogSyncRun(
+                trigger="scheduler",
+                status="running",
+                heartbeat_at=now,
+            )
+            session.add(run)
+            await session.flush()
+
+            first = await capture_awin_row(
+                session,
+                VALID_ROW,
+                feed_id="42",
+                merchant_id=77,
+                merchant_name="Marchand test",
+                offer_id=None,
+                sync_run_id=run.id,
+                observed_at=now,
+            )
+            second = await capture_awin_row(
+                session,
+                VALID_ROW,
+                feed_id="42",
+                merchant_id=77,
+                merchant_name="Marchand test",
+                offer_id=None,
+                sync_run_id=run.id,
+                observed_at=now + timedelta(minutes=10),
+            )
+            await session.commit()
+
+            assert first.raw_created is True
+            assert second.raw_created is False
+            assert second.raw_source_record_id == first.raw_source_record_id
+            assert second.observations_created == 0
+            assert await shadow_counts(session) == {
+                "raw_sources": 1,
+                "observations": 10,
+                "quarantine_open": 0,
+            }
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_successor_run_reuses_predecessor_raw_source_record():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            now = datetime.now(UTC).replace(tzinfo=None)
+            predecessor = core_models.CatalogSyncRun(
+                trigger="scheduler",
+                status="interrupted",
+                heartbeat_at=now,
+                finished_at=now,
+                failure_reason="interrupted",
+            )
+            session.add(predecessor)
+            await session.flush()
+            successor = core_models.CatalogSyncRun(
+                resumed_from_run_id=predecessor.id,
+                trigger="scheduler",
+                status="running",
+                heartbeat_at=now,
+            )
+            session.add(successor)
+            await session.flush()
+
+            first = await capture_awin_row(
+                session,
+                VALID_ROW,
+                feed_id="42",
+                merchant_id=77,
+                merchant_name="Marchand test",
+                offer_id=None,
+                sync_run_id=predecessor.id,
+                observed_at=now,
+            )
+            second = await capture_awin_row(
+                session,
+                VALID_ROW,
+                feed_id="42",
+                merchant_id=77,
+                merchant_name="Marchand test",
+                offer_id=None,
+                sync_run_id=successor.id,
+                resume_from_run_id=predecessor.id,
+                observed_at=now + timedelta(minutes=10),
+            )
+            await session.commit()
+
+            assert first.raw_created is True
+            assert second.raw_created is False
+            assert second.raw_source_record_id == first.raw_source_record_id
+            assert second.observations_created == 0
+            assert await shadow_counts(session) == {
+                "raw_sources": 1,
+                "observations": 10,
+                "quarantine_open": 0,
+            }
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_pre_checkpoint_run_infers_only_the_latest_feed_as_partial():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            now = datetime.now(UTC).replace(tzinfo=None)
+            run = core_models.CatalogSyncRun(
+                trigger="scheduler",
+                status="running",
+                heartbeat_at=now,
+            )
+            session.add(run)
+            await session.flush()
+            await capture_awin_row(
+                session,
+                VALID_ROW,
+                feed_id="41",
+                merchant_id=77,
+                merchant_name="Marchand test",
+                offer_id=None,
+                sync_run_id=run.id,
+                observed_at=now,
+            )
+            later_row = {**VALID_ROW, "aw_product_id": "sony-xm6-silver"}
+            await capture_awin_row(
+                session,
+                later_row,
+                feed_id="42",
+                merchant_id=77,
+                merchant_name="Marchand test",
+                offer_id=None,
+                sync_run_id=run.id,
+                observed_at=now + timedelta(minutes=10),
+            )
+            await session.commit()
+
+            checkpoints = await awin_catalog._load_or_infer_feed_checkpoints(
+                session,
+                sync_run_id=run.id,
+            )
+
+            assert checkpoints["41"].status == "succeeded"
+            assert checkpoints["41"].rows_count == 1
+            assert checkpoints["42"].status == "running"
+            assert checkpoints["42"].rows_count == 1
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_successor_run_clones_predecessor_feed_checkpoints():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            now = datetime.now(UTC).replace(tzinfo=None)
+            predecessor = core_models.CatalogSyncRun(
+                trigger="scheduler",
+                status="interrupted",
+                heartbeat_at=now,
+                finished_at=now,
+                failure_reason="interrupted",
+            )
+            session.add(predecessor)
+            await session.flush()
+            session.add_all(
+                [
+                    core_models.CatalogSyncFeedCheckpoint(
+                        sync_run_id=predecessor.id,
+                        feed_id="41",
+                        status="succeeded",
+                        rows_count=3,
+                        started_at=now,
+                        heartbeat_at=now,
+                        finished_at=now,
+                    ),
+                    core_models.CatalogSyncFeedCheckpoint(
+                        sync_run_id=predecessor.id,
+                        feed_id="42",
+                        status="running",
+                        rows_count=1,
+                        started_at=now,
+                        heartbeat_at=now,
+                    ),
+                ]
+            )
+            successor = core_models.CatalogSyncRun(
+                resumed_from_run_id=predecessor.id,
+                trigger="scheduler",
+                status="running",
+                heartbeat_at=now,
+            )
+            session.add(successor)
+            await session.commit()
+
+            checkpoints = await awin_catalog._load_or_infer_feed_checkpoints(
+                session,
+                sync_run_id=successor.id,
+                resume_from_run_id=predecessor.id,
+            )
+
+            assert checkpoints["41"].sync_run_id == successor.id
+            assert checkpoints["41"].status == "succeeded"
+            assert checkpoints["41"].rows_count == 3
+            assert checkpoints["42"].sync_run_id == successor.id
+            assert checkpoints["42"].status == "running"
+            assert checkpoints["42"].rows_count == 1
+            assert checkpoints["42"].finished_at is None
+    finally:
+        await engine.dispose()
 OBSERVED_AT = datetime(2026, 8, 28, 18, 30, 0)
 
 
@@ -460,10 +680,21 @@ async def test_feed_ingestion_writes_shadow_only_when_enabled(monkeypatch, enabl
             monkeypatch.setattr(awin_catalog, "_download_feed_rows", rows)
             monkeypatch.setattr(awin_catalog, "_upsert_offer", legacy_upsert)
 
-            result = await awin_catalog.ingest_feeds(session, sync_run_id=None)
+            heartbeats = 0
+
+            async def progress():
+                nonlocal heartbeats
+                heartbeats += 1
+
+            result = await awin_catalog.ingest_feeds(
+                session,
+                sync_run_id=None,
+                progress=progress,
+            )
             counts = await shadow_counts(session)
 
             assert result["offers"] == 1
+            assert heartbeats == 4
             assert result["shadow"]["enabled"] is enabled
             assert counts["raw_sources"] == (1 if enabled else 0)
             assert counts["observations"] == (10 if enabled else 0)
@@ -545,5 +776,86 @@ async def test_shadow_failure_rolls_back_its_savepoint_not_the_legacy_offer(monk
                 "observations": 0,
                 "quarantine_open": 0,
             }
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_ingestion_resumes_after_a_succeeded_feed_checkpoint(monkeypatch):
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            merchant = core_models.Merchant(
+                awin_mid=77,
+                name="Marchand test",
+                slug="marchand-test",
+            )
+            run = core_models.CatalogSyncRun(
+                trigger="scheduler",
+                status="running",
+                heartbeat_at=datetime.now(UTC).replace(tzinfo=None),
+            )
+            session.add_all([merchant, run])
+            await session.flush()
+            session.add(
+                core_models.CatalogSyncFeedCheckpoint(
+                    sync_run_id=run.id,
+                    feed_id="41",
+                    status="succeeded",
+                    rows_count=3,
+                )
+            )
+            await session.commit()
+
+            settings = Settings(
+                observation_shadow_enabled=False,
+                awin_regions="BE",
+                awin_max_rows_per_feed=0,
+                awin_feed_limit=0,
+            )
+
+            async def feeds():
+                return [
+                    awin_catalog.FeedInfo("41", 77, "Marchand test", "BE", 3),
+                    awin_catalog.FeedInfo("42", 77, "Marchand test", "BE", 1),
+                ]
+
+            downloaded: list[str] = []
+
+            async def rows(feed_ids, *, max_rows=0):
+                downloaded.extend(feed_ids)
+                return [VALID_ROW]
+
+            async def legacy_upsert(*_args, **_kwargs):
+                return None
+
+            monkeypatch.setattr(awin_catalog, "get_settings", lambda: settings)
+            monkeypatch.setattr(awin_catalog, "list_feeds", feeds)
+            monkeypatch.setattr(awin_catalog, "_download_feed_rows", rows)
+            monkeypatch.setattr(awin_catalog, "_upsert_offer", legacy_upsert)
+
+            result = await awin_catalog.ingest_feeds(
+                session,
+                sync_run_id=run.id,
+            )
+
+            assert downloaded == ["42"]
+            assert result["feeds"] == 2
+            assert result["offers"] == 4
+            checkpoints = (
+                (
+                    await session.execute(
+                        select(core_models.CatalogSyncFeedCheckpoint).order_by(
+                            core_models.CatalogSyncFeedCheckpoint.feed_id
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            assert [(item.feed_id, item.status, item.rows_count) for item in checkpoints] == [
+                ("41", "succeeded", 3),
+                ("42", "succeeded", 1),
+            ]
     finally:
         await engine.dispose()

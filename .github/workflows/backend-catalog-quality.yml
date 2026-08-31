@@ -53,19 +53,6 @@ jobs:
       - name: Installer les dépendances
         run: python -m pip install --upgrade pip && python -m pip install -r requirements.txt
 
-      - name: Déterminer si le moteur de décision a changé
-        id: quality-scope
-        env:
-          QUALITY_BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
-        run: |
-          if [[ -z "$QUALITY_BASE_SHA" || "$QUALITY_BASE_SHA" =~ ^0+$ ]]; then
-            echo "quality_gate_required=true" >> "$GITHUB_OUTPUT"
-            echo "quality_gate_path_count=unknown" >> "$GITHUB_OUTPUT"
-          else
-            git diff --name-only "$QUALITY_BASE_SHA" "$GITHUB_SHA" \
-              | python -m quality_lab.ci_scope >> "$GITHUB_OUTPUT"
-          fi
-
       - name: Tester baseline, stamp, drift et restauration Alembic
         run: >-
           python -m pytest -q
@@ -75,27 +62,29 @@ jobs:
       - name: Exécuter les régressions catalogue
         run: python -m pytest -q
 
-      - name: Produire la readiness du Quality Lab
+      - name: Conserver le reçu historique sans ground truth externe
         if: ${{ !cancelled() }}
         run: >-
           python -m quality_lab.evaluate
           --manifest ../quality/manifest.json
-          --output ../quality-readiness-report.json
+          --output ../quality-external-ground-truth-limitation.json
 
-      - name: Bloquer un changement moteur sans benchmark humain prêt
-        if: ${{ !cancelled() && steps.quality-scope.outputs.quality_gate_required == 'true' }}
+      - name: Exécuter le Quality Lab autonome fail-closed
+        if: ${{ !cancelled() }}
         run: >-
-          python -m quality_lab.evaluate
-          --manifest ../quality/manifest.json
+          python -m quality_lab.autonomous
+          --manifest ../quality/autonomous-manifest.json
           --strict
-          --output ../quality-readiness-report.json
+          --output ../quality-autonomous-report.json
 
-      - name: Publier le rapport Quality Lab
+      - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: quality-readiness-${{ github.sha }}
-          path: ${{ github.workspace }}/quality-readiness-report.json
+          path: |
+            ${{ github.workspace }}/quality-autonomous-report.json
+            ${{ github.workspace }}/quality-external-ground-truth-limitation.json
           if-no-files-found: warn
           retention-days: 14
 

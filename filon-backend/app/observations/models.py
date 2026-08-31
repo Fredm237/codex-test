@@ -48,6 +48,12 @@ class RawSourceRecord(Base):
             "source_record_key",
         ),
         Index("ix_raw_source_observed_at", "observed_at"),
+        Index(
+            "ix_raw_source_sync_feed_record",
+            "sync_run_id",
+            "source_ref",
+            "source_record_key",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

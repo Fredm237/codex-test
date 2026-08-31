@@ -125,15 +125,57 @@ class CatalogSyncRun(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
+    resumed_from_run_id: Mapped[int | None] = mapped_column(
+        ForeignKey("catalog_sync_runs.id"),
+        nullable=True,
+        index=True,
+    )
     trigger: Mapped[str] = mapped_column(String(32), default="manual")
     status: Mapped[str] = mapped_column(String(16), default="running", index=True)
     started_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
+    heartbeat_at: Mapped[datetime] = mapped_column(DateTime)
     finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     merchants_count: Mapped[int] = mapped_column(Integer, default=0)
     feeds_count: Mapped[int] = mapped_column(Integer, default=0)
     offers_count: Mapped[int] = mapped_column(Integer, default=0)
     skipped_feeds: Mapped[int] = mapped_column(Integer, default=0)
     failure_reason: Mapped[str | None] = mapped_column(String(64), nullable=True)
+
+
+class CatalogSyncFeedCheckpoint(Base):
+    """Progression durable d'un feed dans un cycle catalogue reprenable."""
+
+    __tablename__ = "catalog_sync_feed_checkpoints"
+    __table_args__ = (
+        UniqueConstraint(
+            "sync_run_id",
+            "feed_id",
+            name="uq_catalog_sync_feed_checkpoint",
+        ),
+        Index(
+            "ix_catalog_sync_feed_checkpoint_status",
+            "sync_run_id",
+            "status",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    sync_run_id: Mapped[int] = mapped_column(
+        ForeignKey("catalog_sync_runs.id", ondelete="CASCADE"),
+        index=True,
+    )
+    feed_id: Mapped[str] = mapped_column(String(191))
+    status: Mapped[str] = mapped_column(String(16), default="running")
+    rows_count: Mapped[int] = mapped_column(Integer, default=0)
+    started_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+    heartbeat_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
 
 
 class CatalogProduct(Base):

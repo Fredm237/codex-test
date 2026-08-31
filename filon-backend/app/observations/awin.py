@@ -347,13 +347,36 @@ async def persist_projection(
     *,
     offer_id: int | None,
     sync_run_id: int | None,
+    resume_from_run_id: int | None = None,
 ) -> CaptureResult:
     """Persiste une projection sans modifier un raw déjà capturé."""
-    raw = await session.scalar(
-        select(models.RawSourceRecord).where(
+    if sync_run_id is not None:
+        # Une reprise peut reprojeter le dernier feed avec une nouvelle heure
+        # d'observation. Dans un même cycle logique, le même enregistrement et
+        # le même payload restent pourtant une seule preuve immuable.
+        raw_lookup = (
+            select(models.RawSourceRecord)
+            .where(
+                models.RawSourceRecord.sync_run_id.in_(
+                    tuple(
+                        run_id
+                        for run_id in (sync_run_id, resume_from_run_id)
+                        if run_id is not None
+                    )
+                ),
+                models.RawSourceRecord.source_ref == projection.source_ref,
+                models.RawSourceRecord.source_record_key
+                == projection.source_record_key,
+                models.RawSourceRecord.payload_checksum
+                == projection.payload_checksum,
+            )
+            .order_by(models.RawSourceRecord.id.asc())
+        )
+    else:
+        raw_lookup = select(models.RawSourceRecord).where(
             models.RawSourceRecord.replay_key == projection.replay_key
         )
-    )
+    raw = await session.scalar(raw_lookup.limit(1))
     raw_created = raw is None
     if raw is None:
         raw = models.RawSourceRecord(
@@ -371,16 +394,20 @@ async def persist_projection(
         session.add(raw)
         await session.flush()
 
-    existing_fields = set(
-        (
-            await session.execute(
-                select(models.Observation.field).where(
-                    models.Observation.raw_source_record_id == raw.id,
-                    models.Observation.transformation_version
-                    == projection.transformation_version,
+    existing_fields = (
+        set()
+        if raw_created
+        else set(
+            (
+                await session.execute(
+                    select(models.Observation.field).where(
+                        models.Observation.raw_source_record_id == raw.id,
+                        models.Observation.transformation_version
+                        == projection.transformation_version,
+                    )
                 )
-            )
-        ).scalars()
+            ).scalars()
+        )
     )
     observations_created = 0
     for observation in projection.observations:
@@ -405,16 +432,20 @@ async def persist_projection(
         )
         observations_created += 1
 
-    existing_issue_keys = set(
-        (
-            await session.execute(
-                select(models.QuarantineRecord.issue_key).where(
-                    models.QuarantineRecord.raw_source_record_id == raw.id,
-                    models.QuarantineRecord.transformation_version
-                    == projection.transformation_version,
+    existing_issue_keys = (
+        set()
+        if raw_created
+        else set(
+            (
+                await session.execute(
+                    select(models.QuarantineRecord.issue_key).where(
+                        models.QuarantineRecord.raw_source_record_id == raw.id,
+                        models.QuarantineRecord.transformation_version
+                        == projection.transformation_version,
+                    )
                 )
-            )
-        ).scalars()
+            ).scalars()
+        )
     )
     quarantine_created = 0
     for issue in projection.issues:
@@ -456,6 +487,7 @@ async def capture_awin_row(
     merchant_name: str | None,
     offer_id: int | None,
     sync_run_id: int | None,
+    resume_from_run_id: int | None = None,
     observed_at: datetime | None = None,
 ) -> CaptureResult:
     projection = project_awin_row(
@@ -470,6 +502,7 @@ async def capture_awin_row(
         projection,
         offer_id=offer_id,
         sync_run_id=sync_run_id,
+        resume_from_run_id=resume_from_run_id,
     )
 
 

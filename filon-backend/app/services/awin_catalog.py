@@ -22,11 +22,12 @@ import gzip
 import io
 import re
 import tempfile
+from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
 
 import httpx
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.core.config import get_settings
@@ -360,6 +361,7 @@ async def _upsert_offer(
     *,
     merchant_name: str | None = None,
     snapshot_cache: set[tuple[int, str, float, str | None, bool | None]] | None = None,
+    seen_source_record_keys: set[str] | None = None,
 ) -> int | None:
     pid = (row.get("aw_product_id") or "").strip()
     name = (row.get("product_name") or "").strip()
@@ -419,7 +421,12 @@ async def _upsert_offer(
     )
     result = await session.execute(stmt)
     offer_id = result.scalar_one_or_none()
-    if offer_id is not None and price is not None:
+    source_record_key = f"{merchant_id}:{pid}"
+    already_seen_in_resumed_feed = bool(
+        seen_source_record_keys is not None
+        and source_record_key in seen_source_record_keys
+    )
+    if offer_id is not None and price is not None and not already_seen_in_resumed_feed:
         # Plusieurs feeds Awin d’un même marchand existent souvent pour les
         # langues FR/NL/EN. Ils peuvent porter le même article dans le même run.
         # Sans garde, chaque variante ajoutait un relevé identique et gonflait
@@ -440,6 +447,145 @@ async def _upsert_offer(
                 )
             )
     return offer_id
+
+
+def _checkpoint_now() -> datetime:
+    return datetime.now(UTC).replace(tzinfo=None)
+
+
+async def _load_or_infer_feed_checkpoints(
+    session,
+    *,
+    sync_run_id: int | None,
+    resume_from_run_id: int | None = None,
+) -> dict[str, models.CatalogSyncFeedCheckpoint]:
+    """Charge les checkpoints et récupère une exécution pré-checkpoint.
+
+    Les feeds sont traités séquentiellement. Pour un cycle historique encore
+    ``running``, tous les ``source_ref`` sauf le plus récent sont donc terminés ;
+    le dernier est rejoué idempotemment car il peut être partiel.
+    """
+
+    if sync_run_id is None:
+        return {}
+    checkpoints = (
+        (
+            await session.execute(
+                select(models.CatalogSyncFeedCheckpoint).where(
+                    models.CatalogSyncFeedCheckpoint.sync_run_id == sync_run_id
+                )
+            )
+        )
+        .scalars()
+        .all()
+    )
+    if checkpoints:
+        return {checkpoint.feed_id: checkpoint for checkpoint in checkpoints}
+
+    if resume_from_run_id is not None:
+        source_checkpoints = await _load_or_infer_feed_checkpoints(
+            session,
+            sync_run_id=resume_from_run_id,
+        )
+        now = _checkpoint_now()
+        resumed: dict[str, models.CatalogSyncFeedCheckpoint] = {}
+        for source in source_checkpoints.values():
+            status = "succeeded" if source.status == "succeeded" else "running"
+            checkpoint = models.CatalogSyncFeedCheckpoint(
+                sync_run_id=sync_run_id,
+                feed_id=source.feed_id,
+                status=status,
+                rows_count=source.rows_count,
+                started_at=source.started_at,
+                heartbeat_at=now,
+                finished_at=source.finished_at if status == "succeeded" else None,
+            )
+            session.add(checkpoint)
+            resumed[source.feed_id] = checkpoint
+        await session.commit()
+        log.warning(
+            "Checkpoints catalogue repris (run_id=%s resumed_from=%s feeds=%s)",
+            sync_run_id,
+            resume_from_run_id,
+            len(resumed),
+        )
+        return resumed
+
+    from app.observations.models import RawSourceRecord
+
+    observed = (
+        await session.execute(
+            select(
+                RawSourceRecord.source_ref,
+                func.min(RawSourceRecord.observed_at),
+                func.count(RawSourceRecord.id),
+            )
+            .where(
+                RawSourceRecord.sync_run_id == sync_run_id,
+                RawSourceRecord.source_type == "awin_feed",
+                RawSourceRecord.source_ref.like("awin-feed:%"),
+            )
+            .group_by(RawSourceRecord.source_ref)
+            .order_by(
+                func.min(RawSourceRecord.observed_at),
+                RawSourceRecord.source_ref,
+            )
+        )
+    ).all()
+    if not observed:
+        return {}
+
+    now = _checkpoint_now()
+    inferred: dict[str, models.CatalogSyncFeedCheckpoint] = {}
+    last_index = len(observed) - 1
+    for index, (source_ref, observed_at, rows_count) in enumerate(observed):
+        feed_id = str(source_ref).removeprefix("awin-feed:")
+        status = "running" if index == last_index else "succeeded"
+        checkpoint = models.CatalogSyncFeedCheckpoint(
+            sync_run_id=sync_run_id,
+            feed_id=feed_id,
+            status=status,
+            rows_count=int(rows_count or 0),
+            started_at=observed_at or now,
+            heartbeat_at=now,
+            finished_at=None if status == "running" else observed_at or now,
+        )
+        session.add(checkpoint)
+        inferred[feed_id] = checkpoint
+    await session.commit()
+    log.warning(
+        "Checkpoints catalogue historiques reconstruits (run_id=%s feeds=%s)",
+        sync_run_id,
+        len(inferred),
+    )
+    return inferred
+
+
+async def _set_feed_checkpoint(
+    session,
+    checkpoints: dict[str, models.CatalogSyncFeedCheckpoint],
+    *,
+    sync_run_id: int | None,
+    feed_id: str,
+    status: str,
+    rows_count: int,
+) -> None:
+    if sync_run_id is None:
+        return
+    now = _checkpoint_now()
+    checkpoint = checkpoints.get(feed_id)
+    if checkpoint is None:
+        checkpoint = models.CatalogSyncFeedCheckpoint(
+            sync_run_id=sync_run_id,
+            feed_id=feed_id,
+            started_at=now,
+        )
+        session.add(checkpoint)
+        checkpoints[feed_id] = checkpoint
+    checkpoint.status = status
+    checkpoint.rows_count = rows_count
+    checkpoint.heartbeat_at = now
+    checkpoint.finished_at = None if status == "running" else now
 
 
 def _ingestion_stage_outcome(result: dict) -> str:
@@ -464,6 +610,8 @@ async def ingest_feeds(
     *,
     limit_override: int | None = None,
     sync_run_id: int | None = None,
+    resume_from_run_id: int | None = None,
+    progress: Callable[[], Awaitable[None]] | None = None,
 ) -> dict:
     """Ingestion des feeds des marchands inscrits, régions ciblées.
 
@@ -506,7 +654,20 @@ async def ingest_feeds(
         selected = selected[:limit]
     log.info("Feeds retenus pour ingestion : %d / %d", len(selected), len(feeds))
 
-    total_offers = 0
+    async def heartbeat() -> None:
+        if progress is not None:
+            await progress()
+
+    checkpoints = await _load_or_infer_feed_checkpoints(
+        session,
+        sync_run_id=sync_run_id,
+        resume_from_run_id=resume_from_run_id,
+    )
+    total_offers = sum(
+        checkpoint.rows_count
+        for checkpoint in checkpoints.values()
+        if checkpoint.status == "succeeded"
+    )
     skipped = 0
     shadow_raw = 0
     shadow_observations = 0
@@ -531,6 +692,49 @@ async def ingest_feeds(
         tuple[int, str, float, str | None, bool | None]
     ] = set()
     for f in selected:
+        feed_id = str(f.feed_id)
+        checkpoint = checkpoints.get(feed_id)
+        if checkpoint is not None and checkpoint.status == "succeeded":
+            log.info(
+                "Feed déjà terminé repris depuis checkpoint → %s offres",
+                checkpoint.rows_count,
+            )
+            continue
+        seen_source_record_keys: set[str] = set()
+        if sync_run_id is not None and checkpoint is not None:
+            from app.observations.models import RawSourceRecord
+
+            seen_source_record_keys = set(
+                (
+                    await session.execute(
+                        select(RawSourceRecord.source_record_key).where(
+                            RawSourceRecord.sync_run_id.in_(
+                                tuple(
+                                    run_id
+                                    for run_id in (
+                                        sync_run_id,
+                                        resume_from_run_id,
+                                    )
+                                    if run_id is not None
+                                )
+                            ),
+                            RawSourceRecord.source_ref == f"awin-feed:{feed_id}",
+                        )
+                    )
+                ).scalars()
+            )
+        await _set_feed_checkpoint(
+            session,
+            checkpoints,
+            sync_run_id=sync_run_id,
+            feed_id=feed_id,
+            status="running",
+            rows_count=0,
+        )
+        # Le téléchargement est borné à cinq minutes. Un heartbeat avant et
+        # après distingue un flux lent mais vivant d'un conteneur abandonné.
+        await heartbeat()
+        await session.commit()
         try:
             frows = await _download_feed_rows([f.feed_id], max_rows=max_rows)
         except Exception as exc:  # pragma: no cover - réseau/compte
@@ -539,7 +743,18 @@ async def ingest_feeds(
                 type(exc).__name__,
             )
             skipped += 1
+            await _set_feed_checkpoint(
+                session,
+                checkpoints,
+                sync_run_id=sync_run_id,
+                feed_id=feed_id,
+                status="skipped",
+                rows_count=0,
+            )
+            await session.commit()
             continue
+        await heartbeat()
+        await session.commit()
         merchant_id, merchant_name = mid_to_merchant[f.advertiser_id]
         feed_observed_at = datetime.now(UTC).replace(tzinfo=None)
         n = 0
@@ -554,6 +769,7 @@ async def ingest_feeds(
                     row,
                     merchant_name=merchant_name,
                     snapshot_cache=snapshot_cache,
+                    seen_source_record_keys=seen_source_record_keys,
                 )
                 if s.observation_shadow_enabled:
                     # Le savepoint garantit qu'un défaut du shadow ne peut pas
@@ -570,6 +786,7 @@ async def ingest_feeds(
                                 merchant_name=merchant_name,
                                 offer_id=offer_id,
                                 sync_run_id=sync_run_id,
+                                resume_from_run_id=resume_from_run_id,
                                 observed_at=feed_observed_at,
                             )
                         shadow_raw += int(captured.raw_created)
@@ -667,11 +884,31 @@ async def ingest_feeds(
                                 )
                 n += 1
                 if n % 200 == 0:  # commit périodique → progression visible dans /stats
+                    await _set_feed_checkpoint(
+                        session,
+                        checkpoints,
+                        sync_run_id=sync_run_id,
+                        feed_id=feed_id,
+                        status="running",
+                        rows_count=n,
+                    )
+                    await heartbeat()
                     await session.commit()
+            await _set_feed_checkpoint(
+                session,
+                checkpoints,
+                sync_run_id=sync_run_id,
+                feed_id=feed_id,
+                status="succeeded",
+                rows_count=n,
+            )
+            await heartbeat()
             await session.commit()
         total_offers += n
         log.info("Feed traité → %d offres", n)
 
+    await heartbeat()
+    await session.commit()
     log.info("Ingestion terminée : %d feeds, %d offres, %d ignorés", len(selected), total_offers, skipped)
     return {
         "feeds": len(selected),

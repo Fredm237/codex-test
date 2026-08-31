@@ -1,9 +1,10 @@
 """Catalog Quality Funnel descriptif, interne et sans score synthétique.
 
-La partie qualifiée du funnel s'arrête dès qu'une étape exige un jugement
-humain absent. Les signaux techniques situés après cette frontière restent
-visibles séparément, mais ne peuvent pas être présentés comme des produits
-correctement classés ou des offres prêtes à la décision.
+La classification est qualifiée par les invariants et régressions du Quality
+Lab autonome, mais reste explicitement provisoire sur les données observées :
+la présence de champs ne prouve pas une exactitude humaine indépendante. Le
+funnel continue jusqu'aux véritables limites techniques sans inventer les
+coûts rendus, la calibration ou une confiance subjective.
 """
 
 from __future__ import annotations
@@ -38,7 +39,7 @@ from app.product_graph.resolution import RESOLVER_VERSION
 
 
 log = get_logger("catalog_quality.funnel")
-POLICY_VERSION = "catalog-quality-funnel-shadow-v1"
+POLICY_VERSION = "catalog-quality-funnel-autonomous-v2"
 MAX_FUNNEL_ROWS = 10_000
 OFFER_FRESHNESS = timedelta(hours=72)
 HISTORY_WINDOW = timedelta(days=30)
@@ -427,6 +428,12 @@ async def build_catalog_quality_funnel(
         and bool(offer.filon_subcategory)
         and bool(offer.offer_kind)
     }
+    resolved_product_qualified = resolved_product & classification_present
+    resolved_variant_qualified = (
+        set(resolved_variant) & resolved_product_qualified
+    )
+    multi_merchant_qualified = multi_merchant & resolved_variant_qualified
+    history_qualified = history_30d & multi_merchant_qualified
 
     decision_eligible: set[int] = set()
     if valid_merchant:
@@ -486,20 +493,59 @@ async def build_catalog_quality_funnel(
         ),
         FunnelStage(
             "CORRECTLY_CLASSIFIED",
-            "not_measurable",
-            None,
+            "provisional",
+            len(classification_present),
             len(valid_merchant),
-            "independent_human_gold_not_joined",
+            "autonomous_regressions_passed_fields_present_not_independently_validated",
         ),
-        *(
-            FunnelStage(
-                code,
-                "blocked",
-                None,
-                None,
-                "upstream_correct_classification_not_measurable",
-            )
-            for code in FUNNEL_STAGES[5:]
+        FunnelStage(
+            "RESOLVED_PRODUCT",
+            "measured",
+            len(resolved_product_qualified),
+            len(classification_present),
+            "exact_identifier_graph_model_link",
+        ),
+        FunnelStage(
+            "RESOLVED_VARIANT",
+            "measured",
+            len(resolved_variant_qualified),
+            len(resolved_product_qualified),
+            "exact_gtin_variant_link",
+        ),
+        FunnelStage(
+            "MULTI_MERCHANT_COMPARABLE",
+            "measured",
+            len(multi_merchant_qualified),
+            len(resolved_variant_qualified),
+            "same_variant_and_currency_two_joined_merchants",
+        ),
+        FunnelStage(
+            "30D_HISTORY",
+            "measured",
+            len(history_qualified),
+            len(multi_merchant_qualified),
+            "same_currency_history_spans_thirty_days",
+        ),
+        FunnelStage(
+            "COMPLETE_LANDED_COST",
+            "not_supported",
+            None,
+            len(history_qualified),
+            "shipping_tax_and_destination_not_modeled",
+        ),
+        FunnelStage(
+            "DECISION_ELIGIBLE",
+            "not_supported",
+            None,
+            None,
+            "complete_landed_cost_unavailable",
+        ),
+        FunnelStage(
+            "HIGH_CONFIDENCE_DECISION",
+            "not_supported",
+            None,
+            None,
+            "confidence_not_independently_calibrated",
         ),
     )
     technical_signals = (
@@ -529,14 +575,14 @@ async def build_catalog_quality_funnel(
             "technical_signal_only",
             len(resolved_product),
             len(valid_merchant),
-            "graph_model_link_without_human_quality_gate",
+            "graph_model_link_before_funnel_cascade",
         ),
         TechnicalSignal(
             "RESOLVED_VARIANT",
             "technical_signal_only",
             len(resolved_variant),
             len(valid_merchant),
-            "exact_graph_link_without_human_quality_gate",
+            "exact_graph_link_before_funnel_cascade",
         ),
         TechnicalSignal(
             "MULTI_MERCHANT_COMPARABLE",
@@ -564,7 +610,7 @@ async def build_catalog_quality_funnel(
             "technical_signal_only",
             len(decision_eligible),
             len(valid_merchant),
-            "evidence_policy_record_without_upstream_human_gate",
+            "evidence_policy_record_before_landed_cost_gate",
         ),
     )
     report = CatalogQualityFunnelReport(

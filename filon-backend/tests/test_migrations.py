@@ -53,7 +53,9 @@ OFFER_FLAGS_REVISION = "f4c81a9d2e70"
 PRODUCT_GRAPH_REVISION = "8b2f4c7d9a10"
 OFFER_GRAPH_REVISION = "c6a1d4e8f2b3"
 MERCHANT_INTELLIGENCE_REVISION = "d7b2e5f9a4c1"
-HEAD_REVISION = "e8c3f6a0b5d2"
+EVIDENCE_ENGINE_REVISION = "e8c3f6a0b5d2"
+HEARTBEAT_REVISION = "f9a4c7d1e2b3"
+HEAD_REVISION = "a2d7e9f4c1b6"
 
 
 @pytest.fixture(autouse=True)
@@ -125,7 +127,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
     assert scripts.get_revision(HEAD_REVISION).down_revision == (
-        MERCHANT_INTELLIGENCE_REVISION
+        HEARTBEAT_REVISION
     )
 
 
@@ -195,6 +197,20 @@ def test_upgrade_has_no_model_drift_and_snapshot_restores_without_downgrade(
         if column["name"] == "currency"
     )
     assert currency_column["nullable"] is True
+    heartbeat_column = next(
+        column
+        for column in inspect(engine).get_columns("catalog_sync_runs")
+        if column["name"] == "heartbeat_at"
+    )
+    assert heartbeat_column["nullable"] is False
+    assert "resumed_from_run_id" in {
+        column["name"]
+        for column in inspect(engine).get_columns("catalog_sync_runs")
+    }
+    assert "catalog_sync_feed_checkpoints" in inspect(engine).get_table_names()
+    assert "ix_raw_source_sync_feed_record" in {
+        index["name"] for index in inspect(engine).get_indexes("raw_source_records")
+    }
     with engine.begin() as connection:
         connection.execute(
             text(
@@ -228,6 +244,66 @@ def test_upgrade_has_no_model_drift_and_snapshot_restores_without_downgrade(
             == "migration@filon.test"
         )
         assert connection.scalar(text("SELECT currency FROM price_snapshots")) == "EUR"
+    engine.dispose()
+
+
+def test_catalog_sync_heartbeat_upgrade_and_downgrade_preserve_run(
+    tmp_path,
+    monkeypatch,
+):
+    database_path = tmp_path / "heartbeat-rollback.sqlite"
+    config = _config(database_path, monkeypatch)
+    command.upgrade(config, EVIDENCE_ENGINE_REVISION)
+
+    engine = create_engine(_sync_url(database_path))
+    with engine.begin() as connection:
+        connection.execute(
+            text(
+                "INSERT INTO catalog_sync_runs "
+                "(id, trigger, status, started_at, merchants_count, feeds_count, "
+                "offers_count, skipped_feeds) "
+                "VALUES (17, 'scheduler', 'running', '2026-08-31 02:34:19', "
+                "0, 0, 0, 0)"
+            )
+        )
+    engine.dispose()
+
+    command.upgrade(config, "head")
+    engine = create_engine(_sync_url(database_path))
+    assert "heartbeat_at" in {
+        column["name"]
+        for column in inspect(engine).get_columns("catalog_sync_runs")
+    }
+    assert "resumed_from_run_id" in {
+        column["name"]
+        for column in inspect(engine).get_columns("catalog_sync_runs")
+    }
+    with engine.connect() as connection:
+        assert connection.scalar(
+            text("SELECT heartbeat_at FROM catalog_sync_runs WHERE id = 17")
+        ) is not None
+        assert connection.scalar(
+            text("SELECT status FROM catalog_sync_runs WHERE id = 17")
+        ) == "running"
+    engine.dispose()
+
+    command.downgrade(config, EVIDENCE_ENGINE_REVISION)
+    engine = create_engine(_sync_url(database_path))
+    assert "heartbeat_at" not in {
+        column["name"]
+        for column in inspect(engine).get_columns("catalog_sync_runs")
+    }
+    assert "resumed_from_run_id" not in {
+        column["name"]
+        for column in inspect(engine).get_columns("catalog_sync_runs")
+    }
+    with engine.connect() as connection:
+        assert connection.scalar(
+            text("SELECT status FROM catalog_sync_runs WHERE id = 17")
+        ) == "running"
+        assert connection.scalar(text("SELECT version_num FROM alembic_version")) == (
+            EVIDENCE_ENGINE_REVISION
+        )
     engine.dispose()
 
 

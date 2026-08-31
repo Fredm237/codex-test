@@ -100,6 +100,19 @@ async def test_groups_offers_across_merchants(session):
     assert summary["offers_with_valid_ean"] == 4  # 3 + 1, les 2 douteux exclus
 
 
+async def test_rebuild_reports_progress_during_long_work(session):
+    await _seed(session)
+    heartbeats = 0
+
+    async def progress():
+        nonlocal heartbeats
+        heartbeats += 1
+
+    await rebuild_products(session, page=2, batch=1, progress=progress)
+
+    assert heartbeats >= 6
+
+
 async def test_offers_without_valid_ean_stay_unlinked(session):
     await _seed(session)
     await rebuild_products(session)

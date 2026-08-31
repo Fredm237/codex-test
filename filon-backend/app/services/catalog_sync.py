@@ -11,7 +11,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
-from sqlalchemy import func, select, update
+from sqlalchemy import func, inspect, select, update
 from sqlalchemy.exc import IntegrityError
 
 from app.core.logging import get_logger
@@ -21,10 +21,10 @@ from app.services.freshness import format_utc_timestamp
 
 log = get_logger("catalog_sync")
 
-# Une ingestion complète prend du temps. Au-delà de cette durée, un état
-# `running` sans processus vivant provient d'un redéploiement ou d'une panne et
-# doit cesser de bloquer les cycles suivants.
-_INTERRUPTED_AFTER = timedelta(hours=4)
+# Une ingestion complète peut dépasser quatre heures. La preuve de vie est donc
+# renouvelée pendant les écritures et le regroupement ; seul un heartbeat absent
+# depuis cette durée autorise la récupération d'un cycle `running`.
+_HEARTBEAT_TIMEOUT = timedelta(minutes=15)
 
 
 def _now() -> datetime:
@@ -35,9 +35,11 @@ def _now() -> datetime:
 def _summary(run: models.CatalogSyncRun) -> dict[str, Any]:
     return {
         "id": run.id,
+        "resumed_from_run_id": run.resumed_from_run_id,
         "trigger": run.trigger,
         "status": run.status,
         "started_at": format_utc_timestamp(run.started_at),
+        "heartbeat_at": format_utc_timestamp(run.heartbeat_at),
         "finished_at": format_utc_timestamp(run.finished_at),
         "merchants": run.merchants_count or 0,
         "feeds": run.feeds_count or 0,
@@ -57,24 +59,41 @@ async def _latest(session, *, status: str | None = None) -> models.CatalogSyncRu
 
 
 async def start_run(session, *, trigger: str) -> models.CatalogSyncRun | None:
-    """Crée un cycle, ou retourne ``None`` lorsqu'un cycle sain est déjà actif.
+    """Crée un cycle ou un successeur reprenable d'un cycle abandonné.
 
     Un index partiel unique protège aussi le cas où deux processus tenteraient de
-    démarrer simultanément. Les cycles abandonnés sont explicitement marqués avant
-    de laisser une nouvelle tentative repartir.
+    démarrer simultanément. Un cycle dont la preuve de vie a expiré devient
+    terminal ``interrupted`` ; son successeur conserve explicitement sa filiation
+    et reprend les checkpoints sans faire passer l'ancien cycle pour réussi.
     """
     now = _now()
-    await session.execute(
+    interrupted = await session.execute(
         update(models.CatalogSyncRun)
         .where(
             models.CatalogSyncRun.status == "running",
-            models.CatalogSyncRun.started_at < now - _INTERRUPTED_AFTER,
+            func.coalesce(
+                models.CatalogSyncRun.heartbeat_at,
+                models.CatalogSyncRun.started_at,
+            )
+            < now - _HEARTBEAT_TIMEOUT,
         )
-        .values(status="interrupted", finished_at=now, failure_reason="interrupted")
+        .values(
+            status="interrupted",
+            heartbeat_at=now,
+            finished_at=now,
+            failure_reason="interrupted",
+        )
+        .returning(models.CatalogSyncRun.id)
     )
-    await session.commit()
+    interrupted_id = interrupted.scalar_one_or_none()
 
-    run = models.CatalogSyncRun(trigger=trigger, status="running", started_at=now)
+    run = models.CatalogSyncRun(
+        resumed_from_run_id=interrupted_id,
+        trigger=trigger,
+        status="running",
+        started_at=now,
+        heartbeat_at=now,
+    )
     session.add(run)
     try:
         await session.commit()
@@ -83,7 +102,35 @@ async def start_run(session, *, trigger: str) -> models.CatalogSyncRun | None:
         log.info("Synchronisation catalogue déjà active : nouvelle demande ignorée")
         return None
     await session.refresh(run)
+    if interrupted_id is not None:
+        log.warning(
+            "Synchronisation catalogue reprise (run_id=%s resumed_from=%s)",
+            run.id,
+            interrupted_id,
+        )
     return run
+
+
+async def touch_run(session, run_id: int) -> datetime:
+    """Renouvelle la preuve de vie, sans committer la transaction appelante.
+
+    Une mise à jour absente signifie que le processus a perdu la propriété du
+    cycle. Continuer écrirait alors hors du journal mono-exécution : l'appelant
+    doit échouer fermé.
+    """
+
+    now = _now()
+    result = await session.execute(
+        update(models.CatalogSyncRun)
+        .where(
+            models.CatalogSyncRun.id == run_id,
+            models.CatalogSyncRun.status == "running",
+        )
+        .values(heartbeat_at=now)
+    )
+    if result.rowcount != 1:
+        raise RuntimeError("catalog sync run lost ownership")
+    return now
 
 
 async def finish_run(
@@ -97,14 +144,30 @@ async def finish_run(
     skipped_feeds: int = 0,
     failure_reason: str | None = None,
 ) -> dict[str, Any]:
-    run.status = status
-    run.finished_at = _now()
-    run.merchants_count = merchants
-    run.feeds_count = feeds
-    run.offers_count = offers
-    run.skipped_feeds = skipped_feeds
-    run.failure_reason = failure_reason
+    now = _now()
+    run_id = inspect(run).identity[0]
+    result = await session.execute(
+        update(models.CatalogSyncRun)
+        .where(
+            models.CatalogSyncRun.id == run_id,
+            models.CatalogSyncRun.status == "running",
+        )
+        .values(
+            status=status,
+            heartbeat_at=now,
+            finished_at=now,
+            merchants_count=merchants,
+            feeds_count=feeds,
+            offers_count=offers,
+            skipped_feeds=skipped_feeds,
+            failure_reason=failure_reason,
+        )
+    )
+    if result.rowcount != 1:
+        await session.rollback()
+        raise RuntimeError("catalog sync run lost ownership")
     await session.commit()
+    await session.refresh(run)
     return _summary(run)
 
 
@@ -143,15 +206,28 @@ async def run_catalog_sync(
     run = await start_run(session, trigger=trigger)
     if run is None:
         return {"started": False, "status": "already_running"}
+    run_id = inspect(run).identity[0]
+
+    async def progress() -> None:
+        await touch_run(session, run_id)
 
     try:
         merchants = await awin_catalog.sync_merchants(session)
+        await progress()
+        await session.commit()
         ingest = await awin_catalog.ingest_feeds(
             session,
             limit_override=limit_override,
-            sync_run_id=run.id,
+            sync_run_id=run_id,
+            resume_from_run_id=run.resumed_from_run_id,
+            progress=progress,
         )
-        grouping = await catalog_grouping.rebuild_products(session)
+        await progress()
+        await session.commit()
+        grouping = await catalog_grouping.rebuild_products(
+            session,
+            progress=progress,
+        )
         degraded_reason = _degraded_reason(merchants, ingest)
         completed = await finish_run(
             session,
@@ -193,16 +269,18 @@ async def health(session, *, interval_hours: int) -> dict[str, Any]:
 
     if active is not None:
         active_age_hours = max(0, int((now - active.started_at).total_seconds() // 3600))
-        # Un cycle réellement actif reste visible comme tel. Au-delà de quatre
-        # heures, un verrou `running` est traité comme interrompu : le prochain
-        # passage du planificateur appelle `start_run()`, qui le marque alors
-        # durablement avant de lancer une tentative neuve.
-        if now - active.started_at >= _INTERRUPTED_AFTER:
+        heartbeat_at = active.heartbeat_at or active.started_at
+        heartbeat_age_seconds = max(0, int((now - heartbeat_at).total_seconds()))
+        # La durée totale n'est pas un signal d'abandon : les catalogues réels
+        # dépassent parfois quatre heures. Seule une preuve de vie expirée rend
+        # le verrou récupérable.
+        if now - heartbeat_at >= _HEARTBEAT_TIMEOUT:
             return {
                 "status": "interrupted",
                 "last_success": _summary(success) if success else None,
                 "active_run": _summary(active),
                 "age_hours": active_age_hours,
+                "heartbeat_age_seconds": heartbeat_age_seconds,
                 "recovery_required": True,
             }
         return {
@@ -210,6 +288,7 @@ async def health(session, *, interval_hours: int) -> dict[str, Any]:
             "last_success": _summary(success) if success else None,
             "active_run": _summary(active),
             "age_hours": active_age_hours,
+            "heartbeat_age_seconds": heartbeat_age_seconds,
         }
     if success is None:
         # Au déploiement de cette table, les cycles passés n'ont pas de journal.

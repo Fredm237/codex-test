@@ -1,0 +1,34 @@
+name: Production — critical monitor
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: filon-production-critical-monitor
+  cancel-in-progress: true
+
+jobs:
+  critical-monitor:
+    name: API, PostgreSQL, Redis, catalogue et erreurs critiques
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Récupérer le dépôt
+        uses: actions/checkout@v4
+
+      - name: Installer Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Vérifier les blockers critiques de production
+        working-directory: filon-backend
+        run: >-
+          python -m observability.tools.critical_monitor
+          --base-url https://web-production-c6842.up.railway.app
+          --timeout 15

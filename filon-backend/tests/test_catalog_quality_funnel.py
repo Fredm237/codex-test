@@ -126,7 +126,7 @@ def _by_code(rows):
 
 
 @pytest.mark.asyncio
-async def test_funnel_measures_only_technical_truth_and_blocks_human_dependent_stages():
+async def test_funnel_continues_on_autonomous_truth_and_stops_on_real_limits():
     engine, maker = await _session()
     try:
         async with maker() as session:
@@ -207,17 +207,17 @@ async def test_funnel_measures_only_technical_truth_and_blocks_human_dependent_s
                 stages["VALID_MERCHANT"].qualified_count,
                 stages["VALID_MERCHANT"].denominator_count,
             ) == (3, 3)
-            assert stages["CORRECTLY_CLASSIFIED"].status == "not_measurable"
-            assert stages["CORRECTLY_CLASSIFIED"].qualified_count is None
+            assert stages["CORRECTLY_CLASSIFIED"].status == "provisional"
+            assert stages["CORRECTLY_CLASSIFIED"].qualified_count == 2
             assert stages["CORRECTLY_CLASSIFIED"].denominator_count == 3
-            assert all(
-                stage.status == "blocked"
-                and stage.qualified_count is None
-                and stage.denominator_count is None
-                for stage in report.stages[5:]
-            )
+            assert stages["RESOLVED_PRODUCT"].qualified_count == 2
+            assert stages["RESOLVED_VARIANT"].qualified_count == 2
+            assert stages["MULTI_MERCHANT_COMPARABLE"].qualified_count == 2
+            assert stages["30D_HISTORY"].qualified_count == 1
+            assert stages["COMPLETE_LANDED_COST"].status == "not_supported"
+            assert stages["DECISION_ELIGIBLE"].status == "not_supported"
             assert stages["HIGH_CONFIDENCE_DECISION"].reason_code == (
-                "upstream_correct_classification_not_measurable"
+                "confidence_not_independently_calibrated"
             )
 
             assert signals["OFFER_GRAPH_OBSERVED"].observed_count == 5
@@ -339,7 +339,8 @@ async def test_empty_window_remains_fail_closed():
 
             assert stages["RAW_OFFERS"].qualified_count == 0
             assert stages["ACTIVE_OFFERS"].qualified_count == 0
-            assert stages["CORRECTLY_CLASSIFIED"].status == "not_measurable"
+            assert stages["CORRECTLY_CLASSIFIED"].status == "provisional"
+            assert stages["CORRECTLY_CLASSIFIED"].qualified_count == 0
             assert report.launch_gate_eligible is False
     finally:
         await engine.dispose()

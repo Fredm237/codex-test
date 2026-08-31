@@ -21,7 +21,8 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_REVISION = "b9db07b15986"
-HEAD_REVISION = "e8c3f6a0b5d2"
+EVIDENCE_ENGINE_REVISION = "e8c3f6a0b5d2"
+HEAD_REVISION = "a2d7e9f4c1b6"
 MIGRATION_LOCK_ID = 0x46494C4F4E
 
 
@@ -248,5 +249,131 @@ async def test_postgresql_upgrade_drift_extensions_indexes_and_lock() -> None:
                     {"lock_id": MIGRATION_LOCK_ID},
                 )
                 await lock_owner.commit()
+    finally:
+        await engine.dispose()
+
+
+async def test_postgresql_heartbeat_upgrade_and_downgrade_preserve_active_run() -> None:
+    url = _test_database_url()
+    await _reset_public_schema(url)
+
+    before = await asyncio.to_thread(
+        _run_alembic,
+        url,
+        "upgrade",
+        EVIDENCE_ENGINE_REVISION,
+    )
+    assert before.returncode == 0
+
+    engine = create_async_engine(url)
+    try:
+        async with engine.begin() as connection:
+            await connection.execute(
+                text(
+                    "INSERT INTO catalog_sync_runs "
+                    "(id, trigger, status, started_at, merchants_count, "
+                    "feeds_count, offers_count, skipped_feeds) "
+                    "VALUES (17, 'scheduler', 'running', "
+                    "TIMESTAMP '2026-08-31 02:34:19', 0, 0, 0, 0)"
+                )
+            )
+    finally:
+        await engine.dispose()
+
+    upgraded = await asyncio.to_thread(_run_alembic, url, "upgrade", "head")
+    assert upgraded.returncode == 0
+    engine = create_async_engine(url)
+    try:
+        async with engine.begin() as connection:
+            heartbeat = await connection.scalar(
+                text("SELECT heartbeat_at FROM catalog_sync_runs WHERE id = 17")
+            )
+            nullable = await connection.scalar(
+                text(
+                    "SELECT is_nullable FROM information_schema.columns "
+                    "WHERE table_schema = 'public' "
+                    "AND table_name = 'catalog_sync_runs' "
+                    "AND column_name = 'heartbeat_at'"
+                )
+            )
+            checkpoint_table = await connection.scalar(
+                text(
+                    "SELECT table_name FROM information_schema.tables "
+                    "WHERE table_schema = 'public' "
+                    "AND table_name = 'catalog_sync_feed_checkpoints'"
+                )
+            )
+            resume_index = await connection.scalar(
+                text(
+                    "SELECT indexname FROM pg_indexes "
+                    "WHERE schemaname = 'public' "
+                    "AND tablename = 'raw_source_records' "
+                    "AND indexname = 'ix_raw_source_sync_feed_record'"
+                )
+            )
+            lineage_column = await connection.scalar(
+                text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_schema = 'public' "
+                    "AND table_name = 'catalog_sync_runs' "
+                    "AND column_name = 'resumed_from_run_id'"
+                )
+            )
+            lineage_index = await connection.scalar(
+                text(
+                    "SELECT indexname FROM pg_indexes "
+                    "WHERE schemaname = 'public' "
+                    "AND tablename = 'catalog_sync_runs' "
+                    "AND indexname = 'ix_catalog_sync_runs_resumed_from_run_id'"
+                )
+            )
+            await connection.execute(
+                text(
+                    "INSERT INTO catalog_sync_feed_checkpoints "
+                    "(sync_run_id, feed_id, status, rows_count) "
+                    "VALUES (17, '42', 'running', 1200)"
+                )
+            )
+        assert heartbeat is not None
+        assert nullable == "NO"
+        assert checkpoint_table == "catalog_sync_feed_checkpoints"
+        assert resume_index == "ix_raw_source_sync_feed_record"
+        assert lineage_column == "resumed_from_run_id"
+        assert lineage_index == "ix_catalog_sync_runs_resumed_from_run_id"
+    finally:
+        await engine.dispose()
+
+    downgraded = await asyncio.to_thread(
+        _run_alembic,
+        url,
+        "downgrade",
+        EVIDENCE_ENGINE_REVISION,
+    )
+    assert downgraded.returncode == 0
+    engine = create_async_engine(url)
+    try:
+        async with engine.connect() as connection:
+            status = await connection.scalar(
+                text("SELECT status FROM catalog_sync_runs WHERE id = 17")
+            )
+            heartbeat_column = await connection.scalar(
+                text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_schema = 'public' "
+                    "AND table_name = 'catalog_sync_runs' "
+                    "AND column_name = 'heartbeat_at'"
+                )
+            )
+            lineage_column = await connection.scalar(
+                text(
+                    "SELECT column_name FROM information_schema.columns "
+                    "WHERE table_schema = 'public' "
+                    "AND table_name = 'catalog_sync_runs' "
+                    "AND column_name = 'resumed_from_run_id'"
+                )
+            )
+        assert status == "running"
+        assert heartbeat_column is None
+        assert lineage_column is None
     finally:
         await engine.dispose()
