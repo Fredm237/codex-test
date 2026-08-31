@@ -39,6 +39,7 @@ GRAPH_SHADOW_TABLES = {
     "graph_identifiers",
     "graph_identifier_evidence",
     "graph_offer_variant_links",
+    "graph_identity_assertions",
 }
 OFFER_GRAPH_TABLES = {"graph_offer_observations"}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
@@ -55,7 +56,8 @@ OFFER_GRAPH_REVISION = "c6a1d4e8f2b3"
 MERCHANT_INTELLIGENCE_REVISION = "d7b2e5f9a4c1"
 EVIDENCE_ENGINE_REVISION = "e8c3f6a0b5d2"
 HEARTBEAT_REVISION = "f9a4c7d1e2b3"
-HEAD_REVISION = "a2d7e9f4c1b6"
+CHECKPOINT_REVISION = "a2d7e9f4c1b6"
+HEAD_REVISION = "b3e1a7c4d9f2"
 
 
 @pytest.fixture(autouse=True)
@@ -127,7 +129,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
     assert scripts.get_revision(HEAD_REVISION).down_revision == (
-        HEARTBEAT_REVISION
+        CHECKPOINT_REVISION
     )
 
 

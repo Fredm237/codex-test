@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/product-identity/v1/identity-resolution.schema.json",
+  "title": "FILON Product Identity Resolution v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "subject_type",
+    "resolution",
+    "canonical_id",
+    "reason_code",
+    "resolver_version",
+    "evidence_raw_source_ids"
+  ],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "subject_type": {
+      "enum": ["brand", "product_family", "product_model", "variant"]
+    },
+    "resolution": { "enum": ["resolved", "quarantine", "unresolved"] },
+    "canonical_id": { "type": ["integer", "null"], "minimum": 1 },
+    "reason_code": {
+      "enum": [
+        "exact_global_identifier",
+        "missing_identifier",
+        "invalid_identifier",
+        "conflicting_identifier",
+        "insufficient_scope",
+        "insufficient_evidence",
+        "attribute_conflict"
+      ]
+    },
+    "resolver_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "evidence_raw_source_ids": {
+      "type": "array",
+      "items": { "type": "integer", "minimum": 1 },
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "resolution": { "const": "resolved" } } },
+      "then": {
+        "properties": {
+          "canonical_id": { "type": "integer", "minimum": 1 },
+          "evidence_raw_source_ids": { "minItems": 1 }
+        }
+      },
+      "else": { "properties": { "canonical_id": { "type": "null" } } }
+    }
+  ],
+  "additionalProperties": false
+}

@@ -1,0 +1,9 @@
+{
+  "contract_version": "1.0.0",
+  "subject_type": "variant",
+  "resolution": "resolved",
+  "canonical_id": 42,
+  "reason_code": "exact_global_identifier",
+  "resolver_version": "exact-gtin-shadow-v1",
+  "evidence_raw_source_ids": [917]
+}

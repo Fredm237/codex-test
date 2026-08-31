@@ -16,8 +16,11 @@ projet et l'environnement n'ont pas été confirmés par l'opérateur.
 | Offer Graph shadow | `c6a1d4e8f2b3` | Ajoute `graph_offer_observations`, append-only et sans lecteur v2 |
 | Merchant Intelligence shadow | `d7b2e5f9a4c1` | Ajoute `merchant_quality_snapshots`, sans score ni lecteur v2 |
 | Evidence Engine shadow | `e8c3f6a0b5d2` | Ajoute les claims sourcés et l'éligibilité, sans lecteur v2 |
+| Heartbeat ingestion | `f9a4c7d1e2b3` | Ajoute le heartbeat et la filiation des runs, sans toucher au catalogue |
+| Checkpoints par feed | `a2d7e9f4c1b6` | Ajoute les checkpoints de reprise et leur index de replay |
+| Assertions Product Identity | `b3e1a7c4d9f2` | Ajoute les assertions Brand/Variant sourcées, sans promotion ni lecteur v2 |
 
-La seule tête attendue est `e8c3f6a0b5d2`. La colonne de devise reste
+La seule tête attendue est `b3e1a7c4d9f2`. La colonne de devise reste
 `NULL` pour les relevés antérieurs : la devise d'un montant historique n'est
 pas déductible de l'offre courante.
 
@@ -135,7 +138,7 @@ python -m pip install -r requirements.txt
 alembic heads
 ```
 
-Résultat attendu : une seule tête, `e8c3f6a0b5d2`. Confirmer ensuite hors log
+Résultat attendu : une seule tête, `b3e1a7c4d9f2`. Confirmer ensuite hors log
 le projet, l'environnement et l'hôte visés. Pour PostgreSQL, `pg_dump` et
 `pg_restore` reçoivent une URL native `postgresql://`, pas le suffixe
 SQLAlchemy `+asyncpg`.
@@ -166,7 +169,7 @@ alembic current
 alembic check
 ```
 
-La révision courante doit être `e8c3f6a0b5d2 (head)` et le check doit afficher
+La révision courante doit être `b3e1a7c4d9f2 (head)` et le check doit afficher
 `No new upgrade operations detected.`.
 
 ### 3B. Base existante à la baseline ou variante legacy couverte
@@ -198,18 +201,19 @@ alembic check
 ```
 
 L'upgrade ajoute les trois tables Observation, la colonne de devise, normalise
-les deux drapeaux couverts puis crée les huit tables Product Graph, la table
-Offer Graph, la table Merchant Intelligence et les deux tables Evidence. Il ne modifie aucune valeur
+les deux drapeaux couverts puis crée les tables Product Graph, Offer Graph,
+Merchant Intelligence, Evidence, checkpoints et assertions Product Identity.
+Il ne modifie aucune valeur
 historique, ne fabrique aucune devise et ne lance aucun backfill.
 
 ### 3C. Base existante exactement identique à la tête
 
-Si les 29 tables, contraintes, index et colonnes correspondent déjà
+Si les 31 tables, contraintes, index et colonnes correspondent déjà
 exactement aux modèles et aux migrations de tête, une adoption directe est
 possible après la même sauvegarde et une comparaison exhaustive :
 
 ```bash
-alembic stamp e8c3f6a0b5d2
+alembic stamp b3e1a7c4d9f2
 alembic current
 alembic check
 ```
@@ -235,7 +239,7 @@ Avant tout premier déploiement avec migration automatique :
    `OFFER_GRAPH_SHADOW_ENABLED=false` et
    `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false` et
    `EVIDENCE_ENGINE_SHADOW_ENABLED=false` ;
-5. obtenir `e8c3f6a0b5d2 (head)` avec `alembic current` et un `alembic check`
+5. obtenir `b3e1a7c4d9f2 (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -246,7 +250,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `e8c3f6a0b5d2` ;
+  `b3e1a7c4d9f2` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -273,7 +277,7 @@ baseline.**
 ### Régression applicative
 
 Remettre la version applicative précédente, conserver le schéma à
-`e8c3f6a0b5d2` et garder les cinq shadows désactivés. Les structures d'expansion sont
+`b3e1a7c4d9f2` et garder les cinq shadows désactivés. Les structures d'expansion sont
 compatibles avec l'ancien lecteur, qui les ignore. Un rollback applicatif ne
 justifie ni un downgrade ni `DATABASE_SCHEMA_MODE=legacy`.
 

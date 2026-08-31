@@ -1,0 +1,15 @@
+{
+  "contract_version": "1.0.0",
+  "status": "frozen_for_shadow",
+  "frozen_at": "2026-08-31",
+  "public_reader_compatible": true,
+  "unknown_policy": "unknown_never_becomes_favorable_evidence",
+  "artifacts": {
+    "identity_assertion": "identity-assertion.schema.json",
+    "identity_resolution": "identity-resolution.schema.json"
+  },
+  "examples": {
+    "exact_variant": "examples/exact-variant.json",
+    "unresolved_model": "examples/unresolved-model.json"
+  }
+}

@@ -350,6 +350,7 @@ async def test_awin_writer_projects_graph_only_under_both_shadow_flags(monkeypat
                 "identifiers": 1,
                 "evidence": 1,
                 "links": 1,
+                "assertions": 3,
                 "quarantine": 0,
                 "failures": 0,
             }
@@ -357,6 +358,31 @@ async def test_awin_writer_projects_graph_only_under_both_shadow_flags(monkeypat
             assert link is not None
             assert link.resolution == "resolved"
             assert link.variant_id is not None
+            assertions = (
+                (
+                    await session.execute(
+                        select(models.GraphIdentityAssertion).order_by(
+                            models.GraphIdentityAssertion.id
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            assert len(assertions) == 3
+            assert {
+                (
+                    assertion.subject_type,
+                    assertion.identifier_namespace,
+                    assertion.identifier_scope,
+                    assertion.status,
+                )
+                for assertion in assertions
+            } == {
+                ("brand", None, None, "observed"),
+                ("variant", "gtin", "global", "validated"),
+                ("variant", "merchant_sku", f"merchant:{merchant.id}", "validated"),
+            }
     finally:
         await engine.dispose()
 
@@ -388,11 +414,52 @@ async def test_backfill_is_bounded_dry_by_default_and_replay_idempotent():
             assert applied.mode == "apply"
             assert applied.links_created == 2
             assert applied.variants_created == 1
+            assert applied.assertions_created == 2
+            assert applied.assertions_quarantined == 1
             assert applied.missing_offer_links == 1
             replayed = await backfill_batch(session, limit=3, apply=True)
             assert replayed.links_created == 0
             assert replayed.links_existing == 2
             assert replayed.variants_created == 0
+            assert replayed.assertions_created == 0
+            assert replayed.assertions_existing == 2
             assert replayed.last_raw_source_id == unlinked_raw.id
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_backfill_dry_run_reports_brand_and_scoped_identifier_collisions():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            first_raw, first_offer = await _raw_and_offer(session, "g")
+            second_raw, second_offer = await _raw_and_offer(session, "h")
+            first_raw.payload_json = {
+                "ean": "4006381333931",
+                "brand_name": "Rc Design",
+                "aw_product_id": "shared-sku",
+            }
+            second_raw.payload_json = {
+                "ean": "9780201379624",
+                "brand_name": "rc design",
+                "aw_product_id": "shared-sku",
+            }
+            second_raw.context_json = first_raw.context_json
+            await _link_raw_offer(session, first_raw, first_offer)
+            await _link_raw_offer(session, second_raw, second_offer)
+            await session.commit()
+
+            report = await backfill_batch(session, limit=2)
+            assert report.mode == "dry_run"
+            assert report.assertions_projected == 6
+            assert report.assertions_observed == 2
+            assert report.assertions_validated == 4
+            assert report.assertions_quarantined == 0
+            assert report.brand_normalization_collisions == 1
+            assert report.scoped_identifier_collisions == 1
+            assert await session.scalar(
+                select(func.count()).select_from(models.GraphIdentityAssertion)
+            ) == 0
     finally:
         await engine.dispose()

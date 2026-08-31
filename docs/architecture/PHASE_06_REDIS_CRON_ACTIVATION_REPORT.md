@@ -2,8 +2,8 @@
 
 - Date : **31 août 2026**
 - Environnement : **Railway `production`**
-- Décision : **GO Redis distribué ; GO Cron ; premier cycle réel en cours**
-- Verdict global : **Phase 1 et Immersive restent NO-GO**
+- Décision : **GO Redis distribué ; GO Cron ; reprise bornée qualifiée**
+- Verdict global : **Phase 0 = GO ; Phase 1 ouverte ; Immersive reste NO-GO**
 
 ## Topologie activée
 
@@ -109,9 +109,66 @@ mise à jour devra consigner son état terminal, ses compteurs et sa durée.
   rollback est décidé.
 - PostgreSQL : aucune migration ni modification de schéma n'a été nécessaire.
 
+## Fermeture timeboxée du cycle long
+
+Le cycle historique `18`, repris depuis `17`, a fourni deux checkpoints de
+feeds terminés avec `20 000` offres chacun. Il a ensuite été interrompu de
+manière contrôlée par retrait de son déploiement Railway. Son historique, ses
+données déjà commitées et ses checkpoints ont été conservés ; l'API Pulse l'a
+classé `interrupted` sans réécriture favorable.
+
+La capacité permanente `--stop-after-current-feed` a été publiée au commit
+`437dae27725c55eb5dd0543b55274e795df2ef83`. Elle vérifie la demande d'arrêt
+après le commit du checkpoint et clôt le run en `interrupted` avec le motif
+neutre `stop_after_current_feed`. La suite ciblée publique a passé **42 tests**
+et la suite backend locale a qualifié **2 166 réussis, 3 ignorés** en comptant
+le test OTLP loopback rejoué dans l'environnement autorisé.
+
+Une seule reprise bornée a ensuite été exécutée :
+
+- exécution Railway : `5fa66804-f096-4522-9aad-91afdcb2ab75` ;
+- journal PostgreSQL : run `19`, `resumed_from_run_id=18` ;
+- checkpoints repris : `3` ;
+- feed sélectionné : `1 / 834` ;
+- feed déjà terminé reconnu puis sauté : `20 000` offres ;
+- téléchargement ou réingestion inutile : **aucun** ;
+- état terminal : `succeeded` à `2026-08-31T14:39:40.931716Z` ;
+- compteurs terminaux : `243` marchands, `1` feed, `20 000` offres,
+  `0` ignoré.
+
+Le déploiement de restauration
+`7d707084-7d3f-4ae1-a1b5-1799ab59ca47` a remis
+`AWIN_FEED_LIMIT=0` et la cadence `0 */6 * * *`. Il est devenu `Active` sans
+créer de nouvelle exécution. La liste Railway conserve le run borné terminé en
+`42m 6s` et annonce la prochaine occurrence normale.
+
+## Intégration et moniteur critique
+
+La PR GitHub `#385` a été fusionnée dans `main` au commit
+`50a04b85944e6a5363092692572859fbeb00c5a0`. Le run CI `33404710182` a terminé
+ses quatre jobs avec succès. Le workflow `Production — critical monitor` est
+désormais actif sur la branche par défaut :
+
+- exécution manuelle `33404840701` : `success` ;
+- exécution planifiée : **`EXTERNAL_PROVIDER_PENDING / NON_BLOCKING`** ;
+  GitHub n'avait créé aucun événement `schedule` au snapshot final.
+
+Le workflow `346700815` est présent sur la branche par défaut `main`, accepté
+par GitHub, actif, déclaré à `*/15 * * * *` et limité à la permission
+`contents: read`. Le même job a réussi manuellement de bout en bout. Aucune
+erreur de syntaxe, permission ou configuration n'est observable. L'attente
+relève donc de l'ordonnanceur externe GitHub et ne bloque plus Phase 1. Un
+second lancement manuel ne doit jamais être présenté comme une preuve
+planifiée ; la première occurrence réelle reste surveillée.
+
 ## Limites restantes
 
-Cette activation ferme les manques Redis et Cron de P0.6. Elle ne qualifie pas
-le collecteur OTLP externe, l'agrégateur Prometheus, la rétention, le dashboard
-hébergé, le pager, le trafic représentatif ni les sept datasets humains. Le
-NO-GO métier et le NO-GO Immersive restent donc inchangés.
+Cette activation ferme les manques Redis, Cron, heartbeat, reprise et
+checkpoints de P0.6. Le collecteur OTLP externe, l'agrégateur Prometheus, la
+rétention, le dashboard hébergé, le pager secondaire et le trafic
+représentatif restent dans le backlog post-Phase 0. Les sept datasets humains
+restent à zéro sous la limitation explicite `NO_EXTERNAL_HUMAN_GROUND_TRUTH` ;
+ils ne sont plus une gate Phase 0. Aucun blocker d'intégrité, de récupération
+ou de sécurité nécessaire à Product Identity ne reste ouvert. L'occurrence
+GitHub planifiée est une limitation fournisseur non bloquante consignée dans
+[`PHASE_0_FINAL_RECEIPT`](PHASE_0_FINAL_RECEIPT.md).
