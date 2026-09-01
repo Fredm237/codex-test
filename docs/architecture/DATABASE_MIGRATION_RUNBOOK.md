@@ -239,9 +239,10 @@ Avant tout premier déploiement avec migration automatique :
    `PRODUCT_GRAPH_SHADOW_ENABLED=false` et
    `ENTITY_RESOLUTION_SHADOW_ENABLED=false` et
    `OFFER_GRAPH_SHADOW_ENABLED=false` et
+   `OFFER_TRUTH_SHADOW_ENABLED=false` et
    `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false` et
    `EVIDENCE_ENGINE_SHADOW_ENABLED=false` ;
-5. obtenir `c4f2b8d5e0a3 (head)` avec `alembic current` et un `alembic check`
+5. obtenir `d5a3c7e9f1b4 (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -252,7 +253,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `c4f2b8d5e0a3` ;
+  `d5a3c7e9f1b4` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -269,6 +270,7 @@ OBSERVATION_SHADOW_ENABLED=false
 PRODUCT_GRAPH_SHADOW_ENABLED=false
 ENTITY_RESOLUTION_SHADOW_ENABLED=false
 OFFER_GRAPH_SHADOW_ENABLED=false
+OFFER_TRUTH_SHADOW_ENABLED=false
 MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false
 EVIDENCE_ENGINE_SHADOW_ENABLED=false
 ```
