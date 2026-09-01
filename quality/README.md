@@ -82,6 +82,36 @@ L'absence des deux reçus réels ne produit jamais un PASS. La CI teste le
 vérificateur et ses mutations adversariales ; seul le replay PostgreSQL borné
 peut produire les entrées de qualification production.
 
+## Gate Phase 3 — Offer Truth
+
+Le benchmark transactionnel est piloté par
+[`offer-truth-manifest.json`](offer-truth-manifest.json) et ses régressions
+déterministes. Il sépare les claims connus des abstentions sûres et interdit les
+fallbacks favorables de prix, stock, livraison, retours, garantie, marchand ou
+fraîcheur. Sa limitation reste `NO_EXTERNAL_HUMAN_GROUND_TRUTH`.
+
+## Gate Phase 4 — Product Ontology
+
+Le benchmark taxonomy/rôle est piloté par
+[`product-ontology-manifest.json`](product-ontology-manifest.json), avec les
+régressions de
+[`product-ontology-regressions.json`](product-ontology-regressions.json). Il
+mesure séparément exactitude du roster fermé, abstention, faux
+`PRIMARY_PRODUCT` et fausse promotion d'une relation textuelle en relation
+canonique.
+
+Depuis `filon-backend`, la CI ratifie d'abord l'oracle sans le promouvoir :
+
+```bash
+python -m quality_lab.product_ontology \
+  --manifest ../quality/product-ontology-manifest.json \
+  --adapter oracle \
+  --output ../quality-product-ontology-report.json
+```
+
+L'adaptateur `legacy` est volontairement mesuré comme `UNSAFE`. P4D devra
+ajouter un extracteur distinct et passer les mêmes gates avant toute promotion.
+
 ## Historique conservé — contrat externe v0.5 remplacé
 
 Le contrat ci-dessous décrivait un holdout humain indépendant. Il reste utile

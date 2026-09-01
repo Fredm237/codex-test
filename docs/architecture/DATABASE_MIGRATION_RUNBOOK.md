@@ -20,8 +20,10 @@ projet et l'environnement n'ont pas été confirmés par l'opérateur.
 | Checkpoints par feed | `a2d7e9f4c1b6` | Ajoute les checkpoints de reprise et leur index de replay |
 | Assertions Product Identity | `b3e1a7c4d9f2` | Ajoute les assertions Brand/Variant sourcées, sans promotion ni lecteur v2 |
 | Entity Resolution shadow | `c4f2b8d5e0a3` | Ajoute profils de signaux et décisions append-only, sans replay automatique ni lecteur v2 |
+| Offer Truth shadow | `d5a3c7e9f1b4` | Ajoute les snapshots de vérité offre temporels et append-only |
+| Product Ontology shadow | `e6b4d8f0a2c5` | Ajoute les assertions ontologiques append-only, sans lecteur public |
 
-La seule tête attendue est `c4f2b8d5e0a3`. La colonne de devise reste
+La seule tête attendue est `e6b4d8f0a2c5`. La colonne de devise reste
 `NULL` pour les relevés antérieurs : la devise d'un montant historique n'est
 pas déductible de l'offre courante.
 
@@ -240,9 +242,10 @@ Avant tout premier déploiement avec migration automatique :
    `ENTITY_RESOLUTION_SHADOW_ENABLED=false` et
    `OFFER_GRAPH_SHADOW_ENABLED=false` et
    `OFFER_TRUTH_SHADOW_ENABLED=false` et
+   `PRODUCT_ONTOLOGY_SHADOW_ENABLED=false` et
    `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false` et
    `EVIDENCE_ENGINE_SHADOW_ENABLED=false` ;
-5. obtenir `d5a3c7e9f1b4 (head)` avec `alembic current` et un `alembic check`
+5. obtenir `e6b4d8f0a2c5 (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -253,7 +256,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `d5a3c7e9f1b4` ;
+  `e6b4d8f0a2c5` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -271,6 +274,7 @@ PRODUCT_GRAPH_SHADOW_ENABLED=false
 ENTITY_RESOLUTION_SHADOW_ENABLED=false
 OFFER_GRAPH_SHADOW_ENABLED=false
 OFFER_TRUTH_SHADOW_ENABLED=false
+PRODUCT_ONTOLOGY_SHADOW_ENABLED=false
 MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false
 EVIDENCE_ENGINE_SHADOW_ENABLED=false
 ```
@@ -282,7 +286,7 @@ baseline.**
 ### Régression applicative
 
 Remettre la version applicative précédente, conserver le schéma à
-`c4f2b8d5e0a3` et garder les six shadows désactivés. Les structures d'expansion sont
+`e6b4d8f0a2c5` et garder les shadows désactivés. Les structures d'expansion sont
 compatibles avec l'ancien lecteur, qui les ignore. Un rollback applicatif ne
 justifie ni un downgrade ni `DATABASE_SCHEMA_MODE=legacy`.
 

@@ -94,6 +94,14 @@ jobs:
           --require-promotion
           --output ../quality-entity-resolution-report.json
 
+      - name: Ratifier le benchmark Product Ontology sans promouvoir l'oracle
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.product_ontology
+          --manifest ../quality/product-ontology-manifest.json
+          --adapter oracle
+          --output ../quality-product-ontology-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -104,6 +112,7 @@ jobs:
             ${{ github.workspace }}/quality-external-ground-truth-limitation.json
             ${{ github.workspace }}/quality-product-identity-report.json
             ${{ github.workspace }}/quality-entity-resolution-report.json
+            ${{ github.workspace }}/quality-product-ontology-report.json
           if-no-files-found: warn
           retention-days: 14
 

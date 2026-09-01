@@ -1,0 +1,47 @@
+{
+  "schema_version": "product-ontology-benchmark-manifest/v1",
+  "benchmark_version": "1.1.0",
+  "status": "active",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "unknown_policy": "unknown_never_defaults_to_primary_product",
+  "relationship_policy": "observed_text_never_becomes_canonical",
+  "generator": {
+    "version": "filon-product-ontology-holdout/v2",
+    "seeds": [57721566, 16180339, 14142135, 17320508],
+    "samples_per_vertical_seed": 192,
+    "development_engine_input": false
+  },
+  "roles": [
+    "PRIMARY_PRODUCT",
+    "ACCESSORY",
+    "REPLACEMENT_PART",
+    "CONSUMABLE",
+    "SERVICE",
+    "DIGITAL_CONTENT",
+    "ACCOMMODATION",
+    "BUNDLE",
+    "UNKNOWN"
+  ],
+  "verticals": [
+    "smartphones",
+    "fashion",
+    "tyres",
+    "appliances_hvac",
+    "hospitality",
+    "digital"
+  ],
+  "regression_ground_truth": "product-ontology-regressions.json",
+  "minimum_statistical_support": {
+    "known_role_cases": 3000,
+    "primary_negative_cases": 3000,
+    "unknown_cases": 3000,
+    "observed_relation_cases": 3000
+  },
+  "gates": {
+    "known_role_accuracy_ci95_lower_min": 0.995,
+    "unknown_abstention_accuracy_ci95_lower_min": 0.99,
+    "false_primary_product_rate_ci95_upper_max": 0.005,
+    "canonical_relation_false_promotion_rate_ci95_upper_max": 0.005,
+    "blocking_failures_max": 0
+  }
+}

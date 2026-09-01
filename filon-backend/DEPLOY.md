@@ -53,6 +53,7 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    ENTITY_RESOLUTION_SHADOW_ENABLED=false
    OFFER_GRAPH_SHADOW_ENABLED=false
    OFFER_TRUTH_SHADOW_ENABLED=false
+   PRODUCT_ONTOLOGY_SHADOW_ENABLED=false
    MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false
    CORS_ORIGINS=["https://filon.be","https://www.filon.be"]
    FORWARDED_ALLOW_IPS=<IP/CIDR exacts et vérifiés du proxy Railway>
@@ -255,6 +256,21 @@ L'option `--apply` exige les flags Observation et Offer Graph. Reprendre au
 `last_raw_source_id` et ne jamais confondre les compteurs techniques avec une
 mesure Quality Lab.
 
+Le replay Product Ontology suit le même contrat temporel et reste sec par
+défaut :
+
+```bash
+python -m app.product_ontology.replay \
+  --evaluated-at 2026-09-01T12:00:00Z \
+  --after-raw-id 0 \
+  --limit 1000
+```
+
+L'écriture exige `PRODUCT_ONTOLOGY_SHADOW_ENABLED=true` ainsi que les shadows
+Observation, Product Graph et Entity Resolution. Le writer précharge les
+snapshots de la fenêtre, refuse toute divergence au même instant et n'active
+aucun lecteur public.
+
 Mesurer ensuite un lot Merchant Intelligence avec une horloge explicite :
 
 ```bash
@@ -314,10 +330,11 @@ En cas de régression, remettre la version applicative précédente,
 `ENTITY_RESOLUTION_SHADOW_ENABLED=false`,
 `OFFER_GRAPH_SHADOW_ENABLED=false`,
 `OFFER_TRUTH_SHADOW_ENABLED=false`,
+`PRODUCT_ONTOLOGY_SHADOW_ENABLED=false`,
 `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false`,
 `EVIDENCE_ENGINE_SHADOW_ENABLED=false`,
 `OBSERVATION_SHADOW_ENABLED=false`, tout en conservant le schéma à la tête
-`d5a3c7e9f1b4`.
+`e6b4d8f0a2c5`.
 Ne jamais downgrader vers la baseline. Le downgrade technique
 `3a7f9c2e5b61` → `d75faf1f6a94` supprime la colonne de devise et les valeurs
 qu'elle contient ; une suppression structurelle exige une migration

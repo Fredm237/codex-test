@@ -1,0 +1,10 @@
+{
+  "contract_version": "1.0.0",
+  "status": "draft_for_shadow",
+  "opened_at": "2026-09-01",
+  "public_reader_compatible": true,
+  "legacy_taxonomy_policy": "fallback_signal_never_central_truth",
+  "relationship_policy": "observed_text_never_becomes_canonical_without_entity_resolution",
+  "unknown_policy": "unknown_never_becomes_primary_product_or_compatible",
+  "artifact": "product-ontology-assertion.schema.json"
+}
