@@ -1,7 +1,7 @@
 # FILON — Phase 4 Product Ontology Execution Plan
 
 - Préparation locale : **1er septembre 2026**
-- Statut : **OUVERTE — PHASE 3 = GO**
+- Statut : **FERMÉE — PHASE 4 = GO**
 - Gate d'entrée : Phase 3 P3H terminale
 - Gate de sortie : **taxonomy / role benchmarks pass**
 - Lecteurs publics : **NON PROMUS**
@@ -42,15 +42,15 @@ fallbacks et régressions, sans devenir une identité ni une relation canonique.
 
 | Lot | État | Preuve attendue |
 |---|---|---|
-| P4A — contrat | **terminé localement** | ADR-009, schéma, manifest et tests |
-| P4B — baseline réelle | **agrégats préparés ; audit borné à compléter** | couverture catégories/rôles/relations/attributs |
-| P4C — benchmark | **terminé localement** | 18 442 cas v1.1, oracle ratifié, legacy `UNSAFE` |
-| P4D — extracteurs | **qualifié localement** | [extracteur fail-closed : 18 442 cas PASS](PHASE_4D_PRODUCT_ONTOLOGY_EXTRACTOR_REPORT.md) |
-| P4E — schéma/writer | **terminé localement** | [migration `e6b4d8f0a2c5`, writer sec et idempotent](PHASE_4E_PRODUCT_ONTOLOGY_SHADOW_REPORT.md) |
-| P4F — replay | à faire | lot production borné et idempotent |
-| P4G — qualification | à faire | taxonomy/role gates terminales |
-| P4H — revue | à faire | reçu Phase 4 et décision Hybrid Retrieval |
+| P4A — contrat | **terminé** | ADR-009, schéma, manifest et tests |
+| P4B — baseline réelle | **terminé** | agrégats Core et couverture réelle bornée |
+| P4C — benchmark | **terminé** | 18 442 cas v1.1, oracle ratifié, legacy `UNSAFE` |
+| P4D — extracteurs | **terminé** | [extracteur fail-closed : 18 442 cas PASS](PHASE_4D_PRODUCT_ONTOLOGY_EXTRACTOR_REPORT.md) |
+| P4E — schéma/writer | **terminé** | [migration `e6b4d8f0a2c5`, writer sec et idempotent](PHASE_4E_PRODUCT_ONTOLOGY_SHADOW_REPORT.md) |
+| P4F — replay | **terminé** | [1 000 créés, puis 1 000 existants](PHASE_4_FINAL_RECEIPT.md) |
+| P4G — qualification | **terminé** | [exactitude, couverture et abstention publiées](PHASE_4_FINAL_RECEIPT.md) |
+| P4H — revue | **GO** | [reçu Phase 4 et passage vers Hybrid Retrieval](PHASE_4_FINAL_RECEIPT.md) |
 
-Phase 3 est terminale avec le verdict GO. Cette ouverture n'autorise encore ni
-writer Product Ontology, ni replay production, ni promotion d'un lecteur
-public avant les gates P4E à P4H.
+Phase 4 est fermée avec le verdict **GO**. Les lecteurs publics restent
+inchangés ; Phase 5 Hybrid Retrieval est ouverte sur les seuls contrats,
+benchmarks et shadows qualifiés.
