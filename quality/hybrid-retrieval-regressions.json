@@ -1,0 +1,15 @@
+{
+  "schema_version": "hybrid-retrieval-regressions/v1",
+  "truth_basis": "REGRESSION_GROUND_TRUTH",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "cases": [
+    {"case_id":"smartphone-exact-fr","vertical":"smartphones","locale":"fr","scenario":"exact_product","truth_basis":"EXPLICIT_SYNTHETIC_MODEL"},
+    {"case_id":"laptop-alias-nl","vertical":"laptops","locale":"nl","scenario":"multilingual_alias","truth_basis":"CROSS_LANGUAGE_SYNTHETIC_ALIAS"},
+    {"case_id":"audio-no-match-en","vertical":"audio","locale":"en","scenario":"no_match","truth_basis":"ABSENT_SYNTHETIC_ENTITY"},
+    {"case_id":"fashion-ambiguous-fr","vertical":"fashion","locale":"fr","scenario":"ambiguous","truth_basis":"UNDERSPECIFIED_SYNTHETIC_QUERY"},
+    {"case_id":"hvac-accessory-nl","vertical":"appliances_hvac","locale":"nl","scenario":"accessory_trap","truth_basis":"EXPLICIT_MAIN_PRODUCT_NOT_ACCESSORY"},
+    {"case_id":"tyre-constraint-en","vertical":"tyres","locale":"en","scenario":"constraint_conflict","truth_basis":"EXPLICIT_SYNTHETIC_VARIANT_CONFLICT"},
+    {"case_id":"smartphone-duplicate-nl","vertical":"smartphones","locale":"nl","scenario":"duplicate_offers","truth_basis":"SAME_SYNTHETIC_ENTITY_MULTIPLE_MERCHANTS"},
+    {"case_id":"audio-semantic-only-fr","vertical":"audio","locale":"fr","scenario":"semantic_only_unresolved","truth_basis":"SEMANTIC_SIGNAL_WITHOUT_ENTITY_PROOF"}
+  ]
+}

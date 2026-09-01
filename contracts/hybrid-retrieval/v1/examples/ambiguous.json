@@ -1,0 +1,46 @@
+{
+  "contract_version": "1.0.0",
+  "run_id": "synthetic:retrieval:ambiguous:1",
+  "query": {
+    "query_ref": "synthetic-query-3",
+    "query_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "raw_query_retained": false,
+    "locale": "en",
+    "country_code": null
+  },
+  "intent": {
+    "status": "UNRESOLVED",
+    "product_type": { "state": "unknown", "value": null, "evidence": [] },
+    "exact_model": { "state": "unknown", "value": null, "evidence": [] },
+    "brand": { "state": "unknown", "value": null, "evidence": [] },
+    "hard_constraints": [],
+    "soft_preferences": []
+  },
+  "sources": [
+    { "source_type": "LEXICAL", "status": "SUCCEEDED", "candidate_count": 1, "latency_ms": 5, "index_version": "synthetic-fts/v1", "reason_code": null },
+    { "source_type": "STRUCTURED", "status": "ABSTAINED", "candidate_count": 0, "latency_ms": 2, "index_version": "synthetic-ontology/v1", "reason_code": "intent_unresolved" },
+    { "source_type": "SEMANTIC", "status": "SUCCEEDED", "candidate_count": 1, "latency_ms": 14, "index_version": "synthetic-vector/v1", "reason_code": null }
+  ],
+  "candidates": [{
+    "candidate_rank": 1,
+    "candidate_status": "QUARANTINED",
+    "entity": {
+      "state": "UNRESOLVED",
+      "entity_type": "UNKNOWN",
+      "entity_id": null,
+      "group_key": "unresolved:3333333333333333",
+      "evidence": []
+    },
+    "offer_ids": [],
+    "source_hits": [
+      { "source_type": "LEXICAL", "source_rank": 1, "raw_score": "1.0", "score_semantics": "synthetic_text_overlap" },
+      { "source_type": "SEMANTIC", "source_rank": 1, "raw_score": "0.71", "score_semantics": "synthetic_cosine_similarity" }
+    ],
+    "evidence": [{ "evidence_type": "SEMANTIC_HIT", "source_ref": "synthetic-vector:1", "field": "candidate", "transformation": "synthetic_semantic_candidate", "transformation_version": "semantic-adapter/v1" }]
+  }],
+  "outcome": "AMBIGUOUS",
+  "reason_codes": ["ambiguous_intent", "no_resolved_entity"],
+  "retrieval_version": "hybrid-retrieval/v1",
+  "fusion_version": "rrf/v1",
+  "evaluated_at": "2000-01-01T00:00:00Z"
+}

@@ -1,0 +1,17 @@
+{
+  "contract_version": "1.0.0",
+  "status": "draft_for_shadow",
+  "opened_at": "2026-09-01",
+  "public_reader_compatible": true,
+  "raw_query_policy": "digest_and_opaque_ref_only_never_persist_raw_query",
+  "identity_policy": "semantic_signal_never_resolves_entity_without_entity_resolution",
+  "candidate_policy": "product_first_one_group_key_once",
+  "ranking_policy": "retrieval_rank_is_not_product_quality_or_decision_score",
+  "commercial_policy": "affiliate_relationship_and_commission_never_affect_product_retrieval",
+  "artifact": "hybrid-retrieval-run.schema.json",
+  "examples": [
+    "examples/exact-product.json",
+    "examples/no-match.json",
+    "examples/ambiguous.json"
+  ]
+}

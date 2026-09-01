@@ -21,5 +21,7 @@ Versions actives :
   [`offer-truth/v1`](offer-truth/v1/README.md) ;
 - contrats internes Product Ontology shadow :
   [`product-ontology/v1`](product-ontology/v1/README.md) ;
+- contrats internes Hybrid Retrieval shadow :
+  [`hybrid-retrieval/v1`](hybrid-retrieval/v1/README.md) ;
 - taxonomie d'erreurs produit interne :
   [`taxonomies/v1`](taxonomies/v1/README.md).

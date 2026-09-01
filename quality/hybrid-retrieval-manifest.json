@@ -1,0 +1,53 @@
+{
+  "schema_version": "hybrid-retrieval-benchmark-manifest/v1",
+  "benchmark_version": "1.0.0",
+  "status": "active",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "retrieval_policy": "product_first_expand_only_fail_closed",
+  "generator": {
+    "version": "filon-hybrid-retrieval-holdout/v1",
+    "seeds": [20260901, 31415926, 27182818],
+    "samples_per_vertical_seed": 64,
+    "development_engine_input": false
+  },
+  "verticals": [
+    "smartphones",
+    "laptops",
+    "audio",
+    "fashion",
+    "appliances_hvac",
+    "tyres"
+  ],
+  "locales": ["fr", "nl", "en"],
+  "scenarios": [
+    "exact_product",
+    "multilingual_alias",
+    "no_match",
+    "ambiguous",
+    "accessory_trap",
+    "constraint_conflict",
+    "duplicate_offers",
+    "semantic_only_unresolved"
+  ],
+  "regression_ground_truth": "hybrid-retrieval-regressions.json",
+  "minimum_statistical_support": {
+    "positive_cases": 4000,
+    "no_match_cases": 2000,
+    "ambiguous_cases": 2000,
+    "constraint_cases": 1000,
+    "grouping_cases": 1000,
+    "semantic_only_cases": 1000
+  },
+  "gates": {
+    "recall_at_50_min": 0.95,
+    "ndcg_at_10_min": 0.85,
+    "top3_relevance_ci95_lower_min": 0.9,
+    "no_match_accuracy_ci95_lower_min": 0.99,
+    "ambiguous_accuracy_ci95_lower_min": 0.95,
+    "constraint_violations_max": 0,
+    "false_product_groupings_max": 0,
+    "provenance_completeness_min": 1.0,
+    "semantic_only_false_resolutions_max": 0,
+    "blocking_failures_max": 0
+  }
+}
