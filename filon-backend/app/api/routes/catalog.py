@@ -21,6 +21,7 @@ from sqlalchemy import (
     not_,
     or_,
     select,
+    text,
     update,
 )
 
@@ -807,6 +808,20 @@ async def _rail(session, core, *, limit: int, extra=()):
     return cards
 
 
+async def _bound_highlights_parallelism(session) -> None:
+    """Borne le plan PostgreSQL de cette seule transaction de vitrine.
+
+    Les agrégats historiques de ``highlights`` peuvent sinon déclencher plusieurs
+    workers qui se partagent ``/dev/shm``. Sur le Postgres de production, ce plan
+    parallèle peut épuiser la mémoire partagée et faire échouer l'endpoint alors
+    que le plan séquentiel reste sain. ``SET LOCAL`` disparaît avec la transaction
+    et ne modifie donc ni la configuration globale ni les autres requêtes.
+    """
+    bind = session.get_bind()
+    if bind is not None and bind.dialect.name == "postgresql":
+        await session.execute(text("SET LOCAL max_parallel_workers_per_gather = 0"))
+
+
 @router.get("/highlights")
 async def highlights(
     limit: int = Query(default=12, le=24, description="Produits par section"),
@@ -820,6 +835,8 @@ async def highlights(
     """
     if session is None:
         return {"sections": []}
+
+    await _bound_highlights_parallelism(session)
 
     # ── Agrégat d'historique, avec prix de référence validé ────────────────
     #
