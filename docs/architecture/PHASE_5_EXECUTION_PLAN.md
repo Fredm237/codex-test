@@ -2,7 +2,7 @@
 
 - Préparation locale : **1er septembre 2026**
 - Ouverture : **1er septembre 2026**
-- Statut : **OUVERTE — PHASE 4 = GO**
+- Statut : **TERMINÉE — PHASE 5 = GO**
 - Gate d'entrée : Phase 4 Product Ontology terminale avec verdict GO
 - Gate de sortie : **Precision / Recall / NDCG targets**
 - Lecteurs publics : **INCHANGÉS**
@@ -18,9 +18,10 @@
 | P5D — lexical | **TERMINÉ** | `SAFE_INCOMPLETE`, index-compatible, zéro failure bloquante |
 | P5E — structured + semantic | **TERMINÉ** | expand-only qualifié, zéro promotion semantic-only |
 | P5F — fusion et grouping | **TERMINÉ** | RRF product-first, digest et invariance affiliée structurelle |
-| P5G — shadow | **TERMINÉ LOCAL** | migration `f7c5e9a1b3d6`, writer OFF et idempotence |
-| P5H — replay réel | **LOCAL READY / PROD PENDING** | dry/apply/replay testé, publication et migration requises |
-| P5I à P5J | **À FAIRE** | aucun lecteur public promu |
+| P5G — shadow | **TERMINÉ** | migration production `f7c5e9a1b3d6`, writer OFF et idempotence |
+| P5H — replay réel | **TERMINÉ** | dry/apply/replay borné ; 1 create puis 1 existing |
+| P5I — comparaison | **TERMINÉ** | matrice qualité, couverture, latence, coût et limites publiée |
+| P5J — revue de sortie | **TERMINÉ** | Phase 5 = GO ; Phase 6 ouverte ; lecteur public inchangé |
 
 ## Objectif
 
@@ -129,11 +130,9 @@ indépendant n'existe ; elle n'autorise aucune prétention de préférence humai
 - mesures P50/P95/P99, coût et limites connues ;
 - reçu final P5 et décision explicite vers Constraint Engine.
 
-## État d'ouverture
+## État de sortie
 
-P4F, P4G et P4H sont terminaux avec le verdict GO. Phase 5 peut commencer par
-P5A, P5B et P5C. P5A à P5G sont désormais terminales localement ; P5H attend
-la publication, la migration contrôlée et le replay réel borné.
-Cette ouverture n'autorise encore aucune migration, aucun
-index, aucun embedding de production ni aucun changement de lecteur Hybrid
-Retrieval avant les gates propres de P5G à P5J.
+P5A à P5J sont terminales avec le verdict Phase 5 = GO. La migration et le
+replay shadow sont qualifiés ; le writer reste OFF et aucun lecteur public ne
+change. Phase 6 Constraint Engine est ouverte sans promouvoir le ranking de
+Phase 7 ni prétendre disposer d'une vérité humaine externe.

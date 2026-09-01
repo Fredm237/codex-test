@@ -1,6 +1,6 @@
 # FILON — dossier d'architecture Phase 0
 
-Statut : **PHASES 0 À 4 = GO ; PHASE 5 — HYBRID RETRIEVAL OUVERTE ; premier
+Statut : **PHASES 0 À 5 = GO ; PHASE 6 — CONSTRAINT ENGINE OUVERTE ; premier
 événement GitHub `schedule` classé `EXTERNAL_PROVIDER_PENDING /
 NON_BLOCKING` ; Immersive reste NO-GO**.
 
@@ -14,7 +14,7 @@ Ce dossier traduit les mandats Product Intelligence Core, Execution Governance e
 
 ## Décision exécutive
 
-**PHASES 0 À 4 = GO ; Phase 5 ouverte ; NO-GO Immersive inchangé. Aucun blocker
+**PHASES 0 À 5 = GO ; Phase 6 ouverte ; NO-GO Immersive inchangé. Aucun blocker
 humain : le Quality Lab autonome reste la gate active.**
 
 Le cycle catalogue réel, la migration heartbeat, les checkpoints de reprise,
@@ -117,6 +117,8 @@ et extension.
 - [Fusion product-first Hybrid Retrieval Phase 5F](PHASE_5F_HYBRID_RETRIEVAL_FUSION.md)
 - [Persistance shadow Hybrid Retrieval Phase 5G](PHASE_5G_HYBRID_RETRIEVAL_SHADOW.md)
 - [Replay réel borné Hybrid Retrieval Phase 5H](PHASE_5H_HYBRID_RETRIEVAL_REPLAY.md)
+- [Comparaison Hybrid Retrieval Phase 5I](PHASE_5I_HYBRID_RETRIEVAL_COMPARISON.md)
+- [Reçu final Phase 5](PHASE_5_FINAL_RECEIPT.md)
 - [Décision de timebox et sortie de Phase 0](PHASE_0_TIMEBOX_AND_EXIT_DECISION.md)
 - [Backlog de durcissement post-Phase 0](POST_PHASE_0_HARDENING.md)
 - [Durcissement final du contrat catalogue v1](PHASE_0B_CATALOG_CONTRACT_HARDENING_REPORT.md)
