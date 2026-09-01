@@ -138,6 +138,15 @@ jobs:
           --strict-engineering
           --output ../quality-confidence-report.json
 
+      - name: Exécuter le backtest historique BUY WAIT sans fuite future
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.buy_wait
+          --manifest ../quality/buy-wait-v2-manifest.json
+          --adapter buy_wait
+          --strict-engineering
+          --output ../quality-buy-wait-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -153,6 +162,7 @@ jobs:
             ${{ github.workspace }}/quality-product-ranking-report.json
             ${{ github.workspace }}/quality-offer-optimization-report.json
             ${{ github.workspace }}/quality-confidence-report.json
+            ${{ github.workspace }}/quality-buy-wait-report.json
           if-no-files-found: warn
           retention-days: 14
 

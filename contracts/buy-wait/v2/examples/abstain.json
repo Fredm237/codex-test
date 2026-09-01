@@ -1,0 +1,22 @@
+{
+  "schema_version": "buy-wait-decision/v2",
+  "policy_version": "buy-wait-policy/v2",
+  "trace_id": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "context_digest": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "raw_context_retained": false,
+  "outcome": "ABSTAIN",
+  "selected_offer_ref": null,
+  "selected_product_ref": null,
+  "current_price_decimal": null,
+  "currency": null,
+  "history_samples": 0,
+  "tracked_days": 0,
+  "current_percentile_decimal": null,
+  "decision_confidence_decimal": null,
+  "backtest_profile_ref": null,
+  "future_observations_used": false,
+  "reason_codes": ["source_selection_missing"],
+  "claims": [],
+  "evidence_refs": [],
+  "result_digest": "sha256:3333333333333333333333333333333333333333333333333333333333333333"
+}

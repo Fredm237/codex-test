@@ -1,0 +1,9 @@
+{
+  "schema_version": "buy-wait-contract-manifest/v2",
+  "contract": "buy-wait-decision/v2",
+  "schema": "buy-wait-decision.schema.json",
+  "examples": ["examples/buy-now.json", "examples/wait.json", "examples/abstain.json"],
+  "outcomes": ["BUY_NOW", "WAIT", "ABSTAIN"],
+  "future_observations_allowed": false,
+  "raw_context_retained": false
+}

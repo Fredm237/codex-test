@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/buy-wait/v2/buy-wait-decision.schema.json",
+  "title": "FILON Buy/Wait Decision v2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "policy_version", "trace_id", "context_digest",
+    "raw_context_retained", "outcome", "selected_offer_ref",
+    "selected_product_ref", "current_price_decimal", "currency",
+    "history_samples", "tracked_days", "current_percentile_decimal",
+    "decision_confidence_decimal", "backtest_profile_ref",
+    "future_observations_used", "reason_codes", "claims", "evidence_refs",
+    "result_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "buy-wait-decision/v2"},
+    "policy_version": {"const": "buy-wait-policy/v2"},
+    "trace_id": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "context_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "raw_context_retained": {"const": false},
+    "outcome": {"enum": ["BUY_NOW", "WAIT", "ABSTAIN"]},
+    "selected_offer_ref": {"type": ["string", "null"], "pattern": "^offer:.+$"},
+    "selected_product_ref": {"type": ["string", "null"], "pattern": "^(product|model|variant):.+$"},
+    "current_price_decimal": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/positive_decimal"}]},
+    "currency": {"type": ["string", "null"], "pattern": "^[A-Z]{3}$"},
+    "history_samples": {"type": "integer", "minimum": 0},
+    "tracked_days": {"type": "integer", "minimum": 0},
+    "current_percentile_decimal": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/probability"}]},
+    "decision_confidence_decimal": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/probability"}]},
+    "backtest_profile_ref": {"type": ["string", "null"], "minLength": 1},
+    "future_observations_used": {"const": false},
+    "reason_codes": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "claims": {"type": "array", "items": {"$ref": "#/$defs/claim"}},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "result_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"outcome": {"enum": ["BUY_NOW", "WAIT"]}}},
+      "then": {
+        "properties": {
+          "selected_offer_ref": {"type": "string"},
+          "selected_product_ref": {"type": "string"},
+          "current_price_decimal": {"$ref": "#/$defs/positive_decimal"},
+          "currency": {"type": "string"},
+          "history_samples": {"type": "integer", "minimum": 8},
+          "tracked_days": {"type": "integer", "minimum": 14},
+          "current_percentile_decimal": {"$ref": "#/$defs/probability"},
+          "decision_confidence_decimal": {"$ref": "#/$defs/probability"},
+          "backtest_profile_ref": {"type": "string", "minLength": 1},
+          "claims": {"minItems": 3},
+          "evidence_refs": {"minItems": 1}
+        }
+      }
+    },
+    {
+      "if": {"properties": {"outcome": {"const": "ABSTAIN"}}},
+      "then": {"properties": {"backtest_profile_ref": {"type": "null"}}}
+    }
+  ],
+  "$defs": {
+    "positive_decimal": {"type": "string", "pattern": "^(0*[1-9][0-9]*(\\.[0-9]+)?|0+\\.[0-9]*[1-9][0-9]*)$"},
+    "probability": {"type": "string", "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"},
+    "claim": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["claim", "value", "evidence_refs"],
+      "properties": {
+        "claim": {"enum": ["current_price_percentile", "historical_median_price", "decision_confidence"]},
+        "value": {"type": "string", "minLength": 1},
+        "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    }
+  }
+}

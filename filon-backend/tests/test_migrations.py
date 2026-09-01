@@ -30,6 +30,7 @@ from app.constraint_engine import models as constraint_engine_models  # noqa: F4
 from app.product_ranking import models as product_ranking_models  # noqa: F401
 from app.offer_optimization import models as offer_optimization_models  # noqa: F401
 from app.confidence import models as confidence_models  # noqa: F401
+from app.buy_wait import models as buy_wait_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_models  # noqa: F401
 from app.evidence_engine import models as evidence_models  # noqa: F401
 
@@ -58,6 +59,7 @@ CONSTRAINT_ENGINE_TABLES = {"constraint_evaluation_runs", "constraint_candidate_
 PRODUCT_RANKING_TABLES = {"product_ranking_runs", "product_ranking_candidates"}
 OFFER_OPTIMIZATION_TABLES = {"offer_optimization_runs", "offer_optimization_candidates"}
 CONFIDENCE_TABLES = {"confidence_calibration_runs", "confidence_dimension_records"}
+BUY_WAIT_TABLES = {"buy_wait_decision_runs"}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
 EVIDENCE_ENGINE_TABLES = {
     "evidence_claim_records",
@@ -82,7 +84,8 @@ CONSTRAINT_ENGINE_REVISION = "a8d6f0b2c4e7"
 PRODUCT_RANKING_REVISION = "b9e7a1c3d5f8"
 OFFER_OPTIMIZATION_REVISION = "c0f8b2d4e6a9"
 OFFER_OPTIMIZATION_FACTS_REVISION = "d1a9c3e5f7b0"
-HEAD_REVISION = "e2b0d4f6a8c1"
+CONFIDENCE_REVISION = "e2b0d4f6a8c1"
+HEAD_REVISION = "f3c1e5a7b9d2"
 
 
 @pytest.fixture(autouse=True)
@@ -153,7 +156,8 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
 
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == OFFER_OPTIMIZATION_FACTS_REVISION
+    assert scripts.get_revision(CONFIDENCE_REVISION).down_revision == OFFER_OPTIMIZATION_FACTS_REVISION
+    assert scripts.get_revision(HEAD_REVISION).down_revision == CONFIDENCE_REVISION
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):
@@ -428,6 +432,7 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
     assert rollback_settings.product_ranking_shadow_enabled is False
     assert rollback_settings.offer_optimization_shadow_enabled is False
     assert rollback_settings.confidence_shadow_enabled is False
+    assert rollback_settings.buy_wait_shadow_enabled is False
     assert rollback_settings.merchant_intelligence_shadow_enabled is False
     assert rollback_settings.evidence_engine_shadow_enabled is False
     tables = set(inspect(engine).get_table_names())
@@ -442,6 +447,7 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
         | PRODUCT_RANKING_TABLES
         | OFFER_OPTIMIZATION_TABLES
         | CONFIDENCE_TABLES
+        | BUY_WAIT_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
         | EVIDENCE_ENGINE_TABLES
         <= tables
