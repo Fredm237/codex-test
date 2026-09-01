@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_REVISION = "b9db07b15986"
 EVIDENCE_ENGINE_REVISION = "e8c3f6a0b5d2"
-HEAD_REVISION = "b9e7a1c3d5f8"
+HEAD_REVISION = "c0f8b2d4e6a9"
 MIGRATION_LOCK_ID = 0x46494C4F4E
 
 
@@ -205,7 +205,9 @@ async def test_postgresql_upgrade_drift_extensions_indexes_and_lock() -> None:
                             "'constraint_evaluation_runs', "
                             "'constraint_candidate_evaluations', "
                             "'product_ranking_runs', "
-                            "'product_ranking_candidates'))"
+                            "'product_ranking_candidates', "
+                            "'offer_optimization_runs', "
+                            "'offer_optimization_candidates'))"
                         )
                     )
                 )
@@ -237,6 +239,8 @@ async def test_postgresql_upgrade_drift_extensions_indexes_and_lock() -> None:
             "constraint_candidate_evaluations",
             "product_ranking_runs",
             "product_ranking_candidates",
+            "offer_optimization_runs",
+            "offer_optimization_candidates",
             "merchant_quality_snapshots",
             "evidence_claim_records",
             "decision_eligibility_records",

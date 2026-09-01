@@ -120,6 +120,15 @@ jobs:
           --strict-engineering
           --output ../quality-product-ranking-report.json
 
+      - name: Exécuter les garde-fous Offer Optimization sans signal commercial
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.offer_optimization
+          --manifest ../quality/offer-optimization-manifest.json
+          --adapter offer_optimization
+          --strict-engineering
+          --output ../quality-offer-optimization-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -133,6 +142,7 @@ jobs:
             ${{ github.workspace }}/quality-product-ontology-report.json
             ${{ github.workspace }}/quality-constraint-engine-report.json
             ${{ github.workspace }}/quality-product-ranking-report.json
+            ${{ github.workspace }}/quality-offer-optimization-report.json
           if-no-files-found: warn
           retention-days: 14
 
