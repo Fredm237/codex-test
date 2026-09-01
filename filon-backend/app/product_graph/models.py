@@ -13,6 +13,7 @@ from typing import Any
 from sqlalchemy import (
     CheckConstraint,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -325,6 +326,110 @@ class GraphIdentityAssertion(Base):
     observed_at: Mapped[datetime] = mapped_column(DateTime)
     transformation: Mapped[str] = mapped_column(String(96))
     transformation_version: Mapped[str] = mapped_column(String(64))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+
+
+class GraphEntitySignalProjection(Base):
+    """Profil de signaux rejouable, isolé des lecteurs Product Graph v1."""
+
+    __tablename__ = "graph_entity_signal_projections"
+    __table_args__ = (
+        UniqueConstraint(
+            "raw_source_record_id",
+            "extractor_version",
+            name="uq_graph_entity_signal_projection_version",
+        ),
+        UniqueConstraint(
+            "projection_key",
+            name="uq_graph_entity_signal_projection_key",
+        ),
+        CheckConstraint(
+            "length(projection_key) = 64",
+            name="ck_graph_entity_signal_projection_key_sha256",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    projection_key: Mapped[str] = mapped_column(String(64))
+    raw_source_record_id: Mapped[int] = mapped_column(
+        ForeignKey("raw_source_records.id"),
+        index=True,
+    )
+    source_type: Mapped[str] = mapped_column(String(48))
+    source_ref: Mapped[str] = mapped_column(String(255))
+    observed_at: Mapped[datetime] = mapped_column(DateTime)
+    extractor_version: Mapped[str] = mapped_column(String(64), index=True)
+    profile_json: Mapped[dict[str, Any]] = mapped_column(JSON)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        server_default=func.now(),
+    )
+
+
+class GraphEntityResolutionDecision(Base):
+    """Décision Entity Resolution append-only et explicable en shadow."""
+
+    __tablename__ = "graph_entity_resolution_decisions"
+    __table_args__ = (
+        UniqueConstraint(
+            "raw_source_record_id",
+            "resolver_version",
+            "policy_version",
+            name="uq_graph_entity_resolution_decision_version",
+        ),
+        UniqueConstraint(
+            "decision_key",
+            name="uq_graph_entity_resolution_decision_key",
+        ),
+        CheckConstraint(
+            "length(decision_key) = 64",
+            name="ck_graph_entity_resolution_decision_key_sha256",
+        ),
+        CheckConstraint(
+            "resolution IN ('EXACT_VERIFIED', 'HIGH_CONFIDENCE', 'PROBABLE', "
+            "'AMBIGUOUS', 'UNRESOLVED')",
+            name="ck_graph_entity_resolution_state",
+        ),
+        CheckConstraint(
+            "(resolution IN ('EXACT_VERIFIED', 'HIGH_CONFIDENCE') "
+            "AND canonical_variant_id IS NOT NULL) OR "
+            "(resolution IN ('PROBABLE', 'AMBIGUOUS', 'UNRESOLVED') "
+            "AND canonical_variant_id IS NULL)",
+            name="ck_graph_entity_resolution_canonical",
+        ),
+        Index(
+            "ix_graph_entity_resolution_state",
+            "resolution",
+            "resolver_version",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    decision_key: Mapped[str] = mapped_column(String(64))
+    raw_source_record_id: Mapped[int] = mapped_column(
+        ForeignKey("raw_source_records.id"),
+        index=True,
+    )
+    offer_id: Mapped[int] = mapped_column(ForeignKey("offers.id"), index=True)
+    subject_type: Mapped[str] = mapped_column(String(32))
+    resolution: Mapped[str] = mapped_column(String(24), index=True)
+    canonical_variant_id: Mapped[int | None] = mapped_column(
+        ForeignKey("graph_variants.id"),
+        nullable=True,
+        index=True,
+    )
+    candidate_ids_json: Mapped[list[int]] = mapped_column(JSON)
+    confidence_score: Mapped[float | None] = mapped_column(Float, nullable=True)
+    reason_codes_json: Mapped[list[str]] = mapped_column(JSON)
+    evidence_json: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+    conflicts_json: Mapped[list[dict[str, Any]]] = mapped_column(JSON)
+    extractor_version: Mapped[str] = mapped_column(String(64))
+    resolver_version: Mapped[str] = mapped_column(String(64))
+    policy_version: Mapped[str] = mapped_column(String(64))
+    observed_at: Mapped[datetime] = mapped_column(DateTime)
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
         server_default=func.now(),

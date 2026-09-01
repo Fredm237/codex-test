@@ -91,7 +91,7 @@ ratifiés par le benchmark et par la distribution des signaux réels.
 | P2C — benchmark étendu | **terminé** | [benchmark et targets ratifiés](PHASE_2C_ENTITY_RESOLUTION_BENCHMARK_REPORT.md) |
 | P2D — extracteurs shadow | **terminé localement** | [faits versionnés et unknown explicite](PHASE_2D_ENTITY_SIGNAL_EXTRACTORS_REPORT.md) |
 | P2E — resolver multi-signal | **terminé localement** | [resolver hiérarchique et benchmark vert](PHASE_2E_MULTI_SIGNAL_RESOLVER_REPORT.md) |
-| P2F — replay réel borné | **en cours** | application, replay et totaux PostgreSQL |
+| P2F — replay réel borné | **implémentation locale qualifiée ; production en attente** | [migration, writer, idempotence et procédure bornée](PHASE_2F_ENTITY_RESOLUTION_REPLAY_REPORT.md) |
 | P2G — qualification | à faire | métriques et CI terminales |
 | P2H — revue de sortie | à faire | reçu Phase 2 et décision vers Offer Truth |
 
