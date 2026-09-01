@@ -85,6 +85,16 @@ class Settings(BaseSettings):
             errors.append(
                 "OFFER_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
             )
+        if self.offer_truth_shadow_enabled and not (
+            self.observation_shadow_enabled
+            and self.product_graph_shadow_enabled
+            and self.entity_resolution_shadow_enabled
+            and self.offer_graph_shadow_enabled
+        ):
+            errors.append(
+                "OFFER_TRUTH_SHADOW_ENABLED requires Observation, Product Graph, "
+                "Entity Resolution and Offer Graph shadows"
+            )
         if self.merchant_intelligence_shadow_enabled and not (
             self.observation_shadow_enabled
             and self.product_graph_shadow_enabled
@@ -344,6 +354,9 @@ class Settings(BaseSettings):
     # Projection append-only des preuves offre. Elle accepte une identité
     # produit non résolue, mais ne la rend jamais éligible.
     offer_graph_shadow_enabled: bool = Field(default=False)
+    # Snapshot Offer Truth temporel append-only. Le flag ne démarre aucun
+    # replay et exige toutes les preuves Graph nécessaires à une Variant.
+    offer_truth_shadow_enabled: bool = Field(default=False)
     # Mesures agrégées append-only, sans score ni confiance synthétique.
     merchant_intelligence_shadow_enabled: bool = Field(default=False)
     # Claims sourcés et décision strictement shadow ; aucune lecture publique.

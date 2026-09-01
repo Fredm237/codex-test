@@ -1,0 +1,77 @@
+{
+  "contract_version": "1.0.0",
+  "offer_id": 503,
+  "variant_id": 303,
+  "merchant_id": 43,
+  "offer_status": "STALE",
+  "claims": {
+    "price": {
+      "state": "stale",
+      "value": { "amount_decimal": "199.00", "currency": "EUR" },
+      "evidence": [{
+        "raw_source_record_id": 1003,
+        "source_type": "awin_feed",
+        "source_ref": "awin:feed:43:1003",
+        "observed_at": "2026-08-20T06:00:00Z",
+        "field": "search_price",
+        "transformation": "decimal_money_normalization",
+        "transformation_version": "offer-truth-extractor-v1",
+        "confidence_state": "derived_deterministic"
+      }]
+    },
+    "stock": {
+      "state": "stale",
+      "value": "in_stock",
+      "evidence": [{
+        "raw_source_record_id": 1003,
+        "source_type": "awin_feed",
+        "source_ref": "awin:feed:43:1003",
+        "observed_at": "2026-08-20T06:00:00Z",
+        "field": "in_stock",
+        "transformation": "tristate_stock_normalization",
+        "transformation_version": "offer-truth-extractor-v1",
+        "confidence_state": "derived_deterministic"
+      }]
+    },
+    "shipping": { "state": "unknown", "value": null, "evidence": [] },
+    "returns": { "state": "unknown", "value": null, "evidence": [] },
+    "warranty": { "state": "unknown", "value": null, "evidence": [] },
+    "merchant": {
+      "state": "known",
+      "value": {
+        "merchant_id": 43,
+        "merchant_status": "AFFILIATED",
+        "relationship_type": "AFFILIATED",
+        "seller_type": "unknown"
+      },
+      "evidence": [{
+        "raw_source_record_id": 1003,
+        "source_type": "awin_feed",
+        "source_ref": "awin:feed:43:1003",
+        "observed_at": "2026-08-20T06:00:00Z",
+        "field": "merchant_id",
+        "transformation": "merchant_registry_link",
+        "transformation_version": "offer-truth-extractor-v1",
+        "confidence_state": "observed_direct"
+      }]
+    },
+    "freshness": {
+      "state": "stale",
+      "value": { "age_seconds": 1040400, "ttl_seconds": 259200 },
+      "evidence": [{
+        "raw_source_record_id": 1003,
+        "source_type": "awin_feed",
+        "source_ref": "awin:feed:43:1003",
+        "observed_at": "2026-08-20T06:00:00Z",
+        "field": "observed_at",
+        "transformation": "claim_freshness_evaluation",
+        "transformation_version": "offer-truth-policy-v1",
+        "confidence_state": "derived_deterministic"
+      }]
+    }
+  },
+  "reason_codes": ["price_stale", "stock_stale", "observation_stale"],
+  "projection_version": "offer-truth-shadow-v1",
+  "policy_version": "offer-truth-policy-v1",
+  "evaluated_at": "2026-09-01T07:00:00Z"
+}

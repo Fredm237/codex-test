@@ -1,0 +1,366 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/offer-truth/v1/offer-truth-snapshot.schema.json",
+  "title": "FILON Offer Truth Snapshot v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "offer_id",
+    "variant_id",
+    "merchant_id",
+    "offer_status",
+    "claims",
+    "reason_codes",
+    "projection_version",
+    "policy_version",
+    "evaluated_at"
+  ],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "offer_id": { "type": "integer", "minimum": 1 },
+    "variant_id": { "type": ["integer", "null"], "minimum": 1 },
+    "merchant_id": { "type": "integer", "minimum": 1 },
+    "offer_status": {
+      "enum": ["VERIFIED", "PARTIAL", "STALE", "INVALID", "QUARANTINED"]
+    },
+    "claims": {
+      "type": "object",
+      "required": [
+        "price",
+        "stock",
+        "shipping",
+        "returns",
+        "warranty",
+        "merchant",
+        "freshness"
+      ],
+      "properties": {
+        "price": { "$ref": "#/$defs/money_claim" },
+        "stock": { "$ref": "#/$defs/stock_claim" },
+        "shipping": { "$ref": "#/$defs/money_claim" },
+        "returns": { "$ref": "#/$defs/returns_claim" },
+        "warranty": { "$ref": "#/$defs/warranty_claim" },
+        "merchant": { "$ref": "#/$defs/merchant_claim" },
+        "freshness": { "$ref": "#/$defs/freshness_claim" }
+      },
+      "additionalProperties": false
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "verified_core_truth",
+          "identity_unresolved",
+          "price_unknown",
+          "price_invalid",
+          "price_stale",
+          "stock_unknown",
+          "stock_invalid",
+          "stock_stale",
+          "shipping_unknown",
+          "returns_unknown",
+          "warranty_unknown",
+          "merchant_unknown",
+          "observation_stale",
+          "future_observation",
+          "source_conflict"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "projection_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "policy_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "evaluated_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": [
+        "raw_source_record_id",
+        "source_type",
+        "source_ref",
+        "observed_at",
+        "field",
+        "transformation",
+        "transformation_version",
+        "confidence_state"
+      ],
+      "properties": {
+        "raw_source_record_id": { "type": "integer", "minimum": 1 },
+        "source_type": { "type": "string", "minLength": 1, "maxLength": 48 },
+        "source_ref": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+        "transformation": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "transformation_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "confidence_state": {
+          "enum": ["observed_direct", "derived_deterministic", "not_calibrated"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_array": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" },
+      "maxItems": 16
+    },
+    "money": {
+      "type": "object",
+      "required": ["amount_decimal", "currency"],
+      "properties": {
+        "amount_decimal": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+        },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+      },
+      "additionalProperties": false
+    },
+    "money_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid", "stale"] },
+        "value": { "oneOf": [{ "$ref": "#/$defs/money" }, { "type": "null" }] },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["known", "stale"] } } },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/$defs/money" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "stock_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid", "stale"] },
+        "value": {
+          "oneOf": [
+            { "enum": ["in_stock", "out_of_stock", "preorder"] },
+            { "type": "null" }
+          ]
+        },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["known", "stale"] } } },
+          "then": {
+            "properties": {
+              "value": { "enum": ["in_stock", "out_of_stock", "preorder"] },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "returns_value": {
+      "type": "object",
+      "required": ["accepted", "period_days"],
+      "properties": {
+        "accepted": { "type": "boolean" },
+        "period_days": { "type": ["integer", "null"], "minimum": 0, "maximum": 3650 }
+      },
+      "additionalProperties": false
+    },
+    "returns_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid", "stale"] },
+        "value": { "oneOf": [{ "$ref": "#/$defs/returns_value" }, { "type": "null" }] },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["known", "stale"] } } },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/$defs/returns_value" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "warranty_value": {
+      "type": "object",
+      "required": ["duration_months", "description"],
+      "properties": {
+        "duration_months": { "type": ["integer", "null"], "minimum": 0, "maximum": 1200 },
+        "description": { "type": ["string", "null"], "minLength": 1, "maxLength": 512 }
+      },
+      "anyOf": [
+        { "properties": { "duration_months": { "type": "integer" } } },
+        { "properties": { "description": { "type": "string" } } }
+      ],
+      "additionalProperties": false
+    },
+    "warranty_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid", "stale"] },
+        "value": { "oneOf": [{ "$ref": "#/$defs/warranty_value" }, { "type": "null" }] },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["known", "stale"] } } },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/$defs/warranty_value" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "merchant_value": {
+      "type": "object",
+      "required": ["merchant_id", "merchant_status", "relationship_type", "seller_type"],
+      "properties": {
+        "merchant_id": { "type": "integer", "minimum": 1 },
+        "merchant_status": {
+          "enum": ["INDEXED", "AFFILIATED", "DIRECT_PARTNER", "MARKETPLACE", "UNVERIFIED"]
+        },
+        "relationship_type": {
+          "enum": ["INDEXED", "AFFILIATED", "DIRECT_PARTNER", "MARKETPLACE", "UNVERIFIED"]
+        },
+        "seller_type": { "enum": ["direct", "marketplace", "unknown"] }
+      },
+      "additionalProperties": false
+    },
+    "merchant_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid"] },
+        "value": { "oneOf": [{ "$ref": "#/$defs/merchant_value" }, { "type": "null" }] },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "known" } } },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/$defs/merchant_value" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "freshness_value": {
+      "type": "object",
+      "required": ["age_seconds", "ttl_seconds"],
+      "properties": {
+        "age_seconds": { "type": "integer", "minimum": 0 },
+        "ttl_seconds": { "type": "integer", "minimum": 1 }
+      },
+      "additionalProperties": false
+    },
+    "freshness_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["fresh", "stale", "unknown", "invalid_future"] },
+        "value": { "oneOf": [{ "$ref": "#/$defs/freshness_value" }, { "type": "null" }] },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "enum": ["fresh", "stale"] } } },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/$defs/freshness_value" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid_future"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "offer_status": { "const": "VERIFIED" } } },
+      "then": {
+        "properties": {
+          "variant_id": { "type": "integer", "minimum": 1 },
+          "claims": {
+            "properties": {
+              "price": { "properties": { "state": { "const": "known" } } },
+              "stock": { "properties": { "state": { "const": "known" } } },
+              "merchant": { "properties": { "state": { "const": "known" } } },
+              "freshness": { "properties": { "state": { "const": "fresh" } } }
+            }
+          },
+          "reason_codes": { "contains": { "const": "verified_core_truth" } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "offer_status": { "const": "QUARANTINED" } } },
+      "then": {
+        "properties": {
+          "variant_id": { "type": "null" },
+          "reason_codes": { "contains": { "const": "identity_unresolved" } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "offer_status": { "const": "STALE" } } },
+      "then": {
+        "properties": {
+          "freshness": { "type": "object" },
+          "claims": {
+            "properties": {
+              "freshness": { "properties": { "state": { "const": "stale" } } }
+            }
+          },
+          "reason_codes": { "contains": { "const": "observation_stale" } }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

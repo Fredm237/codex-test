@@ -1,0 +1,16 @@
+{
+  "contract_version": "1.0.0",
+  "status": "draft_for_shadow",
+  "opened_at": "2026-09-01",
+  "public_reader_compatible": true,
+  "unknown_policy": "missing_never_becomes_zero_free_available_or_favorable",
+  "money_policy": "decimal_string_and_explicit_iso_currency_are_atomic",
+  "confidence_policy": "no_numeric_confidence_without_external_calibration",
+  "freshness_policy": "stale_and_future_observations_are_never_current_truth",
+  "artifact": "offer-truth-snapshot.schema.json",
+  "examples": {
+    "verified": "examples/verified-offer.json",
+    "partial": "examples/partial-offer.json",
+    "stale": "examples/stale-offer.json"
+  }
+}

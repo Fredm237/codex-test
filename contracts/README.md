@@ -15,5 +15,9 @@ Versions actives :
 - contrats clients publics : [`v1`](v1/README.md) ;
 - contrats internes Product Identity shadow :
   [`product-identity/v1`](product-identity/v1/README.md) ;
+- contrats internes Entity Resolution shadow :
+  [`entity-resolution/v1`](entity-resolution/v1/README.md) ;
+- contrats internes Offer Truth shadow :
+  [`offer-truth/v1`](offer-truth/v1/README.md) ;
 - taxonomie d'erreurs produit interne :
   [`taxonomies/v1`](taxonomies/v1/README.md).

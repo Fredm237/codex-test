@@ -50,7 +50,9 @@ nouveau service ne peut plus l'activer. Pour ce nouveau service,
    DATABASE_SCHEMA_MODE=alembic
    OBSERVATION_SHADOW_ENABLED=false
    PRODUCT_GRAPH_SHADOW_ENABLED=false
+   ENTITY_RESOLUTION_SHADOW_ENABLED=false
    OFFER_GRAPH_SHADOW_ENABLED=false
+   OFFER_TRUTH_SHADOW_ENABLED=false
    MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false
    CORS_ORIGINS=["https://filon.be","https://www.filon.be"]
    FORWARDED_ALLOW_IPS=<IP/CIDR exacts et vérifiés du proxy Railway>
@@ -233,6 +235,22 @@ Qualifier ensuite l'Offer Graph en lecture seule, après le lot Product Graph :
 python -m app.offer_graph.backfill --after-raw-id 0 --limit 1000
 ```
 
+Le replay Offer Truth exige en plus Entity Resolution et un instant explicite,
+afin qu'une seconde exécution au même instant soit strictement idempotente :
+
+```bash
+python -m app.offer_truth.replay \
+  --evaluated-at 2026-09-01T12:00:00Z \
+  --after-raw-id 0 \
+  --limit 1000
+```
+
+La commande reste en dry-run sans `--apply`. L'écriture exige
+`OFFER_TRUTH_SHADOW_ENABLED=true` ainsi que les shadows Observation, Product
+Graph, Entity Resolution et Offer Graph. Une nouvelle évaluation à un autre
+instant crée un nouveau snapshot append-only ; elle ne réécrit jamais
+l'historique.
+
 L'option `--apply` exige les flags Observation et Offer Graph. Reprendre au
 `last_raw_source_id` et ne jamais confondre les compteurs techniques avec une
 mesure Quality Lab.
@@ -293,11 +311,13 @@ import live.
 
 En cas de régression, remettre la version applicative précédente,
 `PRODUCT_GRAPH_SHADOW_ENABLED=false` et
+`ENTITY_RESOLUTION_SHADOW_ENABLED=false`,
 `OFFER_GRAPH_SHADOW_ENABLED=false`,
+`OFFER_TRUTH_SHADOW_ENABLED=false`,
 `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false`,
 `EVIDENCE_ENGINE_SHADOW_ENABLED=false`,
 `OBSERVATION_SHADOW_ENABLED=false`, tout en conservant le schéma à la tête
-`e8c3f6a0b5d2`.
+`d5a3c7e9f1b4`.
 Ne jamais downgrader vers la baseline. Le downgrade technique
 `3a7f9c2e5b61` → `d75faf1f6a94` supprime la colonne de devise et les valeurs
 qu'elle contient ; une suppression structurelle exige une migration
