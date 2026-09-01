@@ -16,7 +16,7 @@ from .engine import OfferOptimization
 from .models import OfferOptimizationCandidate, OfferOptimizationRun
 
 
-PERSISTENCE_VERSION = "offer-optimization-shadow-writer/v1"
+PERSISTENCE_VERSION = "offer-optimization-shadow-writer/v2"
 
 
 class OfferOptimizationPersistenceError(RuntimeError):
@@ -138,7 +138,10 @@ async def persist_offer_optimization(
                     status=item.status,
                     selection_rank=item.selection_rank,
                     total_cost=item.total_cost,
+                    cashback_amount=item.cashback_amount,
+                    landed_cost=item.landed_cost,
                     currency=item.currency,
+                    return_period_days=item.return_period_days,
                     merchant_reliability=item.merchant_reliability,
                     freshness=item.freshness,
                     reason_codes_json=list(item.reason_codes),

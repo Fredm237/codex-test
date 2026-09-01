@@ -18,10 +18,16 @@ de fiabilité marchand. Phase 8 ne transforme pas ces compteurs en score
 synthétique : `merchant_reliability` reste inconnu tant qu'un contrat dédié ne
 le prouve pas.
 
+Le corpus de production audité ne fournit ni cashback ni retours prouvés. La
+politique v2 conserve donc ces dimensions `unknown` : elle n'invente ni
+cashback nul, ni droit de retour, ni durée de retour.
+
 ## Limites
 
 - `NO_RANKED_PRODUCT_IN_PRODUCTION_SHADOW_SAMPLE` ;
 - `NO_PROVEN_MERCHANT_RELIABILITY_SCORE` ;
+- `NO_PROVEN_CASHBACK_FACT` ;
+- `NO_PROVEN_RETURN_POLICY` ;
 - `NO_EXTERNAL_HUMAN_GROUND_TRUTH / NON_BLOCKING` ;
 - `CATALOG_CRON_RECOVERY_PENDING` pour le run catalogue 22 historique.
 

@@ -78,7 +78,8 @@ PRODUCT_ONTOLOGY_REVISION = "e6b4d8f0a2c5"
 HYBRID_RETRIEVAL_REVISION = "f7c5e9a1b3d6"
 CONSTRAINT_ENGINE_REVISION = "a8d6f0b2c4e7"
 PRODUCT_RANKING_REVISION = "b9e7a1c3d5f8"
-HEAD_REVISION = "c0f8b2d4e6a9"
+OFFER_OPTIMIZATION_REVISION = "c0f8b2d4e6a9"
+HEAD_REVISION = "d1a9c3e5f7b0"
 
 
 @pytest.fixture(autouse=True)
@@ -149,9 +150,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
 
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == (
-        PRODUCT_RANKING_REVISION
-    )
+    assert scripts.get_revision(HEAD_REVISION).down_revision == OFFER_OPTIMIZATION_REVISION
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):

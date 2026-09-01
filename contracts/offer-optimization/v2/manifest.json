@@ -1,0 +1,13 @@
+{
+  "schema_version": "offer-optimization-manifest/v2",
+  "ranking_precondition": "only_rank_1_product_can_receive_an_offer",
+  "truth_policy": "only_verified_offer_truth_can_be_optimized",
+  "unknown_policy": "unknown_or_unsourced_operational_fact_never_receives_a_fallback",
+  "objective_policy": "lowest_landed_cost_then_reliability_then_return_period_then_freshness_then_stable_offer_ref",
+  "landed_cost_policy": "price_plus_shipping_minus_explicit_sourced_cashback",
+  "returns_policy": "returns_must_be_explicitly_accepted_with_a_sourced_period",
+  "commercial_policy": "commission_affiliation_and_platform_revenue_are_not_inputs",
+  "currency_policy": "price_shipping_and_cashback_must_have_the_same_explicit_currency",
+  "privacy_policy": "raw_context_and_user_profile_never_persisted",
+  "activation_policy": "shadow_only_no_public_reader"
+}

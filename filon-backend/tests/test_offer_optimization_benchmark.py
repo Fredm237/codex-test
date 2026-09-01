@@ -20,10 +20,10 @@ MANIFEST = ROOT / "quality" / "offer-optimization-manifest.json"
 def test_offer_optimization_passes_autonomous_engineering_gate() -> None:
     report = run_benchmark(MANIFEST)
     assert report["support"] == {
-        "total_cases": 4608,
-        "unknown_cases": 864,
-        "ineligible_cases": 1440,
-        "affiliate_mutation_cases": 720,
+        "total_cases": 5760,
+        "unknown_cases": 2304,
+        "ineligible_cases": 1728,
+        "affiliate_mutation_cases": 576,
     }
     assert report["metrics"]["ineligible_selected"] == 0
     assert report["metrics"]["unknown_selected"] == 0

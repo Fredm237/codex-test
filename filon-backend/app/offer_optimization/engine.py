@@ -14,7 +14,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any, Sequence
 
 
-OFFER_OPTIMIZATION_POLICY_VERSION = "offer-optimization-policy/v1"
+OFFER_OPTIMIZATION_POLICY_VERSION = "offer-optimization-policy/v2"
 FACT_STATES = {"known", "unknown", "invalid", "conflict"}
 TRUTH_STATUSES = {"VERIFIED", "PARTIAL", "STALE", "INVALID", "QUARANTINED"}
 RANKING_OUTCOMES = {"RANKED_PRODUCTS", "ABSTAINED", "NO_ELIGIBLE_PRODUCT"}
@@ -89,6 +89,36 @@ class ScoreFact:
         _validate_refs(self.evidence_refs)
 
 
+@dataclass(frozen=True)
+class ReturnPolicyFact:
+    state: str
+    accepted: bool | None = None
+    period_days: int | None = None
+    evidence_refs: tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.state not in FACT_STATES:
+            raise OfferOptimizationError("return policy fact state is invalid")
+        if self.state == "known":
+            if not isinstance(self.accepted, bool):
+                raise OfferOptimizationError("known return policy requires accepted")
+            if self.accepted and (
+                isinstance(self.period_days, bool)
+                or not isinstance(self.period_days, int)
+                or not 0 <= self.period_days <= 3650
+            ):
+                raise OfferOptimizationError("accepted return policy requires a valid period")
+            if self.period_days is not None and (
+                isinstance(self.period_days, bool)
+                or not isinstance(self.period_days, int)
+                or not 0 <= self.period_days <= 3650
+            ):
+                raise OfferOptimizationError("return period is invalid")
+        elif self.accepted is not None or self.period_days is not None:
+            raise OfferOptimizationError("non-known return policy cannot carry a value")
+        _validate_refs(self.evidence_refs)
+
+
 def _validate_refs(refs: tuple[str, ...]) -> None:
     if any(not isinstance(ref, str) or not ref for ref in refs):
         raise OfferOptimizationError("evidence refs must be non-empty strings")
@@ -103,7 +133,9 @@ class OfferCandidateFacts:
     truth_status: str
     price: MoneyFact
     shipping: MoneyFact
+    cashback: MoneyFact
     availability: AvailabilityFact
+    returns: ReturnPolicyFact
     merchant_reliability: ScoreFact
     freshness: ScoreFact
 
@@ -146,7 +178,10 @@ class OfferEvaluation:
     status: str
     selection_rank: int | None
     total_cost: str | None
+    cashback_amount: str | None
+    landed_cost: str | None
     currency: str | None
+    return_period_days: int | None
     merchant_reliability: str | None
     freshness: str | None
     reason_codes: tuple[str, ...]
@@ -191,62 +226,91 @@ def _known_money(fact: MoneyFact, *, allow_zero: bool) -> tuple[Decimal, str] | 
 def _evaluate_candidate(
     request: OptimizationRequest,
     candidate: OfferCandidateFacts,
-) -> tuple[OfferEvaluation, tuple[Decimal, Decimal, Decimal, str] | None]:
+) -> tuple[OfferEvaluation, tuple[Decimal, Decimal, Decimal, Decimal, str] | None]:
     if request.ranking_outcome != "RANKED_PRODUCTS":
         return OfferEvaluation(
-            candidate.offer_ref,
-            candidate.product_ref,
-            "INELIGIBLE",
-            None,
-            None,
-            None,
-            None,
-            None,
-            ("ranking_precondition_not_met",),
-            (),
+            offer_ref=candidate.offer_ref,
+            product_ref=candidate.product_ref,
+            status="INELIGIBLE",
+            selection_rank=None,
+            total_cost=None,
+            cashback_amount=None,
+            landed_cost=None,
+            currency=None,
+            return_period_days=None,
+            merchant_reliability=None,
+            freshness=None,
+            reason_codes=("ranking_precondition_not_met",),
+            evidence_refs=(),
         ), None
     if candidate.product_ref != request.selected_product_ref:
         return OfferEvaluation(
-            candidate.offer_ref,
-            candidate.product_ref,
-            "INELIGIBLE",
-            None,
-            None,
-            None,
-            None,
-            None,
-            ("different_product",),
-            (),
+            offer_ref=candidate.offer_ref,
+            product_ref=candidate.product_ref,
+            status="INELIGIBLE",
+            selection_rank=None,
+            total_cost=None,
+            cashback_amount=None,
+            landed_cost=None,
+            currency=None,
+            return_period_days=None,
+            merchant_reliability=None,
+            freshness=None,
+            reason_codes=("different_product",),
+            evidence_refs=(),
         ), None
     if candidate.truth_status != "VERIFIED":
         return OfferEvaluation(
-            candidate.offer_ref,
-            candidate.product_ref,
-            "INELIGIBLE",
-            None,
-            None,
-            None,
-            None,
-            None,
-            (f"offer_truth_{candidate.truth_status.lower()}",),
-            (),
+            offer_ref=candidate.offer_ref,
+            product_ref=candidate.product_ref,
+            status="INELIGIBLE",
+            selection_rank=None,
+            total_cost=None,
+            cashback_amount=None,
+            landed_cost=None,
+            currency=None,
+            return_period_days=None,
+            merchant_reliability=None,
+            freshness=None,
+            reason_codes=(f"offer_truth_{candidate.truth_status.lower()}",),
+            evidence_refs=(),
         ), None
     if candidate.availability.state == "known" and candidate.availability.value != "in_stock":
         return OfferEvaluation(
-            candidate.offer_ref,
-            candidate.product_ref,
-            "INELIGIBLE",
-            None,
-            None,
-            None,
-            None,
-            None,
-            (f"availability_{candidate.availability.value}",),
-            candidate.availability.evidence_refs,
+            offer_ref=candidate.offer_ref,
+            product_ref=candidate.product_ref,
+            status="INELIGIBLE",
+            selection_rank=None,
+            total_cost=None,
+            cashback_amount=None,
+            landed_cost=None,
+            currency=None,
+            return_period_days=None,
+            merchant_reliability=None,
+            freshness=None,
+            reason_codes=(f"availability_{candidate.availability.value}",),
+            evidence_refs=candidate.availability.evidence_refs,
+        ), None
+    if candidate.returns.state == "known" and candidate.returns.accepted is False:
+        return OfferEvaluation(
+            offer_ref=candidate.offer_ref,
+            product_ref=candidate.product_ref,
+            status="INELIGIBLE",
+            selection_rank=None,
+            total_cost=None,
+            cashback_amount=None,
+            landed_cost=None,
+            currency=None,
+            return_period_days=None,
+            merchant_reliability=None,
+            freshness=None,
+            reason_codes=("returns_not_accepted",),
+            evidence_refs=candidate.returns.evidence_refs,
         ), None
 
     price = _known_money(candidate.price, allow_zero=False)
     shipping = _known_money(candidate.shipping, allow_zero=True)
+    cashback = _known_money(candidate.cashback, allow_zero=True)
     reliability = _score(candidate.merchant_reliability)
     freshness = _score(candidate.freshness)
     availability_known = (
@@ -254,25 +318,44 @@ def _evaluate_candidate(
         and candidate.availability.value == "in_stock"
         and bool(candidate.availability.evidence_refs)
     )
+    returns_known = (
+        candidate.returns.state == "known"
+        and candidate.returns.accepted is True
+        and isinstance(candidate.returns.period_days, int)
+        and not isinstance(candidate.returns.period_days, bool)
+        and bool(candidate.returns.evidence_refs)
+    )
     missing: list[str] = []
     if price is None:
         missing.append("price_unknown_or_unsourced")
     if shipping is None:
         missing.append("shipping_unknown_or_unsourced")
+    if cashback is None:
+        missing.append("cashback_unknown_or_unsourced")
     if not availability_known:
         missing.append("availability_unknown_or_unsourced")
+    if not returns_known:
+        missing.append("returns_unknown_or_unsourced")
     if reliability is None:
         missing.append("merchant_reliability_unknown_or_unsourced")
     if freshness is None:
         missing.append("freshness_unknown_or_unsourced")
-    if price is not None and shipping is not None and price[1] != shipping[1]:
+    currencies = {
+        item[1] for item in (price, shipping, cashback) if item is not None
+    }
+    if len(currencies) > 1:
         missing.append("currency_conflict")
+    gross = price[0] + shipping[0] if price is not None and shipping is not None else None
+    if gross is not None and cashback is not None and cashback[0] > gross:
+        missing.append("cashback_exceeds_total_cost")
     evidence_refs = tuple(
         sorted(
             set(
                 candidate.price.evidence_refs
                 + candidate.shipping.evidence_refs
+                + candidate.cashback.evidence_refs
                 + candidate.availability.evidence_refs
+                + candidate.returns.evidence_refs
                 + candidate.merchant_reliability.evidence_refs
                 + candidate.freshness.evidence_refs
             )
@@ -280,33 +363,53 @@ def _evaluate_candidate(
     )
     if missing:
         return OfferEvaluation(
-            candidate.offer_ref,
-            candidate.product_ref,
-            "UNOPTIMIZABLE",
-            None,
-            None,
-            None,
-            format(reliability, "f") if reliability is not None else None,
-            format(freshness, "f") if freshness is not None else None,
-            tuple(missing),
-            evidence_refs,
+            offer_ref=candidate.offer_ref,
+            product_ref=candidate.product_ref,
+            status="UNOPTIMIZABLE",
+            selection_rank=None,
+            total_cost=None,
+            cashback_amount=None,
+            landed_cost=None,
+            currency=None,
+            return_period_days=None,
+            merchant_reliability=format(reliability, "f") if reliability is not None else None,
+            freshness=format(freshness, "f") if freshness is not None else None,
+            reason_codes=tuple(missing),
+            evidence_refs=evidence_refs,
         ), None
 
-    assert price is not None and shipping is not None and reliability is not None and freshness is not None
-    total = price[0] + shipping[0]
-    evaluation = OfferEvaluation(
-        candidate.offer_ref,
-        candidate.product_ref,
-        "ELIGIBLE",
-        None,
-        format(total, "f"),
-        price[1],
-        format(reliability, "f"),
-        format(freshness, "f"),
-        ("verified_total_cost_and_operational_evidence",),
-        evidence_refs,
+    assert (
+        price is not None
+        and shipping is not None
+        and cashback is not None
+        and reliability is not None
+        and freshness is not None
+        and candidate.returns.period_days is not None
+        and gross is not None
     )
-    return evaluation, (total, -reliability, -freshness, candidate.offer_ref)
+    landed = gross - cashback[0]
+    evaluation = OfferEvaluation(
+        offer_ref=candidate.offer_ref,
+        product_ref=candidate.product_ref,
+        status="ELIGIBLE",
+        selection_rank=None,
+        total_cost=format(gross, "f"),
+        cashback_amount=format(cashback[0], "f"),
+        landed_cost=format(landed, "f"),
+        currency=price[1],
+        return_period_days=candidate.returns.period_days,
+        merchant_reliability=format(reliability, "f"),
+        freshness=format(freshness, "f"),
+        reason_codes=("verified_landed_cost_returns_and_operational_evidence",),
+        evidence_refs=evidence_refs,
+    )
+    return evaluation, (
+        landed,
+        -reliability,
+        -Decimal(candidate.returns.period_days),
+        -freshness,
+        candidate.offer_ref,
+    )
 
 
 def optimize_offers(
@@ -317,7 +420,9 @@ def optimize_offers(
     if len(refs) != len(set(refs)):
         raise OfferOptimizationError("offer refs must be unique")
     evaluated: list[OfferEvaluation] = []
-    eligible: list[tuple[tuple[Decimal, Decimal, Decimal, str], OfferEvaluation]] = []
+    eligible: list[
+        tuple[tuple[Decimal, Decimal, Decimal, Decimal, str], OfferEvaluation]
+    ] = []
     for candidate in candidates:
         evaluation, objective = _evaluate_candidate(request, candidate)
         evaluated.append(evaluation)
@@ -330,16 +435,19 @@ def optimize_offers(
         selected_ref = selected.offer_ref
         evaluated = [
             OfferEvaluation(
-                item.offer_ref,
-                item.product_ref,
-                "SELECTED" if item.offer_ref == selected_ref else item.status,
-                1 if item.offer_ref == selected_ref else None,
-                item.total_cost,
-                item.currency,
-                item.merchant_reliability,
-                item.freshness,
-                item.reason_codes,
-                item.evidence_refs,
+                offer_ref=item.offer_ref,
+                product_ref=item.product_ref,
+                status="SELECTED" if item.offer_ref == selected_ref else item.status,
+                selection_rank=1 if item.offer_ref == selected_ref else None,
+                total_cost=item.total_cost,
+                cashback_amount=item.cashback_amount,
+                landed_cost=item.landed_cost,
+                currency=item.currency,
+                return_period_days=item.return_period_days,
+                merchant_reliability=item.merchant_reliability,
+                freshness=item.freshness,
+                reason_codes=item.reason_codes,
+                evidence_refs=item.evidence_refs,
             )
             for item in evaluated
         ]
@@ -369,7 +477,7 @@ def optimize_offers(
         "evaluations": [asdict(item) for item in ordered],
     }
     return OfferOptimization(
-        "offer-optimization/v1",
+        "offer-optimization/v2",
         OFFER_OPTIMIZATION_POLICY_VERSION,
         context_digest,
         False,

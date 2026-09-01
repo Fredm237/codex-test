@@ -12,6 +12,7 @@ from app.offer_optimization.engine import (
     MoneyFact,
     OfferCandidateFacts,
     OptimizationRequest,
+    ReturnPolicyFact,
     ScoreFact,
     optimize_offers,
 )
@@ -52,14 +53,16 @@ async def _ranking_run(session, *, outcome: str = "RANKED_PRODUCTS") -> ProductR
 
 def _optimization():
     offer = OfferCandidateFacts(
-        "offer:501",
-        "variant:101",
-        "VERIFIED",
-        MoneyFact("known", "100", "EUR", ("price",)),
-        MoneyFact("known", "5", "EUR", ("shipping",)),
-        AvailabilityFact("known", "in_stock", ("stock",)),
-        ScoreFact("known", "0.9", ("merchant-quality",)),
-        ScoreFact("known", "0.8", ("freshness",)),
+        offer_ref="offer:501",
+        product_ref="variant:101",
+        truth_status="VERIFIED",
+        price=MoneyFact("known", "100", "EUR", ("price",)),
+        shipping=MoneyFact("known", "5", "EUR", ("shipping",)),
+        cashback=MoneyFact("known", "2", "EUR", ("cashback",)),
+        availability=AvailabilityFact("known", "in_stock", ("stock",)),
+        returns=ReturnPolicyFact("known", True, 30, ("returns",)),
+        merchant_reliability=ScoreFact("known", "0.9", ("merchant-quality",)),
+        freshness=ScoreFact("known", "0.8", ("freshness",)),
     )
     return optimize_offers(
         OptimizationRequest("ctx", "RANKED_PRODUCTS", "variant:101", 1),
@@ -94,6 +97,12 @@ async def test_dry_apply_and_replay_are_append_only_without_raw_context() -> Non
         stored = await session.scalar(select(OfferOptimizationRun))
         assert stored is not None and stored.raw_context_retained is False
         assert stored.selected_offer_ref == "offer:501"
+        candidate = await session.scalar(select(OfferOptimizationCandidate))
+        assert candidate is not None
+        assert candidate.total_cost == "105"
+        assert candidate.cashback_amount == "2"
+        assert candidate.landed_cost == "103"
+        assert candidate.return_period_days == 30
     await engine.dispose()
 
 

@@ -1,16 +1,17 @@
 # FILON — Phase 8C Offer Optimization Benchmark
 
 - Mode : **AUTONOMOUS_QUALITY_LAB**
-- Corpus : **4 608 cas synthétiques déterministes et adversariaux**
+- Corpus : **5 760 cas synthétiques déterministes et adversariaux**
 - Validation humaine externe : **NO_EXTERNAL_HUMAN_GROUND_TRUTH / NON_BLOCKING**
 - Statut local : **PASS — RATIFICATION CI RESTANTE**
-- Évaluation : `sha256:bdf9c048e9c8d082cf9ffb987411a2d9af3bce9fbdfc987db48c588fd935ca99`
+- Évaluation : `sha256:7fa3254c26e3b700aba213bb2945f966081afdab88886e21c32c6b55e62192b6`
 
 ## Couverture
 
-Le holdout couvre six verticales, trois locales, huit seeds et six scénarios :
-objectif exact, livraison inconnue, offre périmée, rupture de stock, mutation de
-commission et stabilité des égalités.
+Le holdout v2 couvre six verticales, trois locales, huit seeds et dix
+scénarios : objectif exact, livraison inconnue, cashback inconnu, retours
+inconnus, devise cashback contradictoire, offre périmée, rupture de stock,
+retours refusés, mutation de commission et stabilité des égalités.
 
 Les gates exigent : exactitude avec borne Wilson 95 % supérieure au seuil,
 zéro offre inéligible sélectionnée, zéro inconnue sélectionnée, zéro variation
@@ -21,11 +22,11 @@ inconnues et ne respecte pas les exclusions. Il doit rester `UNSAFE`.
 
 ## Reçu local
 
-- 4 608 sélections exactes sur 4 608 ;
-- borne Wilson 95 % : `0.99916704` ;
-- 864 cas avec livraison inconnue ;
-- 1 440 cas contenant une offre inéligible ;
-- 720 mutations de commission ;
+- 5 760 sélections exactes sur 5 760 ;
+- borne Wilson 95 % : `0.99933352` ;
+- 2 304 cas inconnus ou contradictoires ;
+- 1 728 cas contenant une offre inéligible ;
+- 576 mutations de commission ;
 - zéro inconnue ou offre inéligible sélectionnée ;
 - zéro variation sous mutation de commission ;
 - provenance des sélections : `1.0`.
