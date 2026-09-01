@@ -1,277 +1,197 @@
 {
-  "titre": "FILON — Phase 1 Product Identity",
-  "objectif": "Construire Brand, ProductFamily, ProductModel, Variant, identifiers et provenance en shadow réversible jusqu’au passage du benchmark exact-product",
-  "cree": "2026-08-31T16:17:45+00:00",
-  "maj": "2026-08-31T22:30:00+00:00",
+  "titre": "FILON — Phase 2 Entity Resolution",
+  "objectif": "Augmenter la couverture au-delà du GTIN exact par un resolver multi-signal shadow, mesuré et abstentionniste, sans dépasser le target de faux merge",
+  "cree": "2026-08-31T22:41:21+00:00",
+  "maj": "2026-08-31T23:15:00+00:00",
   "contraintes": [
-    "Conserver les lectures publiques v1 inchangées jusqu’au passage des gates Product Identity",
-    "Aucun unknown ne devient une correspondance favorable ; provenance et abstention obligatoires",
-    "Migrations expand-only, flags off, rollback et backfills dry-run/bornés obligatoires",
-    "NO_EXTERNAL_HUMAN_GROUND_TRUTH reste explicite et non bloquant ; aucune validation humaine ne peut être fabriquée",
+    "FALSE MERGE IS WORSE THAN FALSE SPLIT",
+    "Les preuves exactes de Phase 1 restent prioritaires et ne peuvent pas être affaiblies par un score probabiliste",
+    "Aucun statut HIGH_CONFIDENCE ou PROBABLE ne devient une identité publique avant passage des gates Phase 2",
+    "AMBIGUOUS et UNRESOLVED restent des résultats valides ; aucun fallback favorable sur unknown",
+    "Le resolver reste shadow, réversible et sans lecteur public pendant toute la qualification",
+    "NO_EXTERNAL_HUMAN_GROUND_TRUTH reste explicitement déclaré ; aucune validation humaine ne peut être fabriquée",
     "Immersive, Fashion production et refonte créative restent interdits par leurs gates"
   ],
   "taches": [
     {
-      "id": "p1_a",
-      "objectif": "Auditer les données réelles et établir la baseline Product Identity",
+      "id": "p2_a",
+      "objectif": "Figer le contrat de décision et les niveaux de confiance Entity Resolution",
       "statut": "fait",
       "depend": [],
-      "outil": "audit Awin + PostgreSQL en lecture seule",
-      "attendu": "Couverture, collisions, unknowns et verticales prioritaires mesurés sans secret",
-      "obtenu": "Baseline reelle publiee localement ; rosters lexicaux rejetes ; verticales sequentiees",
-      "verification": "Baseline production : 3 200 produits stratifies, 597 846 produits Core, collisions et volumes de 13 sous-categories documentes dans PHASE_1A_PRODUCT_IDENTITY_BASELINE.md",
-      "tentatives": 1
-    },
-    {
-      "id": "p1_b",
-      "objectif": "Figer les frontières et contrats Brand/Family/Model/Variant",
-      "statut": "fait",
-      "depend": [
-        "p1_a"
-      ],
       "outil": "ADR + contracts",
-      "attendu": "Invariants, provenance, unknown, identifiants et compatibilité v1 versionnés",
-      "obtenu": "Frontieres Brand/Family/Model/Variant, scopes GTIN/MPN/SKU, provenance et unknown figes",
-      "verification": "ADR-006 accepte, deux JSON Schemas et deux exemples valides ; 20 tests Product Identity/Product Graph passent",
+      "attendu": "EXACT_VERIFIED, HIGH_CONFIDENCE, PROBABLE, AMBIGUOUS et UNRESOLVED ont des preuves, interdictions et transitions explicites",
+      "obtenu": "Contrat additif des cinq états, preuves, scores et conflits, sans lecteur public ni writer",
+      "verification": "ADR-007, JSON Schema et cinq exemples ; 36 tests Entity Resolution/Product Identity verts ; exact réservé au GTIN, HIGH exige deux preuves fortes, états non promotables sans canonical_id",
       "tentatives": 1
     },
     {
-      "id": "p1_c",
-      "objectif": "Construire le benchmark exact-product autonome",
+      "id": "p2_b",
+      "objectif": "Auditer la disponibilité réelle des signaux au-delà du GTIN",
       "statut": "fait",
-      "depend": [
-        "p1_b"
-      ],
+      "depend": [],
+      "outil": "PostgreSQL + corpus Awin en lecture seule",
+      "attendu": "Couverture MPN, modèle, marque, attributs variante, titre, image, marchand et taxonomie mesurée par verticale",
+      "obtenu": "Audit production en lecture seule du corpus raw rejouable et de treize verticales Core bornées ; absence de MPN, modèle et attributs de variante structurés confirmée dans le feed actuel",
+      "verification": "1 000 raws d'un feed et d'un marchand : 330 EAN, 670 sans EAN ; aucun champ structuré MPN/modèle/variante ; échantillons Core jusqu'à 500 lignes par verticale ; titre/image/regex classés candidate-only",
+      "tentatives": 1
+    },
+    {
+      "id": "p2_c",
+      "objectif": "Étendre le benchmark avec hard negatives et target de faux merge",
+      "statut": "fait",
+      "depend": ["p2_a", "p2_b"],
       "outil": "Quality Lab",
-      "attendu": "Golden set, hard negatives, multi-seed et scorecard reproductible",
-      "obtenu": "Benchmark autonome multi-seed sur cinq verticales, hard negatives et scorecard Wilson",
-      "verification": "Evaluation f71c3f3e : 10 565/10 565 checks, exact-product 960/960, faux merges 0/2 880 (IC95 haut 0,1332 %), 30 tests cibles verts",
+      "attendu": "Faux merges, faux splits, exact product et variant match mesurés avec intervalles et budget d'abstention",
+      "obtenu": "Benchmark déterministe de 6 730 cas ratifié ; baseline exact-GTIN SAFE_INCOMPLETE, toutes les gates de sécurité vertes et les deux gates de couverture honnêtement rouges",
+      "verification": "0 faux merge sur 3 844 hard negatives, borne Wilson 0,100 % ; 960/960 exact préservés ; 2 884/2 884 conflits abstention ; 965/965 positifs structurés encore abstention ; evaluation a33367af...",
       "tentatives": 1
     },
     {
-      "id": "p1_d",
-      "objectif": "Étendre le schéma et les writers Product Identity en shadow",
+      "id": "p2_d",
+      "objectif": "Construire les extracteurs de modèle et d'attributs variante en shadow",
       "statut": "fait",
-      "depend": [
-        "p1_b"
-      ],
-      "outil": "Alembic + backend",
-      "attendu": "Migration expand-only réversible, flags off, projection idempotente et provenance conservée",
-      "obtenu": "Schema et writers shadow idempotents, rollback par flag, Core v1 inchange",
-      "verification": "Revision b3e1a7c4d9f2 expand-only ; assertions Brand/GTIN/SKU sourcees ; 121 tests cibles verts, 3 PostgreSQL opt-in ignores localement",
+      "depend": ["p2_a", "p2_b"],
+      "outil": "backend",
+      "attendu": "Faits versionnés et sourcés pour MPN, modèle, capacité, couleur, taille et génération, avec unknown explicite",
+      "obtenu": "Extracteur shadow pur de seize signaux avec états observed/candidate_only/unknown/invalid/conflict, provenance et version ; aucun MPN ou modèle inventé depuis le titre",
+      "verification": "JSON Schema et deux exemples ; 62 tests ciblés verts ; alias structurés contradictoires bloqués ; attributs lexicaux faibles ; raw actuel maintenu unknown pour les preuves absentes",
       "tentatives": 1
     },
     {
-      "id": "p1_e",
-      "objectif": "Exécuter un backfill réel borné en dry-run puis shadow",
+      "id": "p2_e",
+      "objectif": "Construire la génération de candidats et le resolver multi-signal hiérarchique",
       "statut": "fait",
-      "depend": [
-        "p1_c",
-        "p1_d"
-      ],
+      "depend": ["p2_c", "p2_d"],
+      "outil": "backend",
+      "attendu": "GTIN/MPN/modèle/attributs/taxonomie/merchant metadata ordonnés, conflits bloquants et scores explicables",
+      "obtenu": "Candidate generator et resolver hiérarchique shadow : GTIN autoritatif, deux types de preuves fortes pour HIGH_CONFIDENCE, conflits et candidats multiples en abstention, score non autoritaire",
+      "verification": "Benchmark multi-signal 6 730/6 730, 0/3 844 faux merges, 965/965 positifs structurés, 2 884/2 884 conflits et 961/961 faibles en abstention ; 79 tests ciblés verts ; evaluation 00f3594a...",
+      "tentatives": 1
+    },
+    {
+      "id": "p2_f",
+      "objectif": "Exécuter un shadow replay réel borné",
+      "statut": "en_cours",
+      "depend": ["p2_e"],
       "outil": "catalog core",
-      "attendu": "Rapport de collisions/quarantaine, zéro faux merge implicite et rollback prouvé",
-      "obtenu": "Lot production de 1 000 raws appliqué puis rejoué sans aucune création supplémentaire",
-      "verification": "Dry-run puis apply : 330 résolus, 670 quarantaines, 2 330 assertions, 1 000 liens et 321 variantes ; replay : 0 création, 2 330 assertions et 1 000 liens reconnus ; schéma b3e1a7c4d9f2 et sondes vertes",
+      "attendu": "Lot réel idempotent, sans lecteur public, avec décisions et provenance persistées",
+      "obtenu": null,
+      "verification": null,
       "tentatives": 1
     },
     {
-      "id": "p1_f",
-      "objectif": "Qualifier Product Identity sur ses gates",
-      "statut": "fait",
-      "depend": [
-        "p1_e"
-      ],
+      "id": "p2_g",
+      "objectif": "Qualifier le target de faux merge et les métriques de résolution",
+      "statut": "a_faire",
+      "depend": ["p2_c", "p2_f"],
       "outil": "tests + benchmark + CI",
-      "attendu": "Exact-product benchmark vert, faux merges/splits mesurés et limites publiées",
-      "obtenu": "Benchmark exact-product et invariants du corpus réel qualifiés sans faux merge ni faux split observé",
-      "verification": "CI 33425556598 verte ; benchmark 10 565/10 565 ; production : 0 GTIN split, 0 variante à GTIN contradictoires, 0 variante orpheline, 0 lien résolu sans variante",
-      "tentatives": 1
+      "attendu": "False Merge sous target ratifié, false split et couverture publiés, abstention conservée",
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
     },
     {
-      "id": "p1_g",
-      "objectif": "Tenir la revue de sortie vers Phase 2",
-      "statut": "fait",
-      "depend": [
-        "p1_f"
-      ],
+      "id": "p2_h",
+      "objectif": "Tenir la revue de sortie vers Phase 3 Offer Truth",
+      "statut": "a_faire",
+      "depend": ["p2_g"],
       "outil": "architecture review",
-      "attendu": "Reçu Phase 1 et décision GO/NO-GO vers Entity Resolution",
-      "obtenu": "Phase 1 fermée GO et Phase 2 Entity Resolution ouverte sans promotion des lecteurs Product Graph",
-      "verification": "PHASE_1_FINAL_RECEIPT.md consolide contrats, benchmark, CI, backfill/replay production, limites et décision de passage",
-      "tentatives": 1
+      "attendu": "Reçu Phase 2 et décision GO/NO-GO sans promotion prématurée",
+      "obtenu": null,
+      "verification": null,
+      "tentatives": 0
     }
   ],
   "journal": [
     {
-      "ts": "2026-08-31T16:17:45+00:00",
+      "ts": "2026-08-31T22:41:21+00:00",
       "evenement": "mission_creee",
-      "detail": "FILON — Phase 1 Product Identity"
+      "detail": "FILON — Phase 2 Entity Resolution"
     },
     {
-      "ts": "2026-08-31T16:17:45+00:00",
-      "evenement": "contrainte",
-      "detail": "Conserver les lectures publiques v1 inchangées jusqu’au passage des gates Product Identity"
-    },
-    {
-      "ts": "2026-08-31T16:17:45+00:00",
-      "evenement": "contrainte",
-      "detail": "Aucun unknown ne devient une correspondance favorable ; provenance et abstention obligatoires"
-    },
-    {
-      "ts": "2026-08-31T16:17:46+00:00",
-      "evenement": "contrainte",
-      "detail": "Migrations expand-only, flags off, rollback et backfills dry-run/bornés obligatoires"
-    },
-    {
-      "ts": "2026-08-31T16:17:46+00:00",
-      "evenement": "contrainte",
-      "detail": "NO_EXTERNAL_HUMAN_GROUND_TRUTH reste explicite et non bloquant ; aucune validation humaine ne peut être fabriquée"
-    },
-    {
-      "ts": "2026-08-31T16:17:46+00:00",
-      "evenement": "contrainte",
-      "detail": "Immersive, Fashion production et refonte créative restent interdits par leurs gates"
-    },
-    {
-      "ts": "2026-08-31T16:17:46+00:00",
-      "evenement": "tache_ajoutee",
-      "detail": "p1_a — Auditer les données réelles et établir la baseline Product Identity"
-    },
-    {
-      "ts": "2026-08-31T16:17:47+00:00",
-      "evenement": "tache_ajoutee",
-      "detail": "p1_b — Figer les frontières et contrats Brand/Family/Model/Variant"
-    },
-    {
-      "ts": "2026-08-31T16:17:47+00:00",
-      "evenement": "tache_ajoutee",
-      "detail": "p1_c — Construire le benchmark exact-product autonome"
-    },
-    {
-      "ts": "2026-08-31T16:17:48+00:00",
-      "evenement": "tache_ajoutee",
-      "detail": "p1_d — Étendre le schéma et les writers Product Identity en shadow"
-    },
-    {
-      "ts": "2026-08-31T16:17:48+00:00",
-      "evenement": "tache_ajoutee",
-      "detail": "p1_e — Exécuter un backfill réel borné en dry-run puis shadow"
-    },
-    {
-      "ts": "2026-08-31T16:17:48+00:00",
-      "evenement": "tache_ajoutee",
-      "detail": "p1_f — Qualifier Product Identity sur ses gates"
-    },
-    {
-      "ts": "2026-08-31T16:17:49+00:00",
-      "evenement": "tache_ajoutee",
-      "detail": "p1_g — Tenir la revue de sortie vers Phase 2"
-    },
-    {
-      "ts": "2026-08-31T17:17:43+00:00",
-      "evenement": "tache_demarree",
-      "detail": "p1_a (tentative 1)"
-    },
-    {
-      "ts": "2026-08-31T17:36:31+00:00",
+      "ts": "2026-08-31T22:41:21+00:00",
       "evenement": "verification",
-      "detail": "p1_a — Baseline production : 3 200 produits stratifies, 597 846 produits Core, collisions et volumes de 13 sous-categories documentes dans PHASE_1A_PRODUCT_IDENTITY_BASELINE.md"
+      "detail": "Entrée Phase 2 — Phase 1 GO ; CI 33446873622 verte ; merge 07ccbb669648ff6b7e28949c26d98e62c0403a79 ; production saine sous b3e1a7c4d9f2"
     },
     {
-      "ts": "2026-08-31T17:36:31+00:00",
-      "evenement": "tache_faite",
-      "detail": "p1_a — Baseline reelle publiee localement ; rosters lexicaux rejetes ; verticales sequentiees"
-    },
-    {
-      "ts": "2026-08-31T17:36:31+00:00",
+      "ts": "2026-08-31T22:41:21+00:00",
       "evenement": "tache_demarree",
-      "detail": "p1_b (tentative 1)"
+      "detail": "p2_a (tentative 1)"
     },
     {
-      "ts": "2026-08-31T17:36:31+00:00",
+      "ts": "2026-08-31T22:47:18+00:00",
       "evenement": "verification",
-      "detail": "p1_b — ADR-006 accepte, deux JSON Schemas et deux exemples valides ; 20 tests Product Identity/Product Graph passent"
+      "detail": "p2_a — ADR-007, JSON Schema et cinq exemples ; 36 tests Entity Resolution/Product Identity verts ; exact réservé au GTIN, HIGH exige deux preuves fortes, états non promotables sans canonical_id"
     },
     {
-      "ts": "2026-08-31T17:36:31+00:00",
+      "ts": "2026-08-31T22:47:18+00:00",
       "evenement": "tache_faite",
-      "detail": "p1_b — Frontieres Brand/Family/Model/Variant, scopes GTIN/MPN/SKU, provenance et unknown figes"
+      "detail": "p2_a — Contrat additif des cinq états, preuves, scores et conflits, sans lecteur public ni writer"
     },
     {
-      "ts": "2026-08-31T17:36:31+00:00",
+      "ts": "2026-08-31T22:47:18+00:00",
       "evenement": "tache_demarree",
-      "detail": "p1_c (tentative 1)"
+      "detail": "p2_b (tentative 1)"
     },
     {
-      "ts": "2026-08-31T17:43:49+00:00",
+      "ts": "2026-08-31T22:55:00+00:00",
       "evenement": "verification",
-      "detail": "p1_c — Evaluation f71c3f3e : 10 565/10 565 checks, exact-product 960/960, faux merges 0/2 880 (IC95 haut 0,1332 %), 30 tests cibles verts"
+      "detail": "p2_b — 1 000 raws : 330 EAN et 670 abstentions ; aucun champ structuré MPN/modèle/variante ; treize verticales Core bornées auditées ; signaux lexicaux maintenus candidate-only"
     },
     {
-      "ts": "2026-08-31T17:43:49+00:00",
+      "ts": "2026-08-31T22:55:00+00:00",
       "evenement": "tache_faite",
-      "detail": "p1_c — Benchmark autonome multi-seed sur cinq verticales, hard negatives et scorecard Wilson"
+      "detail": "p2_b — audit de disponibilité des signaux réels documenté sans écriture production ni promotion publique"
     },
     {
-      "ts": "2026-08-31T17:43:49+00:00",
+      "ts": "2026-08-31T22:55:00+00:00",
       "evenement": "tache_demarree",
-      "detail": "p1_d (tentative 1)"
+      "detail": "p2_c (tentative 1)"
     },
     {
-      "ts": "2026-08-31T17:55:36+00:00",
+      "ts": "2026-08-31T23:04:00+00:00",
       "evenement": "verification",
-      "detail": "p1_d — Revision b3e1a7c4d9f2 expand-only ; assertions Brand/GTIN/SKU sourcees ; 121 tests cibles verts, 3 PostgreSQL opt-in ignores localement"
+      "detail": "p2_c — 6 730 cas ; 0/3 844 faux merges (Wilson haut 0,100 %) ; exact 960/960 ; conflits 2 884/2 884 abstention ; positifs structurés 0/965 résolus au baseline"
     },
     {
-      "ts": "2026-08-31T17:55:36+00:00",
+      "ts": "2026-08-31T23:04:00+00:00",
       "evenement": "tache_faite",
-      "detail": "p1_d — Schema et writers shadow idempotents, rollback par flag, Core v1 inchange"
+      "detail": "p2_c — benchmark, target faux merge 0,5 %, hard negatives et budget d'abstention ratifiés ; baseline SAFE_INCOMPLETE non promouvable"
     },
     {
-      "ts": "2026-08-31T17:55:36+00:00",
+      "ts": "2026-08-31T23:04:00+00:00",
       "evenement": "tache_demarree",
-      "detail": "p1_e (tentative 1)"
+      "detail": "p2_d (tentative 1)"
     },
     {
-      "ts": "2026-08-31T22:23:01+00:00",
+      "ts": "2026-08-31T23:08:00+00:00",
       "evenement": "verification",
-      "detail": "p1_e — Dry-run puis apply : 330 résolus, 670 quarantaines, 2 330 assertions, 1 000 liens et 321 variantes ; replay : 0 création, 2 330 assertions et 1 000 liens reconnus ; schéma b3e1a7c4d9f2 et sondes vertes"
+      "detail": "p2_d — seize signaux explicites par raw ; MPN/modèle jamais extraits d'un titre ; structured/unknown/invalid/conflict versionnés ; 62 tests ciblés verts"
     },
     {
-      "ts": "2026-08-31T22:23:01+00:00",
+      "ts": "2026-08-31T23:08:00+00:00",
       "evenement": "tache_faite",
-      "detail": "p1_e — Lot production de 1 000 raws appliqué puis rejoué sans aucune création supplémentaire"
+      "detail": "p2_d — extracteurs shadow et contrat de provenance terminés localement, sans writer ni lecteur public"
     },
     {
-      "ts": "2026-08-31T22:23:01+00:00",
+      "ts": "2026-08-31T23:08:00+00:00",
       "evenement": "tache_demarree",
-      "detail": "p1_f (tentative 1)"
+      "detail": "p2_e (tentative 1)"
     },
     {
-      "ts": "2026-08-31T22:30:00+00:00",
+      "ts": "2026-08-31T23:15:00+00:00",
       "evenement": "verification",
-      "detail": "p1_f — CI 33425556598 verte ; benchmark 10 565/10 565 ; production : 0 GTIN split, 0 variante à GTIN contradictoires, 0 variante orpheline, 0 lien résolu sans variante"
+      "detail": "p2_e — benchmark multi 6 730/6 730 ; 0 faux merge ; exact 960/960 ; structurés 965/965 ; conflits et faibles 100 % abstention ; 79 tests ciblés verts"
     },
     {
-      "ts": "2026-08-31T22:30:00+00:00",
+      "ts": "2026-08-31T23:15:00+00:00",
       "evenement": "tache_faite",
-      "detail": "p1_f — Benchmark exact-product et invariants du corpus réel qualifiés sans faux merge ni faux split observé"
+      "detail": "p2_e — resolver hiérarchique shadow terminé localement, sans lecteur public ni score contournant un veto"
     },
     {
-      "ts": "2026-08-31T22:30:00+00:00",
+      "ts": "2026-08-31T23:15:00+00:00",
       "evenement": "tache_demarree",
-      "detail": "p1_g (tentative 1)"
-    },
-    {
-      "ts": "2026-08-31T22:30:00+00:00",
-      "evenement": "verification",
-      "detail": "p1_g — PHASE_1_FINAL_RECEIPT.md consolide contrats, benchmark, CI, backfill/replay production, limites et décision de passage"
-    },
-    {
-      "ts": "2026-08-31T22:30:00+00:00",
-      "evenement": "tache_faite",
-      "detail": "p1_g — Phase 1 fermée GO et Phase 2 Entity Resolution ouverte sans promotion des lecteurs Product Graph"
+      "detail": "p2_f (tentative 1)"
     }
   ]
 }

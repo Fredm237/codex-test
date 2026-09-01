@@ -75,6 +75,12 @@ class Settings(BaseSettings):
             errors.append(
                 "PRODUCT_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
             )
+        if self.entity_resolution_shadow_enabled and not (
+            self.observation_shadow_enabled and self.product_graph_shadow_enabled
+        ):
+            errors.append(
+                "ENTITY_RESOLUTION_SHADOW_ENABLED requires Observation and Product Graph shadows"
+            )
         if self.offer_graph_shadow_enabled and not self.observation_shadow_enabled:
             errors.append(
                 "OFFER_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
@@ -332,6 +338,9 @@ class Settings(BaseSettings):
     # Projection Product/Variant Graph strictement shadow. Elle exige la preuve
     # RawSource/Observation et ne change jamais les lectures catalogue v1.
     product_graph_shadow_enabled: bool = Field(default=False)
+    # Persistance des profils et décisions Entity Resolution Phase 2. Le flag
+    # ne promeut aucun lecteur et exige les preuves Observation/Product Graph.
+    entity_resolution_shadow_enabled: bool = Field(default=False)
     # Projection append-only des preuves offre. Elle accepte une identité
     # produit non résolue, mais ne la rend jamais éligible.
     offer_graph_shadow_enabled: bool = Field(default=False)

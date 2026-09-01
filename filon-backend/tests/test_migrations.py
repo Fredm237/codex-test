@@ -40,6 +40,8 @@ GRAPH_SHADOW_TABLES = {
     "graph_identifier_evidence",
     "graph_offer_variant_links",
     "graph_identity_assertions",
+    "graph_entity_signal_projections",
+    "graph_entity_resolution_decisions",
 }
 OFFER_GRAPH_TABLES = {"graph_offer_observations"}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
@@ -57,7 +59,8 @@ MERCHANT_INTELLIGENCE_REVISION = "d7b2e5f9a4c1"
 EVIDENCE_ENGINE_REVISION = "e8c3f6a0b5d2"
 HEARTBEAT_REVISION = "f9a4c7d1e2b3"
 CHECKPOINT_REVISION = "a2d7e9f4c1b6"
-HEAD_REVISION = "b3e1a7c4d9f2"
+IDENTITY_ASSERTION_REVISION = "b3e1a7c4d9f2"
+HEAD_REVISION = "c4f2b8d5e0a3"
 
 
 @pytest.fixture(autouse=True)
@@ -129,7 +132,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
     assert scripts.get_revision(HEAD_REVISION).down_revision == (
-        CHECKPOINT_REVISION
+        IDENTITY_ASSERTION_REVISION
     )
 
 
@@ -399,6 +402,7 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
     rollback_settings = Settings(observation_shadow_enabled=False)
     assert rollback_settings.observation_shadow_enabled is False
     assert rollback_settings.product_graph_shadow_enabled is False
+    assert rollback_settings.entity_resolution_shadow_enabled is False
     assert rollback_settings.offer_graph_shadow_enabled is False
     assert rollback_settings.merchant_intelligence_shadow_enabled is False
     assert rollback_settings.evidence_engine_shadow_enabled is False

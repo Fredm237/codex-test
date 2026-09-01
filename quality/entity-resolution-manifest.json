@@ -1,0 +1,36 @@
+{
+  "schema_version": "entity-resolution-benchmark-manifest/v1",
+  "benchmark_version": "1.0.0",
+  "status": "active",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "false_merge_policy": "false_merge_is_worse_than_false_split",
+  "generator": {
+    "version": "filon-entity-resolution-holdout/v1",
+    "seeds": [20260901, 31415926, 27182818],
+    "samples_per_vertical_seed": 64,
+    "development_engine_input": false
+  },
+  "verticals": [
+    "smartphones",
+    "laptops",
+    "tyres",
+    "appliances_hvac",
+    "audio"
+  ],
+  "regression_ground_truth": "entity-resolution-regressions.json",
+  "minimum_statistical_support": {
+    "hard_negative_cases": 2800,
+    "exact_positive_cases": 900,
+    "structured_positive_cases": 900,
+    "weak_only_cases": 900
+  },
+  "gates": {
+    "exact_preservation_accuracy_ci95_lower_min": 0.98,
+    "false_merge_rate_ci95_upper_max": 0.005,
+    "conflict_abstention_accuracy_ci95_lower_min": 0.995,
+    "weak_only_abstention_accuracy_ci95_lower_min": 0.99,
+    "known_structured_positive_resolution_ci95_lower_min": 0.8,
+    "known_structured_positive_abstention_rate_ci95_upper_max": 0.2,
+    "known_conflict_promotions_max": 0
+  }
+}

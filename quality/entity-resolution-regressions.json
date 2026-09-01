@@ -1,0 +1,97 @@
+{
+  "schema_version": "entity-resolution-regressions/v1",
+  "truth_basis": "REGRESSION_GROUND_TRUTH",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "cases": [
+    {
+      "case_id": "smartphones:same-structured-variant",
+      "vertical": "smartphones",
+      "kind": "structured_positive",
+      "left": {"brand": "Apple", "mpn": "MYE73ZD/A", "model": "iPhone 16", "attributes": {"storage": "128GB", "color": "black"}},
+      "right": {"brand": "APPLE", "mpn": "MYE73ZD/A", "model": "iPhone 16", "attributes": {"storage": "128GB", "color": "black"}},
+      "expected": "same",
+      "truth_basis": "SYNTHETIC_STRUCTURED_IDENTITY"
+    },
+    {
+      "case_id": "smartphones:storage-conflict",
+      "vertical": "smartphones",
+      "kind": "hard_negative",
+      "left": {"brand": "Apple", "model": "iPhone 16", "attributes": {"storage": "128GB"}},
+      "right": {"brand": "Apple", "model": "iPhone 16", "attributes": {"storage": "256GB"}},
+      "expected": "abstain",
+      "truth_basis": "STRUCTURED_VARIANT_CONFLICT"
+    },
+    {
+      "case_id": "laptops:same-brand-mpn-model",
+      "vertical": "laptops",
+      "kind": "structured_positive",
+      "left": {"brand": "Lenovo", "mpn": "83DX00ABFR", "model": "Yoga Pro 7", "attributes": {"memory": "16GB"}},
+      "right": {"brand": "LENOVO", "mpn": "83DX00ABFR", "model": "Yoga Pro 7", "attributes": {"memory": "16GB"}},
+      "expected": "same",
+      "truth_basis": "SYNTHETIC_STRUCTURED_IDENTITY"
+    },
+    {
+      "case_id": "laptops:charger-role-conflict",
+      "vertical": "laptops",
+      "kind": "hard_negative",
+      "left": {"brand": "Lenovo", "model": "Yoga Pro 7", "product_role": "primary_product"},
+      "right": {"brand": "Lenovo", "model": "Yoga Pro 7 charger", "product_role": "accessory"},
+      "expected": "abstain",
+      "truth_basis": "PRODUCT_ROLE_CONFLICT"
+    },
+    {
+      "case_id": "tyres:same-brand-mpn-size",
+      "vertical": "tyres",
+      "kind": "structured_positive",
+      "left": {"brand": "Michelin", "mpn": "PILOT-205-55-R16", "model": "Pilot Sport", "attributes": {"size": "205/55R16"}},
+      "right": {"brand": "MICHELIN", "mpn": "PILOT-205-55-R16", "model": "Pilot Sport", "attributes": {"size": "205/55R16"}},
+      "expected": "same",
+      "truth_basis": "SYNTHETIC_STRUCTURED_IDENTITY"
+    },
+    {
+      "case_id": "tyres:size-conflict",
+      "vertical": "tyres",
+      "kind": "hard_negative",
+      "left": {"brand": "Michelin", "model": "Pilot Sport", "attributes": {"size": "205/55R16"}},
+      "right": {"brand": "Michelin", "model": "Pilot Sport", "attributes": {"size": "225/45R17"}},
+      "expected": "abstain",
+      "truth_basis": "STRUCTURED_VARIANT_CONFLICT"
+    },
+    {
+      "case_id": "appliances-hvac:same-structured-unit",
+      "vertical": "appliances_hvac",
+      "kind": "structured_positive",
+      "left": {"brand": "Daikin", "mpn": "FTXM25R", "model": "Perfera", "attributes": {"capacity": "9000BTU"}},
+      "right": {"brand": "DAIKIN", "mpn": "FTXM25R", "model": "Perfera", "attributes": {"capacity": "9000BTU"}},
+      "expected": "same",
+      "truth_basis": "SYNTHETIC_STRUCTURED_IDENTITY"
+    },
+    {
+      "case_id": "appliances-hvac:filter-role-conflict",
+      "vertical": "appliances_hvac",
+      "kind": "hard_negative",
+      "left": {"brand": "Daikin", "model": "Perfera", "product_role": "primary_product"},
+      "right": {"brand": "Daikin", "model": "Perfera filter", "product_role": "consumable"},
+      "expected": "abstain",
+      "truth_basis": "PRODUCT_ROLE_CONFLICT"
+    },
+    {
+      "case_id": "audio:same-brand-mpn-color",
+      "vertical": "audio",
+      "kind": "structured_positive",
+      "left": {"brand": "Sony", "mpn": "WH1000XM5B", "model": "WH-1000XM5", "attributes": {"color": "black"}},
+      "right": {"brand": "SONY", "mpn": "WH1000XM5B", "model": "WH-1000XM5", "attributes": {"color": "black"}},
+      "expected": "same",
+      "truth_basis": "SYNTHETIC_STRUCTURED_IDENTITY"
+    },
+    {
+      "case_id": "audio:title-image-only",
+      "vertical": "audio",
+      "kind": "weak_only",
+      "left": {"title": "Sony WH-1000XM5 black", "image": "https://example.test/audio-a.jpg"},
+      "right": {"title": "sony wh 1000 xm5 noir", "image": "https://example.test/audio-a.jpg"},
+      "expected": "abstain",
+      "truth_basis": "WEAK_SIGNALS_ONLY"
+    }
+  ]
+}

@@ -85,6 +85,15 @@ jobs:
           --strict
           --output ../quality-product-identity-report.json
 
+      - name: Exécuter le benchmark Entity Resolution
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.entity_resolution
+          --manifest ../quality/entity-resolution-manifest.json
+          --adapter multi
+          --require-promotion
+          --output ../quality-entity-resolution-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -94,6 +103,7 @@ jobs:
             ${{ github.workspace }}/quality-autonomous-report.json
             ${{ github.workspace }}/quality-external-ground-truth-limitation.json
             ${{ github.workspace }}/quality-product-identity-report.json
+            ${{ github.workspace }}/quality-entity-resolution-report.json
           if-no-files-found: warn
           retention-days: 14
 

@@ -39,6 +39,49 @@ Variant passe sous son seuil, si la borne haute du faux merge dépasse 0,5 %,
 si une verticale disparaît ou si la limitation
 `NO_EXTERNAL_HUMAN_GROUND_TRUTH` est altérée.
 
+## Gate Phase 2 — Entity Resolution
+
+Le benchmark multi-signal est piloté par
+[`entity-resolution-manifest.json`](entity-resolution-manifest.json), avec les
+régressions statiques de
+[`entity-resolution-regressions.json`](entity-resolution-regressions.json).
+Il sépare les gates de sécurité des gates de couverture : le baseline
+exact-GTIN est `SAFE_INCOMPLETE` et reste non promouvable tant qu'il s'abstient
+sur tous les positifs structurés non-GTIN.
+
+Depuis `filon-backend` :
+
+```bash
+python -m quality_lab.entity_resolution \
+  --manifest ../quality/entity-resolution-manifest.json \
+  --adapter multi \
+  --require-promotion \
+  --output ../quality-entity-resolution-report.json
+```
+
+L'adaptateur `exact` conserve le baseline P2C `SAFE_INCOMPLETE`. L'adaptateur
+`multi` est bloquant pour P2G et doit passer toutes les gates de sécurité et
+de couverture sans modifier le holdout.
+
+Le replay réel P2F/P2G possède une seconde gate indépendante, pilotée par
+[`entity-resolution-production-gate.json`](entity-resolution-production-gate.json).
+Elle n'exécute ni migration ni writer : elle compare le premier reçu `apply`
+au reçu du replay idempotent et échoue si le corpus Phase 1, les 330 exacts,
+les 321 candidats canoniques, la provenance ou les compteurs divergent.
+
+```bash
+python -m quality_lab.entity_resolution_replay \
+  --manifest ../quality/entity-resolution-production-gate.json \
+  --first /chemin/expurge/p2f-first.json \
+  --replay /chemin/expurge/p2f-replay.json \
+  --strict \
+  --output /chemin/expurge/p2g-receipt.json
+```
+
+L'absence des deux reçus réels ne produit jamais un PASS. La CI teste le
+vérificateur et ses mutations adversariales ; seul le replay PostgreSQL borné
+peut produire les entrées de qualification production.
+
 ## Historique conservé — contrat externe v0.5 remplacé
 
 Le contrat ci-dessous décrivait un holdout humain indépendant. Il reste utile

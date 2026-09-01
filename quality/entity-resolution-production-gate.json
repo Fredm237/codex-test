@@ -1,0 +1,23 @@
+{
+  "schema_version": "entity-resolution-production-gate-manifest/v1",
+  "gate_version": "1.0.0",
+  "status": "active",
+  "source_baseline": "phase1-awin-shadow-2026-08-31",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "corpus": {
+    "after_raw_id": 0,
+    "limit": 1000,
+    "expected_scanned": 1000,
+    "expected_projected": 1000,
+    "expected_last_raw_source_id": 1000,
+    "expected_candidate_profiles": 321,
+    "expected_exact_verified": 330
+  },
+  "gates": {
+    "missing_offer_links_max": 0,
+    "high_confidence_max": 0,
+    "canonical_non_gtin_max": 0,
+    "first_apply_existing_max": 0,
+    "replay_created_max": 0
+  }
+}

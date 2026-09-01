@@ -1,0 +1,158 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/entity-resolution/v1/entity-resolution-signal-extraction.schema.json",
+  "title": "FILON Entity Resolution Signal Extraction v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "raw_source_record_id",
+    "source_type",
+    "source_ref",
+    "observed_at",
+    "extractor_version",
+    "signals"
+  ],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "raw_source_record_id": { "type": "integer", "minimum": 1 },
+    "source_type": { "type": "string", "minLength": 1, "maxLength": 48 },
+    "source_ref": { "type": "string", "minLength": 1, "maxLength": 255 },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "extractor_version": { "const": "awin-entity-signals/v1" },
+    "signals": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/signal" },
+      "minItems": 1,
+      "maxItems": 32
+    }
+  },
+  "$defs": {
+    "signal": {
+      "type": "object",
+      "required": [
+        "signal",
+        "status",
+        "source_fields",
+        "normalized_values",
+        "strength",
+        "role",
+        "reason_code",
+        "transformation",
+        "transformation_version"
+      ],
+      "properties": {
+        "signal": {
+          "enum": [
+            "brand",
+            "mpn",
+            "model",
+            "storage",
+            "memory",
+            "capacity",
+            "size",
+            "color",
+            "generation",
+            "edition",
+            "condition",
+            "pack_quantity",
+            "product_role",
+            "title",
+            "image",
+            "taxonomy"
+          ]
+        },
+        "status": { "enum": ["observed", "candidate_only", "unknown", "invalid", "conflict"] },
+        "source_fields": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+          "uniqueItems": true,
+          "maxItems": 8
+        },
+        "normalized_values": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1, "maxLength": 512 },
+          "uniqueItems": true,
+          "maxItems": 16
+        },
+        "strength": { "enum": ["strong", "weak", "none"] },
+        "role": { "enum": ["primary", "corroborating", "candidate_only", "none"] },
+        "reason_code": {
+          "enum": [
+            "observed_structured",
+            "lexical_candidate",
+            "weak_source_field",
+            "missing_signal",
+            "invalid_signal",
+            "conflicting_structured_values"
+          ]
+        },
+        "transformation": { "const": "entity_signal_extraction" },
+        "transformation_version": { "const": "awin-entity-signals/v1" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "status": { "const": "observed" } } },
+          "then": {
+            "properties": {
+              "source_fields": { "minItems": 1 },
+              "normalized_values": { "minItems": 1, "maxItems": 1 },
+              "strength": { "enum": ["strong", "weak"] },
+              "role": { "enum": ["primary", "corroborating"] },
+              "reason_code": { "const": "observed_structured" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "candidate_only" } } },
+          "then": {
+            "properties": {
+              "source_fields": { "minItems": 1 },
+              "normalized_values": { "minItems": 1 },
+              "strength": { "const": "weak" },
+              "role": { "const": "candidate_only" },
+              "reason_code": { "enum": ["lexical_candidate", "weak_source_field"] }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "unknown" } } },
+          "then": {
+            "properties": {
+              "source_fields": { "maxItems": 0 },
+              "normalized_values": { "maxItems": 0 },
+              "strength": { "const": "none" },
+              "role": { "const": "none" },
+              "reason_code": { "const": "missing_signal" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "invalid" } } },
+          "then": {
+            "properties": {
+              "source_fields": { "minItems": 1 },
+              "normalized_values": { "maxItems": 0 },
+              "strength": { "const": "none" },
+              "role": { "const": "none" },
+              "reason_code": { "const": "invalid_signal" }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "status": { "const": "conflict" } } },
+          "then": {
+            "properties": {
+              "source_fields": { "minItems": 2 },
+              "normalized_values": { "minItems": 2 },
+              "strength": { "const": "none" },
+              "role": { "const": "none" },
+              "reason_code": { "const": "conflicting_structured_values" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
