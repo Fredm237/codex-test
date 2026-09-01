@@ -63,6 +63,25 @@ L'adaptateur `exact` conserve le baseline P2C `SAFE_INCOMPLETE`. L'adaptateur
 `multi` est bloquant pour P2G et doit passer toutes les gates de sécurité et
 de couverture sans modifier le holdout.
 
+Le replay réel P2F/P2G possède une seconde gate indépendante, pilotée par
+[`entity-resolution-production-gate.json`](entity-resolution-production-gate.json).
+Elle n'exécute ni migration ni writer : elle compare le premier reçu `apply`
+au reçu du replay idempotent et échoue si le corpus Phase 1, les 330 exacts,
+les 321 candidats canoniques, la provenance ou les compteurs divergent.
+
+```bash
+python -m quality_lab.entity_resolution_replay \
+  --manifest ../quality/entity-resolution-production-gate.json \
+  --first /chemin/expurge/p2f-first.json \
+  --replay /chemin/expurge/p2f-replay.json \
+  --strict \
+  --output /chemin/expurge/p2g-receipt.json
+```
+
+L'absence des deux reçus réels ne produit jamais un PASS. La CI teste le
+vérificateur et ses mutations adversariales ; seul le replay PostgreSQL borné
+peut produire les entrées de qualification production.
+
 ## Historique conservé — contrat externe v0.5 remplacé
 
 Le contrat ci-dessous décrivait un holdout humain indépendant. Il reste utile

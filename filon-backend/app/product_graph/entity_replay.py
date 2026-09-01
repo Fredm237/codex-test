@@ -43,6 +43,7 @@ from app.product_graph.models import (
 
 log = get_logger("product_graph.entity_replay")
 MAX_REPLAY_ROWS = 10_000
+REPLAY_REPORT_SCHEMA_VERSION = "entity-resolution-replay-report/v1"
 IDENTIFIER_FIELDS = ("gtin", "ean", "ean13", "upc")
 CANDIDATE_WEAK_SIGNALS = {"title", "image"}
 
@@ -53,7 +54,13 @@ class EntityReplayError(RuntimeError):
 
 @dataclass(frozen=True)
 class EntityReplayReport:
+    schema_version: str
+    extractor_version: str
+    resolver_version: str
+    policy_version: str
     mode: str
+    after_raw_id: int
+    limit: int
     scanned: int
     projected: int
     missing_offer_links: int
@@ -439,7 +446,13 @@ async def replay_entity_resolution_batch(
         ]
     )
     return EntityReplayReport(
+        schema_version=REPLAY_REPORT_SCHEMA_VERSION,
+        extractor_version=EXTRACTOR_VERSION,
+        resolver_version=RESOLVER_VERSION,
+        policy_version=POLICY_VERSION,
         mode="apply" if apply else "dry_run",
+        after_raw_id=after_raw_id,
+        limit=limit,
         scanned=len(raws),
         projected=len(projected),
         missing_offer_links=len(raws) - len(projected),
