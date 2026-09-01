@@ -1,0 +1,28 @@
+{
+  "schema_version": "offer-truth-benchmark-manifest/v1",
+  "benchmark_version": "1.0.0",
+  "status": "active",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "generator": {
+    "version": "filon-offer-truth-holdout/v1",
+    "seeds": [20260901, 31415926, 27182818, 16180339],
+    "samples_per_seed": 256,
+    "development_engine_input": false
+  },
+  "claims": ["price", "stock", "shipping", "returns", "warranty", "merchant", "freshness"],
+  "regression_ground_truth": "offer-truth-regressions.json",
+  "minimum_statistical_support": {
+    "total_cases": 10000,
+    "known_cases": 3000,
+    "safe_abstention_cases": 5000,
+    "dangerous_fallback_cases": 5000
+  },
+  "gates": {
+    "overall_correctness_ci95_lower_min": 0.995,
+    "known_claim_accuracy_ci95_lower_min": 0.995,
+    "safe_abstention_accuracy_ci95_lower_min": 0.995,
+    "provenance_accuracy_ci95_lower_min": 0.995,
+    "dangerous_fallback_rate_ci95_upper_max": 0.005,
+    "blocking_failures_max": 0
+  }
+}
