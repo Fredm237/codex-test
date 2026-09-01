@@ -1,0 +1,15 @@
+{
+  "schema_version": "confidence-contract-manifest/v1",
+  "contract": "confidence-report/v1",
+  "schema": "confidence-report.schema.json",
+  "examples": ["examples/calibrated.json", "examples/abstained.json"],
+  "dimensions": [
+    "RETRIEVAL_CONFIDENCE",
+    "ENTITY_MATCH_CONFIDENCE",
+    "ATTRIBUTE_CONFIDENCE",
+    "OFFER_CONFIDENCE",
+    "DECISION_CONFIDENCE"
+  ],
+  "evidence_coverage_is_probability": false,
+  "raw_context_retained": false
+}

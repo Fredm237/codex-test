@@ -1,0 +1,34 @@
+{
+  "schema_version": "confidence-benchmark-manifest/v1",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "dimensions": [
+    "RETRIEVAL_CONFIDENCE",
+    "ENTITY_MATCH_CONFIDENCE",
+    "ATTRIBUTE_CONFIDENCE",
+    "OFFER_CONFIDENCE",
+    "DECISION_CONFIDENCE"
+  ],
+  "generator": {
+    "version": "filon-confidence-holdout/v1",
+    "seeds": [9101, 9109, 9127, 9133],
+    "samples_per_dimension_vertical_locale_seed": 50,
+    "development_engine_input": false
+  },
+  "verticals": ["smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres"],
+  "locales": ["fr", "nl", "en"],
+  "engineering_gates": {
+    "expected_calibration_error_max": 0.001,
+    "brier_score_max": 0.171,
+    "minimum_bucket_support": 3500,
+    "unknown_promoted_max": 0,
+    "synthetic_decision_confidence_max": 0,
+    "provenance_completeness_min": 1.0
+  },
+  "evaluation_governance": {
+    "mode": "AUTONOMOUS_QUALITY_LAB",
+    "progression_gate": "engineering_gates",
+    "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+    "subjective_quality_status": "NOT_INDEPENDENTLY_VALIDATED",
+    "human_validation_required": false
+  }
+}

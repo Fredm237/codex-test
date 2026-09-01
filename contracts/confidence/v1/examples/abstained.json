@@ -1,0 +1,16 @@
+{
+  "schema_version": "confidence-report/v1",
+  "policy_version": "confidence-policy/v1",
+  "context_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "raw_context_retained": false,
+  "outcome": "ABSTAINED",
+  "dimensions": [
+    {"dimension": "RETRIEVAL_CONFIDENCE", "state": "UNKNOWN", "probability_decimal": null, "sample_size": 0, "profile_ref": null, "reason_codes": ["empirical_profile_missing"], "evidence_refs": []},
+    {"dimension": "ENTITY_MATCH_CONFIDENCE", "state": "UNKNOWN", "probability_decimal": null, "sample_size": 0, "profile_ref": null, "reason_codes": ["signal_unknown"], "evidence_refs": []},
+    {"dimension": "ATTRIBUTE_CONFIDENCE", "state": "UNKNOWN", "probability_decimal": null, "sample_size": 0, "profile_ref": null, "reason_codes": ["signal_unknown"], "evidence_refs": []},
+    {"dimension": "OFFER_CONFIDENCE", "state": "UNKNOWN", "probability_decimal": null, "sample_size": 0, "profile_ref": null, "reason_codes": ["signal_unknown"], "evidence_refs": []},
+    {"dimension": "DECISION_CONFIDENCE", "state": "UNKNOWN", "probability_decimal": null, "sample_size": 0, "profile_ref": null, "reason_codes": ["signal_unknown"], "evidence_refs": []}
+  ],
+  "evidence_coverage": {"state": "UNKNOWN", "ratio_decimal": null, "observed_evidence_count": 0, "required_evidence_count": 0, "reason_codes": ["evidence_requirements_unknown"], "evidence_refs": []},
+  "result_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

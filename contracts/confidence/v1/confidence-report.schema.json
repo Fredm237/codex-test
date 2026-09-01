@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/confidence/v1/confidence-report.schema.json",
+  "title": "FILON Confidence Report v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "policy_version", "context_digest", "raw_context_retained",
+    "outcome", "dimensions", "evidence_coverage", "result_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "confidence-report/v1"},
+    "policy_version": {"const": "confidence-policy/v1"},
+    "context_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "raw_context_retained": {"const": false},
+    "outcome": {"enum": ["CONFIDENCE_CALIBRATED", "PARTIAL_CONFIDENCE", "ABSTAINED"]},
+    "dimensions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/dimension"}
+    },
+    "evidence_coverage": {"$ref": "#/$defs/coverage"},
+    "result_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "dimension", "state", "probability_decimal", "sample_size", "profile_ref",
+        "reason_codes", "evidence_refs"
+      ],
+      "properties": {
+        "dimension": {"enum": [
+          "RETRIEVAL_CONFIDENCE", "ENTITY_MATCH_CONFIDENCE", "ATTRIBUTE_CONFIDENCE",
+          "OFFER_CONFIDENCE", "DECISION_CONFIDENCE"
+        ]},
+        "state": {"enum": ["CALIBRATED", "UNKNOWN", "INVALID", "INSUFFICIENT_SUPPORT"]},
+        "probability_decimal": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"}
+          ]
+        },
+        "sample_size": {"type": "integer", "minimum": 0},
+        "profile_ref": {"type": ["string", "null"]},
+        "reason_codes": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"state": {"const": "CALIBRATED"}}},
+          "then": {
+            "properties": {
+              "probability_decimal": {"type": "string"},
+              "sample_size": {"type": "integer", "minimum": 1},
+              "profile_ref": {"type": "string", "minLength": 1},
+              "reason_codes": {"maxItems": 0}
+            }
+          },
+          "else": {"properties": {"probability_decimal": {"type": "null"}}}
+        }
+      ]
+    },
+    "coverage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state", "ratio_decimal", "observed_evidence_count", "required_evidence_count",
+        "reason_codes", "evidence_refs"
+      ],
+      "properties": {
+        "state": {"enum": ["MEASURED", "UNKNOWN"]},
+        "ratio_decimal": {
+          "oneOf": [
+            {"type": "null"},
+            {"type": "string", "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"}
+          ]
+        },
+        "observed_evidence_count": {"type": "integer", "minimum": 0},
+        "required_evidence_count": {"type": "integer", "minimum": 0},
+        "reason_codes": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    }
+  }
+}

@@ -27,6 +27,7 @@ from app.hybrid_retrieval import models as hybrid_retrieval_models  # noqa: F401
 from app.constraint_engine import models as constraint_engine_models  # noqa: F401
 from app.product_ranking import models as product_ranking_models  # noqa: F401
 from app.offer_optimization import models as offer_optimization_models  # noqa: F401
+from app.confidence import models as confidence_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_intelligence_models  # noqa: F401
 from app.evidence_engine import models as evidence_engine_models  # noqa: F401
 
