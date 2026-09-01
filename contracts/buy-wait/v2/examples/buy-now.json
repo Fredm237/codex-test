@@ -1,0 +1,26 @@
+{
+  "schema_version": "buy-wait-decision/v2",
+  "policy_version": "buy-wait-policy/v2",
+  "trace_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "context_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "raw_context_retained": false,
+  "outcome": "BUY_NOW",
+  "selected_offer_ref": "offer:synthetic-buy",
+  "selected_product_ref": "variant:synthetic-buy",
+  "current_price_decimal": "80.00",
+  "currency": "EUR",
+  "history_samples": 8,
+  "tracked_days": 14,
+  "current_percentile_decimal": "0.125000",
+  "decision_confidence_decimal": "0.900000",
+  "backtest_profile_ref": "backtest:buy-wait:v2:synthetic",
+  "future_observations_used": false,
+  "reason_codes": ["current_price_materially_low", "historical_backtest_policy_passed"],
+  "claims": [
+    {"claim": "current_price_percentile", "value": "0.125000", "evidence_refs": ["price:synthetic:1"]},
+    {"claim": "historical_median_price", "value": "100.000000", "evidence_refs": ["price:synthetic:1"]},
+    {"claim": "decision_confidence", "value": "0.900000", "evidence_refs": ["confidence:synthetic:1"]}
+  ],
+  "evidence_refs": ["price:synthetic:1", "confidence:synthetic:1"],
+  "result_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+}
