@@ -95,6 +95,15 @@ class Settings(BaseSettings):
                 "OFFER_TRUTH_SHADOW_ENABLED requires Observation, Product Graph, "
                 "Entity Resolution and Offer Graph shadows"
             )
+        if self.product_ontology_shadow_enabled and not (
+            self.observation_shadow_enabled
+            and self.product_graph_shadow_enabled
+            and self.entity_resolution_shadow_enabled
+        ):
+            errors.append(
+                "PRODUCT_ONTOLOGY_SHADOW_ENABLED requires Observation, Product Graph "
+                "and Entity Resolution shadows"
+            )
         if self.merchant_intelligence_shadow_enabled and not (
             self.observation_shadow_enabled
             and self.product_graph_shadow_enabled
@@ -357,6 +366,9 @@ class Settings(BaseSettings):
     # Snapshot Offer Truth temporel append-only. Le flag ne démarre aucun
     # replay et exige toutes les preuves Graph nécessaires à une Variant.
     offer_truth_shadow_enabled: bool = Field(default=False)
+    # Assertions ontologiques append-only. Aucun lecteur public n'en dépend et
+    # le replay reste sec sans opt-in explicite du processus de maintenance.
+    product_ontology_shadow_enabled: bool = Field(default=False)
     # Mesures agrégées append-only, sans score ni confiance synthétique.
     merchant_intelligence_shadow_enabled: bool = Field(default=False)
     # Claims sourcés et décision strictement shadow ; aucune lecture publique.

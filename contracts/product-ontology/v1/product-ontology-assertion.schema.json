@@ -1,0 +1,376 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/product-ontology/v1/product-ontology-assertion.schema.json",
+  "title": "FILON Product Ontology Assertion v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "raw_source_record_id",
+    "offer_id",
+    "variant_id",
+    "ontology_status",
+    "classification",
+    "product_role",
+    "attributes",
+    "relationships",
+    "facets",
+    "legacy_taxonomy",
+    "reason_codes",
+    "extractor_version",
+    "policy_version",
+    "evaluated_at"
+  ],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "raw_source_record_id": { "type": "integer", "minimum": 1 },
+    "offer_id": { "type": "integer", "minimum": 1 },
+    "variant_id": { "type": ["integer", "null"], "minimum": 1 },
+    "ontology_status": {
+      "enum": ["VERIFIED", "PARTIAL", "QUARANTINED", "INVALID"]
+    },
+    "classification": {
+      "type": "object",
+      "required": ["category", "subcategory", "product_type"],
+      "properties": {
+        "category": { "$ref": "#/$defs/concept_claim" },
+        "subcategory": { "$ref": "#/$defs/concept_claim" },
+        "product_type": { "$ref": "#/$defs/concept_claim" }
+      },
+      "additionalProperties": false
+    },
+    "product_role": { "$ref": "#/$defs/role_claim" },
+    "attributes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/attribute_assertion" },
+      "maxItems": 128
+    },
+    "relationships": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/relationship_assertion" },
+      "maxItems": 128
+    },
+    "facets": {
+      "type": "object",
+      "required": [
+        "use_case",
+        "audience",
+        "compatibility",
+        "style",
+        "material",
+        "season",
+        "occasion",
+        "function"
+      ],
+      "properties": {
+        "use_case": { "$ref": "#/$defs/concept_array" },
+        "audience": { "$ref": "#/$defs/concept_array" },
+        "compatibility": { "$ref": "#/$defs/concept_array" },
+        "style": { "$ref": "#/$defs/concept_array" },
+        "material": { "$ref": "#/$defs/concept_array" },
+        "season": { "$ref": "#/$defs/concept_array" },
+        "occasion": { "$ref": "#/$defs/concept_array" },
+        "function": { "$ref": "#/$defs/concept_array" }
+      },
+      "additionalProperties": false
+    },
+    "legacy_taxonomy": { "$ref": "#/$defs/legacy_taxonomy" },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "ontology_verified",
+          "identity_unresolved",
+          "category_unknown",
+          "subcategory_unknown",
+          "product_type_unknown",
+          "product_role_unknown",
+          "relationship_target_unresolved",
+          "attribute_conflict",
+          "legacy_fallback_only",
+          "source_conflict"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 16
+    },
+    "extractor_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "policy_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "evaluated_at": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "required": [
+        "raw_source_record_id",
+        "source_type",
+        "source_ref",
+        "observed_at",
+        "field",
+        "transformation",
+        "transformation_version",
+        "evidence_strength"
+      ],
+      "properties": {
+        "raw_source_record_id": { "type": "integer", "minimum": 1 },
+        "source_type": { "type": "string", "minLength": 1, "maxLength": 48 },
+        "source_ref": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "observed_at": { "type": "string", "format": "date-time" },
+        "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+        "transformation": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "transformation_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "evidence_strength": {
+          "enum": ["exact_structured", "observed_structured", "legacy_fallback", "weak_text"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence_array": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" },
+      "maxItems": 16
+    },
+    "concept": {
+      "type": "object",
+      "required": ["concept_key", "label"],
+      "properties": {
+        "concept_key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$",
+          "maxLength": 191
+        },
+        "label": { "type": "string", "minLength": 1, "maxLength": 255 }
+      },
+      "additionalProperties": false
+    },
+    "concept_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid", "conflict"] },
+        "value": { "oneOf": [{ "$ref": "#/$defs/concept" }, { "type": "null" }] },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "known" } } },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/$defs/concept" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid", "conflict"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "role_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid", "conflict"] },
+        "value": {
+          "oneOf": [
+            {
+              "enum": [
+                "PRIMARY_PRODUCT",
+                "ACCESSORY",
+                "REPLACEMENT_PART",
+                "CONSUMABLE",
+                "SERVICE",
+                "DIGITAL_CONTENT",
+                "ACCOMMODATION",
+                "BUNDLE"
+              ]
+            },
+            { "const": "UNKNOWN" }
+          ]
+        },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "known" } } },
+          "then": {
+            "properties": {
+              "value": { "not": { "const": "UNKNOWN" } },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid", "conflict"] } } },
+          "then": { "properties": { "value": { "const": "UNKNOWN" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "typed_value": {
+      "type": "object",
+      "required": ["value_type", "value", "unit"],
+      "properties": {
+        "value_type": { "enum": ["string", "integer", "decimal", "boolean"] },
+        "value": { "type": ["string", "integer", "boolean"] },
+        "unit": { "type": ["string", "null"], "minLength": 1, "maxLength": 32 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "value_type": { "const": "integer" } } },
+          "then": { "properties": { "value": { "type": "integer" } } }
+        },
+        {
+          "if": { "properties": { "value_type": { "const": "boolean" } } },
+          "then": { "properties": { "value": { "type": "boolean" } } }
+        },
+        {
+          "if": { "properties": { "value_type": { "const": "decimal" } } },
+          "then": {
+            "properties": {
+              "value": {
+                "type": "string",
+                "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,6})?$"
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "value_type": { "const": "string" } } },
+          "then": { "properties": { "value": { "type": "string", "minLength": 1, "maxLength": 512 } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "attribute_assertion": {
+      "type": "object",
+      "required": ["attribute_key", "state", "value", "evidence"],
+      "properties": {
+        "attribute_key": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "state": { "enum": ["known", "invalid", "conflict"] },
+        "value": { "oneOf": [{ "$ref": "#/$defs/typed_value" }, { "type": "null" }] },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "known" } } },
+          "then": {
+            "properties": {
+              "value": { "$ref": "#/$defs/typed_value" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["invalid", "conflict"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "relationship_assertion": {
+      "type": "object",
+      "required": ["relationship_type", "target_state", "target_variant_id", "target_text", "evidence"],
+      "properties": {
+        "relationship_type": {
+          "enum": [
+            "ACCESSORY_FOR",
+            "CONSUMABLE_FOR",
+            "REPLACEMENT_PART_FOR",
+            "COMPATIBLE_WITH",
+            "INCLUDED_IN",
+            "BUNDLE_COMPONENT",
+            "ALTERNATIVE_TO"
+          ]
+        },
+        "target_state": { "enum": ["canonical", "observed_text", "unknown", "conflict"] },
+        "target_variant_id": { "type": ["integer", "null"], "minimum": 1 },
+        "target_text": { "type": ["string", "null"], "minLength": 1, "maxLength": 512 },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "target_state": { "const": "canonical" } } },
+          "then": {
+            "properties": {
+              "target_variant_id": { "type": "integer", "minimum": 1 },
+              "target_text": { "type": "null" },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "target_state": { "const": "observed_text" } } },
+          "then": {
+            "properties": {
+              "target_variant_id": { "type": "null" },
+              "target_text": { "type": "string", "minLength": 1 },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "target_state": { "enum": ["unknown", "conflict"] } } },
+          "then": {
+            "properties": {
+              "target_variant_id": { "type": "null" },
+              "target_text": { "type": "null" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "concept_array": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/concept_claim" },
+      "maxItems": 32
+    },
+    "legacy_taxonomy": {
+      "type": "object",
+      "required": ["category", "subcategory", "migration_state", "evidence"],
+      "properties": {
+        "category": { "type": ["string", "null"], "minLength": 1, "maxLength": 255 },
+        "subcategory": { "type": ["string", "null"], "minLength": 1, "maxLength": 255 },
+        "migration_state": {
+          "enum": ["fallback_only", "mapped_exact", "mapped_partial", "unmapped"]
+        },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "ontology_status": { "const": "VERIFIED" } } },
+      "then": {
+        "properties": {
+          "variant_id": { "type": "integer", "minimum": 1 },
+          "classification": {
+            "properties": {
+              "category": { "properties": { "state": { "const": "known" } } },
+              "product_type": { "properties": { "state": { "const": "known" } } }
+            }
+          },
+          "product_role": { "properties": { "state": { "const": "known" } } },
+          "reason_codes": { "contains": { "const": "ontology_verified" } }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "ontology_status": { "const": "QUARANTINED" } } },
+      "then": {
+        "properties": {
+          "variant_id": { "type": "null" },
+          "reason_codes": { "contains": { "const": "identity_unresolved" } }
+        }
+      }
+    }
+  ],
+  "additionalProperties": false
+}

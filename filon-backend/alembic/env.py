@@ -22,6 +22,7 @@ from app.observations import models as observation_models  # noqa: F401
 from app.product_graph import models as product_graph_models  # noqa: F401
 from app.offer_graph import models as offer_graph_models  # noqa: F401
 from app.offer_truth import models as offer_truth_models  # noqa: F401
+from app.product_ontology import models as product_ontology_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_intelligence_models  # noqa: F401
 from app.evidence_engine import models as evidence_engine_models  # noqa: F401
 

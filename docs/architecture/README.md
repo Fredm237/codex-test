@@ -98,6 +98,8 @@ et extension.
 - [Rapport Phase 2C — benchmark Entity Resolution](PHASE_2C_ENTITY_RESOLUTION_BENCHMARK_REPORT.md)
 - [Rapport Phase 2D — extracteurs de signaux Entity Resolution](PHASE_2D_ENTITY_SIGNAL_EXTRACTORS_REPORT.md)
 - [Rapport Phase 2E — resolver Entity Resolution multi-signal](PHASE_2E_MULTI_SIGNAL_RESOLVER_REPORT.md)
+- [Rapport Phase 2F — persistance et replay Entity Resolution shadow](PHASE_2F_ENTITY_RESOLUTION_REPLAY_REPORT.md)
+- [Gate Phase 2G — qualification automatique des deux reçus production](PHASE_2G_ENTITY_RESOLUTION_QUALIFICATION_GATE.md)
 - [Décision de timebox et sortie de Phase 0](PHASE_0_TIMEBOX_AND_EXIT_DECISION.md)
 - [Backlog de durcissement post-Phase 0](POST_PHASE_0_HARDENING.md)
 - [Durcissement final du contrat catalogue v1](PHASE_0B_CATALOG_CONTRACT_HARDENING_REPORT.md)

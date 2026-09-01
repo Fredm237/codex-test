@@ -1,0 +1,17 @@
+{
+  "schema_version": "product-ontology-regressions/v1",
+  "truth_basis": "REGRESSION_GROUND_TRUTH",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "cases": [
+    {"case_id":"smartphones:primary","vertical":"smartphones","kind":"known_role","payload":{"name":"Example Phone 128GB","merchant_category":"Smartphones","offer_kind":"physical_product"},"expected_role":"PRIMARY_PRODUCT","expected_relationship_state":"none","truth_basis":"EXPLICIT_SOLD_OBJECT"},
+    {"case_id":"smartphones:case","vertical":"smartphones","kind":"observed_relation","payload":{"name":"Protective case compatible with Example Phone","merchant_category":"Phone accessories","offer_kind":"physical_product"},"expected_role":"ACCESSORY","expected_relationship_state":"observed_text","truth_basis":"EXPLICIT_ACCESSORY_WITH_TEXT_TARGET"},
+    {"case_id":"fashion:unknown","vertical":"fashion","kind":"unknown","payload":{"name":null,"merchant_category":null,"offer_kind":null},"expected_role":"UNKNOWN","expected_relationship_state":"none","truth_basis":"MISSING_PRODUCT_SURFACE"},
+    {"case_id":"fashion:bundle","vertical":"fashion","kind":"known_role","payload":{"name":"Bundle Example Outfit set","merchant_category":"Fashion","offer_kind":"physical_product"},"expected_role":"BUNDLE","expected_relationship_state":"none","truth_basis":"EXPLICIT_BUNDLE_FORM"},
+    {"case_id":"tyres:replacement","vertical":"tyres","kind":"known_role","payload":{"name":"Replacement part for Example Road tyre","merchant_category":"Tyres","offer_kind":"physical_product"},"expected_role":"REPLACEMENT_PART","expected_relationship_state":"observed_text","truth_basis":"EXPLICIT_REPLACEMENT_FORM"},
+    {"case_id":"tyres:ambiguous-compatible","vertical":"tyres","kind":"primary_negative","payload":{"name":"Compatible with Example Road 205/55R16","merchant_category":"Tyres","offer_kind":"physical_product"},"expected_role":"UNKNOWN","expected_relationship_state":"observed_text","truth_basis":"NO_POSITIVE_SOLD_OBJECT_SIGNAL"},
+    {"case_id":"appliances:consumable","vertical":"appliances_hvac","kind":"known_role","payload":{"name":"Filter compatible with Example Climate","merchant_category":"HVAC","offer_kind":"physical_product"},"expected_role":"CONSUMABLE","expected_relationship_state":"observed_text","truth_basis":"EXPLICIT_CONSUMABLE_FORM"},
+    {"case_id":"appliances:service","vertical":"appliances_hvac","kind":"known_role","payload":{"name":"Installation service for Example Climate","merchant_category":"Services","offer_kind":"service"},"expected_role":"SERVICE","expected_relationship_state":"none","truth_basis":"EXPLICIT_SERVICE_KIND"},
+    {"case_id":"hospitality:stay","vertical":"hospitality","kind":"known_role","payload":{"name":"Holiday apartment Example Coast","merchant_category":"Holiday homes","offer_kind":"accommodation"},"expected_role":"ACCOMMODATION","expected_relationship_state":"none","truth_basis":"EXPLICIT_ACCOMMODATION_KIND"},
+    {"case_id":"digital:licence","vertical":"digital","kind":"known_role","payload":{"name":"Software licence download Example Studio","merchant_category":"Software","offer_kind":"digital_content"},"expected_role":"DIGITAL_CONTENT","expected_relationship_state":"none","truth_basis":"EXPLICIT_DIGITAL_KIND"}
+  ]
+}

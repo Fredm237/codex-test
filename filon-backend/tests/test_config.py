@@ -212,6 +212,7 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     assert settings.entity_resolution_shadow_enabled is False
     assert settings.offer_graph_shadow_enabled is False
     assert settings.offer_truth_shadow_enabled is False
+    assert settings.product_ontology_shadow_enabled is False
     assert settings.merchant_intelligence_shadow_enabled is False
     assert settings.evidence_engine_shadow_enabled is False
 
@@ -293,6 +294,28 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
         offer_truth_shadow_enabled=True,
     )
     assert offer_truth_enabled.offer_truth_shadow_enabled is True
+
+    with pytest.raises(
+        ValidationError,
+        match="PRODUCT_ONTOLOGY_SHADOW_ENABLED requires Observation, Product Graph",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            observation_shadow_enabled=True,
+            product_graph_shadow_enabled=True,
+            product_ontology_shadow_enabled=True,
+        )
+
+    ontology_enabled = Settings(
+        _env_file=None,
+        env="test",
+        observation_shadow_enabled=True,
+        product_graph_shadow_enabled=True,
+        entity_resolution_shadow_enabled=True,
+        product_ontology_shadow_enabled=True,
+    )
+    assert ontology_enabled.product_ontology_shadow_enabled is True
 
     with pytest.raises(
         ValidationError,

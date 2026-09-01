@@ -24,6 +24,7 @@ from app.observations import models as observation_models  # noqa: F401
 from app.product_graph import models as product_graph_models  # noqa: F401
 from app.offer_graph import models as offer_graph_models  # noqa: F401
 from app.offer_truth import models as offer_truth_models  # noqa: F401
+from app.product_ontology import models as product_ontology_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_models  # noqa: F401
 from app.evidence_engine import models as evidence_models  # noqa: F401
 
@@ -46,6 +47,7 @@ GRAPH_SHADOW_TABLES = {
 }
 OFFER_GRAPH_TABLES = {"graph_offer_observations"}
 OFFER_TRUTH_TABLES = {"offer_truth_snapshots"}
+PRODUCT_ONTOLOGY_TABLES = {"product_ontology_snapshots"}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
 EVIDENCE_ENGINE_TABLES = {
     "evidence_claim_records",
@@ -63,7 +65,8 @@ HEARTBEAT_REVISION = "f9a4c7d1e2b3"
 CHECKPOINT_REVISION = "a2d7e9f4c1b6"
 IDENTITY_ASSERTION_REVISION = "b3e1a7c4d9f2"
 ENTITY_RESOLUTION_REVISION = "c4f2b8d5e0a3"
-HEAD_REVISION = "d5a3c7e9f1b4"
+OFFER_TRUTH_REVISION = "d5a3c7e9f1b4"
+HEAD_REVISION = "e6b4d8f0a2c5"
 
 
 @pytest.fixture(autouse=True)
@@ -135,7 +138,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
     assert scripts.get_revision(HEAD_REVISION).down_revision == (
-        ENTITY_RESOLUTION_REVISION
+        OFFER_TRUTH_REVISION
     )
 
 
@@ -416,6 +419,7 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
         | GRAPH_SHADOW_TABLES
         | OFFER_GRAPH_TABLES
         | OFFER_TRUTH_TABLES
+        | PRODUCT_ONTOLOGY_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
         | EVIDENCE_ENGINE_TABLES
         <= tables
