@@ -1,0 +1,27 @@
+{
+  "schema_version": "offer-optimization/v2",
+  "policy_version": "offer-optimization-policy/v2",
+  "context_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "raw_context_retained": false,
+  "outcome": "ABSTAINED",
+  "selected_product_ref": "variant:301",
+  "selected_offer_ref": null,
+  "evaluations": [
+    {
+      "offer_ref": "offer:501",
+      "product_ref": "variant:301",
+      "status": "UNOPTIMIZABLE",
+      "selection_rank": null,
+      "total_cost": null,
+      "cashback_amount": null,
+      "landed_cost": null,
+      "currency": null,
+      "return_period_days": null,
+      "merchant_reliability": "0.92",
+      "freshness": "0.98",
+      "reason_codes": ["cashback_unknown_or_unsourced"],
+      "evidence_refs": ["merchant-quality:41", "offer-truth:501", "returns:501"]
+    }
+  ],
+  "result_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

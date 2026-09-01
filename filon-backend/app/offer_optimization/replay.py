@@ -29,13 +29,14 @@ from .engine import (
     MoneyFact,
     OfferCandidateFacts,
     OptimizationRequest,
+    ReturnPolicyFact,
     ScoreFact,
     optimize_offers,
 )
 from .persistence import persist_offer_optimization
 
 
-REPLAY_VERSION = "offer-optimization-production-replay/v1"
+REPLAY_VERSION = "offer-optimization-production-replay/v2"
 MAX_REPLAY_RUNS = 100
 MAX_OFFERS_PER_RUN = 100
 
@@ -120,6 +121,26 @@ def _availability(claim: Mapping[str, Any] | None) -> AvailabilityFact:
     return AvailabilityFact("known", value, _refs(claim))
 
 
+def _returns(claim: Mapping[str, Any] | None) -> ReturnPolicyFact:
+    if not isinstance(claim, Mapping):
+        return ReturnPolicyFact("unknown")
+    state = claim.get("state")
+    value = claim.get("value")
+    if state != "known":
+        return ReturnPolicyFact(state if state in {"unknown", "invalid", "conflict"} else "unknown")
+    if not isinstance(value, Mapping) or not isinstance(value.get("accepted"), bool):
+        return ReturnPolicyFact("invalid")
+    accepted = value["accepted"]
+    period = value.get("period_days")
+    if accepted and (isinstance(period, bool) or not isinstance(period, int)):
+        return ReturnPolicyFact("invalid")
+    if period is not None and (
+        isinstance(period, bool) or not isinstance(period, int) or not 0 <= period <= 3650
+    ):
+        return ReturnPolicyFact("invalid")
+    return ReturnPolicyFact("known", accepted, period, _refs(claim))
+
+
 def _freshness(claim: Mapping[str, Any] | None) -> ScoreFact:
     if not isinstance(claim, Mapping) or claim.get("state") != "fresh":
         return ScoreFact("unknown")
@@ -183,7 +204,9 @@ def _candidate(snapshot: OfferTruthSnapshot, product_ref: str) -> OfferCandidate
         truth_status=snapshot.offer_status,
         price=_money(claims.get("price")),
         shipping=_money(claims.get("shipping")),
+        cashback=_money(claims.get("cashback")),
         availability=_availability(claims.get("stock")),
+        returns=_returns(claims.get("returns")),
         merchant_reliability=ScoreFact("unknown"),
         freshness=_freshness(claims.get("freshness")),
     )

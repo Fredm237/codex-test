@@ -17,22 +17,27 @@ from app.offer_optimization.engine import (
     MoneyFact,
     OfferCandidateFacts,
     OptimizationRequest,
+    ReturnPolicyFact,
     ScoreFact,
     optimize_offers,
 )
 
 
-SCHEMA_VERSION = "offer-optimization-benchmark/v1"
+SCHEMA_VERSION = "offer-optimization-benchmark/v2"
 MANIFEST_VERSION = "offer-optimization-benchmark-manifest/v1"
-GENERATOR_VERSION = "filon-offer-optimization-holdout/v1"
+GENERATOR_VERSION = "filon-offer-optimization-holdout/v2"
 LIMITATION = "NO_EXTERNAL_HUMAN_OFFER_PREFERENCE_GROUND_TRUTH"
 VERTICALS = ("smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres")
 LOCALES = ("fr", "nl", "en")
 SCENARIOS = (
     "exact_objective",
     "unknown_shipping",
+    "unknown_cashback",
+    "unknown_returns",
+    "cashback_currency_conflict",
     "stale_offer",
     "out_of_stock",
+    "returns_not_accepted",
     "commission_mutation",
     "tie_stability",
 )
@@ -95,10 +100,10 @@ def _load_manifest(path: Path) -> Mapping[str, Any]:
     ):
         raise OfferOptimizationBenchmarkError("generator configuration is invalid")
     if manifest.get("minimum_statistical_support") != {
-        "total_cases": 4500,
-        "unknown_cases": 700,
-        "ineligible_cases": 1400,
-        "affiliate_mutation_cases": 700,
+        "total_cases": 5700,
+        "unknown_cases": 2200,
+        "ineligible_cases": 1700,
+        "affiliate_mutation_cases": 500,
     }:
         raise OfferOptimizationBenchmarkError("minimum statistical support is invalid")
     if manifest.get("engineering_gates") != {
@@ -136,9 +141,12 @@ def _offer(
     shipping: int,
     reliability: int,
     freshness: int,
+    cashback: int = 0,
     truth_status: str = "VERIFIED",
     availability: AvailabilityFact | None = None,
     shipping_fact: MoneyFact | None = None,
+    cashback_fact: MoneyFact | None = None,
+    returns_fact: ReturnPolicyFact | None = None,
 ) -> OfferCandidateFacts:
     return OfferCandidateFacts(
         ref,
@@ -146,14 +154,16 @@ def _offer(
         truth_status,
         _money(price, f"price:{ref}"),
         shipping_fact or _money(shipping, f"shipping:{ref}"),
+        cashback_fact or _money(cashback, f"cashback:{ref}"),
         availability or AvailabilityFact("known", "in_stock", (f"stock:{ref}",)),
+        returns_fact or ReturnPolicyFact("known", True, 30, (f"returns:{ref}",)),
         _score(reliability, f"reliability:{ref}"),
         _score(freshness, f"freshness:{ref}"),
     )
 
 
 def _oracle(candidates: tuple[OfferCandidateFacts, ...], product_ref: str) -> str | None:
-    eligible: list[tuple[Decimal, Decimal, Decimal, str]] = []
+    eligible: list[tuple[Decimal, Decimal, Decimal, Decimal, str]] = []
     for candidate in candidates:
         if (
             candidate.product_ref != product_ref
@@ -163,9 +173,21 @@ def _oracle(candidates: tuple[OfferCandidateFacts, ...], product_ref: str) -> st
             or not candidate.availability.evidence_refs
             or candidate.price.state != "known"
             or candidate.shipping.state != "known"
+            or candidate.cashback.state != "known"
             or not candidate.price.evidence_refs
             or not candidate.shipping.evidence_refs
-            or candidate.price.currency != candidate.shipping.currency
+            or not candidate.cashback.evidence_refs
+            or len(
+                {
+                    candidate.price.currency,
+                    candidate.shipping.currency,
+                    candidate.cashback.currency,
+                }
+            ) != 1
+            or candidate.returns.state != "known"
+            or candidate.returns.accepted is not True
+            or candidate.returns.period_days is None
+            or not candidate.returns.evidence_refs
             or candidate.merchant_reliability.state != "known"
             or candidate.freshness.state != "known"
             or not candidate.merchant_reliability.evidence_refs
@@ -175,15 +197,19 @@ def _oracle(candidates: tuple[OfferCandidateFacts, ...], product_ref: str) -> st
         total = Decimal(candidate.price.amount_decimal or "0") + Decimal(
             candidate.shipping.amount_decimal or "0"
         )
+        cashback = Decimal(candidate.cashback.amount_decimal or "0")
+        if cashback > total:
+            continue
         eligible.append(
             (
-                total,
+                total - cashback,
                 -Decimal(candidate.merchant_reliability.value or "0"),
+                -Decimal(candidate.returns.period_days),
                 -Decimal(candidate.freshness.value or "0"),
                 candidate.offer_ref,
             )
         )
-    return min(eligible)[3] if eligible else None
+    return min(eligible)[4] if eligible else None
 
 
 def _case(vertical: str, locale: str, seed: int, index: int) -> BenchmarkCase:
@@ -197,6 +223,7 @@ def _case(vertical: str, locale: str, seed: int, index: int) -> BenchmarkCase:
             product_ref,
             price=rng.randint(10_000, 100_000),
             shipping=rng.randint(0, 2_000),
+            cashback=rng.randint(0, 1_000),
             reliability=rng.randint(60, 99),
             freshness=rng.randint(60, 99),
         )
@@ -216,6 +243,48 @@ def _case(vertical: str, locale: str, seed: int, index: int) -> BenchmarkCase:
             ),
             *candidates[1:],
         )
+    elif scenario == "unknown_cashback":
+        first = candidates[0]
+        candidates = (
+            _offer(
+                first.offer_ref,
+                product_ref,
+                price=1,
+                shipping=0,
+                reliability=99,
+                freshness=99,
+                cashback_fact=MoneyFact("unknown"),
+            ),
+            *candidates[1:],
+        )
+    elif scenario == "unknown_returns":
+        first = candidates[0]
+        candidates = (
+            _offer(
+                first.offer_ref,
+                product_ref,
+                price=1,
+                shipping=0,
+                reliability=99,
+                freshness=99,
+                returns_fact=ReturnPolicyFact("unknown"),
+            ),
+            *candidates[1:],
+        )
+    elif scenario == "cashback_currency_conflict":
+        first = candidates[0]
+        candidates = (
+            _offer(
+                first.offer_ref,
+                product_ref,
+                price=1,
+                shipping=0,
+                reliability=99,
+                freshness=99,
+                cashback_fact=MoneyFact("known", "0.01", "USD", (f"cashback:{first.offer_ref}",)),
+            ),
+            *candidates[1:],
+        )
     elif scenario == "stale_offer":
         candidates = (
             _offer(refs[0], product_ref, price=1, shipping=0, reliability=99, freshness=99, truth_status="STALE"),
@@ -231,6 +300,19 @@ def _case(vertical: str, locale: str, seed: int, index: int) -> BenchmarkCase:
                 reliability=99,
                 freshness=99,
                 availability=AvailabilityFact("known", "out_of_stock", (f"stock:{refs[0]}",)),
+            ),
+            *candidates[1:],
+        )
+    elif scenario == "returns_not_accepted":
+        candidates = (
+            _offer(
+                refs[0],
+                product_ref,
+                price=1,
+                shipping=0,
+                reliability=99,
+                freshness=99,
+                returns_fact=ReturnPolicyFact("known", False, None, (f"returns:{refs[0]}",)),
             ),
             *candidates[1:],
         )
@@ -301,6 +383,10 @@ def run_benchmark(path: Path, *, adapter: str = "offer_optimization") -> dict[st
                 candidate.truth_status != "VERIFIED"
                 or candidate.availability.state != "known"
                 or candidate.availability.value != "in_stock"
+                or (
+                    candidate.returns.state == "known"
+                    and candidate.returns.accepted is False
+                )
             )
             and statuses.get(candidate.offer_ref) == "SELECTED"
             for candidate in case.candidates
@@ -309,6 +395,19 @@ def run_benchmark(path: Path, *, adapter: str = "offer_optimization") -> dict[st
             (
                 candidate.shipping.state != "known"
                 or not candidate.shipping.evidence_refs
+                or candidate.cashback.state != "known"
+                or not candidate.cashback.evidence_refs
+                or len(
+                    {
+                        candidate.price.currency,
+                        candidate.shipping.currency,
+                        candidate.cashback.currency,
+                    }
+                ) != 1
+                or candidate.returns.state != "known"
+                or candidate.returns.accepted is not True
+                or candidate.returns.period_days is None
+                or not candidate.returns.evidence_refs
                 or candidate.merchant_reliability.state != "known"
             )
             and statuses.get(candidate.offer_ref) == "SELECTED"
@@ -320,8 +419,15 @@ def run_benchmark(path: Path, *, adapter: str = "offer_optimization") -> dict[st
     lower, upper = _wilson(exact, len(cases))
     support = {
         "total_cases": len(cases),
-        "unknown_cases": sum(case.scenario == "unknown_shipping" for case in cases),
-        "ineligible_cases": sum(case.scenario in {"stale_offer", "out_of_stock"} for case in cases),
+        "unknown_cases": sum(
+            case.scenario
+            in {"unknown_shipping", "unknown_cashback", "unknown_returns", "cashback_currency_conflict"}
+            for case in cases
+        ),
+        "ineligible_cases": sum(
+            case.scenario in {"stale_offer", "out_of_stock", "returns_not_accepted"}
+            for case in cases
+        ),
         "affiliate_mutation_cases": sum(case.scenario == "commission_mutation" for case in cases),
     }
     support_ok = all(

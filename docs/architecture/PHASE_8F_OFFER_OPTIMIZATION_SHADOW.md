@@ -1,21 +1,27 @@
 # FILON — Phase 8F Offer Optimization shadow
 
 - Date : **1er septembre 2026**
-- Migration : `c0f8b2d4e6a9`
-- Parent : `b9e7a1c3d5f8`
+- Migration initiale : `c0f8b2d4e6a9`
+- Complément v2 : `d1a9c3e5f7b0`
+- Parent v2 : `c0f8b2d4e6a9`
 - Flag : `OFFER_OPTIMIZATION_SHADOW_ENABLED=false`
-- Statut : **PASS LOCAL — NON DÉPLOYÉ**
+- Statut : **V1 DÉPLOYÉE — CORRECTION V2 PASS LOCAL**
 
 ## Expansion additive
 
-La migration ajoute `offer_optimization_runs` et
-`offer_optimization_candidates`. Les lignes sont append-only, reliées aux runs
+La migration initiale ajoute `offer_optimization_runs` et
+`offer_optimization_candidates`. La migration v2 ajoute `cashback_amount`,
+`landed_cost` et `return_period_days`, puis renforce la contrainte de forme.
+Les lignes sont append-only, reliées aux runs
 Product Ranking et snapshots Offer Truth, et protégées par des identités
 uniques. Les contraintes imposent au plus une sélection et interdisent la
 rétention de contexte brut.
 
 Le schéma ne possède aucune colonne de commission, taux d'affiliation, revenu
 plateforme, sponsorisation ou enchère publicitaire.
+
+Les reçus v1 restent lisibles. Toute nouvelle écriture utilise la politique v2
+et exige les faits complets ; aucune ligne historique n'est réécrite.
 
 ## Replay borné
 

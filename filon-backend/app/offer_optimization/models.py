@@ -79,10 +79,15 @@ class OfferOptimizationCandidate(Base):
             name="ck_offer_optimization_candidate_status",
         ),
         CheckConstraint(
-            "(status = 'SELECTED' AND selection_rank = 1 AND total_cost IS NOT NULL AND currency IS NOT NULL) OR "
-            "(status = 'ELIGIBLE' AND selection_rank IS NULL AND total_cost IS NOT NULL AND currency IS NOT NULL) OR "
+            "(status = 'SELECTED' AND selection_rank = 1 AND total_cost IS NOT NULL "
+            "AND cashback_amount IS NOT NULL AND landed_cost IS NOT NULL AND currency IS NOT NULL "
+            "AND return_period_days IS NOT NULL) OR "
+            "(status = 'ELIGIBLE' AND selection_rank IS NULL AND total_cost IS NOT NULL "
+            "AND cashback_amount IS NOT NULL AND landed_cost IS NOT NULL AND currency IS NOT NULL "
+            "AND return_period_days IS NOT NULL) OR "
             "(status IN ('UNOPTIMIZABLE', 'INELIGIBLE') AND selection_rank IS NULL "
-            "AND total_cost IS NULL AND currency IS NULL)",
+            "AND total_cost IS NULL AND cashback_amount IS NULL AND landed_cost IS NULL "
+            "AND currency IS NULL AND return_period_days IS NULL)",
             name="ck_offer_optimization_candidate_shape",
         ),
     )
@@ -99,7 +104,10 @@ class OfferOptimizationCandidate(Base):
     status: Mapped[str] = mapped_column(String(16), index=True)
     selection_rank: Mapped[int | None] = mapped_column(nullable=True, index=True)
     total_cost: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    cashback_amount: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    landed_cost: Mapped[str | None] = mapped_column(String(32), nullable=True)
     currency: Mapped[str | None] = mapped_column(String(3), nullable=True)
+    return_period_days: Mapped[int | None] = mapped_column(nullable=True)
     merchant_reliability: Mapped[str | None] = mapped_column(String(32), nullable=True)
     freshness: Mapped[str | None] = mapped_column(String(32), nullable=True)
     reason_codes_json: Mapped[list[str]] = mapped_column(JSON)

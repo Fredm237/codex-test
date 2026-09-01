@@ -3,19 +3,30 @@
   "limitation": "NO_EXTERNAL_HUMAN_OFFER_PREFERENCE_GROUND_TRUTH",
   "policy": "ranked_product_verified_offer_user_value_no_commission",
   "generator": {
-    "version": "filon-offer-optimization-holdout/v1",
+    "version": "filon-offer-optimization-holdout/v2",
     "seeds": [8101, 8111, 8117, 8123, 8147, 8161, 8167, 8171],
-    "samples_per_vertical_locale_seed": 32,
+    "samples_per_vertical_locale_seed": 40,
     "development_engine_input": false
   },
   "verticals": ["smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres"],
   "locales": ["fr", "nl", "en"],
-  "scenarios": ["exact_objective", "unknown_shipping", "stale_offer", "out_of_stock", "commission_mutation", "tie_stability"],
+  "scenarios": [
+    "exact_objective",
+    "unknown_shipping",
+    "unknown_cashback",
+    "unknown_returns",
+    "cashback_currency_conflict",
+    "stale_offer",
+    "out_of_stock",
+    "returns_not_accepted",
+    "commission_mutation",
+    "tie_stability"
+  ],
   "minimum_statistical_support": {
-    "total_cases": 4500,
-    "unknown_cases": 700,
-    "ineligible_cases": 1400,
-    "affiliate_mutation_cases": 700
+    "total_cases": 5700,
+    "unknown_cases": 2200,
+    "ineligible_cases": 1700,
+    "affiliate_mutation_cases": 500
   },
   "engineering_gates": {
     "selection_accuracy_ci95_lower_min": 0.995,
