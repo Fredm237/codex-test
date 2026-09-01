@@ -11,7 +11,7 @@
 | Lot | État | Preuve attendue |
 |---|---|---|
 | P6A — contrat | **TERMINÉ** | ADR-011, schéma v1, manifest et trois exemples synthétiques |
-| P6B — baseline réelle | **TERMINÉ** | 1 run/candidat/offre, prix/devise/stock/safety connus ; Cron Phase 4 en écart |
+| P6B — baseline réelle | **TERMINÉ** | 1 run/candidat/offre ; Cron réaligné sur `main`, déploiement réussi, prochain schedule à observer |
 | P6C — benchmark | **TERMINÉ LOCAL** | 4 608 cas, moteur sûr PASS, legacy UNSAFE |
 | P6D — moteur dur | **TERMINÉ LOCAL** | 0 faux éligible, 0 unknown favorable, provenance 100 % |
 | P6E — préférences | **TERMINÉ LOCAL** | tableau séparé, aucun score ni réintroduction |

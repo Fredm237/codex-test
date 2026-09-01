@@ -37,14 +37,19 @@ Un appel interne à `/health` sans `X-Real-IP` reçoit volontairement
 `rate_limit_unavailable`; ce résultat prouve le fail-closed de l'identité edge
 et ne constitue pas une panne Redis.
 
-## Écart opérationnel détecté
+## Écart opérationnel détecté et corrigé
 
-Le service Cron est encore attaché à un déploiement Phase 4
+Le service Cron était encore attaché à un déploiement Phase 4
 `89bdef84-2e3c-47bb-9c05-e2b6e39bcd3a`. Son occurrence du 1er septembre à
 12:00 UTC a terminé `Crashed` après 6 secondes avec un motif public neutre
-`RuntimeError`. Le web est déjà sur `main` Phase 5. Aucun changement n'a été
-effectué pendant cette baseline.
+`RuntimeError`, alors que le web était déjà sur `main` Phase 5.
 
-Cet écart doit être corrigé et une occurrence bornée doit réussir avant toute
-activation production du Constraint Engine. Il n'invalide ni les agrégats de
-la base ni la qualification locale du moteur.
+Le raccordement du Cron a été réaligné de `codex/filon-phase-0-core` vers
+`main`. Le déploiement `686e9777-236f-4417-b52f-486bcda6c99b` est terminal
+`Deployment successful` sur le reçu Phase 5. Aucune exécution manuelle ni
+ingestion concurrente n'a été lancée ; la prochaine occurrence reste à la
+cadence normale de six heures.
+
+La première occurrence planifiée sur ce déploiement doit encore réussir avant
+toute activation production du Constraint Engine. Cet état n'invalide ni les
+agrégats de la base ni la qualification locale du moteur.
