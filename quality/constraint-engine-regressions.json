@@ -1,0 +1,11 @@
+{
+  "schema_version": "constraint-engine-regressions/v1",
+  "cases": [
+    {"case_id": "budget:currency-mismatch", "scenario": "availability_unknown", "truth_basis": "CURRENCY_MUST_BE_COMPARABLE"},
+    {"case_id": "stock:unknown", "scenario": "availability_unknown", "truth_basis": "UNKNOWN_NEVER_SATISFIES_REQUIRED_STOCK"},
+    {"case_id": "attribute:conflict", "scenario": "attribute_conflict", "truth_basis": "INCOMPATIBILITY_EXCLUDES"},
+    {"case_id": "adult:excluded", "scenario": "adult_excluded", "truth_basis": "ADULT_SAFETY_PRECEDES_PREFERENCE"},
+    {"case_id": "preference:no-reintroduction", "scenario": "preference_only", "truth_basis": "PREFERENCE_IS_NOT_ELIGIBILITY"},
+    {"case_id": "budget:boundary", "scenario": "eligible", "truth_basis": "DECIMAL_BOUNDARY_IS_INCLUSIVE"}
+  ]
+}

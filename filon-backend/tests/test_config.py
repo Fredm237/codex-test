@@ -214,6 +214,7 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     assert settings.offer_truth_shadow_enabled is False
     assert settings.product_ontology_shadow_enabled is False
     assert settings.hybrid_retrieval_shadow_enabled is False
+    assert settings.constraint_engine_shadow_enabled is False
     assert settings.merchant_intelligence_shadow_enabled is False
     assert settings.evidence_engine_shadow_enabled is False
 
@@ -341,6 +342,28 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
         hybrid_retrieval_shadow_enabled=True,
     )
     assert retrieval_enabled.hybrid_retrieval_shadow_enabled is True
+
+    with pytest.raises(
+        ValidationError,
+        match="CONSTRAINT_ENGINE_SHADOW_ENABLED requires HYBRID_RETRIEVAL_SHADOW_ENABLED",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            constraint_engine_shadow_enabled=True,
+        )
+
+    constraint_enabled = Settings(
+        _env_file=None,
+        env="test",
+        observation_shadow_enabled=True,
+        product_graph_shadow_enabled=True,
+        entity_resolution_shadow_enabled=True,
+        product_ontology_shadow_enabled=True,
+        hybrid_retrieval_shadow_enabled=True,
+        constraint_engine_shadow_enabled=True,
+    )
+    assert constraint_enabled.constraint_engine_shadow_enabled is True
 
     with pytest.raises(
         ValidationError,

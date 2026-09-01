@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.example/contracts/constraint-engine/v1/constraint-evaluation-run.schema.json",
+  "title": "FILON Constraint Evaluation Run v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "run_ref", "retrieval_run_ref", "context_digest",
+    "raw_context_retained", "policy_version", "evaluated_at", "outcome",
+    "candidates", "result_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "constraint-evaluation-run/v1"},
+    "run_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+    "retrieval_run_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+    "context_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "raw_context_retained": {"const": false},
+    "policy_version": {"type": "string", "minLength": 1, "maxLength": 64},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "outcome": {
+      "enum": ["ELIGIBLE_CANDIDATES", "NO_ELIGIBLE_CANDIDATE", "ABSTAINED"]
+    },
+    "candidates": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/candidate"}
+    },
+    "result_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "evidence": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1, "maxLength": 191},
+      "uniqueItems": true
+    },
+    "result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["constraint_id", "kind", "status", "reason_code", "evidence_refs"],
+      "properties": {
+        "constraint_id": {"type": "string", "minLength": 1, "maxLength": 128},
+        "kind": {
+          "enum": ["BUDGET_MAX", "COUNTRY_ALLOWED", "AVAILABILITY_REQUIRED", "ATTRIBUTE_EQUALS", "ADULT_SAFETY", "EXPLICIT_EXCLUSION", "PREFERENCE"]
+        },
+        "status": {"enum": ["SATISFIED", "UNSATISFIED", "UNKNOWN", "NOT_APPLICABLE"]},
+        "reason_code": {"type": "string", "minLength": 1, "maxLength": 128},
+        "evidence_refs": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_ref", "status", "hard_constraints", "preferences", "reason_codes"],
+      "properties": {
+        "entity_ref": {"type": "string", "pattern": "^(product|model|variant):[^:]+$"},
+        "status": {"enum": ["ELIGIBLE", "EXCLUDED", "UNKNOWN"]},
+        "hard_constraints": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/result"}
+        },
+        "preferences": {
+          "type": "array",
+          "items": {
+            "allOf": [
+              {"$ref": "#/$defs/result"},
+              {"properties": {"kind": {"const": "PREFERENCE"}}}
+            ]
+          }
+        },
+        "reason_codes": {
+          "type": "array",
+          "items": {"type": "string", "minLength": 1, "maxLength": 128},
+          "uniqueItems": true
+        }
+      }
+    }
+  }
+}

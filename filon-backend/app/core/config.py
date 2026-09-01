@@ -114,6 +114,10 @@ class Settings(BaseSettings):
                 "HYBRID_RETRIEVAL_SHADOW_ENABLED requires Observation, Product Graph, "
                 "Entity Resolution and Product Ontology shadows"
             )
+        if self.constraint_engine_shadow_enabled and not self.hybrid_retrieval_shadow_enabled:
+            errors.append(
+                "CONSTRAINT_ENGINE_SHADOW_ENABLED requires HYBRID_RETRIEVAL_SHADOW_ENABLED"
+            )
         if self.merchant_intelligence_shadow_enabled and not (
             self.observation_shadow_enabled
             and self.product_graph_shadow_enabled
@@ -382,6 +386,9 @@ class Settings(BaseSettings):
     # Runs et candidats Hybrid Retrieval append-only. Aucun texte de requête
     # brut ni lecteur public ; le writer de maintenance reste OFF par défaut.
     hybrid_retrieval_shadow_enabled: bool = Field(default=False)
+    # Évaluations de contraintes append-only, sans contexte brut, scoring ni
+    # lecteur public. Le writer de maintenance reste OFF par défaut.
+    constraint_engine_shadow_enabled: bool = Field(default=False)
     # Mesures agrégées append-only, sans score ni confiance synthétique.
     merchant_intelligence_shadow_enabled: bool = Field(default=False)
     # Claims sourcés et décision strictement shadow ; aucune lecture publique.
