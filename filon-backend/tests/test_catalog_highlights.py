@@ -13,9 +13,49 @@ from datetime import UTC, datetime
 import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
-from app.api.routes.catalog import highlights
+from app.api.routes.catalog import _bound_highlights_parallelism, highlights
 from app.db import models
 from app.db.base import Base
+
+
+class _Dialect:
+    def __init__(self, name: str):
+        self.name = name
+
+
+class _Bind:
+    def __init__(self, dialect: str):
+        self.dialect = _Dialect(dialect)
+
+
+class _RecordingSession:
+    def __init__(self, dialect: str):
+        self.bind = _Bind(dialect)
+        self.statements = []
+
+    def get_bind(self):
+        return self.bind
+
+    async def execute(self, statement):
+        self.statements.append(str(statement))
+
+
+async def test_highlights_bounds_postgresql_parallelism_per_transaction():
+    session = _RecordingSession("postgresql")
+
+    await _bound_highlights_parallelism(session)
+
+    assert session.statements == [
+        "SET LOCAL max_parallel_workers_per_gather = 0"
+    ]
+
+
+async def test_highlights_keeps_non_postgresql_sessions_unchanged():
+    session = _RecordingSession("sqlite")
+
+    await _bound_highlights_parallelism(session)
+
+    assert session.statements == []
 
 
 @pytest.fixture
