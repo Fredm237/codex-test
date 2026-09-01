@@ -1,0 +1,24 @@
+{
+  "schema_version": "offer-optimization/v1",
+  "policy_version": "offer-optimization-policy/v1",
+  "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "raw_context_retained": false,
+  "outcome": "OFFER_SELECTED",
+  "selected_product_ref": "variant:301",
+  "selected_offer_ref": "offer:501",
+  "evaluations": [
+    {
+      "offer_ref": "offer:501",
+      "product_ref": "variant:301",
+      "status": "SELECTED",
+      "selection_rank": 1,
+      "total_cost": "354.99",
+      "currency": "EUR",
+      "merchant_reliability": "0.92",
+      "freshness": "0.98",
+      "reason_codes": ["verified_total_cost_and_operational_evidence"],
+      "evidence_refs": ["offer-truth:501", "merchant-quality:41"]
+    }
+  ],
+  "result_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

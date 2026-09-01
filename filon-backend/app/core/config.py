@@ -122,6 +122,12 @@ class Settings(BaseSettings):
             errors.append(
                 "PRODUCT_RANKING_SHADOW_ENABLED requires CONSTRAINT_ENGINE_SHADOW_ENABLED"
             )
+        if self.offer_optimization_shadow_enabled and not (
+            self.product_ranking_shadow_enabled and self.offer_truth_shadow_enabled
+        ):
+            errors.append(
+                "OFFER_OPTIMIZATION_SHADOW_ENABLED requires Product Ranking and Offer Truth shadows"
+            )
         if self.merchant_intelligence_shadow_enabled and not (
             self.observation_shadow_enabled
             and self.product_graph_shadow_enabled
@@ -396,6 +402,9 @@ class Settings(BaseSettings):
     # Classement produit append-only, sans sélection d'offre, commission ni
     # lecteur public. Le writer de maintenance reste OFF par défaut.
     product_ranking_shadow_enabled: bool = Field(default=False)
+    # Sélection d'offre append-only pour le produit classé, sans commission ni
+    # lecteur public. Elle exige Product Ranking et Offer Truth explicitement.
+    offer_optimization_shadow_enabled: bool = Field(default=False)
     # Mesures agrégées append-only, sans score ni confiance synthétique.
     merchant_intelligence_shadow_enabled: bool = Field(default=False)
     # Claims sourcés et décision strictement shadow ; aucune lecture publique.

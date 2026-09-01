@@ -1,0 +1,24 @@
+{
+  "schema_version": "offer-optimization/v1",
+  "policy_version": "offer-optimization-policy/v1",
+  "context_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "raw_context_retained": false,
+  "outcome": "ABSTAINED",
+  "selected_product_ref": "variant:301",
+  "selected_offer_ref": null,
+  "evaluations": [
+    {
+      "offer_ref": "offer:501",
+      "product_ref": "variant:301",
+      "status": "UNOPTIMIZABLE",
+      "selection_rank": null,
+      "total_cost": null,
+      "currency": null,
+      "merchant_reliability": null,
+      "freshness": "0.98",
+      "reason_codes": ["merchant_reliability_unknown_or_unsourced"],
+      "evidence_refs": ["offer-truth:501"]
+    }
+  ],
+  "result_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

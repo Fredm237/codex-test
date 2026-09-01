@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.example/contracts/offer-optimization/v1/offer-optimization-run.schema.json",
+  "title": "FILON Offer Optimization v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "policy_version",
+    "context_digest",
+    "raw_context_retained",
+    "outcome",
+    "selected_product_ref",
+    "selected_offer_ref",
+    "evaluations",
+    "result_digest"
+  ],
+  "properties": {
+    "schema_version": { "const": "offer-optimization/v1" },
+    "policy_version": { "const": "offer-optimization-policy/v1" },
+    "context_digest": { "$ref": "#/$defs/digest" },
+    "raw_context_retained": { "const": false },
+    "outcome": { "enum": ["OFFER_SELECTED", "ABSTAINED", "NO_ELIGIBLE_OFFER"] },
+    "selected_product_ref": { "type": ["string", "null"], "pattern": "^(product|model|variant):.+$" },
+    "selected_offer_ref": { "type": ["string", "null"], "pattern": "^offer:.+$" },
+    "evaluations": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evaluation" }
+    },
+    "result_digest": { "$ref": "#/$defs/digest" }
+  },
+  "$defs": {
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "score": {
+      "type": ["string", "null"],
+      "pattern": "^(0(?:\\.[0-9]+)?|1(?:\\.0+)?)$"
+    },
+    "evaluation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "offer_ref",
+        "product_ref",
+        "status",
+        "selection_rank",
+        "total_cost",
+        "currency",
+        "merchant_reliability",
+        "freshness",
+        "reason_codes",
+        "evidence_refs"
+      ],
+      "properties": {
+        "offer_ref": { "type": "string", "pattern": "^offer:.+$" },
+        "product_ref": { "type": "string", "pattern": "^(product|model|variant):.+$" },
+        "status": { "enum": ["SELECTED", "ELIGIBLE", "UNOPTIMIZABLE", "INELIGIBLE"] },
+        "selection_rank": { "type": ["integer", "null"], "minimum": 1 },
+        "total_cost": { "type": ["string", "null"], "pattern": "^[0-9]+(?:\\.[0-9]+)?$" },
+        "currency": { "type": ["string", "null"], "pattern": "^[A-Z]{3}$" },
+        "merchant_reliability": { "$ref": "#/$defs/score" },
+        "freshness": { "$ref": "#/$defs/score" },
+        "reason_codes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        },
+        "evidence_refs": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": { "type": "string", "minLength": 1 }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "OFFER_SELECTED" } } },
+      "then": { "properties": { "selected_offer_ref": { "type": "string" } } },
+      "else": { "properties": { "selected_offer_ref": { "type": "null" } } }
+    }
+  ]
+}
