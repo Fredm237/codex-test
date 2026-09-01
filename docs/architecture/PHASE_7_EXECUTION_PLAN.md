@@ -1,7 +1,7 @@
 # FILON — Phase 7 Product Ranking Execution Plan
 
 - Ouverture : **1er septembre 2026**
-- Statut : **FONDATION SHADOW EN QUALIFICATION**
+- Statut : **PHASE 7 SHADOW = GO — PHASE 8 OUVERTE**
 - Gate d'entrée : Phase 6 Constraint Engine shadow terminale avec verdict GO
 - Lecteurs publics : **INCHANGÉS**
 - Optimisation d'offre : **HORS PÉRIMÈTRE — PHASE 8**
@@ -15,10 +15,10 @@
 | P7C — benchmark | **TERMINÉ TECHNIQUEMENT** | 4 608 cas, moteur sûr PASS, contrôle legacy UNSAFE |
 | P7D — moteur | **TERMINÉ** | éligibles seuls, quatre dimensions sourcées, poids par verticale |
 | P7E — neutralité | **TERMINÉ** | commission et marchand absents du contrat et invariance prouvée |
-| P7F — shadow | **TERMINÉ LOCALEMENT** | migration `b9e7a1c3d5f8`, writer OFF, idempotence |
-| P7G — replay borné | **TERMINÉ LOCALEMENT** | abstention sans preuve, dry/apply/replay idempotents |
+| P7F — shadow | **TERMINÉ EN PRODUCTION** | migration `b9e7a1c3d5f8`, writer persistant OFF, idempotence |
+| P7G — replay borné | **TERMINÉ EN PRODUCTION** | abstention sans preuve, dry/apply/replay idempotents |
 | P7H — gouvernance qualité | **TERMINÉ — NON-BLOQUANT** | `AUTONOMOUS_QUALITY_LAB` + `NO_EXTERNAL_HUMAN_GROUND_TRUTH` |
-| P7I — revue de sortie | **À FAIRE** | production shadow et gates techniques avant Product Ranking GO |
+| P7I — revue de sortie | **TERMINÉE — GO SHADOW** | CI, production, migration, santé, neutralité et replay qualifiés |
 
 ## Invariants
 
@@ -34,12 +34,14 @@
 10. L'absence définitive d'annotation humaine externe reste documentée mais ne
     bloque jamais la progression.
 
-## Séquence restante
+## Décision terminale
 
-1. Publier et faire valider la fondation par la CI complète.
-2. Déployer la migration additive avec le writer persistant désactivé.
-3. Exécuter un dry-run puis un apply/replay strictement bornés sur la fenêtre Phase 6.
-4. Vérifier santé, schéma, idempotence et absence de modification des lecteurs publics.
-5. Conserver `NOT_INDEPENDENTLY_VALIDATED` pour les dimensions subjectives sans
-   inventer de précision humaine.
-6. Comparer le moteur au contrôle autonome et décider Product Ranking GO/NO-GO.
+La fondation a été fusionnée par la PR `#399`, déployée avec la migration
+additive et qualifiée sur une fenêtre réelle d'un run et un candidat. Les trois
+passages dry/apply/replay ont produit la même identité ; le replay final a
+réutilisé les lignes existantes sans nouvelle écriture.
+
+Phase 7 est **GO en shadow**. Les lecteurs publics et tous les flags shadow
+persistants restent désactivés. `NOT_INDEPENDENTLY_VALIDATED` et
+`NO_EXTERNAL_HUMAN_GROUND_TRUTH / NON_BLOCKING` demeurent explicites. La Phase 8
+peut s'ouvrir sans confondre classement produit et optimisation d'offre.
