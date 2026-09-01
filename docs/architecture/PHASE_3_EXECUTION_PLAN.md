@@ -1,7 +1,7 @@
 # FILON — Phase 3 Offer Truth Execution Plan
 
 - Ouverture : **1er septembre 2026**
-- Statut : **OUVERTE**
+- Statut : **FERMÉE — PHASE 3 = GO**
 - Entrée : [PHASE 2 = GO](PHASE_2_FINAL_RECEIPT.md)
 - Gate de sortie : **offer correctness target passes**
 - Lecteurs publics Offer Graph : **NON PROMUS**
@@ -55,15 +55,19 @@ quels champs sont correctement observés.
 
 | Lot | État | Preuve attendue |
 |---|---|---|
-| P3A — contrat Offer Truth | **terminé localement** | [ADR-008](ADR-008-OFFER-TRUTH-V1-CONTRACT.md), schéma, exemples et 33 tests |
+| P3A — contrat Offer Truth | **terminé** | [ADR-008](ADR-008-OFFER-TRUTH-V1-CONTRACT.md), schéma, exemples et 33 tests |
 | P3B — baseline réelle | **terminé en lecture seule** | [couverture réelle des sept claims](PHASE_3B_OFFER_TRUTH_BASELINE.md) |
-| P3C — benchmark | **terminé localement** | [14 352 cas, zéro échec, gates ratifiées](PHASE_3C_OFFER_TRUTH_BENCHMARK_REPORT.md) |
-| P3D — extracteurs | **terminé localement** | [extracteur réel : 14 352 cas PASS](PHASE_3D_OFFER_TRUTH_EXTRACTOR_REPORT.md) |
-| P3E — schéma/writers | **terminé localement** | [migration `d5a3c7e9f1b4`, writer sec et idempotent](PHASE_3E_OFFER_TRUTH_SHADOW_REPORT.md) |
-| P3F — replay production | à faire | lot borné, provenance et idempotence |
-| P3G — qualification | à faire | offer correctness et limitations publiées |
-| P3H — revue de sortie | à faire | reçu Phase 3 et décision vers Product Ontology |
+| P3C — benchmark | **terminé** | [14 352 cas, zéro échec, gates ratifiées](PHASE_3C_OFFER_TRUTH_BENCHMARK_REPORT.md) |
+| P3D — extracteurs | **terminé** | [extracteur réel : 14 352 cas PASS](PHASE_3D_OFFER_TRUTH_EXTRACTOR_REPORT.md) |
+| P3E — schéma/writers | **terminé** | [migration `d5a3c7e9f1b4`, writer sec et idempotent](PHASE_3E_OFFER_TRUTH_SHADOW_REPORT.md) |
+| P3F — replay production | **terminé** | [lot réel de 1 000, puis 1 000 existants](PHASE_3_FINAL_RECEIPT.md) |
+| P3G — qualification | **terminé** | [offer correctness, abstention et limites publiées](PHASE_3_FINAL_RECEIPT.md) |
+| P3H — revue de sortie | **GO** | [reçu Phase 3 et passage vers Product Ontology](PHASE_3_FINAL_RECEIPT.md) |
 
 Les travaux SRE et l'Immersive restent séparés. Aucun score marchand, total
 livré, comparaison multidevise ou claim public nouveau n'est autorisé par ce
 plan.
+
+La Phase 3 est fermée avec le verdict **GO**. Les lecteurs publics restent
+inchangés ; la Phase 4 Product Ontology est ouverte sur les seuls shadows
+qualifiés.
