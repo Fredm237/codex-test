@@ -1,7 +1,7 @@
 # FILON — Phase 10 Buy/Wait v2 Execution Plan
 
 - Ouverture : **1er septembre 2026**
-- Statut : **QUALIFIÉ LOCAL — PUBLICATION ET PRODUCTION EN ATTENTE**
+- Statut : **GO — QUALIFIÉ EN SHADOW DE PRODUCTION**
 - Gate d'entrée : **Phase 9 = GO**
 - Lecteurs publics : **INCHANGÉS**
 - Activation persistante : **OFF**
@@ -16,13 +16,13 @@ lire des observations futures.
 
 | Lot | État | Preuve attendue |
 |---|---|---|
-| P10A — baseline | ACQUIS LOCAL | inventaire du verdict v1 et des historiques exploitables |
-| P10B — contrat | ACQUIS LOCAL | résultat, claims, traces, inconnues et abstention versionnés |
-| P10C — politique v2 | ACQUIS LOCAL | moteur déterministe fail-closed sans prévision inventée |
-| P10D — backtest | ACQUIS LOCAL | 7 200 cas, 3 600 actionnables, Wilson 0,99893407, fuite 0 |
-| P10E — shadow | ACQUIS LOCAL | migration additive, writer append-only, flag OFF |
-| P10F — replay | ACQUIS LOCAL | dry/apply/replay borné et idempotent sur base isolée |
-| P10G — sortie | À FAIRE | reçu terminal et limites explicites |
+| P10A — baseline | ACQUIS | inventaire du verdict v1 et des historiques exploitables |
+| P10B — contrat | ACQUIS | résultat, claims, traces, inconnues et abstention versionnés |
+| P10C — politique v2 | ACQUIS | moteur déterministe fail-closed sans prévision inventée |
+| P10D — backtest | ACQUIS | 7 200 cas, 3 600 actionnables, Wilson 0,99893407, fuite 0 |
+| P10E — shadow | ACQUIS | migration additive, writer append-only, flag OFF |
+| P10F — replay | ACQUIS PRODUCTION | dry/apply/replay borné et idempotent, décision honnête `ABSTAIN` |
+| P10G — sortie | GO | reçu terminal et limites explicites |
 
 ## Invariants
 
@@ -35,3 +35,6 @@ lire des observations futures.
 5. Le moteur ne publie ni prix futur, ni date de baisse, ni économie garantie.
 6. Le backtest sépare strictement le préfixe de décision de l'horizon futur.
 7. Aucun lecteur public ou flag persistant ne change pendant la qualification.
+
+La preuve terminale et les identifiants d'exploitation sont consignés dans
+`PHASE_10_FINAL_RECEIPT.md`.

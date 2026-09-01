@@ -26,3 +26,22 @@ is the intended fail-closed outcome, not a fabricated BUY or WAIT action.
 
 No public reader, API endpoint or persistent product flag is connected to this
 table in Phase 10.
+
+## Production qualification
+
+The additive migration reached production at revision `f3c1e5a7b9d2` through
+Railway deployment `dd723950-6c51-4f14-8442-9d177e0b8ef0`.
+
+One strictly bounded window was evaluated at `2026-09-01T20:45:00Z`, starting
+after Confidence run 0 with limit 1. Dry-run, unique apply and identical replay
+all produced the same evaluation identity:
+`sha256:cd12a5ebbe0e0aa14eaeb50c08cd479c87156e83358a136ac4bf9da62e515a7a`.
+
+The unique apply scanned one source run, created one append-only row and
+returned `ABSTAIN`. The identical replay scanned the same source, created zero
+rows and resolved one existing row. This is the expected fail-closed result for
+a source without a ratified temporal profile.
+
+All twelve persistent shadow flags, from Observation through Buy/Wait, were
+read back as `false` after qualification. No Railway variable or public reader
+was changed.
