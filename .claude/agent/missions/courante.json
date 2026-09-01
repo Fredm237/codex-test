@@ -1,102 +1,67 @@
 {
-  "titre": "FILON — Phase 2 Entity Resolution",
-  "objectif": "Augmenter la couverture au-delà du GTIN exact par un resolver multi-signal shadow, mesuré et abstentionniste, sans dépasser le target de faux merge",
-  "cree": "2026-08-31T22:41:21+00:00",
-  "maj": "2026-08-31T23:15:00+00:00",
+  "titre": "FILON — Promotion atomique de la chaîne V2",
+  "objectif": "Faire progresser P0 shadows et P1–P10 de SHADOW vers CANARY puis PUBLIC sans incohérence de dépendances ni exposition prématurée",
+  "cree": "2026-09-02T00:00:00+02:00",
+  "maj": "2026-09-02T00:48:23+02:00",
   "contraintes": [
-    "FALSE MERGE IS WORSE THAN FALSE SPLIT",
-    "Les preuves exactes de Phase 1 restent prioritaires et ne peuvent pas être affaiblies par un score probabiliste",
-    "Aucun statut HIGH_CONFIDENCE ou PROBABLE ne devient une identité publique avant passage des gates Phase 2",
-    "AMBIGUOUS et UNRESOLVED restent des résultats valides ; aucun fallback favorable sur unknown",
-    "Le resolver reste shadow, réversible et sans lecteur public pendant toute la qualification",
-    "NO_EXTERNAL_HUMAN_GROUND_TRUTH reste explicitement déclaré ; aucune validation humaine ne peut être fabriquée",
-    "Immersive, Fashion production et refonte créative restent interdits par leurs gates"
+    "Le lecteur public Core v1 reste inchangé pendant toute la qualification shadow",
+    "Les writers V2 doivent être activés comme une chaîne atomique et validée fail-closed",
+    "CANARY et PUBLIC restent refusés tant que leur routage, leurs SLO et leur rollback ne sont pas qualifiés",
+    "Aucun unknown, conflit ou preuve absente ne devient un résultat favorable",
+    "Aucun secret, donnée utilisateur, contexte brut ou payload d'offre brut ne doit être publié"
   ],
   "taches": [
     {
-      "id": "p2_a",
-      "objectif": "Figer le contrat de décision et les niveaux de confiance Entity Resolution",
+      "id": "v2p_a",
+      "objectif": "Figer le contrôle OFF/SHADOW/CANARY/PUBLIC et le graphe de dépendances",
       "statut": "fait",
       "depend": [],
-      "outil": "ADR + contracts",
-      "attendu": "EXACT_VERIFIED, HIGH_CONFIDENCE, PROBABLE, AMBIGUOUS et UNRESOLVED ont des preuves, interdictions et transitions explicites",
-      "obtenu": "Contrat additif des cinq états, preuves, scores et conflits, sans lecteur public ni writer",
-      "verification": "ADR-007, JSON Schema et cinq exemples ; 36 tests Entity Resolution/Product Identity verts ; exact réservé au GTIN, HIGH exige deux preuves fortes, états non promotables sans canonical_id",
+      "outil": "configuration + tests",
+      "attendu": "SHADOW active toute la chaîne ; CANARY/PUBLIC échouent fermés tant qu'ils ne sont pas qualifiés",
+      "obtenu": "Mode global off/shadow avec expansion atomique de quatorze writers et refus fail-closed de canary/public et de tout lecteur prématuré",
+      "verification": "Tests Settings verts, y compris expansion depuis l'environnement, conflit writer explicite et lecteurs OFF",
       "tentatives": 1
     },
     {
-      "id": "p2_b",
-      "objectif": "Auditer la disponibilité réelle des signaux au-delà du GTIN",
+      "id": "v2p_b",
+      "objectif": "Construire l'orchestrateur shadow end-to-end borné et idempotent",
       "statut": "fait",
-      "depend": [],
-      "outil": "PostgreSQL + corpus Awin en lecture seule",
-      "attendu": "Couverture MPN, modèle, marque, attributs variante, titre, image, marchand et taxonomie mesurée par verticale",
-      "obtenu": "Audit production en lecture seule du corpus raw rejouable et de treize verticales Core bornées ; absence de MPN, modèle et attributs de variante structurés confirmée dans le feed actuel",
-      "verification": "1 000 raws d'un feed et d'un marchand : 330 EAN, 670 sans EAN ; aucun champ structuré MPN/modèle/variante ; échantillons Core jusqu'à 500 lignes par verticale ; titre/image/regex classés candidate-only",
-      "tentatives": 1
-    },
-    {
-      "id": "p2_c",
-      "objectif": "Étendre le benchmark avec hard negatives et target de faux merge",
-      "statut": "fait",
-      "depend": ["p2_a", "p2_b"],
-      "outil": "Quality Lab",
-      "attendu": "Faux merges, faux splits, exact product et variant match mesurés avec intervalles et budget d'abstention",
-      "obtenu": "Benchmark déterministe de 6 730 cas ratifié ; baseline exact-GTIN SAFE_INCOMPLETE, toutes les gates de sécurité vertes et les deux gates de couverture honnêtement rouges",
-      "verification": "0 faux merge sur 3 844 hard negatives, borne Wilson 0,100 % ; 960/960 exact préservés ; 2 884/2 884 conflits abstention ; 965/965 positifs structurés encore abstention ; evaluation a33367af...",
-      "tentatives": 1
-    },
-    {
-      "id": "p2_d",
-      "objectif": "Construire les extracteurs de modèle et d'attributs variante en shadow",
-      "statut": "fait",
-      "depend": ["p2_a", "p2_b"],
+      "depend": ["v2p_a"],
       "outil": "backend",
-      "attendu": "Faits versionnés et sourcés pour MPN, modèle, capacité, couleur, taille et génération, avec unknown explicite",
-      "obtenu": "Extracteur shadow pur de seize signaux avec états observed/candidate_only/unknown/invalid/conflict, provenance et version ; aucun MPN ou modèle inventé depuis le titre",
-      "verification": "JSON Schema et deux exemples ; 62 tests ciblés verts ; alias structurés contradictoires bloqués ; attributs lexicaux faibles ; raw actuel maintenu unknown pour les preuves absentes",
+      "attendu": "Un snapshot traverse P1 à P10 avec reprise et zéro duplication au replay",
+      "obtenu": "Orchestrateur de treize étapes, checkpoints réutilisables, curseur continu, lease unique, heartbeat et journal terminal sans payload brut",
+      "verification": "Apply puis replay identique sur données synthétiques : même evaluation_id, créations nulles au replay ; collision et reprise stale testées",
       "tentatives": 1
     },
     {
-      "id": "p2_e",
-      "objectif": "Construire la génération de candidats et le resolver multi-signal hiérarchique",
+      "id": "v2p_c",
+      "objectif": "Qualifier localement les gates et l'absence de lecteur public",
       "statut": "fait",
-      "depend": ["p2_c", "p2_d"],
-      "outil": "backend",
-      "attendu": "GTIN/MPN/modèle/attributs/taxonomie/merchant metadata ordonnés, conflits bloquants et scores explicables",
-      "obtenu": "Candidate generator et resolver hiérarchique shadow : GTIN autoritatif, deux types de preuves fortes pour HIGH_CONFIDENCE, conflits et candidats multiples en abstention, score non autoritaire",
-      "verification": "Benchmark multi-signal 6 730/6 730, 0/3 844 faux merges, 965/965 positifs structurés, 2 884/2 884 conflits et 961/961 faibles en abstention ; 79 tests ciblés verts ; evaluation 00f3594a...",
+      "depend": ["v2p_a", "v2p_b"],
+      "outil": "pytest + Quality Lab",
+      "attendu": "Tests ciblés et benchmarks verts ; aucun endpoint public raccordé",
+      "obtenu": "Gates locaux P1–P10 requalifiés et runbook unique SHADOW/CANARY/PUBLIC figé ; aucune route publique raccordée",
+      "verification": "454 tests ciblés verts ; 10 rapports Quality Lab verts ; 79 tests configuration/orchestrateur/migrations verts ; git diff --check vert",
       "tentatives": 1
     },
     {
-      "id": "p2_f",
-      "objectif": "Exécuter un shadow replay réel borné",
+      "id": "v2p_d",
+      "objectif": "Activer et mesurer les writers shadow continus en production",
       "statut": "en_cours",
-      "depend": ["p2_e"],
-      "outil": "catalog core",
-      "attendu": "Lot réel idempotent, sans lecteur public, avec décisions et provenance persistées",
+      "depend": ["v2p_c"],
+      "outil": "Railway",
+      "attendu": "Volumes réels croissants, writers uniques, santé stable et lecteurs publics OFF",
       "obtenu": null,
       "verification": null,
       "tentatives": 1
     },
     {
-      "id": "p2_g",
-      "objectif": "Qualifier le target de faux merge et les métriques de résolution",
+      "id": "v2p_e",
+      "objectif": "Qualifier un dark reader puis un canary end-to-end réversible",
       "statut": "a_faire",
-      "depend": ["p2_c", "p2_f"],
-      "outil": "tests + benchmark + CI",
-      "attendu": "False Merge sous target ratifié, false split et couverture publiés, abstention conservée",
-      "obtenu": null,
-      "verification": null,
-      "tentatives": 0
-    },
-    {
-      "id": "p2_h",
-      "objectif": "Tenir la revue de sortie vers Phase 3 Offer Truth",
-      "statut": "a_faire",
-      "depend": ["p2_g"],
-      "outil": "architecture review",
-      "attendu": "Reçu Phase 2 et décision GO/NO-GO sans promotion prématurée",
+      "depend": ["v2p_d"],
+      "outil": "backend + observabilité",
+      "attendu": "Gates statistiques, SLO ratifiés et rollback prouvé avant toute promotion PUBLIC",
       "obtenu": null,
       "verification": null,
       "tentatives": 0
@@ -104,94 +69,39 @@
   ],
   "journal": [
     {
-      "ts": "2026-08-31T22:41:21+00:00",
+      "ts": "2026-09-02T00:00:00+02:00",
       "evenement": "mission_creee",
-      "detail": "FILON — Phase 2 Entity Resolution"
+      "detail": "Promotion atomique de la chaîne V2 depuis main 9a1c03a, séparée des cinq commits Phase 11"
     },
     {
-      "ts": "2026-08-31T22:41:21+00:00",
-      "evenement": "verification",
-      "detail": "Entrée Phase 2 — Phase 1 GO ; CI 33446873622 verte ; merge 07ccbb669648ff6b7e28949c26d98e62c0403a79 ; production saine sous b3e1a7c4d9f2"
-    },
-    {
-      "ts": "2026-08-31T22:41:21+00:00",
+      "ts": "2026-09-02T00:00:00+02:00",
       "evenement": "tache_demarree",
-      "detail": "p2_a (tentative 1)"
+      "detail": "v2p_a (tentative 1)"
     },
     {
-      "ts": "2026-08-31T22:47:18+00:00",
-      "evenement": "verification",
-      "detail": "p2_a — ADR-007, JSON Schema et cinq exemples ; 36 tests Entity Resolution/Product Identity verts ; exact réservé au GTIN, HIGH exige deux preuves fortes, états non promotables sans canonical_id"
-    },
-    {
-      "ts": "2026-08-31T22:47:18+00:00",
+      "ts": "2026-09-02T00:48:23+02:00",
       "evenement": "tache_faite",
-      "detail": "p2_a — Contrat additif des cinq états, preuves, scores et conflits, sans lecteur public ni writer"
+      "detail": "v2p_a — mode shadow atomique et canary/public fail-closed qualifiés localement"
     },
     {
-      "ts": "2026-08-31T22:47:18+00:00",
-      "evenement": "tache_demarree",
-      "detail": "p2_b (tentative 1)"
-    },
-    {
-      "ts": "2026-08-31T22:55:00+00:00",
-      "evenement": "verification",
-      "detail": "p2_b — 1 000 raws : 330 EAN et 670 abstentions ; aucun champ structuré MPN/modèle/variante ; treize verticales Core bornées auditées ; signaux lexicaux maintenus candidate-only"
-    },
-    {
-      "ts": "2026-08-31T22:55:00+00:00",
+      "ts": "2026-09-02T00:48:23+02:00",
       "evenement": "tache_faite",
-      "detail": "p2_b — audit de disponibilité des signaux réels documenté sans écriture production ni promotion publique"
+      "detail": "v2p_b — orchestrateur end-to-end, curseur, lease unique, heartbeat et journal terminal qualifiés"
     },
     {
-      "ts": "2026-08-31T22:55:00+00:00",
-      "evenement": "tache_demarree",
-      "detail": "p2_c (tentative 1)"
-    },
-    {
-      "ts": "2026-08-31T23:04:00+00:00",
+      "ts": "2026-09-02T00:48:23+02:00",
       "evenement": "verification",
-      "detail": "p2_c — 6 730 cas ; 0/3 844 faux merges (Wilson haut 0,100 %) ; exact 960/960 ; conflits 2 884/2 884 abstention ; positifs structurés 0/965 résolus au baseline"
+      "detail": "v2p_c — 454 tests ciblés et dix Quality Labs verts ; aucune route publique V2 ; migration locale verte"
     },
     {
-      "ts": "2026-08-31T23:04:00+00:00",
+      "ts": "2026-09-02T00:48:23+02:00",
       "evenement": "tache_faite",
-      "detail": "p2_c — benchmark, target faux merge 0,5 %, hard negatives et budget d'abstention ratifiés ; baseline SAFE_INCOMPLETE non promouvable"
+      "detail": "v2p_c — qualification locale terminée sans exposition de lecteur"
     },
     {
-      "ts": "2026-08-31T23:04:00+00:00",
+      "ts": "2026-09-02T00:48:23+02:00",
       "evenement": "tache_demarree",
-      "detail": "p2_d (tentative 1)"
-    },
-    {
-      "ts": "2026-08-31T23:08:00+00:00",
-      "evenement": "verification",
-      "detail": "p2_d — seize signaux explicites par raw ; MPN/modèle jamais extraits d'un titre ; structured/unknown/invalid/conflict versionnés ; 62 tests ciblés verts"
-    },
-    {
-      "ts": "2026-08-31T23:08:00+00:00",
-      "evenement": "tache_faite",
-      "detail": "p2_d — extracteurs shadow et contrat de provenance terminés localement, sans writer ni lecteur public"
-    },
-    {
-      "ts": "2026-08-31T23:08:00+00:00",
-      "evenement": "tache_demarree",
-      "detail": "p2_e (tentative 1)"
-    },
-    {
-      "ts": "2026-08-31T23:15:00+00:00",
-      "evenement": "verification",
-      "detail": "p2_e — benchmark multi 6 730/6 730 ; 0 faux merge ; exact 960/960 ; structurés 965/965 ; conflits et faibles 100 % abstention ; 79 tests ciblés verts"
-    },
-    {
-      "ts": "2026-08-31T23:15:00+00:00",
-      "evenement": "tache_faite",
-      "detail": "p2_e — resolver hiérarchique shadow terminé localement, sans lecteur public ni score contournant un veto"
-    },
-    {
-      "ts": "2026-08-31T23:15:00+00:00",
-      "evenement": "tache_demarree",
-      "detail": "p2_f (tentative 1)"
+      "detail": "v2p_d (tentative 1) — préparation de l'intégration et de la qualification PostgreSQL avant toute activation Railway"
     }
   ]
 }

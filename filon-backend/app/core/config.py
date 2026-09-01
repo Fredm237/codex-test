@@ -3,13 +3,32 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Mapping
 from functools import lru_cache
-from typing import Literal, Self
+from typing import Any, Literal, Self
 from urllib.parse import urlsplit
 from uuid import UUID
 
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+V2_SHADOW_WRITER_FIELDS = (
+    "observation_shadow_enabled",
+    "product_graph_shadow_enabled",
+    "entity_resolution_shadow_enabled",
+    "offer_graph_shadow_enabled",
+    "offer_truth_shadow_enabled",
+    "product_ontology_shadow_enabled",
+    "hybrid_retrieval_shadow_enabled",
+    "constraint_engine_shadow_enabled",
+    "product_ranking_shadow_enabled",
+    "offer_optimization_shadow_enabled",
+    "confidence_shadow_enabled",
+    "buy_wait_shadow_enabled",
+    "merchant_intelligence_shadow_enabled",
+    "evidence_engine_shadow_enabled",
+)
 
 
 class Settings(BaseSettings):
@@ -67,10 +86,75 @@ class Settings(BaseSettings):
             raise ValueError("CORS_ORIGINS must not contain duplicates")
         return origins
 
+    @model_validator(mode="before")
+    @classmethod
+    def expand_atomic_v2_shadow_mode(cls, data: Any) -> Any:
+        """Déplie un opt-in shadow unique sans ouvrir de lecteur public.
+
+        Les flags historiques restent utilisables individuellement pour les
+        replays de maintenance bornés lorsque le mode global est ``off``.
+        ``shadow`` constitue en revanche un contrat atomique : aucun maillon
+        de la chaîne ne peut être explicitement désactivé.
+        """
+
+        if not isinstance(data, Mapping):
+            return data
+        values = dict(data)
+        mode = str(values.get("v2_chain_mode", "off")).strip().lower()
+        if mode != "shadow":
+            return values
+
+        explicit_false = {
+            False,
+            0,
+            "0",
+            "false",
+            "False",
+            "FALSE",
+            "off",
+            "OFF",
+            "no",
+            "NO",
+        }
+        disabled = [
+            field
+            for field in V2_SHADOW_WRITER_FIELDS
+            if field in values and values[field] in explicit_false
+        ]
+        if disabled:
+            raise ValueError(
+                "V2_CHAIN_MODE=shadow cannot disable required writers: "
+                + ", ".join(sorted(disabled))
+            )
+        for field in V2_SHADOW_WRITER_FIELDS:
+            values[field] = True
+        return values
+
     @model_validator(mode="after")
     def reject_unsafe_production_configuration(self) -> Self:
         origins = self.cors_origins_list
         errors: list[str] = []
+        if self.v2_chain_mode == "off":
+            if self.v2_canary_reader_enabled or self.v2_public_reader_enabled:
+                errors.append("V2 readers require a promoted V2_CHAIN_MODE")
+        elif self.v2_chain_mode == "shadow":
+            missing = [
+                field
+                for field in V2_SHADOW_WRITER_FIELDS
+                if not getattr(self, field)
+            ]
+            if missing:
+                errors.append(
+                    "V2_CHAIN_MODE=shadow requires every V2 shadow writer: "
+                    + ", ".join(sorted(missing))
+                )
+            if self.v2_canary_reader_enabled or self.v2_public_reader_enabled:
+                errors.append("V2_CHAIN_MODE=shadow forbids every V2 public reader")
+        else:
+            errors.append(
+                f"V2_CHAIN_MODE={self.v2_chain_mode} is not qualified; "
+                "CANARY and PUBLIC remain fail-closed"
+            )
         if self.product_graph_shadow_enabled and not self.observation_shadow_enabled:
             errors.append(
                 "PRODUCT_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
@@ -383,6 +467,14 @@ class Settings(BaseSettings):
     filon_intelligence_enabled: bool = Field(default=False)
     fashion_expert_enabled: bool = Field(default=False)
     outfit_studio_enabled: bool = Field(default=False)
+    # Contrôle atomique de promotion de la chaîne P0 shadows + P1–P10.
+    # Seul ``shadow`` est actuellement qualifiable. Les modes lecteurs restent
+    # présents dans le contrat mais échouent fermés jusqu'à leur gate dédiée.
+    v2_chain_mode: Literal["off", "shadow", "canary", "public"] = Field(
+        default="off"
+    )
+    v2_canary_reader_enabled: bool = Field(default=False)
+    v2_public_reader_enabled: bool = Field(default=False)
     # Double écriture append-only de l'ingestion vers RawSource/Observation.
     # Désactivée tant que P0.e n'a pas été validé sur un lot réel borné.
     observation_shadow_enabled: bool = Field(default=False)
