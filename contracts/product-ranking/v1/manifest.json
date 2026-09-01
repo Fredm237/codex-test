@@ -1,0 +1,12 @@
+{
+  "schema_version": "product-ranking-manifest/v1",
+  "contract_version": "product-ranking/v1",
+  "policy": "eligible_product_first_vertical_aware_no_commission",
+  "dimensions": ["need_fit", "product_quality", "value", "evidence"],
+  "eligibility_policy": "only_constraint_status_eligible_can_be_ranked",
+  "unknown_policy": "unknown_dimension_never_receives_a_score",
+  "commercial_policy": "commission_and_affiliation_are_not_inputs",
+  "offer_policy": "offer_optimization_is_phase_8",
+  "privacy_policy": "raw_context_and_user_profile_never_persisted",
+  "verticals": ["smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres"]
+}

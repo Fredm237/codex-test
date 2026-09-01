@@ -1,0 +1,26 @@
+{
+  "schema_version": "product-ranking-run/v1",
+  "run_ref": "synthetic:ranking:abstained",
+  "constraint_run_ref": "synthetic:constraint:2",
+  "vertical": "laptops",
+  "context_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "raw_context_retained": false,
+  "policy_version": "product-ranking-policy/v1",
+  "evaluated_at": "2026-09-01T22:00:00Z",
+  "outcome": "ABSTAINED",
+  "candidates": [{
+    "entity_ref": "variant:102",
+    "status": "UNRANKABLE",
+    "rank": null,
+    "utility": null,
+    "dimensions": [
+      {"name": "need_fit", "status": "UNKNOWN", "value": null, "weight": "0.35", "evidence_refs": []},
+      {"name": "product_quality", "status": "UNKNOWN", "value": null, "weight": "0.30", "evidence_refs": []},
+      {"name": "value", "status": "UNKNOWN", "value": null, "weight": "0.25", "evidence_refs": []},
+      {"name": "evidence", "status": "UNKNOWN", "value": null, "weight": "0.10", "evidence_refs": []}
+    ],
+    "reason_codes": ["dimension_unknown:need_fit", "dimension_unknown:product_quality", "dimension_unknown:value", "dimension_unknown:evidence"]
+  }],
+  "ranked_entity_refs": [],
+  "result_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}

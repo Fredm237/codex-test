@@ -111,6 +111,15 @@ jobs:
           --strict
           --output ../quality-constraint-engine-report.json
 
+      - name: Exécuter les garde-fous Product Ranking sans simuler la preuve humaine
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.product_ranking
+          --manifest ../quality/product-ranking-manifest.json
+          --adapter product_ranking
+          --strict-engineering
+          --output ../quality-product-ranking-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -123,6 +132,7 @@ jobs:
             ${{ github.workspace }}/quality-entity-resolution-report.json
             ${{ github.workspace }}/quality-product-ontology-report.json
             ${{ github.workspace }}/quality-constraint-engine-report.json
+            ${{ github.workspace }}/quality-product-ranking-report.json
           if-no-files-found: warn
           retention-days: 14
 

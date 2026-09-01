@@ -24,8 +24,9 @@ projet et l'environnement n'ont pas été confirmés par l'opérateur.
 | Product Ontology shadow | `e6b4d8f0a2c5` | Ajoute les assertions ontologiques append-only, sans lecteur public |
 | Hybrid Retrieval shadow | `f7c5e9a1b3d6` | Ajoute runs et candidats product-first append-only, sans requête brute ni lecteur public |
 | Constraint Engine shadow | `a8d6f0b2c4e7` | Ajoute évaluations et motifs append-only, sans contexte brut, score ni lecteur public |
+| Product Ranking shadow | `b9e7a1c3d5f8` | Ajoute runs et candidats classés append-only, sans offre, commission, contexte brut ni lecteur public |
 
-La seule tête attendue est `a8d6f0b2c4e7`. La colonne de devise reste
+La seule tête attendue est `b9e7a1c3d5f8`. La colonne de devise reste
 `NULL` pour les relevés antérieurs : la devise d'un montant historique n'est
 pas déductible de l'offre courante.
 
@@ -143,7 +144,7 @@ python -m pip install -r requirements.txt
 alembic heads
 ```
 
-Résultat attendu : une seule tête, `a8d6f0b2c4e7`. Confirmer ensuite hors log
+Résultat attendu : une seule tête, `b9e7a1c3d5f8`. Confirmer ensuite hors log
 le projet, l'environnement et l'hôte visés. Pour PostgreSQL, `pg_dump` et
 `pg_restore` reçoivent une URL native `postgresql://`, pas le suffixe
 SQLAlchemy `+asyncpg`.
@@ -174,7 +175,7 @@ alembic current
 alembic check
 ```
 
-La révision courante doit être `a8d6f0b2c4e7 (head)` et le check doit afficher
+La révision courante doit être `b9e7a1c3d5f8 (head)` et le check doit afficher
 `No new upgrade operations detected.`.
 
 ### 3B. Base existante à la baseline ou variante legacy couverte
@@ -249,7 +250,7 @@ Avant tout premier déploiement avec migration automatique :
    `CONSTRAINT_ENGINE_SHADOW_ENABLED=false` et
    `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false` et
    `EVIDENCE_ENGINE_SHADOW_ENABLED=false` ;
-5. obtenir `a8d6f0b2c4e7 (head)` avec `alembic current` et un `alembic check`
+5. obtenir `b9e7a1c3d5f8 (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -260,7 +261,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `a8d6f0b2c4e7` ;
+  `b9e7a1c3d5f8` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -281,6 +282,7 @@ OFFER_TRUTH_SHADOW_ENABLED=false
 PRODUCT_ONTOLOGY_SHADOW_ENABLED=false
 HYBRID_RETRIEVAL_SHADOW_ENABLED=false
 CONSTRAINT_ENGINE_SHADOW_ENABLED=false
+PRODUCT_RANKING_SHADOW_ENABLED=false
 MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false
 EVIDENCE_ENGINE_SHADOW_ENABLED=false
 ```
@@ -314,6 +316,21 @@ python -m app.constraint_engine.replay \
   --apply
 ```
 
+Le replay Product Ranking ne peut lire que des évaluations Constraint Engine
+persistées. Il refuse d'inférer les quatre dimensions à partir d'un prix, d'un
+statut ou d'une commission : sans preuves Phase 7, il persiste une abstention
+honnête. L'apply reste borné, process-local et explicitement activé :
+
+```bash
+PRODUCT_RANKING_SHADOW_ENABLED=true \
+python -m app.product_ranking.replay \
+  --evaluated-at <instant-UTC-fixe> \
+  --vertical smartphones \
+  --after-constraint-run-id 0 \
+  --limit 10 \
+  --apply
+```
+
 Redéployer avec ce flag désactivé. Les tables shadow restent en place et les
 données Core, shadow et de devise sont conservées. **Ne pas downgrader vers la
 baseline.**
@@ -321,7 +338,7 @@ baseline.**
 ### Régression applicative
 
 Remettre la version applicative précédente, conserver le schéma à
-`a8d6f0b2c4e7` et garder les shadows désactivés. Les structures d'expansion sont
+`b9e7a1c3d5f8` et garder les shadows désactivés. Les structures d'expansion sont
 compatibles avec l'ancien lecteur, qui les ignore. Un rollback applicatif ne
 justifie ni un downgrade ni `DATABASE_SCHEMA_MODE=legacy`.
 

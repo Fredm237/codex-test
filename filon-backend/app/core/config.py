@@ -118,6 +118,10 @@ class Settings(BaseSettings):
             errors.append(
                 "CONSTRAINT_ENGINE_SHADOW_ENABLED requires HYBRID_RETRIEVAL_SHADOW_ENABLED"
             )
+        if self.product_ranking_shadow_enabled and not self.constraint_engine_shadow_enabled:
+            errors.append(
+                "PRODUCT_RANKING_SHADOW_ENABLED requires CONSTRAINT_ENGINE_SHADOW_ENABLED"
+            )
         if self.merchant_intelligence_shadow_enabled and not (
             self.observation_shadow_enabled
             and self.product_graph_shadow_enabled
@@ -389,6 +393,9 @@ class Settings(BaseSettings):
     # Évaluations de contraintes append-only, sans contexte brut, scoring ni
     # lecteur public. Le writer de maintenance reste OFF par défaut.
     constraint_engine_shadow_enabled: bool = Field(default=False)
+    # Classement produit append-only, sans sélection d'offre, commission ni
+    # lecteur public. Le writer de maintenance reste OFF par défaut.
+    product_ranking_shadow_enabled: bool = Field(default=False)
     # Mesures agrégées append-only, sans score ni confiance synthétique.
     merchant_intelligence_shadow_enabled: bool = Field(default=False)
     # Claims sourcés et décision strictement shadow ; aucune lecture publique.

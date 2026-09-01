@@ -1,0 +1,11 @@
+{
+  "schema_version": "product-ranking-regressions/v1",
+  "cases": [
+    {"case_id": "eligibility:no-reentry", "truth_basis": "CONSTRAINT_STATUS_PRECEDES_RANKING"},
+    {"case_id": "unknown:no-neutral-default", "truth_basis": "UNKNOWN_DIMENSION_NEVER_RECEIVES_A_SCORE"},
+    {"case_id": "affiliate:invariance", "truth_basis": "COMMISSION_IS_NOT_A_PRODUCT_SIGNAL"},
+    {"case_id": "vertical:weights", "truth_basis": "NO_UNIVERSAL_WEIGHT_PROFILE"},
+    {"case_id": "tie:stable", "truth_basis": "DETERMINISTIC_ENTITY_TIE_BREAK"},
+    {"case_id": "offer:separation", "truth_basis": "PRODUCT_RANKING_PRECEDES_OFFER_OPTIMIZATION"}
+  ]
+}
