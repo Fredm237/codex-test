@@ -1,7 +1,7 @@
 # FILON — Phase 2 Entity Resolution Execution Plan
 
 - Ouverture : **31 août 2026**
-- Statut : **OUVERTE**
+- Statut : **FERMÉE — GO**
 - Entrée : [PHASE 1 = GO](PHASE_1_FINAL_RECEIPT.md)
 - Gate de sortie : **False Merge sous le target ratifié**
 - Lecteurs publics Product Graph : **NON PROMUS**
@@ -89,11 +89,11 @@ ratifiés par le benchmark et par la distribution des signaux réels.
 | P2A — contrat de décision | **terminé** | [ADR-007](ADR-007-ENTITY-RESOLUTION-DECISION-CONTRACT.md), schéma, exemples et 36 tests |
 | P2B — audit des signaux réels | **terminé** | [audit production borné](PHASE_2B_ENTITY_RESOLUTION_SIGNAL_AUDIT.md) |
 | P2C — benchmark étendu | **terminé** | [benchmark et targets ratifiés](PHASE_2C_ENTITY_RESOLUTION_BENCHMARK_REPORT.md) |
-| P2D — extracteurs shadow | **terminé localement** | [faits versionnés et unknown explicite](PHASE_2D_ENTITY_SIGNAL_EXTRACTORS_REPORT.md) |
-| P2E — resolver multi-signal | **terminé localement** | [resolver hiérarchique et benchmark vert](PHASE_2E_MULTI_SIGNAL_RESOLVER_REPORT.md) |
-| P2F — replay réel borné | **implémentation locale qualifiée ; production en attente** | [migration, writer, idempotence et procédure bornée](PHASE_2F_ENTITY_RESOLUTION_REPLAY_REPORT.md) |
-| P2G — qualification | **gate locale prête ; reçus production en attente** | [manifest et vérificateur fail-closed](PHASE_2G_ENTITY_RESOLUTION_QUALIFICATION_GATE.md) |
-| P2H — revue de sortie | à faire | reçu Phase 2 et décision vers Offer Truth |
+| P2D — extracteurs shadow | **terminé** | [faits versionnés et unknown explicite](PHASE_2D_ENTITY_SIGNAL_EXTRACTORS_REPORT.md) |
+| P2E — resolver multi-signal | **terminé** | [resolver hiérarchique et benchmark vert](PHASE_2E_MULTI_SIGNAL_RESOLVER_REPORT.md) |
+| P2F — replay réel borné | **terminé en production** | [migration, replay réel et idempotence](PHASE_2F_ENTITY_RESOLUTION_REPLAY_REPORT.md) |
+| P2G — qualification | **terminé — PASS** | [reçu production et neuf gates verts](PHASE_2G_ENTITY_RESOLUTION_QUALIFICATION_GATE.md) |
+| P2H — revue de sortie | **terminé — GO** | [reçu final Phase 2](PHASE_2_FINAL_RECEIPT.md) ; Phase 3 ouverte |
 
 Les travaux SRE non bloquants et l'Immersive restent séparés. Aucun nouveau
 gate Phase 2 ne doit être créé sans risque démontré pour l'intégrité ou la
