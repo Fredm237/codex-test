@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.example/contracts/product-ranking/v1/product-ranking-run.schema.json",
+  "title": "FILON Product Ranking Run v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "run_ref", "constraint_run_ref", "vertical",
+    "context_digest", "raw_context_retained", "policy_version", "evaluated_at",
+    "outcome", "candidates", "ranked_entity_refs", "result_digest"
+  ],
+  "properties": {
+    "schema_version": {"const": "product-ranking-run/v1"},
+    "run_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+    "constraint_run_ref": {"type": "string", "minLength": 1, "maxLength": 128},
+    "vertical": {"enum": ["smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres"]},
+    "context_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "raw_context_retained": {"const": false},
+    "policy_version": {"type": "string", "minLength": 1, "maxLength": 64},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "outcome": {"enum": ["RANKED_PRODUCTS", "ABSTAINED", "NO_ELIGIBLE_PRODUCT"]},
+    "candidates": {"type": "array", "items": {"$ref": "#/$defs/candidate"}},
+    "ranked_entity_refs": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^(product|model|variant):[^:]+$"},
+      "uniqueItems": true
+    },
+    "result_digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  },
+  "$defs": {
+    "dimension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "status", "value", "weight", "evidence_refs"],
+      "properties": {
+        "name": {"enum": ["need_fit", "product_quality", "value", "evidence"]},
+        "status": {"enum": ["KNOWN", "UNKNOWN", "INVALID", "CONFLICT"]},
+        "value": {"type": ["string", "null"], "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"},
+        "weight": {"type": "string", "pattern": "^0\\.[0-9]+$"},
+        "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    },
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["entity_ref", "status", "rank", "utility", "dimensions", "reason_codes"],
+      "properties": {
+        "entity_ref": {"type": "string", "pattern": "^(product|model|variant):[^:]+$"},
+        "status": {"enum": ["RANKED", "UNRANKABLE", "INELIGIBLE"]},
+        "rank": {"type": ["integer", "null"], "minimum": 1},
+        "utility": {"type": ["string", "null"], "pattern": "^(0(\\.[0-9]+)?|1(\\.0+)?)$"},
+        "dimensions": {"type": "array", "minItems": 4, "maxItems": 4, "items": {"$ref": "#/$defs/dimension"}},
+        "reason_codes": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+      }
+    }
+  }
+}

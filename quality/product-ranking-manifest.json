@@ -1,0 +1,35 @@
+{
+  "schema_version": "product-ranking-benchmark-manifest/v1",
+  "limitation": "NO_EXTERNAL_HUMAN_PREFERENCE_GROUND_TRUTH",
+  "policy": "eligible_product_first_vertical_aware_no_commission",
+  "generator": {
+    "version": "filon-product-ranking-holdout/v1",
+    "seeds": [7103, 7109, 7121, 7127, 7129, 7151, 7159, 7177],
+    "samples_per_vertical_locale_seed": 32,
+    "development_engine_input": false
+  },
+  "verticals": ["smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres"],
+  "locales": ["fr", "nl", "en"],
+  "scenarios": ["exact_order", "vertical_flip", "unknown_dimension", "excluded_reentry", "commission_mutation", "tie_stability"],
+  "minimum_statistical_support": {
+    "total_cases": 4500,
+    "unknown_cases": 700,
+    "ineligible_cases": 700,
+    "affiliate_mutation_cases": 700
+  },
+  "engineering_gates": {
+    "order_accuracy_ci95_lower_min": 0.995,
+    "top1_accuracy_min": 1.0,
+    "ineligible_ranked_max": 0,
+    "unknown_ranked_max": 0,
+    "affiliate_invariance_failures_max": 0,
+    "provenance_completeness_min": 1.0
+  },
+  "evaluation_governance": {
+    "mode": "AUTONOMOUS_QUALITY_LAB",
+    "progression_gate": "engineering_gates",
+    "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+    "subjective_quality_status": "NOT_INDEPENDENTLY_VALIDATED",
+    "human_validation_required": false
+  }
+}
