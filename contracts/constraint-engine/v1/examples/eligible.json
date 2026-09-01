@@ -1,0 +1,30 @@
+{
+  "schema_version": "constraint-evaluation-run/v1",
+  "run_ref": "synthetic:constraint-run:eligible",
+  "retrieval_run_ref": "synthetic:retrieval-run:1",
+  "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "raw_context_retained": false,
+  "policy_version": "constraint-engine/v1",
+  "evaluated_at": "2026-09-01T19:00:00Z",
+  "outcome": "ELIGIBLE_CANDIDATES",
+  "candidates": [{
+    "entity_ref": "variant:101",
+    "status": "ELIGIBLE",
+    "hard_constraints": [{
+      "constraint_id": "budget",
+      "kind": "BUDGET_MAX",
+      "status": "SATISFIED",
+      "reason_code": "budget_satisfied",
+      "evidence_refs": ["offer-truth:1001"]
+    }],
+    "preferences": [{
+      "constraint_id": "prefer-black",
+      "kind": "PREFERENCE",
+      "status": "SATISFIED",
+      "reason_code": "preference_observed",
+      "evidence_refs": ["product-ontology:101:color"]
+    }],
+    "reason_codes": ["all_hard_constraints_satisfied"]
+  }],
+  "result_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

@@ -1,0 +1,18 @@
+{
+  "schema_version": "constraint-engine-manifest/v1",
+  "contract_version": "constraint-engine/v1",
+  "policy": "hard_constraints_before_preferences_fail_closed",
+  "unknown_policy": "unknown_never_satisfies_a_required_constraint",
+  "ranking_policy": "preferences_are_observations_not_scores",
+  "privacy_policy": "raw_context_and_user_profile_never_persisted",
+  "hard_constraint_kinds": [
+    "BUDGET_MAX",
+    "COUNTRY_ALLOWED",
+    "AVAILABILITY_REQUIRED",
+    "ATTRIBUTE_EQUALS",
+    "ADULT_SAFETY",
+    "EXPLICIT_EXCLUSION"
+  ],
+  "candidate_statuses": ["ELIGIBLE", "EXCLUDED", "UNKNOWN"],
+  "result_statuses": ["SATISFIED", "UNSATISFIED", "UNKNOWN", "NOT_APPLICABLE"]
+}

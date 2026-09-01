@@ -1,0 +1,37 @@
+{
+  "schema_version": "constraint-engine-benchmark-manifest/v1",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "policy": "hard_constraints_before_preferences_fail_closed",
+  "generator": {
+    "version": "filon-constraint-engine-holdout/v1",
+    "seeds": [6101, 6109, 6113, 6121, 6131, 6133, 6143, 6151],
+    "samples_per_vertical_locale_seed": 32,
+    "development_engine_input": false
+  },
+  "verticals": ["smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres"],
+  "locales": ["fr", "nl", "en"],
+  "scenarios": [
+    "eligible",
+    "budget_exceeded",
+    "availability_unknown",
+    "attribute_conflict",
+    "adult_excluded",
+    "preference_only"
+  ],
+  "minimum_statistical_support": {
+    "total_cases": 4500,
+    "eligible_cases": 700,
+    "exclusion_cases": 2200,
+    "unknown_cases": 700,
+    "preference_cases": 700
+  },
+  "gates": {
+    "status_accuracy_ci95_lower_min": 0.995,
+    "false_eligible_max": 0,
+    "unknown_satisfied_max": 0,
+    "preference_reintroductions_max": 0,
+    "provenance_completeness_min": 1.0,
+    "blocking_failures_max": 0
+  },
+  "regression_ground_truth": "constraint-engine-regressions.json"
+}

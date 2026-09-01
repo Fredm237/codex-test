@@ -102,6 +102,15 @@ jobs:
           --adapter oracle
           --output ../quality-product-ontology-report.json
 
+      - name: Exécuter le benchmark Constraint Engine fail-closed
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.constraint_engine
+          --manifest ../quality/constraint-engine-manifest.json
+          --adapter constraint_engine
+          --strict
+          --output ../quality-constraint-engine-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -113,6 +122,7 @@ jobs:
             ${{ github.workspace }}/quality-product-identity-report.json
             ${{ github.workspace }}/quality-entity-resolution-report.json
             ${{ github.workspace }}/quality-product-ontology-report.json
+            ${{ github.workspace }}/quality-constraint-engine-report.json
           if-no-files-found: warn
           retention-days: 14
 
