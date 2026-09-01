@@ -1,7 +1,7 @@
 # FILON — Phase 8 Offer Optimization Execution Plan
 
 - Ouverture : **1er septembre 2026**
-- Statut : **CORRECTION V2 QUALIFIÉE LOCALEMENT — PROMOTION RESTANTE**
+- Statut : **TERMINÉE — PHASE 8 = GO**
 - Gate d'entrée : Phase 7 Product Ranking shadow terminale avec verdict GO
 - Lecteurs publics : **INCHANGÉS**
 - Activation persistante : **OFF**
@@ -16,8 +16,8 @@
 | P8D — moteur | **TERMINÉ V2** | coût livré, cashback, retours, fiabilité, fraîcheur |
 | P8E — neutralité | **TERMINÉ** | commission, affiliation et revenu absents des entrées |
 | P8F — shadow | **PASS LOCAL V2** | migration `d1a9c3e5f7b0`, writer OFF, idempotence |
-| P8G — replay borné | **À FAIRE EN PRODUCTION** | dry/apply/replay sans fallback |
-| P8H — revue de sortie | **À FAIRE** | CI, migration, santé et reçu terminal |
+| P8G — replay borné | **PASS PRODUCTION** | dry/apply/replay sans fallback |
+| P8H — revue de sortie | **GO** | CI, migration, santé et reçu terminal |
 
 ## Invariants
 

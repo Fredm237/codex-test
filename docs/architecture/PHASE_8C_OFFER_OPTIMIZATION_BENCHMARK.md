@@ -3,7 +3,7 @@
 - Mode : **AUTONOMOUS_QUALITY_LAB**
 - Corpus : **5 760 cas synthétiques déterministes et adversariaux**
 - Validation humaine externe : **NO_EXTERNAL_HUMAN_GROUND_TRUTH / NON_BLOCKING**
-- Statut local : **PASS — RATIFICATION CI RESTANTE**
+- Statut : **PASS — RATIFIÉ CI `33534826059`**
 - Évaluation : `sha256:7fa3254c26e3b700aba213bb2945f966081afdab88886e21c32c6b55e62192b6`
 
 ## Couverture
