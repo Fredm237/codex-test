@@ -5,7 +5,7 @@
 - Dimensions : **5**
 - Verticales/locales : **6 / 3**
 - Validation humaine externe : **NO_EXTERNAL_HUMAN_GROUND_TRUTH / NON_BLOCKING**
-- Statut : **PASS LOCAL — QUALIFICATION CI À VENIR**
+- Statut : **PASS LOCAL ET CI**
 - Évaluation locale : `sha256:dd531d9488c81b2cdf0088cbdd1ed13d6b195818d3ab3b333331ba9af22341ea`
 
 ## Méthode
@@ -40,3 +40,11 @@ production. Ses profils ne sont jamais chargés par le replay production.
 - zéro Decision Confidence synthétique ;
 - provenance `1.0` ;
 - tous les gates d'ingénierie verts.
+
+## Reçu CI
+
+- run Phase 9 `33539976041` : backend, web, mobile et extension verts ;
+- étape dédiée `Exécuter la calibration Confidence ECE Brier et buckets` :
+  verte ;
+- run correctif catalogue `33541923961` : les quatre jobs sont de nouveau
+  terminaux et verts, y compris les régressions et ce benchmark.

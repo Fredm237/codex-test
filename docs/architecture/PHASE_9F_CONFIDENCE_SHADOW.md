@@ -1,11 +1,11 @@
 # FILON — Phase 9F Confidence shadow
 
-- Date : **2 septembre 2026**
+- Date : **1er septembre 2026**
 - Migration : `e2b0d4f6a8c1`
 - Parent : `d1a9c3e5f7b0`
 - Flag : `CONFIDENCE_SHADOW_ENABLED=false`
 - Lecteur public : **AUCUN**
-- Statut : **QUALIFIÉ LOCAL — PRODUCTION À QUALIFIER**
+- Statut : **PASS PRODUCTION — PHASE 9 = GO**
 
 ## Expansion additive
 
@@ -42,3 +42,20 @@ migration reste réversible en environnement jetable.
   sans profil empirique ;
 - 2 543 tests backend qualifiés au total ;
 - trois tests PostgreSQL explicitement réservés à la CI.
+
+## Reçu production
+
+- migration PostgreSQL terminale : `d1a9c3e5f7b0 -> e2b0d4f6a8c1` ;
+- déploiement Phase 9 : `2f71f2d9-62ab-4c78-8f7c-73f07d04c2db` ;
+- fenêtre : `evaluated_at=2026-09-01T18:20:00Z`, borne source `0`,
+  `limit=1` ;
+- dry-run : 1 source scannée, 1 abstention, 5 dimensions inconnues, aucune
+  écriture ;
+- apply unique : 1 run et 5 dimensions créés ;
+- replay identique : 1 run et 5 dimensions existants, aucune création ;
+- évaluation stable :
+  `sha256:a3cf51e1e17c1b13649dfda635308878e845ab2d5cd11dc2a47728b7cdd55947` ;
+- onze flags shadow persistants relus à `false` après la maintenance.
+
+L'apply a activé ses dépendances uniquement dans le processus de maintenance.
+Il n'a modifié aucune variable Railway ni aucun lecteur public.
