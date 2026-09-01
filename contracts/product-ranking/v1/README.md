@@ -12,6 +12,7 @@ Règles fermées :
 - les poids sont propres à la verticale ;
 - les égalités sont départagées de façon déterministe par l'identité ;
 - aucun contexte brut, profil personnel ou signal commercial n'est persisté ;
-- l'absence de labels humains externes reste une limitation explicite.
+- l'absence de labels humains externes reste une limitation explicite et non
+  bloquante ; elle n'est jamais présentée comme une validation humaine.
 
 Les exemples sont synthétiques. Aucun lecteur public n'est modifié.

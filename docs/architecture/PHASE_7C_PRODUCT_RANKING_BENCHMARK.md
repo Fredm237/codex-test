@@ -27,10 +27,14 @@ de commission et stabilité des égalités.
 | provenance complète | 100 % | 0 % |
 | verdict ingénierie | **PASS** | **UNSAFE** |
 
-## Gate humain
+## Gate autonome et limite humaine
 
-Le manifest exige au moins 200 jugements humains externes. Le corpus courant en
-contient 0 : `PENDING_EXTERNAL_GROUND_TRUTH`. Par conséquent,
-`engineering_passed=true` mais `phase_gate_passed=false` et `passed=false`.
-La CI utilise `--strict-engineering` afin de détecter toute régression technique
-sans fabriquer une ratification humaine.
+La décision fondateur remplace définitivement le gate humain par
+`AUTONOMOUS_QUALITY_LAB`. L'absence de ground truth humaine externe reste
+qualifiée `NO_EXTERNAL_HUMAN_GROUND_TRUTH` et les dimensions subjectives restent
+`NOT_INDEPENDENTLY_VALIDATED`, sans jamais être présentées comme human-validated.
+
+Cette limitation n'est pas bloquante. Le moteur sûr obtient donc
+`engineering_passed=true`, `phase_gate_passed=true` et `passed=true` sur le gate
+autonome. La CI utilise `--strict-engineering` pour refuser toute régression
+objectivement mesurable.

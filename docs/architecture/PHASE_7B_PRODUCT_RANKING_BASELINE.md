@@ -25,6 +25,10 @@ Le résultat attendu du replay initial est `ABSTAINED`, avec le candidat
 `UNRANKABLE`. Produire un score à partir du seul prix, statut, stock ou taux de
 commission serait une invention et doit échouer fermée.
 
+Par décision fondateur, l'absence de labels humains est définitive et non
+bloquante. Elle impose `NO_EXTERNAL_HUMAN_GROUND_TRUTH` et
+`NOT_INDEPENDENTLY_VALIDATED`, jamais une attente de collecte future.
+
 ## Limites héritées
 
 - `SINGLE_CONSTRAINT_CANDIDATE_SHADOW_SAMPLE` ;

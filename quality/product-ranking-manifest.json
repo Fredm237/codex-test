@@ -25,7 +25,11 @@
     "affiliate_invariance_failures_max": 0,
     "provenance_completeness_min": 1.0
   },
-  "phase_gate": {
-    "external_human_preference_labels_min": 200
+  "evaluation_governance": {
+    "mode": "AUTONOMOUS_QUALITY_LAB",
+    "progression_gate": "engineering_gates",
+    "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+    "subjective_quality_status": "NOT_INDEPENDENTLY_VALIDATED",
+    "human_validation_required": false
   }
 }

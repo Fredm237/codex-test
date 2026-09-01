@@ -117,8 +117,14 @@ def _load_manifest(path: Path) -> Mapping[str, Any]:
         "provenance_completeness_min": 1.0,
     }:
         raise ProductRankingBenchmarkError("engineering gates are not ratified")
-    if manifest.get("phase_gate") != {"external_human_preference_labels_min": 200}:
-        raise ProductRankingBenchmarkError("human preference phase gate is invalid")
+    if manifest.get("evaluation_governance") != {
+        "mode": "AUTONOMOUS_QUALITY_LAB",
+        "progression_gate": "engineering_gates",
+        "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+        "subjective_quality_status": "NOT_INDEPENDENTLY_VALIDATED",
+        "human_validation_required": False,
+    }:
+        raise ProductRankingBenchmarkError("autonomous evaluation governance is invalid")
     return manifest
 
 
@@ -277,8 +283,7 @@ def run_benchmark(manifest_path: Path, *, adapter: str = "product_ranking") -> d
         "provenance_completeness_min": provenance_rate >= gates["provenance_completeness_min"],
     }
     engineering_passed = support_ok and all(engineering_gates.values())
-    external_labels = 0
-    phase_gate_passed = external_labels >= manifest["phase_gate"]["external_human_preference_labels_min"]
+    phase_gate_passed = engineering_passed
     return {
         "schema_version": SCHEMA_VERSION,
         "adapter": adapter,
@@ -294,13 +299,15 @@ def run_benchmark(manifest_path: Path, *, adapter: str = "product_ranking") -> d
         },
         "engineering_gates": engineering_gates,
         "engineering_passed": engineering_passed,
-        "human_preference": {
-            "external_labels": external_labels,
-            "minimum_required": manifest["phase_gate"]["external_human_preference_labels_min"],
-            "status": "PASS" if phase_gate_passed else "PENDING_EXTERNAL_GROUND_TRUTH",
+        "quality_status": {
+            "autonomous_quality_lab": "PASS" if engineering_passed else "FAIL",
+            "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+            "subjective_dimensions": "NOT_INDEPENDENTLY_VALIDATED",
+            "human_validation_required": False,
+            "external_limitation_blocking": False,
         },
         "phase_gate_passed": phase_gate_passed,
-        "passed": engineering_passed and phase_gate_passed,
+        "passed": phase_gate_passed,
         "evaluation_id": "sha256:" + hashlib.sha256(json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()).hexdigest(),
     }
 

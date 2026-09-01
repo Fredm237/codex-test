@@ -24,7 +24,10 @@ pertinence.
 7. Le classement porte sur l'identité produit, jamais sur une ligne marchand.
 8. Commission, affiliation, cashback et sélection d'offre sont hors contrat.
 9. Les égalités sont déterministes et aucun contexte brut n'est persisté.
-10. La gate Phase 7 reste ouverte tant qu'un benchmark humain externe n'existe pas.
+10. Il n'existe pas de validation humaine externe obligatoire. Le statut
+    `NO_EXTERNAL_HUMAN_GROUND_TRUTH` reste explicite et non bloquant ; la
+    progression dépend de l'`AUTONOMOUS_QUALITY_LAB` et de ses preuves
+    déterministes, adversariales et traçables.
 
 ## Rollback
 

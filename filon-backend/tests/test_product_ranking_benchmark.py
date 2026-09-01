@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "quality" / "product-ranking-manifest.json"
 
 
-def test_product_ranking_passes_engineering_holdout_without_faking_human_labels() -> None:
+def test_product_ranking_passes_autonomous_gate_without_faking_human_labels() -> None:
     report = run_benchmark(MANIFEST)
     assert report["support"] == {
         "total_cases": 4608,
@@ -30,13 +30,15 @@ def test_product_ranking_passes_engineering_holdout_without_faking_human_labels(
     assert report["metrics"]["affiliate_invariance_failures"] == 0
     assert report["metrics"]["provenance_completeness"] == 1.0
     assert report["engineering_passed"] is True
-    assert report["human_preference"] == {
-        "external_labels": 0,
-        "minimum_required": 200,
-        "status": "PENDING_EXTERNAL_GROUND_TRUTH",
+    assert report["quality_status"] == {
+        "autonomous_quality_lab": "PASS",
+        "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+        "subjective_dimensions": "NOT_INDEPENDENTLY_VALIDATED",
+        "human_validation_required": False,
+        "external_limitation_blocking": False,
     }
-    assert report["phase_gate_passed"] is False
-    assert report["passed"] is False
+    assert report["phase_gate_passed"] is True
+    assert report["passed"] is True
 
 
 def test_legacy_universal_commercial_ranking_is_detected_as_unsafe() -> None:
@@ -64,7 +66,7 @@ def test_holdout_is_reproducible_and_stratified() -> None:
         (("limitation", None), "limitation"),
         (("policy", "commercial_first"), "policy"),
         (("engineering_gates", {}), "engineering gates"),
-        (("phase_gate", {}), "human preference phase gate"),
+        (("evaluation_governance", {}), "autonomous evaluation governance"),
     ],
 )
 def test_manifest_mutations_fail_closed(tmp_path: Path, mutation, message: str) -> None:

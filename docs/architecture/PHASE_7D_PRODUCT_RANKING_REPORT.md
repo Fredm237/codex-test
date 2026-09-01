@@ -35,5 +35,6 @@ meilleure offre appartient à la Phase 8.
 ## Limite de qualification
 
 Les tests et le benchmark prouvent les invariants d'ingénierie. Ils ne prouvent
-pas que les poids reproduisent les préférences humaines réelles ; ce gate reste
-explicitement en attente d'un corpus externe indépendant.
+pas que les poids reproduisent les préférences humaines réelles. Cette limite
+reste `NOT_INDEPENDENTLY_VALIDATED`, mais elle est non bloquante conformément à
+la décision fondateur : aucune annotation humaine externe ne sera attendue.

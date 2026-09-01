@@ -17,8 +17,8 @@
 | P7E — neutralité | **TERMINÉ** | commission et marchand absents du contrat et invariance prouvée |
 | P7F — shadow | **TERMINÉ LOCALEMENT** | migration `b9e7a1c3d5f8`, writer OFF, idempotence |
 | P7G — replay borné | **TERMINÉ LOCALEMENT** | abstention sans preuve, dry/apply/replay idempotents |
-| P7H — préférence humaine | **EN ATTENTE** | au moins 200 jugements externes indépendants |
-| P7I — revue de sortie | **À FAIRE** | production shadow et gate humain avant Product Ranking GO |
+| P7H — gouvernance qualité | **TERMINÉ — NON-BLOQUANT** | `AUTONOMOUS_QUALITY_LAB` + `NO_EXTERNAL_HUMAN_GROUND_TRUTH` |
+| P7I — revue de sortie | **À FAIRE** | production shadow et gates techniques avant Product Ranking GO |
 
 ## Invariants
 
@@ -31,6 +31,8 @@
 7. Le contexte brut et les données personnelles ne sont ni reçus ni persistés.
 8. Le writer reste OFF et aucun lecteur public ne change avant la revue finale.
 9. Un holdout synthétique valide des invariants techniques, pas une préférence humaine.
+10. L'absence définitive d'annotation humaine externe reste documentée mais ne
+    bloque jamais la progression.
 
 ## Séquence restante
 
@@ -38,5 +40,6 @@
 2. Déployer la migration additive avec le writer persistant désactivé.
 3. Exécuter un dry-run puis un apply/replay strictement bornés sur la fenêtre Phase 6.
 4. Vérifier santé, schéma, idempotence et absence de modification des lecteurs publics.
-5. Collecter au moins 200 jugements humains indépendants selon un protocole figé.
-6. Comparer le moteur au contrôle et décider Product Ranking GO/NO-GO.
+5. Conserver `NOT_INDEPENDENTLY_VALIDATED` pour les dimensions subjectives sans
+   inventer de précision humaine.
+6. Comparer le moteur au contrôle autonome et décider Product Ranking GO/NO-GO.
