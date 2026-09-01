@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import subprocess
+import sys
 from datetime import datetime
 
 import pytest
@@ -20,6 +22,26 @@ from app.product_graph.resolution import RESOLVER_VERSION as GRAPH_RESOLVER_VERS
 
 
 OBSERVED_AT = datetime(2026, 9, 1, 1, 0, 0)
+
+
+def test_product_graph_models_load_their_foreign_key_dependencies_in_isolation():
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            (
+                "from sqlalchemy.orm import configure_mappers; "
+                "from app.product_graph.models import "
+                "GraphEntityResolutionDecision; "
+                "configure_mappers()"
+            ),
+        ],
+        capture_output=True,
+        text=True,
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
 
 
 async def _database():

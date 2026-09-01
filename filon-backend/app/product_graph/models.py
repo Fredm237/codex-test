@@ -24,7 +24,12 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
+# Les modèles Graph référencent des tables Core et Observation. Les importer ici
+# garantit que ces tables appartiennent à la même ``MetaData`` même lorsqu'un
+# worker de maintenance charge directement ce module, sans passer par l'app web.
+from app.db import models as core_models  # noqa: F401
 from app.db.base import Base
+from app.observations import models as observation_models  # noqa: F401
 
 
 class GraphBrand(Base):
