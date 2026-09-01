@@ -1,7 +1,7 @@
 # FILON — Phase 4B Product Ontology Baseline
 
 - Date de lecture : **1er septembre 2026**
-- Statut : **BASELINE AGRÉGÉE PRÉPARÉE — ÉCRITURES INTERDITES AVANT P3H**
+- Statut : **TERMINÉE — AUDIT P4F RÉEL QUALIFIÉ**
 - Portée : code legacy, corpus de régression local et agrégats publics
 - Données brutes de production : **NON LUES**
 - Writer Product Ontology : **ABSENT / NON ACTIVÉ**
@@ -111,6 +111,19 @@ Le benchmark taxonomy/role devra au minimum stratifier :
 Le score devra publier séparément exactitude, couverture, abstention, faux
 `PRIMARY_PRODUCT`, fausses relations canoniques et intervalles d'incertitude.
 
+## Audit réel borné P4F
+
+Après P3H, le replay Product Ontology a projeté 1 000 observations de
+production sans lire ni publier leur payload brut. La fenêtre contient 1
+snapshot `VERIFIED`, 329 `PARTIAL`, 670 `QUARANTINED` et 0 `INVALID`, sans lien
+d'offre manquant. Le premier apply a créé les 1 000 snapshots ; son replay
+strictement identique les a tous reconnus sans nouvelle écriture.
+
+Cette couverture faible mais honnête confirme l'écart initial : catégories et
+titres ne suffisent pas à promouvoir un rôle, une relation ou une Variant. La
+quarantaine et le statut partiel sont donc des résultats fail-closed, pas des
+valeurs à remplacer par des inférences favorables.
+
 ## Limites et gate
 
 Les agrégats publics ne donnent ni la distribution réelle des rôles, ni la
@@ -118,5 +131,6 @@ couverture des attributs, ni le volume non classé sur un périmètre strictemen
 comparable. Ces mesures nécessiteront un audit borné après P3H, puis un replay
 shadow P4F. Elles ne peuvent pas être inventées à partir des endpoints publics.
 
-P4B est donc suffisamment préparée pour définir P4C, mais reste **non terminale
-pour la production** tant que Phase 3 n'a pas atteint son état GO.
+P4B est terminale dans son périmètre : baseline agrégée et audit réel borné
+sont publiés sans payload brut. La fenêtre de 1 000 observations ne mesure pas
+le catalogue complet ; cette limite reste transmise à Hybrid Retrieval.

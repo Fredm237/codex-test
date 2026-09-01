@@ -1,7 +1,7 @@
 # FILON — Phase 4E Product Ontology Shadow Report
 
 - Date : **1er septembre 2026**
-- Statut : **PASS LOCAL — PRÊT POUR CI POSTGRESQL**
+- Statut : **PASS LOCAL ET PRODUCTION — P4F QUALIFIÉE**
 - Révision : `e6b4d8f0a2c5`
 - Table : `product_ontology_snapshots`
 - Writer : `app.product_ontology.replay`
@@ -79,6 +79,11 @@ le replay idempotent.
 
 ## Décision P4E
 
-P4E est qualifié localement. P4F reste ouvert tant que la CI PostgreSQL, la
-migration production et le triplet dry-run / apply / replay idempotent ne sont
-pas terminaux.
+P4E et P4F sont qualifiés. La CI PostgreSQL `33493822607`, la révision
+production `e6b4d8f0a2c5` et le triplet dry-run / apply / replay idempotent sont
+terminaux. Sur 1 000 projections, le premier apply a créé 1 000 snapshots et
+le second en a reconnu 1 000 sans création.
+
+Le [reçu final Phase 4](PHASE_4_FINAL_RECEIPT.md) conserve les compteurs,
+l'identifiant d'évaluation, les déploiements et les limites de couverture. Les
+lecteurs publics et les variables Railway persistantes restent inchangés.

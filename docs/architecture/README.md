@@ -1,6 +1,6 @@
 # FILON — dossier d'architecture Phase 0
 
-Statut : **PHASE 0 = GO ; PHASE 1 = GO ; PHASE 2 — ENTITY RESOLUTION OUVERTE ; premier
+Statut : **PHASES 0 À 4 = GO ; PHASE 5 — HYBRID RETRIEVAL OUVERTE ; premier
 événement GitHub `schedule` classé `EXTERNAL_PROVIDER_PENDING /
 NON_BLOCKING` ; Immersive reste NO-GO**.
 
@@ -14,7 +14,7 @@ Ce dossier traduit les mandats Product Intelligence Core, Execution Governance e
 
 ## Décision exécutive
 
-**PHASE 0 = GO ; Phase 1 = GO ; Phase 2 ouverte ; NO-GO Immersive inchangé. Aucun blocker
+**PHASES 0 À 4 = GO ; Phase 5 ouverte ; NO-GO Immersive inchangé. Aucun blocker
 humain : le Quality Lab autonome reste la gate active.**
 
 Le cycle catalogue réel, la migration heartbeat, les checkpoints de reprise,
@@ -100,6 +100,16 @@ et extension.
 - [Rapport Phase 2E — resolver Entity Resolution multi-signal](PHASE_2E_MULTI_SIGNAL_RESOLVER_REPORT.md)
 - [Rapport Phase 2F — persistance et replay Entity Resolution shadow](PHASE_2F_ENTITY_RESOLUTION_REPLAY_REPORT.md)
 - [Gate Phase 2G — qualification automatique des deux reçus production](PHASE_2G_ENTITY_RESOLUTION_QUALIFICATION_GATE.md)
+- [Reçu final Phase 2](PHASE_2_FINAL_RECEIPT.md)
+- [Plan d'exécution Phase 3 — Offer Truth](PHASE_3_EXECUTION_PLAN.md)
+- [Reçu final Phase 3](PHASE_3_FINAL_RECEIPT.md)
+- [Plan d'exécution Phase 4 — Product Ontology](PHASE_4_EXECUTION_PLAN.md)
+- [Baseline Product Ontology Phase 4B](PHASE_4B_PRODUCT_ONTOLOGY_BASELINE.md)
+- [Benchmark Product Ontology Phase 4C](PHASE_4C_PRODUCT_ONTOLOGY_BENCHMARK.md)
+- [Extracteur Product Ontology Phase 4D](PHASE_4D_PRODUCT_ONTOLOGY_EXTRACTOR_REPORT.md)
+- [Persistance Product Ontology Phase 4E](PHASE_4E_PRODUCT_ONTOLOGY_SHADOW_REPORT.md)
+- [Reçu final Phase 4](PHASE_4_FINAL_RECEIPT.md)
+- [Plan d'exécution Phase 5 — Hybrid Retrieval](PHASE_5_EXECUTION_PLAN.md)
 - [Décision de timebox et sortie de Phase 0](PHASE_0_TIMEBOX_AND_EXIT_DECISION.md)
 - [Backlog de durcissement post-Phase 0](POST_PHASE_0_HARDENING.md)
 - [Durcissement final du contrat catalogue v1](PHASE_0B_CATALOG_CONTRACT_HARDENING_REPORT.md)
