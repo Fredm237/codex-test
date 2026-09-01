@@ -211,6 +211,7 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     assert settings.product_graph_shadow_enabled is False
     assert settings.entity_resolution_shadow_enabled is False
     assert settings.offer_graph_shadow_enabled is False
+    assert settings.offer_truth_shadow_enabled is False
     assert settings.merchant_intelligence_shadow_enabled is False
     assert settings.evidence_engine_shadow_enabled is False
 
@@ -268,6 +269,30 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
         offer_graph_shadow_enabled=True,
     )
     assert offer_enabled.offer_graph_shadow_enabled is True
+
+    with pytest.raises(
+        ValidationError,
+        match="OFFER_TRUTH_SHADOW_ENABLED requires Observation, Product Graph",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            observation_shadow_enabled=True,
+            product_graph_shadow_enabled=True,
+            offer_graph_shadow_enabled=True,
+            offer_truth_shadow_enabled=True,
+        )
+
+    offer_truth_enabled = Settings(
+        _env_file=None,
+        env="test",
+        observation_shadow_enabled=True,
+        product_graph_shadow_enabled=True,
+        entity_resolution_shadow_enabled=True,
+        offer_graph_shadow_enabled=True,
+        offer_truth_shadow_enabled=True,
+    )
+    assert offer_truth_enabled.offer_truth_shadow_enabled is True
 
     with pytest.raises(
         ValidationError,
