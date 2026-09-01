@@ -219,6 +219,8 @@ async def test_postgresql_upgrade_drift_extensions_indexes_and_lock() -> None:
             "graph_offer_variant_links",
             "graph_identity_assertions",
             "graph_offer_observations",
+            "graph_entity_signal_projections",
+            "graph_entity_resolution_decisions",
             "merchant_quality_snapshots",
             "evidence_claim_records",
             "decision_eligibility_records",
