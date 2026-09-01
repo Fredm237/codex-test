@@ -1,7 +1,7 @@
 # FILON — Phase 6 Constraint Engine Execution Plan
 
 - Ouverture : **1er septembre 2026**
-- Statut : **EN COURS**
+- Statut : **TERMINÉ — PHASE 6 SHADOW = GO**
 - Gate d'entrée : Phase 5 Hybrid Retrieval terminale avec verdict GO
 - Lecteurs publics : **INCHANGÉS**
 - Ranking et personnalisation : **HORS PÉRIMÈTRE DE PROMOTION**
@@ -12,13 +12,13 @@
 |---|---|---|
 | P6A — contrat | **TERMINÉ** | ADR-011, schéma v1, manifest et trois exemples synthétiques |
 | P6B — baseline réelle | **TERMINÉ** | 1 run/candidat/offre ; Cron réaligné sur `main`, déploiement réussi, prochain schedule à observer |
-| P6C — benchmark | **TERMINÉ LOCAL** | 4 608 cas, moteur sûr PASS, legacy UNSAFE |
-| P6D — moteur dur | **TERMINÉ LOCAL** | 0 faux éligible, 0 unknown favorable, provenance 100 % |
-| P6E — préférences | **TERMINÉ LOCAL** | tableau séparé, aucun score ni réintroduction |
-| P6F — shadow | **TERMINÉ LOCAL** | migration `a8d6f0b2c4e7`, writer OFF, idempotence SQLite |
-| P6G — replay réel | À FAIRE | dry/apply/replay borné |
-| P6H — comparaison | À FAIRE | qualité, couverture, latence et limites |
-| P6I — revue de sortie | À FAIRE | décision vers Phase 7 Product Ranking |
+| P6C — benchmark | **TERMINÉ** | 4 608 cas, moteur sûr PASS, legacy UNSAFE |
+| P6D — moteur dur | **TERMINÉ** | 0 faux éligible, 0 unknown favorable, provenance 100 % |
+| P6E — préférences | **TERMINÉ** | tableau séparé, aucun score ni réintroduction |
+| P6F — shadow | **TERMINÉ** | migration `a8d6f0b2c4e7`, writer OFF, idempotence PostgreSQL |
+| P6G — replay réel | **TERMINÉ** | dry → create → existing sur une fenêtre de 1 run |
+| P6H — comparaison | **TERMINÉ** | qualité, couverture, latence et limites publiées |
+| P6I — revue de sortie | **TERMINÉ** | Phase 6 shadow GO ; ouverture Phase 7 Product Ranking |
 
 ## Invariants
 
