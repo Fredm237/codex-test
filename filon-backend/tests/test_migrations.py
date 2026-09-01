@@ -25,6 +25,7 @@ from app.product_graph import models as product_graph_models  # noqa: F401
 from app.offer_graph import models as offer_graph_models  # noqa: F401
 from app.offer_truth import models as offer_truth_models  # noqa: F401
 from app.product_ontology import models as product_ontology_models  # noqa: F401
+from app.hybrid_retrieval import models as hybrid_retrieval_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_models  # noqa: F401
 from app.evidence_engine import models as evidence_models  # noqa: F401
 
@@ -48,6 +49,7 @@ GRAPH_SHADOW_TABLES = {
 OFFER_GRAPH_TABLES = {"graph_offer_observations"}
 OFFER_TRUTH_TABLES = {"offer_truth_snapshots"}
 PRODUCT_ONTOLOGY_TABLES = {"product_ontology_snapshots"}
+HYBRID_RETRIEVAL_TABLES = {"hybrid_retrieval_runs", "hybrid_retrieval_candidates"}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
 EVIDENCE_ENGINE_TABLES = {
     "evidence_claim_records",
@@ -66,7 +68,8 @@ CHECKPOINT_REVISION = "a2d7e9f4c1b6"
 IDENTITY_ASSERTION_REVISION = "b3e1a7c4d9f2"
 ENTITY_RESOLUTION_REVISION = "c4f2b8d5e0a3"
 OFFER_TRUTH_REVISION = "d5a3c7e9f1b4"
-HEAD_REVISION = "e6b4d8f0a2c5"
+PRODUCT_ONTOLOGY_REVISION = "e6b4d8f0a2c5"
+HEAD_REVISION = "f7c5e9a1b3d6"
 
 
 @pytest.fixture(autouse=True)
@@ -138,7 +141,7 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
     assert head == HEAD_REVISION
     assert head == db_session.CURRENT_SCHEMA_REVISION
     assert scripts.get_revision(HEAD_REVISION).down_revision == (
-        OFFER_TRUTH_REVISION
+        PRODUCT_ONTOLOGY_REVISION
     )
 
 
@@ -420,6 +423,7 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
         | OFFER_GRAPH_TABLES
         | OFFER_TRUTH_TABLES
         | PRODUCT_ONTOLOGY_TABLES
+        | HYBRID_RETRIEVAL_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
         | EVIDENCE_ENGINE_TABLES
         <= tables

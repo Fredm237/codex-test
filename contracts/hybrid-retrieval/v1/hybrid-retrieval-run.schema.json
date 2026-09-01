@@ -1,0 +1,344 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/hybrid-retrieval/v1/hybrid-retrieval-run.schema.json",
+  "title": "FILON Hybrid Retrieval Run v1",
+  "type": "object",
+  "required": [
+    "contract_version",
+    "run_id",
+    "query",
+    "intent",
+    "sources",
+    "candidates",
+    "outcome",
+    "reason_codes",
+    "retrieval_version",
+    "fusion_version",
+    "evaluated_at"
+  ],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "run_id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._:-]{0,127}$" },
+    "query": { "$ref": "#/$defs/query_envelope" },
+    "intent": { "$ref": "#/$defs/intent" },
+    "sources": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/retrieval_source" },
+      "minItems": 1,
+      "maxItems": 3
+    },
+    "candidates": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/candidate" },
+      "maxItems": 500
+    },
+    "outcome": {
+      "enum": ["CANDIDATES", "NO_MATCH", "AMBIGUOUS", "ERROR"]
+    },
+    "reason_codes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "retrieval_candidates",
+          "no_match",
+          "intent_unresolved",
+          "ambiguous_intent",
+          "source_failed",
+          "source_disagreement",
+          "no_resolved_entity",
+          "semantic_abstained"
+        ]
+      },
+      "uniqueItems": true,
+      "minItems": 1,
+      "maxItems": 8
+    },
+    "retrieval_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "fusion_version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "evaluated_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "outcome": { "const": "CANDIDATES" } } },
+      "then": { "properties": { "candidates": { "minItems": 1 } } }
+    },
+    {
+      "if": { "properties": { "outcome": { "enum": ["NO_MATCH", "ERROR"] } } },
+      "then": { "properties": { "candidates": { "maxItems": 0 } } }
+    }
+  ],
+  "$defs": {
+    "query_envelope": {
+      "type": "object",
+      "required": [
+        "query_ref",
+        "query_digest",
+        "raw_query_retained",
+        "locale",
+        "country_code"
+      ],
+      "properties": {
+        "query_ref": { "type": "string", "minLength": 1, "maxLength": 128 },
+        "query_digest": { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" },
+        "raw_query_retained": { "const": false },
+        "locale": { "enum": ["fr", "nl", "en"] },
+        "country_code": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[A-Z]{2}$" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "evidence": {
+      "type": "object",
+      "required": [
+        "evidence_type",
+        "source_ref",
+        "field",
+        "transformation",
+        "transformation_version"
+      ],
+      "properties": {
+        "evidence_type": {
+          "enum": [
+            "QUERY_EXPLICIT",
+            "DETERMINISTIC_INTENT",
+            "PRODUCT_ONTOLOGY",
+            "ENTITY_RESOLUTION",
+            "LEXICAL_HIT",
+            "STRUCTURED_HIT",
+            "SEMANTIC_HIT"
+          ]
+        },
+        "source_ref": { "type": "string", "minLength": 1, "maxLength": 255 },
+        "field": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+        "transformation": { "type": "string", "minLength": 1, "maxLength": 96 },
+        "transformation_version": { "type": "string", "minLength": 1, "maxLength": 64 }
+      },
+      "additionalProperties": false
+    },
+    "evidence_array": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence" },
+      "maxItems": 32
+    },
+    "intent_claim": {
+      "type": "object",
+      "required": ["state", "value", "evidence"],
+      "properties": {
+        "state": { "enum": ["known", "unknown", "invalid", "conflict"] },
+        "value": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 255 },
+            { "type": "null" }
+          ]
+        },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "known" } } },
+          "then": {
+            "properties": {
+              "value": { "type": "string", "minLength": 1 },
+              "evidence": { "minItems": 1 }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "enum": ["unknown", "invalid", "conflict"] } } },
+          "then": { "properties": { "value": { "type": "null" } } }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "constraint": {
+      "type": "object",
+      "required": ["constraint_key", "operator", "value", "evidence"],
+      "properties": {
+        "constraint_key": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+        "operator": { "enum": ["eq", "in", "gte", "lte", "between", "exclude"] },
+        "value": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 255 },
+            { "type": "integer" },
+            { "type": "boolean" },
+            {
+              "type": "array",
+              "items": { "type": ["string", "integer", "boolean"] },
+              "minItems": 1,
+              "maxItems": 16
+            }
+          ]
+        },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "additionalProperties": false
+    },
+    "intent": {
+      "type": "object",
+      "required": [
+        "status",
+        "product_type",
+        "exact_model",
+        "brand",
+        "hard_constraints",
+        "soft_preferences"
+      ],
+      "properties": {
+        "status": { "enum": ["RESOLVED", "PARTIAL", "UNRESOLVED", "INVALID"] },
+        "product_type": { "$ref": "#/$defs/intent_claim" },
+        "exact_model": { "$ref": "#/$defs/intent_claim" },
+        "brand": { "$ref": "#/$defs/intent_claim" },
+        "hard_constraints": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraint" },
+          "maxItems": 32
+        },
+        "soft_preferences": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/constraint" },
+          "maxItems": 32
+        }
+      },
+      "additionalProperties": false
+    },
+    "retrieval_source": {
+      "type": "object",
+      "required": [
+        "source_type",
+        "status",
+        "candidate_count",
+        "latency_ms",
+        "index_version",
+        "reason_code"
+      ],
+      "properties": {
+        "source_type": { "enum": ["LEXICAL", "STRUCTURED", "SEMANTIC"] },
+        "status": { "enum": ["SUCCEEDED", "ABSTAINED", "FAILED", "DISABLED"] },
+        "candidate_count": { "type": "integer", "minimum": 0, "maximum": 10000 },
+        "latency_ms": { "type": "integer", "minimum": 0, "maximum": 300000 },
+        "index_version": {
+          "oneOf": [
+            { "type": "string", "minLength": 1, "maxLength": 128 },
+            { "type": "null" }
+          ]
+        },
+        "reason_code": {
+          "oneOf": [
+            { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+            { "type": "null" }
+          ]
+        }
+      },
+      "additionalProperties": false
+    },
+    "entity_ref": {
+      "type": "object",
+      "required": ["state", "entity_type", "entity_id", "group_key", "evidence"],
+      "properties": {
+        "state": { "enum": ["RESOLVED", "UNRESOLVED"] },
+        "entity_type": { "enum": ["PRODUCT", "MODEL", "VARIANT", "UNKNOWN"] },
+        "entity_id": { "type": ["integer", "null"], "minimum": 1 },
+        "group_key": { "type": "string", "pattern": "^[a-z][a-z0-9._:-]{0,190}$" },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "state": { "const": "RESOLVED" } } },
+          "then": {
+            "properties": {
+              "entity_type": { "enum": ["PRODUCT", "MODEL", "VARIANT"] },
+              "entity_id": { "type": "integer", "minimum": 1 },
+              "evidence": {
+                "minItems": 1,
+                "contains": {
+                  "type": "object",
+                  "properties": { "evidence_type": { "const": "ENTITY_RESOLUTION" } },
+                  "required": ["evidence_type"]
+                }
+              }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "state": { "const": "UNRESOLVED" } } },
+          "then": {
+            "properties": {
+              "entity_type": { "const": "UNKNOWN" },
+              "entity_id": { "type": "null" }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    },
+    "source_hit": {
+      "type": "object",
+      "required": ["source_type", "source_rank", "raw_score", "score_semantics"],
+      "properties": {
+        "source_type": { "enum": ["LEXICAL", "STRUCTURED", "SEMANTIC"] },
+        "source_rank": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "raw_score": {
+          "oneOf": [
+            { "type": "string", "pattern": "^-?(0|[1-9][0-9]*)(\\.[0-9]{1,12})?$" },
+            { "type": "null" }
+          ]
+        },
+        "score_semantics": { "type": "string", "minLength": 1, "maxLength": 128 }
+      },
+      "additionalProperties": false
+    },
+    "candidate": {
+      "type": "object",
+      "required": [
+        "candidate_rank",
+        "candidate_status",
+        "entity",
+        "offer_ids",
+        "source_hits",
+        "evidence"
+      ],
+      "properties": {
+        "candidate_rank": { "type": "integer", "minimum": 1, "maximum": 500 },
+        "candidate_status": { "enum": ["ELIGIBLE_SHADOW", "QUARANTINED"] },
+        "entity": { "$ref": "#/$defs/entity_ref" },
+        "offer_ids": {
+          "type": "array",
+          "items": { "type": "integer", "minimum": 1 },
+          "uniqueItems": true,
+          "maxItems": 100
+        },
+        "source_hits": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/source_hit" },
+          "minItems": 1,
+          "maxItems": 3
+        },
+        "evidence": { "$ref": "#/$defs/evidence_array" }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "candidate_status": { "const": "ELIGIBLE_SHADOW" } } },
+          "then": {
+            "properties": {
+              "entity": { "properties": { "state": { "const": "RESOLVED" } } }
+            }
+          }
+        },
+        {
+          "if": { "properties": { "candidate_status": { "const": "QUARANTINED" } } },
+          "then": {
+            "properties": {
+              "entity": { "properties": { "state": { "const": "UNRESOLVED" } } }
+            }
+          }
+        }
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

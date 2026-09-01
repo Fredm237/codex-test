@@ -112,6 +112,64 @@ python -m quality_lab.product_ontology \
 L'adaptateur `legacy` est volontairement mesuré comme `UNSAFE`. P4D devra
 ajouter un extracteur distinct et passer les mêmes gates avant toute promotion.
 
+## Gate Phase 5 — Hybrid Retrieval
+
+Le benchmark product-first est piloté par
+[`hybrid-retrieval-manifest.json`](hybrid-retrieval-manifest.json), avec les
+régressions de
+[`hybrid-retrieval-regressions.json`](hybrid-retrieval-regressions.json). Il
+croise six verticales, FR/NL/EN et huit scénarios : exact product, alias
+multilingue, no-match, ambiguïté, accessoire piège, contrainte contradictoire,
+duplication d'offres et semantic-only sans identité.
+
+Depuis `filon-backend`, ratifier le holdout sans promouvoir l'oracle :
+
+```bash
+python -m quality_lab.hybrid_retrieval \
+  --manifest ../quality/hybrid-retrieval-manifest.json \
+  --adapter oracle \
+  --output ../quality-hybrid-retrieval-report.json
+```
+
+Le simulateur `legacy_offer_first` doit rester `UNSAFE`. Les futurs adaptateurs
+P5D à P5F devront passer le même corpus sans le modifier ; un score oracle ne
+compte jamais comme qualité humaine ou comme preuve production.
+
+L'adaptateur P5D `lexical` est évalué sur ce même manifeste. Il doit rester
+`SAFE_INCOMPLETE` tant que les cas semantic-only ne sont pas représentés par la
+source sémantique quarantinée de P5E :
+
+```bash
+python -m quality_lab.hybrid_retrieval \
+  --manifest ../quality/hybrid-retrieval-manifest.json \
+  --adapter lexical \
+  --output ../quality-hybrid-lexical-report.json
+```
+
+L'adaptateur P5E `expanded` ajoute la source structurée et représente un hit
+sémantique non résolu en `AMBIGUOUS`, jamais en identité. Il doit passer toutes
+les gates avant P5F :
+
+```bash
+python -m quality_lab.hybrid_retrieval \
+  --manifest ../quality/hybrid-retrieval-manifest.json \
+  --adapter expanded \
+  --require-promotion \
+  --output ../quality-hybrid-expanded-report.json
+```
+
+P5F remplace l'union par la fusion RRF product-first `fused`. Elle doit
+conserver exactement les mêmes gates tout en ajoutant rangs source, grouping et
+digest reproductible :
+
+```bash
+python -m quality_lab.hybrid_retrieval \
+  --manifest ../quality/hybrid-retrieval-manifest.json \
+  --adapter fused \
+  --require-promotion \
+  --output ../quality-hybrid-fused-report.json
+```
+
 ## Historique conservé — contrat externe v0.5 remplacé
 
 Le contrat ci-dessous décrivait un holdout humain indépendant. Il reste utile

@@ -8,6 +8,20 @@
 - Lecteurs publics : **INCHANGÉS**
 - Ranking, contraintes et personnalisation : **HORS PÉRIMÈTRE DE PROMOTION**
 
+## Avancement
+
+| Lot | État | Preuve |
+|---|---|---|
+| P5A — contrat | **TERMINÉ** | contrat v1, manifestes, exemples synthétiques et 12 tests verts |
+| P5B — baseline réelle | **TERMINÉ** | agrégats production, audit SQL/index et plans synthétiques |
+| P5C — benchmark | **TERMINÉ** | 9 224 cas, oracle ratifié, legacy offer-first détecté `UNSAFE` |
+| P5D — lexical | **TERMINÉ** | `SAFE_INCOMPLETE`, index-compatible, zéro failure bloquante |
+| P5E — structured + semantic | **TERMINÉ** | expand-only qualifié, zéro promotion semantic-only |
+| P5F — fusion et grouping | **TERMINÉ** | RRF product-first, digest et invariance affiliée structurelle |
+| P5G — shadow | **TERMINÉ LOCAL** | migration `f7c5e9a1b3d6`, writer OFF et idempotence |
+| P5H — replay réel | **LOCAL READY / PROD PENDING** | dry/apply/replay testé, publication et migration requises |
+| P5I à P5J | **À FAIRE** | aucun lecteur public promu |
+
 ## Objectif
 
 Construire un générateur de candidats produit unique, product-first et à haut
@@ -118,6 +132,8 @@ indépendant n'existe ; elle n'autorise aucune prétention de préférence humai
 ## État d'ouverture
 
 P4F, P4G et P4H sont terminaux avec le verdict GO. Phase 5 peut commencer par
-P5A, P5B et P5C. Cette ouverture n'autorise encore aucune migration, aucun
+P5A, P5B et P5C. P5A à P5G sont désormais terminales localement ; P5H attend
+la publication, la migration contrôlée et le replay réel borné.
+Cette ouverture n'autorise encore aucune migration, aucun
 index, aucun embedding de production ni aucun changement de lecteur Hybrid
 Retrieval avant les gates propres de P5G à P5J.
