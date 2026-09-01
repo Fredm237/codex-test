@@ -1,0 +1,16 @@
+{
+  "schema_version": "confidence-report/v1",
+  "policy_version": "confidence-policy/v1",
+  "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "raw_context_retained": false,
+  "outcome": "CONFIDENCE_CALIBRATED",
+  "dimensions": [
+    {"dimension": "RETRIEVAL_CONFIDENCE", "state": "CALIBRATED", "probability_decimal": "0.900000", "sample_size": 1000, "profile_ref": "profile:retrieval:v1", "reason_codes": [], "evidence_refs": ["synthetic:retrieval"]},
+    {"dimension": "ENTITY_MATCH_CONFIDENCE", "state": "CALIBRATED", "probability_decimal": "0.700000", "sample_size": 1000, "profile_ref": "profile:entity:v1", "reason_codes": [], "evidence_refs": ["synthetic:entity"]},
+    {"dimension": "ATTRIBUTE_CONFIDENCE", "state": "CALIBRATED", "probability_decimal": "0.700000", "sample_size": 1000, "profile_ref": "profile:attribute:v1", "reason_codes": [], "evidence_refs": ["synthetic:attribute"]},
+    {"dimension": "OFFER_CONFIDENCE", "state": "CALIBRATED", "probability_decimal": "0.900000", "sample_size": 1000, "profile_ref": "profile:offer:v1", "reason_codes": [], "evidence_refs": ["synthetic:offer"]},
+    {"dimension": "DECISION_CONFIDENCE", "state": "CALIBRATED", "probability_decimal": "0.700000", "sample_size": 1000, "profile_ref": "profile:decision:v1", "reason_codes": [], "evidence_refs": ["synthetic:decision"]}
+  ],
+  "evidence_coverage": {"state": "MEASURED", "ratio_decimal": "0.800000", "observed_evidence_count": 4, "required_evidence_count": 5, "reason_codes": [], "evidence_refs": ["synthetic:e1", "synthetic:e2", "synthetic:e3", "synthetic:e4"]},
+  "result_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

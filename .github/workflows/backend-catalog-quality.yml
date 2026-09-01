@@ -129,6 +129,15 @@ jobs:
           --strict-engineering
           --output ../quality-offer-optimization-report.json
 
+      - name: Exécuter la calibration Confidence ECE Brier et buckets
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.confidence
+          --manifest ../quality/confidence-manifest.json
+          --adapter confidence
+          --strict-engineering
+          --output ../quality-confidence-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -143,6 +152,7 @@ jobs:
             ${{ github.workspace }}/quality-constraint-engine-report.json
             ${{ github.workspace }}/quality-product-ranking-report.json
             ${{ github.workspace }}/quality-offer-optimization-report.json
+            ${{ github.workspace }}/quality-confidence-report.json
           if-no-files-found: warn
           retention-days: 14
 
