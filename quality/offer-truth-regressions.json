@@ -1,0 +1,22 @@
+{
+  "schema_version": "offer-truth-regressions/v1",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "cases": [
+    {"case_id":"price:decimal-comma","claim":"price","kind":"known","payload":{"amount":"1 249,90","currency":"eur"},"expected_state":"known","expected_value":{"amount_decimal":"1249.9","currency":"EUR"},"truth_basis":"EXPLICIT_MONEY_FIELDS"},
+    {"case_id":"price:missing-currency","claim":"price","kind":"safe_abstention","payload":{"amount":"99.99"},"expected_state":"unknown","expected_value":null,"truth_basis":"ATOMIC_MONEY_REQUIRED"},
+    {"case_id":"price:negative","claim":"price","kind":"safe_abstention","payload":{"amount":"-1","currency":"EUR"},"expected_state":"invalid","expected_value":null,"truth_basis":"NEGATIVE_PRICE_FORBIDDEN"},
+    {"case_id":"stock:explicit-out","claim":"stock","kind":"known","payload":{"value":"out of stock"},"expected_state":"known","expected_value":"out_of_stock","truth_basis":"EXPLICIT_STOCK_ENUM"},
+    {"case_id":"stock:missing","claim":"stock","kind":"safe_abstention","payload":{},"expected_state":"unknown","expected_value":null,"truth_basis":"NO_AVAILABILITY_FALLBACK"},
+    {"case_id":"shipping:explicit-free","claim":"shipping","kind":"known","payload":{"amount":"0","currency":"EUR"},"expected_state":"known","expected_value":{"amount_decimal":"0","currency":"EUR"},"truth_basis":"EXPLICIT_ZERO_SHIPPING"},
+    {"case_id":"shipping:missing","claim":"shipping","kind":"safe_abstention","payload":{},"expected_state":"unknown","expected_value":null,"truth_basis":"NO_FREE_SHIPPING_FALLBACK"},
+    {"case_id":"returns:known","claim":"returns","kind":"known","payload":{"accepted":true,"period_days":30},"expected_state":"known","expected_value":{"accepted":true,"period_days":30},"truth_basis":"EXPLICIT_RETURNS_FIELDS"},
+    {"case_id":"returns:missing","claim":"returns","kind":"safe_abstention","payload":{},"expected_state":"unknown","expected_value":null,"truth_basis":"NO_RETURNS_INFERENCE"},
+    {"case_id":"warranty:known","claim":"warranty","kind":"known","payload":{"duration_months":24},"expected_state":"known","expected_value":{"duration_months":24,"description":null},"truth_basis":"EXPLICIT_WARRANTY_FIELD"},
+    {"case_id":"warranty:marketing-text-only","claim":"warranty","kind":"safe_abstention","payload":{"description":""},"expected_state":"unknown","expected_value":null,"truth_basis":"NO_WARRANTY_INFERENCE"},
+    {"case_id":"merchant:indexed-not-partner","claim":"merchant","kind":"known","payload":{"merchant_id":7,"merchant_status":"INDEXED","relationship_type":"INDEXED","seller_type":"unknown"},"expected_state":"known","expected_value":{"merchant_id":7,"merchant_status":"INDEXED","relationship_type":"INDEXED","seller_type":"unknown"},"truth_basis":"RELATIONSHIP_PRESERVATION"},
+    {"case_id":"merchant:missing","claim":"merchant","kind":"safe_abstention","payload":{},"expected_state":"unknown","expected_value":null,"truth_basis":"NO_PARTNER_EMBELLISHMENT"},
+    {"case_id":"freshness:boundary","claim":"freshness","kind":"known","payload":{"age_seconds":259200,"ttl_seconds":259200},"expected_state":"fresh","expected_value":{"age_seconds":259200,"ttl_seconds":259200},"truth_basis":"VERSIONED_TTL_BOUNDARY"},
+    {"case_id":"freshness:stale","claim":"freshness","kind":"safe_abstention","payload":{"age_seconds":259201,"ttl_seconds":259200},"expected_state":"stale","expected_value":{"age_seconds":259201,"ttl_seconds":259200},"truth_basis":"STALE_EXCLUDED"},
+    {"case_id":"freshness:future","claim":"freshness","kind":"safe_abstention","payload":{"age_seconds":-1,"ttl_seconds":259200},"expected_state":"invalid_future","expected_value":null,"truth_basis":"FUTURE_EXCLUDED"}
+  ]
+}
