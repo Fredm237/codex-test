@@ -18,7 +18,7 @@ _sessionmaker = None
 
 # Doit avancer avec la tête Alembic. Un test empêche qu'une nouvelle révision
 # soit ajoutée sans mettre à jour le garde-fou runtime.
-CURRENT_SCHEMA_REVISION = "c4f2b8d5e0a3"
+CURRENT_SCHEMA_REVISION = "d5a3c7e9f1b4"
 
 
 def _normalize_async_url(url: str) -> str:
@@ -132,6 +132,10 @@ async def create_all() -> None:
     from app.intelligence import models as intelligence_models  # noqa: F401
     from app.observations import models as observation_models  # noqa: F401
     from app.product_graph import models as product_graph_models  # noqa: F401
+    from app.offer_graph import models as offer_graph_models  # noqa: F401
+    from app.offer_truth import models as offer_truth_models  # noqa: F401
+    from app.merchant_intelligence import models as merchant_models  # noqa: F401
+    from app.evidence_engine import models as evidence_models  # noqa: F401
 
     async with _engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
