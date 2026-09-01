@@ -5,7 +5,7 @@
 - Complément v2 : `d1a9c3e5f7b0`
 - Parent v2 : `c0f8b2d4e6a9`
 - Flag : `OFFER_OPTIMIZATION_SHADOW_ENABLED=false`
-- Statut : **V1 DÉPLOYÉE — CORRECTION V2 PASS LOCAL**
+- Statut : **V2 DÉPLOYÉE ET QUALIFIÉE — FLAG OFF**
 
 ## Expansion additive
 
@@ -43,8 +43,9 @@ requis ; la migration reste réversible en environnement jetable.
 
 ## Qualification locale
 
-Le writer a prouvé `dry-run -> apply unique -> replay existant` avec le même
+Le writer a prouvé localement puis en production
+`dry-run -> apply unique -> replay existant` avec le même
 `run_key` et le même `evaluation_id`. La propagation d'une abstention Product
 Ranking crée un reçu sans candidat ni offre sélectionnée. La chaîne Alembic,
-le head runtime et le rollback jetable passent ; le test PostgreSQL réel reste
-le gate de la CI avant toute promotion.
+le head runtime, le rollback jetable et le gate PostgreSQL réel de la CI
+passent. Le reçu terminal est consigné dans `PHASE_8_FINAL_RECEIPT.md`.
