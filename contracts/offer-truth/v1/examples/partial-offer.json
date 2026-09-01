@@ -1,0 +1,38 @@
+{
+  "contract_version": "1.0.0",
+  "offer_id": 502,
+  "variant_id": 302,
+  "merchant_id": 42,
+  "offer_status": "PARTIAL",
+  "claims": {
+    "price": { "state": "unknown", "value": null, "evidence": [] },
+    "stock": { "state": "unknown", "value": null, "evidence": [] },
+    "shipping": { "state": "unknown", "value": null, "evidence": [] },
+    "returns": { "state": "unknown", "value": null, "evidence": [] },
+    "warranty": { "state": "unknown", "value": null, "evidence": [] },
+    "merchant": {
+      "state": "known",
+      "value": {
+        "merchant_id": 42,
+        "merchant_status": "INDEXED",
+        "relationship_type": "INDEXED",
+        "seller_type": "unknown"
+      },
+      "evidence": [{
+        "raw_source_record_id": 1002,
+        "source_type": "awin_feed",
+        "source_ref": "awin:feed:42:1002",
+        "observed_at": "2026-09-01T06:10:00Z",
+        "field": "merchant_id",
+        "transformation": "merchant_registry_link",
+        "transformation_version": "offer-truth-extractor-v1",
+        "confidence_state": "observed_direct"
+      }]
+    },
+    "freshness": { "state": "unknown", "value": null, "evidence": [] }
+  },
+  "reason_codes": ["price_unknown", "stock_unknown", "shipping_unknown"],
+  "projection_version": "offer-truth-shadow-v1",
+  "policy_version": "offer-truth-policy-v1",
+  "evaluated_at": "2026-09-01T07:00:00Z"
+}
