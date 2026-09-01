@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 from pydantic import ValidationError
 
-from app.core.config import Settings
+from app.core.config import Settings, V2_SHADOW_WRITER_FIELDS
 
 
 def _production(**overrides) -> Settings:
@@ -207,6 +207,9 @@ def test_rate_limit_remains_local_without_an_explicit_opt_in() -> None:
 
 def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> None:
     settings = Settings(_env_file=None, env="test")
+    assert settings.v2_chain_mode == "off"
+    assert settings.v2_canary_reader_enabled is False
+    assert settings.v2_public_reader_enabled is False
     assert settings.observation_shadow_enabled is False
     assert settings.product_graph_shadow_enabled is False
     assert settings.entity_resolution_shadow_enabled is False
@@ -517,6 +520,63 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
         evidence_engine_shadow_enabled=True,
     )
     assert evidence_enabled.evidence_engine_shadow_enabled is True
+
+
+def test_atomic_v2_shadow_mode_enables_every_writer_and_no_reader() -> None:
+    settings = Settings(_env_file=None, env="test", v2_chain_mode="shadow")
+
+    assert settings.v2_chain_mode == "shadow"
+    assert all(getattr(settings, field) for field in V2_SHADOW_WRITER_FIELDS)
+    assert settings.v2_canary_reader_enabled is False
+    assert settings.v2_public_reader_enabled is False
+
+
+def test_atomic_v2_shadow_mode_expands_from_the_environment(monkeypatch) -> None:
+    monkeypatch.setenv("V2_CHAIN_MODE", "shadow")
+
+    settings = Settings(_env_file=None, env="test")
+
+    assert settings.v2_chain_mode == "shadow"
+    assert all(getattr(settings, field) for field in V2_SHADOW_WRITER_FIELDS)
+
+
+@pytest.mark.parametrize(
+    "reader",
+    ["v2_canary_reader_enabled", "v2_public_reader_enabled"],
+)
+def test_atomic_v2_shadow_mode_rejects_public_readers(reader: str) -> None:
+    with pytest.raises(
+        ValidationError,
+        match="V2_CHAIN_MODE=shadow forbids every V2 public reader",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            v2_chain_mode="shadow",
+            **{reader: True},
+        )
+
+
+def test_atomic_v2_shadow_mode_rejects_an_explicitly_disabled_writer() -> None:
+    with pytest.raises(
+        ValidationError,
+        match="V2_CHAIN_MODE=shadow cannot disable required writers",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            v2_chain_mode="shadow",
+            product_ranking_shadow_enabled=False,
+        )
+
+
+@pytest.mark.parametrize("mode", ["canary", "public"])
+def test_unqualified_v2_reader_modes_fail_closed(mode: str) -> None:
+    with pytest.raises(
+        ValidationError,
+        match=rf"V2_CHAIN_MODE={mode} is not qualified",
+    ):
+        Settings(_env_file=None, env="test", v2_chain_mode=mode)
 
 
 @pytest.mark.parametrize(
