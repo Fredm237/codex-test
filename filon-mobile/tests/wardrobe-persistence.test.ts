@@ -1,6 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { clearWardrobe, readWardrobe, saveWardrobeItem } from "../lib/filon-wardrobe";
+import {
+  clearWardrobe,
+  eraseWardrobeWithReceipt,
+  exportWardrobe,
+  readWardrobe,
+  saveWardrobeItem,
+} from "../lib/filon-wardrobe";
 
 const { store } = vi.hoisted(() => ({ store: new Map<string, string>() }));
 
@@ -43,6 +49,39 @@ describe("wardrobe v2 persistence", () => {
 
     expect(await clearWardrobe()).toEqual([]);
     expect(await readWardrobe()).toEqual([]);
+    expect(store.size).toBe(0);
+  });
+
+  it("exports a versioned local snapshot with an explicit retention policy", async () => {
+    await saveWardrobeItem({ label: "Pantalon marine", role: "base" });
+
+    const exported = await exportWardrobe("2026-09-02T12:00:00Z");
+
+    expect(exported).toMatchObject({
+      schemaVersion: 1,
+      kind: "filon_wardrobe_export",
+      exportedAt: "2026-09-02T12:00:00.000Z",
+      storageScope: "local_device",
+      retentionPolicy: "until_user_deletion",
+      itemCount: 1,
+    });
+    expect(exported.items[0]).toMatchObject({ label: "Pantalon marine", provenance: "user_declared" });
+  });
+
+  it("issues an erasure receipt only after both stores are verified empty", async () => {
+    await saveWardrobeItem({ label: "Sac", role: "accessory" });
+    store.set("filon.intelligence.wardrobe.v1", "legacy");
+
+    const receipt = await eraseWardrobeWithReceipt("2026-09-02T12:05:00Z");
+
+    expect(receipt).toEqual({
+      schemaVersion: 1,
+      kind: "filon_wardrobe_erasure_receipt",
+      erasedAt: "2026-09-02T12:05:00.000Z",
+      storageScope: "local_device",
+      removedStores: ["filon.intelligence.wardrobe.v2", "filon.intelligence.wardrobe.v1"],
+      verifiedEmpty: true,
+    });
     expect(store.size).toBe(0);
   });
 });

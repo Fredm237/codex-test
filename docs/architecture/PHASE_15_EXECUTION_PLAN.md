@@ -18,7 +18,7 @@ l'appareil.
 | P15A — contrat | schéma versionné, provenance et périmètre de stockage explicites | **GO** |
 | P15B — persistance | migration locale v1 → v2, validation stricte, limite de 40 pièces | **GO** |
 | P15C — consentement | seules les pièces saisies par la personne sont conservées | **GO** |
-| P15D — mutations | écritures concurrentes sérialisées, déduplication et effacement total | **GO** |
+| P15D — mutations | écritures concurrentes sérialisées, déduplication, export versionné et effacement vérifié | **GO** |
 | P15E — expérience | réutilisation dans Complete, notice locale, suppression unitaire et totale | **GO local** |
 | P15F — profil synchronisé | contrat Profile, authentification, consentement réseau et portabilité | **NO-GO — hors lot** |
 | P15G — public | build natif, accessibilité et effacement qualifiés sur appareils | **NO-GO — non exécuté** |
@@ -32,6 +32,9 @@ l'appareil.
 5. les mutations concurrentes ne peuvent pas écraser une pièce validée ;
 6. l'effacement supprime le magasin courant et toute copie legacy ;
 7. aucune écriture réseau, table backend, table shadow, writer ou Cron n'est créé.
+8. la conservation locale dure jusqu'à l'effacement explicite par la personne ;
+9. l'export est un instantané versionné produit localement, sans transfert implicite ;
+10. un reçu d'effacement n'est émis qu'après relecture des deux clés v1/v2 à `null`.
 
 ## Conditions LOCAL → DEVICE CANARY
 

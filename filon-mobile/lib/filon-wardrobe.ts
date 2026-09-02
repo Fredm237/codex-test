@@ -26,6 +26,25 @@ export type WardrobeItemInput = {
   attributes?: Partial<WardrobeAttributes>;
 };
 
+export type WardrobeExport = {
+  schemaVersion: 1;
+  kind: "filon_wardrobe_export";
+  exportedAt: string;
+  storageScope: "local_device";
+  retentionPolicy: "until_user_deletion";
+  itemCount: number;
+  items: WardrobeItem[];
+};
+
+export type WardrobeErasureReceipt = {
+  schemaVersion: 1;
+  kind: "filon_wardrobe_erasure_receipt";
+  erasedAt: string;
+  storageScope: "local_device";
+  removedStores: readonly ["filon.intelligence.wardrobe.v2", "filon.intelligence.wardrobe.v1"];
+  verifiedEmpty: true;
+};
+
 const STORAGE_KEY = "filon.intelligence.wardrobe.v2";
 const LEGACY_STORAGE_KEY = "filon.intelligence.wardrobe.v1";
 const LIMIT = 40;
@@ -157,6 +176,26 @@ export async function readWardrobe(): Promise<WardrobeItem[]> {
   return readStoredWardrobe();
 }
 
+export function buildWardrobeExport(items: WardrobeItem[], exportedAt: string): WardrobeExport {
+  const normalizedExportedAt = normalizedTimestamp(exportedAt);
+  if (!normalizedExportedAt) throw new Error("WARDROBE_EXPORT_TIMESTAMP_INVALID");
+  const sanitized = sanitizeWardrobe(items);
+  return {
+    schemaVersion: 1,
+    kind: "filon_wardrobe_export",
+    exportedAt: normalizedExportedAt,
+    storageScope: "local_device",
+    retentionPolicy: "until_user_deletion",
+    itemCount: sanitized.length,
+    items: sanitized,
+  };
+}
+
+/** Returns a portable, versioned snapshot without creating a network transfer. */
+export function exportWardrobe(exportedAt = new Date().toISOString()): Promise<WardrobeExport> {
+  return wardrobeMutationTail.then(async () => buildWardrobeExport(await readStoredWardrobe(), exportedAt));
+}
+
 function updateWardrobe(transition: (current: WardrobeItem[]) => WardrobeItem[]) {
   const operation = wardrobeMutationTail.then(async () => {
     const current = await readStoredWardrobe();
@@ -179,12 +218,34 @@ export function removeWardrobeItem(id: string): Promise<WardrobeItem[]> {
   return updateWardrobe((current) => current.filter((item) => item.id !== id));
 }
 
-/** Erasure removes both the current store and any unmigrated legacy copy. */
-export async function clearWardrobe(): Promise<WardrobeItem[]> {
+/** Erasure removes both stores and verifies the result before issuing a receipt. */
+export async function eraseWardrobeWithReceipt(
+  erasedAt = new Date().toISOString(),
+): Promise<WardrobeErasureReceipt> {
+  const normalizedErasedAt = normalizedTimestamp(erasedAt);
+  if (!normalizedErasedAt) throw new Error("WARDROBE_ERASURE_TIMESTAMP_INVALID");
   const operation = wardrobeMutationTail.then(async () => {
     await AsyncStorage.multiRemove([STORAGE_KEY, LEGACY_STORAGE_KEY]);
-    return [] as WardrobeItem[];
+    const [current, legacy] = await Promise.all([
+      AsyncStorage.getItem(STORAGE_KEY),
+      AsyncStorage.getItem(LEGACY_STORAGE_KEY),
+    ]);
+    if (current !== null || legacy !== null) throw new Error("WARDROBE_ERASURE_NOT_VERIFIED");
+    return {
+      schemaVersion: 1,
+      kind: "filon_wardrobe_erasure_receipt",
+      erasedAt: normalizedErasedAt,
+      storageScope: "local_device",
+      removedStores: [STORAGE_KEY, LEGACY_STORAGE_KEY],
+      verifiedEmpty: true,
+    } as const;
   });
   wardrobeMutationTail = operation.then(() => undefined, () => undefined);
   return operation;
+}
+
+/** Backwards-compatible UI action; callers needing proof use eraseWardrobeWithReceipt. */
+export async function clearWardrobe(): Promise<WardrobeItem[]> {
+  await eraseWardrobeWithReceipt();
+  return [];
 }

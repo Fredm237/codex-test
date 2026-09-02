@@ -37,3 +37,9 @@ les actions marchandes derrière les preuves V2 existantes.
 
 En conséquence, ce reçu clôt la construction locale prévue jusqu'à Phase 18,
 mais ne déclare pas FILON V2 public ni la production personnelle activée.
+
+Le durcissement confidentialité, l'export local versionné et l'effacement
+vérifié ajoutés le 2 septembre 2026 sont qualifiés séparément dans
+`PHASE_15_18_PRIVACY_READINESS_REPORT.md`. Ils réduisent les gates 4 et 5 pour
+le stockage appareil, sans constituer une preuve shadow production ni un GO
+P18F/P18G.

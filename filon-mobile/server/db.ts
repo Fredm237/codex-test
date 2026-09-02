@@ -10,8 +10,8 @@ export async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
       _db = drizzle(process.env.DATABASE_URL);
-    } catch (error) {
-      console.warn("[Database] Failed to connect:", error);
+    } catch {
+      console.warn("[Database] Failed to connect");
       _db = null;
     }
   }
@@ -71,9 +71,9 @@ export async function upsertUser(user: InsertUser): Promise<void> {
     await db.insert(users).values(values).onDuplicateKeyUpdate({
       set: updateSet,
     });
-  } catch (error) {
-    console.error("[Database] Failed to upsert user:", error);
-    throw error;
+  } catch {
+    console.error("[Database] Failed to upsert user");
+    throw new Error("USER_STORAGE_FAILED");
   }
 }
 
