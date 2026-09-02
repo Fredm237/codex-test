@@ -9,7 +9,7 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "test": "node scripts/test-megamenu.mjs && node scripts/test-contract-v1.mjs && node scripts/test-truth-claims.mjs && node scripts/test-product-truth.mjs && node scripts/test-web-experience.mjs"
+    "test": "node scripts/test-megamenu.mjs && node scripts/test-contract-v1.mjs && node scripts/test-truth-claims.mjs && node scripts/test-product-truth.mjs && node scripts/test-web-experience.mjs && node scripts/test-assistant-experience.mjs"
   },
   "dependencies": {
     "@react-three/drei": "^10.7.7",

@@ -81,5 +81,19 @@ spectacle ni sa dépendance à la 3D.
 - exemple catalogue indisponible lors de l'inspection : rendu **unknown** honnête,
   sans image, prix ou recommandation de substitution.
 
-P11D/P11E restent à aligner. Aucun résultat local n'autorise à lui seul une
-promotion publique ou production.
+## Qualification locale P11D/P11E
+
+- catalogue réel : **1 528 583 offres** observées pendant la qualification ;
+- fiche offre `72493` : montant et stock courants rendus, historique trop récent,
+  confiance non calibrée et champs manquants explicitement exposés ;
+- après expiration de la preuve, la même fiche est retombée sur **prix ou
+  disponibilité à vérifier**, sans conserver le CTA marchand ;
+- les deux routes produit annoncent désormais leur surface claire au header,
+  dont le contraste est stable avant et après scroll ;
+- assistant réel : l'indisponibilité amont produit une abstention terminale,
+  jamais une carte synthétique ;
+- les cartes assistant n'utilisent plus `rank` ni `buy` : elles annoncent
+  seulement une offre avec prix, devise, disponibilité et fraîcheur courants ;
+- Product Ranking, BUY/WAIT, Confidence et autres lecteurs shadow restent OFF.
+
+Aucun résultat local n'autorise à lui seul une promotion publique ou production.

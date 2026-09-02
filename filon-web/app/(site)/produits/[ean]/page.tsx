@@ -137,7 +137,7 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
         }}
       />
 
-      <section className="ed-band" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
+      <section className="ed-band p11-product-surface" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
         <div className="ed-wrap">
           <p style={{ marginBottom: 20 }}>
             <a href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>← Retour au catalogue</a>

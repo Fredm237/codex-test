@@ -18,9 +18,9 @@ const SL = {
     priceFor: "Votre région",
     countryHelp: "Ce contexte ne masque pas les offres européennes comparables. Les frais et la livraison à votre adresse restent à vérifier chez le marchand.",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
-    why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", good: "Bon moment", wait: "Attendre",
+    why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", verifiedOffer: "Offre vérifiée", currentEvidence: "Prix et disponibilité courants",
     real: "Prix réels · Catalogue FILON", est: "Prix estimés, à titre indicatif",
-    analysed: "offres analysées", forNeed: "pour", recos: "Voici mes", recoTail: "recommandation", classed: "classée", nounPl: "s", adjPl: "s",
+    analysed: "offres analysées", forNeed: "pour", verifiedResults: (count: number) => `${count} offre${count > 1 ? "s" : ""} avec preuve courante`,
     failedTitle: "Je ne peux pas répondre pour le moment.",
     failedBody: "L'analyse s'appuie sur les offres de nos marchands partenaires, et ce service est momentanément injoignable. Plutôt que de vous proposer des produits inventés, je préfère ne rien vous proposer. Réessayez dans un instant.",
     sourceTitle: "Aucune offre vérifiée n’est disponible pour cette recherche.",
@@ -39,9 +39,9 @@ const SL = {
     priceFor: "Jouw regio",
     countryHelp: "Deze context verbergt geen vergelijkbare Europese aanbiedingen. Verzendkosten en levering op jouw adres controleer je bij de winkel.",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
-    why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", good: "Goed moment", wait: "Wachten",
+    why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", verifiedOffer: "Geverifieerde aanbieding", currentEvidence: "Actuele prijs en beschikbaarheid",
     real: "Echte prijzen · FILON Catalogus", est: "Geschatte prijzen, ter indicatie",
-    analysed: "aanbiedingen geanalyseerd", forNeed: "voor", recos: "Dit zijn mijn", recoTail: "aanbeveling", classed: "gerangschikt", nounPl: "en", adjPl: "",
+    analysed: "aanbiedingen geanalyseerd", forNeed: "voor", verifiedResults: (count: number) => `${count} aanbieding${count > 1 ? "en" : ""} met actueel bewijs`,
     failedTitle: "Ik kan nu niet antwoorden.",
     failedBody: "De analyse steunt op de aanbiedingen van onze partnerwinkels, en die dienst is tijdelijk onbereikbaar. Liever niets voorstellen dan verzonnen producten. Probeer het zo meteen opnieuw.",
     sourceTitle: "Geen geverifieerde aanbieding voor deze zoekopdracht.",
@@ -60,9 +60,9 @@ const SL = {
     priceFor: "Your region",
     countryHelp: "This context does not hide comparable European offers. Delivery cost and delivery to your address must still be checked with the merchant.",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
-    why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", good: "Good time", wait: "Wait",
+    why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", verifiedOffer: "Verified offer", currentEvidence: "Current price and availability",
     real: "Real prices · FILON Catalogue", est: "Estimated prices, for guidance",
-    analysed: "offers analysed", forNeed: "for", recos: "Here are my", recoTail: "recommendation", classed: "ranked", nounPl: "s", adjPl: "",
+    analysed: "offers analysed", forNeed: "for", verifiedResults: (count: number) => `${count} offer${count > 1 ? "s" : ""} with current evidence`,
     failedTitle: "I can't answer right now.",
     failedBody: "The analysis draws on offers from our partner merchants, and that service is temporarily unreachable. Rather than show you invented products, I would rather show you nothing. Try again in a moment.",
     sourceTitle: "No verified offer is available for this search.",
@@ -127,13 +127,13 @@ const STEPS = [
 
 type Hist = "baisse" | "hausse" | "stable";
 type Card = {
-  rank: string; medal: string; name: string; emoji: string;
+  name: string;
   offer_kind?: string; image?: string | null; link?: string | null;
   price: number; currency: string; merchant: string; delivery: string; warranty: string;
   in_stock: boolean; observed_at: string; evidence_current: boolean;
   cashback: number; coupon: string | null; hist: Hist | null; histNote: string;
   score?: number; evidence_score?: number; decision?: DecisionData | null;
-  why: string; alt: string | null; buy: boolean;
+  why: string; alt: string | null;
 };
 type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; currency?: string; country?: string };
 
@@ -229,8 +229,8 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
       whileHover={{ y: -4, boxShadow: "var(--fx-elevation-3)" }}
     >
       {i === 0
-        ? <div className="fa-flag"><IcCheck /> {c.rank}</div>
-        : <div className="fa-rank"><span className="num">{i + 1}</span> {c.rank}</div>}
+        ? <div className="fa-flag"><IcCheck /> {S.verifiedOffer}</div>
+        : <div className="fa-rank"><span className="num">{i + 1}</span> {S.verifiedOffer}</div>}
       <div className="fa-body">
         <div className={`fa-thumb${showImg ? " has-img" : ""}`} aria-hidden="true">
           {showImg
@@ -256,7 +256,11 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
           {c.alt && <p className="fa-alt">{S.alt}&nbsp;: {c.alt}</p>}
         </div>
         <div className="fa-aside">
-          <span className={`fa-verdict ${c.buy ? "buy" : "wait"}`}>{c.buy ? <><IcCheck /> {S.good}</> : <><IcClock /> {isContextualOffer ? S.contextualOffer : S.wait}</>}</span>
+          <span className={`fa-verdict ${isContextualOffer ? "wait" : "evidence"}`}>
+            {isContextualOffer
+              ? <><IcClock /> {S.contextualOffer}</>
+              : <><IcCheck /> {S.currentEvidence}</>}
+          </span>
           <a
             className="ed-btn wave"
             href={offerUrl}
@@ -525,12 +529,12 @@ export function SearchAssistant() {
                   transition={{ duration: 0.6 }}
                 >
                   <p className="fa-summary">
-                    <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.recos} {result.cards.length} {S.recoTail}{result.cards.length > 1 ? S.nounPl : ""}, {S.classed}{result.cards.length > 1 ? S.adjPl : ""}.
+                    <b>{result.offers} {S.analysed}</b> {S.forNeed} {result.usage}. {S.verifiedResults(result.cards.length)}.
                     <span className="fa-est"> {result.real ? S.real : S.est}{" · "}{countryLabel(result.country || country, locale)}.</span>
                     <span className="fa-country-note">{S.countryHelp}</span>
                   </p>
                   <div className="fa-cards">
-                    {result.cards.map((c, i) => <RecCard key={c.rank} c={c} i={i} q={asked} />)}
+                    {result.cards.map((c, i) => <RecCard key={`${c.merchant}-${c.name}-${i}`} c={c} i={i} q={asked} />)}
                   </div>
                   <p className="sa-disc">{S.disc}</p>
                 </motion.div>

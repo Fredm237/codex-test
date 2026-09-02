@@ -232,6 +232,15 @@ for (const path of ["components/filon/ProductCard.tsx", "components/filon/Rails.
 const offerDetailsSource = guardedSources.find((entry) => entry.path === "components/filon/OfferProductDetails.tsx").source;
 assert.ok(offerDetailsSource.includes("signal.samples === history.length"), "le signal historique doit couvrir exactement les points comparables");
 assert.ok(offerDetailsSource.includes("observationAgeHours"), "l'âge affiché doit être recalculé depuis le relevé");
+for (const path of ["app/(site)/produits/[ean]/page.tsx", "app/(site)/produit/[id]/page.tsx"]) {
+  const source = guardedSources.find((entry) => entry.path === path).source;
+  assert.ok(source.includes("p11-product-surface"), `${path} doit annoncer sa surface claire au header global`);
+}
+const filonCssSource = readFileSync(join(webRoot, "components/filon/filon.css"), "utf8");
+assert.ok(
+  filonCssSource.includes("body:has(.p11-product-surface) .ed-header"),
+  "les fiches produit doivent maintenir un contraste explicite dans la navigation",
+);
 const pulseSource = readFileSync(join(webRoot, "components/filon/Pulse.tsx"), "utf8");
 assert.ok(pulseSource.includes("now - metricsCheckedAt <= METRICS_MAX_AGE_MS"), "les agrégats 24 h doivent expirer sans polling réussi");
 assert.ok(pulseSource.includes("now >= metricsCheckedAt"), "une preuve de contrôle future doit rester inconnue");
