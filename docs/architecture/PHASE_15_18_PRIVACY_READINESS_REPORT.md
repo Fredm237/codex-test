@@ -7,11 +7,12 @@ Branche locale : `codex/filon-phase-15-18-privacy-readiness`
 ## Décision
 
 **GO local** pour la confidentialité du trajet d'authentification mobile et la
-portabilité/effacement du dressing local.
+portabilité/effacement du dressing local. **P18F READY local** pour le journal
+serveur privé, sa rétention, son export et son effacement.
 
 Ce reçu ne change pas les décisions de production : **P15G, P18F et P18G
-restent NO-GO** tant que leurs preuves appareil, shadow réel et canary atomique
-ne sont pas produites.
+restent NO-GO production** tant que leurs preuves appareil, shadow réel et
+canary atomique ne sont pas produites.
 
 ## Confidentialité OAuth
 
@@ -60,12 +61,22 @@ L'avertissement Node relatif au type de module de `eslint.config.js` préexiste
 et n'affecte aucun contrôle fonctionnel. Les quatre tests ignorés exigent des
 services ou identifiants externes et ne sont pas déclarés réussis.
 
+## Journal serveur Personal Commerce
+
+La migration additive `b5d3f7a9c1e4` et le commit local `c196c71` ajoutent un
+journal sans contexte brut, un identifiant sujet HMAC uniquement sous
+consentement, une échéance obligatoire, un export isolé et des reçus
+d'effacement vérifiés. Le writer reste OFF et la clé HMAC n'a aucune valeur
+versionnée. La qualification locale compte 91 tests d'intégration réussis ; la
+suite backend couvre 2 640 tests exécutables. Les trois preuves PostgreSQL sont
+explicitement réservées à la CI avec `TEST_POSTGRES_URL`.
+
 ## Frontière restante avant fermeture réelle de Phase 18
 
 1. publier et qualifier ce durcissement sur CI distante ;
 2. qualifier l'authentification et l'effacement sur appareils iOS et Android ;
-3. définir puis migrer le journal Personal Commerce append-only sans contexte
-   brut ;
+3. appliquer en production le journal Personal Commerce additif déjà préparé,
+   après CI distante PostgreSQL verte ;
 4. exécuter un replay production borné `dry-run → apply → replay` et prouver
    l'idempotence ainsi que l'effacement ;
 5. qualifier une cohorte explicitement consentante avec export et rollback ;
