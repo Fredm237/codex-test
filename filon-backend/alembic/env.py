@@ -32,6 +32,7 @@ from app.buy_wait import models as buy_wait_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_intelligence_models  # noqa: F401
 from app.evidence_engine import models as evidence_engine_models  # noqa: F401
 from app.v2_chain import models as v2_chain_models  # noqa: F401
+from app.personal_commerce import models as personal_commerce_models  # noqa: F401
 
 
 config = context.config

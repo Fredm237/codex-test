@@ -30,8 +30,9 @@ projet et l'environnement n'ont pas été confirmés par l'opérateur.
 | Confidence shadow | `e2b0d4f6a8c1` | Ajoute les calibrations séparées par dimension et leurs preuves |
 | BUY/WAIT V2 shadow | `f3c1e5a7b9d2` | Ajoute les décisions temporelles append-only, sans prédiction inventée |
 | Journal de chaîne V2 | `a4e2c6f8b0d3` | Ajoute lease unique, heartbeat, checkpoints et états terminaux, sans payload brut |
+| Personal Commerce shadow | `b5d3f7a9c1e4` | Ajoute décisions privées, échéances de rétention et reçus d'effacement, sans contexte brut |
 
-La seule tête attendue est `a4e2c6f8b0d3`. La colonne de devise reste
+La seule tête attendue est `b5d3f7a9c1e4`. La colonne de devise reste
 `NULL` pour les relevés antérieurs : la devise d'un montant historique n'est
 pas déductible de l'offre courante.
 
@@ -149,7 +150,7 @@ python -m pip install -r requirements.txt
 alembic heads
 ```
 
-Résultat attendu : une seule tête, `a4e2c6f8b0d3`. Confirmer ensuite hors log
+Résultat attendu : une seule tête, `b5d3f7a9c1e4`. Confirmer ensuite hors log
 le projet, l'environnement et l'hôte visés. Pour PostgreSQL, `pg_dump` et
 `pg_restore` reçoivent une URL native `postgresql://`, pas le suffixe
 SQLAlchemy `+asyncpg`.
@@ -180,7 +181,7 @@ alembic current
 alembic check
 ```
 
-La révision courante doit être `a4e2c6f8b0d3 (head)` et le check doit afficher
+La révision courante doit être `b5d3f7a9c1e4 (head)` et le check doit afficher
 `No new upgrade operations detected.`.
 
 ### 3B. Base existante à la baseline ou variante legacy couverte
@@ -211,20 +212,19 @@ alembic current
 alembic check
 ```
 
-L'upgrade ajoute les trois tables Observation, la colonne de devise, normalise
-les deux drapeaux couverts puis crée les tables Product Graph, Offer Graph,
-Merchant Intelligence, Evidence, checkpoints et assertions Product Identity.
-Il ne modifie aucune valeur
-historique, ne fabrique aucune devise et ne lance aucun backfill.
+L'upgrade ajoute les tables Observation, la colonne de devise, normalise les
+deux drapeaux couverts puis déroule toutes les expansions shadow listées dans
+la topologie jusqu'au journal privé Personal Commerce. Il ne modifie aucune
+valeur historique, ne fabrique aucune devise et ne lance aucun backfill.
 
 ### 3C. Base existante exactement identique à la tête
 
-Si les 31 tables, contraintes, index et colonnes correspondent déjà
+Si toutes les tables, contraintes, index et colonnes correspondent déjà
 exactement aux modèles et aux migrations de tête, une adoption directe est
 possible après la même sauvegarde et une comparaison exhaustive :
 
 ```bash
-alembic stamp c4f2b8d5e0a3
+alembic stamp b5d3f7a9c1e4
 alembic current
 alembic check
 ```
@@ -257,9 +257,12 @@ Avant tout premier déploiement avec migration automatique :
    `OFFER_OPTIMIZATION_SHADOW_ENABLED=false` et
    `CONFIDENCE_SHADOW_ENABLED=false` et
    `BUY_WAIT_SHADOW_ENABLED=false` et
+   `PERSONAL_COMMERCE_SHADOW_ENABLED=false` et
    `MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false` et
    `EVIDENCE_ENGINE_SHADOW_ENABLED=false` et `V2_CHAIN_MODE=off` ;
-5. obtenir `a4e2c6f8b0d3 (head)` avec `alembic current` et un `alembic check`
+   `PERSONAL_COMMERCE_SUBJECT_SECRET` peut être préparé hors log, mais son seul
+   paramétrage n'active aucun writer ;
+5. obtenir `b5d3f7a9c1e4 (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -270,7 +273,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `a4e2c6f8b0d3` ;
+  `b5d3f7a9c1e4` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -292,6 +295,10 @@ PRODUCT_ONTOLOGY_SHADOW_ENABLED=false
 HYBRID_RETRIEVAL_SHADOW_ENABLED=false
 CONSTRAINT_ENGINE_SHADOW_ENABLED=false
 PRODUCT_RANKING_SHADOW_ENABLED=false
+OFFER_OPTIMIZATION_SHADOW_ENABLED=false
+CONFIDENCE_SHADOW_ENABLED=false
+BUY_WAIT_SHADOW_ENABLED=false
+PERSONAL_COMMERCE_SHADOW_ENABLED=false
 MERCHANT_INTELLIGENCE_SHADOW_ENABLED=false
 EVIDENCE_ENGINE_SHADOW_ENABLED=false
 ```
@@ -347,7 +354,7 @@ baseline.**
 ### Régression applicative
 
 Remettre la version applicative précédente, conserver le schéma à
-`a4e2c6f8b0d3` et garder les shadows désactivés. Les structures d'expansion sont
+`b5d3f7a9c1e4` et garder les shadows désactivés. Les structures d'expansion sont
 compatibles avec l'ancien lecteur, qui les ignore. Un rollback applicatif ne
 justifie ni un downgrade ni `DATABASE_SCHEMA_MODE=legacy`.
 

@@ -222,6 +222,8 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     assert settings.offer_optimization_shadow_enabled is False
     assert settings.confidence_shadow_enabled is False
     assert settings.buy_wait_shadow_enabled is False
+    assert settings.personal_commerce_shadow_enabled is False
+    assert settings.personal_commerce_subject_secret is None
     assert settings.merchant_intelligence_shadow_enabled is False
     assert settings.evidence_engine_shadow_enabled is False
 
@@ -478,6 +480,69 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
 
     with pytest.raises(
         ValidationError,
+        match="PERSONAL_COMMERCE_SHADOW_ENABLED requires BUY_WAIT_SHADOW_ENABLED",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            personal_commerce_shadow_enabled=True,
+            personal_commerce_subject_secret="p" * 32,
+        )
+
+    with pytest.raises(
+        ValidationError,
+        match="PERSONAL_COMMERCE_SUBJECT_SECRET is required",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            observation_shadow_enabled=True,
+            product_graph_shadow_enabled=True,
+            entity_resolution_shadow_enabled=True,
+            offer_graph_shadow_enabled=True,
+            offer_truth_shadow_enabled=True,
+            product_ontology_shadow_enabled=True,
+            hybrid_retrieval_shadow_enabled=True,
+            constraint_engine_shadow_enabled=True,
+            product_ranking_shadow_enabled=True,
+            offer_optimization_shadow_enabled=True,
+            confidence_shadow_enabled=True,
+            buy_wait_shadow_enabled=True,
+            personal_commerce_shadow_enabled=True,
+        )
+
+    personal_commerce_enabled = Settings(
+        _env_file=None,
+        env="test",
+        observation_shadow_enabled=True,
+        product_graph_shadow_enabled=True,
+        entity_resolution_shadow_enabled=True,
+        offer_graph_shadow_enabled=True,
+        offer_truth_shadow_enabled=True,
+        product_ontology_shadow_enabled=True,
+        hybrid_retrieval_shadow_enabled=True,
+        constraint_engine_shadow_enabled=True,
+        product_ranking_shadow_enabled=True,
+        offer_optimization_shadow_enabled=True,
+        confidence_shadow_enabled=True,
+        buy_wait_shadow_enabled=True,
+        personal_commerce_shadow_enabled=True,
+        personal_commerce_subject_secret="p" * 32,
+    )
+    assert personal_commerce_enabled.personal_commerce_shadow_enabled is True
+
+    with pytest.raises(
+        ValidationError,
+        match="PERSONAL_COMMERCE_SUBJECT_SECRET must be 32-256",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            personal_commerce_subject_secret="too-short",
+        )
+
+    with pytest.raises(
+        ValidationError,
         match="MERCHANT_INTELLIGENCE_SHADOW_ENABLED requires all Graph shadows",
     ):
         Settings(
@@ -529,6 +594,7 @@ def test_atomic_v2_shadow_mode_enables_every_writer_and_no_reader() -> None:
     assert all(getattr(settings, field) for field in V2_SHADOW_WRITER_FIELDS)
     assert settings.v2_canary_reader_enabled is False
     assert settings.v2_public_reader_enabled is False
+    assert settings.personal_commerce_shadow_enabled is False
 
 
 def test_atomic_v2_shadow_mode_expands_from_the_environment(monkeypatch) -> None:
