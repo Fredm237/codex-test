@@ -82,19 +82,34 @@ flag `PERSONAL_COMMERCE_SHADOW_ENABLED`.
 La qualification locale couvre donc les 2 640 tests exécutables dans cet
 environnement. Les trois tests PostgreSQL restent une gate CI distincte : ils
 ne sont pas présentés comme réussis avant exécution sur la base jetable
-`filon_test` en loopback. Aucune CI distante n'est déclenchée sans publication.
+`filon_test` en loopback. Cette preuve est maintenant apportée par la CI
+distante décrite ci-dessous.
+
+## Qualification distante
+
+- PR de qualification : `#413`, ouverte et non fusionnée ;
+- tête GitHub qualifiée : `78b172296900efe51ad2a4cef46119a19b1f7642` ;
+- run GitHub Actions : `33654292272`, terminal `success` ;
+- Backend, contrats et Quality Lab : `success`, avec PostgreSQL 16 jetable,
+  migrations Alembic, détection de drift et benchmark Personal Commerce ;
+- Web : `success` ;
+- Mobile : `success` ;
+- Extension : `success` ;
+- artefact : `quality-readiness-4d42b77f41355c65a4986b35e7bf5c0fd59a79b1`,
+  digest `sha256:7ff1660e2c5ee3e5596413e22187ce314d9ae56e1c8c8741d0618b3beed69667`,
+  expiration annoncée au `2026-09-16T16:26:10Z`.
+
+Cette preuve ferme la gate CI et la preuve PostgreSQL jetable. Elle n'autorise
+ni fusion, ni migration de production, ni activation du writer ou d'un lecteur.
 
 ## Gates encore ouverts
 
-1. exécuter `alembic check`, la suite backend complète et la preuve PostgreSQL
-   locale jetable ;
-2. publier une branche auditée et obtenir une CI distante verte ;
-3. fusionner et appliquer la migration additive en production ;
-4. exécuter un seul replay borné `dry-run → apply → replay` avec writer
+1. fusionner et appliquer la migration additive en production ;
+2. exécuter un seul replay borné `dry-run → apply → replay` avec writer
    temporairement ON et tous les lecteurs OFF ;
-5. produire une preuve d'export/effacement sur cohorte consentante avant tout
+3. produire une preuve d'export/effacement sur cohorte consentante avant tout
    canary ;
-6. promouvoir la chaîne nécessaire de façon atomique et réversible.
+4. promouvoir la chaîne nécessaire de façon atomique et réversible.
 
 Ce document ne ferme donc pas Phase 18 et ne déclenche pas le mandat créatif
 post-Phase 18.
