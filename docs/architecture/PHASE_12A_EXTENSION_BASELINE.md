@@ -49,8 +49,9 @@ pouvait pas ouvrir une fiche exacte par identifiant.
 - benchmark adversarial : **12/12**, rappel GTIN exact 1,00, zéro
   identifiant invalide accepté, zéro prix non supporté accepté, zéro URL privée
   conservée et zéro transmission automatique ;
-- projection Core : **12/12**, dont déterminisme, allowlist JSON-LD,
-  horloge fail-closed et replay append-only sans doublon ;
+- projection et résolution Core : **17/17**, dont déterminisme, allowlist
+  JSON-LD, horloge fail-closed, replay append-only sans doublon, GTIN exact,
+  devise unique, fraîcheur et comparaison multi-marchands ;
 - régression backend complète : **2 599 réussis, 3 ignorés** dans le bac à
   sable ; le seul test refusé par l'interdiction d'ouvrir un port loopback a
   ensuite réussi **1/1** hors de cette restriction. Aucun échec applicatif ne
@@ -66,12 +67,15 @@ pouvait pas ouvrir une fiche exacte par identifiant.
    pas ce GTIN ou aucune offre courante comparable.
 4. Le zip historique du store n'est pas régénéré avant la qualification
    complète de la source.
+5. Le résolveur exact Core est testé mais reste sans route HTTP : il ne peut
+   recevoir aucun payload tant que le gate de consentement réseau est fermé.
 
 ## GO / NO-GO
 
 - **P12A audit : GO local**.
 - **P12B contrat et extraction : GO local**.
-- **Projection Core append-only : GO local, non raccordée au réseau**.
+- **Projection et comparaison Core exactes : GO local, non raccordées au
+  réseau**.
 - **Transport d'observation vers le Core : NO-GO en attente d'autorisation
   explicite**.
 - **Phase 12 production : NO-GO**.

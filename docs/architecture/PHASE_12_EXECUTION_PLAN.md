@@ -36,8 +36,8 @@ transport futur, après autorisation dédiée :
 | P12A | baseline, dépendances et frontière de responsabilité | aucun moteur de décision dans l'extension |
 | P12B | contrat, extracteur local et navigation exacte | GTIN/prix/devise/URL adversariaux à 100 % |
 | P12C | transport explicite vers le Core | consentement, destination, rate limit et writer OFF par défaut |
-| P12D | capture Observation + Entity Resolution | append-only, idempotence, faux merge nul |
-| P12E | comparaison instantanée | même variante, devise unique, preuves courantes |
+| P12D | capture Observation + résolution exacte | append-only, idempotence, faux merge nul |
+| P12E | comparaison instantanée | même GTIN, devise unique, deux marchands et preuves courantes |
 | P12F | Quality Lab et package store | benchmark vert, permissions minimales, zip reproductible |
 | P12G | production canary | CI, déploiement, sondes, métriques et reçu terminal |
 
@@ -67,9 +67,15 @@ séparée devra précéder son activation ; aucune DDL implicite n'est admise.
 - test statique interdisant tout `fetch` dans l'extension tant que P12C n'est
   pas autorisé.
 
-Résultats actuels : benchmark **12/12**, projection Core **12/12**, régression
-backend **2 599 réussis + 1 test loopback réussi isolément**, **3 ignorés** et
-aucun échec applicatif.
+Résultats actuels : benchmark **12/12**, projection/résolution Core **17/17**,
+régression backend **2 599 réussis + 1 test loopback réussi isolément**, **3
+ignorés** et aucun échec applicatif.
+
+Le résolveur Core local ne publie une comparaison que si le GTIN correspond au
+produit exact, qu'au moins deux marchands possèdent des snapshots actuels en
+stock et que toutes les offres admissibles partagent une devise supportée. Une
+preuve stale, une devise mixte, un seul marchand ou un GTIN absent produit
+`unknown`, `ambiguous` ou `not_found`, jamais un meilleur prix supposé.
 
 ## Promotion conditions
 
