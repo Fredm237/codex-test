@@ -1,0 +1,16 @@
+[
+  { "id": "ean13_exact", "input": "4006381333931", "expected": "4006381333931" },
+  { "id": "ean13_formatted", "input": "87 19295-43943 4", "expected": "8719295439434" },
+  { "id": "ean8_exact", "input": "96385074", "expected": "96385074" },
+  { "id": "upca_canonical", "input": "036000291452", "expected": "0036000291452" },
+  { "id": "gtin14_zero_canonical", "input": "04006381333931", "expected": "4006381333931" },
+  { "id": "gtin14_kept", "input": "10012345678902", "expected": "10012345678902" },
+  { "id": "bad_checksum", "input": "4006381333932", "expected": null },
+  { "id": "bad_checksum_formatted", "input": "4006-3813-3393-2", "expected": null },
+  { "id": "zero_placeholder", "input": "0000000000000", "expected": null },
+  { "id": "one_placeholder", "input": "11111111", "expected": null },
+  { "id": "too_short", "input": "1234567", "expected": null },
+  { "id": "too_long", "input": "123456789012345", "expected": null },
+  { "id": "letters_only", "input": "FILON", "expected": null },
+  { "id": "empty", "input": "", "expected": null }
+]

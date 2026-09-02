@@ -1,0 +1,10 @@
+{
+  "contract": "filon.mobile-barcode-lookup",
+  "contract_version": "1.0.0",
+  "owner": "product-core",
+  "trigger": "explicit_user_scan_or_manual_submit",
+  "transport": "GET /api/catalog/product/{canonical_gtin}",
+  "raw_code_transmitted": false,
+  "shadow_reader": false,
+  "states": ["exact", "invalid", "not_found", "unavailable", "incomparable"]
+}

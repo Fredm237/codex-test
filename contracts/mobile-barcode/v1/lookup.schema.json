@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/mobile-barcode/v1/lookup.schema.json",
+  "title": "FILON mobile barcode lookup boundary",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "canonical_gtin", "trigger"],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "canonical_gtin": { "type": "string", "pattern": "^(?:[0-9]{8}|[0-9]{13}|[1-9][0-9]{13})$" },
+    "trigger": { "enum": ["camera", "manual"] }
+  }
+}

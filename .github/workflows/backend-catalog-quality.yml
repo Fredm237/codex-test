@@ -230,6 +230,9 @@ jobs:
       - name: Exécuter les tests hermétiques
         run: pnpm test
 
+      - name: Qualifier le scan code-barres fail-closed
+        run: pnpm benchmark:barcode
+
   extension-tests:
     name: Extension — contrat, manifeste et syntaxe
     runs-on: ubuntu-latest

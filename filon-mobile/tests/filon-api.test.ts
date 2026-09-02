@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { buildFilonOfferSearchParams, formatFilonPrice, getFirstImageUrl, isFilonObservationFresh, isFilonOfferActionable, isFilonOfferPriceCurrent, normalizeFilonCatalogueNavigation, normalizeFilonCataloguePulse, normalizeFilonCatalogueRelief, normalizeOffer, normalizeOfferDetail, normalizeProduct, searchFilonOffers } from "../lib/filon-api";
+import { buildFilonOfferSearchParams, formatFilonPrice, getFilonProductByEan, getFirstImageUrl, isFilonObservationFresh, isFilonOfferActionable, isFilonOfferPriceCurrent, normalizeFilonCatalogueNavigation, normalizeFilonCataloguePulse, normalizeFilonCatalogueRelief, normalizeOffer, normalizeOfferDetail, normalizeProduct, searchFilonOffers } from "../lib/filon-api";
 
 afterEach(() => vi.unstubAllGlobals());
 
@@ -65,6 +65,24 @@ describe("FILON catalogue normalization", () => {
     const base = { ean: "123", name: "Produit", price_min: 10, price_max: 20, currency: "EUR", offers_count: 2, merchants_count: 2, offers: [{ id: 1, price: 10, currency: "EUR", link: "https://example.com/a", merchant: { name: "A" } }, { id: 2, price: 20, currency: "USD", link: "https://example.com/b", merchant: { name: "B" } }] };
     expect(() => normalizeProduct(base)).toThrow(/multidevises/);
     expect(() => normalizeProduct({ ...base, price_max: 19, offers: base.offers.map((offer) => ({ ...offer, currency: "EUR" })) })).toThrow(/bornes/);
+  });
+
+  it("rejects a grouped product whose returned EAN differs from the requested identity", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({
+        ean: "4006381333931",
+        name: "Produit contradictoire",
+        price_min: 10,
+        price_max: 10,
+        currency: "EUR",
+        offers_count: 1,
+        merchants_count: 1,
+        offers: [{ id: 1, price: 10, currency: "EUR", link: "https://merchant.example/item", merchant: { name: "Marchand" } }],
+      }),
+    }));
+    await expect(getFilonProductByEan("8719295439434")).rejects.toThrow(/identité EAN/);
   });
 
   it("keeps price history limited to comparable in-stock observations", () => {
