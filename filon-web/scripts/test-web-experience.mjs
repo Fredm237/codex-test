@@ -9,6 +9,10 @@ const experience = readFileSync(join(root, "components/experience/WebExperience.
 const primitives = readFileSync(join(root, "components/experience/DecisionPrimitives.tsx"), "utf8");
 const css = readFileSync(join(root, "components/experience/web-experience.module.css"), "utf8");
 const globalCss = readFileSync(join(root, "components/filon/filon.css"), "utf8");
+const editorialCss = readFileSync(join(root, "components/editorial/editorial.css"), "utf8");
+const forms = readFileSync(join(root, "components/editorial/Forms.tsx"), "utf8");
+const editorialNav = readFileSync(join(root, "components/editorial/EditorialNav.tsx"), "utf8");
+const languageSwitcher = readFileSync(join(root, "components/editorial/LanguageSwitcher.tsx"), "utf8");
 
 assert.ok(page.includes("<WebExperience proof={proof} />"), "la home doit rendre l'expérience Phase 11");
 assert.ok(page.includes("await getProof()"), "les chiffres home doivent venir du catalogue réel");
@@ -31,6 +35,15 @@ assert.doesNotMatch(experience, /BUY_NOW|\bWAIT\b/, "les lecteurs BUY/WAIT shado
 assert.doesNotMatch(experience, /currency\s*(?:\|\||\?\?)\s*["']EUR["']/, "aucune devise de secours");
 assert.doesNotMatch(css, /--font-(?:fraunces|outfit|inter)\b/, "la page doit utiliser les variables de fontes réellement déclarées");
 assert.ok(css.includes("prefers-reduced-motion: reduce"), "la politique reduced-motion doit être explicite");
+assert.match(editorialCss, /\.ed-lang-trigger\s*\{[^}]*min-height:\s*44px/s, "le sélecteur de langue doit garder une cible tactile de 44 px");
+assert.match(editorialCss, /\.ed-lang-opt\s*\{[^}]*min-height:\s*44px/s, "chaque option de langue doit garder une cible tactile de 44 px");
+assert.match(forms, /<input name="email" type="email" aria-label=\{T\.email\}/, "le champ newsletter doit conserver un nom accessible");
+assert.match(editorialNav, /aria-controls="filon-mobile-navigation"/, "le bouton mobile doit désigner le panneau contrôlé");
+assert.match(editorialNav, /event\.key !== "Escape"/, "le menu mobile doit pouvoir être fermé au clavier");
+assert.match(editorialNav, /burgerRef\.current\?\.focus\(\)/, "le menu mobile doit restituer le focus à sa fermeture");
+assert.match(languageSwitcher, /aria-controls=\{listboxId\}/, "le sélecteur de langue doit désigner sa liste");
+assert.match(languageSwitcher, /tabIndex=\{open \? 0 : -1\}/, "les langues masquées doivent rester hors du parcours clavier");
+assert.match(languageSwitcher, /triggerRef\.current\?\.focus\(\)/, "Échap doit restituer le focus au sélecteur de langue");
 const animationDeclarations = [...css.matchAll(/animation(?:-[a-z-]+)?\s*:\s*([^;}]+)/gi)]
   .map((match) => match[1].trim());
 assert.ok(

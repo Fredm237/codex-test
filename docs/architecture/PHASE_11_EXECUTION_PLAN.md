@@ -2,7 +2,7 @@
 
 - Ouverture : **1er septembre 2026**
 - Gate d'entrée : **Phase 10 = GO**
-- Statut : **P11A/P11B/P11C QUALIFIÉS LOCALEMENT**
+- Statut : **P11A à P11F QUALIFIÉS LOCALEMENT**
 - Client canonique : **`filon-web`**
 - Lecteurs shadow : **OFF**
 - Immersive : **NO-GO inchangé**
@@ -95,5 +95,24 @@ spectacle ni sa dépendance à la 3D.
 - les cartes assistant n'utilisent plus `rank` ni `buy` : elles annoncent
   seulement une offre avec prix, devise, disponibilité et fraîcheur courants ;
 - Product Ranking, BUY/WAIT, Confidence et autres lecteurs shadow restent OFF.
+
+## Qualification locale P11F
+
+- six suites web : **vertes**, dont les gardes de vérité historiques ;
+- typecheck : **vert** ;
+- build Next.js production : **vert, 42 pages** ;
+- route `/` : **5,33 kB**, premier chargement **114 kB** ;
+- inspections à **320 × 720**, **390 × 844** et **1 440 × 900** : aucun
+  débordement horizontal ;
+- DOM rendu : un `main`, un `h1`, une recherche, zéro champ visible sans nom,
+  zéro bouton visible sans nom et zéro image sans `alt` ;
+- cibles critiques : **44 px minimum** ;
+- navigation mobile et langue : association contrôle/panneau, fermeture
+  `Échap`, exclusion des options masquées du parcours clavier et restitution
+  du focus ;
+- reduced-motion explicite et aucune animation porteuse d'information.
+
+P11G doit encore apporter la preuve terminale de publication, CI, déploiement,
+sondes et invariants de production. Il ne doit activer aucun lecteur shadow.
 
 Aucun résultat local n'autorise à lui seul une promotion publique ou production.

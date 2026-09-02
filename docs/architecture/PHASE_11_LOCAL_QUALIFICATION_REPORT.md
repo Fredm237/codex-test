@@ -1,8 +1,9 @@
 # FILON — Phase 11 local qualification report
 
-- Date : **1er septembre 2026**
+- Date : **2 septembre 2026**
 - Branche locale : **`codex/filon-phase-11-web-experience`**
-- Point de reprise P11A/P11B/P11C : **`f65ea5e`**
+- Point de reprise P11A/P11B/P11C : **`36f0931`**
+- Point de reprise P11D/P11E : **`436f513`**
 - Portée : **home, fiches produit, assistant et gardes de vérité web**
 - Publication : **aucune**
 - Production : **inchangée**
@@ -22,8 +23,8 @@
 | Build Next.js | PASS | 42 pages générées |
 | Budget home | PASS local | route 5,33 kB ; premier chargement 114 kB |
 | Inspection desktop | PASS | home, assistant, catalogue et fiche offre réelle |
-| Inspection mobile | PENDING | media queries présentes ; contrôle visuel dédié à produire |
-| Lighthouse/a11y automatisé | PENDING | focus, labels et reduced-motion présents ; audit outillé à produire |
+| Inspection mobile | PASS | 320 × 720 et 390 × 844, sans débordement horizontal ni contenu tronqué |
+| Accessibilité automatisée | PASS | structure, noms accessibles, cibles tactiles, menus, Échap, restitution du focus et reduced-motion |
 
 ## Preuves fonctionnelles observées
 
@@ -50,6 +51,29 @@ indisponibilité explicite. Aucune offre synthétique, estimation, recommandatio
 BUY/WAIT ou classement n'a été affiché. Les résultats futurs devront satisfaire
 simultanément montant, devise, stock et fraîcheur avant de produire une carte.
 
+### Mobile, clavier et accessibilité
+
+- à 320 px et 390 px, la largeur du document reste inférieure à celle de la
+  fenêtre et la hiérarchie conserve un `main`, un `h1` et une recherche ;
+- à 390 px et 1 440 px, aucun champ visible n'est dépourvu de nom accessible,
+  aucun bouton visible n'est sans nom et aucune image n'est sans attribut
+  `alt` ;
+- le bouton de menu, le retour en haut, la langue et chacune de ses options
+  respectent une cible de 44 px ; la recherche et la comparaison restent à
+  54 px de haut sur mobile ;
+- le menu mobile annonce le panneau qu'il contrôle, verrouille le défilement
+  quand il est ouvert, se ferme avec `Échap` et restitue le focus au bouton ;
+- la liste des langues est identifiée de manière unique, les options masquées
+  sortent du parcours clavier, et `Échap` ferme la liste puis restitue le
+  focus au sélecteur ;
+- la feuille Phase 11 contient une règle explicite `prefers-reduced-motion`
+  et la home ne dépend d'aucune animation pour transmettre une information.
+
+Cet audit combine des gardes de régression exécutées par `npm test` et une
+inspection du DOM rendu dans le navigateur. Aucun score Lighthouse n'est
+revendiqué ; le gate performance repose sur le build de production et ses
+budgets mesurés.
+
 ## Direction visuelle retenue
 
 Les références CID inspirent la centralité du produit, la grande typographie,
@@ -64,14 +88,15 @@ ni scroll spectacle, ni média automatique, ni capacité 3D non qualifiée.
 2. L'assistant amont était indisponible pendant le parcours réel ; seule son
    abstention a donc été qualifiée en situation live.
 3. Le film de l'assistant reste facultatif, contrôlé par l'utilisateur et sans
-   autoplay. Son coût doit entrer dans l'audit performance P11F.
-4. Une qualification mobile visuelle et un audit automatisé accessibilité /
-   performance restent nécessaires avant P11G.
+   autoplay. Il n'entre pas dans le graphe initial de la home qualifiée.
+4. Les appels de données du pré-rendu local n'ont pas résolu le domaine
+   Railway dans le bac à sable ; les routes ont néanmoins produit leurs états
+   fail-closed et le build a généré les 42 pages attendues.
 
 ## Conclusion locale
 
-**P11A à P11E : QUALIFIÉS LOCALEMENT.**
+**P11A à P11F : QUALIFIÉS LOCALEMENT.**
 
 Ce rapport n'est ni un reçu de production ni une autorisation de publication.
-P11F doit fermer les contrôles mobile, accessibilité et performance avant toute
-promotion P11G.
+P11G reste conditionné à la publication autorisée, à la CI, au déploiement et
+aux sondes terminales de production.

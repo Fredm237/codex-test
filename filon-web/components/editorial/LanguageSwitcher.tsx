@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { useLocale, type Locale } from "@/lib/i18n";
 
 const LANGS: Array<{ code: Locale; short: string; label: string }> = [
@@ -24,6 +24,8 @@ export function LanguageSwitcher() {
   const { locale, setLocale, t } = useLocale();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listboxId = useId();
   const current = LANGS.find((l) => l.code === locale) ?? LANGS[0];
 
   useEffect(() => {
@@ -31,7 +33,11 @@ export function LanguageSwitcher() {
     const onDown = (e: MouseEvent) => {
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      setOpen(false);
+      triggerRef.current?.focus();
+    };
     document.addEventListener("mousedown", onDown);
     document.addEventListener("keydown", onKey);
     return () => {
@@ -43,10 +49,12 @@ export function LanguageSwitcher() {
   return (
     <div className={`ed-lang${open ? " open" : ""}`} ref={ref}>
       <button
+        ref={triggerRef}
         type="button"
         className="ed-lang-trigger"
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={listboxId}
         aria-label={t("lang.aria")}
         onClick={() => setOpen((o) => !o)}
       >
@@ -56,13 +64,14 @@ export function LanguageSwitcher() {
           <path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
-      <div className="ed-lang-menu" role="listbox" aria-label={t("lang.aria")}>
+      <div id={listboxId} className="ed-lang-menu" role="listbox" aria-label={t("lang.aria")} aria-hidden={!open}>
         {LANGS.map((l) => (
           <button
             key={l.code}
             type="button"
             role="option"
             aria-selected={l.code === locale}
+            tabIndex={open ? 0 : -1}
             className={`ed-lang-opt${l.code === locale ? " on" : ""}`}
             onClick={() => {
               setLocale(l.code);
