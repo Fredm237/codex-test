@@ -65,7 +65,9 @@ séparée devra précéder son activation ; aucune DDL implicite n'est admise.
 - projection Core déterministe et persistance idempotente ;
 - benchmark adversarial de 12 cas ;
 - test statique interdisant tout `fetch` dans l'extension tant que P12C n'est
-  pas autorisé.
+  pas autorisé ;
+- construction déterministe d'une archive Manifest V3 minimale, vérifiée deux
+  fois octet par octet en CI.
 
 Résultats actuels : benchmark **12/12**, projection/résolution Core **17/17**,
 régression backend **2 599 réussis + 1 test loopback réussi isolément**, **3

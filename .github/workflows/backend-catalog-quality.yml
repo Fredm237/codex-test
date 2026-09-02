@@ -260,6 +260,12 @@ jobs:
           node --check content.js
           node --check popup.js
           node --check product-observation.js
+
+      - name: Vérifier le package store reproductible
+        run: |
+          python3 scripts/build_package.py --output "$RUNNER_TEMP/filon-extension-a.zip"
+          python3 scripts/build_package.py --output "$RUNNER_TEMP/filon-extension-b.zip"
+          cmp "$RUNNER_TEMP/filon-extension-a.zip" "$RUNNER_TEMP/filon-extension-b.zip"
           node --check popup.js
 
       - name: Vérifier le manifeste

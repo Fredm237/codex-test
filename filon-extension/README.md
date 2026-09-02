@@ -22,6 +22,7 @@ documentés. Le périmètre et les inconnues restent visibles.
 | `popup.html` / `popup.js` | Popup de la barre d'outils : recherche + analyse de la page |
 | `icons/` | Icônes 16 / 32 / 48 / 128 (+ 256 pour le store) |
 | `_locales/fr/` | Libellés du store |
+| `scripts/build_package.py` | Archive store minimale et reproductible |
 
 ## Pages prises en charge (v1)
 
@@ -42,6 +43,9 @@ couverture exhaustive du catalogue du site concerné.
 - Description, capture d'écran et politique de confidentialité à joindre au dépôt.
 - Permissions minimales : `activeTab`, `storage` + `host_permissions` limités aux
   marchands supportés (aucun accès « tous les sites »).
+- Construire la source qualifiée avec
+  `python3 scripts/build_package.py --output filon-extension-v1.1.0.zip` ; le
+  constructeur refuse toute référence Manifest absente de son allowlist.
 
 ## Confidentialité
 

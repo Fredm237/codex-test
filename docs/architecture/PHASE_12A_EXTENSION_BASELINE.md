@@ -76,6 +76,7 @@ pouvait pas ouvrir une fiche exacte par identifiant.
 - **P12B contrat et extraction : GO local**.
 - **Projection et comparaison Core exactes : GO local, non raccordées au
   réseau**.
+- **Constructeur package store : GO local ; archive finale non publiée**.
 - **Transport d'observation vers le Core : NO-GO en attente d'autorisation
   explicite**.
 - **Phase 12 production : NO-GO**.
