@@ -1,0 +1,15 @@
+{
+  "contract": "filon.personal-stylist",
+  "contract_version": "1.0.0",
+  "maximum_looks": 3,
+  "owned_first": true,
+  "owned_marginal_cost": 0,
+  "catalogue_currency": "EUR",
+  "weather_evidence_max_age_hours": 6,
+  "compatibility_score": null,
+  "measurement_status": "not_calibrated",
+  "network_transport": false,
+  "persistent_writer": false,
+  "public_reader": false,
+  "cron": false
+}

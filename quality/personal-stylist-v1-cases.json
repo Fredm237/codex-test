@@ -1,0 +1,14 @@
+[
+  { "id": "owned_work_look", "wardrobe_roles": ["base", "structure", "footwear"], "candidates": [], "expected_status": "solution", "expected_purchases": 0 },
+  { "id": "one_verified_addition", "wardrobe_roles": ["base", "structure"], "candidates": [{ "role": "footwear", "price": 70 }], "expected_status": "solution", "expected_purchases": 1 },
+  { "id": "occasion_missing", "brief": { "occasion": null }, "wardrobe_roles": [], "candidates": [], "expected_status": "abstain", "expected_reason": "occasion_unspecified" },
+  { "id": "style_missing", "brief": { "style": null }, "wardrobe_roles": [], "candidates": [], "expected_status": "abstain", "expected_reason": "style_unspecified" },
+  { "id": "weather_missing", "weather": null, "wardrobe_roles": [], "candidates": [], "expected_status": "abstain", "expected_reason": "weather_unverified" },
+  { "id": "weather_wrong_location", "weather": { "location": "Paris" }, "wardrobe_roles": [], "candidates": [], "expected_status": "abstain", "expected_reason": "weather_unverified" },
+  { "id": "rain_capability_unknown", "weather": { "precipitation": "rain" }, "wardrobe_roles": ["base", "structure", "footwear"], "candidates": [], "expected_status": "abstain", "expected_reason": "weather_garment_capability_unknown" },
+  { "id": "size_unverified", "wardrobe_roles": ["base", "structure"], "candidates": [{ "role": "footwear", "price": 70, "size": "L" }], "expected_status": "abstain", "expected_reason": "required_role_unavailable" },
+  { "id": "stale_offer", "wardrobe_roles": ["base", "structure"], "candidates": [{ "role": "footwear", "price": 70, "stale": true }], "expected_status": "abstain", "expected_reason": "required_role_unavailable" },
+  { "id": "budget_exceeded", "brief": { "budget": 50 }, "wardrobe_roles": ["base", "structure"], "candidates": [{ "role": "footwear", "price": 70 }], "expected_status": "abstain", "expected_reason": "budget_exceeded" },
+  { "id": "owned_variants_no_duplicate_buy", "wardrobe_roles": ["base", "base", "structure", "footwear"], "candidates": [{ "role": "base", "price": 40 }], "expected_status": "solution", "expected_purchases": 0, "expected_looks": 2 },
+  { "id": "unsafe_offer", "wardrobe_roles": ["base", "structure"], "candidates": [{ "role": "footwear", "price": 70, "unsafe": true }], "expected_status": "abstain", "expected_reason": "required_role_unavailable" }
+]

@@ -245,6 +245,9 @@ jobs:
       - name: Qualifier le dressing local consent-aware
         run: pnpm benchmark:wardrobe
 
+      - name: Qualifier le Personal Stylist owned-first
+        run: pnpm benchmark:personal-stylist
+
   extension-tests:
     name: Extension — contrat, manifeste et syntaxe
     runs-on: ubuntu-latest
