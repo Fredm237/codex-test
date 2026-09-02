@@ -1,0 +1,19 @@
+{
+  "schema_version": "personal-commerce-benchmark/v1",
+  "development_engine_input": false,
+  "cases": [
+    { "id": "no_consent", "consent": false, "candidates": [{ "id": "owned", "kind": "kit" }], "expected_action": "ABSTAIN" },
+    { "id": "owned_over_buy", "candidates": [{ "id": "buy", "kind": "setup", "purchases": 1, "cost": "20", "action": "BUY" }, { "id": "owned", "kind": "routine" }], "expected_action": "USE_WHAT_YOU_OWN", "expected_ref": "solution:owned" },
+    { "id": "explicit_like", "preferences": [{ "id": "blue", "key": "color", "value": "blue", "polarity": "LIKE" }], "candidates": [{ "id": "red", "kind": "outfit", "attributes": { "color": "red" } }, { "id": "blue", "kind": "outfit", "attributes": { "color": "blue" } }], "expected_action": "USE_WHAT_YOU_OWN", "expected_ref": "solution:blue" },
+    { "id": "explicit_dislike", "preferences": [{ "id": "no-wool", "key": "material", "value": "wool", "polarity": "DISLIKE" }], "candidates": [{ "id": "wool", "kind": "outfit", "attributes": { "material": "wool" } }, { "id": "cotton", "kind": "outfit", "attributes": { "material": "cotton" } }], "expected_action": "USE_WHAT_YOU_OWN", "expected_ref": "solution:cotton" },
+    { "id": "buy_preserved", "candidates": [{ "id": "buy", "kind": "kit", "purchases": 1, "cost": "40", "action": "BUY" }], "expected_action": "BUY" },
+    { "id": "wait_preserved", "candidates": [{ "id": "wait", "kind": "kit", "purchases": 1, "cost": "40", "action": "WAIT" }], "expected_action": "WAIT" },
+    { "id": "over_budget", "budget": "30", "candidates": [{ "id": "buy", "kind": "kit", "purchases": 1, "cost": "40", "action": "BUY" }], "expected_action": "ABSTAIN" },
+    { "id": "foreign_currency", "candidates": [{ "id": "usd", "kind": "kit", "purchases": 1, "cost": "40", "currency": "USD", "action": "BUY" }], "expected_action": "ABSTAIN" },
+    { "id": "unknown_constraints", "candidates": [{ "id": "unknown", "kind": "kit", "constraint": "UNKNOWN" }], "expected_action": "ABSTAIN" },
+    { "id": "abstained_composition", "candidates": [{ "id": "partial", "kind": "kit", "composition": "ABSTAINED" }], "expected_action": "ABSTAIN" },
+    { "id": "unapproved_domain", "allowed": ["outfit"], "candidates": [{ "id": "setup", "kind": "setup" }], "expected_action": "ABSTAIN" },
+    { "id": "stable_tie_break", "candidates": [{ "id": "z", "kind": "kit" }, { "id": "a", "kind": "kit" }], "expected_action": "USE_WHAT_YOU_OWN", "expected_ref": "solution:a" }
+  ],
+  "engineering_gates": { "pass_rate_min": 1.0, "consent_bypasses_max": 0, "false_actions_max": 0, "scores_published_max": 0 }
+}

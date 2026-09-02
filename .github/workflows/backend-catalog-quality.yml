@@ -119,6 +119,14 @@ jobs:
           --strict
           --output ../quality-solution-composer-report.json
 
+      - name: Exécuter le benchmark Personal Commerce consent-aware
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.personal_commerce
+          --manifest ../quality/personal-commerce-manifest.json
+          --strict
+          --output ../quality-personal-commerce-report.json
+
       - name: Exécuter les garde-fous Product Ranking sans simuler la preuve humaine
         if: ${{ !cancelled() }}
         run: >-
@@ -176,6 +184,7 @@ jobs:
             ${{ github.workspace }}/quality-product-ontology-report.json
             ${{ github.workspace }}/quality-constraint-engine-report.json
             ${{ github.workspace }}/quality-solution-composer-report.json
+            ${{ github.workspace }}/quality-personal-commerce-report.json
             ${{ github.workspace }}/quality-product-ranking-report.json
             ${{ github.workspace }}/quality-offer-optimization-report.json
             ${{ github.workspace }}/quality-confidence-report.json
