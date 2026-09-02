@@ -1,0 +1,13 @@
+{
+  "contract": "filon.wardrobe",
+  "contract_version": "1.0.0",
+  "storage_schema_version": 2,
+  "owner": "user-profile",
+  "provenance": "user_declared",
+  "storage_scope": "local_device",
+  "network_transport": false,
+  "product_core_writer": false,
+  "shadow_reader": false,
+  "maximum_items": 40,
+  "erasure": ["current_store", "legacy_store"]
+}

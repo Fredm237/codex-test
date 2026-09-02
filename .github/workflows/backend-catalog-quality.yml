@@ -242,6 +242,9 @@ jobs:
       - name: Qualifier le scan code-barres fail-closed
         run: pnpm benchmark:barcode
 
+      - name: Qualifier le dressing local consent-aware
+        run: pnpm benchmark:wardrobe
+
   extension-tests:
     name: Extension — contrat, manifeste et syntaxe
     runs-on: ubuntu-latest

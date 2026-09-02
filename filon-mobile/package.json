@@ -14,6 +14,7 @@
     "format": "prettier --write .",
     "test": "vitest run",
     "benchmark:barcode": "node --import tsx scripts/benchmark-barcode.ts",
+    "benchmark:wardrobe": "node --import tsx scripts/benchmark-wardrobe.ts",
     "db:push": "drizzle-kit generate && drizzle-kit migrate",
     "android": "expo start --android",
     "ios": "expo start --ios",
