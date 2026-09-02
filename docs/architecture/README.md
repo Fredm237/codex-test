@@ -1,8 +1,7 @@
 # FILON — dossier d'architecture Phase 0
 
-Statut : **PHASES 0 À 5 = GO ; PHASE 6 — CONSTRAINT ENGINE OUVERTE ; premier
-événement GitHub `schedule` classé `EXTERNAL_PROVIDER_PENDING /
-NON_BLOCKING` ; Immersive reste NO-GO**.
+Statut historique : **PHASE 0 = GO ; moniteur GitHub manuel et planifié prouvé ;
+Immersive reste NO-GO**. Les phases ultérieures possèdent leurs reçus dédiés.
 
 Référence de baseline : `Fredm237/codex-test`, branche distante `main`, commit
 `57724c72e77c50ca54aaf64338f838dda3be2747`, le 28 août 2026. État de travail
@@ -19,9 +18,9 @@ humain : le Quality Lab autonome reste la gate active.**
 
 Le cycle catalogue réel, la migration heartbeat, les checkpoints de reprise,
 la CI et l'alerting critique minimum sont désormais prouvés. Le workflow
-GitHub planifié est présent, valide et actif ; l'absence actuelle d'une
-occurrence créée par GitHub reste surveillée comme limitation fournisseur non
-bloquante. Collecteur OTLP, agrégateur, rétention, dashboards avancés, pager
+GitHub planifié est présent, valide et actif ; les runs `33578462794` et
+`33596363980` sont deux exécutions `schedule` terminales `success`. Collecteur
+OTLP, agrégateur, rétention, dashboards avancés, pager
 secondaire et trafic représentatif sont des travaux post-Phase 0 non
 bloquants. Les chemins
 de décision durcis localement conservent désormais les inconnus au lieu de les
