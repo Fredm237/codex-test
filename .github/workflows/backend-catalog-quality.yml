@@ -249,10 +249,17 @@ jobs:
       - name: Vérifier le contrat v1
         run: node tests/contract-v1.mjs
 
+      - name: Qualifier l'observation produit Phase 12
+        run: >-
+          node tests/phase12-observation.mjs &&
+          node quality/benchmark.mjs
+
       - name: Vérifier les scripts Manifest V3
         run: |
           node --check background.js
           node --check content.js
+          node --check popup.js
+          node --check product-observation.js
           node --check popup.js
 
       - name: Vérifier le manifeste

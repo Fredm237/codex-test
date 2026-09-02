@@ -15,12 +15,18 @@ assert.ok(context.query.length <= 140);
 
 const content = readFileSync(join(extensionRoot, "content.js"), "utf8");
 const popup = readFileSync(join(extensionRoot, "popup.js"), "utf8");
+const observation = readFileSync(join(extensionRoot, "product-observation.js"), "utf8");
 assert.match(content, /slice\(0, 140\)/);
 assert.match(content, /utm_source=extension&utm_medium=fiche/);
 assert.match(popup, /utm_source=extension&utm_medium=popup/);
+assert.match(content, /FilonProductObservation\.buildObservation/);
+assert.match(content, /\/produits\/\$\{encodeURIComponent\(gtin\)\}/);
+assert.match(popup, /FILON_GET_PRODUCT_OBSERVATION/);
+assert.doesNotMatch(content + popup + observation, /fetch\s*\(/, "aucune observation ne doit être transmise automatiquement");
 
 const publicCopy = [
   content,
+  observation,
   readFileSync(join(extensionRoot, "STORE-LISTING.md"), "utf8"),
   readFileSync(join(extensionRoot, "README.md"), "utf8"),
   readFileSync(join(extensionRoot, "manifest.json"), "utf8"),

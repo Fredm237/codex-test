@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/extension-observation/v1/page-product-observation.schema.json",
+  "title": "FILON Page Product Observation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "capture_mode", "page", "observed_at"],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "capture_mode": { "const": "explicit_user_action" },
+    "page": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "url", "merchant", "title", "brand", "sku", "mpn", "gtin",
+        "price", "availability", "variant", "json_ld"
+      ],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://[^?#]+$",
+          "maxLength": 2048
+        },
+        "merchant": { "type": "string", "minLength": 1, "maxLength": 253 },
+        "title": { "type": "string", "minLength": 3, "maxLength": 300 },
+        "brand": { "type": ["string", "null"], "minLength": 1, "maxLength": 191 },
+        "sku": { "type": ["string", "null"], "minLength": 1, "maxLength": 191 },
+        "mpn": { "type": ["string", "null"], "minLength": 1, "maxLength": 191 },
+        "gtin": {
+          "type": ["string", "null"],
+          "pattern": "^(?:[0-9]{8}|[0-9]{12}|[0-9]{13}|[0-9]{14})$"
+        },
+        "price": {
+          "oneOf": [
+            { "type": "null" },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["amount", "currency"],
+              "properties": {
+                "amount": { "type": "string", "pattern": "^[0-9]+(?:\\.[0-9]{1,4})?$" },
+                "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+              }
+            }
+          ]
+        },
+        "availability": {
+          "enum": ["in_stock", "out_of_stock", "preorder", "backorder", "unknown"]
+        },
+        "variant": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["model", "color", "size"],
+          "properties": {
+            "model": { "type": ["string", "null"], "minLength": 1, "maxLength": 191 },
+            "color": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 },
+            "size": { "type": ["string", "null"], "minLength": 1, "maxLength": 128 }
+          }
+        },
+        "json_ld": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["present", "source_fields"],
+          "properties": {
+            "present": { "type": "boolean" },
+            "source_fields": {
+              "type": "array",
+              "uniqueItems": true,
+              "maxItems": 16,
+              "items": {
+                "enum": [
+                  "name", "brand", "sku", "mpn", "gtin", "gtin8",
+                  "gtin12", "gtin13", "gtin14", "model", "color", "size",
+                  "offers.price", "offers.priceCurrency", "offers.availability"
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    "observed_at": { "type": "string", "format": "date-time" }
+  }
+}

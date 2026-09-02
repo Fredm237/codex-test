@@ -1,0 +1,15 @@
+{
+  "schema_version": "extension-observation-quality-manifest/v1",
+  "dataset": "filon-extension/quality/extension-observation-cases.json",
+  "runner": "filon-extension/quality/benchmark.mjs",
+  "cases_are_synthetic": true,
+  "external_human_ground_truth": false,
+  "thresholds": {
+    "case_accuracy_min": 1.0,
+    "valid_gtin_recall_min": 1.0,
+    "invalid_gtin_acceptance_max": 0.0,
+    "unsupported_price_acceptance_max": 0.0,
+    "unsafe_url_retention_max": 0.0,
+    "automatic_transmission_count_max": 0
+  }
+}

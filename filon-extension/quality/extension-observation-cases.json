@@ -1,0 +1,73 @@
+[
+  {
+    "id": "exact_gtin_offer",
+    "input": {
+      "url": "https://merchant.example/p/xm6?campaign=private#reviews",
+      "title": "Fallback title",
+      "looksLikeProduct": true,
+      "json_ld": {
+        "@type": "Product",
+        "name": "Sony WH-1000XM6 Black",
+        "brand": { "@type": "Brand", "name": "Sony" },
+        "gtin13": "4006381333931",
+        "offers": { "@type": "Offer", "price": "449.00", "priceCurrency": "EUR", "availability": "https://schema.org/InStock" }
+      }
+    },
+    "expected": { "observation": true, "gtin": "4006381333931", "price": "449.00", "currency": "EUR", "availability": "in_stock", "url": "https://merchant.example/p/xm6" }
+  },
+  {
+    "id": "invalid_gtin_rejected",
+    "input": { "url": "https://merchant.example/p/invalid", "title": "Produit invalide", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit invalide", "gtin13": "4006381333932" } },
+    "expected": { "observation": true, "gtin": null, "price": null, "availability": "unknown", "url": "https://merchant.example/p/invalid" }
+  },
+  {
+    "id": "price_without_currency_unknown",
+    "input": { "url": "https://merchant.example/p/no-currency", "title": "Produit sans devise", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit sans devise", "offers": { "@type": "Offer", "price": "99.99" } } },
+    "expected": { "observation": true, "gtin": null, "price": null, "availability": "unknown", "url": "https://merchant.example/p/no-currency" }
+  },
+  {
+    "id": "aggregate_offer_unknown",
+    "input": { "url": "https://merchant.example/p/range", "title": "Produit à fourchette", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit à fourchette", "offers": { "@type": "AggregateOffer", "lowPrice": "10", "highPrice": "20", "priceCurrency": "EUR" } } },
+    "expected": { "observation": true, "gtin": null, "price": null, "availability": "unknown", "url": "https://merchant.example/p/range" }
+  },
+  {
+    "id": "ambiguous_products_abstain",
+    "input": { "url": "https://merchant.example/p/ambiguous", "title": "Page de variantes", "looksLikeProduct": true, "json_ld": [{ "@type": "Product", "name": "Variante A", "gtin13": "4006381333931" }, { "@type": "Product", "name": "Variante B", "gtin13": "9780201379624" }] },
+    "expected": { "observation": true, "gtin": null, "price": null, "availability": "unknown", "url": "https://merchant.example/p/ambiguous" }
+  },
+  {
+    "id": "graph_product",
+    "input": { "url": "https://merchant.example/p/graph", "title": "Fallback", "looksLikeProduct": true, "json_ld": { "@context": "https://schema.org", "@graph": [{ "@type": "BreadcrumbList" }, { "@type": "Product", "name": "Livre exact", "gtin13": "9780201379624" }] } },
+    "expected": { "observation": true, "gtin": "9780201379624", "price": null, "availability": "unknown", "url": "https://merchant.example/p/graph" }
+  },
+  {
+    "id": "out_of_stock",
+    "input": { "url": "https://merchant.example/p/oos", "title": "Produit épuisé", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit épuisé", "offers": { "@type": "Offer", "price": 25, "priceCurrency": "EUR", "availability": "OutOfStock" } } },
+    "expected": { "observation": true, "gtin": null, "price": "25", "currency": "EUR", "availability": "out_of_stock", "url": "https://merchant.example/p/oos" }
+  },
+  {
+    "id": "preorder",
+    "input": { "url": "https://merchant.example/p/preorder", "title": "Produit précommandé", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit précommandé", "offers": { "@type": "Offer", "price": "50,00", "priceCurrency": "eur", "availability": "https://schema.org/PreOrder" } } },
+    "expected": { "observation": true, "gtin": null, "price": "50.00", "currency": "EUR", "availability": "preorder", "url": "https://merchant.example/p/preorder" }
+  },
+  {
+    "id": "unknown_availability",
+    "input": { "url": "https://merchant.example/p/unknown", "title": "Produit disponibilité libre", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit disponibilité libre", "offers": { "@type": "Offer", "price": "12.50", "priceCurrency": "EUR", "availability": "Disponible demain" } } },
+    "expected": { "observation": true, "gtin": null, "price": "12.50", "currency": "EUR", "availability": "unknown", "url": "https://merchant.example/p/unknown" }
+  },
+  {
+    "id": "credentials_url_rejected",
+    "input": { "url": "https://user:pass@merchant.example/p/private", "title": "Produit privé", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit privé" } },
+    "expected": { "observation": false }
+  },
+  {
+    "id": "http_url_rejected",
+    "input": { "url": "http://merchant.example/p/plain", "title": "Produit HTTP", "looksLikeProduct": true, "json_ld": { "@type": "Product", "name": "Produit HTTP" } },
+    "expected": { "observation": false }
+  },
+  {
+    "id": "category_page_rejected",
+    "input": { "url": "https://merchant.example/category/audio", "title": "Tous les casques", "looksLikeProduct": false, "json_ld": { "@type": "ItemList", "name": "Casques" } },
+    "expected": { "observation": false }
+  }
+]

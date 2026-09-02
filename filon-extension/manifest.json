@@ -63,7 +63,7 @@
         "https://*.backmarket.fr/*",
         "https://*.backmarket.be/*"
       ],
-      "js": ["content.js"],
+      "js": ["product-observation.js", "content.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
     }
