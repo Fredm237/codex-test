@@ -1,7 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getFilonProductByEan } from "@/lib/filon-api";
+import { normalizeProductCode } from "@/lib/barcode";
 
 export function useFilonProduct(ean: string) {
-  return useQuery({ queryKey: ["filon", "product", ean], queryFn: () => getFilonProductByEan(ean), enabled: ean.length >= 8, staleTime: 60_000 });
+  const canonicalEan = normalizeProductCode(ean);
+  return useQuery({
+    queryKey: ["filon", "product", canonicalEan],
+    queryFn: () => getFilonProductByEan(canonicalEan!),
+    enabled: canonicalEan !== null,
+    staleTime: 60_000,
+  });
 }

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/personal-commerce/v1/decision.schema.json",
+  "title": "FILON Personal Commerce decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_version", "objective_digest", "raw_context_retained", "outcome", "action", "selected_solution_ref", "selected_solution_kind", "matched_preference_ids", "eligible_count", "rejected_count", "utility_score", "measurement_status", "reason_codes", "result_digest"],
+  "properties": {
+    "schema_version": { "const": "personal-commerce/v1" },
+    "policy_version": { "const": "personal-commerce-policy/v1" },
+    "objective_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "raw_context_retained": { "const": false },
+    "outcome": { "enum": ["SOLUTION_SELECTED", "ABSTAINED"] },
+    "action": { "enum": ["USE_WHAT_YOU_OWN", "BUY", "WAIT", "ABSTAIN"] },
+    "selected_solution_ref": { "type": ["string", "null"] },
+    "selected_solution_kind": { "enum": ["outfit", "setup", "kit", "routine", null] },
+    "matched_preference_ids": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "eligible_count": { "type": "integer", "minimum": 0 },
+    "rejected_count": { "type": "integer", "minimum": 0 },
+    "utility_score": { "type": "null" },
+    "measurement_status": { "const": "not_calibrated" },
+    "reason_codes": { "type": "array", "items": { "type": "string" } },
+    "result_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

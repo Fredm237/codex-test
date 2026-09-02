@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/fashion/v1/response.schema.json",
+  "title": "FILON Fashion Expert v1 result",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["decision", "style_score", "confidence_score", "confidence_band", "items", "unknowns"],
+  "properties": {
+    "decision": { "enum": ["recommend", "abstain"] },
+    "style_score": { "type": "null" },
+    "confidence_score": { "type": "null" },
+    "confidence_band": { "const": "not_calibrated" },
+    "items": { "type": "array" },
+    "unknowns": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "rejection_reason": { "type": ["string", "null"] }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "contract_version": "1.0.0",
+  "capture_mode": "explicit_user_action",
+  "page": {
+    "url": "https://merchant.example/products/headphones",
+    "merchant": "merchant.example",
+    "title": "Casque sans fil",
+    "brand": null,
+    "sku": null,
+    "mpn": null,
+    "gtin": null,
+    "price": null,
+    "availability": "unknown",
+    "variant": { "model": null, "color": null, "size": null },
+    "json_ld": { "present": false, "source_fields": [] }
+  },
+  "observed_at": "2026-09-02T08:00:00Z"
+}

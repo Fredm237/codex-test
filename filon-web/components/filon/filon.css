@@ -4957,6 +4957,60 @@ body:has(.fx-imm-wrap) .ed-header .ed-nav .ed-btn.dark {
   border-color: var(--fx-action) !important;
   color: var(--fx-on-action) !important;
 }
+
+/* Phase 11 — la home evidence-first utilise une surface papier inspirée des
+   références CID. Le header doit rester lisible avant et après le scroll. */
+body:has(.p11-web-experience) .ed-header,
+body:has(.p11-web-experience) .ed-header:not(.stuck),
+body:has(.p11-web-experience) .ed-header.stuck {
+  background: rgba(241, 238, 230, 0.9) !important;
+  border-bottom: 1px solid rgba(28, 23, 19, 0.12) !important;
+  box-shadow: none;
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+}
+body:has(.p11-web-experience) .ed-header .ed-nav a,
+body:has(.p11-web-experience) .ed-header .ed-nav button,
+body:has(.p11-web-experience) .ed-header .ed-brand-word {
+  color: rgba(28, 23, 19, 0.84) !important;
+}
+body:has(.p11-web-experience) .ed-header .ed-nav a:hover,
+body:has(.p11-web-experience) .ed-header .ed-nav button:hover {
+  color: #b63d1c !important;
+}
+body:has(.p11-web-experience) .ed-header .ed-nav .ed-btn.dark {
+  background: #181411 !important;
+  border-color: #181411 !important;
+  color: #fff8ef !important;
+  box-shadow: none !important;
+}
+
+/* Les fiches produit sont des surfaces claires. Un bandeau sombre maintient
+   le contraste de la navigation sans dépendre du thème mémorisé. */
+body:has(.p11-product-surface) .ed-header,
+body:has(.p11-product-surface) .ed-header:not(.stuck),
+body:has(.p11-product-surface) .ed-header.stuck {
+  background: rgba(24, 20, 17, 0.94) !important;
+  border-bottom: 1px solid rgba(255, 248, 239, 0.12) !important;
+  box-shadow: none;
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+}
+body:has(.p11-product-surface) .ed-header .ed-nav a,
+body:has(.p11-product-surface) .ed-header .ed-nav button,
+body:has(.p11-product-surface) .ed-header .ed-brand-word {
+  color: rgba(255, 248, 239, 0.86) !important;
+}
+body:has(.p11-product-surface) .ed-header .ed-nav a:hover,
+body:has(.p11-product-surface) .ed-header .ed-nav button:hover {
+  color: #ff8b68 !important;
+}
+body:has(.p11-product-surface) .ed-header .ed-nav .ed-btn.dark {
+  background: #ef5a2f !important;
+  border-color: #ef5a2f !important;
+  color: #181411 !important;
+  box-shadow: none !important;
+}
 @media (max-width: 768px) {
   body:has(.fx-imm-wrap) .ed-header,
   body:has(.fx-imm-wrap) .ed-header:not(.stuck) {

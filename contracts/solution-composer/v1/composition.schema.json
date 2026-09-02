@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/solution-composer/v1/composition.schema.json",
+  "title": "FILON Solution Composer result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "policy_version", "context_digest", "raw_context_retained", "solution_kind", "outcome", "reason_code", "selected", "owned_count", "purchase_count", "total_cost", "currency", "utility_score", "measurement_status", "result_digest"],
+  "properties": {
+    "schema_version": { "const": "solution-composer/v1" },
+    "policy_version": { "const": "solution-composer-policy/v1" },
+    "context_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "raw_context_retained": { "const": false },
+    "solution_kind": { "enum": ["outfit", "setup", "kit", "routine"] },
+    "outcome": { "enum": ["SOLUTION_COMPOSED", "ABSTAINED"] },
+    "reason_code": { "type": "string", "minLength": 1 },
+    "selected": { "type": "array" },
+    "owned_count": { "type": "integer", "minimum": 0 },
+    "purchase_count": { "type": "integer", "minimum": 0 },
+    "total_cost": { "type": ["string", "null"] },
+    "currency": { "type": ["string", "null"] },
+    "utility_score": { "type": "null" },
+    "measurement_status": { "const": "not_calibrated" },
+    "result_digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" }
+  }
+}

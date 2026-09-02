@@ -16,11 +16,13 @@ documentés. Le périmètre et les inconnues restent visibles.
 | --- | --- |
 | `manifest.json` | Manifest V3, marchands supportés, popup, service worker |
 | `background.js` | Service worker minimal (ouvre l'accueil à l'installation) |
+| `product-observation.js` | Extraction locale URL/merchant/identifiants/offre/JSON-LD |
 | `content.js` | Détection produit + overlay (pastille → panneau) |
 | `content.css` | Style de l'overlay, namespacé `filon-x` |
 | `popup.html` / `popup.js` | Popup de la barre d'outils : recherche + analyse de la page |
 | `icons/` | Icônes 16 / 32 / 48 / 128 (+ 256 pour le store) |
 | `_locales/fr/` | Libellés du store |
+| `scripts/build_package.py` | Archive store minimale et reproductible |
 
 ## Pages prises en charge (v1)
 
@@ -41,12 +43,19 @@ couverture exhaustive du catalogue du site concerné.
 - Description, capture d'écran et politique de confidentialité à joindre au dépôt.
 - Permissions minimales : `activeTab`, `storage` + `host_permissions` limités aux
   marchands supportés (aucun accès « tous les sites »).
+- Construire la source qualifiée avec
+  `python3 scripts/build_package.py --output filon-extension-v1.1.0.zip` ; le
+  constructeur refuse toute référence Manifest absente de son allowlist.
 
 ## Confidentialité
 
-Le script de contenu lit localement le nom du produit sur les domaines autorisés
+Le script de contenu extrait localement les champs Product JSON-LD autorisés
 afin d'afficher l'overlay. `activeTab` sert au bouton « Analyser la page » de
 la popup. Aucun tracking ni aucune télémétrie n'est implémenté dans
-l'extension. Le nom du produit n'est ajouté à l'URL de recherche `filon.be`
-qu'après une action de l'utilisateur ; l'accueil FILON s'ouvre aussi lors de
-l'installation. La politique de confidentialité du site s'applique alors.
+l'extension. Aucune observation structurée n'est transmise en arrière-plan.
+
+Après une action explicite, un GTIN valide est placé dans le chemin de la fiche
+FILON exacte ; à défaut, seul le titre borné est ajouté à l'URL de recherche.
+L'URL marchande, son prix, son stock, son SKU, son MPN et son JSON-LD restent
+locaux. L'accueil FILON s'ouvre aussi lors de l'installation. La politique de
+confidentialité du site s'applique alors.

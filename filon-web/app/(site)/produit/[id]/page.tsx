@@ -83,7 +83,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ id: st
   if (!o) notFound();
 
   return (
-    <section className="ed-band" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
+    <section className="ed-band p11-product-surface" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
       <div className="ed-wrap">
         <p style={{ marginBottom: 20 }}>
             <OfferBackLink />

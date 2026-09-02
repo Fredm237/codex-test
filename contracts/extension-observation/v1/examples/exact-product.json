@@ -1,0 +1,21 @@
+{
+  "contract_version": "1.0.0",
+  "capture_mode": "explicit_user_action",
+  "page": {
+    "url": "https://merchant.example/products/sony-wh-1000xm6-black",
+    "merchant": "merchant.example",
+    "title": "Sony WH-1000XM6 Black",
+    "brand": "Sony",
+    "sku": "XM6-BLK",
+    "mpn": "WH1000XM6B.CE7",
+    "gtin": "4006381333931",
+    "price": { "amount": "449.00", "currency": "EUR" },
+    "availability": "in_stock",
+    "variant": { "model": "WH-1000XM6", "color": "Black", "size": null },
+    "json_ld": {
+      "present": true,
+      "source_fields": ["brand", "color", "gtin13", "model", "mpn", "name", "offers.availability", "offers.price", "offers.priceCurrency", "sku"]
+    }
+  },
+  "observed_at": "2026-09-02T08:00:00Z"
+}

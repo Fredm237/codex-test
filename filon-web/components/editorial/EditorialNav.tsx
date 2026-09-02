@@ -15,6 +15,7 @@ const DESKTOP = NAV_KEYS.slice(0, 5);
  *  du visiteur. */
 export function EditorialNav({ departments = [] }: { departments?: Department[] }) {
   const ref = useRef<HTMLElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
   const [open, setOpen] = useState(false);
   const { t } = useLocale();
 
@@ -41,6 +42,17 @@ export function EditorialNav({ departments = [] }: { departments?: Department[] 
     };
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setOpen(false);
+      burgerRef.current?.focus();
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
     <>
       <header className="ed-header" ref={ref}>
@@ -61,9 +73,12 @@ export function EditorialNav({ departments = [] }: { departments?: Department[] 
               {t("cta.try")}
             </a>
             <button
+              ref={burgerRef}
+              type="button"
               className="ed-burger"
               aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
               aria-expanded={open}
+              aria-controls="filon-mobile-navigation"
               onClick={() => setOpen((v) => !v)}
             >
               <span className={open ? "open" : ""} />
@@ -74,8 +89,8 @@ export function EditorialNav({ departments = [] }: { departments?: Department[] 
 
       {/* Sibling of <header> so the fixed panel is relative to the viewport,
           not trapped by the header's backdrop-filter containing block. */}
-      <div className={`ed-mobile ${open ? "show" : ""}`} aria-hidden={!open}>
-        <nav className="ed-mobile-nav">
+      <div id="filon-mobile-navigation" className={`ed-mobile ${open ? "show" : ""}`} aria-hidden={!open}>
+        <nav className="ed-mobile-nav" aria-label="Navigation mobile">
           {NAV_KEYS.map((n) => (
             <a key={n.href} href={n.href} onClick={() => setOpen(false)}>
               {t(n.key)}

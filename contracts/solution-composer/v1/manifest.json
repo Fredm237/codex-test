@@ -1,0 +1,16 @@
+{
+  "contract": "filon.solution-composer",
+  "contract_version": "1.0.0",
+  "policy_version": "solution-composer-policy/v1",
+  "solution_kinds": ["outfit", "setup", "kit", "routine"],
+  "owned_first": true,
+  "owned_marginal_cost": "0",
+  "offer_truth_required": "VERIFIED",
+  "constraint_status_required": "ELIGIBLE",
+  "utility_score": null,
+  "measurement_status": "not_calibrated",
+  "raw_context_retained": false,
+  "persistent_writer": false,
+  "public_reader": false,
+  "cron": false
+}

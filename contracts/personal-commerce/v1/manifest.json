@@ -1,0 +1,15 @@
+{
+  "contract": "filon.personal-commerce",
+  "contract_version": "1.0.0",
+  "policy_version": "personal-commerce-policy/v1",
+  "actions": ["USE_WHAT_YOU_OWN", "BUY", "WAIT", "ABSTAIN"],
+  "personalization_consent_required": true,
+  "preference_source": "explicit_only",
+  "commercial_priority": false,
+  "utility_score": null,
+  "measurement_status": "not_calibrated",
+  "raw_context_retained": false,
+  "persistent_writer": false,
+  "public_reader": false,
+  "cron": false
+}

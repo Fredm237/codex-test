@@ -358,7 +358,9 @@ export async function getFilonProductByEan(ean: string): Promise<FilonProduct | 
   const response = await fetch(`${FILON_API_BASE_URL}/api/catalog/product/${encodeURIComponent(ean)}`);
   if (response.status === 404) return null;
   if (!response.ok) throw new Error(`Catalogue indisponible (${response.status})`);
-  return normalizeProduct((await response.json()) as RawProduct);
+  const product = normalizeProduct((await response.json()) as RawProduct);
+  if (product.ean !== ean) throw new TypeError("Produit groupé incohérent : identité EAN différente de la requête");
+  return product;
 }
 
 export async function getFilonOfferDetail(offerId: number): Promise<FilonOfferDetail> {

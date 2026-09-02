@@ -4,7 +4,7 @@ import { evaluateFashionBenchmark, normalizeFashionErrorCode } from "../lib/filo
 import { mergeFashionCorrection, sanitizeFashionCorrections } from "../lib/filon-fashion-corrections";
 import type { OutfitRecommendation } from "../lib/filon-intelligence";
 
-const solution: OutfitRecommendation = { status: "solution", trace: { intent: { request: "mariage", occasion: "wedding", season: "summer", budget: 200, declaredStyle: null }, considered: 4, eligible: 4, excludedNonEligible: 0, excludedUnsafe: 0 }, solution: { pieces: [], total: 100, currency: "EUR", styleScore: null, confidenceScore: null, confidence: "not_calibrated", measurementStatus: "not_calibrated", scoreExplanation: { code: "score.not_measured" }, constraints: [{ code: "constraint.budget_respected", amount: 200, currency: "EUR" }], relations: [], critique: { verdict: "approved", findings: [], scorePenalty: 0 } } };
+const solution: OutfitRecommendation = { status: "solution", trace: { intent: { request: "mariage", occasion: "wedding", season: "summer", budget: 200, declaredStyle: null }, considered: 4, eligible: 4, excludedNonEligible: 0, excludedUnsafe: 0 }, solution: { pieces: [], total: 100, currency: "EUR", styleScore: null, confidenceScore: null, confidence: "not_calibrated", measurementStatus: "not_calibrated", scoreExplanation: { code: "score.not_measured" }, constraints: [{ code: "constraint.budget_respected", amount: 200, currency: "EUR" }], relations: [], critique: { verdict: "approved", findings: [], scorePenalty: null } } };
 
 describe("Qualité Fashion FILON", () => {
   it("évalue un benchmark explicite sans inventer de cas catalogue", () => {

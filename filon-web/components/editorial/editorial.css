@@ -49,7 +49,7 @@
 .ed-lang { position: relative; display: inline-flex; }
 .ed-lang-trigger { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid rgba(255, 255, 255, 0.25);
   border-radius: var(--r-full); cursor: pointer; color: rgba(255, 255, 255, 0.8); font-weight: 700; font-size: 12.5px; letter-spacing: 0.03em;
-  padding: 7px 11px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
+  min-height: 44px; padding: 7px 11px; transition: color 0.15s, border-color 0.15s, background 0.15s; }
 .ed-lang-trigger:hover { color: var(--ink); border-color: var(--line-3, var(--ink-3)); }
 .ed-lang-trigger .chev { transition: transform 0.2s var(--ease); opacity: 0.7; }
 .ed-lang.open .ed-lang-trigger { color: var(--ink); border-color: var(--accent); }
@@ -61,7 +61,7 @@
   transition: opacity 0.16s var(--ease), transform 0.16s var(--ease), visibility 0.16s; }
 .ed-lang.open .ed-lang-menu { opacity: 1; visibility: visible; transform: none; }
 .ed-lang-opt { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 0; cursor: pointer;
-  text-align: left; padding: 9px 10px; border-radius: var(--r-sm, 8px); color: var(--ink-2); transition: background 0.13s, color 0.13s; }
+  min-height: 44px; text-align: left; padding: 9px 10px; border-radius: var(--r-sm, 8px); color: var(--ink-2); transition: background 0.13s, color 0.13s; }
 .ed-lang-opt:hover { background: var(--paper); color: var(--ink); }
 .ed-lang-opt .s { font-weight: 700; font-size: 12px; letter-spacing: 0.03em; width: 22px; color: var(--ink-3); }
 .ed-lang-opt .l { font-size: 14px; }
@@ -656,6 +656,7 @@
 .fa-verdict { font-size: 12.5px; font-weight: 700; padding: 6px 13px; border-radius: var(--r-full); white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; }
 .fa-verdict svg { width: 14px; height: 14px; flex: none; }
 .fa-verdict.buy { color: var(--save); background: var(--save-soft); }
+.fa-verdict.evidence { color: var(--save); background: var(--save-soft); }
 .fa-verdict.wait { color: var(--accent); background: var(--accent-soft); }
 .fa-aside .ed-btn { font-size: 13.5px; padding: 11px 20px; width: 100%; text-align: center; text-decoration: none; }
 

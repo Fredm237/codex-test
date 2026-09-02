@@ -111,6 +111,22 @@ jobs:
           --strict
           --output ../quality-constraint-engine-report.json
 
+      - name: Exécuter le benchmark Solution Composer owned-first
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.solution_composer
+          --manifest ../quality/solution-composer-manifest.json
+          --strict
+          --output ../quality-solution-composer-report.json
+
+      - name: Exécuter le benchmark Personal Commerce consent-aware
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.personal_commerce
+          --manifest ../quality/personal-commerce-manifest.json
+          --strict
+          --output ../quality-personal-commerce-report.json
+
       - name: Exécuter les garde-fous Product Ranking sans simuler la preuve humaine
         if: ${{ !cancelled() }}
         run: >-
@@ -147,6 +163,14 @@ jobs:
           --strict-engineering
           --output ../quality-buy-wait-report.json
 
+      - name: Qualifier Fashion v1 sans score subjectif simulé
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.fashion_v1
+          --manifest ../quality/fashion-v1-manifest.json
+          --strict-engineering
+          --output ../quality-fashion-v1-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -159,10 +183,13 @@ jobs:
             ${{ github.workspace }}/quality-entity-resolution-report.json
             ${{ github.workspace }}/quality-product-ontology-report.json
             ${{ github.workspace }}/quality-constraint-engine-report.json
+            ${{ github.workspace }}/quality-solution-composer-report.json
+            ${{ github.workspace }}/quality-personal-commerce-report.json
             ${{ github.workspace }}/quality-product-ranking-report.json
             ${{ github.workspace }}/quality-offer-optimization-report.json
             ${{ github.workspace }}/quality-confidence-report.json
             ${{ github.workspace }}/quality-buy-wait-report.json
+            ${{ github.workspace }}/quality-fashion-v1-report.json
           if-no-files-found: warn
           retention-days: 14
 
@@ -230,6 +257,15 @@ jobs:
       - name: Exécuter les tests hermétiques
         run: pnpm test
 
+      - name: Qualifier le scan code-barres fail-closed
+        run: pnpm benchmark:barcode
+
+      - name: Qualifier le dressing local consent-aware
+        run: pnpm benchmark:wardrobe
+
+      - name: Qualifier le Personal Stylist owned-first
+        run: pnpm benchmark:personal-stylist
+
   extension-tests:
     name: Extension — contrat, manifeste et syntaxe
     runs-on: ubuntu-latest
@@ -249,10 +285,23 @@ jobs:
       - name: Vérifier le contrat v1
         run: node tests/contract-v1.mjs
 
+      - name: Qualifier l'observation produit Phase 12
+        run: >-
+          node tests/phase12-observation.mjs &&
+          node quality/benchmark.mjs
+
       - name: Vérifier les scripts Manifest V3
         run: |
           node --check background.js
           node --check content.js
+          node --check popup.js
+          node --check product-observation.js
+
+      - name: Vérifier le package store reproductible
+        run: |
+          python3 scripts/build_package.py --output "$RUNNER_TEMP/filon-extension-a.zip"
+          python3 scripts/build_package.py --output "$RUNNER_TEMP/filon-extension-b.zip"
+          cmp "$RUNNER_TEMP/filon-extension-a.zip" "$RUNNER_TEMP/filon-extension-b.zip"
           node --check popup.js
 
       - name: Vérifier le manifeste

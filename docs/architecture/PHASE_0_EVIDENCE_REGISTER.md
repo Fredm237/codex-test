@@ -7,9 +7,8 @@
 - Référence Quality versionnée : artefact Actions `9738761749`
 
 Décision globale : **PHASE 0 = GO ; ingestion timeboxée, reprise, heartbeat,
-CI `main` et moniteur manuel sont prouvés. Le premier événement planifié réel
-reste `EXTERNAL_PROVIDER_PENDING / NON_BLOCKING` et surveillé. Phase 1 est
-ouverte.**
+CI `main`, moniteur manuel et deux exécutions planifiées réelles sont prouvés.
+Phase 1 est ouverte.**
 
 Ce registre relie les lots du plan aux identifiants de la
 [mission courante](../../.claude/agent/missions/courante.json), aux preuves
@@ -31,7 +30,7 @@ Phase 1.
 | P0.3 — Migrations | `p0_d` | **TERMINÉ ET ACTIVÉ EN PRODUCTION** | Baseline `b9db07b15986`, production `e8c3f6a0b5d2`, heartbeat `f9a4c7d1e2b3`, checkpoints `a2d7e9f4c1b6` ; restore drill PostgreSQL 18, stamp, upgrade, drift et invariance prouvés ; reprise du même run, checkpoints par feed et replay idempotent qualifiés ; suite backend courante **2 158 réussis + 3 ignorés**, test OTLP isolé **1/1** | `alembic current`, `alembic check`, tests SQLite/PostgreSQL, reprise de journal et non-duplication d'un feed partiel | [ADR baseline](ADR-001-ALEMBIC-BASELINE.md), [runbook](DATABASE_MIGRATION_RUNBOOK.md), [reçu Railway](PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md) | Acquis ; conserver backup, rollback et fenêtre sans écrivain pour toute future migration |
 | P0.4 — Observation shadow | `p0_e` | **TERMINÉ EN SHADOW** (`fait`) | `7753dff` ; **29 tests ciblés** et backend **1 304/1 304** ; taxonomie E001–E018, replay et compatibilité v1 prouvés | Suites taxonomie/Observation/contrats et replay idempotent, flag shadow désactivé par défaut | [rapport P0.e](PHASE_0E_OBSERVATION_REPORT.md), [taxonomie d'erreurs](ERROR_TAXONOMY.md) | Garder le shadow opt-in et les lectures v1 inchangées tant que le Product Graph n'a pas passé ses gates |
 | P0.5 — Product/Variant + Offer Graph + Merchant Intelligence + Evidence + Funnel shadows | `p0_f` | **TERMINÉ EN SHADOW AUTONOME** ; aucune promotion publique implicite | Douze tables d'expansion, quatre migrations, resolver `exact-gtin-shadow-v1`, argent décimal, stock tri-state, compteurs sans score, 11 claims et funnel `catalog-quality-funnel-autonomous-v2` ; faux merges, GTIN invalides/contradictoires, rattachement, devise, stock et budget qualifiés adversarialement | Funnel poursuit les étapes déterministes avec classification `provisional`, puis s'arrête sur les vraies limites `COMPLETE_LANDED_COST=not_supported` et confiance non calibrée ; lot ciblé cumulé **80/80** | [ADR Product Graph](ADR-002-PRODUCT-GRAPH-IDENTITY-SHADOW.md), [ADR Offer Graph](ADR-003-OFFER-GRAPH-EVIDENCE-SHADOW.md), [ADR Merchant Intelligence](ADR-004-MERCHANT-INTELLIGENCE-MEASUREMENT-SHADOW.md), [ADR Evidence](ADR-005-EVIDENCE-CLAIM-ELIGIBILITY-SHADOW.md), [funnel autonome](PHASE_0F_CATALOG_QUALITY_FUNNEL_REPORT.md) | Lot P0.5 acquis en shadow ; coût rendu, confiance subjective et sources après clic/achat restent non supportés et interdisent seulement les claims correspondants, pas la progression de phase |
-| P0.6 — Observabilité et front door | `p0_i` | **TERMINÉ** ; socle, probes, Redis, Cron, capacité, heartbeat et reprise réels verts | Run 18 terminal `interrupted`, run 19 terminal `succeeded`, trois checkpoints repris, feed terminé sauté sans réingestion ; moniteur manuel `33404840701` vert ; workflow `346700815` actif | Pulse `fresh`, PostgreSQL/Redis/schéma `ok`, exécution Railway `5fa66804-f096-4522-9aad-91afdcb2ab75`, restauration `7d707084-7d3f-4ae1-a1b5-1799ab59ca47` | [reçu final](PHASE_0_FINAL_RECEIPT.md), [activation Redis/Cron](PHASE_06_REDIS_CRON_ACTIVATION_REPORT.md), [backlog post-Phase 0](POST_PHASE_0_HARDENING.md) | Premier événement `schedule` : `EXTERNAL_PROVIDER_PENDING / NON_BLOCKING`. OTLP, Prometheus/Grafana avancés, rétention, pager secondaire et trafic représentatif sont non bloquants |
+| P0.6 — Observabilité et front door | `p0_i` | **TERMINÉ** ; socle, probes, Redis, Cron, capacité, heartbeat et reprise réels verts | Run 18 terminal `interrupted`, run 19 terminal `succeeded`, trois checkpoints repris, feed terminé sauté sans réingestion ; moniteur manuel `33404840701` vert ; runs planifiés `33578462794` et `33596363980` verts | Pulse `fresh`, PostgreSQL/Redis/schéma `ok`, exécution Railway `5fa66804-f096-4522-9aad-91afdcb2ab75`, restauration `7d707084-7d3f-4ae1-a1b5-1799ab59ca47` | [reçu final](PHASE_0_FINAL_RECEIPT.md), [activation Redis/Cron](PHASE_06_REDIS_CRON_ACTIVATION_REPORT.md), [backlog post-Phase 0](POST_PHASE_0_HARDENING.md) | Moniteur planifié prouvé sur `main`; OTLP, Prometheus/Grafana avancés, rétention, pager secondaire et trafic représentatif sont non bloquants |
 | P0.7 — CI multi-surfaces et protection | `p0_g` | **TERMINÉ ET INTÉGRÉ SUR MAIN** | PR #385 fusionnée au commit `50a04b85944e6a5363092692572859fbeb00c5a0` ; ruleset `21798272` sans bypass ; run `33404710182` | Quatre jobs GitHub Actions terminaux `success`, Quality autonome strict bloquant sur régressions objectives | [qualification distante](PHASE_0_REMOTE_QUALIFICATION_REPORT.md), [workflow Phase 0](../../.github/workflows/backend-catalog-quality.yml) | Acquis ; zéro cas humain explicitement non bloquant |
 | Revue de passage Phase 1 | `p0_h` | **TERMINÉ — PHASE 0 GO** | Intégrité, récupérabilité, migration, CI et production prouvées ; moniteur manuel vert ; attente fournisseur non bloquante | Revue exclusive des risques d'intégrité/récupérabilité | Ce registre, le [plan](PHASE_0_EXECUTION_PLAN.md) et le [reçu final](PHASE_0_FINAL_RECEIPT.md) | Phase 1 ouverte ; Immersive reste séparément NO-GO |
 
@@ -101,7 +100,7 @@ Phase 1.
 Les zéros du laboratoire externe interdisent toujours les claims de précision
 humaine, de rappel humain ou de calibration subjective. Ils ne bloquent plus la
 progression. Le backend Core de production, le heartbeat, les checkpoints, la
-reprise bornée, la CI `main` et le moniteur manuel sont qualifiés. Le verdict
-est **PHASE 0 = GO**. L'occurrence planifiée absente reste
-`EXTERNAL_PROVIDER_PENDING / NON_BLOCKING` et surveillée. Il n'existe plus de
-NO-GO humain ni de gate d'observabilité parfaite.
+reprise bornée, la CI `main` et les moniteurs manuel et planifié sont qualifiés.
+Le verdict est **PHASE 0 = GO**. Les runs planifiés `33578462794` et
+`33596363980` ont levé la limitation fournisseur historique. Il n'existe plus
+de NO-GO humain ni de gate d'observabilité parfaite.

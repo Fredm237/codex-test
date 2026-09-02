@@ -1,0 +1,13 @@
+{
+  "contract": "page-product-observation",
+  "version": "1.0.0",
+  "request_schema": "page-product-observation.schema.json",
+  "response_schema": "page-product-observation-result.schema.json",
+  "examples": [
+    "examples/exact-product.json",
+    "examples/partial-product.json"
+  ],
+  "capture_mode": "explicit_user_action",
+  "raw_html_allowed": false,
+  "query_or_fragment_allowed": false
+}

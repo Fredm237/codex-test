@@ -2,6 +2,7 @@
 
 - Date de décision : **31 août 2026**
 - Snapshot final : **2026-08-31T16:07:12Z**
+- Preuve planifiée ajoutée : **2026-09-02**
 - Verdict : **PHASE 0 = GO**
 - Phase suivante : **PHASE 1 — PRODUCT IDENTITY OUVERTE**
 - Immersive : **NO-GO inchangé**
@@ -13,10 +14,9 @@ Product Identity. Aucun risque ouvert de corruption, perte, migration
 irrécupérable, rollback absent, concurrence d'ingestion ou instabilité de
 production n'a été identifié lors de l'audit final.
 
-L'absence actuelle d'une exécution GitHub Actions produite par l'événement
-`schedule` est classée **`EXTERNAL_PROVIDER_PENDING / NON_BLOCKING`**. Elle
-n'est pas présentée comme une réussite planifiée. La surveillance du premier
-événement réel reste active et sa conclusion devra être ajoutée à ce reçu.
+La limitation fournisseur historique est désormais levée : GitHub a produit
+deux exécutions réelles `schedule`, terminales et vertes, sur le commit courant
+de `main` `e667f3e52d3b4adb476b1e4c889b5b221373369e`.
 
 ## Gates de sortie
 
@@ -33,7 +33,7 @@ n'est pas présentée comme une réussite planifiée. La surveillance du premier
 | Shadows Product/Offer/Evidence | **GO shadow** | migrations expand-only, flags off, exact-GTIN, replay et protections anti-faux-merge qualifiés |
 | CI et protection | **GO** | PR #385 fusionnée ; ruleset `21798272` sans bypass ; run `33404710182` terminal `success` sur quatre jobs |
 | Moniteur critique manuel | **GO** | run `33404840701`, événement `workflow_dispatch`, commit `50a04b85944e6a5363092692572859fbeb00c5a0`, terminal `success` |
-| Moniteur critique planifié | **NON BLOQUANT — FOURNISSEUR EN ATTENTE** | workflow actif et calendrier valide ; aucune occurrence `schedule` créée par GitHub au snapshot |
+| Moniteur critique planifié | **GO** | runs `33578462794` et `33596363980`, événement `schedule`, terminaux `success` sur `main` |
 
 ## Qualification GitHub du moniteur
 
@@ -50,12 +50,14 @@ La vérification finale établit :
 - job identique exécuté manuellement avec succès de bout en bout ;
 - aucune erreur de syntaxe, permission ou configuration observable dans l'API
   GitHub ;
-- zéro run `schedule` créé au snapshot, malgré plusieurs créneaux éligibles.
+- au snapshot initial, zéro run `schedule` avait été créé malgré plusieurs
+  créneaux éligibles ; le suivi a ensuite observé les runs `33578462794` à
+  `2026-09-02T01:12:36Z` et `33596363980` à `2026-09-02T05:51:14Z`, tous deux
+  terminaux `success` sur `e667f3e52d3b4adb476b1e4c889b5b221373369e`.
 
-Cette dernière absence dépend exclusivement de l'ordonnanceur GitHub. Elle ne
-réouvre pas Phase 0. Le premier run réel sera surveillé sans lancement manuel
-de substitution ; un échec réel devra être diagnostiqué comme incident
-d'exploitation.
+Le premier événement réel et sa répétition sont donc prouvés sans lancement
+manuel de substitution. Un futur échec reste un incident d'exploitation et ne
+réécrit pas rétroactivement ce reçu.
 
 ## Snapshot production final
 
@@ -89,7 +91,7 @@ d'exploitation.
 
 ## Limites connues non bloquantes
 
-- `EXTERNAL_PROVIDER_PENDING` sur le premier événement GitHub `schedule` ;
+- aucun `EXTERNAL_PROVIDER_PENDING` ne subsiste sur le moniteur planifié ;
 - aucune validation humaine indépendante : limitation explicite
   `NO_EXTERNAL_HUMAN_GROUND_TRUTH` ;
 - OTLP hébergé, Prometheus/Grafana multi-réplica, rétention avancée, pager

@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/extension-observation/v1/page-product-observation-result.schema.json",
+  "title": "FILON Page Product Observation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contract_version", "status", "observation_id", "resolution", "destination_url", "comparison", "reason_codes"],
+  "properties": {
+    "contract_version": { "const": "1.0.0" },
+    "status": { "enum": ["accepted", "feature_disabled", "invalid", "unavailable"] },
+    "observation_id": { "type": ["string", "null"], "pattern": "^[a-f0-9]{64}$" },
+    "resolution": { "enum": ["exact", "not_found", "ambiguous", "unavailable"] },
+    "destination_url": { "type": "string", "format": "uri", "pattern": "^https://filon\\.be/" },
+    "comparison": {
+      "oneOf": [
+        { "type": "null" },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["state", "offers_compared", "merchants_compared", "currency", "best_price"],
+          "properties": {
+            "state": { "enum": ["verified", "unknown"] },
+            "offers_compared": { "type": "integer", "minimum": 0 },
+            "merchants_compared": { "type": "integer", "minimum": 0 },
+            "currency": { "type": ["string", "null"], "pattern": "^[A-Z]{3}$" },
+            "best_price": { "type": ["string", "null"], "pattern": "^[0-9]+(?:\\.[0-9]{1,4})?$" }
+          }
+        }
+      ]
+    },
+    "reason_codes": {
+      "type": "array",
+      "uniqueItems": true,
+      "maxItems": 16,
+      "items": { "type": "string", "pattern": "^[a-z0-9_]+$" }
+    }
+  }
+}

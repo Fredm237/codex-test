@@ -20,23 +20,6 @@
 
   /* ---- détection produit ------------------------------------------------ */
 
-  function fromJsonLd() {
-    for (const s of document.querySelectorAll('script[type="application/ld+json"]')) {
-      try {
-        const data = JSON.parse(s.textContent);
-        const items = Array.isArray(data) ? data : [data];
-        for (const it of items) {
-          const type = it && it["@type"];
-          const isProduct = type === "Product" || (Array.isArray(type) && type.includes("Product"));
-          if (isProduct && it.name) return String(it.name).trim();
-        }
-      } catch {
-        /* JSON-LD malformé — on ignore */
-      }
-    }
-    return null;
-  }
-
   function fromMerchant() {
     // Sélecteurs de titre spécifiques aux marchands supportés.
     const sels = [
@@ -54,20 +37,26 @@
     return null;
   }
 
-  function detectProduct() {
+  function detectObservation() {
     const og = document.querySelector('meta[property="og:type"]')?.content || "";
     const looksLikeProduct =
       og.includes("product") ||
       document.querySelector('[itemtype*="schema.org/Product"], #productTitle, .f-productHeader__title');
-    const name =
-      fromJsonLd() ||
+    const title =
       fromMerchant() ||
       (looksLikeProduct ? document.querySelector('meta[property="og:title"]')?.content : null) ||
       (looksLikeProduct ? document.querySelector("h1")?.textContent?.trim() : null);
-    if (!name) return null;
-    // Nettoyage léger : couper les suffixes marchands après un séparateur.
-    const clean = name.split(/[|·–—:]\s/)[0].trim().slice(0, 140);
-    return clean.length >= 3 ? { name: clean } : null;
+    return window.FilonProductObservation.buildObservation(
+      {
+        url: location.href,
+        title: title ? title.split(/[|·–—:]\s/)[0].trim() : null,
+        looksLikeProduct: Boolean(looksLikeProduct),
+        jsonLdTexts: [...document.querySelectorAll('script[type="application/ld+json"]')]
+          .slice(0, 32)
+          .map((script) => script.textContent || ""),
+      },
+      new Date().toISOString(),
+    );
   }
 
   /* ---- rendu ------------------------------------------------------------ */
@@ -90,12 +79,16 @@
     ["Cashback connu", "affiché seulement lorsqu'il est documenté"],
   ];
 
-  function openFilon(name) {
-    const url = `${SITE}/recherche?q=${encodeURIComponent(name)}&utm_source=extension&utm_medium=fiche`;
+  function openFilon(observation) {
+    const gtin = observation.page.gtin;
+    const query = observation.page.title.slice(0, 140);
+    const url = gtin
+      ? `${SITE}/produits/${encodeURIComponent(gtin)}?utm_source=extension&utm_medium=fiche`
+      : `${SITE}/recherche?q=${encodeURIComponent(query)}&utm_source=extension&utm_medium=fiche`;
     window.open(url, "_blank", "noopener");
   }
 
-  function render(product) {
+  function render(observation) {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     const pill = document.createElement("button");
@@ -115,7 +108,7 @@
       </div>
       <div class="${PREFIX}-detected">
         <span class="${PREFIX}-dl">Produit repéré</span>
-        <b>${esc(product.name)}</b>
+        <b>${esc(observation.page.title)}</b>
       </div>
       <div class="${PREFIX}-checks">
         ${CHECKS.map(
@@ -149,7 +142,10 @@
 
     pill.addEventListener("click", () => setOpen(true));
     panel.querySelector(`.${PREFIX}-close`).addEventListener("click", () => setOpen(false));
-    panel.querySelector(`.${PREFIX}-cta`).addEventListener("click", () => openFilon(product.name));
+    panel.querySelector(`.${PREFIX}-cta`).addEventListener("click", () => {
+      const current = detectObservation();
+      if (current) openFilon(current);
+    });
 
     // Auto-ouverture douce, sauf si l'utilisateur l'a fermé sur ce marchand
     // dans les 12 dernières heures. storage.local est accessible depuis un
@@ -170,6 +166,12 @@
     }
   }
 
-  const product = detectProduct();
-  if (product) render(product);
+  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+    if (!message || message.type !== "FILON_GET_PRODUCT_OBSERVATION") return false;
+    sendResponse({ observation: detectObservation() });
+    return false;
+  });
+
+  const observation = detectObservation();
+  if (observation) render(observation);
 })();
