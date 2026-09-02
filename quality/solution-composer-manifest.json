@@ -1,0 +1,19 @@
+{
+  "schema_version": "solution-composer-benchmark/v1",
+  "development_engine_input": false,
+  "cases": [
+    { "id": "outfit_owned", "kind": "outfit", "slots": ["base", "footwear"], "owned": ["base", "footwear"], "offers": [], "expected": "SOLUTION_COMPOSED", "purchases": 0 },
+    { "id": "setup_owned", "kind": "setup", "slots": ["computer", "display"], "owned": ["computer", "display"], "offers": [], "expected": "SOLUTION_COMPOSED", "purchases": 0 },
+    { "id": "kit_one_purchase", "kind": "kit", "slots": ["tool", "consumable"], "owned": ["tool"], "offers": [{ "slot": "consumable", "amount": "20" }], "expected": "SOLUTION_COMPOSED", "purchases": 1 },
+    { "id": "routine_owned", "kind": "routine", "slots": ["cleanser", "protection"], "owned": ["cleanser", "protection"], "offers": [], "expected": "SOLUTION_COMPOSED", "purchases": 0 },
+    { "id": "required_missing", "kind": "kit", "slots": ["tool", "consumable"], "owned": ["tool"], "offers": [], "expected": "ABSTAINED", "reason": "required_slot_unavailable:consumable" },
+    { "id": "partial_offer", "kind": "kit", "slots": ["tool"], "owned": [], "offers": [{ "slot": "tool", "amount": "20", "truth": "PARTIAL" }], "expected": "ABSTAINED", "reason": "required_slot_unavailable:tool" },
+    { "id": "constraint_unknown", "kind": "kit", "slots": ["tool"], "owned": [], "offers": [{ "slot": "tool", "amount": "20", "constraint": "UNKNOWN" }], "expected": "ABSTAINED", "reason": "required_slot_unavailable:tool" },
+    { "id": "duplicate_owned", "kind": "kit", "slots": ["tool"], "owned": [], "offers": [{ "slot": "tool", "amount": "20", "duplicate": true }], "expected": "ABSTAINED", "reason": "required_slot_unavailable:tool" },
+    { "id": "foreign_currency", "kind": "kit", "slots": ["tool"], "owned": [], "offers": [{ "slot": "tool", "amount": "20", "currency": "USD" }], "expected": "ABSTAINED", "reason": "required_slot_unavailable:tool" },
+    { "id": "over_budget", "kind": "kit", "slots": ["tool"], "owned": [], "budget": "10", "offers": [{ "slot": "tool", "amount": "20" }], "expected": "ABSTAINED", "reason": "solution_budget_exceeded" },
+    { "id": "owned_beats_cheaper_offer", "kind": "kit", "slots": ["tool"], "owned": ["tool"], "offers": [{ "slot": "tool", "amount": "1" }], "expected": "SOLUTION_COMPOSED", "purchases": 0 },
+    { "id": "cheapest_verified", "kind": "kit", "slots": ["tool"], "owned": [], "offers": [{ "slot": "tool", "amount": "30" }, { "slot": "tool", "amount": "20" }], "expected": "SOLUTION_COMPOSED", "purchases": 1, "total": "20" }
+  ],
+  "engineering_gates": { "pass_rate_min": 1.0, "false_compositions_max": 0, "owned_first_violations_max": 0, "scores_published_max": 0 }
+}
