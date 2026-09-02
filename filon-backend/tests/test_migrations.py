@@ -31,6 +31,7 @@ from app.product_ranking import models as product_ranking_models  # noqa: F401
 from app.offer_optimization import models as offer_optimization_models  # noqa: F401
 from app.confidence import models as confidence_models  # noqa: F401
 from app.buy_wait import models as buy_wait_models  # noqa: F401
+from app.personal_commerce import models as personal_commerce_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_models  # noqa: F401
 from app.evidence_engine import models as evidence_models  # noqa: F401
 
@@ -60,6 +61,10 @@ PRODUCT_RANKING_TABLES = {"product_ranking_runs", "product_ranking_candidates"}
 OFFER_OPTIMIZATION_TABLES = {"offer_optimization_runs", "offer_optimization_candidates"}
 CONFIDENCE_TABLES = {"confidence_calibration_runs", "confidence_dimension_records"}
 BUY_WAIT_TABLES = {"buy_wait_decision_runs"}
+PERSONAL_COMMERCE_TABLES = {
+    "personal_commerce_decision_runs",
+    "personal_commerce_erasure_receipts",
+}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
 EVIDENCE_ENGINE_TABLES = {
     "evidence_claim_records",
@@ -86,7 +91,9 @@ OFFER_OPTIMIZATION_REVISION = "c0f8b2d4e6a9"
 OFFER_OPTIMIZATION_FACTS_REVISION = "d1a9c3e5f7b0"
 CONFIDENCE_REVISION = "e2b0d4f6a8c1"
 BUY_WAIT_REVISION = "f3c1e5a7b9d2"
-HEAD_REVISION = "a4e2c6f8b0d3"
+V2_CHAIN_REVISION = "a4e2c6f8b0d3"
+PERSONAL_COMMERCE_REVISION = "b5d3f7a9c1e4"
+HEAD_REVISION = PERSONAL_COMMERCE_REVISION
 
 
 @pytest.fixture(autouse=True)
@@ -159,7 +166,8 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
     assert head == db_session.CURRENT_SCHEMA_REVISION
     assert scripts.get_revision(CONFIDENCE_REVISION).down_revision == OFFER_OPTIMIZATION_FACTS_REVISION
     assert scripts.get_revision(BUY_WAIT_REVISION).down_revision == CONFIDENCE_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == BUY_WAIT_REVISION
+    assert scripts.get_revision(V2_CHAIN_REVISION).down_revision == BUY_WAIT_REVISION
+    assert scripts.get_revision(HEAD_REVISION).down_revision == V2_CHAIN_REVISION
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):
@@ -435,6 +443,7 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
     assert rollback_settings.offer_optimization_shadow_enabled is False
     assert rollback_settings.confidence_shadow_enabled is False
     assert rollback_settings.buy_wait_shadow_enabled is False
+    assert rollback_settings.personal_commerce_shadow_enabled is False
     assert rollback_settings.merchant_intelligence_shadow_enabled is False
     assert rollback_settings.evidence_engine_shadow_enabled is False
     tables = set(inspect(engine).get_table_names())
@@ -450,6 +459,7 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
         | OFFER_OPTIMIZATION_TABLES
         | CONFIDENCE_TABLES
         | BUY_WAIT_TABLES
+        | PERSONAL_COMMERCE_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
         | EVIDENCE_ENGINE_TABLES
         <= tables

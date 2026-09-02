@@ -220,6 +220,17 @@ class Settings(BaseSettings):
             errors.append(
                 "BUY_WAIT_SHADOW_ENABLED requires CONFIDENCE_SHADOW_ENABLED"
             )
+        if self.personal_commerce_shadow_enabled and not self.buy_wait_shadow_enabled:
+            errors.append(
+                "PERSONAL_COMMERCE_SHADOW_ENABLED requires BUY_WAIT_SHADOW_ENABLED"
+            )
+        if (
+            self.personal_commerce_shadow_enabled
+            and self.personal_commerce_subject_secret is None
+        ):
+            errors.append(
+                "PERSONAL_COMMERCE_SUBJECT_SECRET is required for Personal Commerce shadow"
+            )
         if self.merchant_intelligence_shadow_enabled and not (
             self.observation_shadow_enabled
             and self.product_graph_shadow_enabled
@@ -511,6 +522,33 @@ class Settings(BaseSettings):
     # Décision BUY/WAIT V2 append-only, sans prévision ni observation future.
     # Le writer de maintenance et tous les lecteurs restent OFF par défaut.
     buy_wait_shadow_enabled: bool = Field(default=False)
+    # Journal Personal Commerce privé. Il reste hors du mode atomique P1–P10,
+    # exige BUY/WAIT et ne peut écrire sans secret HMAC sujet dédié.
+    personal_commerce_shadow_enabled: bool = Field(default=False)
+    personal_commerce_subject_secret: str | None = Field(default=None)
+
+    @field_validator("personal_commerce_subject_secret")
+    @classmethod
+    def validate_personal_commerce_subject_secret(
+        cls,
+        value: str | None,
+    ) -> str | None:
+        if value is None or value == "":
+            return None
+        if (
+            value != value.strip()
+            or not 32 <= len(value) <= 256
+            or not value.isascii()
+            or any(
+                character.isspace() or not character.isprintable()
+                for character in value
+            )
+        ):
+            raise ValueError(
+                "PERSONAL_COMMERCE_SUBJECT_SECRET must be 32-256 printable "
+                "non-whitespace ASCII characters"
+            )
+        return value
     # Mesures agrégées append-only, sans score ni confiance synthétique.
     merchant_intelligence_shadow_enabled: bool = Field(default=False)
     # Claims sourcés et décision strictement shadow ; aucune lecture publique.

@@ -4,12 +4,16 @@ Date : 2026-09-02
 
 ## Verdict
 
-**Construction locale : GO. Publication, production, canary et public : NO-GO
-tant que les gates ci-dessous ne sont pas exécutés.**
+**Construction locale : GO. Le socle Phase 11–18 est désormais présent sur
+`origin/main` via la PR #412. Les durcissements confidentialité et P18F restent
+locaux ; production personnelle, canary et public : NO-GO.**
 
-La chaîne contient 12 commits propres au-dessus de `origin/main` `e667f3e` et
-115 fichiers modifiés. Les trois fichiers protégés backend sont absents de
-l'écart. Aucune branche Phase 11 à 18 n'existe sur le remote au snapshot.
+Le snapshot historique ci-dessous précédait la PR #412. À l'état courant, la
+branche `codex/filon-phase-15-18-privacy-readiness` porte 32 fichiers au-dessus
+de `origin/main` `5ac88c1`, dont les deux commits fonctionnels `23a1ed8` pour
+le durcissement mobile/dressing et `c196c71` pour P18F, ainsi que cette
+consolidation documentaire. Les trois fichiers protégés backend restent
+absents de cet écart.
 
 ## Chaîne de commits
 
@@ -22,7 +26,7 @@ l'écart. Aucune branche Phase 11 à 18 n'existe sur le remote au snapshot.
 | 15 — Wardrobe | `codex/filon-phase-15-wardrobe` | `b46d2b2` | P15A–P15E GO local |
 | 16 — Personal Stylist | `codex/filon-phase-16-personal-stylist` | `46c7fcf` | P16A–P16E GO local |
 | 17 — Solution Composer | `codex/filon-phase-17-solution-composer` | `85cc4e5` | P17A–P17E GO local |
-| 18 — Personal Commerce | `codex/filon-phase-18-personal-commerce` | `ccec980` | P18A–P18E GO local |
+| 18 — Personal Commerce | `codex/filon-phase-15-18-privacy-readiness` | `c196c71` | P18A–P18E GO ; P18F READY local |
 
 ## Preuves locales principales
 
@@ -35,7 +39,7 @@ l'écart. Aucune branche Phase 11 à 18 n'existe sur le remote au snapshot.
 | 15 | Wardrobe 10/10, 7 tests ciblés, mobile 342 réussis + 4 ignorés |
 | 16 | Personal Stylist 12/12, zéro fausse solution, 10 tests ciblés, mobile 353 réussis + 4 ignorés |
 | 17 | Solution Composer 12/12, zéro fausse composition/violation owned-first/score, 14 tests ciblés |
-| 18 | Personal Commerce 12/12, zéro bypass consentement/fausse action/score, 13 tests ciblés |
+| 18 | Personal Commerce 12/12 ; P18F 91 tests d'intégration, journal privé, export, rétention et effacement |
 
 ## État public vérifié
 
@@ -50,13 +54,15 @@ l'écart. Aucune branche Phase 11 à 18 n'existe sur le remote au snapshot.
 - Pulse : catalogue `live=true`, dernier succès run 19, un seul `active_run`
   exposé (run 24) avec heartbeat frais au snapshot.
 
-Ces preuves qualifient la base de production Phase 0–10/V2 Chain. Elles ne
-qualifient pas les 115 fichiers locaux Phase 11–18.
+Ces preuves historiques qualifient la base de production Phase 0–10/V2 Chain.
+La PR #412 a depuis intégré le socle Phase 11–18, mais ne qualifie ni les 32
+fichiers locaux de durcissement/P18F ni leur activation en production.
 
 ## Gates externes exacts encore ouverts
 
-1. **Publication** — autorisation nominative du lot Phase 11–18 avant tout
-   transfert public ; audit secret final à rejouer immédiatement avant push.
+1. **Publication** — autorisation nominative de l'écart local complet, incluant
+   `23a1ed8`, `c196c71` et sa consolidation documentaire, avant tout transfert
+   public ; audit secret final à rejouer immédiatement avant push.
 2. **Phase 12 transport** — autorisation séparée d'envoyer, uniquement après
    action explicite, les champs marchands autorisés vers la destination Core.
 3. **CI distante** — tous les jobs du lot consolidé doivent être terminaux
@@ -66,8 +72,9 @@ qualifient pas les 115 fichiers locaux Phase 11–18.
    flag n'est implicite dans la qualification locale.
 5. **Appareils** — caméra, permissions, offline, accessibilité et builds signés
    iOS/Android restent à qualifier pour les Phases 13–16.
-6. **Données personnelles** — consentement réel, export, effacement, rétention,
-   journaux sans contenu brut et rollback doivent être prouvés avant shadow.
+6. **Données personnelles** — les mécanismes locaux sont prêts ; consentement
+   réel, export, effacement, rétention et rollback doivent encore être prouvés
+   sur une cohorte autorisée avant canary.
 7. **Shadow réel** — Phases 14 et 16–18 exigent des replays bornés et
    idempotents sur une cohorte autorisée avant canary.
 8. **Promotion atomique** — les lecteurs publics et flags persistants restent
@@ -77,6 +84,6 @@ qualifient pas les 115 fichiers locaux Phase 11–18.
 ## Conclusion
 
 Il ne reste plus de phase de construction locale après Phase 18. Le prochain
-travail autorisé est un travail de livraison et de qualification externe, pas
-l'ajout d'une Phase 19 ni d'un nouveau moteur. Aucun GO public n'est déclaré
-par ce document.
+travail est la livraison de l'écart local, la qualification CI/appareil
+et P18F en production, puis le canary atomique. Ce document n'autorise aucune
+de ces actions et ne déclare aucun GO public.

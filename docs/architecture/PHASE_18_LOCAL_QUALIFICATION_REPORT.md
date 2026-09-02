@@ -4,7 +4,7 @@ Date : 2026-09-02
 
 ## Décision
 
-**P18A–P18E = GO local. P18F–P18G = NO-GO production.**
+**P18A–P18E = GO local. P18F = READY local. P18F–P18G = NO-GO production.**
 
 | Contrôle | Résultat |
 |---|---|
@@ -12,7 +12,7 @@ Date : 2026-09-02
 | Contournements de consentement | **0** |
 | Fausses actions | **0** |
 | Scores publiés | **0** |
-| Tests ciblés moteur + benchmark | **13/13** |
+| Tests ciblés moteur, benchmark, persistance et replay | **19/19** |
 
 ## Comportement qualifié
 
@@ -28,6 +28,8 @@ Date : 2026-09-02
 
 ## Frontière de production
 
-Aucune table, migration, persistance shadow, route publique, flag ou tâche
-planifiée n'est ajouté. La qualification production, le consentement réel,
-l'export/effacement et la promotion atomique de la chaîne restent ouverts.
+La migration additive `b5d3f7a9c1e4`, les deux tables privées, le flag shadow
+séparé, la persistance, le replay borné, l'export et l'effacement sont préparés
+localement. Le writer et tous les lecteurs restent OFF. La publication, la
+migration de production, le consentement réel et la promotion atomique de la
+chaîne restent ouverts.

@@ -20,7 +20,7 @@ les décisions BUY/WAIT qualifiées en amont.
 | P18C — owned-first | `USE_WHAT_YOU_OWN` avant toute solution achetée | **GO** |
 | P18D — BUY/WAIT | action amont et preuve obligatoires, budget/devise respectés | **GO** |
 | P18E — Quality Lab | ≥ 10 cas, zéro bypass consentement ou fausse action | **GO** |
-| P18F — shadow réel | journal append-only, effacement et replay borné | **NO-GO — non exécuté** |
+| P18F — shadow réel | journal append-only, effacement et replay borné | **READY local — production non exécutée** |
 | P18G — canary/public | cohorte cross-domain et chaîne V2 atomique qualifiées | **NO-GO — non exécuté** |
 
 ## Ordre lexicographique public
