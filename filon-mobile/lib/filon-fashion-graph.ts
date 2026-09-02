@@ -1,4 +1,4 @@
-import type { IntelligenceConfidence, OutfitIntent, OutfitPiece, OutfitRole } from "./filon-intelligence";
+import type { IntelligenceMeasurementStatus, OutfitIntent, OutfitPiece, OutfitRole } from "./filon-intelligence";
 import type { IntelligenceRelationType } from "./filon-intelligence-contract";
 
 export type FashionRelationType = Extract<IntelligenceRelationType, "COMPLEMENTS" | "RECOMMENDED_WITH" | "SUITABLE_FOR" | "SUITABLE_IN_SEASON">;
@@ -6,10 +6,10 @@ export type FashionRelation = {
   type: FashionRelationType;
   fromOfferId: number;
   toOfferId: number | null;
-  confidence: IntelligenceConfidence;
+  confidence: IntelligenceMeasurementStatus;
   provenance: "catalogue_partner" | "filon_inference";
   reason: "ROLE_COMPLEMENT" | "DECLARED_OCCASION" | "DECLARED_SEASON";
-  score: number;
+  score: null;
   justification: string;
   updatedAt: string;
 };
@@ -22,7 +22,7 @@ export type FashionCritiqueFinding = {
 export type FashionCritique = {
   verdict: "approved" | "refine";
   findings: FashionCritiqueFinding[];
-  scorePenalty: number;
+  scorePenalty: null;
 };
 
 /**
@@ -37,19 +37,19 @@ export function buildFashionRelations(pieces: OutfitPiece[], intent: OutfitInten
       type: index === 0 ? "COMPLEMENTS" : "RECOMMENDED_WITH",
       fromOfferId: pieces[index].offer.id,
       toOfferId: pieces[index + 1].offer.id,
-      confidence: "medium",
+      confidence: "not_calibrated",
       provenance: "filon_inference",
       reason: "ROLE_COMPLEMENT",
-      score: 0.72,
+      score: null,
       justification: "Les rôles de tenue sont complémentaires dans cette composition.",
       updatedAt,
     });
   }
   if (intent.occasion && pieces[0]) {
-    relations.push({ type: "SUITABLE_FOR", fromOfferId: pieces[0].offer.id, toOfferId: null, confidence: "medium", provenance: "filon_inference", reason: "DECLARED_OCCASION", score: 0.6, justification: "Contexte déclaré par l’utilisateur ; adéquation à confirmer par les attributs catalogue.", updatedAt });
+    relations.push({ type: "SUITABLE_FOR", fromOfferId: pieces[0].offer.id, toOfferId: null, confidence: "not_calibrated", provenance: "filon_inference", reason: "DECLARED_OCCASION", score: null, justification: "Contexte déclaré par l’utilisateur ; adéquation à confirmer par les attributs catalogue.", updatedAt });
   }
   if (intent.season && pieces[0]) {
-    relations.push({ type: "SUITABLE_IN_SEASON", fromOfferId: pieces[0].offer.id, toOfferId: null, confidence: "medium", provenance: "filon_inference", reason: "DECLARED_SEASON", score: 0.6, justification: "Saison déclarée par l’utilisateur ; adéquation à confirmer par les attributs catalogue.", updatedAt });
+    relations.push({ type: "SUITABLE_IN_SEASON", fromOfferId: pieces[0].offer.id, toOfferId: null, confidence: "not_calibrated", provenance: "filon_inference", reason: "DECLARED_SEASON", score: null, justification: "Saison déclarée par l’utilisateur ; adéquation à confirmer par les attributs catalogue.", updatedAt });
   }
   return relations;
 }
@@ -71,6 +71,5 @@ export function critiqueFashionComposition(pieces: OutfitPiece[], intent: Outfit
   if (relations.filter((relation) => relation.toOfferId !== null).length < Math.max(1, pieces.length - 1)) {
     findings.push({ code: "LOW_RELATION_COVERAGE", severity: "advisory" });
   }
-  const scorePenalty = findings.reduce((total, finding) => total + (finding.severity === "advisory" ? 8 : 3), 0);
-  return { verdict: findings.some((finding) => finding.severity === "advisory") ? "refine" : "approved", findings, scorePenalty };
+  return { verdict: findings.some((finding) => finding.severity === "advisory") ? "refine" : "approved", findings, scorePenalty: null };
 }

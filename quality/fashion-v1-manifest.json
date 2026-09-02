@@ -1,0 +1,23 @@
+{
+  "schema_version": "fashion-v1-benchmark-manifest/v1",
+  "limitation": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "development_engine_input": false,
+  "cases": [
+    { "id": "evening_dress", "request": "Une robe noire pour une soirée sous 150 euros", "expected_decision": "recommend", "expected_offer_ids": [1], "offers": [{ "id": 1, "name": "Robe noire de soirée", "category": "Mode femme", "subcategory": "Robes", "price": 120, "currency": "EUR", "availability": "in_stock", "age_hours": 1 }] },
+    { "id": "stale_dress", "request": "Une robe noire pour une soirée sous 150 euros", "expected_decision": "abstain", "expected_offer_ids": [], "offers": [{ "id": 2, "name": "Robe noire de soirée", "category": "Mode femme", "subcategory": "Robes", "price": 120, "currency": "EUR", "availability": "in_stock", "age_hours": 73 }] },
+    { "id": "unknown_stock", "request": "Une robe noire sous 150 euros", "expected_decision": "abstain", "expected_offer_ids": [], "offers": [{ "id": 3, "name": "Robe noire", "category": "Mode femme", "subcategory": "Robes", "price": 80, "currency": "EUR", "availability": "unknown", "age_hours": 1 }] },
+    { "id": "foreign_currency_budget", "request": "Une robe noire sous 150 euros", "expected_decision": "abstain", "expected_offer_ids": [], "offers": [{ "id": 4, "name": "Robe noire", "category": "Mode femme", "subcategory": "Robes", "price": 90, "currency": "USD", "availability": "in_stock", "age_hours": 1 }] },
+    { "id": "bodycare_collision", "request": "Une robe noire pour une soirée sous 150 euros", "expected_decision": "abstain", "expected_offer_ids": [], "offers": [{ "id": 5, "name": "Gel douche La Petite Robe Noire", "category": "Mode femme", "subcategory": "Robes", "price": 30, "currency": "EUR", "availability": "in_stock", "age_hours": 1 }] },
+    { "id": "themed_costume_collision", "request": "Une robe noire pour une soirée sous 150 euros", "expected_decision": "abstain", "expected_offer_ids": [], "offers": [{ "id": 6, "name": "Costume tueur robe noire Halloween", "category": "Mode femme", "subcategory": "Robes", "price": 45, "currency": "EUR", "availability": "in_stock", "age_hours": 1 }] },
+    { "id": "child_sport_work_shoes", "request": "Des chaussures noires pour le travail sous 120 euros", "expected_decision": "abstain", "expected_offer_ids": [], "offers": [{ "id": 7, "name": "Chaussures futsal enfant noires", "category": "Chaussures", "subcategory": "Chaussures basses", "price": 55, "currency": "EUR", "availability": "in_stock", "age_hours": 1 }] },
+    { "id": "work_oxford", "request": "Des chaussures noires pour le travail sous 120 euros", "expected_decision": "recommend", "expected_offer_ids": [8], "offers": [{ "id": 8, "name": "Chaussures Oxford noires en cuir pour le bureau", "category": "Chaussures", "subcategory": "Chaussures basses", "price": 95, "currency": "EUR", "availability": "in_stock", "age_hours": 1 }] },
+    { "id": "mixed_currency_complement", "request": "Une robe avec chaussures sous 200 euros", "expected_decision": "recommend", "expected_offer_ids": [9], "offers": [{ "id": 9, "name": "Robe avec chaussures", "category": "Mode femme", "subcategory": "Robes", "price": 100, "currency": "EUR", "availability": "in_stock", "age_hours": 1 }, { "id": 10, "name": "Chaussures pour robe", "category": "Chaussures", "subcategory": "Escarpins", "price": 50, "currency": "USD", "availability": "in_stock", "age_hours": 1 }] },
+    { "id": "non_positive_price", "request": "Une robe noire sous 150 euros", "expected_decision": "abstain", "expected_offer_ids": [], "offers": [{ "id": 11, "name": "Robe noire", "category": "Mode femme", "subcategory": "Robes", "price": 0, "currency": "EUR", "availability": "in_stock", "age_hours": 1 }] }
+  ],
+  "engineering_gates": {
+    "decision_accuracy_min": 1.0,
+    "selected_identity_accuracy_min": 1.0,
+    "false_recommendations_max": 0,
+    "uncalibrated_output_completeness_min": 1.0
+  }
+}

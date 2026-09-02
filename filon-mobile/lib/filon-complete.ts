@@ -29,7 +29,7 @@ function roleFromCatalogue(offer: FilonOffer): OutfitRole | null {
 
 function asPiece(offer: FilonOffer): OutfitPiece {
   const role = roleFromCatalogue(offer) ?? "accessory";
-  return { role, offer, confidence: role === "accessory" && !roleFromCatalogue(offer) ? "low" : "medium", provenance: "filon_inference", explanation: { code: "piece.role_inferred" } };
+  return { role, offer, confidence: "not_calibrated", provenance: "filon_inference", explanation: { code: "piece.role_inferred" } };
 }
 
 function groupByCurrency(offers: FilonOffer[]) {

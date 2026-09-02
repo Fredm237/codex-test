@@ -1,0 +1,13 @@
+{
+  "contract": "filon.fashion-expert",
+  "contract_version": "1.0.0",
+  "owner": "intelligence-core",
+  "input_source": "current_core_offer_snapshots",
+  "output_decisions": ["recommend", "abstain"],
+  "style_score": null,
+  "confidence_score": null,
+  "relation_score": null,
+  "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+  "human_validation_required_for_engineering_progression": false,
+  "public_flags_default": false
+}

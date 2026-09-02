@@ -147,6 +147,14 @@ jobs:
           --strict-engineering
           --output ../quality-buy-wait-report.json
 
+      - name: Qualifier Fashion v1 sans score subjectif simulé
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.fashion_v1
+          --manifest ../quality/fashion-v1-manifest.json
+          --strict-engineering
+          --output ../quality-fashion-v1-report.json
+
       - name: Publier les rapports Quality Lab
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
@@ -163,6 +171,7 @@ jobs:
             ${{ github.workspace }}/quality-offer-optimization-report.json
             ${{ github.workspace }}/quality-confidence-report.json
             ${{ github.workspace }}/quality-buy-wait-report.json
+            ${{ github.workspace }}/quality-fashion-v1-report.json
           if-no-files-found: warn
           retention-days: 14
 

@@ -4,7 +4,6 @@ import type { OutfitOccasionCode, OutfitPublicMessage, OutfitSeasonCode, OutfitS
 import { createV3PipelineTrace, updateV3PipelineStage, type V3PipelineStage, type V3PipelineTrace } from "./filon-v3-contracts";
 import { isSafePartnerOfferUrl } from "./partner-offer";
 
-export type IntelligenceConfidence = "high" | "medium" | "low";
 export type IntelligenceMeasurementStatus = "not_calibrated";
 export type OutfitRole = "base" | "structure" | "footwear" | "accessory";
 export type OutfitIntent = {
@@ -18,7 +17,7 @@ export type OutfitIntent = {
 export type OutfitPiece = {
   role: OutfitRole;
   offer: FilonOffer;
-  confidence: IntelligenceConfidence;
+  confidence: IntelligenceMeasurementStatus;
   provenance: "catalogue_partner" | "filon_inference";
   explanation: OutfitPublicMessage;
 };
@@ -227,7 +226,7 @@ export function buildOutfitRecommendation(intent: OutfitIntent, offers: FilonOff
     return {
       role: role ?? "accessory",
       offer,
-      confidence: role ? "medium" : "low",
+      confidence: "not_calibrated",
       provenance: role ? "filon_inference" : "catalogue_partner",
       explanation: { code: role ? "piece.role_inferred" : "piece.role_unconfirmed" },
     };
