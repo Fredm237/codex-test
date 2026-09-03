@@ -40,6 +40,7 @@ assert.ok(lab.includes("PerformanceObserver"), "la qualification doit mesurer le
 assert.ok(lab.includes('"largest-contentful-paint"'), "le laboratoire doit mesurer son LCP");
 assert.ok(lab.includes('"layout-shift"'), "le laboratoire doit mesurer son CLS");
 assert.ok(lab.includes('"longtask"'), "le laboratoire doit mesurer les tâches longues");
+assert.ok(lab.includes('data-metric="immersive-longtask"') && lab.includes("filon-immersive-init-start"), "les tâches longues doivent être attribuables à la fenêtre d'initialisation immersive");
 assert.ok(lab.includes('"event"'), "le laboratoire doit observer le coût des interactions");
 assert.doesNotMatch(lab, /BUY_NOW|\bWAIT\b/, "aucun lecteur shadow ne doit entrer dans le laboratoire");
 assert.ok(css.includes("prefers-reduced-motion: reduce"), "le CSS doit aussi neutraliser les mouvements réduits");
@@ -59,6 +60,7 @@ assert.ok(signature.includes("product.offers.length") && signature.includes("pro
 assert.doesNotMatch(signature, /currency\s*(?:\|\||\?\?)\s*["']EUR["']|BUY_NOW|\bWAIT\b/, "la séquence ne doit fabriquer ni devise ni décision shadow");
 
 assert.ok(signatureCanvas.includes("<Canvas") && signatureCanvas.includes("CameraRig"), "les moments signature doivent employer une vraie scène et une vraie caméra");
+assert.ok(signatureCanvas.includes("props.onReady?.()") && signature.includes("filon-immersive-init-ready"), "la sonde doit fermer précisément la fenêtre d'initialisation WebGL");
 assert.ok(signatureCanvas.includes("sampleCausalCamera") && signatureMotion.includes("CAMERA_SEQUENCE"), "la caméra doit suivre des plans déclaratifs partagés");
 for (const shot of ["market", "identity", "proof", "decision"]) {
   assert.ok(signatureMotion.includes(`id: "${shot}"`), `le plan caméra ${shot} doit rester déclaré`);
@@ -73,7 +75,9 @@ assert.ok(signatureCanvas.includes("useTexture(image)") && signatureCanvas.inclu
 assert.ok(signatureCanvas.includes("beam.current.visible = scan > 0 && scan < 1 && proven"), "le faisceau de preuve doit rester fail-closed");
 assert.ok(signatureCanvas.includes('props.quality === "degraded" ? 1 : [1, 1.35]') && signatureCanvas.includes("compact ? 7"), "la charge GPU doit être bornée, adaptative et réduite sur mobile");
 assert.ok(signatureCanvas.includes('frameloop={props.playing ? "always" : "demand"}'), "la scène en pause ne doit pas maintenir une boucle GPU continue");
-assert.ok(immersiveRuntime.includes("FRAME_RATE_FLOOR = 30"), "le seuil de dégradation doit rester explicite à 30 fps");
+assert.ok(immersiveRuntime.includes("FRAME_RATE_DEGRADE = 45"), "la scène complète doit se dégrader sous 45 fps");
+assert.ok(immersiveRuntime.includes("FRAME_RATE_FLOOR = 30"), "la scène dégradée doit fermer WebGL sous 30 fps");
+assert.ok(signature.includes('capability === "webgl" && visible') && signature.includes("if (!visible) stop()"), "la boucle signature doit s'arrêter hors écran");
 assert.ok(immersiveRuntime.includes('setQuality("degraded")') && immersiveRuntime.includes('setState("fallback")'), "une scène durablement lente doit dégrader puis fermer WebGL");
 assert.ok(signatureCss.includes("--motion-cinematic") && signatureCss.includes("--duration-camera"), "les transitions doivent employer les tokens de mouvement FILON");
 assert.ok(signatureCss.includes("min-height: 52px") && signatureCss.includes("min-height: 48px"), "les contrôles signature doivent conserver des cibles tactiles suffisantes");
