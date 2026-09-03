@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { formatSupportedMoney } from "@/lib/currency";
 import type { ImmersiveExactProductProof } from "@/lib/immersive-proof";
 import type { Proof } from "@/lib/proof";
+import { ProductJourneyLink } from "@/components/experience/ProductJourneyLink";
 import { SignatureMomentGate } from "./SignatureMomentGate";
 import styles from "./immersive-lab.module.css";
 
@@ -229,7 +230,9 @@ function CinematicJourney({ product, reduced }: { product: ImmersiveExactProduct
           <span>{product ? "PREUVE COURANTE" : "ABSTENTION"}</span>
           <h3>{product ? [product.brand, product.name].filter(Boolean).join(" · ") : "Produit non démontré"}</h3>
           <p>{product && low ? `${low} · ${product.merchants} marchands comparables` : "FILON ne fabrique ni identité, ni prix."}</p>
-          <a href={product ? `/produits/${encodeURIComponent(product.ean)}` : "/recherche/"}>{product ? "Entrer dans la preuve" : "Lancer une recherche"}</a>
+          {product ? (
+            <ProductJourneyLink href={`/produits/${encodeURIComponent(product.ean)}`} image={product.image} label={product.name}>Entrer dans la preuve</ProductJourneyLink>
+          ) : <a href="/recherche/">Lancer une recherche</a>}
         </div>
         <div className={styles.shotRail} aria-hidden="true">
           {["CHAOS", "IDENTITÉ", "MARCHÉ", "DÉCISION"].map((label, index) => <span key={label} data-active={shot === index}>{label}</span>)}
@@ -393,7 +396,9 @@ function MobilePrototype({ product }: { product: ImmersiveExactProductProof | nu
           ) : <span aria-hidden="true">?</span>}
           <div><small>À PARTIR DE</small><strong>{low ?? "inconnu"}</strong><p>{product ? `${product.merchants} marchands · preuve courante` : "FILON s’abstient"}</p></div>
         </div>
-        <a className={styles.mobileAction} href={product ? `/produits/${encodeURIComponent(product.ean)}` : "/recherche/"}>{product ? "Voir toutes les preuves" : "Rechercher un produit"}</a>
+        {product ? (
+          <ProductJourneyLink className={styles.mobileAction} href={`/produits/${encodeURIComponent(product.ean)}`} image={product.image} label={product.name}>Voir toutes les preuves</ProductJourneyLink>
+        ) : <a className={styles.mobileAction} href="/recherche/">Rechercher un produit</a>}
         <div className={styles.phoneProgress} aria-hidden="true"><span /><span /><span /></div>
       </div>
     </section>

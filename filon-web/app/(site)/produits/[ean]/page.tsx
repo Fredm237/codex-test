@@ -145,7 +145,7 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
           </p>
 
           <div className="pg-grid">
-            <div className="pg-media">
+            <div className="pg-media" data-product-transition-target>
               {p.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={p.image} alt={p.name} />

@@ -5,6 +5,10 @@ import { fileURLToPath } from "node:url";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const transition = readFileSync(join(root, "components/filon/PageTransition.tsx"), "utf8");
+const rootLayout = readFileSync(join(root, "app/layout.tsx"), "utf8");
+const productJourney = readFileSync(join(root, "components/experience/ProductJourneyLink.tsx"), "utf8");
+const productCard = readFileSync(join(root, "components/filon/ProductCard.tsx"), "utf8");
+const exactProductPage = readFileSync(join(root, "app/(site)/produits/[ean]/page.tsx"), "utf8");
 const css = readFileSync(join(root, "components/filon/filon.css"), "utf8");
 const catalogue = readFileSync(join(root, "app/(site)/catalogue/page.tsx"), "utf8");
 const catalogueHeader = readFileSync(join(root, "components/filon/CatalogueHeader.tsx"), "utf8");
@@ -32,8 +36,14 @@ for (const chapter of ["signal", "market", "identity", "proof", "decision", "com
 }
 
 assert.ok(transition.includes("data-experience-chapter"), "chaque route doit exposer son chapitre sémantique");
+assert.ok(rootLayout.includes('data-scroll-behavior="smooth"'), "le layout doit annoncer son défilement fluide à Next.js");
 assert.ok(transition.includes('aria-hidden="true"'), "la matière de transition doit rester décorative");
 assert.ok(transition.includes("resolveJourneyChapter"), "la continuité doit être déterministe et testable");
+assert.ok(transition.includes("PRODUCT_JOURNEY_EVENT") && transition.includes("fx-product-handoff"), "le passage produit doit transporter le même objet entre deux chapitres");
+assert.ok(productJourney.includes("next/link") && productJourney.includes("CustomEvent<ProductJourneyDetail>"), "la continuité produit doit conserver une navigation interne progressive");
+assert.ok(productJourney.includes('prefers-reduced-motion: reduce'), "le transport produit doit s'effacer en mouvement réduit");
+assert.ok(productCard.includes("ProductJourneyLink"), "les cartes catalogue doivent ouvrir le dossier sans casser la continuité d'objet");
+assert.ok(exactProductPage.includes("data-product-transition-target"), "le dossier exact doit recevoir l'objet transporté");
 assert.ok(css.includes("prefers-reduced-motion: reduce"), "le mouvement réduit doit supprimer le balayage");
 assert.ok(css.includes("pointer-events: none"), "la transition ne doit jamais bloquer un contrôle");
 assert.doesNotMatch(transition, /canvas|WebGL|three/i, "la continuité globale ne doit pas imposer de moteur 3D");
@@ -93,6 +103,7 @@ assert.ok(footer.includes("p19-footer-coordinate"), "la sortie globale doit anno
 assert.ok(css.includes(".p19-global-footer .ed-newsblock"), "la newsletter doit appartenir au dernier plan de l'expérience");
 assert.ok(css.includes(".p19-global-footer .ed-foot .ed-foot-links"), "les prochains chemins doivent former un registre navigable");
 assert.match(css, /prefers-reduced-motion[\s\S]*\.p19-global-footer/, "la sortie globale doit neutraliser ses transitions en mouvement réduit");
+assert.match(css, /prefers-reduced-motion[\s\S]*\.fx-product-handoff/, "le transfert d'objet doit disparaître en mouvement réduit");
 assert.ok(reveal.includes("96 / Math.max(el.offsetHeight, 1)"), "un registre long doit se révéler dès ses premiers pixels visibles");
 assert.ok(reveal.includes("Math.min(0.16"), "les blocs courts doivent conserver la chorégraphie de révélation existante");
 assert.ok(seo.includes("requestedTitle.includes(site.name)"), "un titre qui porte déjà FILON ne doit pas doubler la marque");

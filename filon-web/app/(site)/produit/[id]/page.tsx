@@ -89,7 +89,7 @@ export default async function ProduitPage({ params }: { params: Promise<{ id: st
             <OfferBackLink />
         </p>
         <div style={{ display: "grid", gap: 32, gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", alignItems: "start" }} className="pd-grid">
-          <div className="p19-offer-media" style={{ aspectRatio: "1 / 1", background: "#fff", borderRadius: 20, border: "1px solid var(--line-2)", display: "grid", placeItems: "center", overflow: "hidden" }}>
+          <div className="p19-offer-media" data-product-transition-target style={{ aspectRatio: "1 / 1", background: "#fff", borderRadius: 20, border: "1px solid var(--line-2)", display: "grid", placeItems: "center", overflow: "hidden" }}>
             {o.image ? (
               <img src={o.image} alt={o.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 22 }} />
             ) : <span aria-hidden="true">—</span>}

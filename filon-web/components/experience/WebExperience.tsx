@@ -16,6 +16,7 @@ import {
 } from "./DecisionPrimitives";
 import styles from "./web-experience.module.css";
 import { HomeSignatureVolume, type HomeVolumeState } from "./HomeSignatureVolume";
+import { ProductJourneyLink } from "./ProductJourneyLink";
 
 const COPY = {
   fr: {
@@ -310,7 +311,7 @@ export function WebExperience({ exactProduct, proof }: { exactProduct: Immersive
                   <div className={styles.stageDecision}>
                     <span>{copy.current}</span>
                     <b>{product.brand ? `${product.brand} · ` : ""}{product.name}</b>
-                    <a href={`/produits/${encodeURIComponent(product.ean)}/`}>{copy.view}</a>
+                    <ProductJourneyLink href={`/produits/${encodeURIComponent(product.ean)}/`} image={product.image} label={product.name}>{copy.view}</ProductJourneyLink>
                   </div>
                 </>
               ) : (
@@ -369,7 +370,7 @@ export function WebExperience({ exactProduct, proof }: { exactProduct: Immersive
                       { label: copy.scope, state: product.merchants >= 2 ? "verified" : "unknown" },
                     ]}
                   />
-                  <a className={styles.productLink} href={`/produits/${encodeURIComponent(product.ean)}/`}>{copy.view}</a>
+                  <ProductJourneyLink className={styles.productLink} href={`/produits/${encodeURIComponent(product.ean)}/`} image={product.image} label={product.name}>{copy.view}</ProductJourneyLink>
                 </>
               ) : (
                 <UnknownField label={copy.unavailable} detail={copy.unavailableDetail} />

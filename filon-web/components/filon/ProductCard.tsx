@@ -31,6 +31,7 @@ import {
 } from "./product-copy";
 import { normalizeSupportedCurrency } from "@/lib/currency";
 import { useLocale } from "@/lib/i18n";
+import { ProductJourneyLink } from "@/components/experience/ProductJourneyLink";
 import { useEvidenceNow } from "./use-evidence-now";
 
 export type CardOffer = {
@@ -170,9 +171,9 @@ export function ProductCard({
 
         {/* Lien étiré : toute la carte devient la cible, sans imbriquer
             d'ancres l'une dans l'autre (ce qui serait invalide). */}
-        <a className="fx-product-name" href={target}>
+        <ProductJourneyLink className="fx-product-name" href={target} image={offer.image} label={offer.name}>
           {offer.name}
-        </a>
+        </ProductJourneyLink>
 
         {offer.merchant && (
           <span className="fx-product-merchant">
