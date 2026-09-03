@@ -23,6 +23,7 @@ type LabMetrics = {
   cls: number;
   inp: number | null;
   longestTask: number;
+  immersiveLongestTask: number | null;
   transferKb: number;
   resources: number;
   lcpElement: string | null;
@@ -91,12 +92,20 @@ function LabTelemetry() {
 
     const sample = () => {
       const resources = performance.getEntriesByType("resource") as PerformanceResourceTiming[];
+      const immersiveStart = performance.getEntriesByName("filon-immersive-init-start").at(-1);
+      const immersiveReady = performance.getEntriesByName("filon-immersive-init-ready").at(-1);
+      const immersiveLongestTask = immersiveStart && immersiveReady
+        ? Math.max(0, ...performance.getEntriesByType("longtask")
+          .filter((entry) => entry.startTime >= immersiveStart.startTime && entry.startTime <= immersiveReady.startTime)
+          .map((entry) => entry.duration))
+        : null;
       const largest = [...resources].sort((a, b) => (b.transferSize || 0) - (a.transferSize || 0))[0];
       setMetrics({
         lcp: lcp === null ? null : Math.round(lcp),
         cls: Number(cls.toFixed(4)),
         inp: inp === null ? null : Math.round(inp),
         longestTask: Math.round(longestTask),
+        immersiveLongestTask: immersiveLongestTask === null ? null : Math.round(immersiveLongestTask),
         transferKb: Math.round(resources.reduce((total, entry) => total + (entry.transferSize || 0), 0) / 1024),
         resources: resources.length,
         lcpElement,
@@ -132,6 +141,7 @@ function LabTelemetry() {
         <div><dt>CLS</dt><dd data-metric="cls">{metrics ? metrics.cls : "non mesuré"}</dd></div>
         <div><dt>Interaction</dt><dd data-metric="inp">{value(metrics?.inp, " ms")}</dd></div>
         <div><dt>Tâche longue max.</dt><dd data-metric="longtask">{value(metrics?.longestTask, " ms")}</dd></div>
+        <div><dt>Initialisation immersive</dt><dd data-metric="immersive-longtask">{value(metrics?.immersiveLongestTask, " ms")}</dd></div>
         <div><dt>Transfert observé</dt><dd data-metric="transfer">{value(metrics?.transferKb, " Ko")}</dd></div>
         <div><dt>Ressources</dt><dd data-metric="resources">{value(metrics?.resources, "")}</dd></div>
       </dl>
