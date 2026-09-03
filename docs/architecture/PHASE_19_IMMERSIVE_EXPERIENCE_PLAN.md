@@ -836,3 +836,10 @@ exact à **7,37 kB / 162 kB First Load JS**. Les plans `CHAOS` et `DÉCISION`,
 l'état `unknown`, le produit exact et la console du build local ont été revus
 sur desktop. La nouvelle Preview mobile/non indexée reste le prochain gate ;
 aucune promotion production n'est autorisée par cette qualification locale.
+
+Le graphe dynamique de la scène représente environ **237 Ko gzip** répartis en
+cinq chunks et n'entre pas dans le premier chargement des routes. Son montage
+reste retardé de 1,5 à 1,8 seconde, borné à un seul canvas par surface et absent
+des profils contraints. Le budget initial de **2 Mo mobile / 4 Mo desktop** est
+donc respecté avec une marge nette ; cette mesure de bundle ne remplace pas les
+Core Web Vitals terrain de la Preview.
