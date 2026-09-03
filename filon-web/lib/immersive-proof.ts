@@ -104,19 +104,17 @@ function qualifyProduct(product: any): ImmersiveExactProductProof | null {
   };
 }
 
-/**
- * Trouve une preuve produit exacte pour le laboratoire, sans élargir le contrat
- * de la home. La liste ne vaut que comme index de candidats : seule la fiche
- * détaillée, avec offres courantes et horodatées, peut franchir cette frontière.
- */
+/** La liste ne vaut que comme index de candidats : seule la fiche détaillée,
+ * avec offres courantes et horodatées, peut franchir la frontière visuelle. */
 export async function getImmersiveExactProductProof(): Promise<ImmersiveExactProductProof | null> {
   const listing = await getJson(`/api/catalog/products?multi_merchant=true&limit=${CANDIDATE_LIMIT}`);
   const candidates = Array.isArray(listing?.items) ? listing.items : [];
 
-  for (const candidate of candidates) {
-    const ean = typeof candidate?.ean === "string" ? candidate.ean.trim() : "";
-    if (!ean) continue;
-    const detail = await getJson(`/api/catalog/product/${encodeURIComponent(ean)}`);
+  const eans = candidates
+    .map((candidate: any) => typeof candidate?.ean === "string" ? candidate.ean.trim() : "")
+    .filter(Boolean);
+  const details = await Promise.all(eans.map((ean: string) => getJson(`/api/catalog/product/${encodeURIComponent(ean)}`)));
+  for (const detail of details) {
     const qualified = qualifyProduct(detail);
     if (qualified !== null) return qualified;
   }

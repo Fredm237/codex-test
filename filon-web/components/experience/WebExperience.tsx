@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { Proof } from "@/lib/proof";
+import type { ImmersiveExactProductProof } from "@/lib/immersive-proof";
 import { formatSupportedMoney } from "@/lib/currency";
 import { useLocale } from "@/lib/i18n";
 import {
@@ -14,6 +15,7 @@ import {
   WhyThisResult,
 } from "./DecisionPrimitives";
 import styles from "./web-experience.module.css";
+import { HomeSignatureVolume, type HomeVolumeState } from "./HomeSignatureVolume";
 
 const COPY = {
   fr: {
@@ -200,13 +202,15 @@ const COPY = {
 
 const NUMBER_LOCALE = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
 
-export function WebExperience({ proof }: { proof: Proof | null }) {
+export function WebExperience({ exactProduct, proof }: { exactProduct: ImmersiveExactProductProof | null; proof: Proof | null }) {
   const { locale } = useLocale();
   const copy = COPY[locale];
   const journeyRef = useRef<HTMLElement | null>(null);
   const [journeyShot, setJourneyShot] = useState(0);
+  const [journeyProgress, setJourneyProgress] = useState(0);
   const [reducedJourney, setReducedJourney] = useState(false);
-  const product = proof?.product ?? null;
+  const [volumeState, setVolumeState] = useState<HomeVolumeState>("pending");
+  const product = exactProduct ?? proof?.product ?? null;
   const priceLow = product ? formatSupportedMoney(product.priceMin, product.currency, locale) : null;
   const priceHigh = product ? formatSupportedMoney(product.priceMax, product.currency, locale) : null;
   const spread = product ? formatSupportedMoney(product.priceMax - product.priceMin, product.currency, locale) : null;
@@ -225,6 +229,7 @@ export function WebExperience({ proof }: { proof: Proof | null }) {
       setReducedJourney(reduced);
       if (reduced) {
         setJourneyShot(3);
+        setJourneyProgress(1);
         return;
       }
       const root = journeyRef.current;
@@ -232,6 +237,7 @@ export function WebExperience({ proof }: { proof: Proof | null }) {
       const rect = root.getBoundingClientRect();
       const distance = Math.max(1, root.offsetHeight - window.innerHeight);
       const progress = Math.max(0, Math.min(1, -rect.top / distance));
+      setJourneyProgress(progress);
       setJourneyShot(progress < .24 ? 0 : progress < .49 ? 1 : progress < .74 ? 2 : 3);
     };
 
@@ -249,6 +255,8 @@ export function WebExperience({ proof }: { proof: Proof | null }) {
       cancelAnimationFrame(frame);
     };
   }, []);
+
+  const handleVolumeState = useCallback((state: HomeVolumeState) => setVolumeState(state), []);
 
   return (
     <div className={`${styles.page} p11-web-experience`}>
@@ -277,7 +285,13 @@ export function WebExperience({ proof }: { proof: Proof | null }) {
                 <p>{copy.boundary}</p>
               </div>
             </div>
-            <aside className={styles.heroStage} aria-label={copy.exampleEye}>
+            <aside className={styles.heroStage} aria-label={copy.exampleEye} data-volume={volumeState}>
+              <HomeSignatureVolume
+                onStateChange={handleVolumeState}
+                product={comparable ? product : null}
+                progress={journeyProgress}
+                reduced={reducedJourney}
+              />
               <div className={styles.marketFragments} aria-hidden="true">
                 <span>{proof ? number.format(proof.stats.offers) : "?"}<small>{copy.offers}</small></span>
                 <span>{proof ? number.format(proof.stats.merchants) : "?"}<small>{copy.merchants}</small></span>

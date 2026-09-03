@@ -1,6 +1,6 @@
 "use client";
 
-import { Html } from "@react-three/drei";
+import { Edges, Html, RoundedBox } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -206,26 +206,30 @@ function ProductCore({ product, progress }: { product: ProductProjection; progre
 
   return (
     <group ref={group}>
-      <mesh castShadow receiveShadow>
-        <icosahedronGeometry args={[1.04, 5]} />
+      <RoundedBox args={[2.36, 2.92, 0.2]} radius={0.13} smoothness={5} castShadow receiveShadow>
         <meshStandardMaterial
           ref={shell}
-          color={proven ? "#b96a45" : "#443b34"}
+          color={proven ? "#7f4a34" : "#302925"}
           emissive={proven ? "#7d2e1c" : "#181512"}
           transparent
-          opacity={proven ? 0.96 : 0.62}
+          opacity={proven ? 0.9 : 0.62}
           wireframe={!proven}
         />
+        <Edges color={proven ? "#e4aa66" : "#6c625b"} threshold={12} />
+      </RoundedBox>
+      <mesh position={[0, -1.64, 0.06]} castShadow>
+        <boxGeometry args={[3.04, 0.08, 0.54]} />
+        <meshStandardMaterial color={proven ? "#d89750" : "#4b433e"} metalness={0.46} roughness={0.34} />
       </mesh>
-      <mesh rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[1.28, 0.025, 12, 128]} />
-        <meshStandardMaterial color={proven ? "#f0b664" : "#71685f"} emissive={proven ? "#9a4b25" : "#1c1916"} emissiveIntensity={0.7} />
+      <mesh position={[-1.44, 0, 0.02]}>
+        <boxGeometry args={[0.025, 3.58, 0.025]} />
+        <meshBasicMaterial color={proven ? "#f05a31" : "#665c55"} transparent opacity={0.82} />
       </mesh>
-      <mesh rotation={[0, Math.PI / 2, 0]}>
-        <torusGeometry args={[1.42, 0.018, 10, 128]} />
-        <meshStandardMaterial color={proven ? "#f05a31" : "#5c554f"} />
+      <mesh position={[1.44, 0, 0.02]}>
+        <boxGeometry args={[0.025, 3.58, 0.025]} />
+        <meshBasicMaterial color={proven ? "#d69a48" : "#665c55"} transparent opacity={0.58} />
       </mesh>
-      <Html center transform sprite distanceFactor={4.4} zIndexRange={[2, 1]}>
+      <Html center transform position={[0, 0, 0.18]} distanceFactor={4.4} zIndexRange={[2, 1]}>
         <div className={styles.productProjection} data-proven={proven}>
           {product?.image ? (
             // eslint-disable-next-line @next/next/no-img-element

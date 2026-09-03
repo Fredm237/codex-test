@@ -140,9 +140,9 @@
   display: grid;
   place-items: center;
   border: 1px solid rgba(255, 241, 222, .34);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(181, 90, 52, .74), rgba(51, 34, 27, .28) 58%, transparent 59%);
-  box-shadow: 0 0 0 28px rgba(216, 141, 75, .04), 0 42px 90px rgba(0, 0, 0, .32);
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(181, 90, 52, .68), rgba(51, 34, 27, .46));
+  box-shadow: -28px 0 0 -27px #f05a31, 28px 0 0 -27px #d69a48, 0 42px 90px rgba(0, 0, 0, .32);
   transform: translate(-50%, -50%) rotate(calc((1 - var(--signature-progress)) * -12deg)) scale(calc(.72 + var(--signature-progress) * .28));
   transition: transform 900ms cubic-bezier(.22, 1, .36, 1);
 }
@@ -167,19 +167,19 @@
 .stage[data-shot="3"] .staticSeal { opacity: 1; transform: translateY(0); }
 
 .productProjection {
-  width: 136px;
-  height: 136px;
+  width: 168px;
+  height: 210px;
   display: grid;
   place-items: center;
   overflow: hidden;
   border: 1px solid rgba(255, 245, 229, .56);
-  border-radius: 50%;
+  border-radius: 16px;
   background: rgba(244, 232, 213, .92);
   box-shadow: 0 24px 62px rgba(0, 0, 0, .34);
 }
 
 .productProjection[data-proven="false"] { background: rgba(45, 38, 33, .88); }
-.productProjection img { width: 74%; height: 74%; object-fit: contain; }
+.productProjection img { width: 82%; height: 82%; object-fit: contain; }
 .productProjection span { color: #ad9f92; font: 300 72px/1 var(--font-serif), sans-serif; }
 
 .readout {
@@ -277,7 +277,7 @@
   .truthPlate { right: 16px; bottom: 18px; width: calc(100% - 32px); padding: 19px; }
   .staticCore { top: 51%; left: 50%; width: min(62vw, 300px); }
   .staticFragments i:nth-child(5), .staticFragments i:nth-child(6), .staticFragments i:nth-child(7), .staticFragments i:nth-child(8) { display: none; }
-  .productProjection { width: 104px; height: 104px; }
+  .productProjection { width: 124px; height: 156px; }
   .transport { grid-template-columns: 1fr; }
   .momentButtons { grid-template-columns: repeat(2, 1fr); }
   .momentButtons button:nth-child(2) { border-right: 0; }

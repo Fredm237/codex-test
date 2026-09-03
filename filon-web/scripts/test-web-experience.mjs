@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const page = readFileSync(join(root, "app/(site)/page.tsx"), "utf8");
 const experience = readFileSync(join(root, "components/experience/WebExperience.tsx"), "utf8");
+const homeVolume = readFileSync(join(root, "components/experience/HomeSignatureVolume.tsx"), "utf8");
 const primitives = readFileSync(join(root, "components/experience/DecisionPrimitives.tsx"), "utf8");
 const css = readFileSync(join(root, "components/experience/web-experience.module.css"), "utf8");
 const globalCss = readFileSync(join(root, "components/filon/filon.css"), "utf8");
@@ -15,8 +16,9 @@ const editorialNav = readFileSync(join(root, "components/editorial/EditorialNav.
 const languageSwitcher = readFileSync(join(root, "components/editorial/LanguageSwitcher.tsx"), "utf8");
 const stickyCta = readFileSync(join(root, "components/editorial/StickyCta.tsx"), "utf8");
 
-assert.ok(page.includes("<WebExperience proof={proof} />"), "la home doit rendre l'expérience Phase 11");
-assert.ok(page.includes("await getProof()"), "les chiffres home doivent venir du catalogue réel");
+assert.ok(page.includes("<WebExperience exactProduct={exactProduct} proof={proof} />"), "la home doit rendre l'expérience Phase 19");
+assert.ok(page.includes("getProof(),"), "les chiffres home doivent venir du catalogue réel");
+assert.ok(page.includes("getImmersiveExactProductProof()"), "l'objet caméra doit franchir une preuve produit détaillée");
 for (const forbidden of ["ImmersiveExperience", "/seq/", "canvas", "video", "three"])
   assert.doesNotMatch(page, new RegExp(forbidden, "i"), `la home ne doit pas charger ${forbidden}`);
 
@@ -34,6 +36,16 @@ assert.ok(experience.includes('href="#p19-home-after-journey"'), "le chapitre im
 assert.ok(experience.includes("prefers-reduced-motion: reduce"), "la home doit détecter le mouvement réduit");
 assert.ok(experience.includes("connection?.saveData"), "la home doit respecter l'économie de données");
 assert.ok(experience.includes("data-immersive-journey"), "le chapitre doit exposer sa frontière aux contrôles globaux");
+assert.ok(experience.includes("<HomeSignatureVolume"), "la home validée doit exécuter la caméra causale réelle");
+assert.ok(experience.includes("setJourneyProgress(progress)"), "la caméra réelle doit suivre la progression continue du chapitre");
+assert.ok(homeVolume.includes('dynamic('), "le moteur spatial doit rester dans un chunk différé");
+assert.ok(homeVolume.includes('ssr: false'), "le moteur WebGL ne doit pas entrer dans le rendu serveur");
+assert.ok(homeVolume.includes("requestIdleCallback"), "la couche spatiale doit attendre le temps navigateur disponible");
+assert.ok(homeVolume.includes('(max-width: 820px)'), "la caméra doit employer sa composition mobile autonome");
+assert.ok(homeVolume.includes("connection?.saveData"), "la couche spatiale doit respecter l'économie de données");
+assert.ok(homeVolume.includes("deviceMemory < 4"), "la couche spatiale doit refuser les appareils contraints");
+assert.ok(homeVolume.includes('getContext("webgl2"'), "la capacité WebGL doit être testée avant chargement");
+assert.ok(homeVolume.includes("ImmersiveBoundary"), "une erreur 3D doit retomber sur le parcours DOM qualifié");
 assert.ok(stickyCta.includes('querySelector<HTMLElement>("[data-immersive-journey]")'), "le CTA mobile ne doit pas couvrir le chapitre immersif");
 assert.ok(stickyCta.includes("journeyIsComplete"), "le CTA mobile doit attendre la fin du chapitre immersif");
 assert.ok(experience.includes("comparable ? copy.journey : copy.journeyUnknown"), "la narration doit s'abstenir si le produit exact n'est pas comparable");

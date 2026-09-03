@@ -62,7 +62,7 @@ assert.ok(signatureCanvas.includes("THREE.OrthographicCamera") && signatureCanva
 assert.ok(signatureCanvas.includes("CausalLightRig") && signatureCanvas.includes("proof.current.intensity"), "lumière et profondeur doivent évoluer avec la preuve");
 assert.ok(signatureCanvas.includes("activeCount") && signatureCanvas.includes("wireframe={!active}"), "les fragments non prouvés doivent rester des fantômes ouverts");
 assert.ok(signatureCanvas.includes("roughness") && signatureCanvas.includes("metalness"), "la preuve doit changer de matière, pas seulement d'opacité");
-assert.ok(signatureCanvas.includes("<Html center transform sprite") && signatureCanvas.includes("ProductCore"), "le produit doit rester le même objet pendant tout le trajet");
+assert.ok(signatureCanvas.includes('<Html center transform position={[0, 0, 0.18]}') && signatureCanvas.includes("ProductCore"), "le produit doit rester le même objet pendant tout le trajet");
 assert.ok(signatureCanvas.includes("beam.current.visible = scan > 0 && scan < 1 && proven"), "le faisceau de preuve doit rester fail-closed");
 assert.ok(signatureCanvas.includes('dpr={[1, 1.35]}') && signatureCanvas.includes("compact ? 7 : 12"), "la charge GPU doit être bornée et réduite sur mobile");
 assert.ok(signatureCanvas.includes('frameloop={props.playing ? "always" : "demand"}'), "la scène en pause ne doit pas maintenir une boucle GPU continue");
