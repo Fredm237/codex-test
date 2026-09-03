@@ -844,7 +844,7 @@ des profils contraints. Le budget initial de **2 Mo mobile / 4 Mo desktop** est
 donc respecté avec une marge nette ; cette mesure de bundle ne remplace pas les
 Core Web Vitals terrain de la Preview.
 
-### Qualification caméra déclarative et garde 30 fps — 3 septembre 2026
+### Qualification caméra déclarative et garde 45/30 fps — 3 septembre 2026
 
 La caméra finale n'est plus une collection de mutations dépendantes du taux de
 rafraîchissement. Les quatre plans `market → identity → proof → decision`, leurs
@@ -852,10 +852,12 @@ projections, cibles, focales et trajectoires sont déclarés dans un même syst�
 Le mouvement emploie un amortissement temporel ; les transitions CSS partagent
 les tokens cinématique, mécanique et doux de FILON.
 
-Le runtime mesure désormais une fenêtre WebGL réellement animée. Sous **30 fps**,
-il réduit d'abord DPR, ombres et fragments ; si la fenêtre suivante reste sous le
-seuil, la scène se ferme et rend le tableau DOM/CSS. Un onglet masqué ne peut pas
-déclencher artificiellement cette fermeture.
+Le runtime mesure désormais une fenêtre WebGL réellement animée. Sous **45 fps**,
+il réduit d'abord DPR, ombres et fragments ; si la fenêtre suivante reste sous
+**30 fps**, la scène se ferme et rend le tableau DOM/CSS. Un onglet masqué ne
+peut pas déclencher artificiellement cette fermeture. Les boucles de la scène
+signature et du dossier produit s'arrêtent aussi dès que leur surface quitte
+l'écran ; la reprise conserve la progression déjà atteinte.
 
 La qualification locale avec la preuve serveur courante a confirmé :
 
@@ -865,6 +867,9 @@ La qualification locale avec la preuve serveur courante a confirmé :
   texture produit dans le laboratoire et le dossier EAN ;
 - correction d'un arrêt d'orbite sur la tranche : le dossier exact revient sur
   un cadrage frontal lisible avant de s'immobiliser ;
+- profil desktop volontairement contraint : dégradation automatique `full →
+  degraded` observée, fenêtre d'initialisation immersive mesurée à **0 ms** de
+  tâche longue, puis arrêt coopératif confirmé hors écran (`Pause → Rejouer`) ;
 - suite web et TypeScript verts ; build réel de **47 routes** vert ; home
   **8,76 kB / 117 kB**, laboratoire **11,4 kB / 114 kB**, dossier exact
   **7,62 kB / 162 kB** au premier chargement.
