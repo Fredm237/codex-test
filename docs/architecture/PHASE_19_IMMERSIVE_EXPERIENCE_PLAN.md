@@ -4,15 +4,16 @@
 - Branche de travail : **`codex/filon-immersive-production`**
 - Base : **`main` à `e48529bfde73c958f15ae00e1eaff953d382fedc`**
 - Mandat source : **FILON — Immersive Experience Production Bible**
-- État : **P19A–E qualifiés ; prototype WebGL validé par le fondateur ; propagation finale engagée sur la home, sans publication production**
+- État : **P19A–E qualifiés ; direction WebGL validée par le fondateur ; home et dossier produit exact raccordés localement, sans publication production**
 - Règle : **aucune publication ni activation production sans qualification du parcours complet**
 
 ## 1. État exact du mandat
 
 Le socle web evidence-first de Phase 11 est publié, testé et déployé. Le mandat
-immersif complet n'est pas encore exécuté. Sur la branche locale Phase 19,
-`WebExperience` porte désormais un premier plan continu et conserve une
-implémentation DOM/CSS : ni Three.js, ni canvas, ni vidéo, ni séquence d'images.
+immersif complet n'est pas encore promu. Sur la branche locale Phase 19,
+`WebExperience` exécute désormais la caméra R3F/Three.js qualifiée tandis que
+le DOM reste la source de vérité. Aucun ancien tunnel vidéo ni aucune séquence
+de 1 200 images n'est raccordé.
 
 | Étape du mandat | État | Preuve ou sortie attendue |
 |---|---|---|
@@ -27,9 +28,9 @@ implémentation DOM/CSS : ni Three.js, ni canvas, ni vidéo, ni séquence d'imag
 | 9. Prototype transition | **PASS local** | P19C, signal → résolution → comparaison |
 | 10. Prototype produit exact | **PASS local** | P19D, preuve exacte fail-closed |
 | 11. Prototype mobile | **PASS local** | P19E, trois états autonomes |
-| 12. Revues visuelle/performance/a11y | **PASS local initial** | desktop, mobile, clavier, build et budgets initiaux verts ; mesure terrain encore requise |
+| 12. Revues visuelle/performance/a11y | **PASS local partiel** | build de production, desktop, fallback et budgets verts ; nouvelle Preview mobile et mesure terrain encore requises |
 | 13. Choix du langage final | **PASS** | B — chorégraphie de preuve |
-| 14. Expérience complète | **EN COURS / NON PUBLIÉE** | noyau inter-routes et premier plan home locaux ; autres surfaces à propager |
+| 14. Expérience complète | **EN COURS / NON PUBLIÉE** | noyau inter-routes, home et dossier exact locaux ; canary final encore interdit |
 
 ## 2. Audit de l'existant
 
@@ -552,18 +553,19 @@ reader shadow et n'ajoute aucun produit, prix ou marchand de substitution.
 Qualification automatique locale :
 
 - suite web complète et TypeScript verts ;
-- build Next.js complet vert : **47 pages**, fiche exacte à **5,37 kB / 159 kB
-  First Load JS** ;
+- build Next.js complet vert : **43 pages statiques générées**, fiche exacte à
+  **7,37 kB / 162 kB First Load JS** ;
 - présence explicite de la frontière `data-product-evidence="exact"`, des
   coordonnées de preuve et des trois traductions vérifiée par test ;
 - composition responsive dédiée à 860 px et 560 px, mouvement d'arrivée supprimé
   avec `prefers-reduced-motion` ;
-- zéro canvas, zéro WebGL, zéro vidéo et zéro lecteur shadow ajouté.
+- un unique canvas différé, zéro vidéo, zéro média historique et zéro lecteur
+  shadow ajouté.
 
-La revue visuelle desktop/mobile de ce plan doit être rejouée : le navigateur de
-qualification a refusé l'origine locale après le redémarrage de l'environnement.
-Cette limite n'est pas transformée en preuve positive et bloque encore le PASS
-visuel de cette seule étape, pas le commit local de son implémentation.
+La revue de production locale desktop confirme le produit réel dans le dossier
+minéral, six offres comparables, cinq marchands et aucun débordement horizontal.
+La revue mobile de la nouvelle couche WebGL reste à produire sur la prochaine
+Preview ; elle n'est pas transformée en preuve positive.
 
 ### Offre observée historique `/produit/[id]`
 
@@ -824,3 +826,13 @@ Sans image, comparaison, capacité WebGL ou mouvement autorisé, aucun canvas
 n'est monté et l'image DOM originale reste visible. Le moteur de capacité,
 l'arrêt sur erreur et la composition mobile sont mutualisés avec la home plutôt
 que réimplémentés par route.
+
+Après revue fondatrice de la Preview, l'objet générique a été définitivement
+écarté : l'image catalogue devient une texture de la matière WebGL et reste le
+même acteur entre la home et le dossier EAN. La frontière d'erreur conserve
+l'image DOM en secours. La suite web complète, TypeScript et le build propre
+sont verts ; le build final mesure la home à **8,5 kB / 117 kB** et le dossier
+exact à **7,37 kB / 162 kB First Load JS**. Les plans `CHAOS` et `DÉCISION`,
+l'état `unknown`, le produit exact et la console du build local ont été revus
+sur desktop. La nouvelle Preview mobile/non indexée reste le prochain gate ;
+aucune promotion production n'est autorisée par cette qualification locale.
