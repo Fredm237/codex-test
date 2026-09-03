@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import type { CSSProperties } from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { ImmersiveExactProductProof } from "@/lib/immersive-proof";
+import { useAdaptiveFrameBudget } from "./ImmersiveRuntime";
 import styles from "./signature-commerce.module.css";
 
 const SignatureCommerceCanvas = dynamic(
@@ -57,6 +58,8 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
   const [compact, setCompact] = useState(false);
   const [progress, setProgress] = useState(reduced ? 1 : 0);
   const [playing, setPlaying] = useState(false);
+  const failRuntime = useCallback(() => setCapability("fallback"), []);
+  const { measuring, quality } = useAdaptiveFrameBudget(capability === "webgl", failRuntime);
   const shot = shotFromProgress(progress);
   const moment = MOMENTS[shot];
 
@@ -168,15 +171,17 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
         className={styles.stage}
         data-shot={shot}
         data-renderer={capability}
+        data-quality={quality}
         data-proof={product ? "qualified" : "unknown"}
       >
         {near && capability === "webgl" ? (
           <SignatureCommerceCanvas
             compact={compact}
             offerCount={product?.offers.length ?? 0}
-            playing={playing}
+            playing={playing || measuring}
             product={product ? { image: product.image, name: productLabel } : null}
             progress={progress}
+            quality={quality}
           />
         ) : <StaticPhysicalFallback product={product} progress={progress} />}
 

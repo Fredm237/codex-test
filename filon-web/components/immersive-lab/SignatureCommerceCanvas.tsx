@@ -4,6 +4,15 @@ import { Edges, RoundedBox, useTexture } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
+import type { ImmersiveQuality } from "./ImmersiveRuntime";
+import {
+  cinematicEase,
+  dampAlpha,
+  MATERIAL_SEQUENCE,
+  phase,
+  sampleCausalCamera,
+  sampleCausalLights,
+} from "./SignatureMotion";
 import styles from "./signature-commerce.module.css";
 
 type ProductProjection = { image: string | null; name: string } | null;
@@ -14,6 +23,7 @@ type SignatureCanvasProps = {
   playing: boolean;
   product: ProductProjection;
   progress: number;
+  quality: ImmersiveQuality;
 };
 
 const RAW_POSITIONS: Array<[number, number, number]> = [
@@ -22,19 +32,6 @@ const RAW_POSITIONS: Array<[number, number, number]> = [
   [-1.5, 3.8, -2.8], [1.4, -3.8, -2.2], [-3.2, 0.3, -3.5], [3.4, -0.4, -3.2],
 ];
 
-function clamp(value: number, low = 0, high = 1) {
-  return Math.max(low, Math.min(high, value));
-}
-
-function phase(progress: number, start: number, end: number) {
-  return clamp((progress - start) / (end - start));
-}
-
-function smooth(value: number) {
-  const x = clamp(value);
-  return x * x * (3 - 2 * x);
-}
-
 function CameraRig({ compact, playing, progress }: { compact: boolean; playing: boolean; progress: number }) {
   const { camera, set, size } = useThree();
   const perspective = useRef(camera as THREE.PerspectiveCamera);
@@ -42,44 +39,25 @@ function CameraRig({ compact, playing, progress }: { compact: boolean; playing: 
   const activeCamera = useRef<"perspective" | "orthographic">("perspective");
   const target = useMemo(() => new THREE.Vector3(), []);
   const desired = useMemo(() => new THREE.Vector3(), []);
+  const desiredTarget = useMemo(() => new THREE.Vector3(), []);
 
   useEffect(() => () => {
     set({ camera: perspective.current });
   }, [set]);
 
-  useFrame(() => {
-    const wideToMacro = smooth(phase(progress, 0, 0.34));
-    const orbit = smooth(phase(progress, 0.34, 0.72));
-    const settle = smooth(phase(progress, 0.72, 1));
-    const portrait = compact ? 1 : 0;
-
-    if (progress < 0.34) {
-      desired.set(
-        THREE.MathUtils.lerp(0, 2.65 - portrait * 0.8, wideToMacro),
-        THREE.MathUtils.lerp(1.8, 0.35, wideToMacro),
-        THREE.MathUtils.lerp(10.5 + portrait * 2.2, 4.3 + portrait, wideToMacro),
-      );
-    } else if (progress < 0.72) {
-      const angle = THREE.MathUtils.lerp(-0.2, Math.PI * 0.82, orbit);
-      const radius = compact ? 5.3 : 4.9;
-      desired.set(Math.sin(angle) * radius, THREE.MathUtils.lerp(0.35, 1.35, orbit), Math.cos(angle) * radius);
-    } else {
-      desired.set(
-        THREE.MathUtils.lerp(3.9, 0, settle),
-        THREE.MathUtils.lerp(1.25, compact ? 4.8 : 5.8, settle),
-        THREE.MathUtils.lerp(4.5, compact ? 9.8 : 8.2, settle),
-      );
-    }
-
-    const alpha = playing ? 0.13 : 1;
+  useFrame((_, delta) => {
+    const pose = sampleCausalCamera(progress, compact);
+    desired.fromArray(pose.position);
+    desiredTarget.fromArray(pose.target);
+    const alpha = playing ? dampAlpha(delta) : 1;
     const perspectiveCamera = perspective.current;
     perspectiveCamera.position.lerp(desired, alpha);
-    target.set(0, settle * -0.2, 0);
+    target.lerp(desiredTarget, alpha);
     perspectiveCamera.lookAt(target);
     perspectiveCamera.aspect = size.width / Math.max(size.height, 1);
     perspectiveCamera.fov = THREE.MathUtils.lerp(
       perspectiveCamera.fov,
-      THREE.MathUtils.lerp(compact ? 52 : 46, 31, settle),
+      pose.fov,
       alpha,
     );
     perspectiveCamera.updateProjectionMatrix();
@@ -90,11 +68,11 @@ function CameraRig({ compact, playing, progress }: { compact: boolean; playing: 
     orthographic.right = frustum * aspect;
     orthographic.top = frustum;
     orthographic.bottom = -frustum;
-    orthographic.position.set(0, compact ? 5.7 : 6.4, compact ? 9.6 : 8.8);
-    orthographic.lookAt(0, -0.2, 0);
+    orthographic.position.lerp(desired, alpha);
+    orthographic.lookAt(target);
     orthographic.updateProjectionMatrix();
 
-    const nextCamera = progress >= 0.9 ? "orthographic" : "perspective";
+    const nextCamera = pose.projection;
     if (activeCamera.current !== nextCamera) {
       activeCamera.current = nextCamera;
       set({ camera: nextCamera === "orthographic" ? orthographic : perspectiveCamera });
@@ -117,8 +95,8 @@ function MarketFragment({ active, index, progress, total }: { active: boolean; i
 
   useFrame(() => {
     if (!mesh.current || !material.current) return;
-    const gather = smooth(phase(progress, 0.08, 0.45));
-    const seal = smooth(phase(progress, 0.7, 0.96));
+    const gather = cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.gather));
+    const seal = cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.seal));
     const orbit = phase(progress, 0.34, 0.72) * (index % 2 ? -0.35 : 0.35);
     const orbitX = Math.cos(ringAngle + orbit) * 3.15;
     const orbitY = Math.sin(ringAngle + orbit) * 2.15;
@@ -134,7 +112,7 @@ function MarketFragment({ active, index, progress, total }: { active: boolean; i
     );
     const scale = active ? 1 : 0.72;
     mesh.current.scale.setScalar(THREE.MathUtils.lerp(scale, active ? 0.58 : 0.24, seal));
-    const anneal = active ? smooth(phase(progress, 0.46, 0.74)) : 0;
+    const anneal = active ? cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.anneal)) : 0;
     material.current.color.lerpColors(new THREE.Color(active ? "#71503f" : "#3b342e"), new THREE.Color("#c89544"), anneal);
     material.current.roughness = THREE.MathUtils.lerp(active ? 0.96 : 1, active ? 0.24 : 1, anneal);
     material.current.metalness = active ? anneal * 0.58 : 0;
@@ -155,25 +133,18 @@ function CausalLightRig({ progress }: { progress: number }) {
   const decision = useRef<THREE.PointLight>(null);
 
   useFrame(() => {
-    const identity = smooth(phase(progress, 0.2, 0.48));
-    const anneal = smooth(phase(progress, 0.46, 0.76));
-    const settle = smooth(phase(progress, 0.76, 1));
+    const lights = sampleCausalLights(progress);
     if (key.current) {
-      key.current.position.set(
-        THREE.MathUtils.lerp(-5.5, 0.8, identity),
-        THREE.MathUtils.lerp(3.5, 7.4, identity),
-        THREE.MathUtils.lerp(8, 4.2, anneal),
-      );
-      key.current.intensity = THREE.MathUtils.lerp(1.25, 3.1, identity) * (1 - settle * 0.22);
+      key.current.position.fromArray(lights.key.position);
+      key.current.intensity = lights.key.intensity;
     }
     if (proof.current) {
-      proof.current.position.x = THREE.MathUtils.lerp(6.5, -2.4, anneal);
-      proof.current.position.z = THREE.MathUtils.lerp(2.2, 6.8, anneal);
-      proof.current.intensity = THREE.MathUtils.lerp(8, 48, anneal) * (1 - settle * 0.5);
+      proof.current.position.fromArray(lights.proof.position);
+      proof.current.intensity = lights.proof.intensity;
     }
     if (decision.current) {
-      decision.current.position.y = THREE.MathUtils.lerp(-2, 3.4, settle);
-      decision.current.intensity = THREE.MathUtils.lerp(2, 15, settle);
+      decision.current.position.fromArray(lights.decision.position);
+      decision.current.intensity = lights.decision.intensity;
     }
   });
 
@@ -194,13 +165,13 @@ function ProductCore({ product, progress }: { product: ProductProjection; progre
 
   useFrame(() => {
     if (!group.current || !shell.current) return;
-    const focus = smooth(phase(progress, 0.2, 0.52));
-    const seal = smooth(phase(progress, 0.72, 1));
+    const focus = cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.focus));
+    const seal = cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.seal));
     group.current.rotation.y = THREE.MathUtils.lerp(-0.34, Math.PI * 0.24, focus) * (1 - seal);
     group.current.rotation.x = THREE.MathUtils.lerp(0.22, -0.08, focus) * (1 - seal);
     group.current.scale.setScalar(THREE.MathUtils.lerp(0.82, 1.08, focus) - seal * 0.12);
-    shell.current.roughness = proven ? THREE.MathUtils.lerp(0.82, 0.2, smooth(phase(progress, 0.46, 0.76))) : 1;
-    shell.current.metalness = proven ? smooth(phase(progress, 0.46, 0.76)) * 0.68 : 0;
+    shell.current.roughness = proven ? THREE.MathUtils.lerp(0.82, 0.2, cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.anneal))) : 1;
+    shell.current.metalness = proven ? cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.anneal)) * 0.68 : 0;
     shell.current.emissiveIntensity = proven ? 0.08 + focus * 0.18 : 0.02;
   });
 
@@ -287,7 +258,7 @@ function EvidenceSeal({ progress, proven }: { progress: number; proven: boolean 
   const beam = useRef<THREE.Mesh>(null);
 
   useFrame(() => {
-    const settle = smooth(phase(progress, 0.72, 1));
+    const settle = cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.seal));
     if (plane.current && material.current) {
       plane.current.position.y = THREE.MathUtils.lerp(-3.4, -1.62, settle);
       material.current.opacity = settle * 0.72;
@@ -313,8 +284,8 @@ function EvidenceSeal({ progress, proven }: { progress: number; proven: boolean 
   );
 }
 
-function CommerceWorld({ compact, offerCount, playing, product, progress }: SignatureCanvasProps) {
-  const fragmentCount = compact ? 7 : 12;
+function CommerceWorld({ compact, offerCount, playing, product, progress, quality }: SignatureCanvasProps) {
+  const fragmentCount = compact ? 7 : quality === "degraded" ? 9 : 12;
   const activeCount = Math.min(fragmentCount, offerCount);
   const proven = Boolean(product && offerCount >= 2);
 
@@ -339,10 +310,10 @@ export function SignatureCommerceCanvas(props: SignatureCanvasProps) {
     <div className={styles.canvas} aria-hidden="true" data-webgl-signature="commerce-evidence">
       <Canvas
         camera={{ position: [0, 1.8, 10.5], fov: props.compact ? 52 : 46, near: 0.1, far: 60 }}
-        dpr={[1, 1.35]}
+        dpr={props.quality === "degraded" ? 1 : [1, 1.35]}
         frameloop={props.playing ? "always" : "demand"}
         gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
-        shadows={!props.compact}
+        shadows={!props.compact && props.quality === "full"}
         onCreated={({ gl }) => {
           gl.outputColorSpace = THREE.SRGBColorSpace;
           gl.toneMapping = THREE.ACESFilmicToneMapping;

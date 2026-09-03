@@ -1,8 +1,70 @@
 "use client";
 
-import { Component, type ErrorInfo, type ReactNode, useEffect, useState } from "react";
+import { Component, type ErrorInfo, type ReactNode, useEffect, useRef, useState } from "react";
 
 export type ImmersiveState = "pending" | "webgl" | "fallback";
+export type ImmersiveQuality = "full" | "degraded";
+
+export const FRAME_RATE_FLOOR = 30;
+const FRAME_SAMPLE_MS = 2_200;
+
+export function useAdaptiveFrameBudget(enabled: boolean, onFailure: () => void) {
+  const [quality, setQuality] = useState<ImmersiveQuality>("full");
+  const [measuring, setMeasuring] = useState(false);
+  const failureRef = useRef(onFailure);
+
+  useEffect(() => {
+    failureRef.current = onFailure;
+  }, [onFailure]);
+
+  useEffect(() => {
+    if (!enabled) {
+      setMeasuring(false);
+      return;
+    }
+    setMeasuring(true);
+    let frame = 0;
+    let frames = 0;
+    let startedAt = 0;
+    let stopped = false;
+
+    const tick = (now: number) => {
+      if (document.visibilityState !== "visible") {
+        startedAt = 0;
+        frames = 0;
+        frame = requestAnimationFrame(tick);
+        return;
+      }
+      if (!startedAt) startedAt = now;
+      frames += 1;
+      const elapsed = now - startedAt;
+      if (elapsed >= FRAME_SAMPLE_MS) {
+        const fps = frames * 1_000 / elapsed;
+        stopped = true;
+        if (fps < FRAME_RATE_FLOOR) {
+          if (quality === "full") setQuality("degraded");
+          else {
+            setMeasuring(false);
+            failureRef.current();
+          }
+        } else {
+          setMeasuring(false);
+        }
+      }
+      if (!stopped) frame = requestAnimationFrame(tick);
+    };
+
+    const warmup = window.setTimeout(() => {
+      frame = requestAnimationFrame(tick);
+    }, 700);
+    return () => {
+      window.clearTimeout(warmup);
+      cancelAnimationFrame(frame);
+    };
+  }, [enabled, quality]);
+
+  return { measuring, quality };
+}
 
 export function supportsImmersiveVolume() {
   const navigatorWithSignals = navigator as Navigator & {
@@ -63,7 +125,9 @@ export function useImmersiveRuntime(reduced: boolean, delay = 1_500) {
     };
   }, [delay, reduced]);
 
-  return { compact, setState, state };
+  const { measuring, quality } = useAdaptiveFrameBudget(state === "webgl", () => setState("fallback"));
+
+  return { compact, measuring, quality, setState, state };
 }
 
 type BoundaryProps = { children: ReactNode; onFailure: () => void };

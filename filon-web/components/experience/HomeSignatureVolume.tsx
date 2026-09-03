@@ -27,7 +27,7 @@ type Props = {
  * laisse simplement la chorégraphie DOM/CSS qualifiée reprendre la scène.
  */
 export function HomeSignatureVolume({ onStateChange, product, progress, reduced }: Props) {
-  const { compact, setState, state } = useImmersiveRuntime(reduced, 1_500);
+  const { compact, measuring, quality, setState, state } = useImmersiveRuntime(reduced, 1_500);
 
   useEffect(() => onStateChange(state), [onStateChange, state]);
 
@@ -39,9 +39,10 @@ export function HomeSignatureVolume({ onStateChange, product, progress, reduced 
         <SignatureCommerceCanvas
           compact={compact}
           offerCount={product?.merchants ?? 0}
-          playing={false}
+          playing={measuring}
           product={product ? { image: product.image, name: product.name } : null}
           progress={progress}
+          quality={quality}
         />
       </ImmersiveBoundary>
     </div>

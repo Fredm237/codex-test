@@ -843,3 +843,32 @@ reste retardé de 1,5 à 1,8 seconde, borné à un seul canvas par surface et ab
 des profils contraints. Le budget initial de **2 Mo mobile / 4 Mo desktop** est
 donc respecté avec une marge nette ; cette mesure de bundle ne remplace pas les
 Core Web Vitals terrain de la Preview.
+
+### Qualification caméra déclarative et garde 30 fps — 3 septembre 2026
+
+La caméra finale n'est plus une collection de mutations dépendantes du taux de
+rafraîchissement. Les quatre plans `market → identity → proof → decision`, leurs
+projections, cibles, focales et trajectoires sont déclarés dans un même système.
+Le mouvement emploie un amortissement temporel ; les transitions CSS partagent
+les tokens cinématique, mécanique et doux de FILON.
+
+Le runtime mesure désormais une fenêtre WebGL réellement animée. Sous **30 fps**,
+il réduit d'abord DPR, ombres et fragments ; si la fenêtre suivante reste sous le
+seuil, la scène se ferme et rend le tableau DOM/CSS. Un onglet masqué ne peut pas
+déclencher artificiellement cette fermeture.
+
+La qualification locale avec la preuve serveur courante a confirmé :
+
+- desktop **1 280 × 720** et portrait **390 × 844** : un canvas, qualité `full`,
+  aucune largeur excédentaire ;
+- produit exact NANKANG, **EAN 4717622052664**, **6 offres / 5 marchands** : même
+  texture produit dans le laboratoire et le dossier EAN ;
+- correction d'un arrêt d'orbite sur la tranche : le dossier exact revient sur
+  un cadrage frontal lisible avant de s'immobiliser ;
+- suite web et TypeScript verts ; build réel de **47 routes** vert ; home
+  **8,76 kB / 117 kB**, laboratoire **11,4 kB / 114 kB**, dossier exact
+  **7,62 kB / 162 kB** au premier chargement.
+
+Les avertissements de cache sitemap au-delà de 2 Mo restent antérieurs et sans
+rapport avec le graphe immersif. Cette qualification demeure un candidat Preview
+non indexé ; elle n'autorise ni fusion ni promotion production.

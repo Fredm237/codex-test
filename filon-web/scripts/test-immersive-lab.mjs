@@ -9,6 +9,8 @@ const lab = readFileSync(join(root, "components/immersive-lab/ImmersiveLab.tsx")
 const css = readFileSync(join(root, "components/immersive-lab/immersive-lab.module.css"), "utf8");
 const signature = readFileSync(join(root, "components/immersive-lab/SignatureMomentGate.tsx"), "utf8");
 const signatureCanvas = readFileSync(join(root, "components/immersive-lab/SignatureCommerceCanvas.tsx"), "utf8");
+const signatureMotion = readFileSync(join(root, "components/immersive-lab/SignatureMotion.ts"), "utf8");
+const immersiveRuntime = readFileSync(join(root, "components/immersive-lab/ImmersiveRuntime.tsx"), "utf8");
 const signatureCss = readFileSync(join(root, "components/immersive-lab/signature-commerce.module.css"), "utf8");
 const exactProof = readFileSync(join(root, "lib/immersive-proof.ts"), "utf8");
 const fonts = readFileSync(join(root, "app/fonts.ts"), "utf8");
@@ -57,15 +59,23 @@ assert.ok(signature.includes("product.offers.length") && signature.includes("pro
 assert.doesNotMatch(signature, /currency\s*(?:\|\||\?\?)\s*["']EUR["']|BUY_NOW|\bWAIT\b/, "la séquence ne doit fabriquer ni devise ni décision shadow");
 
 assert.ok(signatureCanvas.includes("<Canvas") && signatureCanvas.includes("CameraRig"), "les moments signature doivent employer une vraie scène et une vraie caméra");
-assert.ok(signatureCanvas.includes("wideToMacro") && signatureCanvas.includes("orbit") && signatureCanvas.includes("settle"), "la caméra doit accomplir wide, macro, orbit et stabilisation");
-assert.ok(signatureCanvas.includes("THREE.OrthographicCamera") && signatureCanvas.includes('progress >= 0.9'), "le plan final doit employer une vraie projection orthographique");
+assert.ok(signatureCanvas.includes("sampleCausalCamera") && signatureMotion.includes("CAMERA_SEQUENCE"), "la caméra doit suivre des plans déclaratifs partagés");
+for (const shot of ["market", "identity", "proof", "decision"]) {
+  assert.ok(signatureMotion.includes(`id: "${shot}"`), `le plan caméra ${shot} doit rester déclaré`);
+}
+assert.ok(signatureMotion.includes('projection: p >= 0.9 ? "orthographic" : "perspective"'), "le plan final doit employer une vraie projection orthographique");
+assert.ok(signatureMotion.includes("macroAngle") && signatureMotion.includes("orbitEndAngle"), "la caméra doit accomplir une orbite continue depuis le plan macro");
+assert.ok(signatureMotion.includes("dampAlpha") && signatureCanvas.includes("dampAlpha(delta)"), "le mouvement caméra doit être indépendant de la fréquence d'écran");
 assert.ok(signatureCanvas.includes("CausalLightRig") && signatureCanvas.includes("proof.current.intensity"), "lumière et profondeur doivent évoluer avec la preuve");
 assert.ok(signatureCanvas.includes("activeCount") && signatureCanvas.includes("wireframe={!active}"), "les fragments non prouvés doivent rester des fantômes ouverts");
 assert.ok(signatureCanvas.includes("roughness") && signatureCanvas.includes("metalness"), "la preuve doit changer de matière, pas seulement d'opacité");
 assert.ok(signatureCanvas.includes("useTexture(image)") && signatureCanvas.includes("map={texture}") && signatureCanvas.includes("ProductCore"), "le produit doit rester le même objet texturé pendant tout le trajet");
 assert.ok(signatureCanvas.includes("beam.current.visible = scan > 0 && scan < 1 && proven"), "le faisceau de preuve doit rester fail-closed");
-assert.ok(signatureCanvas.includes('dpr={[1, 1.35]}') && signatureCanvas.includes("compact ? 7 : 12"), "la charge GPU doit être bornée et réduite sur mobile");
+assert.ok(signatureCanvas.includes('props.quality === "degraded" ? 1 : [1, 1.35]') && signatureCanvas.includes("compact ? 7"), "la charge GPU doit être bornée, adaptative et réduite sur mobile");
 assert.ok(signatureCanvas.includes('frameloop={props.playing ? "always" : "demand"}'), "la scène en pause ne doit pas maintenir une boucle GPU continue");
+assert.ok(immersiveRuntime.includes("FRAME_RATE_FLOOR = 30"), "le seuil de dégradation doit rester explicite à 30 fps");
+assert.ok(immersiveRuntime.includes('setQuality("degraded")') && immersiveRuntime.includes('setState("fallback")'), "une scène durablement lente doit dégrader puis fermer WebGL");
+assert.ok(signatureCss.includes("--motion-cinematic") && signatureCss.includes("--duration-camera"), "les transitions doivent employer les tokens de mouvement FILON");
 assert.ok(signatureCss.includes("min-height: 52px") && signatureCss.includes("min-height: 48px"), "les contrôles signature doivent conserver des cibles tactiles suffisantes");
 assert.ok(signatureCss.includes("prefers-reduced-motion: reduce"), "le tableau signature doit neutraliser les transitions en mouvement réduit");
 assert.doesNotMatch(signatureCss, /3000vh|1200vh/, "la signature ne doit pas recréer un tunnel de scroll");

@@ -15,11 +15,14 @@ type Props = {
   offerCount: number;
 };
 
+const PRODUCT_SEQUENCE_START = 0.2;
+const PRODUCT_SEQUENCE_END = 0.92;
+
 export function ProductIdentityVolume({ image, name, offerCount }: Props) {
   const [reduced, setReduced] = useState(false);
-  const [progress, setProgress] = useState(0.2);
+  const [progress, setProgress] = useState(PRODUCT_SEQUENCE_START);
   const frameRef = useRef(0);
-  const { compact, setState, state } = useImmersiveRuntime(reduced, 1_800);
+  const { compact, measuring, quality, setState, state } = useImmersiveRuntime(reduced, 1_800);
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -35,7 +38,7 @@ export function ProductIdentityVolume({ image, name, offerCount }: Props) {
     const tick = (now: number) => {
       const elapsed = Math.min(1, (now - started) / 3_800);
       const eased = elapsed * elapsed * (3 - 2 * elapsed);
-      setProgress(0.2 + eased * 0.56);
+      setProgress(PRODUCT_SEQUENCE_START + eased * (PRODUCT_SEQUENCE_END - PRODUCT_SEQUENCE_START));
       if (elapsed < 1) frameRef.current = requestAnimationFrame(tick);
     };
     frameRef.current = requestAnimationFrame(tick);
@@ -50,9 +53,10 @@ export function ProductIdentityVolume({ image, name, offerCount }: Props) {
         <SignatureCommerceCanvas
           compact={compact}
           offerCount={offerCount}
-          playing={false}
+          playing={measuring}
           product={{ image, name }}
           progress={progress}
+          quality={quality}
         />
       </ImmersiveBoundary>
     </div>
