@@ -7,6 +7,7 @@ import { API } from "@/lib/api";
 import { catalogueAssistantHref } from "@/lib/catalogue-assistant-url";
 import { formatSupportedMoney, normalizeSupportedMoney } from "@/lib/currency";
 import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
+import { ProductJourneyLink } from "@/components/experience/ProductJourneyLink";
 import { hasCurrentOfferEvidence, isSafeExternalOfferUrl } from "@/components/filon/product-copy";
 import marketStyles from "@/components/experience/search-market.module.css";
 
@@ -20,7 +21,7 @@ const SL = {
     priceFor: "Votre région",
     countryHelp: "Ce contexte ne masque pas les offres européennes comparables. Les frais et la livraison à votre adresse restent à vérifier chez le marchand.",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
-    why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", verifiedOffer: "Offre vérifiée", currentEvidence: "Prix et disponibilité courants",
+    why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", proof: "Ouvrir la preuve", catalogue: "Voir dans le catalogue", verifiedOffer: "Offre vérifiée", currentEvidence: "Prix et disponibilité courants",
     real: "Prix réels · Catalogue FILON", est: "Prix estimés, à titre indicatif",
     analysed: "offres analysées", forNeed: "pour", verifiedResults: (count: number) => `${count} offre${count > 1 ? "s" : ""} avec preuve courante`,
     failedTitle: "Je ne peux pas répondre pour le moment.",
@@ -41,7 +42,7 @@ const SL = {
     priceFor: "Jouw regio",
     countryHelp: "Deze context verbergt geen vergelijkbare Europese aanbiedingen. Verzendkosten en levering op jouw adres controleer je bij de winkel.",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
-    why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", verifiedOffer: "Geverifieerde aanbieding", currentEvidence: "Actuele prijs en beschikbaarheid",
+    why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", proof: "Open het bewijs", catalogue: "Bekijk in de catalogus", verifiedOffer: "Geverifieerde aanbieding", currentEvidence: "Actuele prijs en beschikbaarheid",
     real: "Echte prijzen · FILON Catalogus", est: "Geschatte prijzen, ter indicatie",
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", verifiedResults: (count: number) => `${count} aanbieding${count > 1 ? "en" : ""} met actueel bewijs`,
     failedTitle: "Ik kan nu niet antwoorden.",
@@ -62,7 +63,7 @@ const SL = {
     priceFor: "Your region",
     countryHelp: "This context does not hide comparable European offers. Delivery cost and delivery to your address must still be checked with the merchant.",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
-    why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", verifiedOffer: "Verified offer", currentEvidence: "Current price and availability",
+    why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", proof: "Open the evidence", catalogue: "View in catalogue", verifiedOffer: "Verified offer", currentEvidence: "Current price and availability",
     real: "Real prices · FILON Catalogue", est: "Estimated prices, for guidance",
     analysed: "offers analysed", forNeed: "for", verifiedResults: (count: number) => `${count} offer${count > 1 ? "s" : ""} with current evidence`,
     failedTitle: "I can't answer right now.",
@@ -128,6 +129,7 @@ const STEPS = [
 
 type Hist = "baisse" | "hausse" | "stable";
 type Card = {
+  offer_id?: number | null; product_ean?: string | null;
   name: string;
   offer_kind?: string; image?: string | null; link?: string | null;
   price: number; currency: string; merchant: string; delivery: string; warranty: string;
@@ -213,9 +215,15 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
   // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
   // Google Shopping : on le laisse explorer le même produit dans FILON.
   const hasMerchantLink = isSafeExternalOfferUrl(c.link) && !isGoogleShoppingUrl(c.link);
-  const offerUrl = hasMerchantLink
-    ? (c.link as string)
-    : catalogueAssistantHref(q || c.name);
+  const exactEan = typeof c.product_ean === "string" && /^\d{8,14}$/.test(c.product_ean)
+    ? c.product_ean
+    : null;
+  const offerId = Number.isInteger(c.offer_id) && (c.offer_id ?? 0) > 0 ? c.offer_id : null;
+  const evidenceUrl = exactEan
+    ? `/produits/${encodeURIComponent(exactEan)}/`
+    : offerId
+      ? `/produit/${offerId}/`
+      : null;
   const showImg = c.image && imgOk;
   const displayedPrice = hasCurrentOfferEvidence(c) && c.in_stock === true
     ? formatSupportedMoney(c.price, c.currency, locale)
@@ -262,14 +270,20 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
               ? <><IcClock /> {S.contextualOffer}</>
               : <><IcCheck /> {S.currentEvidence}</>}
           </span>
-          <a
-            className="ed-btn wave"
-            href={offerUrl}
-            target={hasMerchantLink ? "_blank" : undefined}
-            rel={hasMerchantLink ? "noopener noreferrer" : undefined}
-          >
-            {hasMerchantLink ? S.see : S.catalogue}
-          </a>
+          <div className="fa-actions" data-search-decision-handoff={evidenceUrl ? "available" : "unavailable"}>
+            {evidenceUrl ? (
+              <ProductJourneyLink className="ed-btn fa-proof" href={evidenceUrl} image={c.image} label={c.name}>
+                {S.proof}
+              </ProductJourneyLink>
+            ) : null}
+            {hasMerchantLink ? (
+              <a className="ed-btn wave" href={c.link as string} target="_blank" rel="noopener noreferrer sponsored">
+                {S.see}
+              </a>
+            ) : (
+              <a className="ed-btn wave" href={catalogueAssistantHref(q || c.name)}>{S.catalogue}</a>
+            )}
+          </div>
         </div>
       </div>
     </motion.article>

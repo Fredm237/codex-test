@@ -12,6 +12,10 @@ assert.ok(assistant.includes("hasCurrentOfferEvidence"), "l'assistant doit exige
 assert.ok(assistant.includes("ev.data.real"), "les estimations ne doivent pas devenir des offres FILON");
 assert.ok(assistant.includes("verifiedCards.length === 0"), "zéro offre vérifiée doit rester un échec honnête");
 assert.ok(assistant.includes("displayedPrice === null) return null"), "une carte sans prix admissible doit rester masquée");
+assert.ok(assistant.includes("ProductJourneyLink"), "une recommandation identifiable doit rester dans FILON avant l'achat");
+assert.ok(assistant.includes("product_ean") && assistant.includes("offer_id"), "le passage recherche → preuve doit utiliser les identifiants réels du backend");
+assert.ok(assistant.includes('data-search-decision-handoff={evidenceUrl ? "available" : "unavailable"}'), "l'état du passage vers la preuve doit rester explicite");
+assert.ok(assistant.includes('rel="noopener noreferrer sponsored"'), "la sortie marchande doit rester identifiée comme lien affilié");
 assert.ok(assistant.includes("currentEvidence"), "la carte doit annoncer uniquement la preuve courante");
 assert.ok(assistant.includes("verifiedOffer"), "la carte doit utiliser un libellé factuel");
 assert.doesNotMatch(assistant, /\bc\.buy\b/, "aucun lecteur BUY/WAIT ne doit piloter l'assistant public");
