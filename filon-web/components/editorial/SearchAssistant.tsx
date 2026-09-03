@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
-import { API } from "@/lib/api";
 import { catalogueAssistantHref } from "@/lib/catalogue-assistant-url";
 import { formatSupportedMoney, normalizeSupportedMoney } from "@/lib/currency";
 import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
@@ -187,7 +186,9 @@ async function* streamAnalyze(
   signal: AbortSignal,
 ): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
-  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}&locale=${encodeURIComponent(locale)}`;
+  // Même origine : la route Next relaie le flux du backend sans exposer la
+  // recherche aux règles CORS variables des domaines Preview Vercel.
+  const url = `/api/advise/stream/?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}&locale=${encodeURIComponent(locale)}`;
   const res = await fetch(url, { headers: { Accept: "text/event-stream" }, signal });
   if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
   const reader = res.body.getReader();
