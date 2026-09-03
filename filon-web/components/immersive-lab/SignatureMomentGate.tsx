@@ -54,12 +54,16 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
   const startedAtRef = useRef(0);
   const hasAutoPlayedRef = useRef(false);
   const [near, setNear] = useState(false);
+  const [visible, setVisible] = useState(false);
   const [capability, setCapability] = useState<Capability>("pending");
   const [compact, setCompact] = useState(false);
   const [progress, setProgress] = useState(reduced ? 1 : 0);
   const [playing, setPlaying] = useState(false);
   const failRuntime = useCallback(() => setCapability("fallback"), []);
-  const { measuring, quality } = useAdaptiveFrameBudget(capability === "webgl", failRuntime);
+  const markRuntimeReady = useCallback(() => {
+    performance.mark("filon-immersive-init-ready");
+  }, []);
+  const { measuring, quality } = useAdaptiveFrameBudget(capability === "webgl" && visible, failRuntime);
   const shot = shotFromProgress(progress);
   const moment = MOMENTS[shot];
 
@@ -72,6 +76,16 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
         observer.disconnect();
       }
     }, { rootMargin: "500px 0px" });
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const observer = new IntersectionObserver(([entry]) => {
+      setVisible(Boolean(entry?.isIntersecting));
+    }, { threshold: 0.02 });
     observer.observe(root);
     return () => observer.disconnect();
   }, []);
@@ -105,6 +119,11 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
         || canvas.getContext("webgl", { failIfMajorPerformanceCaveat: true })
         || canvas.getContext("webgl2")
         || canvas.getContext("webgl");
+      if (context) {
+        performance.clearMarks("filon-immersive-init-start");
+        performance.clearMarks("filon-immersive-init-ready");
+        performance.mark("filon-immersive-init-start");
+      }
       setCapability(context ? "webgl" : "fallback");
       context?.getExtension("WEBGL_lose_context")?.loseContext();
     } catch {
@@ -116,6 +135,10 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
     cancelAnimationFrame(frameRef.current);
     setPlaying(false);
   }, []);
+
+  useEffect(() => {
+    if (!visible) stop();
+  }, [stop, visible]);
 
   const tick = useCallback((now: number) => {
     const next = Math.min(1, (now - startedAtRef.current) / DURATION_MS);
@@ -138,11 +161,11 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
 
   useEffect(() => () => cancelAnimationFrame(frameRef.current), []);
   useEffect(() => {
-    if (near && capability === "webgl" && !reduced && !hasAutoPlayedRef.current) {
+    if (near && visible && capability === "webgl" && !reduced && !hasAutoPlayedRef.current) {
       hasAutoPlayedRef.current = true;
       play();
     }
-  }, [capability, near, play, reduced]);
+  }, [capability, near, play, reduced, visible]);
   useEffect(() => {
     if (reduced) {
       stop();
@@ -178,10 +201,11 @@ export function SignatureMomentGate({ product, reduced }: { product: ImmersiveEx
           <SignatureCommerceCanvas
             compact={compact}
             offerCount={product?.offers.length ?? 0}
-            playing={playing || measuring}
+            playing={visible && (playing || measuring)}
             product={product ? { image: product.image, name: productLabel } : null}
             progress={progress}
             quality={quality}
+            onReady={markRuntimeReady}
           />
         ) : <StaticPhysicalFallback product={product} progress={progress} />}
 
