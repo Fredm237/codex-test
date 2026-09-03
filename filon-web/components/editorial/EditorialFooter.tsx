@@ -63,6 +63,7 @@ const EN_LABELS: Record<string, string> = {
 
 const FOOT = {
   fr: {
+    coordinate: "FILON / CONTINUER",
     newsH: <>Le brief <span className="it">FILON</span>.</>,
     newsP: "Les observations et conseils publiés par FILON, lorsqu'un nouvel envoi est disponible.",
     designed: "Conçu à",
@@ -71,6 +72,7 @@ const FOOT = {
     more: "en savoir plus",
   },
   nl: {
+    coordinate: "FILON / VERDER",
     newsH: <>De <span className="it">FILON</span>-brief.</>,
     newsP: "Waarnemingen en advies van FILON wanneer een nieuwe verzending beschikbaar is.",
     designed: "Ontworpen in",
@@ -79,6 +81,7 @@ const FOOT = {
     more: "meer weten",
   },
   en: {
+    coordinate: "FILON / CONTINUE",
     newsH: <><span className="it">FILON</span> brief.</>,
     newsP: "Observations and guidance published by FILON when a new mailing is available.",
     designed: "Designed in",
@@ -121,8 +124,9 @@ export function EditorialFooter() {
   const lbl = (href: string, fr: string) =>
     locale === "nl" ? NL_LABELS[href] ?? fr : locale === "en" ? EN_LABELS[href] ?? fr : fr;
   return (
-    <footer className="ed-footer">
+    <footer className="ed-footer p19-global-footer" data-experience-exit="continuation">
       <div className="ed-wrap">
+        <span className="p19-footer-coordinate" aria-hidden="true">{x.coordinate}</span>
         <div className="ed-newsblock">
           <div>
             <h3 style={{ fontFamily: "var(--serif)", fontVariationSettings: '"opsz" 40', fontSize: 24, letterSpacing: "-0.01em", color: "var(--fx-text)" }}>

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import type { Proof } from "@/lib/proof";
 import { formatSupportedMoney } from "@/lib/currency";
 import { useLocale } from "@/lib/i18n";
@@ -60,6 +61,20 @@ const COPY = {
     constraints: "Ce que l’accueil exige",
     closing: "Commencez par le produit, pas par une promesse.",
     closingBody: "Décrivez votre besoin ou ouvrez le catalogue. FILON s’abstient lorsque le contexte disponible ne suffit pas.",
+    skipJourney: "Passer l’expérience",
+    journey: [
+      "Le marché arrive en fragments.",
+      "Une identité exacte survit au bruit.",
+      "Les offres deviennent comparables.",
+      "La complexité se réduit à une décision.",
+    ],
+    journeyUnknown: [
+      "Le marché arrive en fragments.",
+      "L’identité reste à démontrer.",
+      "Les offres ne sont pas comparables.",
+      "FILON conserve l’inconnue.",
+    ],
+    journeySummary: "Le parcours montre le marché, l’identité produit, la comparaison et la décision. La recherche reste disponible pendant toute l’expérience.",
   },
   nl: {
     eyebrow: "Aankoopcopiloot · bewijs eerst",
@@ -106,6 +121,20 @@ const COPY = {
     constraints: "Wat de startpagina vereist",
     closing: "Begin met het product, niet met een belofte.",
     closingBody: "Beschrijf je behoefte of open de catalogus. FILON onthoudt zich wanneer de beschikbare context niet volstaat.",
+    skipJourney: "Ervaring overslaan",
+    journey: [
+      "De markt komt binnen als fragmenten.",
+      "Een exacte identiteit overleeft de ruis.",
+      "Aanbiedingen worden vergelijkbaar.",
+      "Complexiteit wordt een beslissing.",
+    ],
+    journeyUnknown: [
+      "De markt komt binnen als fragmenten.",
+      "De identiteit moet nog worden bewezen.",
+      "De aanbiedingen zijn niet vergelijkbaar.",
+      "FILON bewaart het onbekende.",
+    ],
+    journeySummary: "Het traject toont de markt, productidentiteit, vergelijking en beslissing. Zoeken blijft tijdens de hele ervaring beschikbaar.",
   },
   en: {
     eyebrow: "Shopping copilot · evidence first",
@@ -152,6 +181,20 @@ const COPY = {
     constraints: "What the homepage requires",
     closing: "Start with the product, not a promise.",
     closingBody: "Describe your need or open the catalogue. FILON abstains when the available context is insufficient.",
+    skipJourney: "Skip the experience",
+    journey: [
+      "The market arrives in fragments.",
+      "An exact identity survives the noise.",
+      "Offers become comparable.",
+      "Complexity resolves into a decision.",
+    ],
+    journeyUnknown: [
+      "The market arrives in fragments.",
+      "Identity remains unproven.",
+      "The offers are not comparable.",
+      "FILON preserves the unknown.",
+    ],
+    journeySummary: "The journey reveals market, product identity, comparison and decision. Search remains available throughout the experience.",
   },
 } as const;
 
@@ -160,59 +203,118 @@ const NUMBER_LOCALE = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
 export function WebExperience({ proof }: { proof: Proof | null }) {
   const { locale } = useLocale();
   const copy = COPY[locale];
+  const journeyRef = useRef<HTMLElement | null>(null);
+  const [journeyShot, setJourneyShot] = useState(0);
+  const [reducedJourney, setReducedJourney] = useState(false);
   const product = proof?.product ?? null;
   const priceLow = product ? formatSupportedMoney(product.priceMin, product.currency, locale) : null;
   const priceHigh = product ? formatSupportedMoney(product.priceMax, product.currency, locale) : null;
   const spread = product ? formatSupportedMoney(product.priceMax - product.priceMin, product.currency, locale) : null;
   const comparable = Boolean(product && priceLow && priceHigh && spread);
+  const journeyLines = comparable ? copy.journey : copy.journeyUnknown;
   const number = new Intl.NumberFormat(NUMBER_LOCALE[locale]);
+
+  useEffect(() => {
+    const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const connection = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection;
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      const reduced = motion.matches || Boolean(connection?.saveData);
+      setReducedJourney(reduced);
+      if (reduced) {
+        setJourneyShot(3);
+        return;
+      }
+      const root = journeyRef.current;
+      if (!root) return;
+      const rect = root.getBoundingClientRect();
+      const distance = Math.max(1, root.offsetHeight - window.innerHeight);
+      const progress = Math.max(0, Math.min(1, -rect.top / distance));
+      setJourneyShot(progress < .24 ? 0 : progress < .49 ? 1 : progress < .74 ? 2 : 3);
+    };
+
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule, { passive: true });
+    motion.addEventListener("change", schedule);
+    return () => {
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      motion.removeEventListener("change", schedule);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
 
   return (
     <div className={`${styles.page} p11-web-experience`}>
-      <section className={styles.hero} aria-labelledby="p11-home-title">
-        <div className={styles.heroGlow} aria-hidden="true" />
-        <div className={`${styles.wrap} ${styles.heroGrid}`}>
-          <div className={styles.heroCopy}>
-            <EvidenceBadge state="verified">{copy.eyebrow}</EvidenceBadge>
-            <h1 id="p11-home-title"><span>{copy.titleA}</span>{copy.titleB}</h1>
-            <p className={styles.lead}>{copy.lead}</p>
-            <form className={styles.search} action="/recherche/" method="get" role="search">
-              <label htmlFor="p11-query">{copy.searchLabel}</label>
-              <div>
-                <input id="p11-query" type="search" name="q" minLength={2} placeholder={copy.searchPlaceholder} autoComplete="off" />
-                <button type="submit">{copy.search}</button>
+      <section ref={journeyRef} className={styles.hero} aria-labelledby="p11-home-title" data-immersive-journey data-reduced={reducedJourney}>
+        <a className={styles.skipJourney} href="#p19-home-after-journey">{copy.skipJourney}</a>
+        <div className={styles.heroSticky} data-shot={journeyShot}>
+          <div className={styles.heroGlow} aria-hidden="true" />
+          <div className={`${styles.wrap} ${styles.heroGrid}`}>
+            <div className={styles.heroCopy}>
+              <div className={styles.planMarker} aria-hidden="true">FILON / PLAN {String(journeyShot + 1).padStart(2, "0")}</div>
+              <EvidenceBadge state="verified">{copy.eyebrow}</EvidenceBadge>
+              <h1 id="p11-home-title"><span>{copy.titleA}</span>{copy.titleB}</h1>
+              <div className={styles.journeyCopy} aria-hidden="true">
+                {journeyLines.map((line, index) => <p key={line} data-active={journeyShot === index}>{line}</p>)}
               </div>
-            </form>
-            <div className={styles.actions}>
-              <a href="/catalogue/">{copy.catalogue}</a>
-              <p>{copy.boundary}</p>
+              <p className={styles.lead}>{copy.lead}</p>
+              <form className={styles.search} action="/recherche/" method="get" role="search">
+                <label htmlFor="p11-query">{copy.searchLabel}</label>
+                <div>
+                  <input id="p11-query" type="search" name="q" minLength={2} placeholder={copy.searchPlaceholder} autoComplete="off" />
+                  <button type="submit">{copy.search}</button>
+                </div>
+              </form>
+              <div className={styles.actions}>
+                <a href="/catalogue/">{copy.catalogue}</a>
+                <p>{copy.boundary}</p>
+              </div>
             </div>
-          </div>
-          <aside className={styles.heroStage} aria-label={copy.exampleEye}>
-            <span className={styles.stageIndex}>FILON / 01</span>
-            {comparable && product?.image && priceLow && priceHigh ? (
-              <>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={product.image} alt={product.name} fetchPriority="high" decoding="async" />
-                <div className={`${styles.stageFact} ${styles.stageFactTop}`}>
-                  <span>{copy.high}</span><b>{priceHigh}</b>
-                </div>
-                <div className={`${styles.stageFact} ${styles.stageFactBottom}`}>
-                  <span>{copy.low}</span><b>{priceLow}</b>
-                </div>
-                <a href={`/produits/${encodeURIComponent(product.ean)}/`} aria-label={`${copy.view} — ${product.name}`} />
-              </>
-            ) : (
-              <div className={styles.stageUnknown}>
-                <span aria-hidden="true">?</span>
-                <p>{copy.unavailableDetail}</p>
+            <aside className={styles.heroStage} aria-label={copy.exampleEye}>
+              <div className={styles.marketFragments} aria-hidden="true">
+                <span>{proof ? number.format(proof.stats.offers) : "?"}<small>{copy.offers}</small></span>
+                <span>{proof ? number.format(proof.stats.merchants) : "?"}<small>{copy.merchants}</small></span>
+                <span>{product?.ean ?? "?"}<small>EAN</small></span>
               </div>
-            )}
-          </aside>
+              {comparable && product?.image && priceLow && priceHigh ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={product.image} alt={product.name} fetchPriority="high" decoding="async" />
+                  <div className={`${styles.stageFact} ${styles.stageFactTop}`}>
+                    <span>{copy.high}</span><b>{priceHigh}</b>
+                  </div>
+                  <div className={`${styles.stageFact} ${styles.stageFactBottom}`}>
+                    <span>{copy.low}</span><b>{priceLow}</b>
+                  </div>
+                  <div className={styles.stageDecision}>
+                    <span>{copy.current}</span>
+                    <b>{product.brand ? `${product.brand} · ` : ""}{product.name}</b>
+                    <a href={`/produits/${encodeURIComponent(product.ean)}/`}>{copy.view}</a>
+                  </div>
+                </>
+              ) : (
+                <div className={styles.stageUnknown}>
+                  <span aria-hidden="true">?</span>
+                  <p>{copy.unavailableDetail}</p>
+                </div>
+              )}
+            </aside>
+          </div>
+          <div className={styles.shotRail} aria-hidden="true">
+            {["CHAOS", "IDENTITÉ", "MARCHÉ", "DÉCISION"].map((label, index) => <span key={label} data-active={journeyShot === index}>{label}</span>)}
+          </div>
+          <p className={styles.srJourney}>{copy.journeySummary}</p>
         </div>
       </section>
 
-      <section className={styles.proofBand} aria-labelledby="p11-proof-title">
+      <section id="p19-home-after-journey" className={styles.proofBand} aria-labelledby="p11-proof-title">
         <div className={styles.wrap}>
           <header className={styles.sectionHead}>
             <span>01</span>

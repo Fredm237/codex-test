@@ -236,11 +236,20 @@ for (const path of ["app/(site)/produits/[ean]/page.tsx", "app/(site)/produit/[i
   const source = guardedSources.find((entry) => entry.path === path).source;
   assert.ok(source.includes("p11-product-surface"), `${path} doit annoncer sa surface claire au header global`);
 }
+const exactProductPageSource = guardedSources.find((entry) => entry.path.endsWith("produits/[ean]/page.tsx")).source;
+assert.ok(exactProductPageSource.includes("p19-product-surface"), "la fiche exacte doit porter son plan immersif isolé");
+assert.ok(exactProductPageSource.includes('data-product-evidence="exact"'), "la fiche exacte doit annoncer sa frontière de preuve");
+const exactProductDetailsSource = guardedSources.find((entry) => entry.path === "components/filon/ProductDetails.tsx").source;
+assert.ok(exactProductDetailsSource.includes("pg-evidence-coordinates"), "EAN, offres et marchands doivent rester visibles dans le DOM");
+assert.ok(exactProductDetailsSource.includes("FILON / IDENTITÉ 03"), "le plan produit doit être localisé et sémantique");
 const filonCssSource = readFileSync(join(webRoot, "components/filon/filon.css"), "utf8");
 assert.ok(
   filonCssSource.includes("body:has(.p11-product-surface) .ed-header"),
   "les fiches produit doivent maintenir un contraste explicite dans la navigation",
 );
+assert.ok(filonCssSource.includes(".p19-product-surface"), "le dossier produit doit avoir une surface immersive isolée");
+assert.ok(filonCssSource.includes("p19-dossier-arrival"), "la mise en scène produit doit rester bornée à une arrivée");
+assert.match(filonCssSource, /prefers-reduced-motion[\s\S]*\.p19-product-dossier/, "le mouvement produit doit disparaître en mode réduit");
 const pulseSource = readFileSync(join(webRoot, "components/filon/Pulse.tsx"), "utf8");
 assert.ok(pulseSource.includes("now - metricsCheckedAt <= METRICS_MAX_AGE_MS"), "les agrégats 24 h doivent expirer sans polling réussi");
 assert.ok(pulseSource.includes("now >= metricsCheckedAt"), "une preuve de contrôle future doit rester inconnue");

@@ -18,6 +18,7 @@ type Offer = {
 };
 
 const COPY: Record<Locale, {
+  plan: string;
   back: string;
   compared: (count: string) => string;
   subs: string;
@@ -27,6 +28,7 @@ const COPY: Record<Locale, {
   browse: (count: string) => string;
 }> = {
   fr: {
+    plan: "FILON / MARCHÉ · RAYON",
     back: "← Tout le catalogue",
     compared: (count) => `${count} offres indexées dans ce rayon.`,
     subs: "Sous-rayons",
@@ -36,6 +38,7 @@ const COPY: Record<Locale, {
     browse: (count) => `Parcourir les ${count} offres`,
   },
   nl: {
+    plan: "FILON / MARKT · CATEGORIE",
     back: "← Volledige catalogus",
     compared: (count) => `${count} aanbiedingen in deze categorie geïndexeerd.`,
     subs: "Subcategorieën",
@@ -45,6 +48,7 @@ const COPY: Record<Locale, {
     browse: (count) => `${count} aanbiedingen bekijken`,
   },
   en: {
+    plan: "FILON / MARKET · CATEGORY",
     back: "← Full catalogue",
     compared: (count) => `${count} offers indexed in this category.`,
     subs: "Subcategories",
@@ -75,8 +79,10 @@ export function CategoryDetails({
   const subs = category.subcategories ?? [];
 
   return (
-    <section className="ed-band" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
-      <div className="ed-wrap">
+    <main className="p19-category-market" data-market-plan="category">
+      <section className="ed-band">
+        <div className="ed-wrap">
+        <span className="p19-market-coordinate">{copy.plan}</span>
         <p style={{ marginBottom: 18 }}><a href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>{copy.back}</a></p>
         <h1 className="cat-rail-title" style={{ fontSize: "clamp(26px, 4vw, 36px)" }}>{catalogueLabel(category.name, locale)}</h1>
         <p className="cat-rail-sub" style={{ marginBottom: 24 }}>{copy.compared(formatNumber(total))}</p>
@@ -106,7 +112,8 @@ export function CategoryDetails({
             {total > items.length && <p style={{ marginTop: 30, textAlign: "center" }}><a className="ed-btn ghost" href="/catalogue/" style={{ textDecoration: "none" }}>{copy.browse(formatNumber(total))}</a></p>}
           </>
         )}
-      </div>
-    </section>
+        </div>
+      </section>
+    </main>
   );
 }

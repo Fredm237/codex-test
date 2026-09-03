@@ -137,10 +137,10 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
         }}
       />
 
-      <section className="ed-band p11-product-surface" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
-        <div className="ed-wrap">
-          <p style={{ marginBottom: 20 }}>
-            <a href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>← Retour au catalogue</a>
+      <section className="ed-band p11-product-surface p19-product-surface" data-product-evidence="exact">
+        <div className="ed-wrap p19-product-wrap">
+          <p className="p19-product-back">
+            <a href="/catalogue">← Retour au catalogue</a>
           </p>
 
           <div className="pg-grid">
@@ -149,6 +149,8 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={p.image} alt={p.name} />
               ) : <span aria-hidden="true">—</span>}
+              <span className="p19-product-ean">EAN&nbsp;{p.ean}</span>
+              <span className="p19-product-axis" aria-hidden="true" />
             </div>
 
             <ProductDetails p={p} />

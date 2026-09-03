@@ -13,6 +13,7 @@ const editorialCss = readFileSync(join(root, "components/editorial/editorial.css
 const forms = readFileSync(join(root, "components/editorial/Forms.tsx"), "utf8");
 const editorialNav = readFileSync(join(root, "components/editorial/EditorialNav.tsx"), "utf8");
 const languageSwitcher = readFileSync(join(root, "components/editorial/LanguageSwitcher.tsx"), "utf8");
+const stickyCta = readFileSync(join(root, "components/editorial/StickyCta.tsx"), "utf8");
 
 assert.ok(page.includes("<WebExperience proof={proof} />"), "la home doit rendre l'expérience Phase 11");
 assert.ok(page.includes("await getProof()"), "les chiffres home doivent venir du catalogue réel");
@@ -27,6 +28,16 @@ for (const component of [
 assert.ok(experience.includes('role="search"'), "le parcours principal doit exposer une recherche accessible");
 assert.ok(experience.includes('htmlFor="p11-query"'), "la recherche doit avoir un label explicite");
 assert.ok(experience.includes("p11-web-experience"), "la home doit annoncer sa surface au header global");
+assert.ok(experience.includes("data-shot={journeyShot}"), "la home doit être pilotée comme une suite de plans");
+assert.ok(experience.includes("requestAnimationFrame(update)"), "le scroll ne doit pas provoquer de travail hors trame");
+assert.ok(experience.includes('href="#p19-home-after-journey"'), "le chapitre immersif doit être évitable au clavier");
+assert.ok(experience.includes("prefers-reduced-motion: reduce"), "la home doit détecter le mouvement réduit");
+assert.ok(experience.includes("connection?.saveData"), "la home doit respecter l'économie de données");
+assert.ok(experience.includes("data-immersive-journey"), "le chapitre doit exposer sa frontière aux contrôles globaux");
+assert.ok(stickyCta.includes('querySelector<HTMLElement>("[data-immersive-journey]")'), "le CTA mobile ne doit pas couvrir le chapitre immersif");
+assert.ok(stickyCta.includes("journeyIsComplete"), "le CTA mobile doit attendre la fin du chapitre immersif");
+assert.ok(experience.includes("comparable ? copy.journey : copy.journeyUnknown"), "la narration doit s'abstenir si le produit exact n'est pas comparable");
+assert.ok(experience.includes("FILON conserve l’inconnue."), "l'unknown doit être un plan final légitime");
 assert.ok(globalCss.includes("body:has(.p11-web-experience) .ed-header"), "le header Phase 11 doit conserver un contraste explicite");
 assert.ok(experience.includes("formatSupportedMoney"), "aucun montant ne doit contourner la frontière devise");
 assert.ok(experience.includes("<UnknownField"), "l'indisponibilité live doit rester explicitement inconnue");
@@ -35,6 +46,9 @@ assert.doesNotMatch(experience, /BUY_NOW|\bWAIT\b/, "les lecteurs BUY/WAIT shado
 assert.doesNotMatch(experience, /currency\s*(?:\|\||\?\?)\s*["']EUR["']/, "aucune devise de secours");
 assert.doesNotMatch(css, /--font-(?:fraunces|outfit|inter)\b/, "la page doit utiliser les variables de fontes réellement déclarées");
 assert.ok(css.includes("prefers-reduced-motion: reduce"), "la politique reduced-motion doit être explicite");
+assert.match(css, /\.hero\s*\{[^}]*height:\s*360vh/s, "le scroll doit piloter un plan continu, pas une pile de sections");
+assert.match(css, /\.heroSticky\s*\{[^}]*position:\s*sticky/s, "la caméra DOM doit rester stable entre les plans");
+assert.match(css, /\.hero\[data-reduced="true"\]\s*\{[^}]*height:\s*auto/s, "le mouvement réduit ne doit pas conserver un tunnel de scroll");
 assert.match(editorialCss, /\.ed-lang-trigger\s*\{[^}]*min-height:\s*44px/s, "le sélecteur de langue doit garder une cible tactile de 44 px");
 assert.match(editorialCss, /\.ed-lang-opt\s*\{[^}]*min-height:\s*44px/s, "chaque option de langue doit garder une cible tactile de 44 px");
 assert.match(forms, /<input name="email" type="email" aria-label=\{T\.email\}/, "le champ newsletter doit conserver un nom accessible");
@@ -51,4 +65,4 @@ assert.ok(
   "la home Phase 11 ne doit pas dépendre d'une animation",
 );
 
-console.log("✓ Phase 11 web : evidence-first, fail-closed, accessible et sans séquence immersive");
+console.log("✓ Phase 19 home : chorégraphie de preuve fail-closed, accessible et bornée");

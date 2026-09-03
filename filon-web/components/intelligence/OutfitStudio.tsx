@@ -161,6 +161,8 @@ function sanitizeOutfitResponse(raw: unknown, request: string): OutfitResponse |
 }
 
 type Copy = {
+  plan: string;
+  path: Array<[string, string]>;
   eyebrow: string;
   title: string;
   intro: string;
@@ -198,6 +200,8 @@ type Copy = {
 
 const COPY: Record<Locale, Copy> = {
   fr: {
+    plan: "FILON / COMPOSER 01",
+    path: [["Intention", "décrite"], ["Offres", "vérifiées"], ["Solution", "bornée"]],
     eyebrow: "FILON Intelligence · Décision fondée sur des preuves",
     title: "Outfit Studio",
     intro: "Décrivez une tenue, un kit ou un besoin. FILON sélectionne des offres réelles, puis distingue clairement ce qu’il sait de ce qui reste à vérifier.",
@@ -240,6 +244,8 @@ const COPY: Record<Locale, Copy> = {
     },
   },
   nl: {
+    plan: "FILON / SAMENSTELLEN 01",
+    path: [["Intentie", "beschreven"], ["Aanbiedingen", "geverifieerd"], ["Oplossing", "afgebakend"]],
     eyebrow: "FILON Intelligence · Beslissen op bewijs",
     title: "Outfit Studio",
     intro: "Beschrijf een outfit, kit of behoefte. FILON selecteert echte aanbiedingen en maakt duidelijk wat bekend is en wat je nog moet controleren.",
@@ -282,6 +288,8 @@ const COPY: Record<Locale, Copy> = {
     },
   },
   en: {
+    plan: "FILON / COMPOSE 01",
+    path: [["Intention", "described"], ["Offers", "verified"], ["Solution", "bounded"]],
     eyebrow: "FILON Intelligence · Evidence-led decisions",
     title: "Outfit Studio",
     intro: "Describe an outfit, a kit or a need. FILON selects real offers and clearly separates what it knows from what still needs checking.",
@@ -491,12 +499,22 @@ export function OutfitStudio() {
   }
 
   return (
-    <section className="os-shell" aria-labelledby="outfit-title">
-      <div className="os-intro">
-        <p className="os-kicker">{copy.eyebrow}</p>
-        <h1 id="outfit-title">{copy.title}</h1>
-        <p>{copy.intro}</p>
-      </div>
+    <section className="os-shell p19-compose-surface" data-compose-plan="outfit" aria-labelledby="outfit-title">
+      <header className="os-intro">
+        <div className="os-intro-copy">
+          <p className="p19-compose-plan">{copy.plan}</p>
+          <p className="os-kicker">{copy.eyebrow}</p>
+          <h1 id="outfit-title">{copy.title}</h1>
+          <p>{copy.intro}</p>
+        </div>
+        <ol className="p19-compose-path" aria-label={copy.eyebrow}>
+          {copy.path.map(([label, state], index) => (
+            <li key={label}><span>0{index + 1}</span><strong>{label}</strong><small>{state}</small></li>
+          ))}
+        </ol>
+      </header>
+
+      <div className="os-workbench">
 
       {feature === "disabled" && <div className="os-panel os-status"><h2>{copy.disabledTitle}</h2><p>{copy.disabledBody}</p></div>}
 
@@ -543,6 +561,7 @@ export function OutfitStudio() {
           {result && <OutfitResult result={result} copy={copy} locale={locale} feedback={feedback} onFeedback={sendFeedback} />}
         </>
       )}
+      </div>
     </section>
   );
 }

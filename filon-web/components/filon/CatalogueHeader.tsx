@@ -12,8 +12,14 @@ import { useLocale } from "@/lib/i18n";
 import { catalogueLabel } from "@/lib/catalogue-labels";
 
 const TAG = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
+const MARKET_CHAPTER = { fr: "MARCHÉ", nl: "MARKT", en: "MARKET" } as const;
 
 type Named = { name: string; slug: string } | null;
+
+export function CataloguePlanMarker() {
+  const { locale } = useLocale();
+  return <span className="fx-market-plan" aria-hidden="true">FILON / {MARKET_CHAPTER[locale]} 02</span>;
+}
 
 export function CatalogueHeader({
   query,

@@ -83,13 +83,13 @@ export default async function ProduitPage({ params }: { params: Promise<{ id: st
   if (!o) notFound();
 
   return (
-    <section className="ed-band p11-product-surface" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
-      <div className="ed-wrap">
-        <p style={{ marginBottom: 20 }}>
+    <section className="ed-band p11-product-surface p19-product-surface p19-offer-surface" data-product-evidence="offer">
+      <div className="ed-wrap p19-product-wrap">
+        <p className="p19-product-back">
             <OfferBackLink />
         </p>
         <div style={{ display: "grid", gap: 32, gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", alignItems: "start" }} className="pd-grid">
-          <div style={{ aspectRatio: "1 / 1", background: "#fff", borderRadius: 20, border: "1px solid var(--line-2)", display: "grid", placeItems: "center", overflow: "hidden" }}>
+          <div className="p19-offer-media" style={{ aspectRatio: "1 / 1", background: "#fff", borderRadius: 20, border: "1px solid var(--line-2)", display: "grid", placeItems: "center", overflow: "hidden" }}>
             {o.image ? (
               <img src={o.image} alt={o.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 22 }} />
             ) : <span aria-hidden="true">—</span>}

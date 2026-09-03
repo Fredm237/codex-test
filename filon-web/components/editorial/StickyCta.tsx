@@ -10,8 +10,11 @@ export function StickyCta() {
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    const immersiveJourney = document.querySelector<HTMLElement>("[data-immersive-journey]");
     const onScroll = () => {
-      el.classList.toggle("show", window.scrollY > window.innerHeight * 0.9);
+      const journeyIsComplete = !immersiveJourney
+        || immersiveJourney.getBoundingClientRect().bottom <= window.innerHeight;
+      el.classList.toggle("show", window.scrollY > window.innerHeight * 0.9 && journeyIsComplete);
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();

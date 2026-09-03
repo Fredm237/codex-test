@@ -8,7 +8,7 @@ import { CatalogueNav } from "@/components/filon/CatalogueNav";
 import { Pulse } from "@/components/filon/Pulse";
 import { Rails } from "@/components/filon/Rails";
 import {
-  CatalogueHeader, CataloguePager, CatalogueEmpty, CatalogueNavToggle,
+  CatalogueHeader, CataloguePager, CatalogueEmpty, CatalogueNavToggle, CataloguePlanMarker,
 } from "@/components/filon/CatalogueHeader";
 import {
   getDepartments,
@@ -110,6 +110,7 @@ export default async function CataloguePage({
         <div className="fx-catalogue-main">
           <div className="fx-catalogue-intro">
             <div className="fx-catalogue-intro-copy">
+              <CataloguePlanMarker />
               <CatalogueHeader
                 query={query}
                 department={department}
