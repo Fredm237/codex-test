@@ -227,6 +227,7 @@ assert.ok(productVolume.includes('state !== "webgl"'), "le volume produit doit d
 assert.ok(productVolume.includes("prefers-reduced-motion: reduce"), "le volume produit doit respecter le mouvement réduit");
 assert.ok(productVolume.includes("offerCount={offerCount}"), "la matière produit doit recevoir uniquement le volume d'offres qualifiées");
 assert.ok(productVolume.includes("PRODUCT_SEQUENCE_END = 0.92"), "l'orbite produit doit revenir sur un plan de preuve frontal avant de s'arrêter");
+assert.ok(productVolume.includes("IntersectionObserver") && productVolume.includes("!visible"), "le volume produit doit interrompre sa boucle hors écran");
 const railsSource = guardedSources.find((entry) => entry.path === "components/filon/Rails.tsx").source;
 assert.ok(railsSource.includes("currentItems"), "chaque rail doit exclure les cartes dont le prix n'est pas attesté");
 assert.ok(
