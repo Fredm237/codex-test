@@ -22,6 +22,7 @@ const merchants = readFileSync(join(root, "components/editorial/MerchantsBrowser
 const category = readFileSync(join(root, "components/filon/CategoryDetails.tsx"), "utf8");
 const offerPage = readFileSync(join(root, "app/(site)/produit/[id]/page.tsx"), "utf8");
 const offerDetails = readFileSync(join(root, "components/filon/OfferProductDetails.tsx"), "utf8");
+const priceLandscape = readFileSync(join(root, "components/experience/PriceTimeLandscape.tsx"), "utf8");
 const footer = readFileSync(join(root, "components/editorial/EditorialFooter.tsx"), "utf8");
 const reveal = readFileSync(join(root, "components/editorial/Reveal.tsx"), "utf8");
 const seo = readFileSync(join(root, "lib/seo.tsx"), "utf8");
@@ -86,7 +87,13 @@ assert.ok(offerPage.includes('data-product-evidence="offer"'), "l'URL d'offre hi
 assert.ok(offerPage.includes("p19-offer-media"), "l'offre observée doit rester le même objet physique que le dossier exact");
 assert.ok(offerDetails.includes("p19-offer-dossier"), "prix, marchand, verdict et décision doivent partager le même dossier DOM");
 assert.ok(offerDetails.includes("data-purchasable={canBuy || undefined}"), "la scène ne doit afficher un état achetable qu'après la garde métier");
+assert.ok(offerDetails.includes("PriceTimeLandscape"), "l'historique admissible doit devenir un paysage prix-temps réel");
+assert.ok(offerDetails.includes("ProductJourneyLink"), "l'offre groupée doit transporter le même produit vers son dossier exact");
+assert.ok(priceLandscape.includes('type="range"') && priceLandscape.includes("aria-live=\"polite\""), "le paysage prix-temps doit rester parcourable au clavier");
+assert.ok(priceLandscape.includes("<table>"), "chaque relief doit conserver un tableau accessible de ses relevés réels");
+assert.doesNotMatch(priceLandscape, /Math\.random|setInterval|requestAnimationFrame/, "l'historique ne doit ni inventer ni faire défiler des relevés");
 assert.ok(css.includes(".p19-offer-history"), "l'historique disponible doit rester une pièce du dossier offre");
+assert.ok(css.includes(".p19-price-landscape-cursor"), "le relevé actif doit avoir une position spatiale visible");
 assert.match(css, /prefers-reduced-motion[\s\S]*\.p19-offer-dossier/, "le dossier offre doit neutraliser son arrivée en mouvement réduit");
 for (const slug of signalPages) {
   const source = readFileSync(join(root, `app/(site)/${slug}/page.tsx`), "utf8");
