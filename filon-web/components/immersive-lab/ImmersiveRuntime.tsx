@@ -5,6 +5,7 @@ import { Component, type ErrorInfo, type ReactNode, useEffect, useRef, useState 
 export type ImmersiveState = "pending" | "webgl" | "fallback";
 export type ImmersiveQuality = "full" | "degraded";
 
+export const FRAME_RATE_DEGRADE = 45;
 export const FRAME_RATE_FLOOR = 30;
 const FRAME_SAMPLE_MS = 2_200;
 
@@ -41,12 +42,11 @@ export function useAdaptiveFrameBudget(enabled: boolean, onFailure: () => void) 
       if (elapsed >= FRAME_SAMPLE_MS) {
         const fps = frames * 1_000 / elapsed;
         stopped = true;
-        if (fps < FRAME_RATE_FLOOR) {
-          if (quality === "full") setQuality("degraded");
-          else {
-            setMeasuring(false);
-            failureRef.current();
-          }
+        if (quality === "full" && fps < FRAME_RATE_DEGRADE) {
+          setQuality("degraded");
+        } else if (quality === "degraded" && fps < FRAME_RATE_FLOOR) {
+          setMeasuring(false);
+          failureRef.current();
         } else {
           setMeasuring(false);
         }
@@ -91,7 +91,7 @@ export function supportsImmersiveVolume() {
   }
 }
 
-export function useImmersiveRuntime(reduced: boolean, delay = 1_500) {
+export function useImmersiveRuntime(reduced: boolean, delay = 1_500, visible = true) {
   const [state, setState] = useState<ImmersiveState>("pending");
   const [compact, setCompact] = useState(false);
 
@@ -125,7 +125,7 @@ export function useImmersiveRuntime(reduced: boolean, delay = 1_500) {
     };
   }, [delay, reduced]);
 
-  const { measuring, quality } = useAdaptiveFrameBudget(state === "webgl", () => setState("fallback"));
+  const { measuring, quality } = useAdaptiveFrameBudget(state === "webgl" && visible, () => setState("fallback"));
 
   return { compact, measuring, quality, setState, state };
 }
