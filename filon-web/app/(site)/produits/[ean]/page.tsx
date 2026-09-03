@@ -5,6 +5,7 @@ import { API } from "@/lib/api";
 import type { VerdictData } from "@/components/editorial/Verdict";
 import type { DecisionData } from "@/components/filon/DecisionPanel";
 import { ProductDetails } from "@/components/filon/ProductDetails";
+import { ProductIdentityVolume } from "@/components/immersive-lab/ProductIdentityVolume";
 import { deriveProductComparison, money } from "@/components/filon/product-copy";
 
 // Fiche d'un produit regroupé par EAN. Comparaison et JSON-LD expirent avec les
@@ -149,6 +150,13 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={p.image} alt={p.name} />
               ) : <span aria-hidden="true">—</span>}
+              {p.image && comparison ? (
+                <ProductIdentityVolume
+                  image={p.image}
+                  name={[p.brand, p.name].filter(Boolean).join(" · ")}
+                  offerCount={comparison.offers.length}
+                />
+              ) : null}
               <span className="p19-product-ean">EAN&nbsp;{p.ean}</span>
               <span className="p19-product-axis" aria-hidden="true" />
             </div>

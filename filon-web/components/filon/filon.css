@@ -1,5 +1,5 @@
-Warning: truncated output (original token count: 62756)
-Total output lines: 7627
+Warning: truncated output (original token count: 62817)
+Total output lines: 7637
 
 /* ============================================================
    FILON — Composants de la refonte 2026
@@ -3427,11 +3427,7 @@ html, body {
 
 /* ═══════════════════════════════════════════════════════════════════
    CATALOGUE v2 — Premium, vivant, immersif
-   ══…12756 tokens truncated…-poster.is-hidden { opacity: 0; }
-.ce-canvas { z-index: 1; opacity: 0; }
-.ce-canvas.is-visible { opacity: 1; }
-.ce-loading { position: absolute; z-index: 3; inset: 0; background: var(--fx-bg); opacity: .14; }
-.ce-atmosphere { position: absolute; z-index: 2; inset: 0; pointer-events: none; background: linear-gradient(90deg, color-mix(in srgb, var(--fx-ink-1000) 36%, transparent), transparent 42%, color-mix(in srgb, var(--fx-ink-1000) 16%, transparent)); }
+   ══…12817 tokens truncated…te; z-index: 2; inset: 0; pointer-events: none; background: linear-gradient(90deg, color-mix(in srgb, var(--fx-ink-1000) 36%, transparent), transparent 42%, color-mix(in srgb, var(--fx-ink-1000) 16%, transparent)); }
 .ce-overlay { position: absolute; z-index: 4; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); grid-template-rows: auto 1fr auto; padding: clamp(22px, 4vw, 64px); pointer-events: none; color: var(--fx-paper); }
 .ce-copy { align-self: center; max-width: 34rem; transition: opacity 220ms linear; text-shadow: 0 2px 28px color-mix(in srgb, var(--fx-ink-1000) 38%, transparent); }
 .ce-copy p { margin: 0 0 12px; color: var(--fx-accent); font: 600 11px/1.2 var(--fx-font-sans); letter-spacing: .16em; text-transform: uppercase; }
@@ -3771,6 +3767,16 @@ body:has(.p11-product-surface) .ed-header .ed-nav .ed-btn.dark {
   padding: clamp(30px, 5vw, 72px);
   filter: drop-shadow(0 25px 24px rgba(44, 26, 16, 0.2));
 }
+.p19-product-volume {
+  position: absolute;
+  inset: -1px;
+  z-index: 2;
+  overflow: hidden;
+  border-radius: 3px;
+  background: #0b0908;
+  pointer-events: none;
+}
+.p19-product-surface .pg-media:has(.p19-product-volume) > img { opacity: 0; }
 .p19-product-ean {
   position: absolute;
   z-index: 3;

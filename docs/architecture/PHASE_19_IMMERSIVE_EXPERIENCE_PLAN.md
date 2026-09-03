@@ -814,3 +814,13 @@ dans un chunk différé. La revue locale a confirmé les plans 01, 03 et 04, la
 continuité de l'abstention et l'absence d'erreur navigateur. La qualification
 avec un produit exact, la matrice mobile et les mesures de performance de la
 nouvelle intégration restent à produire avant nouvelle Preview finale.
+
+Le deuxième raccordement local porte la continuité `identity → proof` sur le
+dossier EAN. Lorsqu'une image et une comparaison courante existent réellement,
+le même dossier minéral effectue une mise au point macro puis un orbit court ;
+le nombre de plaques actives vient exclusivement des offres qualifiées. Cette
+scène ne se charge qu'après le contenu critique et s'arrête après **3,8 s**.
+Sans image, comparaison, capacité WebGL ou mouvement autorisé, aucun canvas
+n'est monté et l'image DOM originale reste visible. Le moteur de capacité,
+l'arrêt sur erreur et la composition mobile sont mutualisés avec la home plutôt
+que réimplémentés par route.

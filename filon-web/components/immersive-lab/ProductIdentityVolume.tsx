@@ -1,0 +1,60 @@
+"use client";
+
+import dynamic from "next/dynamic";
+import { useEffect, useRef, useState } from "react";
+import { ImmersiveBoundary, useImmersiveRuntime } from "./ImmersiveRuntime";
+
+const SignatureCommerceCanvas = dynamic(
+  () => import("./SignatureCommerceCanvas").then((module) => module.SignatureCommerceCanvas),
+  { ssr: false, loading: () => null },
+);
+
+type Props = {
+  image: string;
+  name: string;
+  offerCount: number;
+};
+
+export function ProductIdentityVolume({ image, name, offerCount }: Props) {
+  const [reduced, setReduced] = useState(false);
+  const [progress, setProgress] = useState(0.2);
+  const frameRef = useRef(0);
+  const { compact, setState, state } = useImmersiveRuntime(reduced, 1_800);
+
+  useEffect(() => {
+    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const update = () => setReduced(media.matches);
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    if (state !== "webgl" || reduced) return;
+    const started = performance.now();
+    const tick = (now: number) => {
+      const elapsed = Math.min(1, (now - started) / 3_800);
+      const eased = elapsed * elapsed * (3 - 2 * elapsed);
+      setProgress(0.2 + eased * 0.56);
+      if (elapsed < 1) frameRef.current = requestAnimationFrame(tick);
+    };
+    frameRef.current = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameRef.current);
+  }, [reduced, state]);
+
+  if (state !== "webgl") return null;
+
+  return (
+    <div className="p19-product-volume" aria-hidden="true" data-product-identity-volume="webgl">
+      <ImmersiveBoundary onFailure={() => setState("fallback")}>
+        <SignatureCommerceCanvas
+          compact={compact}
+          offerCount={offerCount}
+          playing={false}
+          product={{ image, name }}
+          progress={progress}
+        />
+      </ImmersiveBoundary>
+    </div>
+  );
+}

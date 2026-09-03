@@ -219,6 +219,13 @@ for (const path of ["components/filon/ProductDetails.tsx", "components/filon/Off
     `${path} ne doit pas imprimer un prix brut non attesté`,
   );
 }
+const exactProductPage = guardedSources.find((entry) => entry.path === "app/(site)/produits/[ean]/page.tsx").source;
+const productVolume = readFileSync(join(webRoot, "components/immersive-lab/ProductIdentityVolume.tsx"), "utf8");
+assert.ok(exactProductPage.includes("<ProductIdentityVolume"), "le dossier exact doit conserver le produit dans un volume d'identité réel");
+assert.ok(exactProductPage.includes("p.image && comparison"), "la profondeur produit doit rester fermée sans image et comparaison qualifiée");
+assert.ok(productVolume.includes('state !== "webgl"'), "le volume produit doit disparaître lorsque WebGL est indisponible");
+assert.ok(productVolume.includes("prefers-reduced-motion: reduce"), "le volume produit doit respecter le mouvement réduit");
+assert.ok(productVolume.includes("offerCount={offerCount}"), "la matière produit doit recevoir uniquement le volume d'offres qualifiées");
 const railsSource = guardedSources.find((entry) => entry.path === "components/filon/Rails.tsx").source;
 assert.ok(railsSource.includes("currentItems"), "chaque rail doit exclure les cartes dont le prix n'est pas attesté");
 assert.ok(
