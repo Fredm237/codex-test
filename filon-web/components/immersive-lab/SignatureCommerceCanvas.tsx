@@ -24,6 +24,7 @@ type SignatureCanvasProps = {
   product: ProductProjection;
   progress: number;
   quality: ImmersiveQuality;
+  onReady?: () => void;
 };
 
 const RAW_POSITIONS: Array<[number, number, number]> = [
@@ -318,6 +319,7 @@ export function SignatureCommerceCanvas(props: SignatureCanvasProps) {
           gl.outputColorSpace = THREE.SRGBColorSpace;
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.08;
+          props.onReady?.();
         }}
       >
         <CommerceWorld {...props} />
