@@ -1,8 +1,8 @@
 "use client";
 
-import { Edges, Html, RoundedBox } from "@react-three/drei";
+import { Edges, RoundedBox, useTexture } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
-import { useEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
 import styles from "./signature-commerce.module.css";
 
@@ -217,6 +217,11 @@ function ProductCore({ product, progress }: { product: ProductProjection; progre
         />
         <Edges color={proven ? "#e4aa66" : "#6c625b"} threshold={12} />
       </RoundedBox>
+      {product?.image ? (
+        <Suspense fallback={<ProductImageFallback />}>
+          <ProductImagePlane image={product.image} />
+        </Suspense>
+      ) : <ProductImageFallback unknown />}
       <mesh position={[0, -1.64, 0.06]} castShadow>
         <boxGeometry args={[3.04, 0.08, 0.54]} />
         <meshStandardMaterial color={proven ? "#d89750" : "#4b433e"} metalness={0.46} roughness={0.34} />
@@ -229,14 +234,49 @@ function ProductCore({ product, progress }: { product: ProductProjection; progre
         <boxGeometry args={[0.025, 3.58, 0.025]} />
         <meshBasicMaterial color={proven ? "#d69a48" : "#665c55"} transparent opacity={0.58} />
       </mesh>
-      <Html center transform position={[0, 0, 0.18]} distanceFactor={4.4} zIndexRange={[2, 1]}>
-        <div className={styles.productProjection} data-proven={proven}>
-          {product?.image ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={product.image} alt="" decoding="async" loading="lazy" fetchPriority="low" />
-          ) : <span>?</span>}
-        </div>
-      </Html>
+    </group>
+  );
+}
+
+function ProductImageFallback({ unknown = false }: { unknown?: boolean }) {
+  return (
+    <mesh position={[0, 0, 0.115]}>
+      <planeGeometry args={[1.86, 2.38]} />
+      <meshBasicMaterial color={unknown ? "#2d2622" : "#eadfce"} transparent opacity={unknown ? 0.38 : 0.92} />
+    </mesh>
+  );
+}
+
+function ProductImagePlane({ image }: { image: string }) {
+  const texture = useTexture(image);
+  const size = useMemo<[number, number]>(() => {
+    const source = texture.image as { naturalWidth?: number; naturalHeight?: number; width?: number; height?: number } | undefined;
+    const width = source?.naturalWidth || source?.width || 1;
+    const height = source?.naturalHeight || source?.height || 1;
+    const ratio = width / Math.max(height, 1);
+    const maxWidth = 1.86;
+    const maxHeight = 2.38;
+    return ratio >= maxWidth / maxHeight
+      ? [maxWidth, maxWidth / ratio]
+      : [maxHeight * ratio, maxHeight];
+  }, [texture]);
+
+  useEffect(() => {
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.anisotropy = 4;
+    texture.needsUpdate = true;
+  }, [texture]);
+
+  return (
+    <group position={[0, 0, 0.116]}>
+      <mesh>
+        <planeGeometry args={[1.86, 2.38]} />
+        <meshBasicMaterial color="#eadfce" transparent opacity={0.92} />
+      </mesh>
+      <mesh position={[0, 0, 0.008]}>
+        <planeGeometry args={size} />
+        <meshBasicMaterial map={texture} toneMapped={false} />
+      </mesh>
     </group>
   );
 }
