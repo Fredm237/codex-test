@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const assistant = readFileSync(join(root, "components/editorial/SearchAssistant.tsx"), "utf8");
 const streamProxy = readFileSync(join(root, "app/api/advise/stream/route.ts"), "utf8");
+const vercelConfig = readFileSync(join(root, "vercel.json"), "utf8");
 const marketCss = readFileSync(join(root, "components/experience/search-market.module.css"), "utf8");
 
 assert.ok(assistant.includes("normalizeSupportedMoney"), "l'assistant doit normaliser montant et devise");
@@ -18,6 +19,8 @@ assert.ok(assistant.includes('const url = `/api/advise/stream/?'), "le navigateu
 assert.ok(streamProxy.includes('Accept: "text/event-stream"'), "le proxy doit conserver le transport SSE");
 assert.ok(streamProxy.includes('"X-Accel-Buffering": "no"'), "le proxy ne doit pas mettre le flux en tampon");
 assert.ok(streamProxy.includes('cache: "no-store"'), "le flux de recherche ne doit jamais être mis en cache");
+assert.ok(vercelConfig.includes('"source": "/api/advise/stream/"'), "l'export statique Vercel doit exposer le même chemin SSE");
+assert.ok(vercelConfig.includes('/api/advise/stream"'), "la Preview statique doit relayer le flux vers le backend réel");
 assert.ok(assistant.includes("product_ean") && assistant.includes("offer_id"), "le passage recherche → preuve doit utiliser les identifiants réels du backend");
 assert.ok(assistant.includes('data-search-decision-handoff={evidenceUrl ? "available" : "unavailable"}'), "l'état du passage vers la preuve doit rester explicite");
 assert.ok(assistant.includes('rel="noopener noreferrer sponsored"'), "la sortie marchande doit rester identifiée comme lien affilié");
