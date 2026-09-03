@@ -124,7 +124,7 @@ export function EditorialFooter() {
   const lbl = (href: string, fr: string) =>
     locale === "nl" ? NL_LABELS[href] ?? fr : locale === "en" ? EN_LABELS[href] ?? fr : fr;
   return (
-    <footer className="ed-footer p19-global-footer" data-experience-exit="continuation">
+    <footer className="ed-footer p19-global-footer" data-experience-exit="continuation" data-sticky-cta-avoid>
       <div className="ed-wrap">
         <span className="p19-footer-coordinate" aria-hidden="true">{x.coordinate}</span>
         <div className="ed-newsblock">

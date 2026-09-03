@@ -90,6 +90,8 @@ assert.ok(offerDetails.includes("data-purchasable={canBuy || undefined}"), "la s
 assert.ok(offerDetails.includes("PriceTimeLandscape"), "l'historique admissible doit devenir un paysage prix-temps réel");
 assert.ok(offerDetails.includes("ProductJourneyLink"), "l'offre groupée doit transporter le même produit vers son dossier exact");
 assert.ok(priceLandscape.includes('type="range"') && priceLandscape.includes("aria-live=\"polite\""), "le paysage prix-temps doit rester parcourable au clavier");
+assert.ok(priceLandscape.includes("data-sticky-cta-avoid"), "le CTA mobile ne doit pas recouvrir le paysage prix-temps");
+assert.ok(outfit.includes("data-sticky-cta-avoid"), "le CTA mobile ne doit pas recouvrir la table Outfit Studio");
 assert.ok(priceLandscape.includes("<table>"), "chaque relief doit conserver un tableau accessible de ses relevés réels");
 assert.doesNotMatch(priceLandscape, /Math\.random|setInterval|requestAnimationFrame/, "l'historique ne doit ni inventer ni faire défiler des relevés");
 assert.ok(css.includes(".p19-offer-history"), "l'historique disponible doit rester une pièce du dossier offre");
@@ -106,6 +108,7 @@ assert.ok(css.includes('[data-experience-chapter="signal"] .ed-legal'), "les con
 assert.ok(css.includes('form:not(.ed-news)'), "les formulaires publics doivent appartenir au champ éditorial sans modifier leur transport");
 assert.match(css, /prefers-reduced-motion[\s\S]*\[data-experience-chapter="signal"\]/, "le champ signal doit neutraliser ses transitions en mouvement réduit");
 assert.ok(footer.includes('data-experience-exit="continuation"'), "le footer doit prolonger le parcours au lieu de le rompre");
+assert.ok(footer.includes("data-sticky-cta-avoid"), "le CTA mobile ne doit pas recouvrir la newsletter ni les liens de sortie");
 assert.ok(footer.includes("p19-footer-coordinate"), "la sortie globale doit annoncer sa coordonnée dans les trois langues");
 assert.ok(css.includes(".p19-global-footer .ed-newsblock"), "la newsletter doit appartenir au dernier plan de l'expérience");
 assert.ok(css.includes(".p19-global-footer .ed-foot .ed-foot-links"), "les prochains chemins doivent former un registre navigable");

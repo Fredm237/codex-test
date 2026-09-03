@@ -520,7 +520,7 @@ export function OutfitStudio() {
 
       {feature === "ready" && (
         <>
-          <form className="os-panel os-form" onSubmit={submit} aria-busy={busy}>
+          <form className="os-panel os-form" data-sticky-cta-avoid onSubmit={submit} aria-busy={busy}>
             <fieldset>
               <legend>{copy.modeLabel}</legend>
               <div className="os-modes">

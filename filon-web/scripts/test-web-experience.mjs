@@ -49,6 +49,11 @@ assert.ok(immersiveRuntime.includes('getContext("webgl2"'), "la capacité WebGL 
 assert.ok(homeVolume.includes("ImmersiveBoundary"), "une erreur 3D doit retomber sur le parcours DOM qualifié");
 assert.ok(stickyCta.includes('querySelector<HTMLElement>("[data-immersive-journey]")'), "le CTA mobile ne doit pas couvrir le chapitre immersif");
 assert.ok(stickyCta.includes("journeyIsComplete"), "le CTA mobile doit attendre la fin du chapitre immersif");
+assert.ok(stickyCta.includes('pathname.startsWith("/recherche/")'), "le CTA ne doit pas répéter la destination sur la recherche");
+assert.ok(stickyCta.includes('querySelectorAll("[data-sticky-cta-avoid]")'), "le CTA doit céder la place aux outils interactifs mobiles");
+assert.ok(stickyCta.includes("!safeZoneIsVisible"), "une zone interactive visible doit masquer le CTA fixe");
+assert.ok(stickyCta.includes("getBoundingClientRect()"), "les zones hydratées tardivement doivent être réévaluées au scroll");
+assert.ok(stickyCta.includes('document.addEventListener("focusin"'), "le CTA doit disparaître pendant une saisie mobile");
 assert.ok(experience.includes("comparable ? copy.journey : copy.journeyUnknown"), "la narration doit s'abstenir si le produit exact n'est pas comparable");
 assert.ok(experience.includes("FILON conserve l’inconnue."), "l'unknown doit être un plan final légitime");
 assert.ok(globalCss.includes("body:has(.p11-web-experience) .ed-header"), "le header Phase 11 doit conserver un contraste explicite");

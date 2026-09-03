@@ -85,7 +85,7 @@ export function PriceTimeLandscape({
   const style = { "--p19-history-progress": `${(activeIndex / (points.length - 1)) * 100}%` } as CSSProperties;
 
   return (
-    <section className="p19-price-landscape" aria-labelledby={titleId} style={style}>
+    <section className="p19-price-landscape" data-sticky-cta-avoid aria-labelledby={titleId} style={style}>
       <header className="p19-price-landscape-head">
         <div>
           <p>FILON / PRICE–TIME LANDSCAPE</p>
