@@ -30,6 +30,31 @@ V2_SHADOW_WRITER_FIELDS = (
     "evidence_engine_shadow_enabled",
 )
 
+V2_PROMOTED_MODES = frozenset({"canary", "public"})
+V2_ACTIVE_MODES = frozenset({"shadow", "dark", *V2_PROMOTED_MODES})
+
+
+def _is_sha256_digest(value: object) -> bool:
+    if not isinstance(value, str) or not value.startswith("sha256:"):
+        return False
+    digest = value.removeprefix("sha256:")
+    return len(digest) == 64 and all(
+        character in "0123456789abcdef" for character in digest
+    )
+
+
+def _v2_scope_tokens(raw: str, *, name: str, maximum: int) -> list[str]:
+    values = [value.strip() for value in raw.split(",") if value.strip()]
+    if len(values) != len(set(values)):
+        raise ValueError(f"{name} must not contain duplicates")
+    if any(
+        len(value) > maximum
+        or not all(character.isalnum() or character in {"_", "-"} for character in value)
+        for value in values
+    ):
+        raise ValueError(f"{name} contains an invalid token")
+    return values
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
@@ -88,20 +113,21 @@ class Settings(BaseSettings):
 
     @model_validator(mode="before")
     @classmethod
-    def expand_atomic_v2_shadow_mode(cls, data: Any) -> Any:
-        """Déplie un opt-in shadow unique sans ouvrir de lecteur public.
+    def expand_atomic_v2_mode(cls, data: Any) -> Any:
+        """Déplie un mode V2 actif sans permettre une chaîne partielle.
 
         Les flags historiques restent utilisables individuellement pour les
         replays de maintenance bornés lorsque le mode global est ``off``.
-        ``shadow`` constitue en revanche un contrat atomique : aucun maillon
-        de la chaîne ne peut être explicitement désactivé.
+        Tout mode actif constitue un contrat atomique : aucun maillon writer
+        de la chaîne ne peut être explicitement désactivé. Les lecteurs des
+        modes promus restent soumis à un reçu exact vérifié au runtime.
         """
 
         if not isinstance(data, Mapping):
             return data
         values = dict(data)
         mode = str(values.get("v2_chain_mode", "off")).strip().lower()
-        if mode != "shadow":
+        if mode not in V2_ACTIVE_MODES:
             return values
 
         explicit_false = {
@@ -123,7 +149,7 @@ class Settings(BaseSettings):
         ]
         if disabled:
             raise ValueError(
-                "V2_CHAIN_MODE=shadow cannot disable required writers: "
+                f"V2_CHAIN_MODE={mode} cannot disable required writers: "
                 + ", ".join(sorted(disabled))
             )
         for field in V2_SHADOW_WRITER_FIELDS:
@@ -134,10 +160,22 @@ class Settings(BaseSettings):
     def reject_unsafe_production_configuration(self) -> Self:
         origins = self.cors_origins_list
         errors: list[str] = []
+        if (
+            self.is_production
+            and self.v2_chain_mode in V2_ACTIVE_MODES
+            and not _is_sha256_digest(self.v2_chain_campaign_id)
+        ):
+            errors.append(
+                "an active production V2_CHAIN_MODE requires an exact campaign digest"
+            )
         if self.v2_chain_mode == "off":
             if self.v2_canary_reader_enabled or self.v2_public_reader_enabled:
                 errors.append("V2 readers require a promoted V2_CHAIN_MODE")
-        elif self.v2_chain_mode == "shadow":
+            if self.v2_promotion_receipt_evaluation_id is not None:
+                errors.append("V2 promotion receipt requires canary or public mode")
+            if self.v2_canary_subject_digests_list:
+                errors.append("V2_CHAIN_MODE=off forbids a canary cohort")
+        elif self.v2_chain_mode in {"shadow", "dark"}:
             missing = [
                 field
                 for field in V2_SHADOW_WRITER_FIELDS
@@ -145,16 +183,75 @@ class Settings(BaseSettings):
             ]
             if missing:
                 errors.append(
-                    "V2_CHAIN_MODE=shadow requires every V2 shadow writer: "
+                    f"V2_CHAIN_MODE={self.v2_chain_mode} requires every V2 shadow writer: "
                     + ", ".join(sorted(missing))
                 )
             if self.v2_canary_reader_enabled or self.v2_public_reader_enabled:
-                errors.append("V2_CHAIN_MODE=shadow forbids every V2 public reader")
-        else:
-            errors.append(
-                f"V2_CHAIN_MODE={self.v2_chain_mode} is not qualified; "
-                "CANARY and PUBLIC remain fail-closed"
-            )
+                errors.append(
+                    f"V2_CHAIN_MODE={self.v2_chain_mode} forbids every V2 public reader"
+                )
+            if self.v2_promotion_receipt_evaluation_id is not None:
+                errors.append(
+                    f"V2_CHAIN_MODE={self.v2_chain_mode} forbids a promotion receipt"
+                )
+            if self.v2_canary_subject_digests_list:
+                errors.append(
+                    f"V2_CHAIN_MODE={self.v2_chain_mode} forbids a canary cohort"
+                )
+        elif self.v2_chain_mode == "canary":
+            missing = [
+                field
+                for field in V2_SHADOW_WRITER_FIELDS
+                if not getattr(self, field)
+            ]
+            if missing:
+                errors.append(
+                    "V2_CHAIN_MODE=canary requires every V2 shadow writer: "
+                    + ", ".join(sorted(missing))
+                )
+            if not self.v2_canary_reader_enabled:
+                errors.append("V2_CHAIN_MODE=canary requires its reader")
+            if self.v2_public_reader_enabled:
+                errors.append("V2_CHAIN_MODE=canary forbids the public reader")
+            if not _is_sha256_digest(self.v2_promotion_receipt_evaluation_id):
+                errors.append("V2_CHAIN_MODE=canary requires an exact promotion receipt digest")
+            if not self.v2_canary_subject_digests_list:
+                errors.append("V2_CHAIN_MODE=canary requires a closed cohort")
+            if not self.v2_supported_verticals_list:
+                errors.append("V2_CHAIN_MODE=canary requires supported verticals")
+            if not self.v2_supported_locales_list:
+                errors.append("V2_CHAIN_MODE=canary requires supported locales")
+            if not self.v2_supported_decision_types_list:
+                errors.append("V2_CHAIN_MODE=canary requires supported decision types")
+            if self.v2_max_data_age_seconds is None:
+                errors.append("V2_CHAIN_MODE=canary requires an explicit freshness bound")
+        elif self.v2_chain_mode == "public":
+            missing = [
+                field
+                for field in V2_SHADOW_WRITER_FIELDS
+                if not getattr(self, field)
+            ]
+            if missing:
+                errors.append(
+                    "V2_CHAIN_MODE=public requires every V2 shadow writer: "
+                    + ", ".join(sorted(missing))
+                )
+            if self.v2_canary_reader_enabled:
+                errors.append("V2_CHAIN_MODE=public forbids the canary reader")
+            if not self.v2_public_reader_enabled:
+                errors.append("V2_CHAIN_MODE=public requires its reader")
+            if not _is_sha256_digest(self.v2_promotion_receipt_evaluation_id):
+                errors.append("V2_CHAIN_MODE=public requires an exact promotion receipt digest")
+            if self.v2_canary_subject_digests_list:
+                errors.append("V2_CHAIN_MODE=public forbids a residual canary cohort")
+            if not self.v2_supported_verticals_list:
+                errors.append("V2_CHAIN_MODE=public requires supported verticals")
+            if not self.v2_supported_locales_list:
+                errors.append("V2_CHAIN_MODE=public requires supported locales")
+            if not self.v2_supported_decision_types_list:
+                errors.append("V2_CHAIN_MODE=public requires supported decision types")
+            if self.v2_max_data_age_seconds is None:
+                errors.append("V2_CHAIN_MODE=public requires an explicit freshness bound")
         if self.product_graph_shadow_enabled and not self.observation_shadow_enabled:
             errors.append(
                 "PRODUCT_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
@@ -479,13 +576,85 @@ class Settings(BaseSettings):
     fashion_expert_enabled: bool = Field(default=False)
     outfit_studio_enabled: bool = Field(default=False)
     # Contrôle atomique de promotion de la chaîne P0 shadows + P1–P10.
-    # Seul ``shadow`` est actuellement qualifiable. Les modes lecteurs restent
-    # présents dans le contrat mais échouent fermés jusqu'à leur gate dédiée.
-    v2_chain_mode: Literal["off", "shadow", "canary", "public"] = Field(
+    # Les modes lecteurs exigent un reçu append-only précis, revérifié en base
+    # avant toute lecture. Une variable d'environnement seule ne les ouvre pas.
+    v2_chain_mode: Literal["off", "shadow", "dark", "canary", "public"] = Field(
         default="off"
     )
+    # Borne utilisée uniquement par la commande explicite de récupération.
+    # Le Cron normal n'interrompt jamais un lease automatiquement.
+    v2_chain_stale_after_seconds: int = Field(
+        default=4 * 60 * 60,
+        ge=60,
+        le=24 * 60 * 60,
+    )
+    # Identité non secrète de la campagne de qualification continue. Elle lie
+    # les fenêtres, replays, dark reads et reçus sans mélanger l'historique.
+    v2_chain_campaign_id: str | None = Field(default=None)
     v2_canary_reader_enabled: bool = Field(default=False)
     v2_public_reader_enabled: bool = Field(default=False)
+    v2_promotion_receipt_evaluation_id: str | None = Field(default=None)
+    # Liste CSV de digests HMAC/SHA-256 pseudonymisés. Les valeurs ne sont ni
+    # des identités ni des secrets et ne doivent jamais être journalisées.
+    v2_canary_subject_digests: str = Field(default="")
+    # Périmètre fonctionnel fermé. Aucune valeur implicite n'est choisie :
+    # CANARY/PUBLIC exigent une verticale, une locale, un type et une fraîcheur.
+    v2_supported_verticals: str = Field(default="")
+    v2_supported_locales: str = Field(default="")
+    v2_supported_decision_types: str = Field(default="")
+    v2_max_data_age_seconds: int | None = Field(default=None, ge=1, le=30 * 24 * 60 * 60)
+
+    @field_validator(
+        "v2_promotion_receipt_evaluation_id",
+        "v2_chain_campaign_id",
+        mode="before",
+    )
+    @classmethod
+    def normalize_v2_promotion_receipt(
+        cls,
+        value: object,
+    ) -> object:
+        if isinstance(value, str):
+            normalized = value.strip()
+            return normalized or None
+        return value
+
+    @property
+    def v2_canary_subject_digests_list(self) -> list[str]:
+        values = [
+            value.strip()
+            for value in self.v2_canary_subject_digests.split(",")
+            if value.strip()
+        ]
+        if len(values) != len(set(values)):
+            raise ValueError("V2_CANARY_SUBJECT_DIGESTS must not contain duplicates")
+        if any(not _is_sha256_digest(value) for value in values):
+            raise ValueError("V2_CANARY_SUBJECT_DIGESTS must contain SHA-256 digests")
+        return values
+
+    @property
+    def v2_supported_verticals_list(self) -> list[str]:
+        return _v2_scope_tokens(
+            self.v2_supported_verticals,
+            name="V2_SUPPORTED_VERTICALS",
+            maximum=32,
+        )
+
+    @property
+    def v2_supported_locales_list(self) -> list[str]:
+        return _v2_scope_tokens(
+            self.v2_supported_locales,
+            name="V2_SUPPORTED_LOCALES",
+            maximum=8,
+        )
+
+    @property
+    def v2_supported_decision_types_list(self) -> list[str]:
+        return _v2_scope_tokens(
+            self.v2_supported_decision_types,
+            name="V2_SUPPORTED_DECISION_TYPES",
+            maximum=32,
+        )
     # Double écriture append-only de l'ingestion vers RawSource/Observation.
     # Désactivée tant que P0.e n'a pas été validé sur un lot réel borné.
     observation_shadow_enabled: bool = Field(default=False)

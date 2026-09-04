@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/v2-chain/v1/shadow-qualification.schema.json",
+  "title": "FILON V2 shadow to canary qualification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "evaluated_at", "campaign_id", "metrics", "gate", "proof_refs", "maximum_p95_window_ms", "evaluation_id"],
+  "properties": {
+    "schema_version": {"const": "v2-shadow-qualification/v1"},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "campaign_id": {"$ref": "#/$defs/digest"},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "execution_rows", "valid_terminal_windows", "active_executions",
+        "failed_or_interrupted_executions", "cursor_monotone",
+        "non_overlapping_executions", "p95_window_ms", "dark_observations",
+        "dark_eligible", "dark_unsupported", "dark_complete", "dark_invalid", "dark_raw_query_retained",
+        "observed_response_types"
+      ],
+      "properties": {
+        "execution_rows": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "valid_terminal_windows": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "active_executions": {"type": "integer", "minimum": 0},
+        "failed_or_interrupted_executions": {"type": "integer", "minimum": 0},
+        "cursor_monotone": {"type": "boolean"},
+        "non_overlapping_executions": {"type": "boolean"},
+        "p95_window_ms": {"type": ["integer", "null"], "minimum": 0},
+        "dark_observations": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "dark_eligible": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "dark_unsupported": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "dark_complete": {"type": "integer", "minimum": 0},
+        "dark_invalid": {"type": "integer", "minimum": 0},
+        "dark_raw_query_retained": {"type": "integer", "minimum": 0},
+        "observed_response_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]}
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "status", "gates", "blocked_response_types", "blocker_codes", "evaluation_id"],
+      "properties": {
+        "schema_version": {"const": "v2-shadow-to-canary-gate/v1"},
+        "status": {"enum": ["CANARY_HOLD", "CANARY_AUTHORIZED"]},
+        "gates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "migration_and_rollback", "idempotent_chain_replay",
+            "monotone_single_execution", "inherited_benchmarks",
+            "safety_invariants", "thirty_terminal_windows",
+            "performance_distribution", "recovery_exercises",
+            "dark_reader", "dark_reader_rollback"
+          ],
+          "properties": {
+            "migration_and_rollback": {"type": "boolean"},
+            "idempotent_chain_replay": {"type": "boolean"},
+            "monotone_single_execution": {"type": "boolean"},
+            "inherited_benchmarks": {"type": "boolean"},
+            "safety_invariants": {"type": "boolean"},
+            "thirty_terminal_windows": {"type": "boolean"},
+            "performance_distribution": {"type": "boolean"},
+            "recovery_exercises": {"type": "boolean"},
+            "dark_reader": {"type": "boolean"},
+            "dark_reader_rollback": {"type": "boolean"}
+          }
+        },
+        "blocked_response_types": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]}
+        },
+        "blocker_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "evaluation_id": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "proof_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "single_alembic_head_ref", "postgresql_migration_ref",
+        "expand_only_rollback_ref", "replay_idempotence_ref",
+        "inherited_benchmarks_ref", "safety_invariants_ref",
+        "collision_exercise_ref", "stale_interruption_ref",
+        "recovery_replay_ref", "dark_reader_rollback_ref",
+        "performance_policy_ref"
+      ],
+      "properties": {
+        "single_alembic_head_ref": {"$ref": "#/$defs/digest"},
+        "postgresql_migration_ref": {"$ref": "#/$defs/digest"},
+        "expand_only_rollback_ref": {"$ref": "#/$defs/digest"},
+        "replay_idempotence_ref": {"$ref": "#/$defs/digest"},
+        "inherited_benchmarks_ref": {"$ref": "#/$defs/digest"},
+        "safety_invariants_ref": {"$ref": "#/$defs/digest"},
+        "collision_exercise_ref": {"$ref": "#/$defs/digest"},
+        "stale_interruption_ref": {"$ref": "#/$defs/digest"},
+        "recovery_replay_ref": {"$ref": "#/$defs/digest"},
+        "dark_reader_rollback_ref": {"$ref": "#/$defs/digest"},
+        "performance_policy_ref": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "maximum_p95_window_ms": {"type": "integer", "minimum": 1},
+    "evaluation_id": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

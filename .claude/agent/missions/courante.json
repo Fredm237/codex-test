@@ -2,7 +2,7 @@
   "titre": "FILON — Promotion atomique de la chaîne V2",
   "objectif": "Faire progresser P0 shadows et P1–P10 de SHADOW vers CANARY puis PUBLIC sans incohérence de dépendances ni exposition prématurée",
   "cree": "2026-09-02T00:00:00+02:00",
-  "maj": "2026-09-02T00:48:23+02:00",
+  "maj": "2026-09-04T18:20:00+02:00",
   "contraintes": [
     "Le lecteur public Core v1 reste inchangé pendant toute la qualification shadow",
     "Les writers V2 doivent être activés comme une chaîne atomique et validée fail-closed",
@@ -51,20 +51,31 @@
       "depend": ["v2p_c"],
       "outil": "Railway",
       "attendu": "Volumes réels croissants, writers uniques, santé stable et lecteurs publics OFF",
-      "obtenu": null,
-      "verification": null,
-      "tentatives": 1
+      "obtenu": "Point d'entrée Cron privé préparé localement : abstention pendant une ingestion catalogue, lease V2 global, curseur isolé par verticale, fenêtre maximale de 100 raws et lecteurs publics interdits. Une commande distincte peut clore un lease V2 réellement stale après inspection, sans jamais lancer son successeur dans la même occurrence. Le Cron suivant reprend l'instant, la borne et les checkpoints originaux ; un run failed exige une décision d'exploitation",
+      "verification": "172 tests V2/configuration et 2 738 tests backend verts, 3 ignorés ; test OTLP loopback vert isolément ; interruption après Product Ontology puis reprise des 13 étapes sans duplication qualifiée ; audit Railway en lecture seule : web/PostgreSQL/Redis sains et ingestion catalogue 25 unique avec heartbeat frais, donc activation V2 encore volontairement différée",
+      "tentatives": 2
     },
     {
       "id": "v2p_e",
       "objectif": "Qualifier un dark reader puis un canary end-to-end réversible",
-      "statut": "a_faire",
+      "statut": "en_cours",
       "depend": ["v2p_d"],
       "outil": "backend + observabilité",
       "attendu": "Gates statistiques, SLO ratifiés et rollback prouvé avant toute promotion PUBLIC",
-      "obtenu": null,
-      "verification": null,
-      "tentatives": 0
+      "obtenu": "Lecteur sombre local borné et append-only, gate canary autoritaire, cohorte fermée et routage réversible Core/V2 par objets entiers. Le lecteur en ligne P5→P10 est borné au seul type ABSTAIN, sous contrat sans requête brute. Le journal canary agrégé mesure les latences et refuse toute observation V2 incomplète. Les reçus SHADOW→CANARY et CANARY→PUBLIC sont dérivés des journaux, dédupliquent les replays, exigent curseurs contigus, échantillons appariés, support par type, zéro fallback, provenance complète et preuves externes SHA-256. Le journal append-only e8b6c0d2f4a7 persiste les décisions et leur filiation sans payload. Le garde runtime exige l'identité exacte de ce reçu, revérifie ses gates et sa filiation, maintient les writers en CANARY/PUBLIC et interdit toute expansion de type. La commande privée de promotion impose une date stable, les ensembles exacts de preuves et un dry-run/apply/replay append-only avant toute activation. Aucun module n'est raccordé aux routes.",
+      "verification": "Dry-run/apply/replay idempotent sur chaîne synthétique réelle ; migrations c6f4a8b0d2e5, d7a5b9c1e3f6 et e8b6c0d2f4a7 sans drift ; Quality Labs fail-closed sur 30 fenêtres et lectures appariées ; 28 tests ciblés de promotion et 2 729 tests backend verts avec 3 ignorés, test OTLP loopback vert isolément, ainsi que 3 tests PostgreSQL 16 verts sur les migrations inchangées. Qualification production encore interdite ; BUY_NOW et WAIT restent OFF.",
+      "tentatives": 1
+    },
+    {
+      "id": "v2p_f",
+      "objectif": "Fermer localement les gaps du mandat Phase 19.5 avant publication",
+      "statut": "fait",
+      "depend": ["v2p_d", "v2p_e"],
+      "outil": "backend + Quality Lab + PostgreSQL 16",
+      "attendu": "Mode DARK réel, campagne et funnel vérifiables, éligibilité canary, preuves persistées et contrôle opératoire unique",
+      "obtenu": "Dual-read réel non influent raccordé aux routes V1, campagne/replay/recovery séparés, métriques de funnel persistées, éligibilité canary fail-closed, registre append-only de preuves externes, garde runtime renforcé, politique d'incident et vue de contrôle privée",
+      "verification": "2 770 tests backend Python 3.12 verts, 3 ignorés ; 3 tests PostgreSQL 16 verts sur upgrade, drift, verrou et restauration ; compilation, contrats JSON et diff check verts ; aucun secret ou fichier protégé ajouté",
+      "tentatives": 1
     }
   ],
   "journal": [
@@ -102,6 +113,91 @@
       "ts": "2026-09-02T00:48:23+02:00",
       "evenement": "tache_demarree",
       "detail": "v2p_d (tentative 1) — préparation de l'intégration et de la qualification PostgreSQL avant toute activation Railway"
+    },
+    {
+      "ts": "2026-09-03T22:08:02+02:00",
+      "evenement": "verification",
+      "detail": "v2p_d (tentative 2) — scheduler continu fail-closed préparé localement ; curseur par verticale et abstention catalogue/V2 concurrente qualifiés par 22 tests"
+    },
+    {
+      "ts": "2026-09-03T22:29:24+02:00",
+      "evenement": "tache_demarree",
+      "detail": "v2p_e (tentative 1) — préparation locale du lecteur sombre pendant que l'activation production v2p_d reste bloquée par le run catalogue actif"
+    },
+    {
+      "ts": "2026-09-03T22:29:24+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — diff agrégé V2/Core, confidentialité, fail-closed, idempotence et migration réversible qualifiés localement par 105 tests ciblés, 2 663 tests backend et 3 tests PostgreSQL 17"
+    },
+    {
+      "ts": "2026-09-03T22:44:00+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — gate canary objectif, allowlist fermée et fallback Core/V2 atomique qualifiés localement par 80 tests ; raccordement public et mode canary maintenus OFF"
+    },
+    {
+      "ts": "2026-09-03T23:22:21+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — lecteur en ligne P5→P10 borné à ABSTAIN, contrat sans requête brute et 11 tests locaux verts ; aucune route ni aucun flag activé"
+    },
+    {
+      "ts": "2026-09-03T23:47:24+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — journal canary sans requête ni identité, migration d7a5b9c1e3f6, reçu contractuel et latences qualifiés ; 133 tests V2, 2691 tests backend et 3 tests PostgreSQL verts"
+    },
+    {
+      "ts": "2026-09-04T00:03:10+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — reçu SHADOW vers CANARY dérivé des journaux et des preuves SHA-256 ; replays dédupliqués, curseurs contigus et ABSTAIN seul qualifiable ; 139 tests V2, 2697 tests backend et 3 tests PostgreSQL 16 verts"
+    },
+    {
+      "ts": "2026-09-04T00:17:46+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — reçu CANARY vers PUBLIC dérivé de la cohorte et du gate exacts ; support apparié et par type, zéro fallback, provenance et p95 V2-Core exigés ; 146 tests V2 et 2704 tests backend verts"
+    },
+    {
+      "ts": "2026-09-04T00:31:33+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — journal append-only e8b6c0d2f4a7 des promotions, filiation des gates et refus de dérive qualifiés ; 149 tests V2, 2707 tests backend et 3 tests PostgreSQL 16 verts ; run catalogue 25 toujours seul et frais"
+    },
+    {
+      "ts": "2026-09-04T00:55:46+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — garde runtime des promotions qualifiée : reçu exact, gates et preuves revérifiés, filiation canary obligatoire, types non extensibles et writers maintenus en CANARY/PUBLIC ; 132 tests ciblés et 2724 tests backend verts avec 3 ignorés ; run catalogue 25 toujours seul avec heartbeat frais"
+    },
+    {
+      "ts": "2026-09-04T01:11:28+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — commande privée SHADOW→CANARY→PUBLIC qualifiée : date et preuves exactes, dry-run/apply/replay append-only, filiation canary, sortie contractuelle sans payload ; 28 tests ciblés et 2729 tests backend verts avec 3 ignorés"
+    },
+    {
+      "ts": "2026-09-04T02:07:30+02:00",
+      "evenement": "verification",
+      "detail": "v2p_d — récupération stale explicite ajoutée au scheduler : seuil borné, lease frais préservé, lease stale terminé interrupted, aucun successeur dans la même occurrence ; 166 tests V2/configuration et 2736 tests backend verts avec 3 ignorés, OTLP loopback vert isolément ; run catalogue 25 toujours seul et frais"
+    },
+    {
+      "ts": "2026-09-04T02:10:08+02:00",
+      "evenement": "verification",
+      "detail": "v2p_d — le preflight expose désormais l'identifiant du lease, le heartbeat UTC, son âge et l'éligibilité stale sans mutation ni payload ; 168 tests V2/configuration verts"
+    },
+    {
+      "ts": "2026-09-04T02:16:20+02:00",
+      "evenement": "verification",
+      "detail": "v2p_d — qualification terminale du reçu de lease : 2738 tests backend verts, 3 ignorés ; l'unique test OTLP refusé par le sandbox est vert isolément sur loopback autorisé"
+    },
+    {
+      "ts": "2026-09-04T02:24:06+02:00",
+      "evenement": "verification",
+      "detail": "v2p_d — correction d'un risque de trou aval à la reprise : le successeur d'un run interrupted réutilise son instant, sa borne et ses six checkpoints ; un test intégré interrompt après Product Ontology puis termine les 13 étapes sans duplication. Contrat scheduler v1 et trois exemples ajoutés ; 172 tests V2/configuration verts"
+    },
+    {
+      "ts": "2026-09-04T02:30:01+02:00",
+      "evenement": "verification",
+      "detail": "v2p_d — qualification backend complète après correction de reprise : 2742 tests verts, 3 ignorés ; l'unique test OTLP refusé par le sandbox est vert isolément sur loopback autorisé"
+    },
+    {
+      "ts": "2026-09-04T18:20:00+02:00",
+      "evenement": "tache_faite",
+      "detail": "v2p_f — gaps Phase 19.5 fermés localement : mode DARK réel, funnel, éligibilité canary, preuves persistées et garde runtime ; 2770 tests backend et 3 tests PostgreSQL 16 verts ; production inchangée car run catalogue 25 encore actif"
     }
   ]
 }

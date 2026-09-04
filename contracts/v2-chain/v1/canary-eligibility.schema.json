@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/v2-chain/v1/canary-eligibility.schema.json",
+  "title": "FILON V2 canary eligibility decision v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "eligible",
+    "reason_code",
+    "vertical",
+    "locale",
+    "decision_type",
+    "evaluation_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "v2-canary-eligibility-decision/v1"},
+    "eligible": {"type": "boolean"},
+    "reason_code": {
+      "enum": [
+        "eligible",
+        "vertical_unsupported",
+        "locale_unsupported",
+        "decision_type_unsupported",
+        "dependencies_not_admissible",
+        "data_not_fresh",
+        "critical_unknown",
+        "hard_constraint_violation",
+        "confidence_not_admissible",
+        "rollback_unavailable"
+      ]
+    },
+    "vertical": {"type": "string", "minLength": 1, "maxLength": 32},
+    "locale": {"type": "string", "minLength": 1, "maxLength": 8},
+    "decision_type": {"type": "string", "minLength": 1, "maxLength": 32},
+    "evaluation_id": {"$ref": "#/$defs/digest"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"eligible": {"const": true}}, "required": ["eligible"]},
+      "then": {"properties": {"reason_code": {"const": "eligible"}}},
+      "else": {"not": {"properties": {"reason_code": {"const": "eligible"}}}}
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

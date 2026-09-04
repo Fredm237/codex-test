@@ -1,0 +1,9 @@
+{
+  "schema_version": "v2-canary-eligibility-decision/v1",
+  "eligible": true,
+  "reason_code": "eligible",
+  "vertical": "smartphones",
+  "locale": "fr-BE",
+  "decision_type": "purchase_advice",
+  "evaluation_id": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+}

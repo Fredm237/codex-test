@@ -34,6 +34,7 @@ from app.buy_wait import models as buy_wait_models  # noqa: F401
 from app.personal_commerce import models as personal_commerce_models  # noqa: F401
 from app.merchant_intelligence import models as merchant_models  # noqa: F401
 from app.evidence_engine import models as evidence_models  # noqa: F401
+from app.v2_chain import models as v2_chain_models  # noqa: F401
 
 
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
@@ -65,6 +66,10 @@ PERSONAL_COMMERCE_TABLES = {
     "personal_commerce_decision_runs",
     "personal_commerce_erasure_receipts",
 }
+V2_DARK_READER_TABLES = {"v2_dark_read_observations"}
+V2_LIVE_DARK_READER_TABLES = {"v2_live_dark_read_observations"}
+V2_CANARY_OBSERVATION_TABLES = {"v2_canary_read_observations"}
+V2_PROMOTION_PROOF_TABLES = {"v2_promotion_proofs"}
 MERCHANT_INTELLIGENCE_TABLES = {"merchant_quality_snapshots"}
 EVIDENCE_ENGINE_TABLES = {
     "evidence_claim_records",
@@ -93,7 +98,11 @@ CONFIDENCE_REVISION = "e2b0d4f6a8c1"
 BUY_WAIT_REVISION = "f3c1e5a7b9d2"
 V2_CHAIN_REVISION = "a4e2c6f8b0d3"
 PERSONAL_COMMERCE_REVISION = "b5d3f7a9c1e4"
-HEAD_REVISION = PERSONAL_COMMERCE_REVISION
+V2_DARK_READER_REVISION = "c6f4a8b0d2e5"
+V2_CANARY_OBSERVATION_REVISION = "d7a5b9c1e3f6"
+V2_PROMOTION_RECEIPT_REVISION = "e8b6c0d2f4a7"
+V2_PROMOTION_EVIDENCE_REVISION = "f9c7d1e3a5b8"
+HEAD_REVISION = V2_PROMOTION_EVIDENCE_REVISION
 
 
 @pytest.fixture(autouse=True)
@@ -167,7 +176,20 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
     assert scripts.get_revision(CONFIDENCE_REVISION).down_revision == OFFER_OPTIMIZATION_FACTS_REVISION
     assert scripts.get_revision(BUY_WAIT_REVISION).down_revision == CONFIDENCE_REVISION
     assert scripts.get_revision(V2_CHAIN_REVISION).down_revision == BUY_WAIT_REVISION
-    assert scripts.get_revision(HEAD_REVISION).down_revision == V2_CHAIN_REVISION
+    assert scripts.get_revision(PERSONAL_COMMERCE_REVISION).down_revision == V2_CHAIN_REVISION
+    assert scripts.get_revision(V2_DARK_READER_REVISION).down_revision == PERSONAL_COMMERCE_REVISION
+    assert (
+        scripts.get_revision(V2_CANARY_OBSERVATION_REVISION).down_revision
+        == V2_DARK_READER_REVISION
+    )
+    assert (
+        scripts.get_revision(V2_PROMOTION_RECEIPT_REVISION).down_revision
+        == V2_CANARY_OBSERVATION_REVISION
+    )
+    assert (
+        scripts.get_revision(HEAD_REVISION).down_revision
+        == V2_PROMOTION_RECEIPT_REVISION
+    )
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):
@@ -460,6 +482,10 @@ def test_shadow_rollback_flag_preserves_head_schema_and_currency(tmp_path, monke
         | CONFIDENCE_TABLES
         | BUY_WAIT_TABLES
         | PERSONAL_COMMERCE_TABLES
+        | V2_DARK_READER_TABLES
+        | V2_LIVE_DARK_READER_TABLES
+        | V2_CANARY_OBSERVATION_TABLES
+        | V2_PROMOTION_PROOF_TABLES
         | MERCHANT_INTELLIGENCE_TABLES
         | EVIDENCE_ENGINE_TABLES
         <= tables

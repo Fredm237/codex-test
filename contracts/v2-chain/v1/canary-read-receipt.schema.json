@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/v2-chain/v1/canary-read-receipt.schema.json",
+  "title": "FILON V2 canary read receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "source",
+    "response_type",
+    "fallback_reason",
+    "gate_evaluation_id",
+    "cohort",
+    "assignment_reason",
+    "eligibility_evaluation_id",
+    "eligibility_status",
+    "vertical",
+    "locale",
+    "decision_type",
+    "core_latency_us",
+    "v2_latency_us",
+    "total_latency_us",
+    "chain_complete",
+    "safety_state",
+    "provenance_complete",
+    "raw_query_retained"
+  ],
+  "properties": {
+    "schema_version": {"const": "v2-canary-read-receipt/v1"},
+    "source": {"enum": ["core_v1", "v2"]},
+    "response_type": {"enum": ["CORE", "ABSTAIN", "BUY_NOW", "WAIT"]},
+    "fallback_reason": {"type": ["string", "null"], "minLength": 1},
+    "gate_evaluation_id": {"$ref": "#/$defs/digest"},
+    "cohort": {"enum": ["core", "canary"]},
+    "assignment_reason": {"type": "string", "minLength": 1, "maxLength": 64},
+    "eligibility_evaluation_id": {"$ref": "#/$defs/digest"},
+    "eligibility_status": {"enum": ["eligible", "ineligible"]},
+    "vertical": {"type": "string", "minLength": 1, "maxLength": 32},
+    "locale": {"type": "string", "minLength": 1, "maxLength": 8},
+    "decision_type": {"type": "string", "minLength": 1, "maxLength": 32},
+    "core_latency_us": {"type": "integer", "minimum": 0},
+    "v2_latency_us": {"type": ["integer", "null"], "minimum": 0},
+    "total_latency_us": {"type": "integer", "minimum": 0},
+    "chain_complete": {"type": ["boolean", "null"]},
+    "safety_state": {"enum": ["SAFE", "ABSTAIN", "INVALID", null]},
+    "provenance_complete": {"type": ["boolean", "null"]},
+    "raw_query_retained": {"const": false}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"source": {"const": "v2"}}, "required": ["source"]},
+      "then": {
+        "properties": {
+          "cohort": {"const": "canary"},
+          "eligibility_status": {"const": "eligible"},
+          "response_type": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]},
+          "fallback_reason": {"type": "null"},
+          "v2_latency_us": {"type": "integer"},
+          "chain_complete": {"const": true},
+          "safety_state": {"enum": ["SAFE", "ABSTAIN"]},
+          "provenance_complete": {"const": true}
+        }
+      },
+      "else": {
+        "properties": {
+          "response_type": {"const": "CORE"},
+          "fallback_reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"}
+  }
+}

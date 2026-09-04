@@ -1,0 +1,12 @@
+{
+  "schema_version": "v2-promotion-command-receipt/v1",
+  "promotion_stage": "shadow_to_canary",
+  "qualification_status": "CANARY_AUTHORIZED",
+  "evaluation_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "gate_evaluation_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "authorized_response_types": ["ABSTAIN"],
+  "blocked_response_types": ["BUY_NOW", "WAIT"],
+  "persistence_status": "dry_run",
+  "receipt_id": null,
+  "raw_payload_retained": false
+}

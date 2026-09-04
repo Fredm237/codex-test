@@ -383,6 +383,12 @@ def _parser() -> argparse.ArgumentParser:
     cursor_group.add_argument("--continue-after-last-success", action="store_true")
     parser.add_argument("--limit", type=int, default=10)
     parser.add_argument("--apply", action="store_true")
+    parser.add_argument("--campaign-id")
+    parser.add_argument(
+        "--execution-kind",
+        choices=("progression", "replay", "recovery"),
+    )
+    parser.add_argument("--source-execution-id", type=int)
     for field in V2ChainCheckpoints.__dataclass_fields__:
         parser.add_argument("--checkpoint-" + field.replace("_", "-"), type=int)
     return parser
@@ -391,10 +397,30 @@ def _parser() -> argparse.ArgumentParser:
 async def _run(args: argparse.Namespace) -> V2ChainReport:
     settings = get_settings()
     configure_logging(settings.debug)
-    if args.apply and settings.v2_chain_mode != "shadow":
-        raise RuntimeError("V2_CHAIN_MODE=shadow is required for --apply")
+    if args.apply and settings.v2_chain_mode not in {
+        "shadow",
+        "dark",
+        "canary",
+        "public",
+    }:
+        raise RuntimeError("an active V2_CHAIN_MODE is required for --apply")
     if not db.is_enabled():
         raise RuntimeError("DATABASE_URL is required")
+    campaign_values = (
+        args.campaign_id,
+        args.execution_kind,
+        args.source_execution_id,
+    )
+    if any(value is not None for value in campaign_values) and not (
+        args.campaign_id is not None and args.execution_kind is not None
+    ):
+        raise RuntimeError("campaign id and execution kind must be supplied together")
+    if args.continue_after_last_success and args.campaign_id is None:
+        raise RuntimeError("continuous cursor requires an exact campaign id")
+    if args.apply and args.campaign_id is not None and (
+        settings.v2_chain_campaign_id != args.campaign_id
+    ):
+        raise RuntimeError("execution campaign does not match active configuration")
     supplied = {
         field: getattr(args, "checkpoint_" + field)
         for field in V2ChainCheckpoints.__dataclass_fields__
@@ -418,7 +444,11 @@ async def _run(args: argparse.Namespace) -> V2ChainReport:
         )
 
         after_raw_id = (
-            await next_after_raw_id(session)
+            await next_after_raw_id(
+                session,
+                vertical=args.vertical,
+                campaign_id=args.campaign_id,
+            )
             if args.continue_after_last_success
             else args.after_raw_id
         )
@@ -434,6 +464,9 @@ async def _run(args: argparse.Namespace) -> V2ChainReport:
             limit=args.limit,
             apply=args.apply,
             checkpoints=checkpoints,
+            campaign_id=args.campaign_id,
+            execution_kind=args.execution_kind,
+            source_execution_id=args.source_execution_id,
         )
 
 

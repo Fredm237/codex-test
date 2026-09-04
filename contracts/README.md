@@ -23,5 +23,7 @@ Versions actives :
   [`product-ontology/v1`](product-ontology/v1/README.md) ;
 - contrats internes Hybrid Retrieval shadow :
   [`hybrid-retrieval/v1`](hybrid-retrieval/v1/README.md) ;
+- contrat du lecteur atomique V2, borné à l'abstention :
+  [`v2-chain/v1`](v2-chain/v1/README.md) ;
 - taxonomie d'erreurs produit interne :
   [`taxonomies/v1`](taxonomies/v1/README.md).

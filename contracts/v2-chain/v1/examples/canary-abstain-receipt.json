@@ -1,0 +1,21 @@
+{
+  "schema_version": "v2-canary-read-receipt/v1",
+  "source": "v2",
+  "response_type": "ABSTAIN",
+  "fallback_reason": null,
+  "gate_evaluation_id": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "cohort": "canary",
+  "assignment_reason": "closed_cohort_match",
+  "eligibility_evaluation_id": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+  "eligibility_status": "eligible",
+  "vertical": "smartphones",
+  "locale": "fr-BE",
+  "decision_type": "purchase_advice",
+  "core_latency_us": 2000,
+  "v2_latency_us": 1400,
+  "total_latency_us": 3500,
+  "chain_complete": true,
+  "safety_state": "ABSTAIN",
+  "provenance_complete": true,
+  "raw_query_retained": false
+}

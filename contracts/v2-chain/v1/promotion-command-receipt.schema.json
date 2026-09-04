@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.example/contracts/v2-chain/v1/promotion-command-receipt.schema.json",
+  "title": "FILON V2 promotion command receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "promotion_stage",
+    "qualification_status",
+    "evaluation_id",
+    "gate_evaluation_id",
+    "authorized_response_types",
+    "blocked_response_types",
+    "persistence_status",
+    "receipt_id",
+    "raw_payload_retained"
+  ],
+  "properties": {
+    "schema_version": { "const": "v2-promotion-command-receipt/v1" },
+    "promotion_stage": {
+      "enum": ["shadow_to_canary", "canary_to_public"]
+    },
+    "qualification_status": {
+      "enum": [
+        "CANARY_HOLD",
+        "CANARY_AUTHORIZED",
+        "PUBLIC_HOLD",
+        "PUBLIC_AUTHORIZED"
+      ]
+    },
+    "evaluation_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "gate_evaluation_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "authorized_response_types": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["ABSTAIN", "BUY_NOW", "WAIT"] }
+    },
+    "blocked_response_types": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "enum": ["ABSTAIN", "BUY_NOW", "WAIT"] }
+    },
+    "persistence_status": {
+      "enum": ["dry_run", "created", "existing"]
+    },
+    "receipt_id": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "raw_payload_retained": { "const": false }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "promotion_stage": { "const": "shadow_to_canary" } },
+        "required": ["promotion_stage"]
+      },
+      "then": {
+        "properties": {
+          "qualification_status": {
+            "enum": ["CANARY_HOLD", "CANARY_AUTHORIZED"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "promotion_stage": { "const": "canary_to_public" } },
+        "required": ["promotion_stage"]
+      },
+      "then": {
+        "properties": {
+          "qualification_status": {
+            "enum": ["PUBLIC_HOLD", "PUBLIC_AUTHORIZED"]
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "persistence_status": { "const": "dry_run" } },
+        "required": ["persistence_status"]
+      },
+      "then": { "properties": { "receipt_id": { "type": "null" } } },
+      "else": { "properties": { "receipt_id": { "type": "integer" } } }
+    }
+  ]
+}

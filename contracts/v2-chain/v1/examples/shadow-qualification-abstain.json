@@ -1,0 +1,55 @@
+{
+  "schema_version": "v2-shadow-qualification/v1",
+  "evaluated_at": "2026-09-04T09:00:00Z",
+  "campaign_id": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "metrics": {
+    "execution_rows": 30,
+    "valid_terminal_windows": 30,
+    "active_executions": 0,
+    "failed_or_interrupted_executions": 0,
+    "cursor_monotone": true,
+    "non_overlapping_executions": true,
+    "p95_window_ms": 100,
+    "dark_observations": 30,
+    "dark_eligible": 30,
+    "dark_unsupported": 0,
+    "dark_complete": 30,
+    "dark_invalid": 0,
+    "dark_raw_query_retained": 0,
+    "observed_response_types": ["ABSTAIN"]
+  },
+  "gate": {
+    "schema_version": "v2-shadow-to-canary-gate/v1",
+    "status": "CANARY_AUTHORIZED",
+    "gates": {
+      "migration_and_rollback": true,
+      "idempotent_chain_replay": true,
+      "monotone_single_execution": true,
+      "inherited_benchmarks": true,
+      "safety_invariants": true,
+      "thirty_terminal_windows": true,
+      "performance_distribution": true,
+      "recovery_exercises": true,
+      "dark_reader": true,
+      "dark_reader_rollback": true
+    },
+    "blocked_response_types": ["BUY_NOW", "WAIT"],
+    "blocker_codes": ["RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:WAIT"],
+    "evaluation_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+  },
+  "proof_refs": {
+    "single_alembic_head_ref": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "postgresql_migration_ref": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "expand_only_rollback_ref": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "replay_idempotence_ref": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "inherited_benchmarks_ref": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "safety_invariants_ref": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "collision_exercise_ref": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "stale_interruption_ref": "sha256:8888888888888888888888888888888888888888888888888888888888888888",
+    "recovery_replay_ref": "sha256:9999999999999999999999999999999999999999999999999999999999999999",
+    "dark_reader_rollback_ref": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "performance_policy_ref": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+  },
+  "maximum_p95_window_ms": 500,
+  "evaluation_id": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+}
