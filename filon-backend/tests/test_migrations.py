@@ -563,12 +563,17 @@ def test_docker_image_contains_the_alembic_runtime_contract():
     alembic_tree_copy = dockerfile.index(
         "COPY --chown=filon:filon alembic ./alembic"
     )
+    quality_lab_copy = dockerfile.index(
+        "COPY --chown=filon:filon quality_lab ./quality_lab"
+    )
     unprivileged_user = dockerfile.index("USER filon")
     start = dockerfile.index('CMD ["python", "-m", "app"]')
 
     assert alembic_ini_copy < start
     assert alembic_tree_copy < start
+    assert quality_lab_copy < start
     assert alembic_tree_copy < unprivileged_user < start
+    assert quality_lab_copy < unprivileged_user < start
     assert any(
         requirement.startswith("alembic>=")
         for requirement in (BACKEND_ROOT / "requirements.txt").read_text().splitlines()
