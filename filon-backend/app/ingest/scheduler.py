@@ -116,12 +116,35 @@ async def run_once(*, stop_after_current_feed: bool = False) -> str:
     )
 
 
+async def interrupt_stale_once() -> dict[str, object]:
+    """Clôt au plus un cycle stale sans lancer de successeur catalogue."""
+
+    hours = _validated_interval()
+    await db.prepare_schema()
+    async with db.session_scope() as session:
+        if session is None:
+            raise RuntimeError("catalog scheduler database session unavailable")
+        interrupted = await catalog_sync.interrupt_stale_run(session)
+    return {
+        "status": "interrupted" if interrupted is not None else "not_stale",
+        "run_id": interrupted.get("id") if interrupted is not None else None,
+        "interval_hours": hours,
+        "schema_revision": db.CURRENT_SCHEMA_REVISION,
+        "successor_started": False,
+    }
+
+
 def main(argv: Sequence[str] = ()) -> int:
     arguments = tuple(argv)
-    if arguments not in {(), ("--check",), ("--stop-after-current-feed",)}:
+    if arguments not in {
+        (),
+        ("--check",),
+        ("--interrupt-stale",),
+        ("--stop-after-current-feed",),
+    }:
         log.error(
             "Usage: python -m app.ingest.scheduler "
-            "[--check|--stop-after-current-feed]"
+            "[--check|--interrupt-stale|--stop-after-current-feed]"
         )
         return 2
     try:
@@ -129,6 +152,10 @@ def main(argv: Sequence[str] = ()) -> int:
         configure_logging(settings.debug)
         if arguments == ("--check",):
             receipt = asyncio.run(preflight())
+            print(json.dumps(receipt, separators=(",", ":"), sort_keys=True))
+            return 0
+        if arguments == ("--interrupt-stale",):
+            receipt = asyncio.run(interrupt_stale_once())
             print(json.dumps(receipt, separators=(",", ":"), sort_keys=True))
             return 0
         outcome = asyncio.run(

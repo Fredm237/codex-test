@@ -58,15 +58,7 @@ async def _latest(session, *, status: str | None = None) -> models.CatalogSyncRu
     return (await session.execute(stmt.limit(1))).scalar_one_or_none()
 
 
-async def start_run(session, *, trigger: str) -> models.CatalogSyncRun | None:
-    """Crée un cycle ou un successeur reprenable d'un cycle abandonné.
-
-    Un index partiel unique protège aussi le cas où deux processus tenteraient de
-    démarrer simultanément. Un cycle dont la preuve de vie a expiré devient
-    terminal ``interrupted`` ; son successeur conserve explicitement sa filiation
-    et reprend les checkpoints sans faire passer l'ancien cycle pour réussi.
-    """
-    now = _now()
+async def _interrupt_stale_run(session, *, now: datetime) -> int | None:
     interrupted = await session.execute(
         update(models.CatalogSyncRun)
         .where(
@@ -85,7 +77,37 @@ async def start_run(session, *, trigger: str) -> models.CatalogSyncRun | None:
         )
         .returning(models.CatalogSyncRun.id)
     )
-    interrupted_id = interrupted.scalar_one_or_none()
+    return interrupted.scalar_one_or_none()
+
+
+async def interrupt_stale_run(session) -> dict[str, Any] | None:
+    """Clôt honnêtement un cycle stale sans créer de successeur.
+
+    Cette frontière séparée permet à l'exploitation de libérer le lease après
+    avoir arrêté le schedule. Un heartbeat frais reste toujours intouchable.
+    """
+
+    interrupted_id = await _interrupt_stale_run(session, now=_now())
+    if interrupted_id is None:
+        await session.rollback()
+        return None
+    await session.commit()
+    run = await session.get(models.CatalogSyncRun, interrupted_id)
+    if run is None:  # pragma: no cover - garde défensive après RETURNING
+        raise RuntimeError("interrupted catalog sync run disappeared")
+    return _summary(run)
+
+
+async def start_run(session, *, trigger: str) -> models.CatalogSyncRun | None:
+    """Crée un cycle ou un successeur reprenable d'un cycle abandonné.
+
+    Un index partiel unique protège aussi le cas où deux processus tenteraient de
+    démarrer simultanément. Un cycle dont la preuve de vie a expiré devient
+    terminal ``interrupted`` ; son successeur conserve explicitement sa filiation
+    et reprend les checkpoints sans faire passer l'ancien cycle pour réussi.
+    """
+    now = _now()
+    interrupted_id = await _interrupt_stale_run(session, now=now)
 
     run = models.CatalogSyncRun(
         resumed_from_run_id=interrupted_id,

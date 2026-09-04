@@ -90,6 +90,43 @@ async def test_an_abandoned_running_sync_becomes_recoverable():
         await engine.dispose()
 
 
+async def test_a_stale_sync_can_be_interrupted_without_starting_a_successor():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            stale_run = await catalog_sync.start_run(session, trigger="scheduler")
+            assert stale_run is not None
+            stale_run.heartbeat_at = (
+                datetime.now(UTC).replace(tzinfo=None) - timedelta(minutes=20)
+            )
+            await session.commit()
+
+            receipt = await catalog_sync.interrupt_stale_run(session)
+
+            assert receipt is not None
+            assert receipt["id"] == stale_run.id
+            assert receipt["status"] == "interrupted"
+            assert receipt["failure_reason"] == "interrupted"
+            assert receipt["finished_at"] is not None
+            assert await catalog_sync._latest(session, status="running") is None
+    finally:
+        await engine.dispose()
+
+
+async def test_a_fresh_sync_cannot_be_interrupted_by_maintenance():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            run = await catalog_sync.start_run(session, trigger="scheduler")
+            assert run is not None
+
+            assert await catalog_sync.interrupt_stale_run(session) is None
+            await session.refresh(run)
+            assert run.status == "running"
+    finally:
+        await engine.dispose()
+
+
 async def test_a_long_running_sync_with_a_recent_heartbeat_is_not_recovered():
     engine, maker = await _session()
     try:
