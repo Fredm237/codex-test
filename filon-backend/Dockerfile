@@ -15,6 +15,7 @@ RUN groupadd --system filon \
 COPY --chown=filon:filon alembic.ini ./alembic.ini
 COPY --chown=filon:filon alembic ./alembic
 COPY --chown=filon:filon app ./app
+COPY --chown=filon:filon quality_lab ./quality_lab
 
 USER filon
 
