@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db import models
 from app.db.base import Base
-from app.intelligence.general_catalog import retrieve_general_offers
+from app.intelligence.general_catalog import _base_statement, retrieve_general_offers
 from app.intelligence.intent_resolution import GeneralIntent, IntentScope, resolve_intent
 from app.services import taxonomy
 
@@ -70,6 +70,15 @@ async def test_exige_la_reference_de_modele_resolue_avant_la_selection(session):
     offers = await retrieve_general_offers(session, intent)
 
     assert [offer.offer_id for offer in offers] == [expected.id]
+
+
+def test_borne_le_scope_sql_par_la_reference_modele_avant_pagination():
+    intent = resolve_intent("iPhone 15 sous 600 €", "fr")
+    statement = _base_statement(intent.scopes[0], intent.required_title_phrases)
+    parameters = set(statement.compile().params.values())
+
+    assert "%iphone 15%" in parameters
+    assert "%iphone-15%" in parameters
 
 
 async def test_lit_tous_les_scopes_d_une_demande_multi_produits(session):

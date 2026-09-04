@@ -5,6 +5,8 @@ import { API } from "@/lib/api";
 import type { VerdictData } from "@/components/editorial/Verdict";
 import type { DecisionData } from "@/components/filon/DecisionPanel";
 import { ProductDetails } from "@/components/filon/ProductDetails";
+import { ProductIdentityVolume } from "@/components/experience/signature/ProductIdentityVolume";
+import { getImmersiveTextureDataUri } from "@/lib/immersive-proof";
 import { deriveProductComparison, money } from "@/components/filon/product-copy";
 
 // Fiche d'un produit regroupé par EAN. Comparaison et JSON-LD expirent avec les
@@ -115,6 +117,9 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
   if (!p) notFound();
 
   const comparison = deriveProductComparison(p.offers);
+  const textureImage = p.image && comparison
+    ? await getImmersiveTextureDataUri(p.image)
+    : null;
 
   return (
     <>
@@ -137,18 +142,27 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
         }}
       />
 
-      <section className="ed-band p11-product-surface" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
-        <div className="ed-wrap">
-          <p style={{ marginBottom: 20 }}>
-            <a href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>← Retour au catalogue</a>
+      <section className="ed-band p11-product-surface p19-product-surface" data-product-evidence="exact">
+        <div className="ed-wrap p19-product-wrap">
+          <p className="p19-product-back">
+            <a href="/catalogue">← Retour au catalogue</a>
           </p>
 
           <div className="pg-grid">
-            <div className="pg-media">
+            <div className="pg-media" data-product-transition-target>
               {p.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={p.image} alt={p.name} />
               ) : <span aria-hidden="true">—</span>}
+              {p.image && comparison ? (
+                <ProductIdentityVolume
+                  image={textureImage}
+                  name={[p.brand, p.name].filter(Boolean).join(" · ")}
+                  offerCount={comparison.offers.length}
+                />
+              ) : null}
+              <span className="p19-product-ean">EAN&nbsp;{p.ean}</span>
+              <span className="p19-product-axis" aria-hidden="true" />
             </div>
 
             <ProductDetails p={p} />

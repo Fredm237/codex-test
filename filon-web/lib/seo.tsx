@@ -12,7 +12,12 @@ export function buildMetadata(input: {
   path?: string;
   image?: string;
 }): Metadata {
-  const title = input.title ? `${input.title} · ${site.name}` : `${site.name} · ${site.tagline}`;
+  const requestedTitle = input.title?.trim();
+  const title = requestedTitle
+    ? requestedTitle.includes(site.name)
+      ? requestedTitle
+      : `${requestedTitle} · ${site.name}`
+    : `${site.name} · ${site.tagline}`;
   const description = input.description ?? site.description;
   const url = siteUrl(input.path);
 

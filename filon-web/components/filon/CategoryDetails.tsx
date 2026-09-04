@@ -75,8 +75,9 @@ export function CategoryDetails({
   const subs = category.subcategories ?? [];
 
   return (
-    <section className="ed-band" style={{ paddingTop: "clamp(90px, 12vw, 130px)" }}>
-      <div className="ed-wrap">
+    <div className="p19-category-market" data-market-plan="category">
+      <section className="ed-band">
+        <div className="ed-wrap">
         <p style={{ marginBottom: 18 }}><a href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>{copy.back}</a></p>
         <h1 className="cat-rail-title" style={{ fontSize: "clamp(26px, 4vw, 36px)" }}>{catalogueLabel(category.name, locale)}</h1>
         <p className="cat-rail-sub" style={{ marginBottom: 24 }}>{copy.compared(formatNumber(total))}</p>
@@ -106,7 +107,8 @@ export function CategoryDetails({
             {total > items.length && <p style={{ marginTop: 30, textAlign: "center" }}><a className="ed-btn ghost" href="/catalogue/" style={{ textDecoration: "none" }}>{copy.browse(formatNumber(total))}</a></p>}
           </>
         )}
-      </div>
-    </section>
+        </div>
+      </section>
+    </div>
   );
 }

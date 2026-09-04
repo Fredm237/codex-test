@@ -98,7 +98,7 @@ def _model_phrases(value: str) -> tuple[str, ...]:
     """
     phrases: list[str] = []
     normalized = _normalize_compounds(value)
-    for match in re.finditer(r"\b([a-zà-ÿ][a-zà-ÿ0-9-]{1,})\s+([0-9]{1,4}[a-z]?)\b", normalized):
+    for match in re.finditer(r"\b([a-zà-ÿ][a-zà-ÿ0-9-]{1,})[- ]+([0-9]{1,4}[a-z]?)\b", normalized):
         prefix, number = match.groups()
         trailing = normalized[match.end(): match.end() + 6]
         if prefix in _GENERIC_WORDS or re.match(r"\s*(?:€|eur|euro)", trailing):

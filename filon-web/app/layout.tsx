@@ -5,13 +5,14 @@ import { buildMetadata, organizationSchema, websiteSchema, JsonLd } from "@/lib/
 import { site } from "@/lib/site";
 
 // S’exécute avant l’hydratation : le premier pixel respecte le choix
-// enregistré, ou le réglage système si l’utilisateur n’a encore rien choisi.
+// enregistré. La première visite ouvre FILON en lumière éditoriale ;
+// le mode sombre reste un choix explicite, jamais une surprise système.
 const themeBootstrap = `(() => {
   try {
     const stored = localStorage.getItem("filon-tone");
     const tone = stored === "light" || stored === "dark"
       ? stored
-      : window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+      : "light";
     const root = document.documentElement;
     root.dataset.tone = tone;
     root.style.colorScheme = tone;
@@ -28,12 +29,18 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#0e0c0b",
+  themeColor: "#efe7da",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${fraunces.variable} ${outfit.variable} ${inter.variable}`} suppressHydrationWarning>
+    <html
+      lang="fr"
+      className={`${fraunces.variable} ${outfit.variable} ${inter.variable}`}
+      data-scroll-behavior="smooth"
+      data-tone="light"
+      suppressHydrationWarning
+    >
       <head>
         <meta name="color-scheme" content="dark light" />
         <script dangerouslySetInnerHTML={{ __html: themeBootstrap }} />

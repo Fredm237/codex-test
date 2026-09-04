@@ -1,6 +1,7 @@
 "use client";
 
 import { useLocale } from "@/lib/i18n";
+import { SkipLink } from "./SkipLink";
 
 const COPY = {
   fr: "Aller directement au contenu",
@@ -12,8 +13,8 @@ const COPY = {
 export function SkipToContent() {
   const { locale } = useLocale();
   return (
-    <a className="fx-skip-link" href="#main-content">
+    <SkipLink className="fx-skip-link" targetId="main-content">
       {COPY[locale]}
-    </a>
+    </SkipLink>
   );
 }
