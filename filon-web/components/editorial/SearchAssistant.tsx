@@ -3,22 +3,24 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
-import { API } from "@/lib/api";
 import { catalogueAssistantHref } from "@/lib/catalogue-assistant-url";
 import { formatSupportedMoney, normalizeSupportedMoney } from "@/lib/currency";
 import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
+import { ProductJourneyLink } from "@/components/experience/ProductJourneyLink";
 import { hasCurrentOfferEvidence, isSafeExternalOfferUrl } from "@/components/filon/product-copy";
+import marketStyles from "@/components/experience/search-market.module.css";
 
 const SL = {
   fr: {
-    steps: ["Compréhension du besoin", "Analyse des marchands", "Analyse des prix", "Analyse de l'historique", "Analyse du cashback", "Analyse des avis", "Recherche d'alternatives", "Calcul du Score FILON"],
     eyebrow: "Assistant d'achat",
     h1Idle: "Que cherchez-vous ?", h1Again: "Un autre achat à analyser ?",
     placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
+    searching: "FILON cherche dans le catalogue…",
+    searchingDetail: "Les résultats apparaîtront seulement lorsque les prix et les produits auront été vérifiés.",
     priceFor: "Votre région",
     countryHelp: "Ce contexte ne masque pas les offres européennes comparables. Les frais et la livraison à votre adresse restent à vérifier chez le marchand.",
     chips: ["Un PC portable pour étudiant, 800€", "Un bon smartphone à 500€", "Un casque à réduction de bruit", "Une machine pour le montage vidéo"],
-    why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", catalogue: "Voir dans le catalogue", verifiedOffer: "Offre vérifiée", currentEvidence: "Prix et disponibilité courants",
+    why: "Pourquoi", decision: "Ce que FILON sait", alt: "Alternative", see: "Voir l'offre", proof: "Ouvrir la preuve", catalogue: "Voir dans le catalogue", verifiedOffer: "Offre vérifiée", currentEvidence: "Prix et disponibilité courants",
     real: "Prix réels · Catalogue FILON", est: "Prix estimés, à titre indicatif",
     analysed: "offres analysées", forNeed: "pour", verifiedResults: (count: number) => `${count} offre${count > 1 ? "s" : ""} avec preuve courante`,
     failedTitle: "Je ne peux pas répondre pour le moment.",
@@ -27,19 +29,19 @@ const SL = {
     sourceBody: "FILON s’appuie uniquement sur les offres de son catalogue partenaire. Cette recherche ne renvoie pas encore de prix vérifiables ; explorez le catalogue ou reformulez votre demande.",
     retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
-    film: "Voir le film", closeFilm: "Fermer le film",
     at: "chez", cashback: "cashback", coupon: "coupon", observedRate: "Tarif observé", contextualOffer: "À confirmer pour vos dates et conditions",
     hist: { baisse: "En baisse", hausse: "En hausse", stable: "Stable" } as Record<Hist, string>,
   },
   nl: {
-    steps: ["Begrip van de behoefte", "Analyse van de winkels", "Prijsanalyse", "Analyse van de geschiedenis", "Analyse van de cashback", "Analyse van de reviews", "Alternatieven zoeken", "Berekening van de FILON-Score"],
     eyebrow: "Koopassistent",
     h1Idle: "Wat zoek je?", h1Again: "Nog een aankoop om te analyseren?",
     placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
+    searching: "FILON zoekt in de catalogus…",
+    searchingDetail: "Resultaten verschijnen pas nadat de producten en prijzen zijn gecontroleerd.",
     priceFor: "Jouw regio",
     countryHelp: "Deze context verbergt geen vergelijkbare Europese aanbiedingen. Verzendkosten en levering op jouw adres controleer je bij de winkel.",
     chips: ["Een studentenlaptop, 800€", "Een goede smartphone voor 500€", "Een koptelefoon met ruisonderdrukking", "Een machine voor videomontage"],
-    why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", catalogue: "Bekijk in de catalogus", verifiedOffer: "Geverifieerde aanbieding", currentEvidence: "Actuele prijs en beschikbaarheid",
+    why: "Waarom", decision: "Wat FILON weet", alt: "Alternatief", see: "Bekijk de aanbieding", proof: "Open het bewijs", catalogue: "Bekijk in de catalogus", verifiedOffer: "Geverifieerde aanbieding", currentEvidence: "Actuele prijs en beschikbaarheid",
     real: "Echte prijzen · FILON Catalogus", est: "Geschatte prijzen, ter indicatie",
     analysed: "aanbiedingen geanalyseerd", forNeed: "voor", verifiedResults: (count: number) => `${count} aanbieding${count > 1 ? "en" : ""} met actueel bewijs`,
     failedTitle: "Ik kan nu niet antwoorden.",
@@ -48,19 +50,19 @@ const SL = {
     sourceBody: "FILON gebruikt uitsluitend aanbiedingen uit zijn partnercatalogus. Deze zoekopdracht levert nog geen verifieerbare prijzen op; verken de catalogus of verfijn je vraag.",
     retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
-    film: "Bekijk de film", closeFilm: "Film sluiten",
     at: "bij", cashback: "cashback", coupon: "code", observedRate: "Waargenomen tarief", contextualOffer: "Bevestig data en voorwaarden",
     hist: { baisse: "Dalend", hausse: "Stijgend", stable: "Stabiel" } as Record<Hist, string>,
   },
   en: {
-    steps: ["Understanding the need", "Analysing merchants", "Analysing prices", "Analysing price history", "Analysing cashback", "Analysing reviews", "Searching for alternatives", "Computing the FILON Score"],
     eyebrow: "Shopping assistant",
     h1Idle: "What are you looking for?", h1Again: "Another purchase to analyse?",
     placeholder: "Describe a need, or a product…", ask: "Ask",
+    searching: "FILON is searching the catalogue…",
+    searchingDetail: "Results will appear only after the products and prices have been checked.",
     priceFor: "Your region",
     countryHelp: "This context does not hide comparable European offers. Delivery cost and delivery to your address must still be checked with the merchant.",
     chips: ["A student laptop, €800", "A good smartphone at €500", "Noise-cancelling headphones", "A machine for video editing"],
-    why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", catalogue: "View in catalogue", verifiedOffer: "Verified offer", currentEvidence: "Current price and availability",
+    why: "Why", decision: "What FILON knows", alt: "Alternative", see: "See the offer", proof: "Open the evidence", catalogue: "View in catalogue", verifiedOffer: "Verified offer", currentEvidence: "Current price and availability",
     real: "Real prices · FILON Catalogue", est: "Estimated prices, for guidance",
     analysed: "offers analysed", forNeed: "for", verifiedResults: (count: number) => `${count} offer${count > 1 ? "s" : ""} with current evidence`,
     failedTitle: "I can't answer right now.",
@@ -69,7 +71,6 @@ const SL = {
     sourceBody: "FILON relies only on offers from its partner catalogue. This search does not yet return verifiable prices; explore the catalogue or refine your request.",
     retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
-    film: "Watch the film", closeFilm: "Close film",
     at: "at", cashback: "cashback", coupon: "coupon", observedRate: "Observed rate", contextualOffer: "Confirm dates and terms",
     hist: { baisse: "Falling", hausse: "Rising", stable: "Stable" } as Record<Hist, string>,
   },
@@ -114,19 +115,9 @@ const IcBox = () => (
 );
 const HIST_ICON = { baisse: IcTrendDown, hausse: IcTrendUp, stable: IcTrendFlat } as const;
 
-const STEPS = [
-  "Compréhension du besoin",
-  "Analyse des marchands",
-  "Analyse des prix",
-  "Analyse de l'historique",
-  "Analyse du cashback",
-  "Analyse des avis",
-  "Recherche d'alternatives",
-  "Calcul du Score FILON",
-];
-
 type Hist = "baisse" | "hausse" | "stable";
 type Card = {
+  offer_id?: number | null; product_ean?: string | null;
   name: string;
   offer_kind?: string; image?: string | null; link?: string | null;
   price: number; currency: string; merchant: string; delivery: string; warranty: string;
@@ -175,7 +166,11 @@ const isGoogleShoppingUrl = (value?: string | null) =>
 /* Real backend: reads the same events over SSE from FILON's /advise/stream.
    Enabled by setting NEXT_PUBLIC_FILON_API (the backend base URL) at build time.
    The UI is identical — only the source of the events changes. */
-const ASSISTANT_TIMEOUT_MS = 30_000;
+// Le backend peut consacrer jusqu'à 30 s à la recherche. Le client doit
+// laisser passer son
+// événement terminal honnête — résultat ou abstention — au lieu de couper le
+// flux juste avant lui et de transformer une réponse métier en panne réseau.
+const ASSISTANT_TIMEOUT_MS = 40_000;
 
 async function* streamAnalyze(
   q: string,
@@ -184,7 +179,9 @@ async function* streamAnalyze(
   signal: AbortSignal,
 ): AsyncGenerator<Ev> {
   const budget = detectBudget(q);
-  const url = `${API}/api/advise/stream?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}&locale=${encodeURIComponent(locale)}`;
+  // Même origine : la route Next relaie le flux du backend sans exposer la
+  // recherche aux règles CORS variables des domaines Preview Vercel.
+  const url = `/api/advise/stream/?q=${encodeURIComponent(q)}${budget ? `&budget=${budget}` : ""}${country ? `&country=${encodeURIComponent(country)}` : ""}&locale=${encodeURIComponent(locale)}`;
   const res = await fetch(url, { headers: { Accept: "text/event-stream" }, signal });
   if (!res.ok || !res.body) throw new Error(`stream ${res.status}`);
   const reader = res.body.getReader();
@@ -212,9 +209,15 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
   // Une offre sans deep link ne doit jamais faire sortir l’utilisateur vers
   // Google Shopping : on le laisse explorer le même produit dans FILON.
   const hasMerchantLink = isSafeExternalOfferUrl(c.link) && !isGoogleShoppingUrl(c.link);
-  const offerUrl = hasMerchantLink
-    ? (c.link as string)
-    : catalogueAssistantHref(q || c.name);
+  const exactEan = typeof c.product_ean === "string" && /^\d{8,14}$/.test(c.product_ean)
+    ? c.product_ean
+    : null;
+  const offerId = Number.isInteger(c.offer_id) && (c.offer_id ?? 0) > 0 ? c.offer_id : null;
+  const evidenceUrl = exactEan
+    ? `/produits/${encodeURIComponent(exactEan)}/`
+    : offerId
+      ? `/produit/${offerId}/`
+      : null;
   const showImg = c.image && imgOk;
   const displayedPrice = hasCurrentOfferEvidence(c) && c.in_stock === true
     ? formatSupportedMoney(c.price, c.currency, locale)
@@ -261,14 +264,20 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
               ? <><IcClock /> {S.contextualOffer}</>
               : <><IcCheck /> {S.currentEvidence}</>}
           </span>
-          <a
-            className="ed-btn wave"
-            href={offerUrl}
-            target={hasMerchantLink ? "_blank" : undefined}
-            rel={hasMerchantLink ? "noopener noreferrer" : undefined}
-          >
-            {hasMerchantLink ? S.see : S.catalogue}
-          </a>
+          <div className="fa-actions" data-search-decision-handoff={evidenceUrl ? "available" : "unavailable"}>
+            {evidenceUrl ? (
+              <ProductJourneyLink className="ed-btn fa-proof" href={evidenceUrl} image={c.image} label={c.name}>
+                {S.proof}
+              </ProductJourneyLink>
+            ) : null}
+            {hasMerchantLink ? (
+              <a className="ed-btn wave" href={c.link as string} target="_blank" rel="noopener noreferrer sponsored">
+                {S.see}
+              </a>
+            ) : (
+              <a className="ed-btn wave" href={catalogueAssistantHref(q || c.name)}>{S.catalogue}</a>
+            )}
+          </div>
         </div>
       </div>
     </motion.article>
@@ -278,12 +287,9 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
 export function SearchAssistant() {
   const [query, setQuery] = useState("");
   const [phase, setPhase] = useState<"idle" | "thinking" | "results" | "failed">("idle");
-  const [active, setActive] = useState(-1);
-  const [done, setDone] = useState<number[]>([]);
   const [result, setResult] = useState<Result | null>(null);
   const [asked, setAsked] = useState("");
   const [blockedExternal, setBlockedExternal] = useState(false);
-  const [filmOpen, setFilmOpen] = useState(false);
   // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
   // devise et les marchands disponibles en dépendent, et un visiteur français
   // n'a aucune raison de partir sur la Belgique. Le sélecteur reste maître —
@@ -321,14 +327,10 @@ export function SearchAssistant() {
     setPhase("thinking");
     setResult(null);
     setBlockedExternal(false);
-    setDone([]);
-    setActive(0);
 
     const apply = (ev: Ev): boolean => {
       if (runId.current !== id) return false; // superseded by a newer query
-      if (ev.type === "step") setActive(ev.i);
-      else if (ev.type === "step-done") setDone((d) => [...d, ev.i]);
-      else if (ev.type === "results") {
+      if (ev.type === "results") {
         receivedTerminalEvent = true;
         // Une recommandation ne peut pas être présentée comme FILON lorsqu’elle
         // ne contient que des liens Google Shopping. On bloque le résultat au
@@ -347,7 +349,6 @@ export function SearchAssistant() {
             ? [verified]
             : [];
         });
-        setActive(-1);
         // `real: false` signifie que le backend n’a pas trouvé de réponse dans
         // le catalogue FILON : ce sont des estimations et non des offres à
         // recommander. Elles restent donc hors de l’interface de décision.
@@ -360,8 +361,6 @@ export function SearchAssistant() {
         setPhase("results");
       } else if (ev.type === "error") {
         receivedTerminalEvent = true;
-        setDone([]);
-        setActive(-1);
         setPhase("failed");
       }
       return true;
@@ -376,8 +375,6 @@ export function SearchAssistant() {
       // Un SSE clos avant "results" n’est pas une réponse : sans ce garde-fou,
       // l’interface restait indéfiniment sur les étapes d’analyse.
       if (runId.current === id && !controller.signal.aborted && !receivedTerminalEvent) {
-        setDone([]);
-        setActive(-1);
         setPhase("failed");
       }
     } catch (error) {
@@ -386,8 +383,6 @@ export function SearchAssistant() {
       // En revanche, l’annulation par délai est une indisponibilité honnête :
       // l’utilisateur doit alors voir une conclusion, jamais des étapes figées.
       if (runId.current !== id) return;
-      setDone([]);
-      setActive(-1);
       setPhase("failed");
     } finally {
       window.clearTimeout(timeout);
@@ -400,7 +395,6 @@ export function SearchAssistant() {
   // rendu dynamique de la page, qui est statique et doit le rester.
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("film") === "1") setFilmOpen(true);
     const q = params.get("q");
     if (!q) return;
     setQuery(q);
@@ -410,31 +404,14 @@ export function SearchAssistant() {
   }, []);
 
   return (
-    <section className={`sa ${phase !== "idle" ? "searched" : ""}`}>
-      {/* Scène cinématique fiable : aucun média absent, aucun visuel inventé. */}
-      {phase === "idle" && (
-        <>
-          {/* L’assistant conserve une affiche légère. Le film complet est lu
-              explicitement à la demande, avec son propre son et ses contrôles. */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            className="sa-bg-visual sa-bg-poster"
-            src="/film/filon-est-ce-vraiment-le-bon-prix-poster.jpg"
-            alt=""
-            aria-hidden="true"
-            fetchPriority="high"
-          />
-          <div className="sa-bg-overlay" />
-        </>
-      )}
-      <div className="ed-wrap sa-content">
+    <section className={`sa ${marketStyles.surface} ${phase !== "idle" ? "searched" : ""}`} data-market-state={phase}>
+      <div className={marketStyles.field} aria-hidden="true">
+        <span className={marketStyles.ring} />
+        <span className={marketStyles.axis} />
+      </div>
+      <div className={`ed-wrap sa-content ${marketStyles.content}`}>
         {phase === "idle" && <span className="eyebrow sa-eyebrow-light">{S.eyebrow}</span>}
         <h1 className={phase === "idle" ? "sa-title-light" : ""}>{phase === "idle" ? S.h1Idle : S.h1Again}</h1>
-        {phase === "idle" && (
-          <button type="button" className="sa-film-launch" onClick={() => setFilmOpen(true)}>
-            <span aria-hidden="true">▶</span>{S.film}
-          </button>
-        )}
 
         <form className="sa-search" onSubmit={(e) => { e.preventDefault(); ask(query || S.chips[0]); }}>
           <div className="sa-box">
@@ -475,29 +452,20 @@ export function SearchAssistant() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              {/* streamed reasoning — retiré en cas d'échec : des étapes figées
-                  à mi-course laissent croire que l'analyse continue. */}
-              <motion.div
-                className={`fa-steps ${phase === "results" ? "collapsed" : ""} ${phase === "failed" ? "hidden" : ""}`}
-                layout
-              >
-                {S.steps.map((s, i) => {
-                  const st = done.includes(i) ? "done" : i === active ? "active" : "pending";
-                  return (
-                    <motion.div 
-                      layout
-                      className={`fa-step ${st}`} 
-                      key={i}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: i * 0.05 }}
-                    >
-                      <span className="tk">{st === "done" ? "✓" : ""}</span>
-                      {s}
-                    </motion.div>
-                  );
-                })}
-              </motion.div>
+              {phase === "thinking" && (
+                <motion.div
+                  className="sa-searching"
+                  role="status"
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <span className="sa-searching-mark" aria-hidden="true"><span /></span>
+                  <div>
+                    <p className="sa-searching-title">{S.searching}</p>
+                    <p className="sa-searching-detail">{S.searchingDetail}</p>
+                  </div>
+                </motion.div>
+              )}
 
               {phase === "failed" && (
                 <motion.div
@@ -543,16 +511,6 @@ export function SearchAssistant() {
           )}
         </AnimatePresence>
       </div>
-      {filmOpen && (
-        <div className="sa-film-modal" role="dialog" aria-modal="true" aria-label={S.film}>
-          <button type="button" className="sa-film-close" onClick={() => setFilmOpen(false)} aria-label={S.closeFilm}>
-            <span aria-hidden="true">×</span>{S.closeFilm}
-          </button>
-          <video className="sa-film-player" controls playsInline preload="metadata" poster="/film/filon-est-ce-vraiment-le-bon-prix-poster.jpg">
-            <source src="/film/filon-est-ce-vraiment-le-bon-prix.mp4" type="video/mp4" />
-          </video>
-        </div>
-      )}
     </section>
   );
 }

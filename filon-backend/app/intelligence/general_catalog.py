@@ -23,7 +23,7 @@ def _availability(in_stock: bool | None) -> str:
     return "unknown"
 
 
-def _base_statement(scope: IntentScope):
+def _base_statement(scope: IntentScope, required_title_phrases: tuple[str, ...] = ()):
     clauses = [
         models.Offer.filon_category == scope.category,
         models.Offer.offer_kind == taxonomy.PHYSICAL_PRODUCT,
@@ -37,6 +37,17 @@ def _base_statement(scope: IntentScope):
     ]
     if scope.subcategory is not None:
         clauses.append(models.Offer.filon_subcategory == scope.subcategory)
+    if required_title_phrases:
+        # La validation Python normalise déjà les tirets en espaces. Porter la
+        # même contrainte en SQL évite de charger un rayon entier lorsqu'un
+        # modèle explicite (iPhone 15, SV-3…) suffit à borner le corpus.
+        clauses.append(or_(*[
+            or_(
+                models.Offer.name.ilike(f"%{phrase}%"),
+                models.Offer.name.ilike(f"%{phrase.replace(' ', '-')}%"),
+            )
+            for phrase in required_title_phrases
+        ]))
     return (
         select(models.Offer, models.Merchant)
         .join(models.Merchant, models.Offer.merchant_id == models.Merchant.id)
@@ -81,7 +92,7 @@ async def retrieve_general_offers(session: AsyncSession, intent: GeneralIntent) 
         async with traced_dependency("postgres", "read"):
             rows = await fetch_all_offer_rows(
                 session.execute,
-                _base_statement(scope),
+                _base_statement(scope, intent.required_title_phrases),
             )
         input_count += len(rows)
         strict: list[CoreOfferSnapshot] = []

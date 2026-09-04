@@ -29,6 +29,13 @@ def test_conserve_une_reference_de_modele_sans_lire_le_budget_comme_modele():
     assert intent.budget_eur == 600.0
 
 
+def test_reconnait_un_code_modele_avec_tiret_sans_inventer_de_rayon():
+    intent = resolve_intent("NANKANG Winter Activa SV-3", "fr")
+
+    assert intent.required_title_phrases == ("sv 3",)
+    assert intent.resolved is False
+
+
 def test_ne_cree_pas_de_rayon_lorsque_la_taxonomie_ne_reconnait_pas_la_demande():
     intent = resolve_intent("objet imaginaire inexistant", "fr")
 

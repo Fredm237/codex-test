@@ -156,8 +156,8 @@ def search_clause(query: str | None):
     return and_(
         *[
             or_(
-                func.lower(models.Offer.name).contains(stem(t)),
-                func.lower(models.Offer.brand).contains(stem(t)),
+                models.Offer.name.ilike(f"%{stem(t)}%"),
+                models.Offer.brand.ilike(f"%{stem(t)}%"),
             )
             for t in terms
         ]

@@ -2,20 +2,23 @@ import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { WebExperience } from "@/components/experience/WebExperience";
 import { getProof } from "@/lib/proof";
+import { getImmersiveExactProductProof } from "@/lib/immersive-proof";
 
 export const revalidate = 600;
 
 export const metadata: Metadata = buildMetadata({
   path: "/",
-  title: "FILON — Le copilote d'achat intelligent",
+  title: "FILON — Comparez le bon produit et ses prix",
   description:
-    "FILON compare les offres indexées, montre les prix observés et s'abstient quand les données ne suffisent pas.",
+    "FILON vérifie qu'il s'agit du même produit, compare les offres disponibles et vous montre clairement d'où viennent les prix.",
 });
 
-// Phase 11 : l'accueil canonique reste léger et evidence-first. Les anciens
-// assets immersifs ne sont plus dans le graphe d'import de la home tant que la
-// gate Core UX/Immersive n'est pas explicitement ouverte.
+// La preuve reste rendue côté serveur. La couche spatiale Phase 19 est différée,
+// adaptative et strictement facultative : le DOM qualifié demeure le parcours.
 export default async function HomePage() {
-  const proof = await getProof();
-  return <WebExperience proof={proof} />;
+  const [proof, exactProduct] = await Promise.all([
+    getProof(),
+    getImmersiveExactProductProof(),
+  ]);
+  return <WebExperience exactProduct={exactProduct} proof={proof} />;
 }

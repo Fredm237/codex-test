@@ -219,6 +219,15 @@ for (const path of ["components/filon/ProductDetails.tsx", "components/filon/Off
     `${path} ne doit pas imprimer un prix brut non attesté`,
   );
 }
+const exactProductPage = guardedSources.find((entry) => entry.path === "app/(site)/produits/[ean]/page.tsx").source;
+const productVolume = readFileSync(join(webRoot, "components/experience/signature/ProductIdentityVolume.tsx"), "utf8");
+assert.ok(exactProductPage.includes("<ProductIdentityVolume"), "le dossier exact doit conserver le produit dans un volume d'identité réel");
+assert.ok(exactProductPage.includes("p.image && comparison"), "la profondeur produit doit rester fermée sans image et comparaison qualifiée");
+assert.ok(productVolume.includes('state !== "webgl"'), "le volume produit doit disparaître lorsque WebGL est indisponible");
+assert.ok(productVolume.includes("prefers-reduced-motion: reduce"), "le volume produit doit respecter le mouvement réduit");
+assert.ok(productVolume.includes("offerCount={offerCount}"), "la matière produit doit recevoir uniquement le volume d'offres qualifiées");
+assert.ok(productVolume.includes("PRODUCT_SEQUENCE_END = 0.92"), "l'orbite produit doit revenir sur un plan de preuve frontal avant de s'arrêter");
+assert.ok(productVolume.includes("IntersectionObserver") && productVolume.includes("!visible"), "le volume produit doit interrompre sa boucle hors écran");
 const railsSource = guardedSources.find((entry) => entry.path === "components/filon/Rails.tsx").source;
 assert.ok(railsSource.includes("currentItems"), "chaque rail doit exclure les cartes dont le prix n'est pas attesté");
 assert.ok(
@@ -236,11 +245,20 @@ for (const path of ["app/(site)/produits/[ean]/page.tsx", "app/(site)/produit/[i
   const source = guardedSources.find((entry) => entry.path === path).source;
   assert.ok(source.includes("p11-product-surface"), `${path} doit annoncer sa surface claire au header global`);
 }
+const exactProductPageSource = guardedSources.find((entry) => entry.path.endsWith("produits/[ean]/page.tsx")).source;
+assert.ok(exactProductPageSource.includes("p19-product-surface"), "la fiche exacte doit porter son plan immersif isolé");
+assert.ok(exactProductPageSource.includes('data-product-evidence="exact"'), "la fiche exacte doit annoncer sa frontière de preuve");
+const exactProductDetailsSource = guardedSources.find((entry) => entry.path === "components/filon/ProductDetails.tsx").source;
+assert.ok(exactProductDetailsSource.includes("pg-evidence-coordinates"), "EAN, offres et marchands doivent rester visibles dans le DOM");
+assert.doesNotMatch(exactProductDetailsSource, /FILON \/ (?:IDENTITÉ|IDENTITEIT|IDENTITY) \d/, "le dossier produit final ne doit pas exposer un numéro de plan");
 const filonCssSource = readFileSync(join(webRoot, "components/filon/filon.css"), "utf8");
 assert.ok(
   filonCssSource.includes("body:has(.p11-product-surface) .ed-header"),
   "les fiches produit doivent maintenir un contraste explicite dans la navigation",
 );
+assert.ok(filonCssSource.includes(".p19-product-surface"), "le dossier produit doit avoir une surface immersive isolée");
+assert.ok(filonCssSource.includes("p19-dossier-arrival"), "la mise en scène produit doit rester bornée à une arrivée");
+assert.match(filonCssSource, /prefers-reduced-motion[\s\S]*\.p19-product-dossier/, "le mouvement produit doit disparaître en mode réduit");
 const pulseSource = readFileSync(join(webRoot, "components/filon/Pulse.tsx"), "utf8");
 assert.ok(pulseSource.includes("now - metricsCheckedAt <= METRICS_MAX_AGE_MS"), "les agrégats 24 h doivent expirer sans polling réussi");
 assert.ok(pulseSource.includes("now >= metricsCheckedAt"), "une preuve de contrôle future doit rester inconnue");

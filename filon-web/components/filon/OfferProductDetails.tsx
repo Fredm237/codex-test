@@ -13,10 +13,11 @@ import {
   money,
   observationAgeHours,
   positiveFinitePrice,
-  type ComparableHistoryPoint,
 } from "./product-copy";
 import { normalizeSupportedCurrency } from "@/lib/currency";
 import { useEvidenceNow } from "./use-evidence-now";
+import { PriceTimeLandscape } from "@/components/experience/PriceTimeLandscape";
+import { ProductJourneyLink } from "@/components/experience/ProductJourneyLink";
 
 type Hist = { price: number | null; currency?: string | null; at: string | null; in_stock?: boolean | null };
 type Offer = {
@@ -30,6 +31,7 @@ type Offer = {
   in_stock: boolean | null;
   observed_at: string | null;
   evidence_current: boolean | null;
+  image: string | null;
   link: string | null;
   merchant: { name: string; slug: string; domain: string | null; region: string | null };
   history: Hist[];
@@ -64,16 +66,6 @@ const COPY = {
     observedRate: "Observed rate", contextStatus: "Confirm for your context", currentUnknown: "Check price or availability", contextNote: "This rate is not a total booking price. Confirm dates, travellers, fees and terms with the merchant.",
   },
 } as const;
-
-function Sparkline({ hist }: { hist: ComparableHistoryPoint[] }) {
-  const values = hist.map((entry) => entry.price).filter((price): price is number => price != null);
-  if (values.length < 2) return null;
-  const width = 600; const height = 120; const padding = 8;
-  const min = Math.min(...values); const max = Math.max(...values); const span = max - min || 1;
-  const step = (width - padding * 2) / (values.length - 1);
-  const path = values.map((price, index) => `${index === 0 ? "M" : "L"} ${padding + index * step} ${height - padding - ((price - min) / span) * (height - padding * 2)}`).join(" ");
-  return <svg viewBox={`0 0 ${width} ${height}`} width="100%" height="120" preserveAspectRatio="none" aria-hidden="true" style={{ display: "block" }}><path d={path} fill="none" stroke="var(--accent)" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" /></svg>;
-}
 
 export function OfferBackLink() {
   const { locale } = useLocale();
@@ -171,28 +163,44 @@ export function OfferProductDetails({ offer }: { offer: Offer }) {
     && offer.product.ean.length > 0;
 
   return (
-    <div>
-      {offer.brand && <span style={{ fontSize: 12.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--ink-3)" }}>{offer.brand}</span>}
-      <h1 style={{ fontFamily: "var(--serif)", fontSize: "clamp(24px, 4vw, 34px)", lineHeight: 1.15, margin: "6px 0 14px" }}>{offer.name}</h1>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
+    <div className="p19-offer-dossier">
+      {offer.brand && <span className="p19-offer-brand" style={{ fontSize: 12.5, letterSpacing: "0.05em", textTransform: "uppercase", color: "var(--ink-3)" }}>{offer.brand}</span>}
+      <h1 className="p19-offer-title" style={{ fontFamily: "var(--serif)", fontSize: "clamp(24px, 4vw, 34px)", lineHeight: 1.15, margin: "6px 0 14px" }}>{offer.name}</h1>
+      <div className="p19-offer-headline" style={{ display: "flex", alignItems: "baseline", gap: 12, flexWrap: "wrap" }}>
         {isContextualOffer && <span style={{ fontSize: 12.5, fontWeight: 700, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--ink-3)" }}>{C.observedRate}</span>}
-        <b style={{ fontSize: 30, color: "var(--ink)" }}>{money(
+        <b className="p19-offer-price" style={{ fontSize: 30, color: "var(--ink)" }}>{money(
           hasCurrentPriceEvidence ? offer.price : null,
           hasCurrentPriceEvidence ? offer.currency : null,
           locale,
         )}</b>
-        <span style={{ fontSize: 13, fontWeight: 600, color: canBuy ? "var(--accent)" : "var(--ink-3)" }}>{isContextualOffer ? C.contextStatus : canBuy ? C.stock : stockState === false ? C.unavailable : C.currentUnknown}</span>
+        <span className="p19-offer-status" data-purchasable={canBuy || undefined} style={{ fontSize: 13, fontWeight: 600, color: canBuy ? "var(--accent)" : "var(--ink-3)" }}>{isContextualOffer ? C.contextStatus : canBuy ? C.stock : stockState === false ? C.unavailable : C.currentUnknown}</span>
       </div>
-      <p style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6 }}>{C.at} <b>{offer.merchant.name}</b></p>
+      <p className="p19-offer-merchant" style={{ fontSize: 14, color: "var(--ink-2)", marginTop: 6 }}>{C.at} <b>{offer.merchant.name}</b></p>
       {offer.link && canBuy && <a className="ed-btn wave" href={offer.link} target="_blank" rel="noopener noreferrer sponsored" style={{ marginTop: 18, textDecoration: "none" }}>{C.offer}</a>}
       {verdict && <Verdict v={verdict} />}
       <DecisionPanel decision={decision} />
-      {hasGroupedProduct && offer.product && <a className="pd-compare" href={`/produits/${offer.product.ean}/`}><b>{C.grouped}</b><span>{C.compare}</span></a>}
-      {!isContextualOffer && <div style={{ marginTop: 30, background: "var(--card)", border: "1px solid var(--line-2)", borderRadius: 16, padding: 18 }}>
-        <span style={{ fontSize: 12.5, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--ink-3)" }}>{C.history}</span>
-        {hasHistory ? <><div style={{ marginTop: 12 }}><Sparkline hist={history} /></div><div style={{ display: "flex", gap: 22, marginTop: 12, fontSize: 13 }}><span><span style={{ color: "var(--ink-3)" }}>{C.low} </span><b>{money(historyMin, offer.currency, locale)}</b></span><span><span style={{ color: "var(--ink-3)" }}>{C.high} </span><b>{money(historyMax, offer.currency, locale)}</b></span>{hasCurrentPriceEvidence && <span><span style={{ color: "var(--ink-3)" }}>{C.current} </span><b>{money(offer.price, offer.currency, locale)}</b></span>}</div></> : <p style={{ fontSize: 13.5, color: "var(--ink-3)", marginTop: 10 }}>{C.accumulating}</p>}
-      </div>}
-      <p style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 16, lineHeight: 1.5 }}>{isContextualOffer ? C.contextNote : C.note}</p>
+      {hasGroupedProduct && offer.product && (
+        <ProductJourneyLink className="pd-compare" href={`/produits/${offer.product.ean}/`} image={offer.image} label={offer.name}>
+          <b>{C.grouped}</b><span>{C.compare}</span>
+        </ProductJourneyLink>
+      )}
+      {!isContextualOffer && (
+        <div className="p19-offer-history">
+          {hasHistory && offer.currency ? (
+            <PriceTimeLandscape history={history} currency={offer.currency} locale={locale} />
+          ) : (
+            <><span className="p19-offer-history-title">{C.history}</span><p>{C.accumulating}</p></>
+          )}
+          {hasHistory ? (
+            <dl className="p19-offer-history-summary">
+              <div><dt>{C.low}</dt><dd>{money(historyMin, offer.currency, locale)}</dd></div>
+              <div><dt>{C.high}</dt><dd>{money(historyMax, offer.currency, locale)}</dd></div>
+              {hasCurrentPriceEvidence && <div><dt>{C.current}</dt><dd>{money(offer.price, offer.currency, locale)}</dd></div>}
+            </dl>
+          ) : null}
+        </div>
+      )}
+      <p className="p19-offer-note" style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 16, lineHeight: 1.5 }}>{isContextualOffer ? C.contextNote : C.note}</p>
     </div>
   );
 }

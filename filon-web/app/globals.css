@@ -13,7 +13,7 @@
   --sans: var(--fx-font-body);
   --serif: var(--fx-font-display);
   --mono: "SF Mono", ui-monospace, "Geist Mono", Menlo, monospace;
-  color-scheme: dark;
+  color-scheme: light;
 }
 :root[data-tone="dark"] { color-scheme: dark; }
 :root[data-tone="light"] { color-scheme: light; }

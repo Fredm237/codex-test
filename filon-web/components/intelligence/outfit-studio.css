@@ -130,3 +130,314 @@ html[data-tone="dark"] .os-feedback { background: rgba(71, 47, 23, .45); }
   .os-modes button, .os-submit { transition: none; }
   .os-analysis-status::before { animation: none; }
 }
+
+/* Phase 19 — compose.
+   L'outil devient une table de composition continue : intention, offres
+   vérifiées et solution bornée restent sur le même axe. Les styles ci-dessous
+   ne changent aucun contrat de preuve ni l'état d'activation du module. */
+body:has(.p19-compose-surface) .ed-header,
+body:has(.p19-compose-surface) .ed-header:not(.stuck),
+body:has(.p19-compose-surface) .ed-header.stuck {
+  background: rgba(248, 242, 232, .94) !important;
+  border-bottom: 1px solid rgba(42, 33, 28, .18) !important;
+  box-shadow: none;
+  backdrop-filter: blur(18px) saturate(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+}
+body:has(.p19-compose-surface) .ed-header .ed-nav a,
+body:has(.p19-compose-surface) .ed-header .ed-nav button,
+body:has(.p19-compose-surface) .ed-header .ed-brand-word {
+  color: #2a211c !important;
+}
+body:has(.p19-compose-surface) .ed-header .ed-nav a:hover,
+body:has(.p19-compose-surface) .ed-header .ed-nav button:hover {
+  color: #a94128 !important;
+}
+body:has(.p19-compose-surface) .ed-header .ed-nav .ed-btn.dark {
+  color: #fffaf2 !important;
+  border-color: #a94128 !important;
+  background: #a94128 !important;
+}
+
+.os-shell.p19-compose-surface {
+  --os-ink: #251914;
+  --os-muted: #6f6259;
+  --os-paper: #f1ece2;
+  --os-panel: #f7f2e9;
+  --os-line: rgba(49, 32, 23, .18);
+  --os-gold: #e65a32;
+  --os-gold-deep: #a9381c;
+  --os-shadow: none;
+  position: relative;
+  isolation: isolate;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  overflow: clip;
+  background: #f1ece2;
+}
+.os-shell.p19-compose-surface::before,
+html[data-tone="dark"] .os-shell.p19-compose-surface::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 100svh;
+  pointer-events: none;
+  background: #d5ddcf;
+}
+.p19-compose-surface .os-intro {
+  width: min(1240px, calc(100% - clamp(36px, 8vw, 112px)));
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(320px, .72fr);
+  gap: clamp(58px, 9vw, 148px);
+  align-items: center;
+  margin: 0 auto;
+  padding: clamp(122px, 13vw, 176px) 0 clamp(76px, 9vw, 126px);
+  color: #251914;
+}
+.p19-compose-surface .os-intro-copy {
+  min-width: 0;
+  animation: p19-compose-arrival 720ms cubic-bezier(.16, 1, .3, 1) both;
+}
+@keyframes p19-compose-arrival {
+  from { opacity: 0; transform: translate3d(0, 24px, 0); }
+  to { opacity: 1; transform: translate3d(0, 0, 0); }
+}
+.p19-compose-plan {
+  margin: 0 0 clamp(38px, 5vw, 66px);
+  color: #ff8b68;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  font-weight: 650;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+.p19-compose-surface .os-intro .os-kicker {
+  color: rgba(37, 25, 20, .58);
+  font-size: 10px;
+  letter-spacing: .15em;
+}
+.p19-compose-surface .os-intro h1 {
+  max-width: 10ch;
+  margin-top: 14px;
+  color: #251914;
+  font-family: var(--serif);
+  font-size: clamp(58px, 9.5vw, 138px);
+  font-weight: 400;
+  line-height: .82;
+  letter-spacing: -.075em;
+}
+.p19-compose-surface .os-intro-copy > p:last-child {
+  max-width: 56ch;
+  margin-top: clamp(30px, 4vw, 48px);
+  color: rgba(37, 25, 20, .68);
+  font-size: clamp(16px, 1.45vw, 20px);
+  line-height: 1.65;
+}
+.p19-compose-path {
+  position: relative;
+  list-style: none;
+  padding: 14px 0;
+  margin: 0;
+  border-top: 1px solid rgba(37, 25, 20, .2);
+  border-bottom: 1px solid rgba(37, 25, 20, .2);
+}
+.p19-compose-path::before {
+  content: "";
+  position: absolute;
+  left: 20px;
+  top: 45px;
+  bottom: 45px;
+  width: 1px;
+  background: linear-gradient(#a9381c, rgba(37, 25, 20, .16));
+}
+.p19-compose-path li {
+  position: relative;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  gap: 18px;
+  align-items: baseline;
+  padding: 26px 0;
+}
+.p19-compose-path li + li { border-top: 1px solid rgba(255, 248, 239, .1); }
+.p19-compose-path li > span {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  color: #ff8b68;
+  border: 1px solid #ef5a2f;
+  border-radius: 50%;
+  background: #f8efe4;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+}
+.p19-compose-path strong {
+  color: #251914;
+  font-family: var(--serif);
+  font-size: clamp(21px, 2vw, 28px);
+  font-weight: 400;
+}
+.p19-compose-path small {
+  color: rgba(37, 25, 20, .5);
+  font-size: 9px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.p19-compose-surface .os-workbench {
+  position: relative;
+  padding: clamp(84px, 10vw, 144px) clamp(18px, 4vw, 48px) clamp(88px, 11vw, 156px);
+  color: var(--os-ink);
+  background:
+    linear-gradient(rgba(49, 32, 23, .065) 1px, transparent 1px) 0 0 / 100% 86px,
+    #f1ece2;
+}
+.p19-compose-surface .os-workbench::before {
+  content: "COMPOSE";
+  position: absolute;
+  right: max(2vw, 18px);
+  top: 38px;
+  color: rgba(49, 32, 23, .035);
+  font-family: var(--serif);
+  font-size: clamp(76px, 16vw, 230px);
+  font-style: italic;
+  line-height: .8;
+  letter-spacing: -.07em;
+  pointer-events: none;
+}
+.p19-compose-surface .os-workbench > .os-panel,
+.p19-compose-surface .os-workbench > .os-result {
+  position: relative;
+  z-index: 1;
+  width: min(1160px, 100%);
+  margin-right: auto;
+  margin-left: auto;
+}
+.p19-compose-surface .os-panel,
+.p19-compose-surface .os-result,
+html[data-tone="dark"] .p19-compose-surface .os-panel,
+html[data-tone="dark"] .p19-compose-surface .os-result {
+  color: var(--os-ink);
+  border: 1px solid rgba(49, 32, 23, .2);
+  border-radius: 0;
+  background: rgba(247, 242, 233, .82);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+.p19-compose-surface .os-form { padding: clamp(24px, 5vw, 62px); }
+.p19-compose-surface .os-form fieldset { margin-bottom: clamp(34px, 5vw, 56px); }
+.p19-compose-surface .os-form legend,
+.p19-compose-surface .os-form > label {
+  margin-bottom: 18px;
+  color: var(--os-gold-deep);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 10px;
+  letter-spacing: .13em;
+}
+.p19-compose-surface .os-modes {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0;
+  border-top: 1px solid var(--os-line);
+  border-left: 1px solid var(--os-line);
+}
+.p19-compose-surface .os-modes button,
+html[data-tone="dark"] .p19-compose-surface .os-modes button {
+  min-height: 92px;
+  padding: 14px;
+  color: var(--os-ink);
+  border: 0;
+  border-right: 1px solid var(--os-line);
+  border-bottom: 1px solid var(--os-line);
+  border-radius: 0;
+  background: rgba(255, 252, 247, .35);
+}
+.p19-compose-surface .os-modes button:hover,
+.p19-compose-surface .os-modes button:focus-visible {
+  z-index: 1;
+  transform: none;
+  outline: 2px solid #e65a32;
+  outline-offset: -2px;
+}
+.p19-compose-surface .os-modes button.active,
+html[data-tone="dark"] .p19-compose-surface .os-modes button.active {
+  color: #fff8ef;
+  background: #a94128;
+}
+.p19-compose-surface .os-form textarea,
+html[data-tone="dark"] .p19-compose-surface .os-form textarea {
+  min-height: 154px;
+  padding: clamp(18px, 3vw, 30px);
+  color: var(--os-ink);
+  border: 1px solid rgba(49, 32, 23, .24);
+  border-radius: 0;
+  background: rgba(255, 252, 247, .52);
+  font-family: var(--serif);
+  font-size: clamp(20px, 2.4vw, 31px);
+  line-height: 1.35;
+}
+.p19-compose-surface .os-form textarea:focus {
+  border-color: #e65a32;
+  box-shadow: 0 0 0 2px rgba(230, 90, 50, .18);
+}
+.p19-compose-surface .os-examples { margin: 14px 0 30px; }
+.p19-compose-surface .os-examples button {
+  min-height: 42px;
+  padding: 8px 12px;
+  border-radius: 0;
+  background: transparent;
+}
+.p19-compose-surface .os-submit {
+  min-height: 58px;
+  border-radius: 0;
+  background: #e65a32;
+  color: #1b120e;
+}
+.p19-compose-surface .os-submit:hover { background: #cf4924; }
+.p19-compose-surface .os-submit:focus-visible { outline: 2px solid #1b120e; outline-offset: 3px; }
+.p19-compose-surface .os-result { margin-top: 32px; }
+.p19-compose-surface .os-result-head,
+.p19-compose-surface .os-feedback { background: transparent; }
+.p19-compose-surface .os-item,
+html[data-tone="dark"] .p19-compose-surface .os-item {
+  background: rgba(255, 252, 247, .68);
+}
+.p19-compose-surface .os-item-image { border-radius: 0; }
+.p19-compose-surface .os-scores span,
+.p19-compose-surface .os-feedback button { border-radius: 0; }
+.p19-compose-surface .os-feedback button:first-child { background: #6d5548; border-color: #6d5548; }
+
+@media (max-width: 980px) {
+  .p19-compose-surface .os-intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 60px;
+  }
+  .p19-compose-surface .os-intro h1 { max-width: 12ch; }
+  .p19-compose-surface .os-modes { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .p19-compose-surface .os-intro {
+    width: calc(100% - 36px);
+    min-height: auto;
+    padding: 108px 0 78px;
+  }
+  .p19-compose-surface .os-intro h1 { font-size: clamp(54px, 18vw, 82px); }
+  .p19-compose-surface .os-workbench { padding: 72px 18px 90px; }
+  .p19-compose-surface .os-form { padding: 24px 18px; }
+  .p19-compose-surface .os-modes { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .p19-compose-path li { grid-template-columns: 42px minmax(0, 1fr); }
+  .p19-compose-path small { grid-column: 2; margin-top: -10px; }
+}
+
+@media (max-width: 400px) {
+  .p19-compose-surface .os-modes { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .p19-compose-surface .os-intro-copy { animation: none; }
+}

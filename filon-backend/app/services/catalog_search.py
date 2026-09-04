@@ -21,7 +21,7 @@ from app.db.models import Merchant, Offer
 from app.intelligence.contracts import CoreOfferSnapshot
 from app.intelligence.general_catalog import retrieve_general_offers
 from app.intelligence.general_decision import compose_general_plan
-from app.intelligence.intent_resolution import GeneralIntent, resolve_intent_with_fallback
+from app.intelligence.intent_resolution import GeneralIntent, resolve_intent, resolve_intent_with_fallback
 from app.services import decision, taxonomy
 from app.services.catalog_paging import fetch_all_offer_rows
 from app.services.currency import normalize_currency_code
@@ -429,6 +429,17 @@ def _planned_general_offer_ids(intent: GeneralIntent, snapshots) -> list[int]:
     return [int(item["offer_id"]) for item in plan.get("items", []) if item.get("offer_id") is not None]
 
 
+def _prefer_deterministic_model_intent(intent: GeneralIntent) -> bool:
+    """Évite qu'un code modèle explicite soit élargi par une inférence de rayon.
+
+    Lorsqu'aucun scope taxonomique n'est prouvé mais qu'un identifiant de modèle
+    l'est, la recherche lexicale exacte est à la fois plus fidèle et beaucoup
+    plus bornée qu'une lecture exhaustive d'un rayon proposé par le modèle.
+    """
+
+    return not intent.resolved and bool(intent.required_title_phrases)
+
+
 @traced_pipeline_stage("retrieval")
 async def search_internal_products(
     query: str, budget: float | None, *, limit: int = 20, country: str | None = None
@@ -452,7 +463,12 @@ async def search_internal_products(
             # catégories et sous-catégories FILON, lit toutes les offres admissibles
             # puis seulement les classe. Les anciennes ancres ne servent plus que
             # d’ultime repli quand la taxonomie ne reconnaît aucune intention.
-            general_intent = await resolve_intent_with_fallback(query)
+            deterministic_intent = resolve_intent(query)
+            general_intent = (
+                deterministic_intent
+                if _prefer_deterministic_model_intent(deterministic_intent)
+                else await resolve_intent_with_fallback(query)
+            )
             from sqlalchemy.orm import joinedload as jl
             if general_intent.resolved:
                 snapshots = _normalize_general_snapshots(
