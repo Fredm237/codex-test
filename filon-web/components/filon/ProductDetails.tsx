@@ -36,18 +36,21 @@ type Product = {
 
 const COPY = {
   fr: {
+    identity: "Identité exacte", currentOffers: "Offres comparables actuelles", comparedMerchants: "Marchands comparés", unknown: "Inconnu", proof: "Preuve et décision",
     from: "à partir de", at: "chez", merchant: "marchand", merchants: "marchands",
     save: "Écart de prix observé", saveTail: "entre l’offre la moins chère et la plus chère comparées.",
     best: "Vérifier le prix chez", all: "Toutes les offres", bestPrice: "Prix le plus bas observé",
     stock: "En stock", unavailable: "Indisponible", availabilityUnknown: "Prix ou disponibilité à vérifier", comparisonUnknown: "Comparaison de prix à vérifier", see: "Voir", note: "Prix indicatifs, susceptibles d’évoluer chez les marchands. Les offres sont regroupées par code-barres", commission: "FILON peut percevoir une commission via ces liens. Confirmez le prix, les frais et le total chez le marchand.",
   },
   nl: {
+    identity: "Exacte identiteit", currentOffers: "Huidige vergelijkbare aanbiedingen", comparedMerchants: "Vergeleken winkels", unknown: "Onbekend", proof: "Bewijs en beslissing",
     from: "vanaf", at: "bij", merchant: "winkel", merchants: "winkels",
     save: "Waargenomen prijsverschil", saveTail: "tussen de goedkoopste en duurste vergeleken aanbieding.",
     best: "Controleer de prijs bij", all: "Alle aanbiedingen", bestPrice: "Laagste waargenomen prijs",
     stock: "Op voorraad", unavailable: "Niet beschikbaar", availabilityUnknown: "Prijs of beschikbaarheid controleren", comparisonUnknown: "Prijsvergelijking te controleren", see: "Bekijk", note: "Prijzen zijn indicatief en kunnen veranderen bij de winkels. Aanbiedingen zijn gegroepeerd per barcode", commission: "Via deze links kan FILON een commissie ontvangen. Bevestig prijs, kosten en eindtotaal bij de winkel.",
   },
   en: {
+    identity: "Exact identity", currentOffers: "Current comparable offers", comparedMerchants: "Compared merchants", unknown: "Unknown", proof: "Evidence and decision",
     from: "from", at: "at", merchant: "merchant", merchants: "merchants",
     save: "Observed price spread", saveTail: "between the lowest and highest compared offer.",
     best: "Check the price at", all: "All offers", bestPrice: "Lowest observed price",
@@ -138,9 +141,24 @@ export function ProductDetails({ p }: { p: Product }) {
   })();
 
   return (
-    <div>
+    <div className="p19-product-dossier">
       {p.brand && <span className="pg-brand">{p.brand}</span>}
       <h1 className="pg-title">{p.name}</h1>
+
+      <dl className="pg-evidence-coordinates" aria-label={C.identity}>
+        <div>
+          <dt>EAN</dt>
+          <dd>{p.ean}</dd>
+        </div>
+        <div>
+          <dt>{C.currentOffers}</dt>
+          <dd>{comparison ? comparison.offers.length : C.unknown}</dd>
+        </div>
+        <div>
+          <dt>{C.comparedMerchants}</dt>
+          <dd>{comparison ? merchantsCount : C.unknown}</dd>
+        </div>
+      </dl>
 
       <div className="pg-headline">
         <span>
@@ -151,6 +169,7 @@ export function ProductDetails({ p }: { p: Product }) {
         {merchantsCount > 0 && <span className="pg-count">{C.at} {merchantsCount} {merchantLabel}</span>}
       </div>
 
+      <p className="pg-proof-step"><span>{C.proof}</span></p>
       {verdict && <Verdict v={verdict} />}
       <DecisionPanel decision={decision} />
 

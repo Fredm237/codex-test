@@ -12,7 +12,6 @@ import { useLocale } from "@/lib/i18n";
 import { catalogueLabel } from "@/lib/catalogue-labels";
 
 const TAG = { fr: "fr-BE", nl: "nl-BE", en: "en-GB" } as const;
-
 type Named = { name: string; slug: string } | null;
 
 export function CatalogueHeader({

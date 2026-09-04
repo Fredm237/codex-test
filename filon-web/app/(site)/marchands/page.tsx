@@ -40,7 +40,7 @@ export default async function MarchandsPage() {
   const initialItems = await getMerchants();
 
   return (
-    <>
+    <div className="p19-market-merchants" data-market-plan="merchants">
       <Localized
         fr={<Hero eyebrow="Catalogue" crumb="Marchands" title={<>Les marchands que FILON <span className="it">indexe</span>.</>} intro="FILON présente les prix observés chez les enseignes indexées. Un cashback ou un code promo n'apparaît que lorsqu'il est documenté ; ses conditions restent à confirmer chez le marchand." />}
         nl={<Hero eyebrow="Catalogus" crumb="Winkels" title={<>De winkels die FILON <span className="it">indexeert</span>.</>} intro="FILON toont waargenomen prijzen bij geïndexeerde winkels. Cashback of een kortingscode verschijnt alleen wanneer die is gedocumenteerd; controleer de voorwaarden bij de winkel." />}
@@ -51,6 +51,6 @@ export default async function MarchandsPage() {
           <MerchantsBrowser initialItems={initialItems} />
         </div>
       </section>
-    </>
+    </div>
   );
 }

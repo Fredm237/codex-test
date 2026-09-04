@@ -70,12 +70,7 @@ function Monogram({ name }: { name: string }) {
 function Card({ m }: { m: Merchant }) {
   const [imgOk, setImgOk] = useState(true);
   return (
-    <div
-      style={{
-        display: "flex", alignItems: "center", gap: 14, padding: 16,
-        background: "var(--card)", border: "1px solid var(--line-2)", borderRadius: 16,
-      }}
-    >
+    <div className="p19-merchant-row">
       {m.logo && imgOk ? (
         <img
           src={m.logo} alt="" loading="lazy" onError={() => setImgOk(false)}
@@ -84,11 +79,11 @@ function Card({ m }: { m: Merchant }) {
       ) : (
         <Monogram name={m.name} />
       )}
-      <span style={{ minWidth: 0 }}>
-        <b style={{ display: "block", fontSize: 15, color: "var(--ink)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+      <span className="p19-merchant-copy">
+        <b>
           {m.name}
         </b>
-        <span style={{ fontSize: 12.5, color: "var(--ink-3)" }}>
+        <span>
           {[m.sector, m.region ? REGION_LABEL[m.region] || m.region : null].filter(Boolean).join(" · ") || m.domain}
         </span>
       </span>
@@ -139,7 +134,7 @@ export function MerchantsBrowser({ initialItems = null }: { initialItems?: Merch
   }, [items, q, region]);
 
   if (error) {
-    return <p style={{ color: "var(--ink-3)", fontSize: 14.5 }}>{t.error}</p>;
+    return <p className="p19-market-state">{t.error}</p>;
   }
   if (items === null) {
     return (
@@ -155,26 +150,22 @@ export function MerchantsBrowser({ initialItems = null }: { initialItems?: Merch
   }
 
   return (
-    <div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "center", marginBottom: 22 }}>
+    <div className="p19-merchant-ledger">
+      <div className="p19-merchant-toolbar">
         <input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder={t.search}
           aria-label={t.search}
-          style={{
-            flex: "1 1 240px", minWidth: 0, background: "var(--card)", border: "1px solid var(--line-2)",
-            borderRadius: "var(--r-full)", padding: "11px 18px", color: "var(--ink)",
-            fontFamily: "var(--sans)", fontSize: 14.5, outline: "none",
-          }}
+          className="p19-merchant-search"
         />
-        <span style={{ fontSize: 13, color: "var(--ink-3)", fontVariantNumeric: "tabular-nums" }}>
+        <span className="p19-merchant-count">
           {t.count(filtered.length)}
         </span>
       </div>
 
       {regions.length > 1 && (
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 24 }}>
+        <div className="p19-merchant-filters">
           {["", ...regions].map((r) => (
             <button
               key={r || "all"}
@@ -198,9 +189,9 @@ export function MerchantsBrowser({ initialItems = null }: { initialItems?: Merch
       )}
 
       {filtered.length === 0 ? (
-        <p style={{ color: "var(--ink-3)", fontSize: 14.5 }}>{t.empty}</p>
+        <p className="p19-market-state">{t.empty}</p>
       ) : (
-        <div style={{ display: "grid", gap: 14, gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))" }}>
+        <div className="p19-merchant-grid">
           {filtered.map((m) => (
             <Card key={m.mid} m={m} />
           ))}

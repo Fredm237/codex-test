@@ -12,6 +12,7 @@ from app.services.catalog_search import (
     _intent_primary_scope,
     _intent_search_terms,
     _intent_search_clause,
+    _prefer_deterministic_model_intent,
     _required_name_terms,
     _search_query_for,
 )
@@ -28,6 +29,16 @@ def test_named_product_terms_are_preserved_even_when_a_category_anchor_exists():
 
 def test_generic_smartphone_request_remains_open_to_the_catalogue_category():
     assert _required_name_terms("un smartphone sous 400 €", "smartphone") == ()
+
+
+def test_unresolved_model_code_stays_on_the_exact_lexical_route():
+    from app.intelligence.intent_resolution import resolve_intent
+
+    exact = resolve_intent("NANKANG Winter Activa SV-3", "fr")
+    generic = resolve_intent("objet imaginaire inexistant", "fr")
+
+    assert _prefer_deterministic_model_intent(exact) is True
+    assert _prefer_deterministic_model_intent(generic) is False
 
 
 def test_primary_product_intents_have_an_explicit_core_scope():

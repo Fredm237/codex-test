@@ -16,23 +16,19 @@ export const fraunces = localFont({
 // Outfit et Inter pendant chaque build Vercel. Une indisponibilité temporaire de
 // Google Fonts faisait alors échouer une prévisualisation pourtant saine.
 export const outfit = localFont({
-  src: [
-    { path: "./fonts/Outfit-200.ttf", weight: "200", style: "normal" },
-    { path: "./fonts/Outfit-300.ttf", weight: "300", style: "normal" },
-    { path: "./fonts/Outfit-400.ttf", weight: "400", style: "normal" },
-    { path: "./fonts/Outfit-500.ttf", weight: "500", style: "normal" },
-  ],
+  src: [{ path: "./fonts/Outfit-200-500-latin.woff2", weight: "200 500", style: "normal" }],
   variable: "--font-display",
   display: "swap",
+  // Une seule variable WOFF2 remplace les quatre graisses TTF historiques.
+  // Elle reste chargée à la demande : Fraunces porte le premier titre public.
+  preload: false,
 });
 
 export const inter = localFont({
-  src: [
-    { path: "./fonts/Inter-400.ttf", weight: "400", style: "normal" },
-    { path: "./fonts/Inter-500.ttf", weight: "500", style: "normal" },
-    { path: "./fonts/Inter-600.ttf", weight: "600", style: "normal" },
-    { path: "./fonts/Inter-700.ttf", weight: "700", style: "normal" },
-  ],
+  src: [{ path: "./fonts/Inter-400-700-latin.woff2", weight: "400 700", style: "normal" }],
   variable: "--font-sans",
   display: "swap",
+  // Le navigateur charge le fichier variable uniquement lorsqu'une route
+  // rencontre du corps de texte, sans huit requêtes globales anticipées.
+  preload: false,
 });

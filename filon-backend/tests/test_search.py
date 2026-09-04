@@ -91,6 +91,14 @@ class TestTerms:
         assert search_clause("  ") is None
         assert relevance_order("!!") is None
 
+    def test_clause_uses_postgresql_trigram_compatible_ilike(self):
+        from sqlalchemy.dialects import postgresql
+
+        sql = str(search_clause("NANKANG SV-3").compile(dialect=postgresql.dialect()))
+
+        assert "ILIKE" in sql
+        assert "lower(" not in sql.lower()
+
 
 async def _search(session, q, **kw):
     # Les défauts viennent de la signature : ajouter un paramètre à l'endpoint

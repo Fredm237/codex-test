@@ -20,6 +20,11 @@ export function Reveal({
       el.classList.add("in");
       return;
     }
+    // A Reveal can wrap a whole ledger (blog, merchants, FAQ). A fixed ratio
+    // would require hundreds of invisible pixels to enter the viewport before
+    // the first item appears on mobile. Keep the same choreography, but cap the
+    // visible distance needed to start it.
+    const threshold = Math.min(0.16, 96 / Math.max(el.offsetHeight, 1));
     const io = new IntersectionObserver(
       (entries) => {
         entries.forEach((e) => {
@@ -29,7 +34,7 @@ export function Reveal({
           }
         });
       },
-      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" }
+      { threshold, rootMargin: "0px 0px -8% 0px" }
     );
     io.observe(el);
     return () => io.disconnect();
