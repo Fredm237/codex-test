@@ -1,0 +1,95 @@
+{
+  "schema_version": "filon-v2-dark-qualification-evidence/v1",
+  "campaign_id": "sha256:1f96acc4650db96c92d1878c084ff91e8eb14b00b18de541fe98913fba46088d",
+  "qualified_at": "2026-09-04T21:54:42Z",
+  "source_revision": "3fb33d5a776511ca8da3c16876715aa5fa3cc79c",
+  "deployment": {
+    "provider": "railway",
+    "active_deployment_id": "4c4fed4d-f355-4b5a-8211-e86c4258e555",
+    "schema_revision": "f9c7d1e3a5b8",
+    "mode": "dark",
+    "writers_all_on": true,
+    "canary_reader": false,
+    "public_reader": false,
+    "core_v1_served": true
+  },
+  "health": {
+    "live_http": 200,
+    "ready_http": 200,
+    "health_http": 200,
+    "postgresql": "ok",
+    "redis": "ok"
+  },
+  "ci": {
+    "phase_19_5_run_id": 33915302430,
+    "phase_19_5_conclusion": "success",
+    "current_main_run_id": 33917900695,
+    "current_main_conclusion": "success",
+    "scheduled_monitor_run_id": 33915260578,
+    "scheduled_monitor_conclusion": "success"
+  },
+  "shadow": {
+    "execution_ids": {
+      "first_apply": 4,
+      "exact_replay": 5,
+      "last_progression": 34
+    },
+    "replay_evaluation_id": "sha256:7d701379fec01f8eb218b95f1f728ef6d15ae13c85987986fdbc9f0e65c5a07b",
+    "real_terminal_progression_windows": 30,
+    "active_executions": 0,
+    "failed_or_interrupted_progressions": 0,
+    "cursor_start": 0,
+    "cursor_end": 129,
+    "cursor_monotone": true,
+    "non_overlapping": true,
+    "progression_p95_window_ms": 28282,
+    "performance_policy_maximum_p95_window_ms": 30000,
+    "coverage_status": "READY"
+  },
+  "dark_reader": {
+    "production_path_qualification_observations": 30,
+    "organic_user_observations_claimed": false,
+    "eligible": 30,
+    "complete": 30,
+    "invalid": 0,
+    "raw_query_retained": 0,
+    "observed_response_types": [
+      "ABSTAIN"
+    ],
+    "buy_now_qualified": false,
+    "wait_qualified": false,
+    "core_v1_response_influenced": false
+  },
+  "rollback": {
+    "dark_to_shadow_deployment_id": "c0ad9f93-2645-44b6-a04b-4022f299a653",
+    "dark_observations_before_v1_probe": 30,
+    "dark_observations_after_v1_probe": 30,
+    "v1_probe_http": 200,
+    "restored_dark_deployment_id": "4c4fed4d-f355-4b5a-8211-e86c4258e555",
+    "verified": true
+  },
+  "recovery": {
+    "catalogue_run_25_terminal_status": "interrupted",
+    "catalogue_successor_started": false,
+    "v2_collision_recovery_contract_ci_run_id": 33915302430,
+    "covered_test_contracts": [
+      "racing scheduler refuses a second execution",
+      "stale lease interruption requires an explicit operator action",
+      "fresh lease is preserved",
+      "recovery keeps the original window identity and checkpoints"
+    ]
+  },
+  "migration": {
+    "single_head": "f9c7d1e3a5b8",
+    "postgresql_runtime_ready": true,
+    "additive_and_reversible_contract_ci_run_id": 33915302430
+  },
+  "safety": {
+    "safety_violations": 0,
+    "raw_payload_retained": false,
+    "v1_fallback_available": true,
+    "canary_scope_candidate": [
+      "ABSTAIN"
+    ]
+  }
+}
