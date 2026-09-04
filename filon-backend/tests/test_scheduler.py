@@ -270,6 +270,47 @@ def test_scheduler_main_forwards_cooperative_stop(monkeypatch) -> None:
     run.assert_awaited_once_with(stop_after_current_feed=True)
 
 
+@pytest.mark.asyncio
+async def test_scheduler_interrupts_only_a_stale_run_without_successor(
+    monkeypatch,
+) -> None:
+    session = object()
+    interrupt = AsyncMock(return_value={"id": 25, "status": "interrupted"})
+    monkeypatch.setattr(scheduler, "get_settings", lambda: _settings(hours=6))
+    monkeypatch.setattr(scheduler.db, "is_enabled", lambda: True)
+    monkeypatch.setattr(scheduler.db, "prepare_schema", AsyncMock())
+    monkeypatch.setattr(scheduler.db, "session_scope", _session_scope(session))
+    monkeypatch.setattr(scheduler.catalog_sync, "interrupt_stale_run", interrupt)
+
+    receipt = await scheduler.interrupt_stale_once()
+
+    assert receipt == {
+        "status": "interrupted",
+        "run_id": 25,
+        "interval_hours": 6,
+        "schema_revision": scheduler.db.CURRENT_SCHEMA_REVISION,
+        "successor_started": False,
+    }
+    interrupt.assert_awaited_once_with(session)
+
+
+def test_scheduler_main_runs_stale_interrupt_command(monkeypatch, capsys) -> None:
+    receipt = {
+        "status": "interrupted",
+        "run_id": 25,
+        "interval_hours": 6,
+        "schema_revision": scheduler.db.CURRENT_SCHEMA_REVISION,
+        "successor_started": False,
+    }
+    interrupt = AsyncMock(return_value=receipt)
+    monkeypatch.setattr(scheduler, "get_settings", lambda: _settings(hours=6))
+    monkeypatch.setattr(scheduler, "interrupt_stale_once", interrupt)
+
+    assert scheduler.main(("--interrupt-stale",)) == 0
+    assert json.loads(capsys.readouterr().out) == receipt
+    interrupt.assert_awaited_once_with()
+
+
 def test_scheduler_main_rejects_unknown_arguments() -> None:
     assert scheduler.main(("--write",)) == 2
 
