@@ -1,0 +1,17 @@
+{
+  "schema_version": "v2-shadow-schedule-receipt/v1",
+  "status": "v2_running",
+  "vertical": "smartphones",
+  "row_limit": 100,
+  "after_raw_id": 1400,
+  "latest_raw_id": 1600,
+  "due": true,
+  "execution_id": null,
+  "evaluation_id": null,
+  "active_execution_id": 41,
+  "active_heartbeat_at": "2026-09-04T00:00:00Z",
+  "heartbeat_age_seconds": 14401,
+  "stale_recovery_eligible": true,
+  "recovery_source_execution_id": null,
+  "raw_payload_retained": false
+}

@@ -1,0 +1,55 @@
+{
+  "schema_version": "v2-public-qualification/v1",
+  "evaluated_at": "2026-09-04T11:00:00Z",
+  "shadow_gate_evaluation_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "metrics": {
+    "canary_observations": 30,
+    "paired_observations": 30,
+    "v2_served": 30,
+    "v2_fallbacks": 0,
+    "v2_reader_errors": 0,
+    "invalid_or_incomplete": 0,
+    "provenance_complete": 30,
+    "raw_query_retained": 0,
+    "p95_latency_delta_us": -500,
+    "served_response_types": ["ABSTAIN"],
+    "served_response_type_counts": {"ABSTAIN": 30}
+  },
+  "gate": {
+    "schema_version": "v2-canary-to-public-gate/v1",
+    "status": "PUBLIC_AUTHORIZED",
+    "gates": {
+      "shadow_gate": true,
+      "runtime_health": true,
+      "safety_invariants": true,
+      "paired_sample": true,
+      "latency_non_inferiority": true,
+      "error_non_inferiority": true,
+      "provenance": true,
+      "response_type_coverage": true,
+      "failure_injection": true,
+      "rollback_to_shadow": true,
+      "operations": true,
+      "regressions_and_blockers": true
+    },
+    "authorized_response_types": ["ABSTAIN"],
+    "blocked_response_types": ["BUY_NOW", "WAIT"],
+    "blocker_codes": ["RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:WAIT"],
+    "evaluation_id": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
+  },
+  "proof_refs": {
+    "shadow_gate_ref": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+    "readiness_and_5xx_ref": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+    "failure_injection_ref": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+    "rollback_to_shadow_ref": "sha256:3333333333333333333333333333333333333333333333333333333333333333",
+    "backup_restore_ref": "sha256:4444444444444444444444444444444444444444444444444444444444444444",
+    "capacity_and_alerting_ref": "sha256:5555555555555555555555555555555555555555555555555555555555555555",
+    "inherited_regressions_ref": "sha256:6666666666666666666666666666666666666666666666666666666666666666",
+    "open_blockers_audit_ref": "sha256:7777777777777777777777777777777777777777777777777777777777777777",
+    "public_policy_ref": "sha256:8888888888888888888888888888888888888888888888888888888888888888"
+  },
+  "minimum_paired_observations": 30,
+  "minimum_observations_per_response_type": 30,
+  "requested_response_types": ["ABSTAIN"],
+  "evaluation_id": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"
+}

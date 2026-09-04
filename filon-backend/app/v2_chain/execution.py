@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
+import json
 import secrets
 from dataclasses import asdict, replace
 from datetime import datetime, timezone
@@ -28,6 +30,115 @@ def _utc_naive() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+def _valid_campaign(value: str | None) -> bool:
+    if not isinstance(value, str) or not value.startswith("sha256:"):
+        return False
+    digest = value.removeprefix("sha256:")
+    return len(digest) == 64 and all(
+        character in "0123456789abcdef" for character in digest
+    )
+
+
+def _campaign_fields(
+    *,
+    campaign_id: str | None,
+    execution_kind: str | None,
+    source_execution_id: int | None,
+) -> tuple[str | None, str | None, int | None]:
+    if campaign_id is None and execution_kind is None and source_execution_id is None:
+        return None, None, None
+    if not _valid_campaign(campaign_id):
+        raise ValueError("V2 campaign id must be a sha256 digest")
+    if execution_kind not in {"progression", "replay", "recovery"}:
+        raise ValueError("V2 execution kind is invalid")
+    if execution_kind == "progression" and source_execution_id is not None:
+        raise ValueError("V2 progression cannot reference a source execution")
+    if execution_kind in {"replay", "recovery"} and (
+        isinstance(source_execution_id, bool)
+        or not isinstance(source_execution_id, int)
+        or source_execution_id < 1
+    ):
+        raise ValueError("V2 replay/recovery requires a source execution")
+    return campaign_id, execution_kind, source_execution_id
+
+
+def _integer(stage: dict[str, object], field: str) -> int:
+    value = stage.get(field, 0)
+    return int(value) if isinstance(value, int) and not isinstance(value, bool) else 0
+
+
+def window_metrics(report: V2ChainReport) -> dict[str, object]:
+    """Projette le funnel demandé sans confondre les compteurs des étapes."""
+
+    stages = report.stages
+    identity = stages.get("product_identity", {})
+    entity = stages.get("entity_resolution", {})
+    offer_graph = stages.get("offer_graph", {})
+    offer_truth = stages.get("offer_truth", {})
+    ontology = stages.get("product_ontology", {})
+    retrieval = stages.get("hybrid_retrieval", {})
+    constraints = stages.get("constraint_engine", {})
+    ranking = stages.get("product_ranking", {})
+    optimization = stages.get("offer_optimization", {})
+    confidence = stages.get("confidence", {})
+    decision = stages.get("buy_wait", {})
+    snapshot_payload = {
+        "after_raw_id": report.after_raw_id,
+        "last_raw_source_id": identity.get("last_raw_source_id"),
+        "checkpoints": asdict(report.checkpoints),
+    }
+    snapshot = "sha256:" + hashlib.sha256(
+        json.dumps(snapshot_payload, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    coverage_funnel = {
+        "raw": _integer(identity, "scanned"),
+        "identified": _integer(identity, "resolved"),
+        "resolved": sum(
+            _integer(entity, field)
+            for field in ("exact_verified", "high_confidence", "probable")
+        ),
+        "verified_offer": _integer(offer_truth, "verified"),
+        "ontology_verified": _integer(ontology, "verified"),
+        "retrieved": _integer(retrieval, "candidate_runs"),
+        "eligible": _integer(constraints, "eligible_candidates"),
+        "rankable": _integer(ranking, "ranked_candidates"),
+        "optimizable": _integer(optimization, "eligible_offers"),
+        "calibrated": _integer(confidence, "calibrated_runs"),
+        "actionable": (
+            _integer(decision, "buy_now_runs")
+            + _integer(decision, "wait_runs")
+        ),
+    }
+    return {
+        "schema_version": "v2-window-metrics/v1",
+        "source_snapshot": snapshot,
+        "records_scanned": _integer(identity, "scanned"),
+        "records_accepted": _integer(offer_graph, "eligible"),
+        "records_rejected": _integer(offer_graph, "ineligible"),
+        "unknown": _integer(offer_graph, "unknown"),
+        "unresolved": _integer(entity, "unresolved"),
+        "quarantined": max(
+            _integer(identity, "quarantined"),
+            _integer(offer_graph, "quarantine"),
+        ),
+        "rankable": _integer(ranking, "ranked_candidates"),
+        "unrankable": _integer(ranking, "unrankable_candidates"),
+        "optimizable": _integer(optimization, "eligible_offers"),
+        "unoptimizable": _integer(optimization, "unoptimizable_offers"),
+        "confidence": {
+            "calibrated": _integer(confidence, "calibrated_runs"),
+            "partial": _integer(confidence, "partial_runs"),
+            "abstained": _integer(confidence, "abstained_runs"),
+        },
+        "BUY_NOW": _integer(decision, "buy_now_runs"),
+        "WAIT": _integer(decision, "wait_runs"),
+        "ABSTAIN": _integer(decision, "abstained_runs"),
+        "coverage_funnel": coverage_funnel,
+        "errors": 0,
+        "evaluation_identity": report.evaluation_id,
+    }
+
+
 async def _start_execution(
     session,
     *,
@@ -37,7 +148,15 @@ async def _start_execution(
     limit: int,
     apply: bool,
     checkpoints: V2ChainCheckpoints,
+    campaign_id: str | None,
+    execution_kind: str | None,
+    source_execution_id: int | None,
 ) -> int:
+    campaign_id, execution_kind, source_execution_id = _campaign_fields(
+        campaign_id=campaign_id,
+        execution_kind=execution_kind,
+        source_execution_id=source_execution_id,
+    )
     now = _utc_naive()
     execution = V2ChainExecution(
         execution_key=secrets.token_hex(32),
@@ -50,6 +169,9 @@ async def _start_execution(
         last_raw_source_id=after_raw_id,
         checkpoints_json=asdict(checkpoints),
         completed_stages_json=[],
+        campaign_id=campaign_id,
+        execution_kind=execution_kind,
+        source_execution_id=source_execution_id,
         heartbeat_at=now,
     )
     session.add(execution)
@@ -89,6 +211,7 @@ async def _finish_execution(
     evaluation_id: str | None = None,
     last_raw_source_id: int | None = None,
     failure_reason: str | None = None,
+    metrics: dict[str, object] | None = None,
 ) -> None:
     now = _utc_naive()
     result = await session.execute(
@@ -108,6 +231,7 @@ async def _finish_execution(
                 else V2ChainExecution.last_raw_source_id
             ),
             failure_reason=failure_reason,
+            window_metrics_json=metrics,
         )
     )
     if result.rowcount != 1:
@@ -140,17 +264,34 @@ async def interrupt_stale_execution(session, *, stale_before: datetime) -> int:
     return int(result.rowcount or 0)
 
 
-async def next_after_raw_id(session) -> int:
-    """Retourne le curseur du dernier apply terminalement réussi."""
+async def next_after_raw_id(
+    session,
+    *,
+    vertical: str | None = None,
+    campaign_id: str | None = None,
+) -> int:
+    """Retourne le curseur du dernier apply réussi pour une verticale.
 
-    value = await session.scalar(
-        select(V2ChainExecution.last_raw_source_id)
-        .where(
-            V2ChainExecution.status == "succeeded",
-            V2ChainExecution.mode == "apply",
+    Le filtre est optionnel pour conserver le contrat des replays historiques.
+    Le scheduler continu le fournit toujours : deux verticales ne doivent
+    jamais consommer mutuellement leur curseur.
+    """
+
+    statement = select(V2ChainExecution.last_raw_source_id).where(
+        V2ChainExecution.status == "succeeded",
+        V2ChainExecution.mode == "apply",
+    )
+    if vertical is not None:
+        statement = statement.where(V2ChainExecution.vertical == vertical)
+    if campaign_id is not None:
+        if not _valid_campaign(campaign_id):
+            raise ValueError("V2 campaign id must be a sha256 digest")
+        statement = statement.where(
+            V2ChainExecution.campaign_id == campaign_id,
+            V2ChainExecution.execution_kind.in_(("progression", "recovery")),
         )
-        .order_by(V2ChainExecution.id.desc())
-        .limit(1)
+    value = await session.scalar(
+        statement.order_by(V2ChainExecution.id.desc()).limit(1)
     )
     return int(value or 0)
 
@@ -164,6 +305,9 @@ async def run_journaled_v2_shadow_chain(
     limit: int = 10,
     apply: bool = False,
     checkpoints: V2ChainCheckpoints | None = None,
+    campaign_id: str | None = None,
+    execution_kind: str | None = None,
+    source_execution_id: int | None = None,
 ) -> V2ChainReport:
     """Exécute la chaîne sous lease unique et consigne chaque étape."""
 
@@ -183,6 +327,9 @@ async def run_journaled_v2_shadow_chain(
         limit=limit,
         apply=apply,
         checkpoints=captured,
+        campaign_id=campaign_id,
+        execution_kind=execution_kind,
+        source_execution_id=source_execution_id,
     )
 
     async def on_stage_complete(stage_name: str) -> None:
@@ -211,6 +358,11 @@ async def run_journaled_v2_shadow_chain(
             execution_id,
             status=terminal_status,
             failure_reason=type(exc).__name__[:64],
+            metrics=(
+                {"schema_version": "v2-window-metrics/v1", "errors": 1}
+                if campaign_id is not None
+                else None
+            ),
         )
         raise
     await _finish_execution(
@@ -222,5 +374,6 @@ async def run_journaled_v2_shadow_chain(
             report.stages["product_identity"].get("last_raw_source_id")
             or after_raw_id
         ),
+        metrics=window_metrics(report) if campaign_id is not None else None,
     )
     return replace(report, execution_id=execution_id)

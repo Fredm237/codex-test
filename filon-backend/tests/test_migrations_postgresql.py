@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_REVISION = "b9db07b15986"
 EVIDENCE_ENGINE_REVISION = "e8c3f6a0b5d2"
-HEAD_REVISION = "b5d3f7a9c1e4"
+HEAD_REVISION = "f9c7d1e3a5b8"
 MIGRATION_LOCK_ID = 0x46494C4F4E
 
 
@@ -212,7 +212,12 @@ async def test_postgresql_upgrade_drift_extensions_indexes_and_lock() -> None:
                             "'confidence_dimension_records', "
                             "'buy_wait_decision_runs', "
                             "'personal_commerce_decision_runs', "
-                            "'personal_commerce_erasure_receipts'))"
+                            "'personal_commerce_erasure_receipts', "
+                            "'v2_dark_read_observations', "
+                            "'v2_canary_read_observations', "
+                            "'v2_promotion_receipts', "
+                            "'v2_live_dark_read_observations', "
+                            "'v2_promotion_proofs'))"
                         )
                     )
                 )
@@ -251,6 +256,11 @@ async def test_postgresql_upgrade_drift_extensions_indexes_and_lock() -> None:
             "buy_wait_decision_runs",
             "personal_commerce_decision_runs",
             "personal_commerce_erasure_receipts",
+            "v2_dark_read_observations",
+            "v2_canary_read_observations",
+            "v2_promotion_receipts",
+            "v2_live_dark_read_observations",
+            "v2_promotion_proofs",
             "merchant_quality_snapshots",
             "evidence_claim_records",
             "decision_eligibility_records",

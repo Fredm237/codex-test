@@ -1,0 +1,152 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.example/contracts/v2-chain/v1/shadow-schedule-receipt.schema.json",
+  "title": "FILON V2 shadow schedule receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "vertical",
+    "row_limit",
+    "after_raw_id",
+    "latest_raw_id",
+    "due",
+    "execution_id",
+    "evaluation_id",
+    "active_execution_id",
+    "active_heartbeat_at",
+    "heartbeat_age_seconds",
+    "stale_recovery_eligible",
+    "recovery_source_execution_id",
+    "raw_payload_retained"
+  ],
+  "properties": {
+    "schema_version": { "const": "v2-shadow-schedule-receipt/v1" },
+    "status": {
+      "enum": [
+        "catalog_syncing",
+        "v2_running",
+        "v2_interrupted",
+        "v2_resume_due",
+        "v2_failed",
+        "fresh",
+        "due",
+        "succeeded"
+      ]
+    },
+    "vertical": {
+      "enum": [
+        "smartphones",
+        "laptops",
+        "audio",
+        "fashion",
+        "appliances_hvac",
+        "tyres"
+      ]
+    },
+    "row_limit": { "type": "integer", "minimum": 1, "maximum": 100 },
+    "after_raw_id": { "type": "integer", "minimum": 0 },
+    "latest_raw_id": { "type": "integer", "minimum": 0 },
+    "due": { "type": "boolean" },
+    "execution_id": { "type": ["integer", "null"], "minimum": 1 },
+    "evaluation_id": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^sha256:[0-9a-f]{64}$" }
+      ]
+    },
+    "active_execution_id": { "type": ["integer", "null"], "minimum": 1 },
+    "active_heartbeat_at": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "format": "date-time" }
+      ]
+    },
+    "heartbeat_age_seconds": { "type": ["integer", "null"], "minimum": 0 },
+    "stale_recovery_eligible": { "type": "boolean" },
+    "recovery_source_execution_id": {
+      "type": ["integer", "null"],
+      "minimum": 1
+    },
+    "raw_payload_retained": { "const": false }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": { "status": { "const": "succeeded" } },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "execution_id": { "type": "integer" },
+          "evaluation_id": { "type": "string" }
+        }
+      },
+      "else": {
+        "properties": {
+          "execution_id": { "type": "null" },
+          "evaluation_id": { "type": "null" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "active_execution_id": { "type": "integer" } },
+        "required": ["active_execution_id"]
+      },
+      "then": {
+        "properties": {
+          "status": { "const": "v2_running" },
+          "active_heartbeat_at": { "type": "string" },
+          "heartbeat_age_seconds": { "type": "integer" }
+        }
+      },
+      "else": {
+        "properties": {
+          "active_heartbeat_at": { "type": "null" },
+          "heartbeat_age_seconds": { "type": "null" },
+          "stale_recovery_eligible": { "const": false }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": { "stale_recovery_eligible": { "const": true } },
+        "required": ["stale_recovery_eligible"]
+      },
+      "then": {
+        "properties": {
+          "status": { "const": "v2_running" },
+          "active_execution_id": { "type": "integer" },
+          "active_heartbeat_at": { "type": "string" },
+          "heartbeat_age_seconds": { "type": "integer" }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "status": { "enum": ["v2_resume_due", "v2_failed"] }
+        },
+        "required": ["status"]
+      },
+      "then": {
+        "properties": {
+          "recovery_source_execution_id": { "type": "integer" }
+        }
+      },
+      "else": {
+        "if": {
+          "properties": { "status": { "const": "succeeded" } },
+          "required": ["status"]
+        },
+        "else": {
+          "properties": {
+            "recovery_source_execution_id": { "type": "null" }
+          }
+        }
+      }
+    }
+  ]
+}

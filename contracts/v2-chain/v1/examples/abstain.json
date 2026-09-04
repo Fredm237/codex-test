@@ -1,0 +1,22 @@
+{
+  "schema_version": "v2-online-response/v1",
+  "reader_version": "v2-online-reader/v1",
+  "outcome": "ABSTAIN",
+  "query_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "reason_codes": [
+    "v2_actionable_evidence_incomplete",
+    "retrieval_no_match",
+    "ranking_no_eligible_product",
+    "confidence_not_calibrated"
+  ],
+  "items": [],
+  "provenance": [
+    {"stage": "hybrid_retrieval", "result_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+    {"stage": "constraint_engine", "result_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},
+    {"stage": "product_ranking", "result_digest": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"},
+    {"stage": "offer_optimization", "result_digest": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"},
+    {"stage": "confidence", "result_digest": "sha256:ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"},
+    {"stage": "buy_wait", "result_digest": "sha256:1111111111111111111111111111111111111111111111111111111111111111"}
+  ],
+  "raw_query_retained": false
+}

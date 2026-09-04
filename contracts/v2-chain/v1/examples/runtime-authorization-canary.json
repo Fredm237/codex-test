@@ -1,0 +1,10 @@
+{
+  "schema_version": "v2-runtime-authorization/v1",
+  "mode": "canary",
+  "promotion_stage": "shadow_to_canary",
+  "receipt_evaluation_id": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "gate_evaluation_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "authorized_response_types": ["ABSTAIN"],
+  "canary_subjects": 1,
+  "raw_payload_retained": false
+}

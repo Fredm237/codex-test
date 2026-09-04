@@ -18,7 +18,7 @@ _sessionmaker = None
 
 # Doit avancer avec la tête Alembic. Un test empêche qu'une nouvelle révision
 # soit ajoutée sans mettre à jour le garde-fou runtime.
-CURRENT_SCHEMA_REVISION = "b5d3f7a9c1e4"
+CURRENT_SCHEMA_REVISION = "f9c7d1e3a5b8"
 
 
 def _normalize_async_url(url: str) -> str:

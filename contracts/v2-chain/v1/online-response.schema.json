@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/v2-chain/v1/online-response.schema.json",
+  "title": "FILON V2 online response v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "reader_version",
+    "outcome",
+    "query_digest",
+    "reason_codes",
+    "items",
+    "provenance",
+    "raw_query_retained"
+  ],
+  "properties": {
+    "schema_version": {"const": "v2-online-response/v1"},
+    "reader_version": {"const": "v2-online-reader/v1"},
+    "outcome": {"const": "ABSTAIN"},
+    "query_digest": {"$ref": "#/$defs/digest"},
+    "reason_codes": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "items": {"type": "array", "maxItems": 0},
+    "provenance": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "uniqueItems": true,
+      "items": {"$ref": "#/$defs/provenance"},
+      "allOf": [
+        {"contains": {"properties": {"stage": {"const": "hybrid_retrieval"}}, "required": ["stage"]}},
+        {"contains": {"properties": {"stage": {"const": "constraint_engine"}}, "required": ["stage"]}},
+        {"contains": {"properties": {"stage": {"const": "product_ranking"}}, "required": ["stage"]}},
+        {"contains": {"properties": {"stage": {"const": "offer_optimization"}}, "required": ["stage"]}},
+        {"contains": {"properties": {"stage": {"const": "confidence"}}, "required": ["stage"]}},
+        {"contains": {"properties": {"stage": {"const": "buy_wait"}}, "required": ["stage"]}}
+      ]
+    },
+    "raw_query_retained": {"const": false}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["stage", "result_digest"],
+      "properties": {
+        "stage": {
+          "enum": [
+            "hybrid_retrieval",
+            "constraint_engine",
+            "product_ranking",
+            "offer_optimization",
+            "confidence",
+            "buy_wait"
+          ]
+        },
+        "result_digest": {"$ref": "#/$defs/digest"}
+      }
+    }
+  }
+}

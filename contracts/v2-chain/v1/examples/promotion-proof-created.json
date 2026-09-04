@@ -1,0 +1,9 @@
+{
+  "schema_version": "v2-promotion-proof-persistence/v1",
+  "status": "created",
+  "proof_ref": "sha256:1111111111111111111111111111111111111111111111111111111111111111",
+  "proof_kind": "single_alembic_head_ref",
+  "scope_ref": "sha256:2222222222222222222222222222222222222222222222222222222222222222",
+  "proof_id": 1,
+  "raw_payload_retained": false
+}

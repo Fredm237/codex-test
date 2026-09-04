@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.be/contracts/v2-chain/v1/promotion-proof.schema.json",
+  "title": "FILON V2 promotion proof reference",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "status",
+    "proof_ref",
+    "proof_kind",
+    "scope_ref",
+    "proof_id",
+    "raw_payload_retained"
+  ],
+  "properties": {
+    "schema_version": {"const": "v2-promotion-proof-persistence/v1"},
+    "status": {"enum": ["dry_run", "created", "existing"]},
+    "proof_ref": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "proof_kind": {
+      "type": "string",
+      "enum": [
+        "single_alembic_head_ref",
+        "postgresql_migration_ref",
+        "expand_only_rollback_ref",
+        "replay_idempotence_ref",
+        "inherited_benchmarks_ref",
+        "safety_invariants_ref",
+        "collision_exercise_ref",
+        "stale_interruption_ref",
+        "recovery_replay_ref",
+        "dark_reader_rollback_ref",
+        "performance_policy_ref",
+        "readiness_and_5xx_ref",
+        "failure_injection_ref",
+        "rollback_to_shadow_ref",
+        "backup_restore_ref",
+        "capacity_and_alerting_ref",
+        "inherited_regressions_ref",
+        "open_blockers_audit_ref",
+        "public_policy_ref"
+      ]
+    },
+    "scope_ref": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "proof_id": {"type": ["integer", "null"], "minimum": 1},
+    "raw_payload_retained": {"const": false}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "dry_run"}}},
+      "then": {"properties": {"proof_id": {"const": null}}}
+    },
+    {
+      "if": {"properties": {"status": {"enum": ["created", "existing"]}}},
+      "then": {"properties": {"proof_id": {"type": "integer", "minimum": 1}}}
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.example/contracts/v2-chain/v1/runtime-authorization.schema.json",
+  "title": "FILON V2 runtime authorization v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version",
+    "mode",
+    "promotion_stage",
+    "receipt_evaluation_id",
+    "gate_evaluation_id",
+    "authorized_response_types",
+    "canary_subjects",
+    "raw_payload_retained"
+  ],
+  "properties": {
+    "schema_version": { "const": "v2-runtime-authorization/v1" },
+    "mode": { "enum": ["canary", "public"] },
+    "promotion_stage": {
+      "enum": ["shadow_to_canary", "canary_to_public"]
+    },
+    "receipt_evaluation_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "gate_evaluation_id": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "authorized_response_types": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": { "enum": ["ABSTAIN", "BUY_NOW", "WAIT"] }
+    },
+    "canary_subjects": { "type": "integer", "minimum": 0 },
+    "raw_payload_retained": { "const": false }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "mode": { "const": "canary" } } },
+      "then": {
+        "properties": {
+          "promotion_stage": { "const": "shadow_to_canary" },
+          "canary_subjects": { "minimum": 1 }
+        }
+      }
+    },
+    {
+      "if": { "properties": { "mode": { "const": "public" } } },
+      "then": {
+        "properties": {
+          "promotion_stage": { "const": "canary_to_public" },
+          "canary_subjects": { "const": 0 }
+        }
+      }
+    }
+  ]
+}

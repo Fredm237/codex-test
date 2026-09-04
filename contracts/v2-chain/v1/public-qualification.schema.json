@@ -1,0 +1,130 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/v2-chain/v1/public-qualification.schema.json",
+  "title": "FILON V2 canary to public qualification v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "evaluated_at", "shadow_gate_evaluation_id", "metrics",
+    "gate", "proof_refs", "minimum_paired_observations",
+    "minimum_observations_per_response_type", "requested_response_types",
+    "evaluation_id"
+  ],
+  "properties": {
+    "schema_version": {"const": "v2-public-qualification/v1"},
+    "evaluated_at": {"type": "string", "format": "date-time"},
+    "shadow_gate_evaluation_id": {"$ref": "#/$defs/digest"},
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "canary_observations", "paired_observations", "v2_served",
+        "v2_fallbacks", "v2_reader_errors", "invalid_or_incomplete",
+        "provenance_complete", "raw_query_retained", "p95_latency_delta_us",
+        "served_response_types", "served_response_type_counts"
+      ],
+      "properties": {
+        "canary_observations": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "paired_observations": {"type": "integer", "minimum": 0, "maximum": 10000},
+        "v2_served": {"type": "integer", "minimum": 0},
+        "v2_fallbacks": {"type": "integer", "minimum": 0},
+        "v2_reader_errors": {"type": "integer", "minimum": 0},
+        "invalid_or_incomplete": {"type": "integer", "minimum": 0},
+        "provenance_complete": {"type": "integer", "minimum": 0},
+        "raw_query_retained": {"type": "integer", "minimum": 0},
+        "p95_latency_delta_us": {"type": ["integer", "null"]},
+        "served_response_types": {"$ref": "#/$defs/response_types"},
+        "served_response_type_counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ABSTAIN": {"type": "integer", "minimum": 0},
+            "BUY_NOW": {"type": "integer", "minimum": 0},
+            "WAIT": {"type": "integer", "minimum": 0}
+          }
+        }
+      }
+    },
+    "gate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema_version", "status", "gates", "authorized_response_types",
+        "blocked_response_types", "blocker_codes", "evaluation_id"
+      ],
+      "properties": {
+        "schema_version": {"const": "v2-canary-to-public-gate/v1"},
+        "status": {"enum": ["PUBLIC_HOLD", "PUBLIC_AUTHORIZED"]},
+        "gates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "shadow_gate", "runtime_health", "safety_invariants",
+            "paired_sample", "latency_non_inferiority",
+            "error_non_inferiority", "provenance", "response_type_coverage",
+            "failure_injection", "rollback_to_shadow", "operations",
+            "regressions_and_blockers"
+          ],
+          "properties": {
+            "shadow_gate": {"type": "boolean"},
+            "runtime_health": {"type": "boolean"},
+            "safety_invariants": {"type": "boolean"},
+            "paired_sample": {"type": "boolean"},
+            "latency_non_inferiority": {"type": "boolean"},
+            "error_non_inferiority": {"type": "boolean"},
+            "provenance": {"type": "boolean"},
+            "response_type_coverage": {"type": "boolean"},
+            "failure_injection": {"type": "boolean"},
+            "rollback_to_shadow": {"type": "boolean"},
+            "operations": {"type": "boolean"},
+            "regressions_and_blockers": {"type": "boolean"}
+          }
+        },
+        "authorized_response_types": {"$ref": "#/$defs/response_types"},
+        "blocked_response_types": {"$ref": "#/$defs/response_types"},
+        "blocker_codes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "evaluation_id": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "proof_refs": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "shadow_gate_ref", "readiness_and_5xx_ref", "failure_injection_ref",
+        "rollback_to_shadow_ref", "backup_restore_ref",
+        "capacity_and_alerting_ref", "inherited_regressions_ref",
+        "open_blockers_audit_ref", "public_policy_ref"
+      ],
+      "properties": {
+        "shadow_gate_ref": {"$ref": "#/$defs/digest"},
+        "readiness_and_5xx_ref": {"$ref": "#/$defs/digest"},
+        "failure_injection_ref": {"$ref": "#/$defs/digest"},
+        "rollback_to_shadow_ref": {"$ref": "#/$defs/digest"},
+        "backup_restore_ref": {"$ref": "#/$defs/digest"},
+        "capacity_and_alerting_ref": {"$ref": "#/$defs/digest"},
+        "inherited_regressions_ref": {"$ref": "#/$defs/digest"},
+        "open_blockers_audit_ref": {"$ref": "#/$defs/digest"},
+        "public_policy_ref": {"$ref": "#/$defs/digest"}
+      }
+    },
+    "minimum_paired_observations": {"type": "integer", "minimum": 1, "maximum": 10000},
+    "minimum_observations_per_response_type": {"type": "integer", "minimum": 1, "maximum": 10000},
+    "requested_response_types": {
+      "$ref": "#/$defs/response_types",
+      "minItems": 1
+    },
+    "evaluation_id": {"$ref": "#/$defs/digest"}
+  },
+  "$defs": {
+    "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "response_types": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]}
+    }
+  }
+}

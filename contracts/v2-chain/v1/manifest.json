@@ -1,0 +1,37 @@
+{
+  "schema_version": "v2-online-contract-manifest/v1",
+  "contract": "v2-online-response/v1",
+  "schema": "online-response.schema.json",
+  "examples": ["examples/abstain.json"],
+  "canary_receipt_schema": "canary-read-receipt.schema.json",
+  "canary_receipt_examples": ["examples/canary-abstain-receipt.json"],
+  "canary_eligibility_schema": "canary-eligibility.schema.json",
+  "canary_eligibility_examples": [
+    "examples/canary-eligibility-smartphone.json"
+  ],
+  "shadow_qualification_schema": "shadow-qualification.schema.json",
+  "shadow_qualification_examples": ["examples/shadow-qualification-abstain.json"],
+  "public_qualification_schema": "public-qualification.schema.json",
+  "public_qualification_examples": ["examples/public-qualification-abstain.json"],
+  "runtime_authorization_schema": "runtime-authorization.schema.json",
+  "runtime_authorization_examples": [
+    "examples/runtime-authorization-canary.json",
+    "examples/runtime-authorization-public.json"
+  ],
+  "promotion_command_receipt_schema": "promotion-command-receipt.schema.json",
+  "promotion_command_receipt_examples": [
+    "examples/promotion-command-canary-dry-run.json",
+    "examples/promotion-command-public-created.json"
+  ],
+  "promotion_proof_schema": "promotion-proof.schema.json",
+  "promotion_proof_examples": ["examples/promotion-proof-created.json"],
+  "shadow_schedule_receipt_schema": "shadow-schedule-receipt.schema.json",
+  "shadow_schedule_receipt_examples": [
+    "examples/scheduler-running-stale.json",
+    "examples/scheduler-interrupted.json",
+    "examples/scheduler-resume-due.json"
+  ],
+  "servable_response_types": ["ABSTAIN"],
+  "raw_query_retained": false,
+  "atomic_core_fallback_required": true
+}

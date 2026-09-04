@@ -210,6 +210,12 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     assert settings.v2_chain_mode == "off"
     assert settings.v2_canary_reader_enabled is False
     assert settings.v2_public_reader_enabled is False
+    assert settings.v2_promotion_receipt_evaluation_id is None
+    assert settings.v2_canary_subject_digests_list == []
+    assert settings.v2_supported_verticals_list == []
+    assert settings.v2_supported_locales_list == []
+    assert settings.v2_supported_decision_types_list == []
+    assert settings.v2_max_data_age_seconds is None
     assert settings.observation_shadow_enabled is False
     assert settings.product_graph_shadow_enabled is False
     assert settings.entity_resolution_shadow_enabled is False
@@ -595,6 +601,28 @@ def test_atomic_v2_shadow_mode_enables_every_writer_and_no_reader() -> None:
     assert settings.v2_canary_reader_enabled is False
     assert settings.v2_public_reader_enabled is False
     assert settings.personal_commerce_shadow_enabled is False
+    assert settings.v2_chain_stale_after_seconds == 14_400
+
+
+def test_atomic_v2_dark_mode_enables_every_writer_and_keeps_public_readers_off() -> None:
+    settings = Settings(_env_file=None, env="test", v2_chain_mode="dark")
+
+    assert settings.v2_chain_mode == "dark"
+    assert all(getattr(settings, field) for field in V2_SHADOW_WRITER_FIELDS)
+    assert settings.v2_canary_reader_enabled is False
+    assert settings.v2_public_reader_enabled is False
+    assert settings.v2_promotion_receipt_evaluation_id is None
+    assert settings.v2_canary_subject_digests_list == []
+
+
+@pytest.mark.parametrize("value", [0, 59, 86_401])
+def test_v2_stale_recovery_threshold_is_bounded(value: int) -> None:
+    with pytest.raises(ValidationError, match="v2_chain_stale_after_seconds"):
+        Settings(
+            _env_file=None,
+            env="test",
+            v2_chain_stale_after_seconds=value,
+        )
 
 
 def test_atomic_v2_shadow_mode_expands_from_the_environment(monkeypatch) -> None:
@@ -623,6 +651,23 @@ def test_atomic_v2_shadow_mode_rejects_public_readers(reader: str) -> None:
         )
 
 
+@pytest.mark.parametrize(
+    "reader",
+    ["v2_canary_reader_enabled", "v2_public_reader_enabled"],
+)
+def test_atomic_v2_dark_mode_rejects_public_readers(reader: str) -> None:
+    with pytest.raises(
+        ValidationError,
+        match="V2_CHAIN_MODE=dark forbids every V2 public reader",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            v2_chain_mode="dark",
+            **{reader: True},
+        )
+
+
 def test_atomic_v2_shadow_mode_rejects_an_explicitly_disabled_writer() -> None:
     with pytest.raises(
         ValidationError,
@@ -636,13 +681,138 @@ def test_atomic_v2_shadow_mode_rejects_an_explicitly_disabled_writer() -> None:
         )
 
 
-@pytest.mark.parametrize("mode", ["canary", "public"])
-def test_unqualified_v2_reader_modes_fail_closed(mode: str) -> None:
+def test_atomic_v2_dark_mode_rejects_an_explicitly_disabled_writer() -> None:
     with pytest.raises(
         ValidationError,
-        match=rf"V2_CHAIN_MODE={mode} is not qualified",
+        match="V2_CHAIN_MODE=dark cannot disable required writers",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            v2_chain_mode="dark",
+            product_ranking_shadow_enabled=False,
+        )
+
+
+@pytest.mark.parametrize(
+    ("mode", "message"),
+    [
+        ("canary", "V2_CHAIN_MODE=canary requires its reader"),
+        ("public", "V2_CHAIN_MODE=public requires its reader"),
+    ],
+)
+def test_unqualified_v2_reader_modes_fail_closed(mode: str, message: str) -> None:
+    with pytest.raises(
+        ValidationError,
+        match=message,
     ):
         Settings(_env_file=None, env="test", v2_chain_mode=mode)
+
+
+def test_atomic_v2_canary_mode_requires_exact_receipt_and_closed_cohort() -> None:
+    digest = "sha256:" + "a" * 64
+    subject = "sha256:" + "b" * 64
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        v2_chain_mode="canary",
+        v2_canary_reader_enabled=True,
+        v2_promotion_receipt_evaluation_id=digest,
+        v2_canary_subject_digests=subject,
+        v2_supported_verticals="smartphones",
+        v2_supported_locales="fr-BE",
+        v2_supported_decision_types="purchase_advice",
+        v2_max_data_age_seconds=300,
+    )
+
+    assert all(getattr(settings, field) for field in V2_SHADOW_WRITER_FIELDS)
+    assert settings.v2_public_reader_enabled is False
+    assert settings.v2_canary_subject_digests_list == [subject]
+    assert settings.v2_supported_verticals_list == ["smartphones"]
+    assert settings.v2_supported_locales_list == ["fr-BE"]
+    assert settings.v2_supported_decision_types_list == ["purchase_advice"]
+    assert settings.v2_max_data_age_seconds == 300
+
+
+def test_blank_v2_promotion_receipt_is_closed_default() -> None:
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        v2_promotion_receipt_evaluation_id="  ",
+    )
+
+    assert settings.v2_promotion_receipt_evaluation_id is None
+
+
+def test_atomic_v2_public_mode_requires_exact_receipt_and_no_canary_cohort() -> None:
+    digest = "sha256:" + "c" * 64
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        v2_chain_mode="public",
+        v2_public_reader_enabled=True,
+        v2_promotion_receipt_evaluation_id=digest,
+        v2_supported_verticals="smartphones",
+        v2_supported_locales="fr-BE",
+        v2_supported_decision_types="purchase_advice",
+        v2_max_data_age_seconds=300,
+    )
+
+    assert all(getattr(settings, field) for field in V2_SHADOW_WRITER_FIELDS)
+    assert settings.v2_canary_reader_enabled is False
+    assert settings.v2_canary_subject_digests_list == []
+
+
+@pytest.mark.parametrize(
+    ("overrides", "message"),
+    [
+        (
+            {
+                "v2_chain_mode": "canary",
+                "v2_canary_reader_enabled": True,
+                "v2_promotion_receipt_evaluation_id": "not-a-digest",
+                "v2_canary_subject_digests": "sha256:" + "b" * 64,
+            },
+            "requires an exact promotion receipt digest",
+        ),
+        (
+            {
+                "v2_chain_mode": "canary",
+                "v2_canary_reader_enabled": True,
+                "v2_promotion_receipt_evaluation_id": "sha256:" + "a" * 64,
+            },
+            "requires a closed cohort",
+        ),
+        (
+            {
+                "v2_chain_mode": "public",
+                "v2_public_reader_enabled": True,
+                "v2_promotion_receipt_evaluation_id": "sha256:" + "c" * 64,
+                "v2_canary_subject_digests": "sha256:" + "b" * 64,
+            },
+            "forbids a residual canary cohort",
+        ),
+        (
+            {
+                "v2_chain_mode": "shadow",
+                "v2_promotion_receipt_evaluation_id": "sha256:" + "a" * 64,
+            },
+            "forbids a promotion receipt",
+        ),
+        (
+            {
+                "v2_canary_subject_digests": "sha256:" + "b" * 64,
+            },
+            "V2_CHAIN_MODE=off forbids a canary cohort",
+        ),
+    ],
+)
+def test_v2_promoted_configuration_rejects_incomplete_evidence(
+    overrides,
+    message,
+) -> None:
+    with pytest.raises(ValidationError, match=message):
+        Settings(_env_file=None, env="test", **overrides)
 
 
 @pytest.mark.parametrize(
