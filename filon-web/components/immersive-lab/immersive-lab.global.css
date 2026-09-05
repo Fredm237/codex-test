@@ -1,0 +1,28 @@
+body:has(.p19-immersive-lab) .ed-header,
+body:has(.p19-immersive-lab) .ed-header:not(.stuck),
+body:has(.p19-immersive-lab) .ed-header.stuck {
+  background: rgba(255, 253, 247, .92) !important;
+  border-bottom-color: rgba(23, 74, 120, .12) !important;
+}
+
+body:has(.p19-immersive-lab) .ed-header .ed-nav a,
+body:has(.p19-immersive-lab) .ed-header .ed-nav button,
+body:has(.p19-immersive-lab) .ed-header .ed-brand-word {
+  color: #132638 !important;
+}
+
+body:has(.p19-immersive-lab) .ed-header .ed-nav a:hover,
+body:has(.p19-immersive-lab) .ed-header .ed-nav button:hover {
+  color: #f45f43 !important;
+}
+
+body:has(.p19-immersive-lab) .ed-header .ed-nav .ed-nav-cta {
+  color: #fffdf7 !important;
+  border-color: #174a78 !important;
+  background: #174a78 !important;
+  box-shadow: none !important;
+}
+
+body:has(.p19-immersive-lab) .ed-footer {
+  display: none;
+}
