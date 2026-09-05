@@ -40,7 +40,7 @@ function CanvasLifecycle({ onFailure, onReady }: Pick<FounderStoryCanvasProps, "
   useEffect(() => {
     gl.outputColorSpace = THREE.SRGBColorSpace;
     gl.toneMapping = THREE.ACESFilmicToneMapping;
-    gl.toneMappingExposure = 1.04;
+    gl.toneMappingExposure = 1.12;
     const unbind = bindWebglContextLoss(gl.domElement, () => failureRef.current());
     readyRef.current?.();
     return unbind;
@@ -136,15 +136,15 @@ function LaptopPortal({ image, progress }: { image: string; progress: number }) 
     <group ref={root} position={[0, 0.05, 0]}>
       <mesh position={[0, -2.05, 0]} receiveShadow>
         <boxGeometry args={[13, 0.18, 8]} />
-        <meshStandardMaterial color="#d9cdbd" roughness={0.92} />
+        <meshStandardMaterial color="#e9f5fa" roughness={0.92} />
       </mesh>
       <group position={[0, 0.55, 0]} rotation={[-0.06, 0, 0]}>
         <RoundedBox args={[5.7, 3.55, 0.24]} radius={0.16} smoothness={4} castShadow>
-          <meshStandardMaterial ref={material} color="#3c3b37" roughness={0.34} metalness={0.34} transparent />
+          <meshStandardMaterial ref={material} color="#174a78" roughness={0.3} metalness={0.3} transparent />
         </RoundedBox>
         <mesh position={[0, 0, 0.132]}>
           <planeGeometry args={[5.28, 3.12]} />
-          <meshBasicMaterial color="#f3eadc" />
+          <meshBasicMaterial color="#fffdf7" />
         </mesh>
         <group position={[0, 0.1, 0.15]}>
           <Suspense fallback={null}><ProductImage image={image} size={[2.05, 2.05]} /></Suspense>
@@ -152,16 +152,16 @@ function LaptopPortal({ image, progress }: { image: string; progress: number }) 
       </group>
       <mesh position={[0, -1.32, 1.28]} rotation={[-0.9, 0, 0]} castShadow>
         <boxGeometry args={[6.2, 3.5, 0.12]} />
-        <meshStandardMaterial color="#b9b5ac" roughness={0.45} metalness={0.48} />
+        <meshStandardMaterial color="#a8c6d7" roughness={0.42} metalness={0.42} />
       </mesh>
     </group>
   );
 }
 
 const BUILDINGS: Array<[number, number, number, number, string]> = [
-  [-5.3, 0.2, -1.9, 3.6, "#b76346"], [-3.6, 0.55, -2.8, 4.3, "#d39b75"],
-  [-1.8, 0.12, -3.5, 3.45, "#8f9b7c"], [1.8, 0.45, -3.6, 4.05, "#d5b692"],
-  [3.75, 0.18, -2.6, 3.5, "#9f6b56"], [5.45, 0.62, -1.7, 4.4, "#c58a5e"],
+  [-5.3, 0.2, -1.9, 3.6, "#f47a60"], [-3.6, 0.55, -2.8, 4.3, "#f5c84c"],
+  [-1.8, 0.12, -3.5, 3.45, "#54a99f"], [1.8, 0.45, -3.6, 4.05, "#f49c79"],
+  [3.75, 0.18, -2.6, 3.5, "#6ba6cf"], [5.45, 0.62, -1.7, 4.4, "#f2b94e"],
 ];
 
 function ShopBuilding({ data, image, index, progress }: { data: [number, number, number, number, string]; image: string; index: number; progress: number }) {
@@ -186,34 +186,34 @@ function ShopBuilding({ data, image, index, progress }: { data: [number, number,
       </mesh>
       <mesh position={[0, height / 2 + 0.31, 0]} rotation={[0, Math.PI / 4, 0]} castShadow>
         <coneGeometry args={[1.08, 0.68, 4]} />
-        <meshStandardMaterial color={index % 2 ? "#6f594b" : "#7e4738"} roughness={0.92} />
+        <meshStandardMaterial color={index % 2 ? "#174a78" : "#e8513b"} roughness={0.86} />
       </mesh>
       {[-0.36, 0.36].map((windowX) => (
         <group key={windowX} position={[windowX, height * 0.2, 0.615]}>
           <mesh>
             <planeGeometry args={[0.42, 0.62]} />
-            <meshStandardMaterial color="#8fa5a0" emissive="#e3d7bd" emissiveIntensity={0.18} roughness={0.34} />
+            <meshStandardMaterial color="#b9dce9" emissive="#fff7c7" emissiveIntensity={0.24} roughness={0.3} />
           </mesh>
           <mesh position={[0, 0, 0.008]}>
             <planeGeometry args={[0.025, 0.62]} />
-            <meshBasicMaterial color="#675b4f" />
+            <meshBasicMaterial color="#174a78" />
           </mesh>
         </group>
       ))}
       <mesh position={[0, -height * 0.15, 0.62]}>
         <planeGeometry args={[1.12, 1.25]} />
-        <meshBasicMaterial color="#ece1cf" />
+        <meshBasicMaterial color="#fffdf7" />
       </mesh>
       <group position={[0, -height * 0.15, 0.65]}>
         <Suspense fallback={null}><ProductImage image={image} size={[0.88, 0.88]} /></Suspense>
       </group>
       <mesh position={[0, height * 0.24, 0.62]}>
         <planeGeometry args={[0.78, 0.1]} />
-        <meshBasicMaterial color={index % 2 ? "#304c43" : "#8f3e2d"} />
+        <meshBasicMaterial color={index % 2 ? "#2f766d" : "#f45f43"} />
       </mesh>
       <mesh position={[0, -height * 0.15 + 0.72, 0.77]} rotation={[Math.PI / 2, 0, 0]} castShadow>
         <boxGeometry args={[1.25, 0.42, 0.08]} />
-        <meshStandardMaterial color={index % 2 ? "#315b51" : "#b14e36"} roughness={0.72} />
+        <meshStandardMaterial color={index % 2 ? "#3b9185" : "#f45f43"} roughness={0.68} />
       </mesh>
     </group>
   );
@@ -251,7 +251,7 @@ function OfferMatter({ admitted, index, progress }: { admitted: boolean; index: 
   return (
     <mesh ref={mesh} position={start} castShadow={admitted}>
       <boxGeometry args={[1.08, 0.42, 0.08]} />
-      <meshStandardMaterial ref={material} color={admitted ? "#f0c67a" : "#9c8775"} transparent wireframe={!admitted} />
+      <meshStandardMaterial ref={material} color={admitted ? "#f5c84c" : "#7895aa"} transparent wireframe={!admitted} />
     </mesh>
   );
 }
@@ -273,7 +273,7 @@ function HeroProduct({ image, progress }: { image: string; progress: number }) {
   return (
     <group ref={root}>
       <RoundedBox args={[2.45, 2.85, 0.18]} radius={0.16} smoothness={4} castShadow>
-        <meshStandardMaterial ref={frame} color="#efe6d6" roughness={0.86} />
+        <meshStandardMaterial ref={frame} color="#fffdf7" roughness={0.86} />
       </RoundedBox>
       <group position={[0, 0, 0.105]}>
         <Suspense fallback={null}><ProductImage image={image} size={[1.9, 1.9]} /></Suspense>
@@ -296,7 +296,7 @@ function WorldToInterface({ progress }: { progress: number }) {
   return (
     <mesh ref={plane} position={[0, -2.3, -0.18]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
       <planeGeometry args={[10.5, 7]} />
-      <meshStandardMaterial ref={material} color="#f5efe5" roughness={0.92} transparent opacity={0} />
+      <meshStandardMaterial ref={material} color="#fffdf7" roughness={0.92} transparent opacity={0} />
     </mesh>
   );
 }
@@ -311,9 +311,9 @@ function Daylight({ progress }: { progress: number }) {
   });
   return (
     <>
-      <hemisphereLight args={["#fff5df", "#69735e", 1.75]} />
-      <directionalLight ref={sun} position={[-7, 10, 8]} color="#fff0d0" intensity={2.1} castShadow />
-      <spotLight ref={proof} position={[5, 6, 4]} color="#ef8b54" intensity={0} angle={0.5} penumbra={0.88} distance={18} />
+      <hemisphereLight args={["#fffdf0", "#6da9ba", 1.8]} />
+      <directionalLight ref={sun} position={[-7, 10, 8]} color="#fff4bd" intensity={2.1} castShadow />
+      <spotLight ref={proof} position={[5, 6, 4]} color="#ff765c" intensity={0} angle={0.5} penumbra={0.88} distance={18} />
     </>
   );
 }
@@ -323,11 +323,11 @@ function FounderWorld(props: FounderStoryCanvasProps) {
   const admittedCount = Math.min(fragmentCount, props.offerCount);
   return (
     <>
-      <color attach="background" args={["#d8d2be"]} />
-      <fog attach="fog" args={["#d8d2be", 9, 24]} />
+      <color attach="background" args={["#dcecf4"]} />
+      <fog attach="fog" args={["#dcecf4", 9, 24]} />
       <Daylight progress={props.progress} />
       <CameraJourney compact={props.compact} playing={props.playing} progress={props.progress} />
-      <gridHelper args={[18, 22, "#8d7f6b", "#c6baa7"]} position={[0, -2.08, 0]} />
+      <gridHelper args={[18, 22, "#4e8bab", "#b8d8e6"]} position={[0, -2.08, 0]} />
       <LaptopPortal image={props.product.image} progress={props.progress} />
       {BUILDINGS.slice(0, props.compact ? 4 : 6).map((building, index) => (
         <ShopBuilding key={index} data={building} image={props.product.image} index={index} progress={props.progress} />

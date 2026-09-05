@@ -25,9 +25,9 @@ assert.ok(labAccess.includes("if (explicit !== undefined) return ENABLED.has(exp
 
 assert.ok(lab.includes("FounderStoryGate"), "le laboratoire doit rendre la séquence fondateur finale");
 assert.doesNotMatch(lab, /CinematicJourney|SignatureMomentGate|type Direction/, "les anciennes démonstrations abstraites ne doivent plus être rendues");
-assert.ok(lab.includes("formatSupportedMoney"), "les prix doivent respecter la frontière devise");
 assert.doesNotMatch(lab, /currency\s*(?:\|\||\?\?)\s*["']EUR["']/, "aucune devise de secours n'est autorisée");
-assert.ok(lab.includes("product.offers.map") && lab.includes("product.latestObservedAt"), "les offres et leur fraîcheur doivent rester visibles dans le DOM");
+assert.doesNotMatch(lab, /EvidenceLedger|lab-boundaries-title|lab-telemetry-title/, "aucun chapitre explicatif ne doit allonger la narration");
+assert.ok(lab.includes('data-proof-state={proof ? "available" : "unknown"}'), "la preuve agrégée doit rester qualifiable sans devenir une section visible");
 assert.ok(lab.includes("PerformanceObserver") && lab.includes('"largest-contentful-paint"'), "le laboratoire doit mesurer le LCP");
 assert.ok(lab.includes('"layout-shift"') && lab.includes('"longtask"') && lab.includes('"event"'), "stabilité, tâches longues et interactions doivent être mesurées");
 assert.ok(lab.includes('data-metric="immersive-longtask"') && lab.includes("filon-immersive-init-start"), "l'initialisation 3D doit être mesurable séparément");
@@ -40,12 +40,13 @@ assert.ok(gate.includes("product?.textureImage"), "seule la texture sûre doit e
 assert.ok(gate.includes("StaticStory"), "le récit doit survivre sans WebGL");
 assert.ok(gate.includes("ImmersiveBoundary") && gate.includes("onFailure={failRuntime}"), "une erreur GPU ou texture doit rendre le récit statique");
 assert.ok(gate.includes("hasPlayedRef") && gate.includes('capability === "webgl"'), "la scène doit s'exécuter à son entrée à l'écran");
-assert.equal((gate.match(/label: "/g) || []).length, 6, "la séquence doit rester bornée à six battements lisibles");
+assert.equal((gate.match(/"Chercher"|"Entrer"|"Distinguer"|"Vérifier"|"Écarter"|"Comparer"/g) || []).length, 6, "la séquence doit rester bornée à six battements lisibles");
 assert.ok(gate.includes('type="range"') && gate.includes("Passer l’expérience"), "la séquence doit être contrôlable et évitable");
 assert.ok(gate.includes('href="/recherche/"') && gate.includes("ProductJourneyLink"), "recherche et fiche produit doivent rester accessibles");
-assert.ok(gate.includes("Le même produit. Des réponses différentes."), "la confusion marchande doit être compréhensible sans jargon");
-assert.ok(gate.includes("Le bruit disparaît. Les preuves restent."), "la résolution doit être expliquée en langage humain");
+assert.ok(gate.includes("Les offres se ressemblent. Pas toujours les produits."), "la confusion marchande doit être compréhensible sans jargon");
+assert.ok(gate.includes("Les mauvaises pistes s’effacent."), "la résolution doit être expliquée en langage humain");
 assert.ok(gate.includes("product.offers.length") && gate.includes("product.ean"), "le résultat final doit refléter la preuve courante");
+assert.ok(gate.includes("formatSupportedMoney"), "les prix doivent respecter la frontière devise");
 assert.doesNotMatch(gate, /LABORATOIRE|P19|PLAN 0|SHADOW|BUY_NOW|\bWAIT\b/, "la scène jugée ne doit exposer aucun vocabulaire de chantier");
 
 assert.ok(canvas.includes("<Canvas") && canvas.includes("CameraJourney"), "le récit doit employer une vraie scène et une vraie caméra");
@@ -66,7 +67,8 @@ assert.ok(gate.includes('capability === "webgl" && visible') && gate.includes("i
 assert.ok(css.includes("min-height: 48px"), "les actions doivent conserver des cibles tactiles suffisantes");
 assert.ok(css.includes("prefers-reduced-motion: reduce") && labCss.includes("prefers-reduced-motion: reduce"), "les deux couches CSS doivent neutraliser les mouvements réduits");
 assert.doesNotMatch(css + labCss, /3000vh|1200vh|position:\s*sticky/, "la nouvelle histoire ne doit pas recréer un tunnel de scroll");
-assert.ok(css.includes("#f5efe4") && css.includes("#53644d") && css.includes("#c85b3f"), "la palette doit rester claire, naturelle et identifiable");
+assert.ok(css.includes("#dcecf4") && css.includes("#174a78") && css.includes("#f45f43") && css.includes("#f5c84c"), "la palette doit être lumineuse, franche et identifiable");
+assert.ok(css.includes("height: 100svh") && !labCss.includes(".evidence"), "le laboratoire doit être une narration plein écran unique");
 
 assert.ok(exactProof.includes("evidence_current !== true"), "une offre non courante doit être exclue");
 assert.ok(exactProof.includes("isFreshObservation") && exactProof.includes("currencies.size !== 1"), "fraîcheur et devise doivent fermer la comparaison");

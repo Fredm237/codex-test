@@ -18,15 +18,8 @@ const FounderStoryCanvas = dynamic(
   { ssr: false, loading: () => null },
 );
 
-const DURATION_MS = 17_000;
-const BEATS = [
-  { at: 0, label: "Chercher" },
-  { at: 0.2, label: "Entrer" },
-  { at: 0.38, label: "Explorer" },
-  { at: 0.58, label: "Vérifier" },
-  { at: 0.78, label: "Clarifier" },
-  { at: 0.94, label: "Décider" },
-] as const;
+const DURATION_MS = 16_000;
+const BEATS = ["Chercher", "Entrer", "Distinguer", "Vérifier", "Écarter", "Comparer"] as const;
 
 type Capability = "pending" | "webgl" | "fallback";
 
@@ -171,22 +164,17 @@ export function FounderStoryGate({ product, reduced }: { product: ImmersiveExact
   const priceLow = product ? formatSupportedMoney(product.priceMin, product.currency, "fr") : null;
   const priceHigh = product ? formatSupportedMoney(product.priceMax, product.currency, "fr") : null;
   const line = [
-    "Tout commence par une recherche.",
-    "Entrez dans le marché.",
-    "Le même produit. Des réponses différentes.",
-    "FILON vérifie ce qui correspond vraiment.",
-    "Le bruit disparaît. Les preuves restent.",
-    "Comparez ce qui peut l’être.",
+    "Vous cherchez un produit.",
+    "Le marché s’ouvre.",
+    "Les offres se ressemblent. Pas toujours les produits.",
+    "FILON vérifie chaque correspondance.",
+    "Les mauvaises pistes s’effacent.",
+    "Il ne reste que ce que vous pouvez vraiment comparer.",
   ][beat];
 
   return (
     <section ref={rootRef} className={styles.story} aria-labelledby="founder-story-title">
       <a className={styles.skip} href="#p19-lab-after-journey">Passer l’expérience</a>
-      <header className={styles.intro}>
-        <p>Votre achat, enfin lisible.</p>
-        <h1 id="founder-story-title">Du marché entier<br />à la bonne comparaison.</h1>
-      </header>
-
       <div ref={stageRef} className={styles.stage} data-beat={beat} data-renderer={capability} data-quality={quality}>
         {near && capability === "webgl" && product?.textureImage ? (
           <ImmersiveBoundary onFailure={failRuntime}>
@@ -203,8 +191,12 @@ export function FounderStoryGate({ product, reduced }: { product: ImmersiveExact
           </ImmersiveBoundary>
         ) : <StaticStory product={product} progress={progress} />}
 
+        <header className={styles.intro}>
+          <p>Une seule recherche.</p>
+          <h1 id="founder-story-title">Du marché entier<br />à votre meilleur choix.</h1>
+        </header>
+
         <div className={styles.storyLine} aria-live="polite">
-          <span>{String(beat + 1).padStart(2, "0")}</span>
           <p>{line}</p>
         </div>
 
@@ -231,27 +223,25 @@ export function FounderStoryGate({ product, reduced }: { product: ImmersiveExact
 
         <nav className={styles.actions} aria-label="Actions de la séquence">
           <a href="/recherche/">Rechercher</a>
-          <button type="button" onClick={() => { stop(); setProgress(1); }}>Passer</button>
+          <button type="button" onClick={() => { stop(); setProgress(1); }}>Voir le résultat</button>
         </nav>
-      </div>
 
-      <div className={styles.transport}>
-        <button type="button" onClick={playing ? stop : play} disabled={reduced}>
-          {reduced ? "Mouvement réduit" : playing ? "Pause" : "Rejouer"}
-        </button>
-        <label>
-          <span>Parcourir l’histoire</span>
+        <div className={styles.transport}>
+          <button type="button" onClick={playing ? stop : play} disabled={reduced}>
+            {reduced ? "Image fixe" : playing ? "Pause" : progress >= 1 ? "Rejouer" : "Continuer"}
+          </button>
+          <label>
+            <span>Progression de l’histoire</span>
           <input
             type="range"
             min="0"
             max="100"
             value={Math.round(progress * 100)}
-            aria-valuetext={`${BEATS[beat].label}, ${Math.round(progress * 100)} %`}
+              aria-valuetext={`${BEATS[beat]}, ${Math.round(progress * 100)} %`}
             onChange={(event) => { stop(); setProgress(Number(event.target.value) / 100); }}
           />
-        </label>
-        <div className={styles.beats} aria-hidden="true">
-          {BEATS.map((item, index) => <span key={item.label} data-active={index === beat}>{item.label}</span>)}
+          </label>
+          <span className={styles.progressValue} aria-hidden="true">{String(beat + 1).padStart(2, "0")} / 06</span>
         </div>
       </div>
 

@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ProductJourneyLink } from "@/components/experience/ProductJourneyLink";
-import { formatSupportedMoney } from "@/lib/currency";
 import type { ImmersiveExactProductProof } from "@/lib/immersive-proof";
 import type { Proof } from "@/lib/proof";
 import { FounderStoryGate } from "./FounderStoryGate";
@@ -33,65 +31,7 @@ function useReducedExperience() {
   return reduced;
 }
 
-function formatObservation(value: string): string {
-  try {
-    return new Intl.DateTimeFormat("fr-BE", {
-      dateStyle: "medium", timeStyle: "short", timeZone: "Europe/Brussels",
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function EvidenceLedger({ product }: { product: ImmersiveExactProductProof | null }) {
-  const low = product ? formatSupportedMoney(product.priceMin, product.currency, "fr") : null;
-  const high = product ? formatSupportedMoney(product.priceMax, product.currency, "fr") : null;
-  return (
-    <section className={styles.evidence} aria-labelledby="lab-evidence-title">
-      <header>
-        <p className={styles.eyebrow}>La scène repose sur ces faits</p>
-        <h2 id="lab-evidence-title">Ce que le mouvement ne change jamais.</h2>
-        <p>Le produit, les prix, les marchands et l’heure d’observation viennent de la même preuve serveur.</p>
-      </header>
-      {product ? (
-        <div className={styles.evidenceGrid}>
-          <article className={styles.productCard}>
-            {product.image ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={product.image} alt={product.name} decoding="async" loading="lazy" fetchPriority="low" />
-            ) : <div className={styles.unknownProduct} aria-label="Image indisponible">?</div>}
-            <div>
-              <span>Produit exact</span>
-              <h3>{[product.brand, product.name].filter(Boolean).join(" · ")}</h3>
-              <p>EAN {product.ean}</p>
-              <p>Observé le {formatObservation(product.latestObservedAt)}</p>
-              <ProductJourneyLink href={`/produits/${encodeURIComponent(product.ean)}`} image={product.image} label={product.name}>
-                Ouvrir la fiche réelle
-              </ProductJourneyLink>
-            </div>
-          </article>
-          <div className={styles.priceCard}>
-            <span>Comparaison admissible</span>
-            <strong>{low && high ? `${low} — ${high}` : "Prix non démontré"}</strong>
-            <small>{product.offers.length} offres · {product.merchants} marchands</small>
-          </div>
-          <div className={styles.offerList} role="list" aria-label="Offres utilisées dans la scène">
-            {product.offers.map((offer) => (
-              <div key={offer.id} role="listitem">
-                <span><b>{offer.merchant}</b><small>{formatObservation(offer.observedAt)}</small></span>
-                <strong>{formatSupportedMoney(offer.price, offer.currency, "fr") ?? "Prix inconnu"}</strong>
-              </div>
-            ))}
-          </div>
-        </div>
-      ) : (
-        <p className={styles.failClosed}>Aucun produit n’a franchi les vérifications d’identité, de devise, de fraîcheur et de pluralité marchande. FILON s’abstient.</p>
-      )}
-    </section>
-  );
-}
-
-function LabTelemetry() {
+function SilentTelemetry() {
   const [metrics, setMetrics] = useState<LabMetrics | null>(null);
   useEffect(() => {
     let lcp: number | null = null;
@@ -99,13 +39,17 @@ function LabTelemetry() {
     let inp: number | null = null;
     let longestTask = 0;
     const observers: PerformanceObserver[] = [];
-    const observe = (type: string, onEntries: (entries: PerformanceEntry[]) => void, options: PerformanceObserverInit = { type, buffered: true }) => {
+    const observe = (
+      type: string,
+      onEntries: (entries: PerformanceEntry[]) => void,
+      options: PerformanceObserverInit = { type, buffered: true },
+    ) => {
       try {
         const observer = new PerformanceObserver((list) => onEntries(list.getEntries()));
         observer.observe(options);
         observers.push(observer);
       } catch {
-        // Une mesure absente reste inconnue.
+        // Une mesure non disponible reste inconnue et n'entre pas dans le récit.
       }
     };
     observe("largest-contentful-paint", (entries) => { const last = entries.at(-1); if (last) lcp = last.startTime; });
@@ -126,8 +70,10 @@ function LabTelemetry() {
           .map((entry) => entry.duration))
         : null;
       setMetrics({
-        cls: Number(cls.toFixed(4)), immersiveLongestTask: immersiveLongestTask === null ? null : Math.round(immersiveLongestTask),
-        inp: inp === null ? null : Math.round(inp), lcp: lcp === null ? null : Math.round(lcp),
+        cls: Number(cls.toFixed(4)),
+        immersiveLongestTask: immersiveLongestTask === null ? null : Math.round(immersiveLongestTask),
+        inp: inp === null ? null : Math.round(inp),
+        lcp: lcp === null ? null : Math.round(lcp),
         longestTask: Math.round(longestTask),
         transferKb: Math.round(resources.reduce((total, entry) => total + (entry.transferSize || 0), 0) / 1024),
       });
@@ -135,44 +81,36 @@ function LabTelemetry() {
     const timer = window.setTimeout(sample, 2_600);
     const interval = window.setInterval(sample, 1_500);
     return () => {
-      window.clearTimeout(timer); window.clearInterval(interval);
+      window.clearTimeout(timer);
+      window.clearInterval(interval);
       observers.forEach((observer) => observer.disconnect());
     };
   }, []);
-  const value = (metric: number | null | undefined, suffix: string) => metric === null || metric === undefined ? "non mesuré" : `${metric}${suffix}`;
+
   return (
-    <section className={styles.telemetry} aria-labelledby="lab-telemetry-title">
-      <div><p className={styles.eyebrow}>Contrôle du prototype</p><h2 id="lab-telemetry-title">La beauté reste sous budget.</h2></div>
-      <dl data-lab-metrics-ready={metrics !== null}>
-        <div><dt>LCP</dt><dd data-metric="lcp">{value(metrics?.lcp, " ms")}</dd></div>
-        <div><dt>CLS</dt><dd data-metric="cls">{metrics ? metrics.cls : "non mesuré"}</dd></div>
-        <div><dt>Interaction</dt><dd data-metric="inp">{value(metrics?.inp, " ms")}</dd></div>
-        <div><dt>Tâche longue</dt><dd data-metric="longtask">{value(metrics?.longestTask, " ms")}</dd></div>
-        <div><dt>Initialisation 3D</dt><dd data-metric="immersive-longtask">{value(metrics?.immersiveLongestTask, " ms")}</dd></div>
-        <div><dt>Transfert</dt><dd data-metric="transfer">{value(metrics?.transferKb, " Ko")}</dd></div>
-      </dl>
-    </section>
+    <output className={styles.srOnly} data-lab-metrics-ready={metrics !== null} aria-hidden="true">
+      <span data-metric="lcp">{metrics?.lcp ?? "unknown"}</span>
+      <span data-metric="cls">{metrics?.cls ?? "unknown"}</span>
+      <span data-metric="inp">{metrics?.inp ?? "unknown"}</span>
+      <span data-metric="longtask">{metrics?.longestTask ?? "unknown"}</span>
+      <span data-metric="immersive-longtask">{metrics?.immersiveLongestTask ?? "unknown"}</span>
+      <span data-metric="transfer">{metrics?.transferKb ?? "unknown"}</span>
+    </output>
   );
 }
 
 export function ImmersiveLab({ proof, exactProduct }: { proof: Proof | null; exactProduct: ImmersiveExactProductProof | null }) {
   const reduced = useReducedExperience();
   return (
-    <main className={`${styles.page} p19-immersive-lab`}>
+    <main
+      className={`${styles.page} p19-immersive-lab`}
+      data-proof-state={proof ? "available" : "unknown"}
+    >
       <FounderStoryGate product={exactProduct} reduced={reduced} />
-      <div id="p19-lab-after-journey" tabIndex={-1}>
-        <EvidenceLedger product={exactProduct} />
-        <section className={styles.boundaries} aria-labelledby="lab-boundaries-title">
-          <p className={styles.eyebrow}>Ce que FILON garantit</p>
-          <h2 id="lab-boundaries-title">Le spectacle ne dépasse jamais la preuve.</h2>
-          <div>
-            <article><span>01</span><h3>Un produit réel</h3><p>La scène n’apparaît que si une identité exacte peut être conservée du début à la fin.</p></article>
-            <article><span>02</span><h3>Des prix comparables</h3><p>Une devise inconnue, une offre périmée ou une variante incompatible disparaît au lieu d’être arrangée.</p></article>
-            <article><span>03</span><h3>Une sortie complète</h3><p>Sans 3D, avec mouvement réduit ou sur appareil contraint, le produit et les actions restent accessibles. {proof ? `${proof.stats.offers.toLocaleString("fr-BE")} offres alimentent actuellement la preuve agrégée.` : "Les agrégats restent inconnus si l’API est indisponible."}</p></article>
-          </div>
-        </section>
-        <LabTelemetry />
+      <div id="p19-lab-after-journey" className={styles.srOnly} tabIndex={-1}>
+        Fin de l’expérience. La recherche et la fiche produit restent accessibles dans la scène.
       </div>
+      <SilentTelemetry />
     </main>
   );
 }
