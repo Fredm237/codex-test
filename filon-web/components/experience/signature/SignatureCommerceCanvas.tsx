@@ -1,6 +1,6 @@
 "use client";
 
-import { Edges, RoundedBox, useTexture } from "@react-three/drei";
+import { useTexture } from "@react-three/drei";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { Suspense, useEffect, useMemo, useRef } from "react";
 import * as THREE from "three";
@@ -139,7 +139,7 @@ function MarketFragment({ active, index, progress, total }: { active: boolean; i
     const scale = active ? 1 : 0.72;
     mesh.current.scale.setScalar(THREE.MathUtils.lerp(scale, active ? 0.58 : 0.24, seal));
     const anneal = active ? cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.anneal)) : 0;
-    material.current.color.lerpColors(new THREE.Color(active ? "#a5654e" : "#887a70"), new THREE.Color("#bf6547"), anneal);
+    material.current.color.lerpColors(new THREE.Color(active ? "#2f769f" : "#9fb7c7"), new THREE.Color("#f05f43"), anneal);
     material.current.roughness = THREE.MathUtils.lerp(active ? 0.96 : 1, active ? 0.24 : 1, anneal);
     material.current.metalness = active ? anneal * 0.58 : 0;
     material.current.opacity = active ? THREE.MathUtils.lerp(0.76, 1, anneal) : THREE.MathUtils.lerp(0.17, 0.035, seal);
@@ -177,60 +177,39 @@ function CausalLightRig({ progress }: { progress: number }) {
   return (
     <>
       <ambientLight intensity={0.78} />
-      <directionalLight ref={key} position={[-5.5, 3.5, 8]} color="#fff8ec" intensity={1.5} castShadow />
-      <spotLight ref={proof} position={[6.5, 2, 2.2]} color="#c65e3f" intensity={6} angle={0.38} penumbra={0.92} distance={20} />
-      <pointLight ref={decision} position={[0, -2, 4]} color="#d89051" intensity={1.7} distance={10} />
+      <directionalLight ref={key} position={[-5.5, 3.5, 8]} color="#fffdf7" intensity={1.5} castShadow />
+      <spotLight ref={proof} position={[6.5, 2, 2.2]} color="#f05f43" intensity={6} angle={0.38} penumbra={0.92} distance={20} />
+      <pointLight ref={decision} position={[0, -2, 4]} color="#f4c84c" intensity={1.7} distance={10} />
     </>
   );
 }
 
 function ProductCore({ product, progress }: { product: ProductProjection; progress: number }) {
   const group = useRef<THREE.Group>(null);
-  const shell = useRef<THREE.MeshStandardMaterial>(null);
   const proven = Boolean(product);
 
   useFrame(() => {
-    if (!group.current || !shell.current) return;
+    if (!group.current) return;
     const focus = cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.focus));
     const seal = cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.seal));
     group.current.rotation.y = THREE.MathUtils.lerp(-0.34, Math.PI * 0.24, focus) * (1 - seal);
     group.current.rotation.x = THREE.MathUtils.lerp(0.22, -0.08, focus) * (1 - seal);
     group.current.scale.setScalar(THREE.MathUtils.lerp(0.82, 1.08, focus) - seal * 0.12);
-    shell.current.roughness = proven ? THREE.MathUtils.lerp(0.82, 0.2, cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.anneal))) : 1;
-    shell.current.metalness = proven ? cinematicEase(phase(progress, ...MATERIAL_SEQUENCE.anneal)) * 0.68 : 0;
-    shell.current.emissiveIntensity = proven ? 0.08 + focus * 0.18 : 0.02;
   });
 
   return (
     <group ref={group}>
-      <RoundedBox args={[2.36, 2.92, 0.2]} radius={0.13} smoothness={5} castShadow receiveShadow>
-        <meshStandardMaterial
-          ref={shell}
-          color={proven ? "#bd664a" : "#7f746b"}
-          emissive={proven ? "#743522" : "#4b433e"}
-          transparent
-          opacity={proven ? 0.9 : 0.62}
-          wireframe={!proven}
-        />
-        <Edges color={proven ? "#6b3325" : "#5f574f"} threshold={12} />
-      </RoundedBox>
       {product?.image ? (
         <Suspense fallback={<ProductImageFallback />}>
           <ProductImagePlane image={product.image} />
         </Suspense>
       ) : <ProductImageFallback unknown />}
-      <mesh position={[0, -1.64, 0.06]} castShadow>
-        <boxGeometry args={[3.04, 0.08, 0.54]} />
-        <meshStandardMaterial color={proven ? "#c47a4e" : "#746a62"} metalness={0.34} roughness={0.42} />
-      </mesh>
-      <mesh position={[-1.44, 0, 0.02]}>
-        <boxGeometry args={[0.025, 3.58, 0.025]} />
-        <meshBasicMaterial color={proven ? "#a8442b" : "#665c55"} transparent opacity={0.82} />
-      </mesh>
-      <mesh position={[1.44, 0, 0.02]}>
-        <boxGeometry args={[0.025, 3.58, 0.025]} />
-        <meshBasicMaterial color={proven ? "#d69a48" : "#665c55"} transparent opacity={0.58} />
-      </mesh>
+      {proven ? (
+        <mesh position={[0, -1.72, -0.04]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
+          <circleGeometry args={[1.45, 64]} />
+          <meshStandardMaterial color="#fffdf7" transparent opacity={0.42} roughness={.92} />
+        </mesh>
+      ) : null}
     </group>
   );
 }
@@ -238,8 +217,8 @@ function ProductCore({ product, progress }: { product: ProductProjection; progre
 function ProductImageFallback({ unknown = false }: { unknown?: boolean }) {
   return (
     <mesh position={[0, 0, 0.115]}>
-      <planeGeometry args={[1.86, 2.38]} />
-      <meshBasicMaterial color={unknown ? "#2d2622" : "#eadfce"} transparent opacity={unknown ? 0.38 : 0.92} />
+      <ringGeometry args={[.72, .76, 64]} />
+      <meshBasicMaterial color={unknown ? "#143451" : "#fffdf7"} transparent opacity={unknown ? 0.28 : 0.72} />
     </mesh>
   );
 }
@@ -251,8 +230,8 @@ function ProductImagePlane({ image }: { image: string }) {
     const width = source?.naturalWidth || source?.width || 1;
     const height = source?.naturalHeight || source?.height || 1;
     const ratio = width / Math.max(height, 1);
-    const maxWidth = 1.86;
-    const maxHeight = 2.38;
+    const maxWidth = 2.72;
+    const maxHeight = 3.18;
     return ratio >= maxWidth / maxHeight
       ? [maxWidth, maxWidth / ratio]
       : [maxHeight * ratio, maxHeight];
@@ -267,10 +246,6 @@ function ProductImagePlane({ image }: { image: string }) {
   return (
     <group position={[0, 0, 0.116]}>
       <mesh>
-        <planeGeometry args={[1.86, 2.38]} />
-        <meshBasicMaterial color="#eadfce" transparent opacity={0.92} />
-      </mesh>
-      <mesh position={[0, 0, 0.008]}>
         <planeGeometry args={size} />
         <meshBasicMaterial map={texture} toneMapped={false} />
       </mesh>
@@ -300,11 +275,11 @@ function EvidenceSeal({ progress, proven }: { progress: number; proven: boolean 
     <>
       <mesh ref={plane} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
         <planeGeometry args={[11, 7]} />
-        <meshStandardMaterial ref={material} color="#cdb9a6" transparent opacity={0} roughness={0.82} metalness={0.04} />
+        <meshStandardMaterial ref={material} color="#ddecf3" transparent opacity={0} roughness={0.82} metalness={0.04} />
       </mesh>
       <mesh ref={beam} position={[-4.8, 0, 0.9]}>
         <boxGeometry args={[0.045, 5.8, 0.025]} />
-        <meshBasicMaterial color="#ba5034" transparent opacity={0.72} blending={THREE.NormalBlending} />
+        <meshBasicMaterial color="#f05f43" transparent opacity={0.72} blending={THREE.NormalBlending} />
       </mesh>
     </>
   );
@@ -317,11 +292,11 @@ function CommerceWorld({ compact, offerCount, playing, product, progress, qualit
 
   return (
     <>
-      <color attach="background" args={["#e5d9c9"]} />
-      <fog attach="fog" args={["#e5d9c9", compact ? 7 : 8, compact ? 18 : 20]} />
+      <color attach="background" args={["#ddecf3"]} />
+      <fog attach="fog" args={["#ddecf3", compact ? 7 : 8, compact ? 18 : 20]} />
       <CausalLightRig progress={progress} />
       <CameraRig compact={compact} playing={playing} progress={progress} />
-      <gridHelper args={[18, 18, "#9f715e", "#c7b6a5"]} position={[0, -1.64, 0]} />
+      <gridHelper args={[18, 18, "#6795b5", "#b8d1df"]} position={[0, -1.64, 0]} />
       {Array.from({ length: fragmentCount }, (_, index) => (
         <MarketFragment key={index} active={index < activeCount} index={index} progress={progress} total={fragmentCount} />
       ))}

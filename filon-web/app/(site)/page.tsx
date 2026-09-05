@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
-import { WebExperience } from "@/components/experience/WebExperience";
+import { CommerceJourney } from "@/components/experience/CommerceJourney";
 import { getProof } from "@/lib/proof";
 import { getImmersiveExactProductProof } from "@/lib/immersive-proof";
 
@@ -20,5 +20,5 @@ export default async function HomePage() {
     getProof(),
     getImmersiveExactProductProof(),
   ]);
-  return <WebExperience exactProduct={exactProduct} proof={proof} />;
+  return <CommerceJourney exactProduct={exactProduct} proof={proof} />;
 }
