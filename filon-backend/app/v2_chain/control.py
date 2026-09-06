@@ -10,7 +10,7 @@ import math
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 
-from sqlalchemy import select
+from sqlalchemy import case, func, select
 
 from app.core.config import get_settings
 from app.core.logging import configure_logging
@@ -61,6 +61,8 @@ class V2PromotionControlReport:
     dark_differences: int
     dark_observations: int
     canary_observations: int
+    public_observations: int
+    public_fallbacks: int
     canary_status: str
     rollback_status: str
     evaluation_id: str
@@ -193,6 +195,55 @@ async def build_promotion_control(
         if canary_gate_id is not None
         else []
     )
+    public_gate_id = (
+        receipt.gate_evaluation_id
+        if receipt is not None and receipt.promotion_stage == "canary_to_public"
+        else None
+    )
+    public_observations, public_fallbacks, public_safety = (
+        (
+            await session.execute(
+                select(
+                    func.count(V2CanaryReadObservation.id),
+                    func.sum(
+                        case(
+                            (V2CanaryReadObservation.source == "core_v1", 1),
+                            else_=0,
+                        )
+                    ),
+                    func.sum(
+                        case(
+                            (
+                                (V2CanaryReadObservation.v2_latency_us.is_not(None))
+                                & (
+                                    V2CanaryReadObservation.safety_state.not_in(
+                                        ("SAFE", "ABSTAIN")
+                                    )
+                                    | V2CanaryReadObservation.chain_complete.is_not(
+                                        True
+                                    )
+                                    | V2CanaryReadObservation.provenance_complete.is_not(
+                                        True
+                                    )
+                                    | (
+                                        V2CanaryReadObservation.eligibility_status
+                                        != "eligible"
+                                    )
+                                ),
+                                1,
+                            ),
+                            else_=0,
+                        )
+                    ),
+                ).where(
+                    V2CanaryReadObservation.gate_evaluation_id == public_gate_id,
+                    V2CanaryReadObservation.assignment_reason == "public_authorized",
+                )
+            )
+        ).one()
+        if public_gate_id is not None
+        else (0, 0, 0)
+    )
     if any(len(rows) > MAX_CONTROL_ROWS for rows in (executions, dark, canary)):
         raise V2PromotionControlError("promotion control exceeds the bounded audit limit")
     running = [item for item in executions if item.status == "running"]
@@ -228,12 +279,21 @@ async def build_promotion_control(
         )
         for item in canary
     )
+    safety += int(public_safety or 0)
     canary_status = receipt.status if receipt is not None else "NOT_AUTHORIZED"
+    rollback_gate, rollback_proof = (
+        ("dark_reader_rollback", "dark_reader_rollback_ref")
+        if receipt is not None and receipt.promotion_stage == "shadow_to_canary"
+        else ("rollback_to_shadow", "rollback_to_shadow_ref")
+        if receipt is not None and receipt.promotion_stage == "canary_to_public"
+        else (None, None)
+    )
     rollback = (
         "PROOF_REFERENCED"
         if receipt is not None
-        and receipt.gates_json.get("dark_reader_rollback") is True
-        and "dark_reader_rollback_ref" in receipt.proof_refs_json
+        and rollback_gate is not None
+        and receipt.gates_json.get(rollback_gate) is True
+        and rollback_proof in receipt.proof_refs_json
         else "NOT_PROVEN"
     )
     identity = {
@@ -258,6 +318,8 @@ async def build_promotion_control(
         ),
         "dark_observations": len(dark),
         "canary_observations": len(canary),
+        "public_observations": int(public_observations or 0),
+        "public_fallbacks": int(public_fallbacks or 0),
         "canary_status": canary_status,
         "rollback_status": rollback,
     }

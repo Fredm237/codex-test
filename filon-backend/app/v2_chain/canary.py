@@ -1,4 +1,9 @@
-"""Routage canary atomique et réversible, non raccordé aux routes publiques."""
+"""Primitive de routage canary atomique et réversible.
+
+Les routes publiques ne l'appellent jamais directement : le raccordement passe
+uniquement par ``live_router``, après validation du reçu persistant et avec le
+bloc Core V1 déjà disponible comme repli intégral.
+"""
 
 from __future__ import annotations
 

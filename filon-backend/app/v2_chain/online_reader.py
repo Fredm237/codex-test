@@ -1,7 +1,8 @@
 """Lecteur V2 P5→P10 en mémoire, limité aux abstentions qualifiables.
 
-Ce module n'est relié à aucune route. Il permet de prouver qu'une requête
-fermée traverse la chaîne de lecture réelle sans écriture et sans inventer les
+Ce module n'est jamais appelé directement par une route. Seul ``live_router``
+peut l'invoquer après autorisation persistée, éligibilité et contrôle de
+fraîcheur. Il traverse la chaîne réelle sans écriture et sans inventer les
 dimensions de ranking, profils de confiance ou faits marchands encore absents.
 """
 
@@ -34,7 +35,11 @@ from app.constraint_engine.engine import (
     evaluate_constraints,
 )
 from app.db import models as core_models
-from app.hybrid_retrieval.fusion import FusionSourceHit, reciprocal_rank_fusion
+from app.hybrid_retrieval.fusion import (
+    FusionResult,
+    FusionSourceHit,
+    reciprocal_rank_fusion,
+)
 from app.hybrid_retrieval.lexical import (
     LEXICAL_ADAPTER_VERSION,
     LexicalDocument,
@@ -113,8 +118,41 @@ class V2OnlineReadRequest:
                 raise V2OnlineReaderError("budget currency is invalid")
 
 
+@dataclass(frozen=True)
+class V2OnlineInspection:
+    """Index et candidats exacts utilisés par une lecture en ligne.
+
+    L'inspection reste en mémoire. Elle lie la fraîcheur aux snapshots qui ont
+    effectivement produit les candidats, au lieu de laisser un snapshot global
+    sans rapport avec la requête autoriser une réponse fondée sur des données
+    plus anciennes.
+    """
+
+    request_key: str
+    evaluated_at: datetime
+    documents: tuple[ReplayDocument, ...]
+    query_digest: str
+    retrieval: FusionResult
+    data_age_seconds: int | None
+    dependencies_admissible: bool
+
+
 def _query_digest(query: str) -> str:
     return "sha256:" + hashlib.sha256(query.strip().encode("utf-8")).hexdigest()
+
+
+def _request_key(request: V2OnlineReadRequest) -> str:
+    canonical = "\x1f".join(
+        (
+            _query_digest(request.query),
+            request.vertical,
+            request.locale,
+            request.country_code or "",
+            request.budget_amount_decimal or "",
+            request.budget_currency or "",
+        )
+    )
+    return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def _latest_snapshot_statement():
@@ -144,16 +182,28 @@ def _latest_snapshot_statement():
     )
 
 
-async def _documents(session) -> tuple[ReplayDocument, ...]:
+async def _documents(
+    session,
+) -> tuple[tuple[ReplayDocument, ...], dict[int, datetime]]:
     rows = (await session.execute(_latest_snapshot_statement())).all()
     result: list[ReplayDocument] = []
+    evaluated_at_by_snapshot: dict[int, datetime] = {}
     for snapshot, offer in rows:
         try:
-            result.append(_document(snapshot, offer))
+            document = _document(snapshot, offer)
         except Exception:
             # Une ligne incomplète ne devient jamais un document implicite.
             continue
-    return tuple(result)
+        result.append(document)
+        snapshot_evaluated_at = snapshot.evaluated_at
+        if snapshot_evaluated_at.tzinfo is None:
+            snapshot_evaluated_at = snapshot_evaluated_at.replace(
+                tzinfo=timezone.utc
+            )
+        evaluated_at_by_snapshot[document.snapshot_id] = (
+            snapshot_evaluated_at.astimezone(timezone.utc)
+        )
+    return tuple(result), evaluated_at_by_snapshot
 
 
 def _retrieval(
@@ -381,19 +431,75 @@ def _provenance(stage_results: Mapping[str, object]) -> tuple[dict[str, str], ..
     return tuple(result)
 
 
+async def inspect_v2_online(
+    session,
+    request: V2OnlineReadRequest,
+    *,
+    evaluated_at: datetime,
+) -> V2OnlineInspection:
+    """Prépare une lecture et mesure la fraîcheur de ses preuves exactes."""
+
+    if evaluated_at.tzinfo is None:
+        raise V2OnlineReaderError("evaluated_at must include a timezone")
+    evaluated = evaluated_at.astimezone(timezone.utc)
+    documents, snapshot_times = await _documents(session)
+    query_digest, retrieval = _retrieval(request, documents)
+    candidate_entities = {
+        candidate.entity_ref for candidate in retrieval.candidates
+    }
+    used_snapshot_ids = {
+        document.snapshot_id
+        for document in documents
+        if document.entity_ref in candidate_entities
+    }
+    used_times = [
+        snapshot_times[snapshot_id]
+        for snapshot_id in sorted(used_snapshot_ids)
+        if snapshot_id in snapshot_times
+    ]
+    future_evidence = any(value > evaluated for value in used_times)
+    dependencies_admissible = bool(used_times) and not future_evidence
+    data_age_seconds = (
+        max(int((evaluated - value).total_seconds()) for value in used_times)
+        if dependencies_admissible
+        else None
+    )
+    return V2OnlineInspection(
+        request_key=_request_key(request),
+        evaluated_at=evaluated,
+        documents=documents,
+        query_digest=query_digest,
+        retrieval=retrieval,
+        data_age_seconds=data_age_seconds,
+        dependencies_admissible=dependencies_admissible,
+    )
+
+
 async def read_v2_online(
     session,
     request: V2OnlineReadRequest,
     *,
     evaluated_at: datetime,
+    inspection: V2OnlineInspection | None = None,
 ) -> V2CanaryPayload:
     """Exécute P5→P10 sans persistance et retourne une abstention prouvée."""
 
     if evaluated_at.tzinfo is None:
         raise V2OnlineReaderError("evaluated_at must include a timezone")
     evaluated = evaluated_at.astimezone(timezone.utc)
-    documents = await _documents(session)
-    query_digest, retrieval = _retrieval(request, documents)
+    prepared = inspection or await inspect_v2_online(
+        session,
+        request,
+        evaluated_at=evaluated,
+    )
+    if (
+        prepared.request_key != _request_key(request)
+        or prepared.evaluated_at != evaluated
+    ):
+        raise V2OnlineReaderError("online inspection does not match the request")
+    documents = prepared.documents
+    query_digest = prepared.query_digest
+    retrieval = prepared.retrieval
     offer_ids = sorted(
         {
             offer_id

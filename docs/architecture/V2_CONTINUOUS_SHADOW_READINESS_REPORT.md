@@ -3,10 +3,10 @@
 - Date de qualification locale : **4 septembre 2026**
 - Branche : **`codex/filon-v2-continuous-shadow`**
 - Base locale avant correctifs : **`9e8aaacbe1397e30ce7e5316f35bd25d011b9995`**
-- Verdict logiciel : **READY LOCAL**
-- Verdict activation : **NO-GO tant que le run catalogue 25 est actif**
-- Publication : **non autorisée pour ce lot**
-- Production : **inchangée, Core V1 seul**
+- Statut du rapport : **READINESS HISTORIQUE — remplacé par les reçus de production**
+- Verdict logiciel : **READY LOCAL, puis SHADOW/DARK qualifiés en production**
+- Révision qualifiée : **`3fb33d5a776511ca8da3c16876715aa5fa3cc79c`**
+- Production : **writers V2 ON en DARK non influent ; Core V1 seul servi**
 
 ## Résultat
 
@@ -16,8 +16,11 @@ curseur monotone, replay/reprise séparés, funnel de couverture, dual-read rée
 éligibilité canary, preuves externes persistées, reçus append-only, garde
 runtime et vue de contrôle privée.
 
-Ce résultat ne constitue ni un déploiement, ni une activation. Les writers,
-lecteurs et Crons V2 de production restent OFF.
+Ce rapport a précédé le déploiement et reste conservé comme preuve de
+readiness. L'état autoritaire actuel est porté par
+`V2_DARK_QUALIFICATION_EVIDENCE.json`, `V2_CONTINUOUS_SHADOW_RECEIPT.md`,
+`V2_30_WINDOW_QUALIFICATION.md`, `V2_COVERAGE_FUNNEL.md`,
+`V2_DARK_READ_RECEIPT.md` et `V2_ROLLBACK_RECEIPT.md`.
 
 ## Frontières atomiques
 
@@ -148,43 +151,43 @@ Le PostgreSQL de test a été supprimé après la preuve.
 
 ## Production lue sans modification
 
-Dernière revalidation publique : **2026-09-04T16:06Z**.
+Qualification SHADOW/DARK : **2026-09-04T21:54:42Z**. Dernière revalidation
+publique de ce rapport : **2026-09-05T22:24Z**.
 
 | Signal | État |
 |---|---|
 | `/health/live` | HTTP 200 |
 | `/health/ready` | HTTP 200, PostgreSQL `ok` |
 | `/health` | HTTP 200, PostgreSQL et Redis `ok` |
-| schéma | `b5d3f7a9c1e4` |
-| catalogue | run 25 unique, `running` |
-| heartbeat run 25 | frais, environ 5 s |
-| mode V2 production | `off` |
+| schéma qualifié | `f9c7d1e3a5b8` |
+| catalogue | run 26 unique, `running` |
+| heartbeat run 26 | frais, environ 9 s lors de la lecture |
+| mode V2 qualifié | `dark`, writers atomiques ON |
 | lecteurs publics | Core V1 |
 
-Le run 25 a commencé le `2026-09-02T18:03:39Z`. Son heartbeat frais prouve un
-processus encore vivant. Conformément au mandat, aucun writer V2, flag, Cron,
-déploiement ou migration de production n'a été lancé.
+Le run 26 a commencé le `2026-09-05T00:01:28Z`. Son heartbeat frais prouve un
+processus encore vivant. Il interdit toute nouvelle mutation ou exécution V2
+jusqu'à son état terminal honnête, mais n'annule pas la qualification SHADOW et
+DARK déjà reçue.
 
 ## Gates restant avant activation réelle
 
-1. état terminal honnête du run catalogue 25 et absence d'autre ingestion ;
-2. autorisation nominative de publication du lot Phase 19.5 ;
-3. CI distante terminale verte ;
-4. déploiement lecteurs OFF et migration additive `f9c7d1e3a5b8` ;
-5. snapshot production puis fenêtre manuelle dry-run/apply/replay ;
-6. un seul Cron shadow privé et 30 fenêtres réelles valides ;
-7. funnel réel et preuves de collision/interruption/reprise/performance ;
-8. passage en `dark`, trafic réel observé et rollback `DARK → OFF → V1` ;
-9. enregistrement des preuves et reçu `CANARY_AUTHORIZED` ;
-10. canary fonctionnel fermé, mesures appariées et rollback vers shadow ;
-11. SLO proposés depuis les distributions réelles puis ratifiés ;
-12. reçu `PUBLIC_AUTHORIZED`, activation atomique et observation post-bascule.
+1. état terminal honnête du run catalogue 26 et absence d'autre ingestion ;
+2. enregistrement/revalidation du reçu `CANARY_AUTHORIZED` exact, limité à
+   `ABSTAIN` ;
+3. canary fermé sur cohorte autorisée, avec mesures persistées et zéro fallback
+   V2 éligible ;
+4. exercice réel de retrait CANARY vers DARK/Core V1 ;
+5. décision SLO calculée depuis cette distribution canary réelle ;
+6. reçu `PUBLIC_AUTHORIZED` lié au reçu canary, sans élargir implicitement
+   `BUY_NOW` ou `WAIT` ;
+7. activation publique atomique, observation post-bascule et rollback chaud
+   Core V1 conservé.
 
 ## Verdict
 
-**READY LOCAL / NO-GO ACTIVATION.**
+**SHADOW + DARK QUALIFIED / CANARY NOT ACTIVE.**
 
-Le code peut être proposé à la publication et à la CI. La prochaine action de
-production reste interdite tant que le run 25 est actif. Aucune phase produit
-déjà GO n'est rouverte ; seuls les gates de promotion de la chaîne sont encore
-à produire.
+La prochaine action de production reste interdite tant que le run 26 est
+actif. Aucune phase produit déjà GO n'est rouverte ; seuls les gates de
+promotion de la chaîne restent à produire.

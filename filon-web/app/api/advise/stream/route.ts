@@ -5,6 +5,8 @@ import { API } from "@/lib/api";
 export const dynamic = "force-dynamic";
 
 const ALLOWED_PARAMS = ["q", "budget", "country", "locale"] as const;
+const V2_SUBJECT_HEADER = "x-filon-v2-subject-digest";
+const SHA256_DIGEST = /^sha256:[0-9a-f]{64}$/;
 
 export async function GET(request: NextRequest) {
   const upstream = new URL("/api/advise/stream", API);
@@ -14,9 +16,14 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const headers = new Headers({ Accept: "text/event-stream" });
+    const subjectDigest = request.headers.get(V2_SUBJECT_HEADER);
+    if (subjectDigest && SHA256_DIGEST.test(subjectDigest)) {
+      headers.set(V2_SUBJECT_HEADER, subjectDigest);
+    }
     const response = await fetch(upstream, {
       cache: "no-store",
-      headers: { Accept: "text/event-stream" },
+      headers,
       signal: request.signal,
     });
 

@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from unittest.mock import AsyncMock
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -13,6 +14,8 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db import models as core_models
 from app.db.base import Base
+from app.hybrid_retrieval.fusion import FusedCandidate, FusionResult
+from app.hybrid_retrieval.replay import ReplayDocument
 from app.hybrid_retrieval.models import HybridRetrievalRun
 from app.observations.models import Observation, RawSourceRecord
 from app.product_ontology.models import ProductOntologySnapshot
@@ -21,6 +24,7 @@ from app.v2_chain.online_reader import (
     ONLINE_READER_VERSION,
     V2OnlineReadRequest,
     V2OnlineReaderError,
+    inspect_v2_online,
     read_v2_online,
 )
 
@@ -237,3 +241,113 @@ def test_online_reader_contract_and_example_are_valid() -> None:
     VALIDATOR.validate(example)
     assert example["raw_query_retained"] is False
     assert example["items"] == []
+
+
+@pytest.mark.asyncio
+async def test_online_inspection_measures_the_oldest_used_candidate_snapshot(
+    monkeypatch,
+) -> None:
+    used = ReplayDocument(
+        11,
+        "variant:11",
+        101,
+        "Acme Smartphone",
+        "Acme",
+        "Smartphone",
+        "smartphones",
+        None,
+        {},
+    )
+    unrelated_fresh = ReplayDocument(
+        12,
+        "variant:12",
+        102,
+        "Other Smartphone",
+        "Other",
+        "Smartphone",
+        "smartphones",
+        None,
+        {},
+    )
+    monkeypatch.setattr(
+        "app.v2_chain.online_reader._documents",
+        AsyncMock(
+            return_value=(
+                (used, unrelated_fresh),
+                {
+                    11: EVALUATED_AT - timedelta(hours=2),
+                    12: EVALUATED_AT - timedelta(seconds=5),
+                },
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        "app.v2_chain.online_reader._retrieval",
+        lambda _request, _documents: (
+            "sha256:" + "1" * 64,
+            FusionResult(
+                "CANDIDATES",
+                (FusedCandidate(1, "variant:11", 0.1, (101,), ()),),
+                ("retrieval_candidates",),
+                0,
+                "sha256:" + "2" * 64,
+            ),
+        ),
+    )
+
+    inspection = await inspect_v2_online(
+        object(),
+        V2OnlineReadRequest(query="Acme", vertical="smartphones"),
+        evaluated_at=EVALUATED_AT,
+    )
+
+    assert inspection.dependencies_admissible is True
+    assert inspection.data_age_seconds == 7_200
+
+
+@pytest.mark.asyncio
+async def test_online_inspection_rejects_future_candidate_evidence(
+    monkeypatch,
+) -> None:
+    document = ReplayDocument(
+        13,
+        "variant:13",
+        103,
+        "Future Smartphone",
+        "Future",
+        "Smartphone",
+        "smartphones",
+        None,
+        {},
+    )
+    monkeypatch.setattr(
+        "app.v2_chain.online_reader._documents",
+        AsyncMock(
+            return_value=(
+                (document,),
+                {13: EVALUATED_AT + timedelta(seconds=1)},
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        "app.v2_chain.online_reader._retrieval",
+        lambda _request, _documents: (
+            "sha256:" + "3" * 64,
+            FusionResult(
+                "CANDIDATES",
+                (FusedCandidate(1, "variant:13", 0.1, (103,), ()),),
+                ("retrieval_candidates",),
+                0,
+                "sha256:" + "4" * 64,
+            ),
+        ),
+    )
+
+    inspection = await inspect_v2_online(
+        object(),
+        V2OnlineReadRequest(query="Future", vertical="smartphones"),
+        evaluated_at=EVALUATED_AT,
+    )
+
+    assert inspection.dependencies_admissible is False
+    assert inspection.data_age_seconds is None

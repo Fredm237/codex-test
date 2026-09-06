@@ -522,7 +522,15 @@ async def evaluate_persisted_canary_to_public(
         raise V2QualificationError("public qualification exceeds the audit limit")
     paired = [item for item in observations if item.v2_latency_us is not None]
     served = [item for item in observations if item.source == "v2"]
-    fallbacks = [item for item in observations if item.source == "core_v1"]
+    # Une requête inéligible n'entre jamais dans le canary : son retour V1 est
+    # la politique attendue, pas une panne V2. Il reste journalisé dans
+    # canary_observations, mais seul un fallback après éligibilité peut bloquer
+    # la promotion publique.
+    fallbacks = [
+        item
+        for item in observations
+        if item.source == "core_v1" and item.eligibility_status == "eligible"
+    ]
     served_type_counts = {
         response_type: sum(item.response_type == response_type for item in served)
         for response_type in sorted({item.response_type for item in served})
