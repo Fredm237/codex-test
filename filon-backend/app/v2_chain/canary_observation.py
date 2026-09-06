@@ -1,4 +1,9 @@
-"""Persistance bornée des lectures canary, sans requête ni identité."""
+"""Persistance bornée des lectures promues, sans requête ni identité.
+
+Le même format append-only couvre CANARY et PUBLIC. Leur gate exact et leur
+raison d'assignation les séparent : une observation PUBLIC ne peut donc jamais
+être réutilisée pour qualifier CANARY vers PUBLIC.
+"""
 
 from __future__ import annotations
 
@@ -150,7 +155,7 @@ async def record_canary_read(
     evaluated_at: datetime,
     apply: bool = False,
 ) -> V2CanaryObservationReport:
-    """Valide puis persiste un reçu idempotent, sans donnée de requête."""
+    """Valide puis persiste un reçu promu idempotent, sans donnée de requête."""
 
     if not _observation_key(observation_key):
         raise V2CanaryObservationError("observation key is invalid")

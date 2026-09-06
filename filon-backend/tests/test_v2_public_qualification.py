@@ -135,8 +135,9 @@ def _observation(
     index: int,
     *,
     source: str = "v2",
-    v2_latency_us: int = 1_500,
+    v2_latency_us: int | None = 1_500,
     fallback_reason: str | None = None,
+    eligibility_status: str = "eligible",
 ) -> V2CanaryReadObservation:
     served_v2 = source == "v2"
     return V2CanaryReadObservation(
@@ -145,7 +146,7 @@ def _observation(
         cohort="canary",
         assignment_reason="closed_cohort_match",
         eligibility_evaluation_id=_digest("9"),
-        eligibility_status="eligible",
+        eligibility_status=eligibility_status,
         vertical="smartphones",
         locale="fr-BE",
         decision_type="purchase_advice",
@@ -154,7 +155,7 @@ def _observation(
         fallback_reason=fallback_reason,
         core_latency_us=2_000,
         v2_latency_us=v2_latency_us,
-        total_latency_us=2_000 + v2_latency_us,
+        total_latency_us=2_000 + (v2_latency_us or 0),
         chain_complete=True if served_v2 else None,
         safety_state="ABSTAIN" if served_v2 else None,
         provenance_complete=True if served_v2 else None,
@@ -299,6 +300,39 @@ async def test_any_canary_fallback_keeps_public_closed() -> None:
             assert report.gate.status == "PUBLIC_HOLD"
             assert "RUNTIME_HEALTH" in report.gate.blocker_codes
             assert "ERROR_NON_INFERIORITY" in report.gate.blocker_codes
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_expected_ineligible_fallback_is_observed_without_blocking_public() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            session.add_all(_observation(index) for index in range(30))
+            session.add(
+                _observation(
+                    30,
+                    source="core_v1",
+                    v2_latency_us=None,
+                    fallback_reason="critical_unknown",
+                    eligibility_status="ineligible",
+                )
+            )
+            proof_refs = await _registered_proof_refs(session)
+            await session.commit()
+
+            report = await evaluate_persisted_canary_to_public(
+                session,
+                shadow_gate=SHADOW_GATE,
+                proofs=_proofs(**proof_refs),
+                evaluated_at=EVALUATED_AT + timedelta(hours=1),
+            )
+
+            assert report.metrics.canary_observations == 31
+            assert report.metrics.paired_observations == 30
+            assert report.metrics.v2_fallbacks == 0
+            assert report.gate.status == "PUBLIC_AUTHORIZED"
     finally:
         await engine.dispose()
 

@@ -9,7 +9,12 @@ from app.db import models as core_models  # noqa: F401
 from app.db.base import Base
 from app.v2_chain.control import _parser, build_promotion_control
 from app.v2_chain.coverage_funnel import FUNNEL_STAGES
-from app.v2_chain.models import V2ChainExecution, V2LiveDarkReadObservation
+from app.v2_chain.models import (
+    V2CanaryReadObservation,
+    V2ChainExecution,
+    V2LiveDarkReadObservation,
+    V2PromotionReceipt,
+)
 
 
 NOW = datetime(2026, 9, 4, 14, tzinfo=timezone.utc)
@@ -108,12 +113,125 @@ async def test_promotion_control_exposes_only_aggregate_state() -> None:
             assert report.unknown == 2
             assert report.abstain == 1
             assert report.dark_observations == 1
+            assert report.public_observations == 0
+            assert report.public_fallbacks == 0
             assert report.dark_differences == 1
             assert report.safety_violations == 0
             assert report.coverage_status == "PENDING"
             assert report.canary_status == "NOT_AUTHORIZED"
             assert report.rollback_status == "NOT_PROVEN"
             assert "raw_query" not in str(report.to_dict())
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_public_control_separates_canary_and_public_runtime_evidence() -> None:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    sessions = async_sessionmaker(engine, expire_on_commit=False)
+    try:
+        async with sessions() as session:
+            source_gate = "sha256:" + "2" * 64
+            public_gate = "sha256:" + "3" * 64
+            receipt_id = "sha256:" + "4" * 64
+            session.add(
+                V2PromotionReceipt(
+                    evaluation_id=receipt_id,
+                    gate_evaluation_id=public_gate,
+                    source_gate_evaluation_id=source_gate,
+                    promotion_stage="canary_to_public",
+                    status="PUBLIC_AUTHORIZED",
+                    authorized_response_types_json=["ABSTAIN"],
+                    blocked_response_types_json=["BUY_NOW", "WAIT"],
+                    gates_json={"rollback_to_shadow": True},
+                    metrics_json={},
+                    proof_refs_json={
+                        "rollback_to_shadow_ref": "sha256:" + "a" * 64
+                    },
+                    policy_json={},
+                    raw_payload_retained=False,
+                    evaluated_at=NOW.replace(tzinfo=None),
+                )
+            )
+            common = {
+                "cohort": "canary",
+                "eligibility_evaluation_id": "sha256:" + "5" * 64,
+                "eligibility_status": "eligible",
+                "vertical": "smartphones",
+                "locale": "fr",
+                "decision_type": "purchase_advice",
+                "core_latency_us": 100,
+                "v2_latency_us": 80,
+                "total_latency_us": 180,
+                "chain_complete": True,
+                "safety_state": "ABSTAIN",
+                "provenance_complete": True,
+                "raw_query_retained": False,
+                "evaluated_at": NOW.replace(tzinfo=None),
+            }
+            session.add(
+                V2CanaryReadObservation(
+                    observation_key="6" * 64,
+                    gate_evaluation_id=source_gate,
+                    assignment_reason="closed_cohort_match",
+                    source="v2",
+                    response_type="ABSTAIN",
+                    fallback_reason=None,
+                    **common,
+                )
+            )
+            session.add(
+                V2CanaryReadObservation(
+                    observation_key="7" * 64,
+                    gate_evaluation_id=public_gate,
+                    assignment_reason="public_authorized",
+                    source="v2",
+                    response_type="ABSTAIN",
+                    fallback_reason=None,
+                    **common,
+                )
+            )
+            session.add(
+                V2CanaryReadObservation(
+                    observation_key="8" * 64,
+                    gate_evaluation_id=public_gate,
+                    cohort="canary",
+                    assignment_reason="public_authorized",
+                    eligibility_evaluation_id="sha256:" + "9" * 64,
+                    eligibility_status="ineligible",
+                    vertical="smartphones",
+                    locale="fr",
+                    decision_type="purchase_advice",
+                    source="core_v1",
+                    response_type="CORE",
+                    fallback_reason="critical_unknown",
+                    core_latency_us=100,
+                    v2_latency_us=None,
+                    total_latency_us=100,
+                    chain_complete=None,
+                    safety_state=None,
+                    provenance_complete=None,
+                    raw_query_retained=False,
+                    evaluated_at=NOW.replace(tzinfo=None),
+                )
+            )
+            await session.commit()
+
+            report = await build_promotion_control(
+                session,
+                campaign_id=CAMPAIGN,
+                mode="public",
+                evaluated_at=NOW,
+                promotion_receipt_evaluation_id=receipt_id,
+            )
+
+            assert report.canary_observations == 1
+            assert report.public_observations == 2
+            assert report.public_fallbacks == 1
+            assert report.safety_violations == 0
+            assert report.rollback_status == "PROOF_REFERENCED"
     finally:
         await engine.dispose()
 

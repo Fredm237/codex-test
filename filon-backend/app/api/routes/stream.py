@@ -13,12 +13,13 @@ import json
 import time
 from typing import AsyncGenerator
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Query
+from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
 from app.core.logging import get_logger
 from app.services.recommend import stream_events
 from app.v2_chain.live_dark_reader import observe_live_dark_read
+from app.v2_chain.live_router import route_promoted_response
 
 log = get_logger("stream")
 
@@ -34,11 +35,16 @@ async def _sse(
     country: str | None,
     locale: str,
     background_tasks: BackgroundTasks,
+    subject_digest: str | None = None,
 ) -> AsyncGenerator[str, None]:
     started_ns = time.perf_counter_ns()
     try:
         async for event in stream_events(query, budget, country, locale):
             if event.get("type") == "results" and isinstance(event.get("data"), dict):
+                core_latency_us = max(
+                    0,
+                    (time.perf_counter_ns() - started_ns) // 1_000,
+                )
                 background_tasks.add_task(
                     observe_live_dark_read,
                     query=query,
@@ -46,12 +52,20 @@ async def _sse(
                     country=country,
                     locale=locale,
                     core_response=event["data"],
-                    core_latency_us=max(
-                        0,
-                        (time.perf_counter_ns() - started_ns) // 1_000,
-                    ),
+                    core_latency_us=core_latency_us,
                     surface="advise_stream",
                 )
+                routed = await route_promoted_response(
+                    core_response=event["data"],
+                    core_latency_us=core_latency_us,
+                    query=query,
+                    budget=budget,
+                    country=country,
+                    locale=locale,
+                    surface="advise_stream",
+                    subject_digest=subject_digest,
+                )
+                event = {**event, "data": routed.response}
             yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
     except GeneratorExit:
         log.info("Client déconnecté pendant le streaming")
@@ -67,6 +81,7 @@ async def advise_stream(
     budget: float | None = Query(default=None, ge=0, le=100000, description="Budget max en euros."),
     country: str | None = Query(default=None, description="Pays : be, be-nl, fr, ch, lu, nl."),
     locale: str = Query(default="fr", description="Langue d'interface : fr, nl ou en."),
+    x_filon_v2_subject_digest: str | None = Header(default=None),
 ) -> StreamingResponse:
     # Validation du pays
     if country and country.lower() not in _VALID_COUNTRIES:
@@ -78,7 +93,14 @@ async def advise_stream(
     log.info("Stream assistant demandé")
 
     return StreamingResponse(
-        _sse(q, budget, country, locale, background_tasks),
+        _sse(
+            q,
+            budget,
+            country,
+            locale,
+            background_tasks,
+            x_filon_v2_subject_digest,
+        ),
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache, no-store",

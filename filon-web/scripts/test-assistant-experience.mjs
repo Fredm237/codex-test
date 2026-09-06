@@ -18,6 +18,9 @@ assert.ok(assistant.includes("ProductJourneyLink"), "une recommandation identifi
 assert.ok(assistant.includes('const url = `/api/advise/stream/?'), "le navigateur doit lire le flux sur la même origine sans redirection SSE");
 assert.ok(assistant.includes("ASSISTANT_TIMEOUT_MS = 40_000"), "le client doit attendre l'événement terminal après le budget maximal du backend");
 assert.ok(streamProxy.includes('Accept: "text/event-stream"'), "le proxy doit conserver le transport SSE");
+assert.ok(streamProxy.includes('const V2_SUBJECT_HEADER = "x-filon-v2-subject-digest"'), "le proxy doit nommer explicitement l'en-tête de cohorte fermée");
+assert.ok(streamProxy.includes('const SHA256_DIGEST = /^sha256:[0-9a-f]{64}$/'), "le proxy doit refuser les identifiants de cohorte qui ne sont pas des digests stricts");
+assert.ok(streamProxy.includes('headers.set(V2_SUBJECT_HEADER, subjectDigest)'), "le proxy doit transmettre uniquement le digest canary validé");
 assert.ok(streamProxy.includes('"X-Accel-Buffering": "no"'), "le proxy ne doit pas mettre le flux en tampon");
 assert.ok(streamProxy.includes('cache: "no-store"'), "le flux de recherche ne doit jamais être mis en cache");
 assert.ok(vercelConfig.includes('"source": "/api/advise/stream/"'), "l'export statique Vercel doit exposer le même chemin SSE");

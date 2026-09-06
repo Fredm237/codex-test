@@ -132,7 +132,7 @@ Tant qu'une de ces conditions manque, aucun reçu `CANARY_AUTHORIZED` ne peut
 être produit ; le garde runtime refuse alors le lecteur même si un déploiement
 tente de positionner le mode.
 
-### Garde et routage canary préparés
+### Garde et routage canary raccordés
 
 Le module `quality_lab.v2_canary` traduit les dix conditions ci-dessus en un
 reçu déterministe `CANARY_HOLD` ou `CANARY_AUTHORIZED`. Il n'accepte pas un
@@ -140,7 +140,7 @@ simple booléen manuel : migration, replay, curseur, benchmarks, invariants,
 30 fenêtres terminales, distribution de performance, exercices de reprise,
 lecteur sombre et rollback doivent chacun fournir leur preuve.
 
-Le module privé `app.v2_chain.canary` prépare le routage réversible :
+Le module privé `app.v2_chain.canary` porte le routage réversible :
 
 - une identité pseudonymisée n'entre dans la cohorte que si son digest figure
   exactement dans une allowlist fermée ;
@@ -150,20 +150,43 @@ Le module privé `app.v2_chain.canary` prépare le routage réversible :
   de réponse non observé rendent immédiatement la réponse Core entière ;
 - le reçu ne conserve ni sujet, ni requête, ni payload, ni texte d'exception.
 
-Cette primitive n'est pas encore reliée à une route servante. La configuration
-accepte `V2_CHAIN_MODE=canary` uniquement avec tous les writers ON, le lecteur
-canary seul ON, une cohorte explicite, un périmètre d'éligibilité complet et le
-digest exact d'un reçu autorisé. Elle qualifie le comportement atomique et le
-rollback logiciel ; elle ne constitue pas un canary actif tant que ces preuves
-et le déploiement correspondant n'existent pas.
+`app.v2_chain.live_router` relie désormais cette primitive aux deux surfaces
+`/api/advise` et `/api/advise/stream`. Ce raccordement reste inerte en modes
+`off`, `shadow` et `dark` : Core V1 est alors rendu sans consultation du garde
+de promotion. En mode `canary`, le header pseudonymisé
+`X-FILON-V2-Subject-Digest` doit correspondre exactement à la cohorte fermée.
+En mode `public`, aucune identité de cohorte n'est lue.
+
+Pour les deux modes promus, le routeur exige avant toute lecture V2 :
+
+- le reçu append-only exact désigné par le déploiement et toutes ses preuves
+  enregistrées ;
+- une verticale, une locale et un type de décision explicitement autorisés ;
+- un snapshot admissible respectant la borne de fraîcheur configurée ;
+- Core V1 déjà calculé et disponible comme rollback du bloc entier ;
+- en canary, une observation agrégée persistée avec succès avant de rendre V2.
+
+Le seul bloc V2 actuellement adaptable aux contrats publics est l'abstention
+honnête : zéro offre et zéro carte pour le SSE, aucune recommandation pour le
+contrat JSON. La requête est seulement renvoyée au client qui l'a fournie ; elle
+n'entre ni dans le reçu ni dans le journal canary. Une erreur d'autorisation,
+de lecture, de fraîcheur ou de télémétrie rend la réponse Core entière.
+Cette abstention ne peut remplacer Core que si Core n'a lui-même aucune offre,
+carte, recommandation ou alternative. Une réponse Core réelle reste servie en
+entier : la première capacité V2 ne peut donc provoquer aucune perte de résultat.
+
+Ce raccordement ne constitue pas à lui seul un canary actif : celui-ci commence
+uniquement après déploiement de la configuration autorisée et production de ses
+observations réelles.
 
 ### Lecteur en ligne borné à l'abstention
 
 `app.v2_chain.online_reader` exécute la chaîne réelle P5 → P10 en mémoire à
 partir des snapshots Product Ontology et des offres canoniques. Il ne persiste
-rien et n'est importé par aucune route publique. La première version est
-volontairement bornée au seul type de réponse qui ne peut provoquer une action
-commerciale : `ABSTAIN`.
+rien et n'est jamais importé directement par une route publique : seul le
+routeur atomique, soumis au garde de promotion, peut l'appeler. La première
+version est volontairement bornée au seul type de réponse qui ne peut provoquer
+une action commerciale : `ABSTAIN`.
 
 Le contrat `contracts/v2-chain/v1/online-response.schema.json` exige :
 
@@ -200,10 +223,18 @@ zéro fallback, une chaîne et une provenance complètes, ainsi qu'un état
 les contraintes SQL. L'apply/replay est idempotent ; une même clé portant des
 mesures différentes est une erreur, jamais un écrasement.
 
+Les retours V1 d'une requête déclarée inéligible restent observés mais ne sont
+pas comptés comme erreurs V2 : ils prouvent précisément le fonctionnement du
+périmètre fermé. En revanche, tout fallback d'une requête déjà éligible
+compte dans `v2_fallbacks` et maintient le gate PUBLIC fermé.
+
 Le schéma de reçu `v2-canary-read-receipt/v1` est testé avec le code. Cette
 télémétrie rend les gates CANARY → PUBLIC calculables sans collecter de
-contexte utilisateur. Elle ne raccorde toujours aucune route et n'active aucun
-mode.
+contexte utilisateur. Elle reste obligatoire en mode PUBLIC : les lignes
+PUBLIC portent le gate `PUBLIC_AUTHORIZED` exact et la raison
+`public_authorized`, tandis que les calculs CANARY → PUBLIC restent filtrés sur
+le gate canary source. Une écriture de télémétrie PUBLIC impossible conserve le
+bloc Core V1 entier. Le journal n'active aucun mode par lui-même.
 
 ### Reçu autoritaire SHADOW → CANARY
 
@@ -375,6 +406,12 @@ exécution fraîche n'est jamais interrompue pour en lancer une autre.
 Chaque artefact externe est enregistré avant d'être référencé par une
 décision. Exemple sans écriture, puis même appel avec `--apply` et replay :
 
+Le manifeste qualifié
+`docs/architecture/V2_SHADOW_PROMOTION_PROOF_MANIFEST.json` fixe la portée, le
+vérificateur, l'instant, les localisateurs, digests d'artefacts et onze
+`proof_ref` de la campagne. Un test recalcule les digests des fichiers et
+l'identité de chaque preuve ; toute dérive interdit son enregistrement.
+
 ```text
 python -m app.v2_chain.promote proof \
   --scope-ref sha256:<campaign> \
@@ -540,7 +577,8 @@ contiguës, sans lease actif, avec des compteurs monotones.
 `app.v2_chain.control.build_promotion_control` est la vue privée unique
 de pilotage. Elle expose sans payload : MODE, fenêtre courante et précédente,
 curseur, taux d'erreur, p95, statut du funnel, UNKNOWN, ABSTAIN, fallback,
-violations de sécurité, divergences dark, état canary et preuve de rollback.
+violations de sécurité, divergences dark, observations/fallbacks PUBLIC, état
+canary et preuve de rollback.
 Elle borne chaque lecture à 10 000 lignes et filtre toutes les observations par
 la campagne ou le gate actif ; elle ne mélange pas l'historique.
 
@@ -575,6 +613,16 @@ Les journaux et tables shadow sont conservés pour l'analyse. Une reprise ne
 peut être tentée qu'après un reçu terminal de l'incident et une nouvelle
 qualification des gates affectées ; les phases produit déjà GO ne sont pas
 rouvertes.
+
+### Fraîcheur exacte du lecteur en ligne
+
+La fraîcheur CANARY/PUBLIC est calculée sur les snapshots qui ont réellement
+produit les candidats de la requête. Un snapshot global plus récent mais sans
+rapport avec ces candidats ne peut pas autoriser leur lecture. Une preuve
+candidate future, absente ou au-delà de `V2_MAX_DATA_AGE_SECONDS` conserve le
+bloc Core V1 entier. L'inspection reste en mémoire et sa clé lie exactement le
+digest de requête, la verticale, la locale, le pays et le budget ; elle ne peut
+pas être réutilisée pour une autre demande.
 
 ## Ce qui est testable immédiatement
 
