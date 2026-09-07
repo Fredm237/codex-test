@@ -1,9 +1,12 @@
-# V2 Chain online reader v1
+# V2 Chain online reader v2
 
-Ce contrat décrit la première sortie canary qualifiable de la chaîne atomique
-P5 → P10. La version `v1` autorise uniquement `ABSTAIN` : aucun produit, offre,
-classement, probabilité ou conseil BUY/WAIT n'est servi tant que son type de
-réponse n'a pas franchi ses propres observations et gates.
+Ce contrat décrit les sorties canary qualifiables de la chaîne atomique
+P5 → P10. La version `v2` conserve `ABSTAIN` et ajoute `FACTUAL_OPTIONS` :
+une liste bornée de produits et d'offres dont le prix, la devise, le stock et
+la fraîcheur sont prouvés. Son ordre vient uniquement de P5 et P6 ; il ne
+constitue ni une note de qualité, ni une probabilité, ni un conseil BUY/WAIT.
+Les dimensions inconnues sont explicites et les verdicts P7→P10 restent
+fermés tant qu'ils n'ont pas franchi leurs propres observations et gates.
 
 La requête n'est jamais renvoyée ni conservée. Seul son digest SHA-256 permet de
 relier les six étapes. Chaque étape doit fournir son digest de résultat. Le

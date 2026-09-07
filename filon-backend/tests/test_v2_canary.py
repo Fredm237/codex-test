@@ -42,7 +42,12 @@ def _evidence(**overrides) -> V2CanaryEvidence:
         "recovery_replay_green": True,
         "dark_reader_qualified": True,
         "dark_reader_rollback_green": True,
-        "observed_response_types": ("ABSTAIN", "BUY_NOW", "WAIT"),
+        "observed_response_types": (
+            "ABSTAIN",
+            "FACTUAL_OPTIONS",
+            "BUY_NOW",
+            "WAIT",
+        ),
     }
     values.update(overrides)
     return V2CanaryEvidence(**values)
@@ -90,9 +95,10 @@ def test_unobserved_output_stays_off_without_blocking_observed_outputs() -> None
     )
 
     assert report.status == "CANARY_AUTHORIZED"
-    assert report.blocked_response_types == ("BUY_NOW", "WAIT")
+    assert report.blocked_response_types == ("BUY_NOW", "FACTUAL_OPTIONS", "WAIT")
     assert report.blocker_codes == (
         "RESPONSE_TYPE_OFF:BUY_NOW",
+        "RESPONSE_TYPE_OFF:FACTUAL_OPTIONS",
         "RESPONSE_TYPE_OFF:WAIT",
     )
 

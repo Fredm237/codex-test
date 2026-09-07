@@ -144,7 +144,11 @@ async def test_public_control_separates_canary_and_public_runtime_evidence() -> 
                     promotion_stage="canary_to_public",
                     status="PUBLIC_AUTHORIZED",
                     authorized_response_types_json=["ABSTAIN"],
-                    blocked_response_types_json=["BUY_NOW", "WAIT"],
+                    blocked_response_types_json=[
+                        "BUY_NOW",
+                        "FACTUAL_OPTIONS",
+                        "WAIT",
+                    ],
                     gates_json={"rollback_to_shadow": True},
                     metrics_json={},
                     proof_refs_json={

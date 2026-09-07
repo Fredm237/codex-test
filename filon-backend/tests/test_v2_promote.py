@@ -73,8 +73,12 @@ async def test_canary_command_builds_dry_run_from_the_exact_proof_set(
         schema_version="v2-shadow-to-canary-gate/v1",
         status="CANARY_AUTHORIZED",
         gates={"all": True},
-        blocked_response_types=("BUY_NOW", "WAIT"),
-        blocker_codes=("RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:WAIT"),
+        blocked_response_types=("BUY_NOW", "FACTUAL_OPTIONS", "WAIT"),
+        blocker_codes=(
+            "RESPONSE_TYPE_OFF:BUY_NOW",
+            "RESPONSE_TYPE_OFF:FACTUAL_OPTIONS",
+            "RESPONSE_TYPE_OFF:WAIT",
+        ),
         evaluation_id=_digest("b"),
     )
     report = SimpleNamespace(gate=gate)
@@ -103,7 +107,11 @@ async def test_canary_command_builds_dry_run_from_the_exact_proof_set(
     assert receipt.qualification_status == "CANARY_AUTHORIZED"
     assert receipt.persistence_status == "dry_run"
     assert receipt.authorized_response_types == ("ABSTAIN",)
-    assert receipt.blocked_response_types == ("BUY_NOW", "WAIT")
+    assert receipt.blocked_response_types == (
+        "BUY_NOW",
+        "FACTUAL_OPTIONS",
+        "WAIT",
+    )
     assert receipt.raw_payload_retained is False
     evaluate.assert_awaited_once()
     record.assert_awaited_once_with(session, report=report, apply=False)
@@ -122,8 +130,12 @@ async def test_public_command_uses_active_canary_receipt_and_commits_apply(
         schema_version="v2-shadow-to-canary-gate/v1",
         status="CANARY_AUTHORIZED",
         gates={"all": True},
-        blocked_response_types=("BUY_NOW", "WAIT"),
-        blocker_codes=("RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:WAIT"),
+        blocked_response_types=("BUY_NOW", "FACTUAL_OPTIONS", "WAIT"),
+        blocker_codes=(
+            "RESPONSE_TYPE_OFF:BUY_NOW",
+            "RESPONSE_TYPE_OFF:FACTUAL_OPTIONS",
+            "RESPONSE_TYPE_OFF:WAIT",
+        ),
         evaluation_id=_digest("b"),
     )
     load = AsyncMock(return_value=shadow_gate)
@@ -133,8 +145,12 @@ async def test_public_command_uses_active_canary_receipt_and_commits_apply(
         status="PUBLIC_AUTHORIZED",
         gates={"all": True},
         authorized_response_types=("ABSTAIN",),
-        blocked_response_types=("BUY_NOW", "WAIT"),
-        blocker_codes=("RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:WAIT"),
+        blocked_response_types=("BUY_NOW", "FACTUAL_OPTIONS", "WAIT"),
+        blocker_codes=(
+            "RESPONSE_TYPE_OFF:BUY_NOW",
+            "RESPONSE_TYPE_OFF:FACTUAL_OPTIONS",
+            "RESPONSE_TYPE_OFF:WAIT",
+        ),
         evaluation_id=_digest("d"),
     )
     report = SimpleNamespace(gate=public_gate)

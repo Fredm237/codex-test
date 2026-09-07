@@ -50,7 +50,7 @@ REQUIRED_STAGES = frozenset(
         "buy_wait",
     }
 )
-RESPONSE_TYPES = frozenset({"BUY_NOW", "WAIT", "ABSTAIN"})
+RESPONSE_TYPES = frozenset({"BUY_NOW", "WAIT", "ABSTAIN", "FACTUAL_OPTIONS"})
 
 
 class V2QualificationError(ValueError):

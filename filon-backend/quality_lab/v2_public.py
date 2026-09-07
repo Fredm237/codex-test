@@ -7,7 +7,7 @@ import json
 from dataclasses import asdict, dataclass
 
 
-RESPONSE_TYPES = frozenset({"ABSTAIN", "BUY_NOW", "WAIT"})
+RESPONSE_TYPES = frozenset({"ABSTAIN", "BUY_NOW", "WAIT", "FACTUAL_OPTIONS"})
 
 
 @dataclass(frozen=True)

@@ -102,7 +102,8 @@ V2_DARK_READER_REVISION = "c6f4a8b0d2e5"
 V2_CANARY_OBSERVATION_REVISION = "d7a5b9c1e3f6"
 V2_PROMOTION_RECEIPT_REVISION = "e8b6c0d2f4a7"
 V2_PROMOTION_EVIDENCE_REVISION = "f9c7d1e3a5b8"
-HEAD_REVISION = V2_PROMOTION_EVIDENCE_REVISION
+V2_FACTUAL_OPTIONS_REVISION = "0b8d2f4a6c9e"
+HEAD_REVISION = V2_FACTUAL_OPTIONS_REVISION
 
 
 @pytest.fixture(autouse=True)
@@ -187,9 +188,38 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
         == V2_CANARY_OBSERVATION_REVISION
     )
     assert (
-        scripts.get_revision(HEAD_REVISION).down_revision
+        scripts.get_revision(V2_PROMOTION_EVIDENCE_REVISION).down_revision
         == V2_PROMOTION_RECEIPT_REVISION
     )
+    assert (
+        scripts.get_revision(HEAD_REVISION).down_revision
+        == V2_PROMOTION_EVIDENCE_REVISION
+    )
+
+
+def test_factual_options_constraints_are_reversible(tmp_path, monkeypatch):
+    database_path = tmp_path / "factual-options-constraints.sqlite"
+    config = _config(database_path, monkeypatch)
+    command.upgrade(config, V2_PROMOTION_EVIDENCE_REVISION)
+
+    def constraint_sql(table_name: str) -> str:
+        engine = create_engine(_sync_url(database_path))
+        try:
+            checks = inspect(engine).get_check_constraints(table_name)
+            return " ".join(check.get("sqltext") or "" for check in checks)
+        finally:
+            engine.dispose()
+
+    assert "FACTUAL_OPTIONS" not in constraint_sql("v2_live_dark_read_observations")
+    assert "FACTUAL_OPTIONS" not in constraint_sql("v2_canary_read_observations")
+
+    command.upgrade(config, HEAD_REVISION)
+    assert "FACTUAL_OPTIONS" in constraint_sql("v2_live_dark_read_observations")
+    assert "FACTUAL_OPTIONS" in constraint_sql("v2_canary_read_observations")
+
+    command.downgrade(config, V2_PROMOTION_EVIDENCE_REVISION)
+    assert "FACTUAL_OPTIONS" not in constraint_sql("v2_live_dark_read_observations")
+    assert "FACTUAL_OPTIONS" not in constraint_sql("v2_canary_read_observations")
 
 
 def test_default_runtime_mode_only_validates_alembic(monkeypatch):

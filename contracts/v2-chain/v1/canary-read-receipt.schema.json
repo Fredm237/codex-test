@@ -28,7 +28,7 @@
   "properties": {
     "schema_version": {"const": "v2-canary-read-receipt/v1"},
     "source": {"enum": ["core_v1", "v2"]},
-    "response_type": {"enum": ["CORE", "ABSTAIN", "BUY_NOW", "WAIT"]},
+    "response_type": {"enum": ["CORE", "ABSTAIN", "FACTUAL_OPTIONS", "BUY_NOW", "WAIT"]},
     "fallback_reason": {"type": ["string", "null"], "minLength": 1},
     "gate_evaluation_id": {"$ref": "#/$defs/digest"},
     "cohort": {"enum": ["core", "canary"]},
@@ -53,7 +53,7 @@
         "properties": {
           "cohort": {"const": "canary"},
           "eligibility_status": {"const": "eligible"},
-          "response_type": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]},
+          "response_type": {"enum": ["ABSTAIN", "FACTUAL_OPTIONS", "BUY_NOW", "WAIT"]},
           "fallback_reason": {"type": "null"},
           "v2_latency_us": {"type": "integer"},
           "chain_complete": {"const": true},

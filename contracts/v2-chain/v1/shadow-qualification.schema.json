@@ -36,7 +36,7 @@
         "observed_response_types": {
           "type": "array",
           "uniqueItems": true,
-          "items": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]}
+          "items": {"enum": ["ABSTAIN", "FACTUAL_OPTIONS", "BUY_NOW", "WAIT"]}
         }
       }
     },
@@ -73,7 +73,7 @@
         "blocked_response_types": {
           "type": "array",
           "uniqueItems": true,
-          "items": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]}
+          "items": {"enum": ["ABSTAIN", "FACTUAL_OPTIONS", "BUY_NOW", "WAIT"]}
         },
         "blocker_codes": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
         "evaluation_id": {"$ref": "#/$defs/digest"}

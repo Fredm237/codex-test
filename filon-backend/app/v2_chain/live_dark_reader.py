@@ -147,8 +147,12 @@ def _classification(
         return "V2_ABSTAINS_CORRECTLY"
     # Sans vérité humaine indépendante, une divergence factuellement sûre ne
     # devient jamais artificiellement une amélioration de V1 ou de V2.
-    if v2_outcome in {"BUY_NOW", "WAIT"} and core.outcome == "CANDIDATES":
+    if v2_outcome in {"BUY_NOW", "WAIT", "FACTUAL_OPTIONS"} and core.outcome == "CANDIDATES":
         return "BOTH_VALID"
+    if v2_outcome == "FACTUAL_OPTIONS" and core.outcome == "NO_MATCH":
+        # Sans vérité externe, une option factuelle supplémentaire reste à
+        # examiner ; elle ne devient pas artificiellement une victoire V2.
+        return "AMBIGUOUS"
     return "AMBIGUOUS"
 
 

@@ -122,6 +122,126 @@ def _public_abstention(
     }
 
 
+def _factual_option_analysis(item: Mapping[str, Any]) -> dict[str, Any]:
+    price = item.get("price")
+    if not isinstance(price, Mapping):
+        raise ValueError("V2 factual option price is invalid")
+    amount = float(price.get("amount"))
+    currency = price.get("currency")
+    observed_at = item.get("observed_at")
+    if (
+        amount <= 0
+        or not isinstance(currency, str)
+        or not isinstance(observed_at, str)
+    ):
+        raise ValueError("V2 factual option evidence is incomplete")
+    return {
+        "product_id": item["entity_ref"],
+        "name": item["name"],
+        "specs": {},
+        "best_offer": {
+            "merchant": item["merchant"],
+            "price": amount,
+            "currency": currency,
+            "observed_at": observed_at,
+            "delivery_days": None,
+            "delivery_cost": None,
+            "warranty_months": None,
+            "in_stock": item.get("availability") == "in_stock",
+            "affiliate_network": "Awin",
+        },
+        "cashback": None,
+        "promo": None,
+        "history": None,
+        "reviews": None,
+        "real_price": amount,
+        "shipping_cost_known": False,
+        "price_comparison_complete": False,
+        "savings_vs_market": None,
+    }
+
+
+def _public_factual_options(
+    *,
+    surface: Surface,
+    query: str,
+    vertical: str,
+    country: str | None,
+    payload: V2CanaryPayload,
+) -> dict[str, Any]:
+    raw_items = payload.response.get("items")
+    if not isinstance(raw_items, list) or not raw_items:
+        raise ValueError("V2 factual options are empty")
+    items = [item for item in raw_items if isinstance(item, Mapping)]
+    if len(items) != len(raw_items):
+        raise ValueError("V2 factual options are malformed")
+    analyses = [_factual_option_analysis(item) for item in items]
+    if surface == "advise":
+        return {
+            "query": query,
+            "criteria": {
+                "category": vertical,
+                "budget_max": None,
+                "usage": [],
+                "must_have": [],
+                "priorities": [],
+                "keywords": [],
+            },
+            # FACTUAL_OPTIONS ne devient jamais une recommandation implicite.
+            "recommendation": None,
+            "alternatives": analyses[:3],
+            "trace": [
+                "V2 : options factuelles issues du catalogue",
+                "Qualité produit et moment d'achat non affirmés",
+            ],
+        }
+
+    cards: list[dict[str, Any]] = []
+    for index, (item, analysis) in enumerate(zip(items, analyses, strict=True)):
+        offer = analysis["best_offer"]
+        cards.append(
+            {
+                "rank": "Option factuelle" if index == 0 else "Autre option factuelle",
+                "medal": "",
+                "offer_id": int(str(item["offer_ref"]).split(":", 1)[1]),
+                "product_ean": None,
+                "offer_kind": "physical_product",
+                "name": item["name"],
+                "emoji": "",
+                "image": item.get("image_url"),
+                "link": item.get("destination_url"),
+                "price": offer["price"],
+                "currency": offer["currency"],
+                "merchant": offer["merchant"],
+                "in_stock": True,
+                "observed_at": offer["observed_at"],
+                "evidence_current": True,
+                "delivery": "voir marchand",
+                "warranty": "conditions marchand",
+                "cashback": None,
+                "coupon": None,
+                "hist": None,
+                "histNote": "",
+                "decision": None,
+                "why": (
+                    "Prix, devise et stock observés. Qualité produit et moment "
+                    "d'achat non affirmés."
+                ),
+                "alt": None,
+                "buy": False,
+            }
+        )
+    currencies = {card["currency"] for card in cards}
+    return {
+        "usage": query,
+        "offers": len(cards),
+        "cards": cards,
+        "real": True,
+        "currency": next(iter(currencies)) if len(currencies) == 1 else None,
+        "country": (country or "be").lower(),
+    }
+
+
 def _core_accepts_abstention(
     *,
     surface: Surface,
@@ -241,13 +361,17 @@ async def route_promoted_response(
                     decision_type="purchase_advice",
                     data_age_seconds=inspection.data_age_seconds,
                     dependencies_admissible=inspection.dependencies_admissible,
-                    # Le lecteur actuellement qualifié ne sert qu'ABSTAIN : il
-                    # ne formule donc aucun claim affecté par un fait inconnu.
-                    # Le lecteur qualifié ne produit encore qu'ABSTAIN. Une
-                    # réponse Core réelle interdit donc son remplacement.
-                    critical_unknown=not _core_accepts_abstention(
-                        surface=surface,
-                        response=core_response,
+                    # Une autorisation limitée à ABSTAIN ne peut jamais
+                    # effacer une réponse Core réelle. FACTUAL_OPTIONS peut la
+                    # remplacer uniquement après qualification explicite ; le
+                    # lecteur revérifie encore le type obtenu ci-dessous.
+                    critical_unknown=(
+                        not _core_accepts_abstention(
+                            surface=surface,
+                            response=core_response,
+                        )
+                        and "FACTUAL_OPTIONS"
+                        not in authorization.authorized_response_types
                     ),
                     hard_constraint_violation=False,
                     confidence_required=False,
@@ -266,8 +390,24 @@ async def route_promoted_response(
                     evaluated_at=evaluated_at,
                     inspection=inspection,
                 )
+                if payload.response_type == "FACTUAL_OPTIONS":
+                    return replace(
+                        payload,
+                        response=_public_factual_options(
+                            surface=surface,
+                            query=query,
+                            vertical=vertical,
+                            country=country,
+                            payload=payload,
+                        ),
+                    )
                 if payload.response_type != "ABSTAIN":
                     raise RuntimeError("public response adapter is not qualified")
+                if not _core_accepts_abstention(
+                    surface=surface,
+                    response=core_response,
+                ):
+                    raise RuntimeError("V2 abstention cannot erase a Core result")
                 return replace(
                     payload,
                     response=_public_abstention(

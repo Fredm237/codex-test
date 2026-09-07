@@ -40,12 +40,12 @@
     "authorized_response_types": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["ABSTAIN", "BUY_NOW", "WAIT"] }
+      "items": { "enum": ["ABSTAIN", "FACTUAL_OPTIONS", "BUY_NOW", "WAIT"] }
     },
     "blocked_response_types": {
       "type": "array",
       "uniqueItems": true,
-      "items": { "enum": ["ABSTAIN", "BUY_NOW", "WAIT"] }
+      "items": { "enum": ["ABSTAIN", "FACTUAL_OPTIONS", "BUY_NOW", "WAIT"] }
     },
     "persistence_status": {
       "enum": ["dry_run", "created", "existing"]

@@ -147,13 +147,21 @@ async def test_online_reader_executes_real_chain_without_writing_or_exposing_que
             )
 
             assert result.chain_complete is True
-            assert result.safety_state == "ABSTAIN"
+            assert result.safety_state == "SAFE"
             assert result.provenance_complete is True
-            assert result.response_type == "ABSTAIN"
-            assert result.response["schema_version"] == "v2-online-response/v1"
+            assert result.response_type == "FACTUAL_OPTIONS"
+            assert result.response["schema_version"] == "v2-online-response/v2"
             assert result.response["reader_version"] == ONLINE_READER_VERSION
-            assert result.response["outcome"] == "ABSTAIN"
-            assert result.response["items"] == []
+            assert result.response["outcome"] == "FACTUAL_OPTIONS"
+            assert len(result.response["items"]) == 1
+            option = result.response["items"][0]
+            assert option["name"] == "Acme Smartphone Prime 128GB"
+            assert option["merchant"] == "Online Reader Merchant"
+            assert option["price"] == {"amount": "599.00", "currency": "EUR"}
+            assert option["availability"] == "in_stock"
+            assert option["ranking_basis"] == "retrieval_and_hard_constraints_only"
+            assert "product_quality" in option["unknowns"]
+            assert "buy_wait" in option["unknowns"]
             assert result.response["raw_query_retained"] is False
             assert result.response["query_digest"].startswith("sha256:")
             assert len(result.response["provenance"]) == 6
@@ -190,6 +198,44 @@ async def test_online_reader_empty_index_is_an_honest_abstention() -> None:
             assert result.response_type == "ABSTAIN"
             assert result.response["items"] == []
             assert "retrieval_no_match" in result.response["reason_codes"]
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_online_reader_never_exposes_an_option_from_stale_offer_evidence() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            await _seed(session)
+            snapshot = await session.scalar(select(core_models.PriceSnapshot))
+            assert snapshot is not None
+            snapshot.captured_at = (EVALUATED_AT - timedelta(days=4)).replace(
+                tzinfo=None
+            )
+            await session.commit()
+            await run_journaled_v2_shadow_chain(
+                session,
+                evaluated_at=EVALUATED_AT,
+                vertical="smartphones",
+                limit=1,
+                apply=True,
+            )
+
+            result = await read_v2_online(
+                session,
+                V2OnlineReadRequest(
+                    query="Acme Smartphone Prime",
+                    vertical="smartphones",
+                    locale="fr",
+                ),
+                evaluated_at=EVALUATED_AT,
+            )
+
+            assert result.response_type == "ABSTAIN"
+            assert result.safety_state == "ABSTAIN"
+            assert result.response["items"] == []
+            VALIDATOR.validate(dict(result.response))
     finally:
         await engine.dispose()
 
@@ -236,11 +282,17 @@ def test_online_reader_is_not_wired_to_public_routes() -> None:
 
 def test_online_reader_contract_and_example_are_valid() -> None:
     Draft202012Validator.check_schema(SCHEMA)
-    example = json.loads((CONTRACT_ROOT / "examples" / "abstain.json").read_text())
+    abstain = json.loads((CONTRACT_ROOT / "examples" / "abstain.json").read_text())
+    factual = json.loads(
+        (CONTRACT_ROOT / "examples" / "factual-options.json").read_text()
+    )
 
-    VALIDATOR.validate(example)
-    assert example["raw_query_retained"] is False
-    assert example["items"] == []
+    VALIDATOR.validate(abstain)
+    VALIDATOR.validate(factual)
+    assert abstain["raw_query_retained"] is False
+    assert abstain["items"] == []
+    assert factual["outcome"] == "FACTUAL_OPTIONS"
+    assert len(factual["items"]) == 1
 
 
 @pytest.mark.asyncio
