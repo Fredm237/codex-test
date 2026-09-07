@@ -55,6 +55,7 @@ def _term_clause(term: str):
         models.Offer.brand.ilike(pattern),
         models.Offer.category.ilike(pattern),
         models.Offer.filon_category.ilike(pattern),
+        models.Offer.filon_subcategory.ilike(pattern),
     )
 
 
@@ -178,6 +179,7 @@ async def search_products(
                     for value in (
                         getattr(pair[0], "category", None),
                         getattr(pair[0], "filon_category", None),
+                        getattr(pair[0], "filon_subcategory", None),
                     )
                     if isinstance(value, str) and value.strip()
                 ),
@@ -233,6 +235,7 @@ async def search_products(
                             for value in (
                                 (product.category if product else first.category),
                                 getattr(first, "filon_category", None),
+                                getattr(first, "filon_subcategory", None),
                             )
                             if isinstance(value, str) and value.strip()
                         ),
