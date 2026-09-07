@@ -30,7 +30,32 @@ _STOPWORDS = {
     "et", "ou", "en", "au", "aux", "dans", "sur", "je", "veux", "cherche",
     "besoin", "bon", "bonne", "meilleur", "meilleure", "euros", "eur", "moins",
     "plus", "qui", "que", "quoi", "mon", "ma", "mes", "ce", "cette", "est",
+    # Préférences générales qui ne figurent normalement pas dans un titre
+    # marchand. Elles restent visibles dans la compréhension de la demande,
+    # mais ne deviennent jamais des mots SQL obligatoires : « fiable » ne doit
+    # pas empêcher de retrouver un téléphone réellement indexé. Les contraintes
+    # observables adjacentes (par exemple ``128`` dans « 128 Go de stockage »)
+    # restent, elles, exigées.
+    "fiable", "fiables", "fiabilite", "fiabilité",
+    "qualite", "qualité", "stockage", "capacity", "capacite", "capacité",
 }
+
+
+def _term_clause(term: str):
+    """Cherche un terme dans les champs marchands réellement observés.
+
+    Un iPhone n'a pas nécessairement le mot « smartphone » dans son nom, alors
+    que sa catégorie marchande ou FILON le porte. Limiter la présélection au
+    titre fabriquait donc des faux négatifs avant même le classement prudent.
+    """
+
+    pattern = f"%{term}%"
+    return or_(
+        models.Offer.name.ilike(pattern),
+        models.Offer.brand.ilike(pattern),
+        models.Offer.category.ilike(pattern),
+        models.Offer.filon_category.ilike(pattern),
+    )
 
 
 def keywords(text: str) -> list[str]:
@@ -123,7 +148,7 @@ async def search_products(
                 models.Offer.price.isnot(None),
                 models.Offer.price > 0,
                 models.Offer.image_url.isnot(None),
-                *[models.Offer.name.ilike(f"%{t}%") for t in exigés],
+                *[_term_clause(t) for t in exigés],
             )
         )
         blocked = get_settings().blocked_merchant_slugs
@@ -145,8 +170,17 @@ async def search_products(
         pertinentes = [
             pair for pair in rows
             if relevance.score(
-                terms, pair[0].name or "",
+                terms,
+                pair[0].name or "",
                 offer_kind=getattr(pair[0], "offer_kind", None),
+                categorie=" ".join(
+                    value
+                    for value in (
+                        getattr(pair[0], "category", None),
+                        getattr(pair[0], "filon_category", None),
+                    )
+                    if isinstance(value, str) and value.strip()
+                ),
             ) >= relevance.SEUIL
         ]
         if not pertinentes:
@@ -194,6 +228,14 @@ async def search_products(
                         terms,
                         (product.name if product else first.name) or "",
                         offer_kind=getattr(first, "offer_kind", None),
+                        categorie=" ".join(
+                            value
+                            for value in (
+                                (product.category if product else first.category),
+                                getattr(first, "filon_category", None),
+                            )
+                            if isinstance(value, str) and value.strip()
+                        ),
                     ),
                 )
             )

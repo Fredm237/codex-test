@@ -59,6 +59,13 @@ def test_keywords_drop_filler_words():
     assert keywords("!!") == []
 
 
+def test_keywords_keep_observable_storage_value_but_drop_generic_preferences():
+    assert keywords("smartphone fiable avec 128 Go de stockage") == [
+        "smartphone",
+        "128",
+    ]
+
+
 async def test_returns_real_products_with_real_merchants(catalogue):
     results = await search_products("un bon casque sans fil", budget_max=400)
     names = [p["name"] for p in results]
@@ -126,6 +133,37 @@ async def test_lit_toutes_les_pages_avant_de_classer_la_meilleure_offre(catalogu
     results = await search_products("casque audio", budget_max=400)
 
     assert any(product["name"] == "Sony casque audio sans fil" for product in results)
+
+
+async def test_product_type_can_be_proven_by_category_when_model_title_omits_it(catalogue):
+    async with db._sessionmaker() as session:
+        merchant = (
+            await session.execute(select(models.Merchant).where(models.Merchant.slug == "coolblue"))
+        ).scalar_one()
+        session.add(
+            models.Offer(
+                merchant_id=merchant.id,
+                awin_product_id="iphone-15-128",
+                name="Apple iPhone 15 128GB",
+                brand="Apple",
+                category="Smartphones",
+                filon_category="Téléphonie",
+                price=699.0,
+                currency="EUR",
+                image_url="https://example.test/iphone.jpg",
+                deep_link="https://example.test/iphone",
+                offer_kind="physical_product",
+                in_stock=True,
+            )
+        )
+        await session.commit()
+
+    results = await search_products(
+        "Je cherche un smartphone fiable avec 128 Go de stockage",
+        budget_max=700,
+    )
+
+    assert [product["name"] for product in results] == ["Apple iPhone 15 128GB"]
 
 
 async def test_no_database_returns_nothing_rather_than_invented_data():
