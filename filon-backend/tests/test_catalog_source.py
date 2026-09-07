@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -36,14 +38,29 @@ async def catalogue():
             return models.Offer(
                 merchant_id=m.id, awin_product_id=pid, name=name, brand="Sony",
                 price=price, currency="EUR", ean=ean, image_url=image,
-                deep_link="https://example.test/go",
+                deep_link="https://example.test/go", in_stock=True,
             )
 
-        s.add(offer(coolblue, "1", "Sony WH-1000XM5 Casque sans fil", 329.0, EAN))
-        s.add(offer(media, "2", "Sony WH-1000XM5 Casque sans fil", 299.0, EAN))
-        s.add(offer(coolblue, "3", "Casque Bluetooth JBL Tune", 59.0))
-        s.add(offer(blocked, "4", "Casque pour adulte", 49.0))
-        s.add(offer(coolblue, "5", "Casque sans image", 39.0, image=None))
+        offers = [
+            offer(coolblue, "1", "Sony WH-1000XM5 Casque sans fil", 329.0, EAN),
+            offer(media, "2", "Sony WH-1000XM5 Casque sans fil", 299.0, EAN),
+            offer(coolblue, "3", "Casque Bluetooth JBL Tune", 59.0),
+            offer(blocked, "4", "Casque pour adulte", 49.0),
+            offer(coolblue, "5", "Casque sans image", 39.0, image=None),
+        ]
+        s.add_all(offers)
+        await s.flush()
+        observed_at = datetime.now(UTC).replace(tzinfo=None)
+        s.add_all(
+            models.PriceSnapshot(
+                offer_id=item.id,
+                price=item.price,
+                currency=item.currency,
+                in_stock=True,
+                captured_at=observed_at,
+            )
+            for item in offers
+        )
         await s.commit()
         await rebuild_products(s)
 
@@ -115,8 +132,7 @@ async def test_lit_toutes_les_pages_avant_de_classer_la_meilleure_offre(catalogu
             )
             for index in range(501)
         ])
-        session.add(
-            models.Offer(
+        current = models.Offer(
                 merchant_id=merchant.id,
                 awin_product_id="casque-apres-page-500",
                 name="Sony casque audio sans fil",
@@ -126,6 +142,17 @@ async def test_lit_toutes_les_pages_avant_de_classer_la_meilleure_offre(catalogu
                 image_url="https://example.test/sony.jpg",
                 deep_link="https://example.test/sony",
                 offer_kind="physical_product",
+                in_stock=True,
+            )
+        session.add(current)
+        await session.flush()
+        session.add(
+            models.PriceSnapshot(
+                offer_id=current.id,
+                price=current.price,
+                currency=current.currency,
+                in_stock=True,
+                captured_at=datetime.now(UTC).replace(tzinfo=None),
             )
         )
         await session.commit()
@@ -140,8 +167,7 @@ async def test_product_type_can_be_proven_by_category_when_model_title_omits_it(
         merchant = (
             await session.execute(select(models.Merchant).where(models.Merchant.slug == "coolblue"))
         ).scalar_one()
-        session.add(
-            models.Offer(
+        iphone = models.Offer(
                 merchant_id=merchant.id,
                 awin_product_id="iphone-15-128",
                 name="Apple iPhone 15 128GB",
@@ -155,6 +181,16 @@ async def test_product_type_can_be_proven_by_category_when_model_title_omits_it(
                 deep_link="https://example.test/iphone",
                 offer_kind="physical_product",
                 in_stock=True,
+            )
+        session.add(iphone)
+        await session.flush()
+        session.add(
+            models.PriceSnapshot(
+                offer_id=iphone.id,
+                price=iphone.price,
+                currency=iphone.currency,
+                in_stock=True,
+                captured_at=datetime.now(UTC).replace(tzinfo=None),
             )
         )
         await session.commit()
