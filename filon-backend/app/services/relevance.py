@@ -523,8 +523,15 @@ def score(
     if not termes:
         return 0.0
 
-    mots_offre = set(mots(nom_offre))
-    nom = _plat(nom_offre)
+    # La catégorie est une observation marchande/FILON, pas une déduction. Elle
+    # peut donc prouver le type de produit (« smartphone ») quand le titre se
+    # contente d'un modèle (« iPhone 15 »). Les règles anti-accessoire restent
+    # volontairement appliquées au seul nom de l'objet vendu.
+    surface = " ".join(
+        value for value in (nom_offre, categorie or "") if isinstance(value, str)
+    )
+    mots_offre = set(mots(surface))
+    nom = _plat(surface)
 
     # Part des termes de la demande réellement présents.
     trouves = sum(1 for t in termes if _term_is_present(t, mots_offre, nom))
