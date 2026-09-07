@@ -166,43 +166,47 @@ Pour les deux modes promus, le routeur exige avant toute lecture V2 :
 - Core V1 déjà calculé et disponible comme rollback du bloc entier ;
 - en canary, une observation agrégée persistée avec succès avant de rendre V2.
 
-Le seul bloc V2 actuellement adaptable aux contrats publics est l'abstention
-honnête : zéro offre et zéro carte pour le SSE, aucune recommandation pour le
-contrat JSON. La requête est seulement renvoyée au client qui l'a fournie ; elle
+Deux blocs V2 sont adaptables aux contrats publics : l'abstention honnête et
+`FACTUAL_OPTIONS`. Ce second type expose au plus cinq options dont le prix, la
+devise, le stock et la fraîcheur ont été rapprochés d'un relevé append-only.
+Il ne porte ni note de qualité, ni comparaison de livraison, ni verdict
+BUY/WAIT. La requête est seulement renvoyée au client qui l'a fournie ; elle
 n'entre ni dans le reçu ni dans le journal canary. Une erreur d'autorisation,
-de lecture, de fraîcheur ou de télémétrie rend la réponse Core entière.
-Cette abstention ne peut remplacer Core que si Core n'a lui-même aucune offre,
-carte, recommandation ou alternative. Une réponse Core réelle reste servie en
-entier : la première capacité V2 ne peut donc provoquer aucune perte de résultat.
+de lecture, de fraîcheur, d'adaptation ou de télémétrie rend la réponse Core
+entière. Une abstention V2 ne peut remplacer Core que si Core n'a lui-même
+aucune offre. `FACTUAL_OPTIONS` ne peut remplacer Core que si ce type exact a
+été observé et autorisé par les reçus SHADOW puis CANARY.
 
 Ce raccordement ne constitue pas à lui seul un canary actif : celui-ci commence
 uniquement après déploiement de la configuration autorisée et production de ses
 observations réelles.
 
-### Lecteur en ligne borné à l'abstention
+### Lecteur en ligne factuel, sans verdict implicite
 
 `app.v2_chain.online_reader` exécute la chaîne réelle P5 → P10 en mémoire à
 partir des snapshots Product Ontology et des offres canoniques. Il ne persiste
 rien et n'est jamais importé directement par une route publique : seul le
-routeur atomique, soumis au garde de promotion, peut l'appeler. La première
-version est volontairement bornée au seul type de réponse qui ne peut provoquer
-une action commerciale : `ABSTAIN`.
+routeur atomique, soumis au garde de promotion, peut l'appeler. Sa sortie reste
+bornée aux formes qui ne provoquent aucune action commerciale : `ABSTAIN` et
+`FACTUAL_OPTIONS`.
 
 Le contrat `contracts/v2-chain/v1/online-response.schema.json` exige :
 
 - un digest de requête sans texte brut ;
 - exactement les six provenances Retrieval, Constraints, Ranking,
   Optimization, Confidence et BUY/WAIT ;
-- une liste `items` vide ;
+- une liste vide pour `ABSTAIN`, ou de une à cinq options strictement sourcées
+  pour `FACTUAL_OPTIONS` ;
 - `raw_query_retained=false` ;
-- aucune autre sortie que `ABSTAIN`.
+- aucune sortie autre que `ABSTAIN` ou `FACTUAL_OPTIONS`.
 
-Un index vide, un candidat non éligible, une dimension de ranking inconnue,
-l'absence de calibration et l'absence de profil historique aboutissent à cette
-abstention honnête. Toute sortie interne différente du chemin qualifié fait
-échouer le lecteur. Le routeur canary peut donc, après satisfaction de toutes
-les gates de production, ouvrir `ABSTAIN` sans ouvrir implicitement BUY_NOW ou
-WAIT. Ces deux types restent individuellement bloqués.
+Un index vide, un candidat non éligible ou l'absence de preuve courante
+aboutissent à l'abstention honnête. Quand P5/P6 trouvent des candidats qui
+satisfont toutes les contraintes observables, le lecteur peut rendre
+`FACTUAL_OPTIONS` tout en laissant P7 Product Ranking, P8 Offer Optimization,
+P9 Confidence et P10 BUY/WAIT en abstention interne. Cela signifie : des choix
+à examiner, jamais un gagnant affirmé. Toute autre sortie interne fait échouer
+le lecteur. `BUY_NOW` et `WAIT` restent individuellement bloqués.
 
 ### Journal de qualification canary
 

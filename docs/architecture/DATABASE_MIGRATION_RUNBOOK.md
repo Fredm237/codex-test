@@ -35,8 +35,9 @@ projet et l'environnement n'ont pas été confirmés par l'opérateur.
 | Observations canary V2 | `d7a5b9c1e3f6` | Ajoute source, type de réponse, latences et état de preuve, sans requête ni identité |
 | Reçus de promotion V2 | `e8b6c0d2f4a7` | Ajoute les décisions SHADOW/CANARY/PUBLIC append-only, sans requête ni payload |
 | Preuves et télémétrie de promotion V2 | `f9c7d1e3a5b8` | Ajoute campagnes, funnel, dark reads réels, éligibilité canary et registre de preuves append-only |
+| Options factuelles V2 | `0b8d2f4a6c9e` | Étend sans effacement les journaux dark/canary au type `FACTUAL_OPTIONS` |
 
-La seule tête attendue est `f9c7d1e3a5b8`. La colonne de devise reste
+La seule tête attendue est `0b8d2f4a6c9e`. La colonne de devise reste
 `NULL` pour les relevés antérieurs : la devise d'un montant historique n'est
 pas déductible de l'offre courante.
 
@@ -154,7 +155,7 @@ python -m pip install -r requirements.txt
 alembic heads
 ```
 
-Résultat attendu : une seule tête, `f9c7d1e3a5b8`. Confirmer ensuite hors log
+Résultat attendu : une seule tête, `0b8d2f4a6c9e`. Confirmer ensuite hors log
 le projet, l'environnement et l'hôte visés. Pour PostgreSQL, `pg_dump` et
 `pg_restore` reçoivent une URL native `postgresql://`, pas le suffixe
 SQLAlchemy `+asyncpg`.
@@ -185,7 +186,7 @@ alembic current
 alembic check
 ```
 
-La révision courante doit être `f9c7d1e3a5b8 (head)` et le check doit afficher
+La révision courante doit être `0b8d2f4a6c9e (head)` et le check doit afficher
 `No new upgrade operations detected.`.
 
 ### 3B. Base existante à la baseline ou variante legacy couverte
@@ -229,7 +230,7 @@ exactement aux modèles et aux migrations de tête, une adoption directe est
 possible après la même sauvegarde et une comparaison exhaustive :
 
 ```bash
-alembic stamp f9c7d1e3a5b8
+alembic stamp 0b8d2f4a6c9e
 alembic current
 alembic check
 ```
@@ -267,7 +268,7 @@ Avant tout premier déploiement avec migration automatique :
    `EVIDENCE_ENGINE_SHADOW_ENABLED=false` et `V2_CHAIN_MODE=off` ;
    `PERSONAL_COMMERCE_SUBJECT_SECRET` peut être préparé hors log, mais son seul
    paramétrage n'active aucun writer ;
-5. obtenir `f9c7d1e3a5b8 (head)` avec `alembic current` et un `alembic check`
+5. obtenir `0b8d2f4a6c9e (head)` avec `alembic current` et un `alembic check`
    sans drift ;
 6. pour un nouveau service, enregistrer dans le Dashboard les six valeurs du
    parcours 1B et confirmer leur présence dans les détails de déploiement ;
@@ -278,7 +279,7 @@ Avant tout premier déploiement avec migration automatique :
 Après bascule :
 
 - `/health/ready` répond HTTP 200 et annonce la révision
-  `f9c7d1e3a5b8` ;
+  `0b8d2f4a6c9e` ;
 - les comptes catalogue correspondent aux comptes avant migration ;
 - une ingestion limitée termine sans DDL implicite ni erreur de schéma ;
 - les latences, comptes et identifiants de preuve sont annexés à la livraison ;
@@ -359,7 +360,7 @@ baseline.**
 ### Régression applicative
 
 Remettre la version applicative précédente, conserver le schéma à
-`f9c7d1e3a5b8` et garder les shadows désactivés. Les structures d'expansion sont
+`0b8d2f4a6c9e` et garder les shadows désactivés. Les structures d'expansion sont
 compatibles avec l'ancien lecteur, qui les ignore. Un rollback applicatif ne
 justifie ni un downgrade ni `DATABASE_SCHEMA_MODE=legacy`.
 

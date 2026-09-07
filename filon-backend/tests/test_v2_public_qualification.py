@@ -179,7 +179,11 @@ def test_pure_public_gate_is_fail_closed_and_type_scoped() -> None:
 
     assert authorized.status == "PUBLIC_AUTHORIZED"
     assert authorized.authorized_response_types == ("ABSTAIN",)
-    assert authorized.blocked_response_types == ("BUY_NOW", "WAIT")
+    assert authorized.blocked_response_types == (
+        "BUY_NOW",
+        "FACTUAL_OPTIONS",
+        "WAIT",
+    )
     assert held.status == "PUBLIC_HOLD"
     assert "RUNTIME_HEALTH" in held.blocker_codes
     assert "ERROR_NON_INFERIORITY" in held.blocker_codes
@@ -208,7 +212,11 @@ async def test_thirty_paired_reads_authorize_only_abstain() -> None:
             assert report.metrics.paired_observations == 30
             assert report.metrics.p95_latency_delta_us == -500
             assert report.gate.authorized_response_types == ("ABSTAIN",)
-            assert report.gate.blocked_response_types == ("BUY_NOW", "WAIT")
+            assert report.gate.blocked_response_types == (
+                "BUY_NOW",
+                "FACTUAL_OPTIONS",
+                "WAIT",
+            )
             VALIDATOR.validate(report.to_dict())
     finally:
         await engine.dispose()
@@ -372,4 +380,8 @@ def test_public_qualification_contract_and_example_are_valid() -> None:
 
     VALIDATOR.validate(example)
     assert example["gate"]["authorized_response_types"] == ["ABSTAIN"]
-    assert example["gate"]["blocked_response_types"] == ["BUY_NOW", "WAIT"]
+    assert example["gate"]["blocked_response_types"] == [
+        "BUY_NOW",
+        "FACTUAL_OPTIONS",
+        "WAIT",
+    ]

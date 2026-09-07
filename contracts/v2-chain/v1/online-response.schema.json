@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://filon.local/contracts/v2-chain/v1/online-response.schema.json",
-  "title": "FILON V2 online response v1",
+  "title": "FILON V2 online response v2",
   "type": "object",
   "additionalProperties": false,
   "required": [
@@ -15,9 +15,9 @@
     "raw_query_retained"
   ],
   "properties": {
-    "schema_version": {"const": "v2-online-response/v1"},
-    "reader_version": {"const": "v2-online-reader/v1"},
-    "outcome": {"const": "ABSTAIN"},
+    "schema_version": {"const": "v2-online-response/v2"},
+    "reader_version": {"const": "v2-online-reader/v2"},
+    "outcome": {"enum": ["ABSTAIN", "FACTUAL_OPTIONS"]},
     "query_digest": {"$ref": "#/$defs/digest"},
     "reason_codes": {
       "type": "array",
@@ -25,7 +25,11 @@
       "uniqueItems": true,
       "items": {"type": "string", "minLength": 1}
     },
-    "items": {"type": "array", "maxItems": 0},
+    "items": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {"$ref": "#/$defs/option"}
+    },
     "provenance": {
       "type": "array",
       "minItems": 6,
@@ -43,8 +47,62 @@
     },
     "raw_query_retained": {"const": false}
   },
+  "allOf": [
+    {
+      "if": {"properties": {"outcome": {"const": "ABSTAIN"}}, "required": ["outcome"]},
+      "then": {"properties": {"items": {"maxItems": 0}}}
+    },
+    {
+      "if": {"properties": {"outcome": {"const": "FACTUAL_OPTIONS"}}, "required": ["outcome"]},
+      "then": {"properties": {"items": {"minItems": 1}}}
+    }
+  ],
   "$defs": {
     "digest": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amount", "currency"],
+      "properties": {
+        "amount": {"type": "string", "pattern": "^[0-9]+(\\.[0-9]{2})$"},
+        "currency": {"type": "string", "pattern": "^[A-Z]{3}$"}
+      }
+    },
+    "option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "entity_ref", "offer_ref", "name", "brand", "image_url",
+        "merchant", "merchant_ref", "price", "availability", "observed_at",
+        "destination_url", "ranking_basis", "unknowns", "evidence_refs"
+      ],
+      "properties": {
+        "entity_ref": {"type": "string", "pattern": "^(product|model|variant):.+$"},
+        "offer_ref": {"type": "string", "pattern": "^offer:[1-9][0-9]*$"},
+        "name": {"type": "string", "minLength": 1},
+        "brand": {"type": ["string", "null"]},
+        "image_url": {"type": ["string", "null"]},
+        "merchant": {"type": "string", "minLength": 1},
+        "merchant_ref": {"type": "string", "pattern": "^merchant:[1-9][0-9]*$"},
+        "price": {"$ref": "#/$defs/money"},
+        "availability": {"const": "in_stock"},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "destination_url": {"type": ["string", "null"]},
+        "ranking_basis": {"const": "retrieval_and_hard_constraints_only"},
+        "unknowns": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "evidence_refs": {
+          "type": "array",
+          "minItems": 3,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
     "provenance": {
       "type": "object",
       "additionalProperties": false,

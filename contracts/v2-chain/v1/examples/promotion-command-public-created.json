@@ -5,7 +5,7 @@
   "evaluation_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
   "gate_evaluation_id": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
   "authorized_response_types": ["ABSTAIN"],
-  "blocked_response_types": ["BUY_NOW", "WAIT"],
+  "blocked_response_types": ["BUY_NOW", "FACTUAL_OPTIONS", "WAIT"],
   "persistence_status": "created",
   "receipt_id": 12,
   "raw_payload_retained": false

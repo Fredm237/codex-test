@@ -124,7 +124,7 @@
     "response_types": {
       "type": "array",
       "uniqueItems": true,
-      "items": {"enum": ["ABSTAIN", "BUY_NOW", "WAIT"]}
+      "items": {"enum": ["ABSTAIN", "FACTUAL_OPTIONS", "BUY_NOW", "WAIT"]}
     }
   }
 }

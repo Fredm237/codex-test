@@ -49,7 +49,7 @@ def _shadow_receipt(**overrides) -> V2PromotionReceipt:
         "promotion_stage": "shadow_to_canary",
         "status": "CANARY_AUTHORIZED",
         "authorized_response_types_json": ["ABSTAIN"],
-        "blocked_response_types_json": ["BUY_NOW", "WAIT"],
+        "blocked_response_types_json": ["BUY_NOW", "FACTUAL_OPTIONS", "WAIT"],
         "gates_json": {name: True for name in CANARY_GATES},
         "metrics_json": {"valid_terminal_windows": 30},
         "proof_refs_json": _proofs(SHADOW_PROOF_KEYS),
@@ -75,7 +75,7 @@ def _public_receipt(**overrides) -> V2PromotionReceipt:
         "promotion_stage": "canary_to_public",
         "status": "PUBLIC_AUTHORIZED",
         "authorized_response_types_json": ["ABSTAIN"],
-        "blocked_response_types_json": ["BUY_NOW", "WAIT"],
+        "blocked_response_types_json": ["BUY_NOW", "FACTUAL_OPTIONS", "WAIT"],
         "gates_json": {name: True for name in PUBLIC_GATES},
         "metrics_json": {"paired_observations": 30},
         "proof_refs_json": proofs,
@@ -172,9 +172,14 @@ async def test_canary_requires_and_returns_the_exact_authorized_receipt() -> Non
             )
             assert gate.status == "CANARY_AUTHORIZED"
             assert gate.evaluation_id == _digest("b")
-            assert gate.blocked_response_types == ("BUY_NOW", "WAIT")
+            assert gate.blocked_response_types == (
+                "BUY_NOW",
+                "FACTUAL_OPTIONS",
+                "WAIT",
+            )
             assert gate.blocker_codes == (
                 "RESPONSE_TYPE_OFF:BUY_NOW",
+                "RESPONSE_TYPE_OFF:FACTUAL_OPTIONS",
                 "RESPONSE_TYPE_OFF:WAIT",
             )
     finally:
@@ -198,11 +203,34 @@ async def test_canary_fails_closed_for_absent_hold_or_drifted_receipt() -> None:
             session.add(
                 _shadow_receipt(
                     authorized_response_types_json=["ABSTAIN", "WAIT"],
-                    blocked_response_types_json=["WAIT", "BUY_NOW"],
+                    blocked_response_types_json=[
+                        "WAIT",
+                        "FACTUAL_OPTIONS",
+                        "BUY_NOW",
+                    ],
                 )
             )
             await session.flush()
             with pytest.raises(V2PromotionGuardError, match="partition"):
+                await authorize_v2_runtime(session, settings=_settings("canary"))
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_canary_rejects_legacy_receipt_without_factual_options_partition() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            legacy = _shadow_receipt(
+                authorized_response_types_json=["ABSTAIN"],
+                blocked_response_types_json=["BUY_NOW", "WAIT"],
+            )
+            await _register_receipt_proofs(session, legacy)
+            session.add(legacy)
+            await session.flush()
+
+            with pytest.raises(V2PromotionGuardError, match="partition is incomplete"):
                 await authorize_v2_runtime(session, settings=_settings("canary"))
     finally:
         await engine.dispose()
@@ -272,7 +300,7 @@ async def test_public_cannot_expand_beyond_canary_authorized_response_types() ->
             shadow = _shadow_receipt()
             public = _public_receipt(
                 authorized_response_types_json=["ABSTAIN", "WAIT"],
-                blocked_response_types_json=["BUY_NOW"],
+                blocked_response_types_json=["BUY_NOW", "FACTUAL_OPTIONS"],
             )
             await _register_receipt_proofs(session, shadow)
             await _register_receipt_proofs(session, public)

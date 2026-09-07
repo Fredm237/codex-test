@@ -1,8 +1,8 @@
 {
   "schema_version": "v2-online-contract-manifest/v1",
-  "contract": "v2-online-response/v1",
+  "contract": "v2-online-response/v2",
   "schema": "online-response.schema.json",
-  "examples": ["examples/abstain.json"],
+  "examples": ["examples/abstain.json", "examples/factual-options.json"],
   "canary_receipt_schema": "canary-read-receipt.schema.json",
   "canary_receipt_examples": ["examples/canary-abstain-receipt.json"],
   "canary_eligibility_schema": "canary-eligibility.schema.json",
@@ -31,7 +31,7 @@
     "examples/scheduler-interrupted.json",
     "examples/scheduler-resume-due.json"
   ],
-  "servable_response_types": ["ABSTAIN"],
+  "servable_response_types": ["ABSTAIN", "FACTUAL_OPTIONS"],
   "raw_query_retained": false,
   "atomic_core_fallback_required": true
 }

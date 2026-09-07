@@ -61,8 +61,12 @@ def _gate() -> V2CanaryGateReport:
         schema_version="v2-shadow-to-canary-gate/v1",
         status="CANARY_AUTHORIZED",
         gates={},
-        blocked_response_types=("BUY_NOW", "WAIT"),
-        blocker_codes=("RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:WAIT"),
+        blocked_response_types=("BUY_NOW", "FACTUAL_OPTIONS", "WAIT"),
+        blocker_codes=(
+            "RESPONSE_TYPE_OFF:BUY_NOW",
+            "RESPONSE_TYPE_OFF:FACTUAL_OPTIONS",
+            "RESPONSE_TYPE_OFF:WAIT",
+        ),
         evaluation_id=GATE_ID,
     )
 
@@ -74,6 +78,33 @@ def _payload() -> V2CanaryPayload:
         safety_state="ABSTAIN",
         provenance_complete=True,
         response_type="ABSTAIN",
+    )
+
+
+def _factual_payload() -> V2CanaryPayload:
+    return V2CanaryPayload(
+        response={
+            "outcome": "FACTUAL_OPTIONS",
+            "items": [
+                {
+                    "entity_ref": "variant:42",
+                    "offer_ref": "offer:77",
+                    "name": "Acme Smartphone 128 Go",
+                    "brand": "Acme",
+                    "image_url": "https://assets.example.test/phone.jpg",
+                    "merchant": "Marchand Test",
+                    "merchant_ref": "merchant:9",
+                    "price": {"amount": "599.00", "currency": "EUR"},
+                    "availability": "in_stock",
+                    "observed_at": "2026-09-07T08:00:00+00:00",
+                    "destination_url": "https://merchant.example.test/offer/77",
+                }
+            ],
+        },
+        chain_complete=True,
+        safety_state="SAFE",
+        provenance_complete=True,
+        response_type="FACTUAL_OPTIONS",
     )
 
 
@@ -198,6 +229,77 @@ async def test_canary_abstention_never_erases_a_real_core_result(monkeypatch) ->
     reader.assert_not_awaited()
     recorder.assert_awaited_once()
     assert recorder.await_args.kwargs["receipt"].source == "core_v1"
+    session.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_authorized_factual_options_replace_core_as_an_atomic_safe_block(
+    monkeypatch,
+) -> None:
+    session, reader, recorder, inspector = _install_promoted_runtime(
+        monkeypatch,
+        mode="canary",
+    )
+    monkeypatch.setattr(
+        live_router,
+        "authorize_v2_runtime",
+        AsyncMock(
+            return_value=V2RuntimeAuthorization(
+                schema_version="v2-runtime-authorization/v1",
+                mode="canary",
+                promotion_stage="shadow_to_canary",
+                receipt_evaluation_id=RECEIPT,
+                gate_evaluation_id=GATE_ID,
+                authorized_response_types=("ABSTAIN", "FACTUAL_OPTIONS"),
+                canary_subjects=1,
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        live_router,
+        "load_authorized_canary_gate",
+        AsyncMock(
+            return_value=V2CanaryGateReport(
+                schema_version="v2-shadow-to-canary-gate/v1",
+                status="CANARY_AUTHORIZED",
+                gates={},
+                blocked_response_types=("BUY_NOW", "WAIT"),
+                blocker_codes=(
+                    "RESPONSE_TYPE_OFF:BUY_NOW",
+                    "RESPONSE_TYPE_OFF:WAIT",
+                ),
+                evaluation_id=GATE_ID,
+            )
+        ),
+    )
+    reader.return_value = _factual_payload()
+
+    result = await live_router.route_promoted_response(
+        core_response={"real": True, "offers": 1, "cards": [{"offer_id": 1}]},
+        core_latency_us=2_000,
+        query="un smartphone 128 Go",
+        budget=700,
+        country="be",
+        locale="fr",
+        surface="advise_stream",
+        subject_digest=SUBJECT,
+    )
+
+    assert result.source == "v2"
+    assert result.response["real"] is True
+    assert result.response["offers"] == 1
+    card = result.response["cards"][0]
+    assert card["offer_id"] == 77
+    assert card["price"] == 599.0
+    assert card["currency"] == "EUR"
+    assert card["buy"] is False
+    assert card["evidence_current"] is True
+    inspector.assert_awaited_once()
+    reader.assert_awaited_once()
+    receipt = recorder.await_args.kwargs["receipt"]
+    assert receipt.source == "v2"
+    assert receipt.response_type == "FACTUAL_OPTIONS"
+    assert receipt.safety_state == "SAFE"
     session.commit.assert_awaited_once()
 
 

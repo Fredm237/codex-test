@@ -8,7 +8,9 @@ from dataclasses import asdict, dataclass
 from typing import Any
 
 
-REQUIRED_RESPONSE_TYPES = frozenset({"BUY_NOW", "WAIT", "ABSTAIN"})
+REQUIRED_RESPONSE_TYPES = frozenset(
+    {"BUY_NOW", "WAIT", "ABSTAIN", "FACTUAL_OPTIONS"}
+)
 
 
 @dataclass(frozen=True)

@@ -33,8 +33,8 @@
       "regressions_and_blockers": true
     },
     "authorized_response_types": ["ABSTAIN"],
-    "blocked_response_types": ["BUY_NOW", "WAIT"],
-    "blocker_codes": ["RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:WAIT"],
+    "blocked_response_types": ["BUY_NOW", "FACTUAL_OPTIONS", "WAIT"],
+    "blocker_codes": ["RESPONSE_TYPE_OFF:BUY_NOW", "RESPONSE_TYPE_OFF:FACTUAL_OPTIONS", "RESPONSE_TYPE_OFF:WAIT"],
     "evaluation_id": "sha256:dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd"
   },
   "proof_refs": {

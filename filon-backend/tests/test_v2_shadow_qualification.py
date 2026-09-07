@@ -180,7 +180,11 @@ async def test_thirty_real_windows_authorize_only_observed_abstain() -> None:
             assert report.metrics.p95_window_ms == 100
             assert report.metrics.dark_complete == 30
             assert report.metrics.observed_response_types == ("ABSTAIN",)
-            assert report.gate.blocked_response_types == ("BUY_NOW", "WAIT")
+            assert report.gate.blocked_response_types == (
+                "BUY_NOW",
+                "FACTUAL_OPTIONS",
+                "WAIT",
+            )
             assert "RESPONSE_TYPE_OFF:BUY_NOW" in report.gate.blocker_codes
             assert report.evaluation_id.startswith("sha256:")
             VALIDATOR.validate(report.to_dict())
@@ -312,4 +316,8 @@ def test_shadow_qualification_contract_and_example_are_valid() -> None:
 
     VALIDATOR.validate(example)
     assert example["gate"]["status"] == "CANARY_AUTHORIZED"
-    assert example["gate"]["blocked_response_types"] == ["BUY_NOW", "WAIT"]
+    assert example["gate"]["blocked_response_types"] == [
+        "BUY_NOW",
+        "FACTUAL_OPTIONS",
+        "WAIT",
+    ]

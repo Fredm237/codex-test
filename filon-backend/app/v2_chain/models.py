@@ -115,7 +115,8 @@ class V2LiveDarkReadObservation(Base):
             name="ck_v2_live_dark_core_outcome",
         ),
         CheckConstraint(
-            "v2_outcome IN ('BUY_NOW', 'WAIT', 'ABSTAIN', 'ERROR', 'UNSUPPORTED')",
+            "v2_outcome IN ('BUY_NOW', 'WAIT', 'ABSTAIN', 'FACTUAL_OPTIONS', "
+            "'ERROR', 'UNSUPPORTED')",
             name="ck_v2_live_dark_v2_outcome",
         ),
         CheckConstraint(
@@ -295,7 +296,8 @@ class V2CanaryReadObservation(Base):
             name="ck_v2_canary_source",
         ),
         CheckConstraint(
-            "response_type IN ('CORE', 'ABSTAIN', 'BUY_NOW', 'WAIT')",
+            "response_type IN ('CORE', 'ABSTAIN', 'FACTUAL_OPTIONS', "
+            "'BUY_NOW', 'WAIT')",
             name="ck_v2_canary_response_type",
         ),
         CheckConstraint(

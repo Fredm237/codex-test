@@ -1,15 +1,42 @@
 {
   "schema_version": "v2-online-response/v2",
   "reader_version": "v2-online-reader/v2",
-  "outcome": "ABSTAIN",
+  "outcome": "FACTUAL_OPTIONS",
   "query_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "reason_codes": [
-    "v2_actionable_evidence_incomplete",
-    "retrieval_no_match",
-    "ranking_no_eligible_product",
-    "confidence_not_calibrated"
+    "factual_options_only",
+    "product_quality_not_claimed",
+    "buy_wait_not_calibrated"
   ],
-  "items": [],
+  "items": [
+    {
+      "entity_ref": "variant:42",
+      "offer_ref": "offer:77",
+      "name": "Smartphone Exemple 128 Go",
+      "brand": "Exemple",
+      "image_url": "https://assets.example.test/phone.jpg",
+      "merchant": "Marchand Exemple",
+      "merchant_ref": "merchant:12",
+      "price": {"amount": "599.00", "currency": "EUR"},
+      "availability": "in_stock",
+      "observed_at": "2026-09-07T08:00:00+00:00",
+      "destination_url": "https://merchant.example.test/product/77",
+      "ranking_basis": "retrieval_and_hard_constraints_only",
+      "unknowns": [
+        "shipping_cost",
+        "delivery_time",
+        "returns",
+        "cashback",
+        "product_quality",
+        "buy_wait"
+      ],
+      "evidence_refs": [
+        "offer:77:price",
+        "offer:77:stock",
+        "product-ontology:42:lexical"
+      ]
+    }
+  ],
   "provenance": [
     {"stage": "hybrid_retrieval", "result_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
     {"stage": "constraint_engine", "result_digest": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"},

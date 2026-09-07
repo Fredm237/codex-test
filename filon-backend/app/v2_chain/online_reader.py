@@ -1,9 +1,12 @@
-"""Lecteur V2 P5→P10 en mémoire, limité aux abstentions qualifiables.
+"""Lecteur V2 P5→P10 en mémoire, factuel et fermé par défaut.
 
 Ce module n'est jamais appelé directement par une route. Seul ``live_router``
 peut l'invoquer après autorisation persistée, éligibilité et contrôle de
 fraîcheur. Il traverse la chaîne réelle sans écriture et sans inventer les
 dimensions de ranking, profils de confiance ou faits marchands encore absents.
+Lorsque P5/P6 disposent toutefois de prix, devise, stock et fraîcheur prouvés,
+il peut rendre une liste d'options factuelles. Cette liste n'est ni un classement
+de qualité, ni une recommandation BUY/WAIT.
 """
 
 from __future__ import annotations
@@ -67,10 +70,12 @@ from app.product_ranking.engine import (
     rank_products,
 )
 from app.services.currency import normalize_currency_code
+from app.services.freshness import format_utc_timestamp, offer_observation_is_fresh
+from app.services.offer_evidence import OfferEvidence, load_offer_evidence
 from app.v2_chain.canary import V2CanaryPayload
 
 
-ONLINE_READER_VERSION = "v2-online-reader/v1"
+ONLINE_READER_VERSION = "v2-online-reader/v2"
 MAX_QUERY_LENGTH = 512
 MAX_DOCUMENTS = 1_000
 MAX_CANDIDATES = 50
@@ -316,10 +321,42 @@ def _retrieval(
     return digest, fusion
 
 
-def _price_fact(offers: list[core_models.Offer]) -> Fact:
+def _proven_current_offers(
+    offers: list[core_models.Offer],
+    evidence_by_offer: Mapping[int, OfferEvidence],
+    *,
+    evaluated_at: datetime,
+) -> list[core_models.Offer]:
+    """Conserve seulement l'état marchand rapproché d'un relevé append-only."""
+
+    return [
+        offer
+        for offer in offers
+        if (
+            (evidence := evidence_by_offer.get(offer.id)) is not None
+            and evidence.current_observed_at is not None
+            and offer_observation_is_fresh(
+                evidence.current_observed_at,
+                now=evaluated_at,
+            )
+        )
+    ]
+
+
+def _price_fact(
+    offers: list[core_models.Offer],
+    evidence_by_offer: Mapping[int, OfferEvidence],
+    *,
+    evaluated_at: datetime,
+) -> Fact:
     valid: list[tuple[float, str, int]] = []
-    for offer in offers:
-        currency = normalize_currency_code(offer.currency)
+    for offer in _proven_current_offers(
+        offers,
+        evidence_by_offer,
+        evaluated_at=evaluated_at,
+    ):
+        evidence = evidence_by_offer[offer.id]
+        currency = evidence.currency
         price = offer.price
         if (
             currency is not None
@@ -343,7 +380,14 @@ def _price_fact(offers: list[core_models.Offer]) -> Fact:
     )
 
 
-def _candidate_facts(entity_ref: str, offers: list[core_models.Offer]) -> CandidateFacts:
+def _candidate_facts(
+    entity_ref: str,
+    offers: list[core_models.Offer],
+    evidence_by_offer: Mapping[int, OfferEvidence],
+    merchant_by_id: Mapping[int, core_models.Merchant],
+    *,
+    evaluated_at: datetime,
+) -> CandidateFacts:
     if not offers:
         return CandidateFacts(
             entity_ref,
@@ -354,25 +398,59 @@ def _candidate_facts(entity_ref: str, offers: list[core_models.Offer]) -> Candid
             {},
             {},
         )
-    stock_refs = tuple(f"offer:{offer.id}:stock" for offer in offers)
-    if any(offer.in_stock is True for offer in offers):
+    current = _proven_current_offers(
+        offers,
+        evidence_by_offer,
+        evaluated_at=evaluated_at,
+    )
+    stock_refs = tuple(f"offer:{offer.id}:stock" for offer in current)
+    if current:
         availability = Fact(
             "known",
             "in_stock",
-            tuple(
-                f"offer:{offer.id}:stock"
-                for offer in offers
-                if offer.in_stock is True
-            ),
+            stock_refs,
         )
     elif all(offer.in_stock is False for offer in offers):
         availability = Fact("known", "out_of_stock", stock_refs)
-    else:
+    elif offers:
         availability = Fact("unknown", evidence_refs=stock_refs)
+    else:
+        availability = Fact("unknown")
+
+    country_values = sorted(
+        {
+            merchant.region.strip().upper()
+            for offer in current
+            if (
+                (merchant := merchant_by_id.get(offer.merchant_id)) is not None
+                and isinstance(merchant.region, str)
+                and len(merchant.region.strip()) == 2
+            )
+        }
+    )
+    countries = (
+        Fact(
+            "known",
+            country_values,
+            tuple(sorted({
+                f"merchant:{offer.merchant_id}:region"
+                for offer in current
+                if offer.merchant_id in merchant_by_id
+                and isinstance(merchant_by_id[offer.merchant_id].region, str)
+                and len(merchant_by_id[offer.merchant_id].region.strip()) == 2
+            })),
+        )
+        if country_values
+        else Fact("unknown")
+    )
     return CandidateFacts(
         entity_ref=entity_ref,
-        price=_price_fact(offers),
-        countries=Fact("unknown"),
+        price=_price_fact(
+            offers,
+            evidence_by_offer,
+            evaluated_at=evaluated_at,
+        ),
+        countries=countries,
         availability=availability,
         adult_restricted=Fact(
             "known",
@@ -382,6 +460,94 @@ def _candidate_facts(entity_ref: str, offers: list[core_models.Offer]) -> Candid
         attributes={},
         preference_facts={},
     )
+
+
+def _option_items(
+    *,
+    request: V2OnlineReadRequest,
+    retrieval: FusionResult,
+    constraints,
+    by_id: Mapping[int, core_models.Offer],
+    merchant_by_id: Mapping[int, core_models.Merchant],
+    evidence_by_offer: Mapping[int, OfferEvidence],
+    evaluated_at: datetime,
+) -> tuple[dict[str, object], ...]:
+    """Matérialise au plus cinq options prouvées, dans l'ordre P5.
+
+    L'ordre est celui de la fusion retrieval. Il ne devient jamais une note de
+    qualité et le prix n'est utilisé qu'entre offres de même entité.
+    """
+
+    eligible = {
+        candidate.entity_ref
+        for candidate in constraints.candidates
+        if candidate.status == "ELIGIBLE"
+    }
+    items: list[dict[str, object]] = []
+    for candidate in retrieval.candidates:
+        if candidate.entity_ref not in eligible:
+            continue
+        candidate_offers = _proven_current_offers(
+            [by_id[value] for value in candidate.offer_ids if value in by_id],
+            evidence_by_offer,
+            evaluated_at=evaluated_at,
+        )
+        if request.budget_currency is not None:
+            candidate_offers = [
+                offer
+                for offer in candidate_offers
+                if evidence_by_offer[offer.id].currency == request.budget_currency
+            ]
+        candidate_offers.sort(key=lambda offer: (float(offer.price), offer.id))
+        if not candidate_offers:
+            continue
+        offer = candidate_offers[0]
+        merchant = merchant_by_id.get(offer.merchant_id)
+        evidence = evidence_by_offer[offer.id]
+        currency = evidence.currency
+        observed_at = format_utc_timestamp(evidence.current_observed_at)
+        if (
+            merchant is None
+            or currency is None
+            or observed_at is None
+            or offer.price is None
+        ):
+            continue
+        items.append(
+            {
+                "entity_ref": candidate.entity_ref,
+                "offer_ref": f"offer:{offer.id}",
+                "name": offer.name,
+                "brand": offer.brand,
+                "image_url": offer.image_url,
+                "merchant": merchant.name,
+                "merchant_ref": f"merchant:{merchant.id}",
+                "price": {"amount": f"{float(offer.price):.2f}", "currency": currency},
+                "availability": "in_stock",
+                "observed_at": observed_at,
+                "destination_url": offer.deep_link or offer.product_url,
+                "ranking_basis": "retrieval_and_hard_constraints_only",
+                "unknowns": [
+                    "shipping_cost",
+                    "delivery_time",
+                    "returns",
+                    "cashback",
+                    "product_quality",
+                    "buy_wait",
+                ],
+                "evidence_refs": [
+                    f"offer:{offer.id}:price",
+                    f"offer:{offer.id}:stock",
+                    *[
+                        source.evidence_ref
+                        for source in candidate.source_evidence
+                    ],
+                ],
+            }
+        )
+        if len(items) == 5:
+            break
+    return tuple(items)
 
 
 def _constraints(request: V2OnlineReadRequest) -> tuple[HardConstraint, ...]:
@@ -507,22 +673,36 @@ async def read_v2_online(
             for offer_id in candidate.offer_ids
         }
     )
-    offers = (
+    offer_rows = (
         (
             await session.execute(
-                select(core_models.Offer).where(core_models.Offer.id.in_(offer_ids))
+                select(core_models.Offer, core_models.Merchant)
+                .join(
+                    core_models.Merchant,
+                    core_models.Offer.merchant_id == core_models.Merchant.id,
+                )
+                .where(core_models.Offer.id.in_(offer_ids))
             )
         )
-        .scalars()
         .all()
         if offer_ids
         else []
     )
+    offers = [offer for offer, _merchant in offer_rows]
     by_id = {offer.id: offer for offer in offers}
+    merchant_by_id = {merchant.id: merchant for _offer, merchant in offer_rows}
+    evidence_by_offer = await load_offer_evidence(
+        session,
+        offers,
+        current_only=True,
+    )
     candidate_facts = [
         _candidate_facts(
             candidate.entity_ref,
             [by_id[value] for value in candidate.offer_ids if value in by_id],
+            evidence_by_offer,
+            merchant_by_id,
+            evaluated_at=evaluated,
         )
         for candidate in retrieval.candidates
     ]
@@ -591,7 +771,7 @@ async def read_v2_online(
         or decision.outcome != "ABSTAIN"
     ):
         raise V2OnlineReaderError(
-            "online reader may only expose its qualified abstention path"
+            "online reader downstream decision stages must remain fail-closed"
         )
     stages = {
         "hybrid_retrieval": retrieval,
@@ -602,25 +782,43 @@ async def read_v2_online(
         "buy_wait": decision,
     }
     provenance = _provenance(stages)
+    items = _option_items(
+        request=request,
+        retrieval=retrieval,
+        constraints=constraints,
+        by_id=by_id,
+        merchant_by_id=merchant_by_id,
+        evidence_by_offer=evidence_by_offer,
+        evaluated_at=evaluated,
+    )
+    outcome = "FACTUAL_OPTIONS" if items else "ABSTAIN"
     response = {
-        "schema_version": "v2-online-response/v1",
+        "schema_version": "v2-online-response/v2",
         "reader_version": ONLINE_READER_VERSION,
-        "outcome": "ABSTAIN",
+        "outcome": outcome,
         "query_digest": query_digest,
-        "reason_codes": [
-            "v2_actionable_evidence_incomplete",
-            f"retrieval_{retrieval.outcome.lower()}",
-            f"ranking_{ranking.outcome.lower()}",
-            "confidence_not_calibrated",
-        ],
-        "items": [],
+        "reason_codes": (
+            [
+                "factual_options_only",
+                "product_quality_not_claimed",
+                "buy_wait_not_calibrated",
+            ]
+            if items
+            else [
+                "v2_actionable_evidence_incomplete",
+                f"retrieval_{retrieval.outcome.lower()}",
+                f"ranking_{ranking.outcome.lower()}",
+                "confidence_not_calibrated",
+            ]
+        ),
+        "items": [dict(item) for item in items],
         "provenance": [dict(item) for item in provenance],
         "raw_query_retained": False,
     }
     return V2CanaryPayload(
         response=response,
         chain_complete=True,
-        safety_state="ABSTAIN",
+        safety_state="SAFE" if items else "ABSTAIN",
         provenance_complete=True,
-        response_type="ABSTAIN",
+        response_type=outcome,
     )
