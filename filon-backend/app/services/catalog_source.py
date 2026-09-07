@@ -21,6 +21,8 @@ from app.db import models
 from app.db import session as db
 from app.services import relevance
 from app.services.catalog_paging import fetch_all_offer_rows
+from app.services.freshness import offer_observation_is_fresh
+from app.services.offer_evidence import OfferEvidence, load_offer_evidence
 
 log = get_logger("catalog_source")
 
@@ -73,6 +75,7 @@ def _shape(
     category: str | None,
     image: str | None,
     offers: list[tuple],
+    evidence_by_offer: dict[int, OfferEvidence],
     relevance_score: float = 0.0,
 ) -> dict:
     """Format attendu par les agents en aval (product_search, price_compare…)."""
@@ -94,8 +97,8 @@ def _shape(
                 "merchant": m.name,
                 "merchant_slug": m.slug,
                 "price": o.price,
-                "currency": o.currency,
-                "observed_at": getattr(o, "updated_at", None),
+                "currency": evidence_by_offer[o.id].currency,
+                "observed_at": evidence_by_offer[o.id].current_observed_at,
                 "url": o.deep_link,
                 "in_stock": o.in_stock,
                 # Attendus par les agents, absents des flux Awin : rester à None
@@ -107,7 +110,8 @@ def _shape(
                 "affiliate_network": "Awin",
             }
             for (o, m) in offers
-            if o.price is not None
+            if o.id in evidence_by_offer
+            and evidence_by_offer[o.id].current_observed_at is not None
         ],
     }
 
@@ -188,7 +192,26 @@ async def search_products(
         if not pertinentes:
             log.info("catalog_search_sans_correspondance")
             return []
-        rows = pertinentes
+        # Une ligne Offer mutable ne prouve pas que son prix, sa devise et son
+        # stock sont encore valables. Le même journal append-only que les pages
+        # catalogue est autoritaire ici ; sans relevé courant et frais, l'offre
+        # ne peut pas occuper une place parmi les cinq candidats de l'assistant.
+        evidence_by_offer = await load_offer_evidence(
+            session,
+            [pair[0] for pair in pertinentes],
+            current_only=True,
+        )
+        rows = [
+            pair
+            for pair in pertinentes
+            if (
+                (proof := evidence_by_offer.get(pair[0].id)) is not None
+                and offer_observation_is_fresh(proof.current_observed_at)
+            )
+        ]
+        if not rows:
+            log.info("catalog_search_sans_preuve_courante")
+            return []
 
         grouped: dict[object, list[tuple]] = {}
         for pair in rows:
@@ -224,6 +247,7 @@ async def search_products(
                     category=(product.category if product else first.category),
                     image=(product.image_url if product else first.image_url),
                     offers=offers,
+                    evidence_by_offer=evidence_by_offer,
                     # Le nom présenté au visiteur est celui du produit regroupé
                     # quand il existe : c'est donc lui qu'on note, pas l'offre.
                     relevance_score=relevance.score(

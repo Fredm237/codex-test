@@ -22,10 +22,12 @@ from pydantic import ValidationError
 
 from app.schemas.advise import Offer, ProductAnalysis
 from app.services.catalog_source import _shape
+from app.services.offer_evidence import OfferEvidence
 
 
 class _FakeOffer:
     def __init__(self, price):
+        self.id = 1
         self.price = price
         self.currency = "EUR"
         self.updated_at = datetime.now(UTC)
@@ -64,13 +66,17 @@ def test_champs_omis_valent_none():
 
 def test_analyse_complete_avec_offre_awin_reelle():
     """La forme produite par _shape() doit traverser le schéma sans erreur."""
+    offer = _FakeOffer(59.9)
     produit = _shape(
         product_id="0705632189061",
         name="Baskets de running homme",
         brand="Marque",
         category="chaussures",
         image=None,
-        offers=[(_FakeOffer(59.9), _FakeMerchant())],
+        offers=[(offer, _FakeMerchant())],
+        evidence_by_offer={
+            offer.id: OfferEvidence("EUR", (), offer.updated_at),
+        },
     )
     # C'est bien la source qui pose None, pas une hypothèse du test.
     assert produit["offers"][0]["delivery_days"] is None
