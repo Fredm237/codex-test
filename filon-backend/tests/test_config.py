@@ -814,12 +814,6 @@ def test_atomic_v2_public_mode_requires_exact_receipt_and_no_canary_cohort() -> 
             },
             "forbids a promotion receipt",
         ),
-        (
-            {
-                "v2_canary_subject_digests": "sha256:" + "b" * 64,
-            },
-            "V2_CHAIN_MODE=off forbids a canary cohort",
-        ),
     ],
 )
 def test_v2_promoted_configuration_rejects_incomplete_evidence(
@@ -828,6 +822,23 @@ def test_v2_promoted_configuration_rejects_incomplete_evidence(
 ) -> None:
     with pytest.raises(ValidationError, match=message):
         Settings(_env_file=None, env="test", **overrides)
+
+
+def test_v2_off_mode_keeps_audit_refs_dormant_for_fast_kill_switch() -> None:
+    receipt = "sha256:" + "a" * 64
+    subject = "sha256:" + "b" * 64
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        v2_chain_mode="off",
+        v2_promotion_receipt_evaluation_id=receipt,
+        v2_canary_subject_digests=subject,
+    )
+
+    assert settings.v2_canary_reader_enabled is False
+    assert settings.v2_public_reader_enabled is False
+    assert settings.v2_promotion_receipt_evaluation_id == receipt
+    assert settings.v2_canary_subject_digests_list == [subject]
 
 
 @pytest.mark.parametrize(

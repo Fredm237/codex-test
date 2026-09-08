@@ -171,10 +171,6 @@ class Settings(BaseSettings):
         if self.v2_chain_mode == "off":
             if self.v2_canary_reader_enabled or self.v2_public_reader_enabled:
                 errors.append("V2 readers require a promoted V2_CHAIN_MODE")
-            if self.v2_promotion_receipt_evaluation_id is not None:
-                errors.append("V2 promotion receipt requires canary or public mode")
-            if self.v2_canary_subject_digests_list:
-                errors.append("V2_CHAIN_MODE=off forbids a canary cohort")
         elif self.v2_chain_mode in {"shadow", "dark"}:
             missing = [
                 field
