@@ -1,6 +1,7 @@
 {
   "schema_version": "v2-public-qualification/v1",
   "evaluated_at": "2026-09-04T11:00:00Z",
+  "shadow_receipt_evaluation_id": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "shadow_gate_evaluation_id": "sha256:cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
   "metrics": {
     "canary_observations": 30,

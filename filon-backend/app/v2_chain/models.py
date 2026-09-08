@@ -274,6 +274,10 @@ class V2CanaryReadObservation(Base):
             name="ck_v2_canary_gate_evaluation_digest",
         ),
         CheckConstraint(
+            "receipt_evaluation_id IS NULL OR length(receipt_evaluation_id) = 71",
+            name="ck_v2_canary_receipt_evaluation_digest",
+        ),
+        CheckConstraint(
             "eligibility_evaluation_id IS NULL OR "
             "length(eligibility_evaluation_id) = 71",
             name="ck_v2_canary_eligibility_digest",
@@ -333,6 +337,11 @@ class V2CanaryReadObservation(Base):
             "gate_evaluation_id",
             "evaluated_at",
         ),
+        Index(
+            "ix_v2_canary_receipt_evaluated",
+            "receipt_evaluation_id",
+            "evaluated_at",
+        ),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
@@ -340,6 +349,11 @@ class V2CanaryReadObservation(Base):
         String(64), unique=True, index=True
     )
     gate_evaluation_id: Mapped[str] = mapped_column(String(71), index=True)
+    # Nullable uniquement pour l'historique créé avant la migration de
+    # filiation. Toute nouvelle observation est validée avec un reçu exact.
+    receipt_evaluation_id: Mapped[str | None] = mapped_column(
+        String(71), nullable=True, index=True
+    )
     cohort: Mapped[str] = mapped_column(String(16), index=True)
     assignment_reason: Mapped[str] = mapped_column(String(64))
     eligibility_evaluation_id: Mapped[str | None] = mapped_column(
@@ -393,6 +407,11 @@ class V2PromotionReceipt(Base):
             name="ck_v2_promotion_source_gate",
         ),
         CheckConstraint(
+            "source_receipt_evaluation_id IS NULL OR "
+            "length(source_receipt_evaluation_id) = 71",
+            name="ck_v2_promotion_source_receipt_digest",
+        ),
+        CheckConstraint(
             "raw_payload_retained = false",
             name="ck_v2_promotion_no_raw_payload",
         ),
@@ -407,6 +426,11 @@ class V2PromotionReceipt(Base):
     evaluation_id: Mapped[str] = mapped_column(String(71), unique=True, index=True)
     gate_evaluation_id: Mapped[str] = mapped_column(String(71), index=True)
     source_gate_evaluation_id: Mapped[str | None] = mapped_column(
+        String(71), nullable=True, index=True
+    )
+    # Les reçus PUBLIC récents désignent le reçu CANARY exact qui a produit
+    # leur échantillon. Nullable pour conserver les reçus historiques.
+    source_receipt_evaluation_id: Mapped[str | None] = mapped_column(
         String(71), nullable=True, index=True
     )
     promotion_stage: Mapped[str] = mapped_column(String(32), index=True)

@@ -157,6 +157,7 @@ async def record_canary_read(
     session,
     *,
     observation_key: str,
+    receipt_evaluation_id: str,
     receipt: CanaryReadReceipt,
     evaluated_at: datetime,
     apply: bool = False,
@@ -165,8 +166,11 @@ async def record_canary_read(
 
     if not _observation_key(observation_key):
         raise V2CanaryObservationError("observation key is invalid")
+    if not _digest(receipt_evaluation_id):
+        raise V2CanaryObservationError("promotion receipt evaluation id is invalid")
     _validate(receipt)
     values = _values(receipt, evaluated_at)
+    values["receipt_evaluation_id"] = receipt_evaluation_id
     existing = await session.scalar(
         select(V2CanaryReadObservation).where(
             V2CanaryReadObservation.observation_key == observation_key

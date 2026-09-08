@@ -96,6 +96,7 @@ def _shadow_values(report: V2ShadowQualificationReport) -> dict[str, object]:
         "evaluation_id": report.evaluation_id,
         "gate_evaluation_id": report.gate.evaluation_id,
         "source_gate_evaluation_id": None,
+        "source_receipt_evaluation_id": None,
         "promotion_stage": "shadow_to_canary",
         "status": report.gate.status,
         "authorized_response_types_json": authorized,
@@ -115,6 +116,7 @@ def _shadow_values(report: V2ShadowQualificationReport) -> dict[str, object]:
 def _public_values(report: V2PublicQualificationReport) -> dict[str, object]:
     identity = {
         "evaluated_at": report.evaluated_at,
+        "shadow_receipt_evaluation_id": report.shadow_receipt_evaluation_id,
         "shadow_gate_evaluation_id": report.shadow_gate_evaluation_id,
         "metrics": asdict(report.metrics),
         "gate": report.gate.to_dict(),
@@ -137,6 +139,7 @@ def _public_values(report: V2PublicQualificationReport) -> dict[str, object]:
         "evaluation_id": report.evaluation_id,
         "gate_evaluation_id": report.gate.evaluation_id,
         "source_gate_evaluation_id": report.shadow_gate_evaluation_id,
+        "source_receipt_evaluation_id": report.shadow_receipt_evaluation_id,
         "promotion_stage": "canary_to_public",
         "status": report.gate.status,
         "authorized_response_types_json": list(
@@ -147,6 +150,7 @@ def _public_values(report: V2PublicQualificationReport) -> dict[str, object]:
         "metrics_json": _json_value(asdict(report.metrics)),
         "proof_refs_json": _json_value(report.proof_refs),
         "policy_json": {
+            "shadow_receipt_evaluation_id": report.shadow_receipt_evaluation_id,
             "minimum_paired_observations": report.minimum_paired_observations,
             "minimum_observations_per_response_type": (
                 report.minimum_observations_per_response_type
@@ -171,6 +175,7 @@ def _values(
         values["evaluation_id"],
         values["gate_evaluation_id"],
         values["source_gate_evaluation_id"],
+        values.get("source_receipt_evaluation_id"),
         *values["proof_refs_json"].values(),
     )
     if any(value is not None and not _valid_digest(value) for value in digests):

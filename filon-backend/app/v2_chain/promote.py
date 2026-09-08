@@ -209,6 +209,7 @@ async def _run(
             )
             report = await evaluate_persisted_canary_to_public(
                 session,
+                shadow_receipt_evaluation_id=args.shadow_receipt_evaluation_id,
                 shadow_gate=shadow_gate,
                 proofs=V2PublicExternalProofs(
                     shadow_gate_ref=shadow_gate.evaluation_id,

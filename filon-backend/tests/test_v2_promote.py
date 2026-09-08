@@ -187,6 +187,11 @@ async def test_public_command_uses_active_canary_receipt_and_commits_apply(
         receipt_evaluation_id=shadow_receipt,
     )
     record.assert_awaited_once_with(session, report=report, apply=True)
+    evaluate.assert_awaited_once()
+    assert (
+        evaluate.await_args.kwargs["shadow_receipt_evaluation_id"]
+        == shadow_receipt
+    )
     session.commit.assert_awaited_once()
 
 

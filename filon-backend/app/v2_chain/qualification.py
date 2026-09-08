@@ -181,6 +181,7 @@ class V2PublicQualificationMetrics:
 class V2PublicQualificationReport:
     schema_version: str
     evaluated_at: str
+    shadow_receipt_evaluation_id: str
     shadow_gate_evaluation_id: str
     metrics: V2PublicQualificationMetrics
     gate: V2PublicGateReport
@@ -478,6 +479,7 @@ async def evaluate_persisted_shadow_to_canary(
 async def evaluate_persisted_canary_to_public(
     session,
     *,
+    shadow_receipt_evaluation_id: str,
     shadow_gate: V2CanaryGateReport,
     proofs: V2PublicExternalProofs,
     evaluated_at: datetime,
@@ -490,6 +492,8 @@ async def evaluate_persisted_canary_to_public(
         or not _valid_digest(shadow_gate.evaluation_id)
     ):
         raise V2QualificationError("shadow gate evaluation id is invalid")
+    if not _valid_digest(shadow_receipt_evaluation_id):
+        raise V2QualificationError("shadow receipt evaluation id is invalid")
     if proofs.shadow_gate_ref != shadow_gate.evaluation_id:
         raise V2QualificationError("shadow gate proof does not match candidate")
     refs = _proof_refs(proofs)
@@ -508,6 +512,8 @@ async def evaluate_persisted_canary_to_public(
                 select(V2CanaryReadObservation)
                 .where(
                     V2CanaryReadObservation.cohort == "canary",
+                    V2CanaryReadObservation.receipt_evaluation_id
+                    == shadow_receipt_evaluation_id,
                     V2CanaryReadObservation.gate_evaluation_id
                     == shadow_gate.evaluation_id,
                 )
@@ -599,6 +605,7 @@ async def evaluate_persisted_canary_to_public(
     )
     identity = {
         "evaluated_at": evaluated.isoformat().replace("+00:00", "Z"),
+        "shadow_receipt_evaluation_id": shadow_receipt_evaluation_id,
         "shadow_gate_evaluation_id": shadow_gate.evaluation_id,
         "metrics": asdict(metrics),
         "gate": gate.to_dict(),
@@ -612,6 +619,7 @@ async def evaluate_persisted_canary_to_public(
     return V2PublicQualificationReport(
         schema_version="v2-public-qualification/v1",
         evaluated_at=identity["evaluated_at"],
+        shadow_receipt_evaluation_id=shadow_receipt_evaluation_id,
         shadow_gate_evaluation_id=shadow_gate.evaluation_id,
         metrics=metrics,
         gate=gate,
