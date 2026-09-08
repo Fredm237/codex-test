@@ -2,7 +2,7 @@
   "titre": "FILON — Promotion atomique de la chaîne V2",
   "objectif": "Faire progresser P0 shadows et P1–P10 de SHADOW vers CANARY puis PUBLIC sans incohérence de dépendances ni exposition prématurée",
   "cree": "2026-09-02T00:00:00+02:00",
-  "maj": "2026-09-07T14:14:53+02:00",
+  "maj": "2026-09-09T00:23:00+02:00",
   "contraintes": [
     "Le lecteur public Core v1 reste inchangé pendant toute la qualification shadow",
     "Les writers V2 doivent être activés comme une chaîne atomique et validée fail-closed",
@@ -63,7 +63,7 @@
       "outil": "backend + observabilité",
       "attendu": "Gates statistiques, SLO ratifiés et rollback prouvé avant toute promotion PUBLIC",
       "obtenu": "DARK non influent, CANARY fermé puis PUBLIC ABSTAIN-only qualifiés avec reçus append-only, filiation exacte, rollback Core V1 et journal public sans requête brute ; BUY_NOW et WAIT restent fermés",
-      "verification": "Reçu PUBLIC sha256:aec9c600d9cda149ab792323688f4ea96827400e7408a86b38c3ac4dc9a18b6d déployé ; observation publique 69 source v2, eligibility eligible, ABSTAIN, chaîne/provenance complètes, aucun fallback ; fallbacks Core V1 critical_unknown et dependencies_not_admissible exercés ; santé HTTP/PostgreSQL/Redis verte",
+      "verification": "Reçu PUBLIC Belgique sha256:1d6270ec321564ad73fd988e734161584c7fb388f1f98179be065e3885a264ff déployé ; observation publique 143 source v2, eligibility eligible, ABSTAIN, chaîne/provenance complètes, aucun fallback ; rollback shadow Core V1 exercé ; santé HTTP/PostgreSQL/Redis verte",
       "tentatives": 1
     },
     {
@@ -203,6 +203,11 @@
       "ts": "2026-09-07T14:14:53+02:00",
       "evenement": "tache_faite",
       "detail": "v2p_d et v2p_e — promotion production terminée : reçu PUBLIC append-only, routeur public ABSTAIN-only, fallback Core V1, fenêtre smartphone réelle 1001-1100 et observation publique V2 numéro 69 prouvés sans concurrence ni violation de sûreté"
+    },
+    {
+      "ts": "2026-09-09T00:23:00+02:00",
+      "evenement": "verification",
+      "detail": "v2p_e — promotion Belgique requalifiée sur la filiation exacte : reçu PUBLIC append-only sha256:1d6270ec321564ad73fd988e734161584c7fb388f1f98179be065e3885a264ff, déploiement Railway 0a620a3c-b005-44fa-8ee4-c0e27059df50 actif, observation 143 source v2 ABSTAIN sans fallback ni requête brute, santé HTTP/PostgreSQL/Redis verte ; BUY_NOW, FACTUAL_OPTIONS et WAIT restent fermés"
     }
   ]
 }
