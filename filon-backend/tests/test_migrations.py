@@ -104,7 +104,8 @@ V2_PROMOTION_RECEIPT_REVISION = "e8b6c0d2f4a7"
 V2_PROMOTION_EVIDENCE_REVISION = "f9c7d1e3a5b8"
 V2_FACTUAL_OPTIONS_REVISION = "0b8d2f4a6c9e"
 V2_RECEIPT_SCOPED_CANARY_REVISION = "1c9e3b5d7f0a"
-HEAD_REVISION = V2_RECEIPT_SCOPED_CANARY_REVISION
+V2_COUNTRY_SCOPE_REVISION = "2d0f4a6c8e1b"
+HEAD_REVISION = V2_COUNTRY_SCOPE_REVISION
 
 
 @pytest.fixture(autouse=True)
@@ -197,8 +198,12 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
         == V2_PROMOTION_EVIDENCE_REVISION
     )
     assert (
-        scripts.get_revision(HEAD_REVISION).down_revision
+        scripts.get_revision(V2_RECEIPT_SCOPED_CANARY_REVISION).down_revision
         == V2_FACTUAL_OPTIONS_REVISION
+    )
+    assert (
+        scripts.get_revision(HEAD_REVISION).down_revision
+        == V2_RECEIPT_SCOPED_CANARY_REVISION
     )
 
 
@@ -248,6 +253,58 @@ def test_receipt_scoped_canary_lineage_is_reversible(tmp_path, monkeypatch):
     finally:
         engine.dispose()
 
+
+def test_v2_country_scope_is_additive_and_reversible(tmp_path, monkeypatch):
+    database_path = tmp_path / "v2-country-scope.sqlite"
+    config = _config(database_path, monkeypatch)
+    command.upgrade(config, V2_RECEIPT_SCOPED_CANARY_REVISION)
+
+    engine = create_engine(_sync_url(database_path))
+    try:
+        columns = {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_chain_executions")
+        }
+        assert "country_code" not in columns
+        assert "raw_id_upper_bound" not in columns
+    finally:
+        engine.dispose()
+
+    command.upgrade(config, HEAD_REVISION)
+    engine = create_engine(_sync_url(database_path))
+    try:
+        inspector = inspect(engine)
+        columns = {
+            column["name"]
+            for column in inspector.get_columns("v2_chain_executions")
+        }
+        indexes = {
+            index["name"]
+            for index in inspector.get_indexes("v2_chain_executions")
+        }
+        constraints = {
+            constraint["name"]
+            for constraint in inspector.get_check_constraints(
+                "v2_chain_executions"
+            )
+        }
+        assert {"country_code", "raw_id_upper_bound"} <= columns
+        assert "ix_v2_chain_executions_country_code" in indexes
+        assert "ck_v2_chain_execution_country_scope" in constraints
+    finally:
+        engine.dispose()
+
+    command.downgrade(config, V2_RECEIPT_SCOPED_CANARY_REVISION)
+    engine = create_engine(_sync_url(database_path))
+    try:
+        columns = {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_chain_executions")
+        }
+        assert "country_code" not in columns
+        assert "raw_id_upper_bound" not in columns
+    finally:
+        engine.dispose()
 
 def test_factual_options_constraints_are_reversible(tmp_path, monkeypatch):
     database_path = tmp_path / "factual-options-constraints.sqlite"

@@ -12,6 +12,9 @@
     "after_raw_id",
     "latest_raw_id",
     "due",
+    "country_code",
+    "initial_after_raw_id",
+    "raw_id_upper_bound",
     "execution_id",
     "evaluation_id",
     "active_execution_id",
@@ -49,6 +52,14 @@
     "after_raw_id": { "type": "integer", "minimum": 0 },
     "latest_raw_id": { "type": "integer", "minimum": 0 },
     "due": { "type": "boolean" },
+    "country_code": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "string", "pattern": "^[A-Z]{2}$" }
+      ]
+    },
+    "initial_after_raw_id": { "type": ["integer", "null"], "minimum": 0 },
+    "raw_id_upper_bound": { "type": ["integer", "null"], "minimum": 1 },
     "execution_id": { "type": ["integer", "null"], "minimum": 1 },
     "evaluation_id": {
       "oneOf": [
@@ -72,6 +83,24 @@
     "raw_payload_retained": { "const": false }
   },
   "allOf": [
+    {
+      "if": {
+        "properties": { "country_code": { "type": "string" } },
+        "required": ["country_code"]
+      },
+      "then": {
+        "properties": {
+          "initial_after_raw_id": { "type": "integer" },
+          "raw_id_upper_bound": { "type": "integer" }
+        }
+      },
+      "else": {
+        "properties": {
+          "initial_after_raw_id": { "type": "null" },
+          "raw_id_upper_bound": { "type": "null" }
+        }
+      }
+    },
     {
       "if": {
         "properties": { "status": { "const": "succeeded" } },

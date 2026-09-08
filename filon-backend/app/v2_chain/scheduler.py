@@ -54,6 +54,9 @@ class V2ScheduleReceipt:
     after_raw_id: int
     latest_raw_id: int
     due: bool
+    country_code: str | None = None
+    initial_after_raw_id: int | None = None
+    raw_id_upper_bound: int | None = None
     execution_id: int | None = None
     evaluation_id: str | None = None
     active_execution_id: int | None = None
@@ -64,7 +67,14 @@ class V2ScheduleReceipt:
     raw_payload_retained: bool = False
 
 
-def _validate_configuration(vertical: str, limit: int) -> None:
+def _validate_configuration(
+    vertical: str,
+    limit: int,
+    *,
+    country_code: str | None = None,
+    initial_after_raw_id: int | None = None,
+    raw_id_upper_bound: int | None = None,
+) -> None:
     settings = get_settings()
     if settings.database_schema_mode != "alembic":
         raise RuntimeError("V2 scheduler requires DATABASE_SCHEMA_MODE=alembic")
@@ -76,6 +86,25 @@ def _validate_configuration(vertical: str, limit: int) -> None:
         raise RuntimeError("V2 scheduler vertical is unsupported")
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= MAX_CHAIN_ROWS:
         raise RuntimeError(f"V2 scheduler limit must be between 1 and {MAX_CHAIN_ROWS}")
+    scope = (country_code, initial_after_raw_id, raw_id_upper_bound)
+    if any(value is not None for value in scope) and not all(
+        value is not None for value in scope
+    ):
+        raise RuntimeError("V2 scheduler country scope is incomplete")
+    if country_code is not None and (
+        len(country_code) != 2
+        or country_code.upper() != country_code
+        or not country_code.isalpha()
+    ):
+        raise RuntimeError("V2 scheduler country code is invalid")
+    if initial_after_raw_id is not None and (
+        isinstance(initial_after_raw_id, bool)
+        or not isinstance(initial_after_raw_id, int)
+        or initial_after_raw_id < 0
+    ):
+        raise RuntimeError("V2 scheduler initial cursor is invalid")
+    if raw_id_upper_bound is not None and raw_id_upper_bound <= initial_after_raw_id:
+        raise RuntimeError("V2 scheduler raw upper bound is invalid")
     if not db.is_enabled():
         raise RuntimeError("V2 scheduler requires DATABASE_URL")
 
@@ -151,13 +180,18 @@ async def _latest_terminal_recovery(
     )
 
 
-async def _latest_awin_raw_id(session) -> int:
+async def _latest_awin_raw_id(
+    session,
+    *,
+    raw_id_upper_bound: int | None,
+) -> int:
     value = await session.scalar(
         select(func.max(RawSourceRecord.id)).where(
             RawSourceRecord.source_type == "awin_feed"
         )
     )
-    return int(value or 0)
+    latest = int(value or 0)
+    return min(latest, raw_id_upper_bound) if raw_id_upper_bound is not None else latest
 
 
 def _receipt(
@@ -171,6 +205,9 @@ def _receipt(
     evaluation_id: str | None = None,
     lease: dict[str, object] | None = None,
     recovery_source_execution_id: int | None = None,
+    country_code: str | None = None,
+    initial_after_raw_id: int | None = None,
+    raw_id_upper_bound: int | None = None,
 ) -> V2ScheduleReceipt:
     return V2ScheduleReceipt(
         schema_version="v2-shadow-schedule-receipt/v1",
@@ -180,6 +217,9 @@ def _receipt(
         after_raw_id=after_raw_id,
         latest_raw_id=latest_raw_id,
         due=latest_raw_id > after_raw_id,
+        country_code=country_code,
+        initial_after_raw_id=initial_after_raw_id,
+        raw_id_upper_bound=raw_id_upper_bound,
         execution_id=execution_id,
         evaluation_id=evaluation_id,
         recovery_source_execution_id=recovery_source_execution_id,
@@ -192,13 +232,37 @@ async def _state(
     *,
     vertical: str,
     campaign_id: str,
+    country_code: str | None = None,
+    initial_after_raw_id: int | None = None,
+    raw_id_upper_bound: int | None = None,
 ) -> tuple[str, int, int]:
     after_raw_id = await next_after_raw_id(
         session,
         vertical=vertical,
         campaign_id=campaign_id,
     )
-    latest_raw_id = await _latest_awin_raw_id(session)
+    if after_raw_id == 0 and initial_after_raw_id is not None:
+        after_raw_id = initial_after_raw_id
+    if country_code is not None:
+        scoped_rows = {
+            (row.country_code, row.raw_id_upper_bound)
+            for row in (
+                await session.execute(
+                    select(
+                        V2ChainExecution.country_code,
+                        V2ChainExecution.raw_id_upper_bound,
+                    )
+                    .where(V2ChainExecution.campaign_id == campaign_id)
+                    .distinct()
+                )
+            ).all()
+        }
+        if scoped_rows and scoped_rows != {(country_code, raw_id_upper_bound)}:
+            raise RuntimeError("V2 campaign country scope drifted")
+    latest_raw_id = await _latest_awin_raw_id(
+        session,
+        raw_id_upper_bound=raw_id_upper_bound,
+    )
     if await _catalog_sync_active(session):
         return "catalog_syncing", after_raw_id, latest_raw_id
     if await _v2_chain_active(session):
@@ -220,10 +284,23 @@ async def _state(
     return "due", after_raw_id, latest_raw_id
 
 
-async def preflight(*, vertical: str, limit: int) -> V2ScheduleReceipt:
+async def preflight(
+    *,
+    vertical: str,
+    limit: int,
+    country_code: str | None = None,
+    initial_after_raw_id: int | None = None,
+    raw_id_upper_bound: int | None = None,
+) -> V2ScheduleReceipt:
     """Retourne l'état du Cron sans lancer de writer V2."""
 
-    _validate_configuration(vertical, limit)
+    _validate_configuration(
+        vertical,
+        limit,
+        country_code=country_code,
+        initial_after_raw_id=initial_after_raw_id,
+        raw_id_upper_bound=raw_id_upper_bound,
+    )
     settings = get_settings()
     await db.prepare_schema()
     async with db.session_scope() as session:
@@ -233,6 +310,9 @@ async def preflight(*, vertical: str, limit: int) -> V2ScheduleReceipt:
             session,
             vertical=vertical,
             campaign_id=settings.v2_chain_campaign_id,
+            country_code=country_code,
+            initial_after_raw_id=initial_after_raw_id,
+            raw_id_upper_bound=raw_id_upper_bound,
         )
         lease = (
             await _active_v2_lease(
@@ -262,13 +342,29 @@ async def preflight(*, vertical: str, limit: int) -> V2ScheduleReceipt:
         recovery_source_execution_id=(
             recovery.id if recovery is not None else None
         ),
+        country_code=country_code,
+        initial_after_raw_id=initial_after_raw_id,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
 
 
-async def run_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
+async def run_once(
+    *,
+    vertical: str,
+    limit: int,
+    country_code: str | None = None,
+    initial_after_raw_id: int | None = None,
+    raw_id_upper_bound: int | None = None,
+) -> V2ScheduleReceipt:
     """Exécute au plus une fenêtre V2 lorsque son amont est stable."""
 
-    _validate_configuration(vertical, limit)
+    _validate_configuration(
+        vertical,
+        limit,
+        country_code=country_code,
+        initial_after_raw_id=initial_after_raw_id,
+        raw_id_upper_bound=raw_id_upper_bound,
+    )
     settings = get_settings()
     await db.prepare_schema()
     async with db.session_scope() as session:
@@ -278,6 +374,9 @@ async def run_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
             session,
             vertical=vertical,
             campaign_id=settings.v2_chain_campaign_id,
+            country_code=country_code,
+            initial_after_raw_id=initial_after_raw_id,
+            raw_id_upper_bound=raw_id_upper_bound,
         )
         if status not in {"due", "v2_resume_due"}:
             lease = (
@@ -308,6 +407,9 @@ async def run_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
                 recovery_source_execution_id=(
                     recovery.id if recovery is not None else None
                 ),
+                country_code=country_code,
+                initial_after_raw_id=initial_after_raw_id,
+                raw_id_upper_bound=raw_id_upper_bound,
             )
         recovery = None
         execution_limit = limit
@@ -348,6 +450,8 @@ async def run_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
                 campaign_id=settings.v2_chain_campaign_id,
                 execution_kind=("recovery" if recovery is not None else "progression"),
                 source_execution_id=(recovery.id if recovery is not None else None),
+                country_code=country_code,
+                raw_id_upper_bound=raw_id_upper_bound,
             )
         except V2ChainAlreadyRunning:
             catalog_active = await _catalog_sync_active(session)
@@ -369,6 +473,9 @@ async def run_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
                 recovery_source_execution_id=(
                     recovery.id if recovery is not None else None
                 ),
+                country_code=country_code,
+                initial_after_raw_id=initial_after_raw_id,
+                raw_id_upper_bound=raw_id_upper_bound,
             )
     return _receipt(
         status="succeeded",
@@ -381,10 +488,20 @@ async def run_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
         recovery_source_execution_id=(
             recovery.id if recovery is not None else None
         ),
+        country_code=country_code,
+        initial_after_raw_id=initial_after_raw_id,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
 
 
-async def interrupt_stale_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
+async def interrupt_stale_once(
+    *,
+    vertical: str,
+    limit: int,
+    country_code: str | None = None,
+    initial_after_raw_id: int | None = None,
+    raw_id_upper_bound: int | None = None,
+) -> V2ScheduleReceipt:
     """Clôt au plus un lease stale, sans lancer son successeur.
 
     Cette commande est volontairement distincte de ``run_once``. L'opérateur
@@ -392,7 +509,13 @@ async def interrupt_stale_once(*, vertical: str, limit: int) -> V2ScheduleReceip
     occurrence normale ne transforme jamais seule un lease frais ou stale.
     """
 
-    _validate_configuration(vertical, limit)
+    _validate_configuration(
+        vertical,
+        limit,
+        country_code=country_code,
+        initial_after_raw_id=initial_after_raw_id,
+        raw_id_upper_bound=raw_id_upper_bound,
+    )
     settings = get_settings()
     await db.prepare_schema()
     async with db.session_scope() as session:
@@ -402,6 +525,9 @@ async def interrupt_stale_once(*, vertical: str, limit: int) -> V2ScheduleReceip
             session,
             vertical=vertical,
             campaign_id=settings.v2_chain_campaign_id,
+            country_code=country_code,
+            initial_after_raw_id=initial_after_raw_id,
+            raw_id_upper_bound=raw_id_upper_bound,
         )
         if status != "v2_running":
             return _receipt(
@@ -410,6 +536,9 @@ async def interrupt_stale_once(*, vertical: str, limit: int) -> V2ScheduleReceip
                 limit=limit,
                 after_raw_id=after_raw_id,
                 latest_raw_id=latest_raw_id,
+                country_code=country_code,
+                initial_after_raw_id=initial_after_raw_id,
+                raw_id_upper_bound=raw_id_upper_bound,
             )
         stale_before = datetime.now(timezone.utc) - timedelta(
             seconds=settings.v2_chain_stale_after_seconds
@@ -433,6 +562,9 @@ async def interrupt_stale_once(*, vertical: str, limit: int) -> V2ScheduleReceip
         after_raw_id=after_raw_id,
         latest_raw_id=latest_raw_id,
         lease=lease,
+        country_code=country_code,
+        initial_after_raw_id=initial_after_raw_id,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
 
 
@@ -442,6 +574,9 @@ def _parser() -> argparse.ArgumentParser:
     )
     parser.add_argument("--vertical", required=True, choices=tuple(VERTICAL_WEIGHTS))
     parser.add_argument("--limit", type=int, default=MAX_CHAIN_ROWS)
+    parser.add_argument("--country-code")
+    parser.add_argument("--initial-after-raw-id", type=int)
+    parser.add_argument("--raw-id-upper-bound", type=int)
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--interrupt-stale", action="store_true")
     return parser
@@ -461,7 +596,19 @@ def main(argv: Sequence[str] | None = None) -> int:
             if args.interrupt_stale
             else run_once
         )
-        receipt = asyncio.run(operation(vertical=args.vertical, limit=args.limit))
+        receipt = asyncio.run(
+            operation(
+                vertical=args.vertical,
+                limit=args.limit,
+                country_code=(
+                    args.country_code.strip().upper()
+                    if isinstance(args.country_code, str)
+                    else None
+                ),
+                initial_after_raw_id=args.initial_after_raw_id,
+                raw_id_upper_bound=args.raw_id_upper_bound,
+            )
+        )
     except Exception as exc:  # pragma: no cover - dépendances réelles
         print(
             json.dumps(

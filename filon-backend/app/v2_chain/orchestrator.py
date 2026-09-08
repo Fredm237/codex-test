@@ -68,6 +68,8 @@ class V2ChainReport:
     stages: dict[str, dict[str, Any]]
     evaluation_id: str
     execution_id: int | None = None
+    country_code: str | None = None
+    raw_id_upper_bound: int | None = None
 
 
 async def _max_id(session, model) -> int:
@@ -95,6 +97,8 @@ def validate_v2_chain_request(
     after_raw_id: int,
     limit: int,
     checkpoints: V2ChainCheckpoints,
+    country_code: str | None = None,
+    raw_id_upper_bound: int | None = None,
 ) -> datetime:
     if evaluated_at.tzinfo is None:
         raise ValueError("evaluated_at must include a timezone")
@@ -117,6 +121,20 @@ def validate_v2_chain_request(
         for value in asdict(checkpoints).values()
     ):
         raise ValueError("V2 chain checkpoints must be non-negative integers")
+    if (country_code is None) != (raw_id_upper_bound is None):
+        raise ValueError("country scope requires both country and raw upper bound")
+    if country_code is not None and (
+        len(country_code) != 2
+        or country_code.upper() != country_code
+        or not country_code.isalpha()
+    ):
+        raise ValueError("country code must be an uppercase ISO alpha-2 code")
+    if raw_id_upper_bound is not None and (
+        isinstance(raw_id_upper_bound, bool)
+        or not isinstance(raw_id_upper_bound, int)
+        or raw_id_upper_bound <= after_raw_id
+    ):
+        raise ValueError("raw upper bound must be greater than after_raw_id")
     return evaluated_at.astimezone(timezone.utc)
 
 
@@ -143,6 +161,8 @@ def _identity_payload(
     limit: int,
     checkpoints: V2ChainCheckpoints,
     stages: dict[str, dict[str, Any]],
+    country_code: str | None,
+    raw_id_upper_bound: int | None,
 ) -> dict[str, Any]:
     stable_stage_ids = {
         name: report.get("evaluation_id")
@@ -155,6 +175,8 @@ def _identity_payload(
         "after_raw_id": after_raw_id,
         "limit": limit,
         "checkpoints": asdict(checkpoints),
+        "country_code": country_code,
+        "raw_id_upper_bound": raw_id_upper_bound,
         "stage_evaluation_ids": stable_stage_ids,
     }
 
@@ -169,6 +191,8 @@ async def run_v2_shadow_chain(
     apply: bool = False,
     checkpoints: V2ChainCheckpoints | None = None,
     on_stage_complete: Callable[[str], Awaitable[None]] | None = None,
+    country_code: str | None = None,
+    raw_id_upper_bound: int | None = None,
 ) -> V2ChainReport:
     """Exécute la chaîne avec une fenêtre et des checkpoints réutilisables."""
 
@@ -179,6 +203,8 @@ async def run_v2_shadow_chain(
         after_raw_id=after_raw_id,
         limit=limit,
         checkpoints=captured,
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
     measured_at = evaluated.replace(tzinfo=None)
 
@@ -345,6 +371,8 @@ async def run_v2_shadow_chain(
         limit=limit,
         checkpoints=captured,
         stages=stages,
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
     encoded = json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()
     return V2ChainReport(
@@ -357,6 +385,8 @@ async def run_v2_shadow_chain(
         checkpoints=captured,
         stages=stages,
         evaluation_id="sha256:" + hashlib.sha256(encoded).hexdigest(),
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
 
 
@@ -382,6 +412,8 @@ def _parser() -> argparse.ArgumentParser:
     cursor_group.add_argument("--after-raw-id", type=int, default=0)
     cursor_group.add_argument("--continue-after-last-success", action="store_true")
     parser.add_argument("--limit", type=int, default=10)
+    parser.add_argument("--country-code")
+    parser.add_argument("--raw-id-upper-bound", type=int)
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--campaign-id")
     parser.add_argument(
@@ -467,6 +499,12 @@ async def _run(args: argparse.Namespace) -> V2ChainReport:
             campaign_id=args.campaign_id,
             execution_kind=args.execution_kind,
             source_execution_id=args.source_execution_id,
+            country_code=(
+                args.country_code.strip().upper()
+                if isinstance(args.country_code, str)
+                else None
+            ),
+            raw_id_upper_bound=args.raw_id_upper_bound,
         )
 
 

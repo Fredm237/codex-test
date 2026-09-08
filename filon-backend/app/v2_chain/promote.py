@@ -26,6 +26,7 @@ from app.v2_chain.promotion_receipt import (
 from app.v2_chain.qualification import (
     RESPONSE_TYPES,
     V2ExternalProofs,
+    V2PromotionScope,
     V2PublicExternalProofs,
     evaluate_persisted_canary_to_public,
     evaluate_persisted_shadow_to_canary,
@@ -194,6 +195,15 @@ async def _run(
                     **proof_values,
                     campaign_id=settings.v2_chain_campaign_id,
                     maximum_p95_window_ms=args.maximum_p95_window_ms,
+                ),
+                runtime_scope=V2PromotionScope(
+                    verticals=tuple(sorted(settings.v2_supported_verticals_list)),
+                    locales=tuple(sorted(settings.v2_supported_locales_list)),
+                    countries=tuple(sorted(settings.v2_supported_countries_list)),
+                    decision_types=tuple(
+                        sorted(settings.v2_supported_decision_types_list)
+                    ),
+                    maximum_data_age_seconds=settings.v2_max_data_age_seconds,
                 ),
                 evaluated_at=_evaluated_at(args),
             )

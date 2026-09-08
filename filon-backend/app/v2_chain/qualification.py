@@ -58,6 +58,49 @@ class V2QualificationError(ValueError):
 
 
 @dataclass(frozen=True)
+class V2PromotionScope:
+    verticals: tuple[str, ...]
+    locales: tuple[str, ...]
+    countries: tuple[str, ...]
+    decision_types: tuple[str, ...]
+    maximum_data_age_seconds: int
+
+    def __post_init__(self) -> None:
+        token_groups = (
+            ("verticals", self.verticals, 32),
+            ("locales", self.locales, 8),
+            ("countries", self.countries, 2),
+            ("decision_types", self.decision_types, 32),
+        )
+        for name, values, maximum in token_groups:
+            if (
+                not values
+                or len(values) != len(set(values))
+                or tuple(sorted(values)) != values
+                or any(
+                    not isinstance(value, str)
+                    or not value
+                    or len(value) > maximum
+                    for value in values
+                )
+            ):
+                raise V2QualificationError(f"promotion scope {name} are invalid")
+        if any(
+            len(country) != 2
+            or country.upper() != country
+            or not country.isalpha()
+            for country in self.countries
+        ):
+            raise V2QualificationError("promotion scope countries are invalid")
+        if (
+            isinstance(self.maximum_data_age_seconds, bool)
+            or not isinstance(self.maximum_data_age_seconds, int)
+            or not 1 <= self.maximum_data_age_seconds <= 30 * 24 * 60 * 60
+        ):
+            raise V2QualificationError("promotion scope data age is invalid")
+
+
+@dataclass(frozen=True)
 class V2ExternalProofs:
     campaign_id: str
     single_alembic_head_ref: str
@@ -152,6 +195,7 @@ class V2ShadowQualificationReport:
     schema_version: str
     evaluated_at: str
     campaign_id: str
+    runtime_scope: V2PromotionScope
     metrics: V2QualificationMetrics
     gate: V2CanaryGateReport
     proof_refs: dict[str, str]
@@ -339,6 +383,7 @@ async def evaluate_persisted_shadow_to_canary(
     session,
     *,
     proofs: V2ExternalProofs,
+    runtime_scope: V2PromotionScope,
     evaluated_at: datetime,
 ) -> V2ShadowQualificationReport:
     """Calcule le gate à partir des journaux et de reçus externes digestés."""
@@ -364,7 +409,16 @@ async def evaluate_persisted_shadow_to_canary(
         (
             await session.execute(
                 select(V2LiveDarkReadObservation)
-                .where(V2LiveDarkReadObservation.campaign_id == proofs.campaign_id)
+                .where(
+                    V2LiveDarkReadObservation.campaign_id == proofs.campaign_id,
+                    V2LiveDarkReadObservation.country_code.in_(
+                        runtime_scope.countries
+                    ),
+                    V2LiveDarkReadObservation.vertical.in_(
+                        runtime_scope.verticals
+                    ),
+                    V2LiveDarkReadObservation.locale.in_(runtime_scope.locales),
+                )
                 .order_by(V2LiveDarkReadObservation.id)
                 .limit(MAX_QUALIFICATION_ROWS + 1)
             )
@@ -379,6 +433,19 @@ async def evaluate_persisted_shadow_to_canary(
         raise V2QualificationError("qualification window exceeds the bounded audit limit")
 
     progress_windows, cursor_monotone = _progress_windows(executions)
+    execution_countries = {
+        item.country_code for item in executions if item.country_code is not None
+    }
+    execution_verticals = {item.vertical for item in executions}
+    if executions and (
+        any(
+            item.country_code is None or item.raw_id_upper_bound is None
+            for item in executions
+        )
+        or execution_countries != set(runtime_scope.countries)
+        or execution_verticals != set(runtime_scope.verticals)
+    ):
+        raise V2QualificationError("campaign execution scope is incomplete")
     p95 = _p95_window_ms(progress_windows)
     dark_invalid = sum(item.safety_state == "INVALID" for item in observations)
     dark_raw = sum(item.raw_query_retained is not False for item in observations)
@@ -459,6 +526,7 @@ async def evaluate_persisted_shadow_to_canary(
     identity = {
         "evaluated_at": evaluated.isoformat().replace("+00:00", "Z"),
         "campaign_id": proofs.campaign_id,
+        "runtime_scope": asdict(runtime_scope),
         "metrics": asdict(metrics),
         "gate": gate.to_dict(),
         "proof_refs": refs,
@@ -468,6 +536,7 @@ async def evaluate_persisted_shadow_to_canary(
         schema_version="v2-shadow-qualification/v1",
         evaluated_at=identity["evaluated_at"],
         campaign_id=proofs.campaign_id,
+        runtime_scope=runtime_scope,
         metrics=metrics,
         gate=gate,
         proof_refs=refs,

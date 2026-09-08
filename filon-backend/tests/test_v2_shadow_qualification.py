@@ -17,6 +17,7 @@ from app.v2_chain.proof_registry import SHADOW_PROOF_KEYS, record_promotion_proo
 from app.v2_chain.qualification import (
     REQUIRED_STAGES,
     V2ExternalProofs,
+    V2PromotionScope,
     V2QualificationError,
     evaluate_persisted_shadow_to_canary,
 )
@@ -29,6 +30,13 @@ CONTRACT_ROOT = (
 )
 SCHEMA = json.loads((CONTRACT_ROOT / "shadow-qualification.schema.json").read_text())
 VALIDATOR = Draft202012Validator(SCHEMA)
+SCOPE = V2PromotionScope(
+    verticals=("smartphones",),
+    locales=("fr",),
+    countries=("FR",),
+    decision_types=("purchase_advice",),
+    maximum_data_age_seconds=300,
+)
 
 
 def _digest(character: str) -> str:
@@ -98,6 +106,8 @@ async def _seed_proven_window(
         completed_stages_json=sorted(REQUIRED_STAGES),
         campaign_id=CAMPAIGN_ID,
         execution_kind="progression",
+        country_code="FR",
+        raw_id_upper_bound=30,
         window_metrics_json={
             "schema_version": "v2-window-metrics/v1",
             "evaluation_identity": report_digest,
@@ -145,6 +155,7 @@ async def test_empty_evidence_keeps_canary_closed() -> None:
             report = await evaluate_persisted_shadow_to_canary(
                 session,
                 proofs=_proofs(),
+                runtime_scope=SCOPE,
                 evaluated_at=EVALUATED_AT,
             )
 
@@ -170,6 +181,7 @@ async def test_thirty_real_windows_authorize_only_observed_abstain() -> None:
             report = await evaluate_persisted_shadow_to_canary(
                 session,
                 proofs=_proofs(**proof_refs),
+                runtime_scope=SCOPE,
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
             )
 
@@ -204,6 +216,7 @@ async def test_digest_shaped_but_unregistered_proofs_never_open_canary() -> None
             report = await evaluate_persisted_shadow_to_canary(
                 session,
                 proofs=_proofs(),
+                runtime_scope=SCOPE,
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
             )
 
@@ -211,6 +224,34 @@ async def test_digest_shaped_but_unregistered_proofs_never_open_canary() -> None
             assert "MIGRATION_AND_ROLLBACK" in report.gate.blocker_codes
             assert "IDEMPOTENT_CHAIN_REPLAY" in report.gate.blocker_codes
             assert "DARK_READER_ROLLBACK" in report.gate.blocker_codes
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_campaign_cannot_authorize_a_different_country_scope() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            await _seed_proven_window(session, 0)
+            await session.commit()
+
+            with pytest.raises(
+                V2QualificationError,
+                match="execution scope is incomplete",
+            ):
+                await evaluate_persisted_shadow_to_canary(
+                    session,
+                    proofs=_proofs(),
+                    runtime_scope=V2PromotionScope(
+                        verticals=("smartphones",),
+                        locales=("fr",),
+                        countries=("BE",),
+                        decision_types=("purchase_advice",),
+                        maximum_data_age_seconds=300,
+                    ),
+                    evaluated_at=EVALUATED_AT + timedelta(hours=1),
+                )
     finally:
         await engine.dispose()
 
@@ -259,6 +300,7 @@ async def test_identical_replay_is_not_counted_as_a_new_real_window() -> None:
             report = await evaluate_persisted_shadow_to_canary(
                 session,
                 proofs=_proofs(),
+                runtime_scope=SCOPE,
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
             )
 
@@ -288,6 +330,7 @@ async def test_gap_overlap_or_invalid_dark_observation_keeps_gate_closed() -> No
             report = await evaluate_persisted_shadow_to_canary(
                 session,
                 proofs=_proofs(),
+                runtime_scope=SCOPE,
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
             )
 

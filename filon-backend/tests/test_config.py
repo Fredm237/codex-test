@@ -214,6 +214,7 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
     assert settings.v2_canary_subject_digests_list == []
     assert settings.v2_supported_verticals_list == []
     assert settings.v2_supported_locales_list == []
+    assert settings.v2_supported_countries_list == []
     assert settings.v2_supported_decision_types_list == []
     assert settings.v2_max_data_age_seconds is None
     assert settings.observation_shadow_enabled is False
@@ -721,6 +722,7 @@ def test_atomic_v2_canary_mode_requires_exact_receipt_and_closed_cohort() -> Non
         v2_canary_subject_digests=subject,
         v2_supported_verticals="smartphones",
         v2_supported_locales="fr-BE",
+        v2_supported_countries="BE",
         v2_supported_decision_types="purchase_advice",
         v2_max_data_age_seconds=300,
     )
@@ -730,8 +732,20 @@ def test_atomic_v2_canary_mode_requires_exact_receipt_and_closed_cohort() -> Non
     assert settings.v2_canary_subject_digests_list == [subject]
     assert settings.v2_supported_verticals_list == ["smartphones"]
     assert settings.v2_supported_locales_list == ["fr-BE"]
+    assert settings.v2_supported_countries_list == ["BE"]
     assert settings.v2_supported_decision_types_list == ["purchase_advice"]
     assert settings.v2_max_data_age_seconds == 300
+
+
+def test_v2_country_scope_rejects_non_iso_tokens() -> None:
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        v2_supported_countries="B1",
+    )
+
+    with pytest.raises(ValueError, match="ISO-3166"):
+        _ = settings.v2_supported_countries_list
 
 
 def test_blank_v2_promotion_receipt_is_closed_default() -> None:
@@ -754,6 +768,7 @@ def test_atomic_v2_public_mode_requires_exact_receipt_and_no_canary_cohort() -> 
         v2_promotion_receipt_evaluation_id=digest,
         v2_supported_verticals="smartphones",
         v2_supported_locales="fr-BE",
+        v2_supported_countries="BE",
         v2_supported_decision_types="purchase_advice",
         v2_max_data_age_seconds=300,
     )
@@ -799,12 +814,6 @@ def test_atomic_v2_public_mode_requires_exact_receipt_and_no_canary_cohort() -> 
             },
             "forbids a promotion receipt",
         ),
-        (
-            {
-                "v2_canary_subject_digests": "sha256:" + "b" * 64,
-            },
-            "V2_CHAIN_MODE=off forbids a canary cohort",
-        ),
     ],
 )
 def test_v2_promoted_configuration_rejects_incomplete_evidence(
@@ -813,6 +822,23 @@ def test_v2_promoted_configuration_rejects_incomplete_evidence(
 ) -> None:
     with pytest.raises(ValidationError, match=message):
         Settings(_env_file=None, env="test", **overrides)
+
+
+def test_v2_off_mode_keeps_audit_refs_dormant_for_fast_kill_switch() -> None:
+    receipt = "sha256:" + "a" * 64
+    subject = "sha256:" + "b" * 64
+    settings = Settings(
+        _env_file=None,
+        env="test",
+        v2_chain_mode="off",
+        v2_promotion_receipt_evaluation_id=receipt,
+        v2_canary_subject_digests=subject,
+    )
+
+    assert settings.v2_canary_reader_enabled is False
+    assert settings.v2_public_reader_enabled is False
+    assert settings.v2_promotion_receipt_evaluation_id == receipt
+    assert settings.v2_canary_subject_digests_list == [subject]
 
 
 @pytest.mark.parametrize(

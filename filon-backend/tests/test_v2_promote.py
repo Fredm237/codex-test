@@ -51,6 +51,11 @@ def _settings(*, stage: str, receipt: str | None = None):
         v2_canary_reader_enabled=stage == "public",
         v2_public_reader_enabled=False,
         v2_promotion_receipt_evaluation_id=receipt,
+        v2_supported_verticals_list=("smartphones",),
+        v2_supported_locales_list=("fr-BE",),
+        v2_supported_countries_list=("BE",),
+        v2_supported_decision_types_list=("purchase_advice",),
+        v2_max_data_age_seconds=259_200,
         debug=False,
     )
 

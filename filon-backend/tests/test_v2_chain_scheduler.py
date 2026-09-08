@@ -398,7 +398,13 @@ def test_main_prints_a_machine_readable_safe_receipt(monkeypatch, capsys) -> Non
 
     assert scheduler.main(["--vertical", "smartphones", "--limit", "25", "--check"]) == 0
     assert json.loads(capsys.readouterr().out) == asdict(receipt)
-    preflight.assert_awaited_once_with(vertical="smartphones", limit=25)
+    preflight.assert_awaited_once_with(
+        vertical="smartphones",
+        limit=25,
+        country_code=None,
+        initial_after_raw_id=None,
+        raw_id_upper_bound=None,
+    )
 
 
 def test_main_routes_explicit_stale_recovery(monkeypatch, capsys) -> None:
@@ -419,7 +425,13 @@ def test_main_routes_explicit_stale_recovery(monkeypatch, capsys) -> None:
         ["--vertical", "smartphones", "--limit", "25", "--interrupt-stale"]
     ) == 0
     assert json.loads(capsys.readouterr().out) == asdict(receipt)
-    recover.assert_awaited_once_with(vertical="smartphones", limit=25)
+    recover.assert_awaited_once_with(
+        vertical="smartphones",
+        limit=25,
+        country_code=None,
+        initial_after_raw_id=None,
+        raw_id_upper_bound=None,
+    )
 
 
 def test_main_refuses_check_and_recovery_together(monkeypatch, capsys) -> None:
@@ -522,6 +534,81 @@ async def test_real_state_queries_block_catalog_and_keep_vertical_cursors() -> N
                 1,
                 1,
             )
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_country_campaign_cursor_is_bounded_and_scope_cannot_drift() -> None:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    sessions = async_sessionmaker(engine, expire_on_commit=False)
+    try:
+        async with sessions() as session:
+            session.add(
+                RawSourceRecord(
+                    source_type="awin_feed",
+                    source_ref="awin-feed:1201",
+                    source_record_key="1201:be-scope",
+                    schema_version="awin-create-a-feed-v1",
+                    context_json={"merchant_id": 1201},
+                    payload_json={"name": "Bounded source"},
+                    payload_checksum="a" * 64,
+                    replay_key="b" * 64,
+                    observed_at=scheduler.datetime(2026, 9, 8),
+                )
+            )
+            await session.commit()
+
+            assert await scheduler._state(
+                session,
+                vertical="smartphones",
+                campaign_id=CAMPAIGN_ID,
+                country_code="BE",
+                initial_after_raw_id=0,
+                raw_id_upper_bound=1,
+            ) == ("due", 0, 1)
+
+            session.add(
+                V2ChainExecution(
+                    execution_key="e" * 64,
+                    mode="apply",
+                    status="succeeded",
+                    evaluated_at=scheduler.datetime(2026, 9, 8),
+                    vertical="smartphones",
+                    after_raw_id=0,
+                    row_limit=1,
+                    last_raw_source_id=1,
+                    checkpoints_json={},
+                    completed_stages_json=[],
+                    campaign_id=CAMPAIGN_ID,
+                    execution_kind="progression",
+                    country_code="BE",
+                    raw_id_upper_bound=1,
+                    heartbeat_at=scheduler.datetime(2026, 9, 8),
+                    finished_at=scheduler.datetime(2026, 9, 8),
+                )
+            )
+            await session.commit()
+
+            assert await scheduler._state(
+                session,
+                vertical="smartphones",
+                campaign_id=CAMPAIGN_ID,
+                country_code="BE",
+                initial_after_raw_id=0,
+                raw_id_upper_bound=1,
+            ) == ("fresh", 1, 1)
+            with pytest.raises(RuntimeError, match="country scope drifted"):
+                await scheduler._state(
+                    session,
+                    vertical="smartphones",
+                    campaign_id=CAMPAIGN_ID,
+                    country_code="FR",
+                    initial_after_raw_id=0,
+                    raw_id_upper_bound=1,
+                )
     finally:
         await engine.dispose()
 

@@ -49,6 +49,12 @@ class V2ChainExecution(Base):
             "AND source_execution_id IS NOT NULL)))",
             name="ck_v2_chain_execution_campaign",
         ),
+        CheckConstraint(
+            "(country_code IS NULL AND raw_id_upper_bound IS NULL) OR "
+            "(length(country_code) = 2 AND country_code = upper(country_code) "
+            "AND raw_id_upper_bound > after_raw_id)",
+            name="ck_v2_chain_execution_country_scope",
+        ),
         Index("ix_v2_chain_executions_started", "started_at"),
         Index(
             "ix_v2_chain_campaign_execution",
@@ -81,6 +87,10 @@ class V2ChainExecution(Base):
     source_execution_id: Mapped[int | None] = mapped_column(
         ForeignKey("v2_chain_executions.id", ondelete="RESTRICT"), nullable=True
     )
+    country_code: Mapped[str | None] = mapped_column(
+        String(2), nullable=True, index=True
+    )
+    raw_id_upper_bound: Mapped[int | None] = mapped_column(Integer, nullable=True)
     window_metrics_json: Mapped[dict[str, object] | None] = mapped_column(
         JSON, nullable=True
     )
