@@ -1,0 +1,149 @@
+{
+  "schema_version": "filon-v2-be-canary-qualification-evidence/v1",
+  "evaluated_at": "2026-09-08T21:00:00Z",
+  "scope": {
+    "country": "BE",
+    "locales": [
+      "fr",
+      "fr-BE"
+    ],
+    "verticals": [
+      "smartphones"
+    ],
+    "decision_types": [
+      "purchase_advice"
+    ],
+    "authorized_response_types": [
+      "ABSTAIN"
+    ],
+    "blocked_response_types": [
+      "BUY_NOW",
+      "FACTUAL_OPTIONS",
+      "WAIT"
+    ]
+  },
+  "lineage": {
+    "campaign_id": "sha256:d4160cb9a4e0aa08a9b7e3e61385fc7c31ada5f6f650a5d14b8d6fabc7109b8a",
+    "shadow_receipt_evaluation_id": "sha256:c979b6353767d64d4e63a8775afebf835d56e3326ae437afdb2a34b515c5576d",
+    "shadow_gate_evaluation_id": "sha256:a9c35db4450c7b0c4ef1f184264bf84e7227d53dabd7b9323b5a18c5b94707f6",
+    "candidate_main_commit": "bc6caaaff88fd5a3c34f1b43ba6fc2bdd180bd73"
+  },
+  "canary": {
+    "initial_deployment_id": "09ad2a15-3e31-4313-8121-e24813c08511",
+    "restored_deployment_id": "1808f2aa-faf4-4a61-9225-2671421b4a16",
+    "observations": 30,
+    "observation_id_first": 113,
+    "observation_id_last": 142,
+    "observed_at_first": "2026-09-08T20:45:39.196019Z",
+    "observed_at_last": "2026-09-08T20:52:43.757423Z",
+    "v2_served": 30,
+    "served_response_type_counts": {
+      "ABSTAIN": 30
+    },
+    "paired_observations": 30,
+    "eligible_fallbacks": 0,
+    "reader_errors": 0,
+    "invalid_or_incomplete": 0,
+    "provenance_complete": 30,
+    "raw_query_retained": 0,
+    "p95_latency_delta_us": -2766304
+  },
+  "readiness_and_5xx": {
+    "status": "VERIFIED",
+    "health_live_http": 200,
+    "health_ready_http": 200,
+    "health_http": 200,
+    "database": "ok",
+    "redis": "ok",
+    "schema_revision": "2d0f4a6c8e1b",
+    "canary_reader_errors": 0,
+    "v2_attributed_5xx": 0
+  },
+  "failure_injection": {
+    "status": "VERIFIED",
+    "contract": "The promoted reader returns the complete Core V1 block on a V2 reader exception and records only a neutral failure reason.",
+    "test_file": "filon-backend/tests/test_v2_live_router.py",
+    "candidate_ci_run_id": 34274007623,
+    "candidate_ci_job": "Backend, contrats et Quality Lab",
+    "prior_live_route_exercise": "docs/architecture/V2_PUBLIC_ACTIVATION_RECEIPT.md#qualification-canary-reelle",
+    "production_candidate_error_injected": false,
+    "reason": "A failing row was not inserted into the closed Belgian cohort because that would deliberately invalidate the same append-only public gate; the fail-closed path is covered on the candidate revision and was already exercised on the identical public router lineage."
+  },
+  "rollback_to_shadow": {
+    "status": "VERIFIED",
+    "shadow_deployment_id": "bf1de86c-d4e7-4af5-9986-d01f6a4dc149",
+    "mode": "shadow",
+    "canary_reader_enabled": false,
+    "public_reader_enabled": false,
+    "core_v1_probe_http": 200,
+    "core_v1_probe_result": "recommendation absent and alternatives empty",
+    "canary_observations_before": 30,
+    "canary_observations_after": 30,
+    "journal_preserved": true,
+    "restored_canary_deployment_id": "1808f2aa-faf4-4a61-9225-2671421b4a16"
+  },
+  "backup_restore": {
+    "status": "VERIFIED",
+    "latest_volume_backup": "daily",
+    "latest_backup_age_at_observation": "7 hours",
+    "latest_backup_size_gb": 7.22,
+    "daily_backups_present": true,
+    "weekly_backups_present": true,
+    "monthly_backups_present": true,
+    "restore_action_available": true,
+    "phase_0_restore_drill": "docs/architecture/PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md#sauvegarde-et-restauration-prouvee",
+    "pitr_enabled": false,
+    "pitr_classification": "KNOWN_LIMITATION_NON_BLOCKING_WITH_SCHEDULED_BACKUPS_AND_PROVEN_RESTORE_DRILL"
+  },
+  "capacity_and_alerting": {
+    "status": "VERIFIED",
+    "paired_observations": 30,
+    "p95_latency_delta_us": -2766304,
+    "v2_fallbacks": 0,
+    "v2_reader_errors": 0,
+    "database_health": "ok",
+    "redis_health": "ok",
+    "operations_receipt": "docs/architecture/PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md"
+  },
+  "inherited_regressions": {
+    "status": "VERIFIED",
+    "github_actions_run_id": 34274007623,
+    "conclusion": "success",
+    "jobs": {
+      "Backend, contrats et Quality Lab": "success",
+      "Web — contrats, tests et build": "success",
+      "Mobile — types, lint et tests hermétiques": "success",
+      "Extension — contrat, manifeste et syntaxe": "success"
+    }
+  },
+  "open_blockers_audit": {
+    "status": "VERIFIED",
+    "integrity_blocker": false,
+    "recovery_blocker": false,
+    "security_blocker": false,
+    "scope_expansion_blocked": true,
+    "notes": [
+      "The promotion is limited to the response type observed 30 times in the exact Belgian canary lineage.",
+      "BUY_NOW, FACTUAL_OPTIONS and WAIT remain blocked.",
+      "Unsupported countries, locales, verticals, stale data, incomplete provenance and reader errors keep the complete Core V1 response."
+    ]
+  },
+  "public_policy": {
+    "status": "VERIFIED",
+    "mode": "public",
+    "authorized_response_types": [
+      "ABSTAIN"
+    ],
+    "public_reader": true,
+    "canary_reader": false,
+    "closed_canary_cohort_required": false,
+    "core_v1_computed_first": true,
+    "core_v1_fallback": true,
+    "kill_switch": "V2_CHAIN_MODE=shadow with both readers disabled",
+    "no_partial_v2_response": true,
+    "no_implicit_verdict": true
+  },
+  "raw_payload_retained": false,
+  "user_data_retained": false,
+  "secrets_retained": false
+}
