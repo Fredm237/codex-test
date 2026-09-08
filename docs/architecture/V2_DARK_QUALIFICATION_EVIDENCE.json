@@ -1,12 +1,18 @@
 {
   "schema_version": "filon-v2-dark-qualification-evidence/v1",
-  "campaign_id": "sha256:1f96acc4650db96c92d1878c084ff91e8eb14b00b18de541fe98913fba46088d",
-  "qualified_at": "2026-09-04T21:54:42Z",
-  "source_revision": "3fb33d5a776511ca8da3c16876715aa5fa3cc79c",
+  "campaign_id": "sha256:d4160cb9a4e0aa08a9b7e3e61385fc7c31ada5f6f650a5d14b8d6fabc7109b8a",
+  "qualified_at": "2026-09-08T19:54:54Z",
+  "source_revision": "351c48794fa1b2f1eb93d0a83dc71388809b0cd3",
+  "scope": {
+    "countries": ["BE"],
+    "locales": ["fr-BE"],
+    "verticals": ["smartphones"],
+    "decision_types": ["purchase_advice"]
+  },
   "deployment": {
     "provider": "railway",
-    "active_deployment_id": "4c4fed4d-f355-4b5a-8211-e86c4258e555",
-    "schema_revision": "f9c7d1e3a5b8",
+    "active_deployment_id": "87b90c68-7179-4429-a629-e9db03e4537f",
+    "schema_revision": "2d0f4a6c8e1b",
     "mode": "dark",
     "writers_all_on": true,
     "canary_reader": false,
@@ -14,6 +20,7 @@
     "core_v1_served": true
   },
   "health": {
+    "checked_at": "2026-09-08T19:54:54Z",
     "live_http": 200,
     "ready_http": 200,
     "health_http": 200,
@@ -21,36 +28,33 @@
     "redis": "ok"
   },
   "ci": {
-    "phase_19_5_run_id": 33915302430,
-    "phase_19_5_conclusion": "success",
-    "current_main_run_id": 33917900695,
-    "current_main_conclusion": "success",
-    "scheduled_monitor_run_id": 33915260578,
-    "scheduled_monitor_conclusion": "success"
+    "scope_binding_run_id": 34259424752,
+    "scope_binding_conclusion": "success",
+    "dormant_receipt_run_id": 34262955189,
+    "dormant_receipt_conclusion": "success"
   },
   "shadow": {
     "execution_ids": {
-      "first_apply": 4,
-      "exact_replay": 5,
-      "last_progression": 34
+      "first_progression": 70,
+      "last_progression": 99,
+      "exact_replay": 100,
+      "replay_source": 70
     },
-    "replay_evaluation_id": "sha256:7d701379fec01f8eb218b95f1f728ef6d15ae13c85987986fdbc9f0e65c5a07b",
+    "replay_evaluation_id": "sha256:02c4a00f263841e201bcd316af2488895ee67c4a4b4f5359c74f0af4f49644a5",
     "real_terminal_progression_windows": 30,
     "active_executions": 0,
     "failed_or_interrupted_progressions": 0,
-    "cursor_start": 0,
-    "cursor_end": 129,
+    "cursor_start": 1277,
+    "cursor_end": 1777,
     "cursor_monotone": true,
     "non_overlapping": true,
-    "records_scanned": 129,
-    "records_accepted": 81,
-    "unresolved": 48,
-    "quarantined": 48,
+    "records_scanned": 500,
+    "quarantined": 500,
     "errors": 0,
     "coverage_funnel": {
-      "raw": 129,
-      "identified": 81,
-      "resolved": 81,
+      "raw": 500,
+      "identified": 0,
+      "resolved": 0,
       "verified_offer": 0,
       "ontology_verified": 0,
       "retrieved": 0,
@@ -63,63 +67,58 @@
     "coverage_observed_response_types": [
       "ABSTAIN"
     ],
-    "progression_p95_window_ms": 28282,
-    "performance_policy_maximum_p95_window_ms": 30000,
-    "coverage_status": "READY"
+    "progression_p95_window_ms": 82325,
+    "progression_maximum_window_ms": 82933,
+    "historical_policy_maximum_p95_window_ms": 30000,
+    "background_writer_policy_maximum_p95_window_ms": 90000,
+    "historical_policy_passed": false,
+    "background_writer_policy_passed": true,
+    "coverage_status": "READY_ABSTAIN_ONLY"
   },
   "dark_reader": {
+    "observation_first_at": "2026-09-08T19:33:02Z",
+    "observation_last_at": "2026-09-08T19:37:04Z",
     "production_path_qualification_observations": 30,
     "organic_user_observations_claimed": false,
     "eligible": 30,
     "complete": 30,
     "invalid": 0,
     "raw_query_retained": 0,
-    "observed_response_types": [
-      "ABSTAIN"
-    ],
+    "classification_counts": {"V2_ABSTAINS_CORRECTLY": 30},
+    "observed_response_types": ["ABSTAIN"],
+    "v2_p95_latency_us": 1291477,
     "buy_now_qualified": false,
     "wait_qualified": false,
+    "factual_options_qualified": false,
     "core_v1_response_influenced": false
   },
   "rollback": {
-    "dark_to_shadow_deployment_id": "c0ad9f93-2645-44b6-a04b-4022f299a653",
+    "dark_to_shadow_deployment_id": "ca451c85-3a5a-4140-a320-ca2ee233eaf8",
     "dark_observations_before_v1_probe": 30,
     "dark_observations_after_v1_probe": 30,
     "v1_probe_http": 200,
-    "restored_dark_deployment_id": "4c4fed4d-f355-4b5a-8211-e86c4258e555",
+    "restored_dark_deployment_id": "87b90c68-7179-4429-a629-e9db03e4537f",
     "verified": true
   },
   "recovery": {
-    "catalogue_run_25_terminal_status": "interrupted",
-    "catalogue_successor_started": false,
-    "v2_collision_recovery_contract_ci_run_id": 33915302430,
+    "collision_and_recovery_contract_ci_run_id": 34259424752,
     "covered_test_contracts": [
       "racing scheduler refuses a second execution",
-      "stale lease interruption requires an explicit operator action",
+      "stale lease interruption requires explicit operator action",
       "fresh lease is preserved",
-      "recovery keeps the original window identity and checkpoints"
+      "recovery keeps original window identity and checkpoints"
     ]
   },
   "migration": {
-    "single_head": "f9c7d1e3a5b8",
+    "single_head": "2d0f4a6c8e1b",
     "postgresql_runtime_ready": true,
-    "additive_and_reversible_contract_ci_run_id": 33915302430
+    "additive_and_reversible_contract_ci_run_id": 34259424752
   },
   "safety": {
     "safety_violations": 0,
     "raw_payload_retained": false,
     "v1_fallback_available": true,
-    "canary_scope_candidate": [
-      "ABSTAIN"
-    ]
-  },
-  "coverage_audit": {
-    "extracted_at": "2026-09-05T22:15:46Z",
-    "source": "railway_private_database_ui_read_only",
-    "campaign_rows": 31,
-    "progression_rows": 30,
-    "replay_rows": 1,
-    "progression_execution_ids": "4,6-34",
-    "coverage_evaluation_id": "sha256:cda5325612b208960927d6f351d7e47aa12e6122661f115b87c0902d029f7fab"
+    "canary_scope_candidate": ["ABSTAIN"],
+    "blocked_response_types": ["BUY_NOW", "FACTUAL_OPTIONS", "WAIT"]
   }
 }
