@@ -13,6 +13,8 @@ from app.db import models
 
 from app.db.base import Base
 from app.services import catalog_sync
+from app.v2_chain.models import V2ChainExecution
+from app.v2_chain.orchestrator import V2ChainCheckpoints
 
 
 async def _session():
@@ -53,6 +55,36 @@ async def test_a_single_running_sync_is_allowed_and_a_completed_one_becomes_fres
             assert datetime.fromisoformat(
                 state["last_success"]["heartbeat_at"]
             ).utcoffset() == UTC.utcoffset(None)
+    finally:
+        await engine.dispose()
+
+
+async def test_catalog_writer_does_not_start_while_v2_writer_is_active():
+    engine, maker = await _session()
+    try:
+        async with maker() as session:
+            session.add(
+                V2ChainExecution(
+                    execution_key="1" * 64,
+                    mode="apply",
+                    status="running",
+                    evaluated_at=datetime.now(UTC).replace(tzinfo=None),
+                    vertical="smartphones",
+                    after_raw_id=0,
+                    row_limit=1,
+                    last_raw_source_id=0,
+                    checkpoints_json={
+                        key: 0
+                        for key in V2ChainCheckpoints.__dataclass_fields__
+                    },
+                    completed_stages_json=[],
+                    heartbeat_at=datetime.now(UTC).replace(tzinfo=None),
+                )
+            )
+            await session.commit()
+
+            assert await catalog_sync.start_run(session, trigger="scheduler") is None
+            assert await catalog_sync._latest(session, status="running") is None
     finally:
         await engine.dispose()
 

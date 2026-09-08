@@ -16,8 +16,10 @@ from sqlalchemy.exc import IntegrityError
 
 from app.core.logging import get_logger
 from app.db import models
+from app.db.writer_lease import serialize_pipeline_writer_start
 from app.services import awin_catalog, catalog_grouping
 from app.services.freshness import format_utc_timestamp
+from app.v2_chain.models import V2ChainExecution
 
 log = get_logger("catalog_sync")
 
@@ -106,6 +108,17 @@ async def start_run(session, *, trigger: str) -> models.CatalogSyncRun | None:
     terminal ``interrupted`` ; son successeur conserve explicitement sa filiation
     et reprend les checkpoints sans faire passer l'ancien cycle pour réussi.
     """
+    await serialize_pipeline_writer_start(session)
+    v2_active = await session.scalar(
+        select(V2ChainExecution.id)
+        .where(V2ChainExecution.status == "running")
+        .limit(1)
+    )
+    if v2_active is not None:
+        await session.rollback()
+        log.info("Writer V2 actif : synchronisation catalogue ignorée")
+        return None
+
     now = _now()
     interrupted_id = await _interrupt_stale_run(session, now=now)
 
@@ -221,6 +234,9 @@ async def run_catalog_sync(
     trigger: str,
     limit_override: int | None = None,
     stop_after_current_feed: bool = False,
+    region_override: str | None = None,
+    feed_ids_override: tuple[str, ...] | None = None,
+    max_rows_override: int | None = None,
 ) -> dict[str, Any]:
     """Synchronise marchands, feeds et regroupements dans un cycle journalisé."""
     if session is None:
@@ -245,6 +261,9 @@ async def run_catalog_sync(
             resume_from_run_id=run.resumed_from_run_id,
             progress=progress,
             stop_after_current_feed=stop_after_current_feed,
+            region_override=region_override,
+            feed_ids_override=feed_ids_override,
+            max_rows_override=max_rows_override,
         )
         await progress()
         await session.commit()

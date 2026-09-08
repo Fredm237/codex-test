@@ -350,12 +350,17 @@ async def run_once(*, vertical: str, limit: int) -> V2ScheduleReceipt:
                 source_execution_id=(recovery.id if recovery is not None else None),
             )
         except V2ChainAlreadyRunning:
-            lease = await _active_v2_lease(
-                session,
-                stale_after_seconds=settings.v2_chain_stale_after_seconds,
+            catalog_active = await _catalog_sync_active(session)
+            lease = (
+                None
+                if catalog_active
+                else await _active_v2_lease(
+                    session,
+                    stale_after_seconds=settings.v2_chain_stale_after_seconds,
+                )
             )
             return _receipt(
-                status="v2_running",
+                status="catalog_syncing" if catalog_active else "v2_running",
                 vertical=vertical,
                 limit=execution_limit,
                 after_raw_id=after_raw_id,
