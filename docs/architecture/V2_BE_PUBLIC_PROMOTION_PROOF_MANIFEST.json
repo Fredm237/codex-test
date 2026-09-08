@@ -1,0 +1,58 @@
+{
+  "schema_version": "filon-v2-be-public-promotion-proof-manifest/v1",
+  "scope_ref": "sha256:a9c35db4450c7b0c4ef1f184264bf84e7227d53dabd7b9323b5a18c5b94707f6",
+  "verified_at": "2026-09-08T21:00:00Z",
+  "verifier_version": "phase19.5-ops-v4",
+  "verification_status": "VERIFIED",
+  "raw_payload_retained": false,
+  "proofs": [
+    {
+      "proof_kind": "readiness_and_5xx_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#readiness_and_5xx",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:c16b1f0eb64dc886c0d66126700e630cf2bc5a0066bd74800be0be3b841bf866"
+    },
+    {
+      "proof_kind": "failure_injection_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#failure_injection",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:259f3738ed68400980c87bfe91b612da3dc49754165cdc4b77858686a34e1372"
+    },
+    {
+      "proof_kind": "rollback_to_shadow_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#rollback_to_shadow",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:4bfa2f52f1e02f42d1a565f6ce7ed7e36f80dcfba656d96ed1c83358e4003a24"
+    },
+    {
+      "proof_kind": "backup_restore_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#backup_restore",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:6f121179f60f1ec3a6f0ca197a1b5a13477b7b6bacef459c6390db0d0bada53c"
+    },
+    {
+      "proof_kind": "capacity_and_alerting_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#capacity_and_alerting",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:c5a72a0046c77410ba2ff1edf72c0712a6b91ac525b7b3812c6e24c5b61f23bd"
+    },
+    {
+      "proof_kind": "inherited_regressions_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#inherited_regressions",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:681af1819895662d0a10260fa93f1e757b6c9d1306c38d510fa1d0a3ebf87ad4"
+    },
+    {
+      "proof_kind": "open_blockers_audit_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#open_blockers_audit",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:6540d73359484132eda498b6623213127a36e4b08db49f6491e49ae0d2a811b9"
+    },
+    {
+      "proof_kind": "public_policy_ref",
+      "artifact_ref": "doc:docs/architecture/V2_BE_CANARY_QUALIFICATION_EVIDENCE.json#public_policy",
+      "artifact_digest": "sha256:4ddbc76a8ef5293a565ce673852db9e6ae35dabbb5ae1454ee6e329648c9f982",
+      "proof_ref": "sha256:3d50929cbf9eafa684cd50a023e229f3a2fb30f14ce394e0f6bbce98d0ff72ea"
+    }
+  ]
+}
