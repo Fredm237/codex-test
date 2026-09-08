@@ -108,13 +108,11 @@ Cette promotion n’autorise ni verdict d’achat ni recommandation temporelle.
 `BUY_NOW`, `WAIT` et `ABSTAIN` restent bloqués. Les autres verticales restent
 sur Core V1.
 
-La Belgique n’a actuellement aucun snapshot Product Ontology régional qualifié
-malgré la présence d’offres. Une requête `country=be`, `locale=fr-BE` a donc
-servi Core V1 intégralement (observation `110`, HTTP 200, aucune requête brute
-conservée). Cette limite est sûre mais signifie que le trafic belge n’utilise
-pas encore `FACTUAL_OPTIONS` V2. Son ouverture exigera une campagne BE bornée,
-des observations canary liées à un nouveau reçu, puis une nouvelle promotion ;
-elle ne peut pas être déduite de la preuve France.
+Au moment de ce reçu France, la Belgique n'avait aucun snapshot régional
+qualifié et restait donc sur Core V1. Cette limite historique ne doit pas être
+interprétée comme une autorisation belge. La campagne belge indépendante a été
+qualifiée et activée le 9 septembre 2026 sous un reçu séparé,
+`V2_BE_PUBLIC_ACTIVATION_RECEIPT.md`, limité à `ABSTAIN`.
 
 ## Verdict
 
