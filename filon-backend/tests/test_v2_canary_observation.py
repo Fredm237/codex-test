@@ -178,6 +178,38 @@ async def test_canary_observation_dry_apply_and_replay_are_idempotent() -> None:
 
 
 @pytest.mark.asyncio
+async def test_canary_observation_accepts_factual_options_receipt() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            result = await _result()
+            factual_receipt = replace(
+                result.receipt,
+                response_type="FACTUAL_OPTIONS",
+                safety_state="SAFE",
+            )
+
+            RECEIPT_VALIDATOR.validate(asdict(factual_receipt))
+            report = await record_canary_read(
+                session,
+                observation_key="f" * 64,
+                receipt=factual_receipt,
+                evaluated_at=EVALUATED_AT,
+                apply=True,
+            )
+            stored = await session.scalar(select(V2CanaryReadObservation))
+
+            assert report.status == "created"
+            assert report.response_type == "FACTUAL_OPTIONS"
+            assert stored is not None
+            assert stored.source == "v2"
+            assert stored.response_type == "FACTUAL_OPTIONS"
+            assert stored.safety_state == "SAFE"
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
 async def test_canary_observation_refuses_replay_drift() -> None:
     engine, sessions = await _database()
     try:
