@@ -79,7 +79,13 @@ def _validate(receipt: CanaryReadReceipt) -> None:
         raise V2CanaryObservationError("assignment reason is invalid")
     if receipt.source not in {"core_v1", "v2"}:
         raise V2CanaryObservationError("source is invalid")
-    if receipt.response_type not in {\n        "CORE",\n        "ABSTAIN",\n        "FACTUAL_OPTIONS",\n        "BUY_NOW",\n        "WAIT",\n    }:
+    if receipt.response_type not in {
+        "CORE",
+        "ABSTAIN",
+        "FACTUAL_OPTIONS",
+        "BUY_NOW",
+        "WAIT",
+    }:
         raise V2CanaryObservationError("response type is invalid")
     latencies = (receipt.core_latency_us, receipt.total_latency_us)
     if any(
