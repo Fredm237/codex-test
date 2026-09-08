@@ -12,6 +12,8 @@ from datetime import datetime, timezone
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 
+from app.db import models as core_models
+from app.db.writer_lease import serialize_pipeline_writer_start
 from app.v2_chain.models import V2ChainExecution
 from app.v2_chain.orchestrator import (
     V2ChainCheckpoints,
@@ -157,6 +159,16 @@ async def _start_execution(
         execution_kind=execution_kind,
         source_execution_id=source_execution_id,
     )
+    await serialize_pipeline_writer_start(session)
+    catalog_active = await session.scalar(
+        select(core_models.CatalogSyncRun.id)
+        .where(core_models.CatalogSyncRun.status == "running")
+        .limit(1)
+    )
+    if catalog_active is not None:
+        await session.rollback()
+        raise V2ChainAlreadyRunning("catalog synchronization is running")
+
     now = _utc_naive()
     execution = V2ChainExecution(
         execution_key=secrets.token_hex(32),

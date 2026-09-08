@@ -614,6 +614,9 @@ async def ingest_feeds(
     resume_from_run_id: int | None = None,
     progress: Callable[[], Awaitable[None]] | None = None,
     stop_after_current_feed: bool = False,
+    region_override: str | None = None,
+    feed_ids_override: tuple[str, ...] | None = None,
+    max_rows_override: int | None = None,
 ) -> dict:
     """Ingestion des feeds des marchands inscrits, régions ciblées.
 
@@ -627,7 +630,33 @@ async def ingest_feeds(
         return {"feeds": 0, "offers": 0, "skipped": 0}
     s = get_settings()
     regions = set(s.awin_regions_list)
+    if region_override is not None:
+        normalized_region = region_override.strip().upper()
+        if not re.fullmatch(r"[A-Z]{2}", normalized_region):
+            raise ValueError("region override must be an ISO alpha-2 code")
+        regions = {normalized_region}
     max_rows = s.awin_max_rows_per_feed
+    if max_rows_override is not None:
+        if (
+            isinstance(max_rows_override, bool)
+            or not isinstance(max_rows_override, int)
+            or not 1 <= max_rows_override <= _HARD_MAX_ROWS_PER_FEED
+        ):
+            raise ValueError("max rows override is outside the safe bound")
+        if max_rows and max_rows_override > max_rows:
+            raise ValueError("max rows override exceeds the configured bound")
+        max_rows = max_rows_override
+
+    requested_feed_ids: tuple[str, ...] | None = None
+    if feed_ids_override is not None:
+        requested_feed_ids = tuple(value.strip() for value in feed_ids_override)
+        if (
+            not requested_feed_ids
+            or len(requested_feed_ids) > 8
+            or len(requested_feed_ids) != len(set(requested_feed_ids))
+            or any(not value.isdigit() for value in requested_feed_ids)
+        ):
+            raise ValueError("feed ids override is invalid")
 
     # Marchands inscrits connus en base : le nom est aussi un signal sémantique
     # borné, utilisé uniquement par les règles qui l’exigent explicitement.
@@ -651,6 +680,11 @@ async def ingest_feeds(
         f for f in feeds
         if f.advertiser_id in mid_to_merchant and (not regions or not f.region or f.region in regions)
     ]
+    if requested_feed_ids is not None:
+        eligible_by_id = {feed.feed_id: feed for feed in selected}
+        if any(feed_id not in eligible_by_id for feed_id in requested_feed_ids):
+            raise RuntimeError("requested Awin feed scope is unavailable")
+        selected = [eligible_by_id[feed_id] for feed_id in requested_feed_ids]
     limit = limit_override if limit_override is not None else s.awin_feed_limit
     if limit and limit > 0:
         selected = selected[:limit]

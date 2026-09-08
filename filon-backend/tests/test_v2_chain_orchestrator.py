@@ -25,11 +25,45 @@ from app.v2_chain.execution import (
     run_journaled_v2_shadow_chain,
 )
 from app.v2_chain.models import V2ChainExecution
-from app.v2_chain.orchestrator import _parser, run_v2_shadow_chain
+from app.v2_chain.orchestrator import V2ChainCheckpoints, _parser, run_v2_shadow_chain
 
 
 EVALUATED_AT = datetime(2026, 9, 2, 8, tzinfo=timezone.utc)
 ROUTES_ROOT = Path(__file__).resolve().parents[1] / "app" / "api" / "routes"
+
+
+async def test_v2_writer_does_not_start_while_catalog_writer_is_active() -> None:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    maker = async_sessionmaker(engine, expire_on_commit=False)
+    try:
+        async with maker() as session:
+            session.add(
+                core_models.CatalogSyncRun(
+                    trigger="scheduler",
+                    status="running",
+                    heartbeat_at=EVALUATED_AT.replace(tzinfo=None),
+                )
+            )
+            await session.commit()
+
+            with pytest.raises(V2ChainAlreadyRunning, match="catalog"):
+                await v2_execution._start_execution(
+                    session,
+                    evaluated_at=EVALUATED_AT,
+                    vertical="smartphones",
+                    after_raw_id=0,
+                    limit=1,
+                    apply=True,
+                    checkpoints=V2ChainCheckpoints(0, 0, 0, 0, 0, 0),
+                    campaign_id=None,
+                    execution_kind=None,
+                    source_execution_id=None,
+                )
+            assert await session.scalar(select(V2ChainExecution.id)) is None
+    finally:
+        await engine.dispose()
 
 
 async def _seed(session) -> None:
