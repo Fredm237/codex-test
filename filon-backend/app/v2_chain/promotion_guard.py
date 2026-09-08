@@ -201,19 +201,19 @@ async def authorize_v2_runtime(
             proof_names=PUBLIC_PROOF_KEYS,
         )
         source_gate = receipt.source_gate_evaluation_id
+        source_receipt = receipt.source_receipt_evaluation_id
         if not _valid_digest(source_gate):
             raise V2PromotionGuardError("public receipt has no valid canary lineage")
+        if not _valid_digest(source_receipt):
+            raise V2PromotionGuardError("public receipt has no exact canary receipt lineage")
         if receipt.proof_refs_json.get("shadow_gate_ref") != source_gate:
             raise V2PromotionGuardError("public receipt canary lineage drifted")
         source = await session.scalar(
             select(V2PromotionReceipt).where(
+                V2PromotionReceipt.evaluation_id == source_receipt,
                 V2PromotionReceipt.promotion_stage == "shadow_to_canary",
                 V2PromotionReceipt.status == "CANARY_AUTHORIZED",
                 V2PromotionReceipt.gate_evaluation_id == source_gate,
-            )
-            .order_by(
-                V2PromotionReceipt.evaluated_at.desc(),
-                V2PromotionReceipt.id.desc(),
             )
             .limit(1)
         )

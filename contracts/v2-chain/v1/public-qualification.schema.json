@@ -5,7 +5,8 @@
   "type": "object",
   "additionalProperties": false,
   "required": [
-    "schema_version", "evaluated_at", "shadow_gate_evaluation_id", "metrics",
+    "schema_version", "evaluated_at", "shadow_receipt_evaluation_id",
+    "shadow_gate_evaluation_id", "metrics",
     "gate", "proof_refs", "minimum_paired_observations",
     "minimum_observations_per_response_type", "requested_response_types",
     "evaluation_id"
@@ -13,6 +14,7 @@
   "properties": {
     "schema_version": {"const": "v2-public-qualification/v1"},
     "evaluated_at": {"type": "string", "format": "date-time"},
+    "shadow_receipt_evaluation_id": {"$ref": "#/$defs/digest"},
     "shadow_gate_evaluation_id": {"$ref": "#/$defs/digest"},
     "metrics": {
       "type": "object",
@@ -39,6 +41,7 @@
           "additionalProperties": false,
           "properties": {
             "ABSTAIN": {"type": "integer", "minimum": 0},
+            "FACTUAL_OPTIONS": {"type": "integer", "minimum": 0},
             "BUY_NOW": {"type": "integer", "minimum": 0},
             "WAIT": {"type": "integer", "minimum": 0}
           }

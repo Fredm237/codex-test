@@ -134,6 +134,7 @@ async def test_public_control_separates_canary_and_public_runtime_evidence() -> 
     try:
         async with sessions() as session:
             source_gate = "sha256:" + "2" * 64
+            source_receipt = "sha256:" + "1" * 64
             public_gate = "sha256:" + "3" * 64
             receipt_id = "sha256:" + "4" * 64
             session.add(
@@ -141,6 +142,7 @@ async def test_public_control_separates_canary_and_public_runtime_evidence() -> 
                     evaluation_id=receipt_id,
                     gate_evaluation_id=public_gate,
                     source_gate_evaluation_id=source_gate,
+                    source_receipt_evaluation_id=source_receipt,
                     promotion_stage="canary_to_public",
                     status="PUBLIC_AUTHORIZED",
                     authorized_response_types_json=["ABSTAIN"],
@@ -179,6 +181,7 @@ async def test_public_control_separates_canary_and_public_runtime_evidence() -> 
                 V2CanaryReadObservation(
                     observation_key="6" * 64,
                     gate_evaluation_id=source_gate,
+                    receipt_evaluation_id=source_receipt,
                     assignment_reason="closed_cohort_match",
                     source="v2",
                     response_type="ABSTAIN",
@@ -190,6 +193,7 @@ async def test_public_control_separates_canary_and_public_runtime_evidence() -> 
                 V2CanaryReadObservation(
                     observation_key="7" * 64,
                     gate_evaluation_id=public_gate,
+                    receipt_evaluation_id=receipt_id,
                     assignment_reason="public_authorized",
                     source="v2",
                     response_type="ABSTAIN",
@@ -201,6 +205,7 @@ async def test_public_control_separates_canary_and_public_runtime_evidence() -> 
                 V2CanaryReadObservation(
                     observation_key="8" * 64,
                     gate_evaluation_id=public_gate,
+                    receipt_evaluation_id=receipt_id,
                     cohort="canary",
                     assignment_reason="public_authorized",
                     eligibility_evaluation_id="sha256:" + "9" * 64,

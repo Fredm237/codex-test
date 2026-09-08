@@ -32,6 +32,7 @@ from quality_lab.v2_canary import V2CanaryEvidence, evaluate_shadow_to_canary
 
 EVALUATED_AT = datetime(2026, 9, 3, 21, tzinfo=timezone.utc)
 OBSERVATION_KEY = "a" * 64
+PROMOTION_RECEIPT = "sha256:" + "d" * 64
 ROUTES_ROOT = Path(__file__).resolve().parents[1] / "app" / "api" / "routes"
 CONTRACT_ROOT = Path(__file__).resolve().parents[2] / "contracts" / "v2-chain" / "v1"
 RECEIPT_SCHEMA = json.loads(
@@ -133,6 +134,7 @@ async def test_canary_observation_dry_apply_and_replay_are_idempotent() -> None:
             dry = await record_canary_read(
                 session,
                 observation_key=OBSERVATION_KEY,
+                receipt_evaluation_id=PROMOTION_RECEIPT,
                 receipt=result.receipt,
                 evaluated_at=EVALUATED_AT,
             )
@@ -144,6 +146,7 @@ async def test_canary_observation_dry_apply_and_replay_are_idempotent() -> None:
             created = await record_canary_read(
                 session,
                 observation_key=OBSERVATION_KEY,
+                receipt_evaluation_id=PROMOTION_RECEIPT,
                 receipt=result.receipt,
                 evaluated_at=EVALUATED_AT,
                 apply=True,
@@ -151,6 +154,7 @@ async def test_canary_observation_dry_apply_and_replay_are_idempotent() -> None:
             replay = await record_canary_read(
                 session,
                 observation_key=OBSERVATION_KEY,
+                receipt_evaluation_id=PROMOTION_RECEIPT,
                 receipt=result.receipt,
                 evaluated_at=EVALUATED_AT,
                 apply=True,
@@ -162,6 +166,7 @@ async def test_canary_observation_dry_apply_and_replay_are_idempotent() -> None:
             assert replay.observation_id == created.observation_id
             assert stored is not None
             assert stored.source == "v2"
+            assert stored.receipt_evaluation_id == PROMOTION_RECEIPT
             assert stored.response_type == "ABSTAIN"
             assert stored.eligibility_status == "eligible"
             assert stored.vertical == "smartphones"
@@ -193,6 +198,7 @@ async def test_canary_observation_accepts_factual_options_receipt() -> None:
             report = await record_canary_read(
                 session,
                 observation_key="f" * 64,
+                receipt_evaluation_id=PROMOTION_RECEIPT,
                 receipt=factual_receipt,
                 evaluated_at=EVALUATED_AT,
                 apply=True,
@@ -218,6 +224,7 @@ async def test_canary_observation_refuses_replay_drift() -> None:
             await record_canary_read(
                 session,
                 observation_key=OBSERVATION_KEY,
+                receipt_evaluation_id=PROMOTION_RECEIPT,
                 receipt=result.receipt,
                 evaluated_at=EVALUATED_AT,
                 apply=True,
@@ -232,6 +239,7 @@ async def test_canary_observation_refuses_replay_drift() -> None:
                 await record_canary_read(
                     session,
                     observation_key=OBSERVATION_KEY,
+                    receipt_evaluation_id=PROMOTION_RECEIPT,
                     receipt=drifted,
                     evaluated_at=EVALUATED_AT,
                     apply=True,
@@ -253,6 +261,7 @@ async def test_core_fallback_observation_contains_no_v2_or_identity_state() -> N
             report = await record_canary_read(
                 session,
                 observation_key="b" * 64,
+                receipt_evaluation_id=PROMOTION_RECEIPT,
                 receipt=result.receipt,
                 evaluated_at=EVALUATED_AT,
                 apply=True,
@@ -276,6 +285,7 @@ async def test_canary_observation_rejects_raw_retention_and_invalid_keys() -> No
                 await record_canary_read(
                     session,
                     observation_key=OBSERVATION_KEY,
+                    receipt_evaluation_id=PROMOTION_RECEIPT,
                     receipt=replace(result.receipt, raw_query_retained=True),
                     evaluated_at=EVALUATED_AT,
                     apply=True,
@@ -284,6 +294,16 @@ async def test_canary_observation_rejects_raw_retention_and_invalid_keys() -> No
                 await record_canary_read(
                     session,
                     observation_key="not-a-digest",
+                    receipt_evaluation_id=PROMOTION_RECEIPT,
+                    receipt=result.receipt,
+                    evaluated_at=EVALUATED_AT,
+                    apply=True,
+                )
+            with pytest.raises(V2CanaryObservationError, match="promotion receipt"):
+                await record_canary_read(
+                    session,
+                    observation_key=OBSERVATION_KEY,
+                    receipt_evaluation_id="not-a-digest",
                     receipt=result.receipt,
                     evaluated_at=EVALUATED_AT,
                     apply=True,

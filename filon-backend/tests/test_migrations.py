@@ -103,7 +103,8 @@ V2_CANARY_OBSERVATION_REVISION = "d7a5b9c1e3f6"
 V2_PROMOTION_RECEIPT_REVISION = "e8b6c0d2f4a7"
 V2_PROMOTION_EVIDENCE_REVISION = "f9c7d1e3a5b8"
 V2_FACTUAL_OPTIONS_REVISION = "0b8d2f4a6c9e"
-HEAD_REVISION = V2_FACTUAL_OPTIONS_REVISION
+V2_RECEIPT_SCOPED_CANARY_REVISION = "1c9e3b5d7f0a"
+HEAD_REVISION = V2_RECEIPT_SCOPED_CANARY_REVISION
 
 
 @pytest.fixture(autouse=True)
@@ -192,9 +193,60 @@ def test_runtime_revision_matches_single_alembic_head(tmp_path, monkeypatch):
         == V2_PROMOTION_RECEIPT_REVISION
     )
     assert (
-        scripts.get_revision(HEAD_REVISION).down_revision
+        scripts.get_revision(V2_FACTUAL_OPTIONS_REVISION).down_revision
         == V2_PROMOTION_EVIDENCE_REVISION
     )
+    assert (
+        scripts.get_revision(HEAD_REVISION).down_revision
+        == V2_FACTUAL_OPTIONS_REVISION
+    )
+
+
+def test_receipt_scoped_canary_lineage_is_reversible(tmp_path, monkeypatch):
+    database_path = tmp_path / "receipt-scoped-canary.sqlite"
+    config = _config(database_path, monkeypatch)
+    command.upgrade(config, V2_FACTUAL_OPTIONS_REVISION)
+
+    engine = create_engine(_sync_url(database_path))
+    try:
+        assert "receipt_evaluation_id" not in {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_canary_read_observations")
+        }
+        assert "source_receipt_evaluation_id" not in {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_promotion_receipts")
+        }
+    finally:
+        engine.dispose()
+
+    command.upgrade(config, HEAD_REVISION)
+    engine = create_engine(_sync_url(database_path))
+    try:
+        assert "receipt_evaluation_id" in {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_canary_read_observations")
+        }
+        assert "source_receipt_evaluation_id" in {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_promotion_receipts")
+        }
+    finally:
+        engine.dispose()
+
+    command.downgrade(config, V2_FACTUAL_OPTIONS_REVISION)
+    engine = create_engine(_sync_url(database_path))
+    try:
+        assert "receipt_evaluation_id" not in {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_canary_read_observations")
+        }
+        assert "source_receipt_evaluation_id" not in {
+            column["name"]
+            for column in inspect(engine).get_columns("v2_promotion_receipts")
+        }
+    finally:
+        engine.dispose()
 
 
 def test_factual_options_constraints_are_reversible(tmp_path, monkeypatch):

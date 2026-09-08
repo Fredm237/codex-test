@@ -177,6 +177,7 @@ def _public_report(shadow) -> V2PublicQualificationReport:
     refs["shadow_gate_ref"] = shadow.gate.evaluation_id
     identity = {
         "evaluated_at": EVALUATED_AT,
+        "shadow_receipt_evaluation_id": shadow.evaluation_id,
         "shadow_gate_evaluation_id": shadow.gate.evaluation_id,
         "metrics": asdict(metrics),
         "gate": gate.to_dict(),
@@ -188,6 +189,7 @@ def _public_report(shadow) -> V2PublicQualificationReport:
     return V2PublicQualificationReport(
         schema_version="v2-public-qualification/v1",
         evaluated_at=EVALUATED_AT,
+        shadow_receipt_evaluation_id=shadow.evaluation_id,
         shadow_gate_evaluation_id=shadow.gate.evaluation_id,
         metrics=metrics,
         gate=gate,
@@ -248,6 +250,7 @@ async def test_promotion_receipts_dry_apply_and_replay_are_append_only() -> None
             assert receipts[0].authorized_response_types_json == ["ABSTAIN"]
             assert receipts[1].promotion_stage == "canary_to_public"
             assert receipts[1].source_gate_evaluation_id == shadow.gate.evaluation_id
+            assert receipts[1].source_receipt_evaluation_id == shadow.evaluation_id
             assert receipts[1].raw_payload_retained is False
             assert not hasattr(receipts[1], "raw_query")
             assert not hasattr(receipts[1], "payload_json")

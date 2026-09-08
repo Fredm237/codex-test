@@ -46,6 +46,7 @@ def _shadow_receipt(**overrides) -> V2PromotionReceipt:
         "evaluation_id": _digest("a"),
         "gate_evaluation_id": _digest("b"),
         "source_gate_evaluation_id": None,
+        "source_receipt_evaluation_id": None,
         "promotion_stage": "shadow_to_canary",
         "status": "CANARY_AUTHORIZED",
         "authorized_response_types_json": ["ABSTAIN"],
@@ -72,6 +73,7 @@ def _public_receipt(**overrides) -> V2PromotionReceipt:
         "evaluation_id": _digest("c"),
         "gate_evaluation_id": _digest("d"),
         "source_gate_evaluation_id": source_gate,
+        "source_receipt_evaluation_id": _digest("a"),
         "promotion_stage": "canary_to_public",
         "status": "PUBLIC_AUTHORIZED",
         "authorized_response_types_json": ["ABSTAIN"],
@@ -271,6 +273,21 @@ async def test_public_fails_closed_when_canary_lineage_is_missing() -> None:
             await session.flush()
 
             with pytest.raises(V2PromotionGuardError, match="lineage is absent"):
+                await authorize_v2_runtime(session, settings=_settings("public"))
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_public_fails_closed_without_exact_canary_receipt_lineage() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            public = _public_receipt(source_receipt_evaluation_id=None)
+            session.add_all([_shadow_receipt(), public])
+            await session.flush()
+
+            with pytest.raises(V2PromotionGuardError, match="exact canary receipt"):
                 await authorize_v2_runtime(session, settings=_settings("public"))
     finally:
         await engine.dispose()

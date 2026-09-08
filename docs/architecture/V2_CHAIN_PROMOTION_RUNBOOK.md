@@ -211,7 +211,10 @@ le lecteur. `BUY_NOW` et `WAIT` restent individuellement bloqués.
 ### Journal de qualification canary
 
 La migration additive `d7a5b9c1e3f6` ajoute
-`v2_canary_read_observations`. Le journal ne contient jamais la requête, un
+`v2_canary_read_observations`. Chaque observation récente est liée au reçu
+SHADOW → CANARY exact par `receipt_evaluation_id`; un gate logique identique
+ne peut donc jamais mélanger deux campagnes de qualification. Le journal ne
+contient jamais la requête, un
 digest de sujet, les candidats ou la réponse. Il conserve seulement :
 
 - l'identifiant du gate, la cohorte et la raison d'assignation ;

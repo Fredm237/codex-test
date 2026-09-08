@@ -22,7 +22,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 BACKEND_ROOT = Path(__file__).resolve().parents[1]
 BASELINE_REVISION = "b9db07b15986"
 EVIDENCE_ENGINE_REVISION = "e8c3f6a0b5d2"
-HEAD_REVISION = "0b8d2f4a6c9e"
+HEAD_REVISION = "1c9e3b5d7f0a"
 MIGRATION_LOCK_ID = 0x46494C4F4E
 
 

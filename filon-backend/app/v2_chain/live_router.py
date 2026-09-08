@@ -439,6 +439,7 @@ async def route_promoted_response(
                 await record_canary_read(
                     session,
                     observation_key=secrets.token_hex(32),
+                    receipt_evaluation_id=authorization.receipt_evaluation_id,
                     receipt=receipt,
                     evaluated_at=evaluated_at,
                     apply=True,

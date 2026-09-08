@@ -59,6 +59,9 @@ def _digest(character: str) -> str:
     return "sha256:" + character * 64
 
 
+SHADOW_RECEIPT_ID = _digest("a")
+
+
 def _proofs(**overrides) -> V2PublicExternalProofs:
     values = {
         "shadow_gate_ref": GATE_ID,
@@ -143,6 +146,7 @@ def _observation(
     return V2CanaryReadObservation(
         observation_key=f"{index + 1:064x}",
         gate_evaluation_id=GATE_ID,
+        receipt_evaluation_id=SHADOW_RECEIPT_ID,
         cohort="canary",
         assignment_reason="closed_cohort_match",
         eligibility_evaluation_id=_digest("9"),
@@ -202,6 +206,7 @@ async def test_thirty_paired_reads_authorize_only_abstain() -> None:
 
             report = await evaluate_persisted_canary_to_public(
                 session,
+                shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
                 shadow_gate=SHADOW_GATE,
                 proofs=_proofs(**proof_refs),
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
@@ -232,6 +237,7 @@ async def test_digest_shaped_but_unregistered_proofs_never_open_public() -> None
 
             report = await evaluate_persisted_canary_to_public(
                 session,
+                shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
                 shadow_gate=SHADOW_GATE,
                 proofs=_proofs(),
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
@@ -258,12 +264,14 @@ async def test_insufficient_or_slower_sample_keeps_public_closed() -> None:
 
             slower = await evaluate_persisted_canary_to_public(
                 session,
+                shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
                 shadow_gate=SHADOW_GATE,
                 proofs=_proofs(**proof_refs),
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
             )
             insufficient = await evaluate_persisted_canary_to_public(
                 session,
+                shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
                 shadow_gate=SHADOW_GATE,
                 proofs=_proofs(
                     **proof_refs,
@@ -298,6 +306,7 @@ async def test_any_canary_fallback_keeps_public_closed() -> None:
 
             report = await evaluate_persisted_canary_to_public(
                 session,
+                shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
                 shadow_gate=SHADOW_GATE,
                 proofs=_proofs(**proof_refs),
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
@@ -308,6 +317,38 @@ async def test_any_canary_fallback_keeps_public_closed() -> None:
             assert report.gate.status == "PUBLIC_HOLD"
             assert "RUNTIME_HEALTH" in report.gate.blocker_codes
             assert "ERROR_NON_INFERIORITY" in report.gate.blocker_codes
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_identical_gate_from_another_receipt_never_pollutes_canary() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            session.add_all(_observation(index) for index in range(30))
+            historical = _observation(
+                30,
+                source="core_v1",
+                fallback_reason="v2_reader_error",
+            )
+            historical.receipt_evaluation_id = _digest("b")
+            session.add(historical)
+            proof_refs = await _registered_proof_refs(session)
+            await session.commit()
+
+            report = await evaluate_persisted_canary_to_public(
+                session,
+                shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
+                shadow_gate=SHADOW_GATE,
+                proofs=_proofs(**proof_refs),
+                evaluated_at=EVALUATED_AT + timedelta(hours=1),
+            )
+
+            assert report.shadow_receipt_evaluation_id == SHADOW_RECEIPT_ID
+            assert report.metrics.canary_observations == 30
+            assert report.metrics.v2_fallbacks == 0
+            assert report.gate.status == "PUBLIC_AUTHORIZED"
     finally:
         await engine.dispose()
 
@@ -332,6 +373,7 @@ async def test_expected_ineligible_fallback_is_observed_without_blocking_public(
 
             report = await evaluate_persisted_canary_to_public(
                 session,
+                shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
                 shadow_gate=SHADOW_GATE,
                 proofs=_proofs(**proof_refs),
                 evaluated_at=EVALUATED_AT + timedelta(hours=1),
@@ -353,6 +395,7 @@ async def test_public_proofs_must_match_candidate_gate() -> None:
             with pytest.raises(V2QualificationError, match="does not match"):
                 await evaluate_persisted_canary_to_public(
                     session,
+                    shadow_receipt_evaluation_id=SHADOW_RECEIPT_ID,
                     shadow_gate=SHADOW_GATE,
                     proofs=_proofs(shadow_gate_ref=_digest("d")),
                     evaluated_at=EVALUATED_AT,

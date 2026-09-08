@@ -172,10 +172,10 @@ async def build_promotion_control(
         if promotion_receipt_evaluation_id is not None
         else None
     )
-    canary_gate_id = (
-        receipt.gate_evaluation_id
+    canary_receipt_id = (
+        receipt.evaluation_id
         if receipt is not None and receipt.promotion_stage == "shadow_to_canary"
-        else receipt.source_gate_evaluation_id
+        else receipt.source_receipt_evaluation_id
         if receipt is not None and receipt.promotion_stage == "canary_to_public"
         else None
     )
@@ -184,7 +184,10 @@ async def build_promotion_control(
             (
                 await session.execute(
                     select(V2CanaryReadObservation)
-                    .where(V2CanaryReadObservation.gate_evaluation_id == canary_gate_id)
+                    .where(
+                        V2CanaryReadObservation.receipt_evaluation_id
+                        == canary_receipt_id
+                    )
                     .order_by(V2CanaryReadObservation.id)
                     .limit(MAX_CONTROL_ROWS + 1)
                 )
@@ -192,11 +195,11 @@ async def build_promotion_control(
             .scalars()
             .all()
         )
-        if canary_gate_id is not None
+        if canary_receipt_id is not None
         else []
     )
-    public_gate_id = (
-        receipt.gate_evaluation_id
+    public_receipt_id = (
+        receipt.evaluation_id
         if receipt is not None and receipt.promotion_stage == "canary_to_public"
         else None
     )
@@ -236,12 +239,13 @@ async def build_promotion_control(
                         )
                     ),
                 ).where(
-                    V2CanaryReadObservation.gate_evaluation_id == public_gate_id,
+                    V2CanaryReadObservation.receipt_evaluation_id
+                    == public_receipt_id,
                     V2CanaryReadObservation.assignment_reason == "public_authorized",
                 )
             )
         ).one()
-        if public_gate_id is not None
+        if public_receipt_id is not None
         else (0, 0, 0)
     )
     if any(len(rows) > MAX_CONTROL_ROWS for rows in (executions, dark, canary)):
