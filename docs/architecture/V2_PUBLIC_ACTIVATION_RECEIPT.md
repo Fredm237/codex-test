@@ -1,120 +1,124 @@
 # FILON — Reçu d’activation publique V2
 
-- Date : **7 septembre 2026**
-- Verdict : **PUBLIC ACTIVÉ ET PROUVÉ**
-- Portée : **smartphones / `fr` / `fr-BE` / `purchase_advice`**
-- Type de réponse autorisé : **`ABSTAIN` uniquement**
+- Date : **8 septembre 2026**
+- Verdict : **PUBLIC FACTUEL ACTIVÉ ET PROUVÉ**
+- Portée prouvée : **smartphones / France / `fr` / `purchase_advice`**
+- Type de réponse autorisé : **`FACTUAL_OPTIONS` uniquement**
 - Lecteur public V2 : **ON**
 - Lecteur canary : **OFF**
 - Fallback Core V1 : **ON et exercé**
-- `BUY_NOW` / `WAIT` : **NON AUTORISÉS**
+- `ABSTAIN`, `BUY_NOW` et `WAIT` : **NON AUTORISÉS**
 
 ## Autorisation persistée
 
-La promotion repose sur le reçu append-only :
+La promotion repose sur des lignes append-only et sur la filiation exacte de
+la campagne canary :
 
 - reçu public :
-  `sha256:aec9c600d9cda149ab792323688f4ea96827400e7408a86b38c3ac4dc9a18b6d` ;
+  `sha256:6360c99b1597885e2fc1f799d18e6e5bb282040b87140eb6b69c506d4bff8acc` ;
 - gate public :
-  `sha256:fed54c4ed2d4aebea44d4080171ada0ee2dd03d017f0898b529d18c9a5f98dad` ;
+  `sha256:04dc0b082c169f4771e3feaf574daa6502d7aab7a387863c62be558c0fbffea9` ;
+- reçu canary source :
+  `sha256:65fac702d451e5ec31c1976dc84552cb5e47d3f66f8467a731116e9c0515f428` ;
+- gate canary source :
+  `sha256:5f8eb7638b1d54958c4d783fff305286dda2ead085cdd1a69e6cbd9193e8efe4` ;
 - campagne :
-  `sha256:1f96acc4650db96c92d1878c084ff91e8eb14b00b18de541fe98913fba46088d` ;
-- reçu de base SHADOW :
-  `sha256:871ce08cdf0afd1faa1694241042f88acc2a6d4b7d49dcefebd31c537a8a9449`.
+  `sha256:c16fe38cd6787f362a1270ba6d22b02c6e36fea44017fdd1f2abb9b8251722fb`.
 
-Le dry-run, l’apply unique et le replay exact ont convergé vers la même
-identité. Les huit preuves PUBLIC ont été enregistrées dans
-`v2_promotion_proofs` puis relues par leur digest exact : readiness/5xx,
-failure injection, rollback, backup/restore, capacité/alerting, régressions,
-audit des blockers et politique publique.
+Le calcul `dry-run → apply unique → replay identique` a convergé vers le même
+reçu `PUBLIC_AUTHORIZED`. Les huit preuves exigées ont été enregistrées puis
+rejouées sans duplication : readiness/5xx, injection d’échec, rollback vers
+shadow, backup/restore, capacité/alerting, régressions héritées, audit des
+blockers et politique publique.
+
+## Qualification canary réelle
+
+Le gate public a utilisé uniquement les observations portant simultanément le
+reçu canary et le gate canary exacts. L’ancienne télémétrie d’autres campagnes
+n’a pas été mélangée :
+
+- 30 requêtes réelles appariées Core V1 / V2 ;
+- 30 réponses servies par V2 ;
+- 30 réponses `FACTUAL_OPTIONS` ;
+- 0 fallback éligible ;
+- 0 erreur lecteur ;
+- 0 requête brute conservée ;
+- p95 apparié `latence V2 - latence Core V1` : **-275 337 µs** ;
+- provenance, chaîne et état de sûreté complets : **30/30**.
+
+Une injection d’échec a servi le bloc Core V1 entier avec le motif neutre
+`v2_reader_error`. Un processus isolé configuré en `shadow` a prouvé le kill
+switch : source `core_v1`, raison `reader_off`, réponse Core inchangée.
 
 ## Déploiement
 
 Le service Railway `web` sert le déploiement
-`0ad257bc-c778-4e0e-9504-ac48f6c42bed` avec :
+`1cfe9474-a2ba-42b1-9c3d-6442f561ab3e`, instance
+`e1b13be2-3f0e-40f2-a8db-f61e434fadea`, avec :
 
 - `V2_CHAIN_MODE=public` ;
 - `V2_PUBLIC_READER_ENABLED=true` ;
 - `V2_CANARY_READER_ENABLED=false` ;
+- aucune cohorte canary résiduelle ;
 - le reçu public exact désigné ;
 - les writers atomiques maintenus ON ;
-- le schéma Alembic `f9c7d1e3a5b8`.
+- le schéma Alembic `1c9e3b5d7f0a`.
 
-Le routeur calcule toujours Core V1 en premier. Il ne remplace Core que si le
-périmètre, la fraîcheur, la provenance, la complétude et la sûreté V2 sont
-admissibles. Toute autre situation conserve le bloc Core V1 complet.
-
-## Données réelles et exécutions
-
-Le corpus initial ne contenait aucune preuve smartphone dans les 1 000 raws.
-Un flux Awin E.Leclerc FR strictement borné a donc été inspecté puis arrêté
-après la première fenêtre commitée :
-
-- 200 raws persistés ;
-- 43 lignes correspondant à des smartphones identifiables ;
-- run catalogue `28` terminal `interrupted`, raison neutre
-  `v2_seed_window_complete` ;
-- aucune ingestion catalogue ou chaîne V2 concurrente.
-
-La chaîne a ensuite traité la fenêtre réelle `1001–1100` :
-
-- exécution initiale `38` : **succeeded**, 13/13 étapes ;
-- rafraîchissement `39` : **succeeded**, 13/13 étapes ;
-- evaluation `39` :
-  `sha256:1832e2a7a5d92beb73ff1b6847aed565812a881fdac39d6c8d8d05367e6882dd` ;
-- 100 snapshots Product Ontology : 17 `VERIFIED`, 83 `PARTIAL`.
+Le routeur calcule toujours Core V1 en premier. V2 ne remplace Core que comme
+un bloc entier lorsque périmètre, fraîcheur, provenance, complétude et sûreté
+sont tous admissibles.
 
 ## Preuve de service public
 
-Une requête synthétique non personnelle sur `iPhone 15`, avec un budget
-incompatible, a produit une abstention V2 réelle. Le journal agrégé et sans
-requête brute a persisté l’observation `69` :
+Une requête non personnelle `iPhone 15`, exécutée par la vraie route
+`/api/advise/stream` avec `country=fr` et `locale=fr`, a retourné HTTP 200 et
+un produit réel vérifié. L’observation append-only `109` prouve :
 
 | Champ | Valeur |
 |---|---|
 | assignment | `public_authorized` |
-| eligibility | `eligible` |
-| vertical | `smartphones` |
 | source | `v2` |
-| response type | `ABSTAIN` |
+| response type | `FACTUAL_OPTIONS` |
 | chain complete | `true` |
-| safety state | `ABSTAIN` |
+| safety state | `SAFE` |
 | provenance complete | `true` |
 | fallback | aucun |
+| raw query retained | `false` |
 
-Une requête pour laquelle Core disposait d’un résultat réel est restée sur
-Core V1 avec la raison `critical_unknown`. Une requête sans dépendances V2
-admissibles est également revenue entièrement à Core V1. Ces deux cas
-prouvent que l’activation publique n’efface pas une réponse existante et
-n’invente aucune donnée.
+Le gate et le reçu portés par cette observation sont exactement les identités
+publiques ci-dessus.
 
 ## Santé finale observée
 
-Après activation et preuve de routage :
+Après activation :
 
-- `/health/live` : HTTP 200 ;
-- `/health/ready` : HTTP 200 ;
-- `/health` : HTTP 200, statut `ok` ;
-- `/api/catalog/pulse` : HTTP 200 ;
-- PostgreSQL et Redis : disponibles ;
+- `/health/live` : HTTP 200, vivant ;
+- `/health/ready` : HTTP 200, prêt ;
+- `/health` : HTTP 200, PostgreSQL et Redis `ok` ;
 - ingestion catalogue active : **0** ;
 - exécution V2 active : **0** ;
-- violations de sûreté observées : **0**.
+- sauvegardes volume PostgreSQL : actives, restauration disponible ;
+- schéma : `1c9e3b5d7f0a` ;
+- CI GitHub Actions `34213980406` : **4/4 jobs verts**, y compris le contrôle
+  Alembic baseline/stamp/drift/restauration.
 
-La CI GitHub Actions `34048734311`, utilisée pour le code déployé, est
-terminale et verte sur ses quatre jobs : backend/Quality Lab, web, mobile et
-extension.
+## Limites explicites et fail-closed
 
-## Limite explicite
+Cette promotion n’autorise ni verdict d’achat ni recommandation temporelle.
+`BUY_NOW`, `WAIT` et `ABSTAIN` restent bloqués. Les autres verticales restent
+sur Core V1.
 
-`PUBLIC` ne signifie pas que V2 rend déjà des recommandations actionnables.
-La seule sortie promue est l’abstention prouvée. `BUY_NOW`, `WAIT`, les autres
-verticales et tout élargissement de locale restent fermés jusqu’à leurs
-propres preuves objectives et reçus append-only. Core V1 reste le fallback et
-le kill switch opérationnel.
+La Belgique n’a actuellement aucun snapshot Product Ontology régional qualifié
+malgré la présence d’offres. Une requête `country=be`, `locale=fr-BE` a donc
+servi Core V1 intégralement (observation `110`, HTTP 200, aucune requête brute
+conservée). Cette limite est sûre mais signifie que le trafic belge n’utilise
+pas encore `FACTUAL_OPTIONS` V2. Son ouverture exigera une campagne BE bornée,
+des observations canary liées à un nouveau reçu, puis une nouvelle promotion ;
+elle ne peut pas être déduite de la preuve France.
 
 ## Verdict
 
-**V2 PUBLIC / ABSTAIN-ONLY / CORE V1 FALLBACK PROUVÉ.**
+**V2 PUBLIC / FACTUAL_OPTIONS FRANCE / CORE V1 FALLBACK PROUVÉ.**
 
-Ce reçu n’autorise aucune extension implicite du périmètre public.
+Ce reçu n’autorise aucune extension implicite de pays, verticale ou type de
+réponse.
