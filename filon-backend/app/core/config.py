@@ -186,14 +186,6 @@ class Settings(BaseSettings):
                 errors.append(
                     f"V2_CHAIN_MODE={self.v2_chain_mode} forbids every V2 public reader"
                 )
-            if self.v2_promotion_receipt_evaluation_id is not None:
-                errors.append(
-                    f"V2_CHAIN_MODE={self.v2_chain_mode} forbids a promotion receipt"
-                )
-            if self.v2_canary_subject_digests_list:
-                errors.append(
-                    f"V2_CHAIN_MODE={self.v2_chain_mode} forbids a canary cohort"
-                )
         elif self.v2_chain_mode == "canary":
             missing = [
                 field
