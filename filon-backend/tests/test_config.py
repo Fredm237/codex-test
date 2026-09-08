@@ -807,13 +807,6 @@ def test_atomic_v2_public_mode_requires_exact_receipt_and_no_canary_cohort() -> 
             },
             "forbids a residual canary cohort",
         ),
-        (
-            {
-                "v2_chain_mode": "shadow",
-                "v2_promotion_receipt_evaluation_id": "sha256:" + "a" * 64,
-            },
-            "forbids a promotion receipt",
-        ),
     ],
 )
 def test_v2_promoted_configuration_rejects_incomplete_evidence(
@@ -824,13 +817,14 @@ def test_v2_promoted_configuration_rejects_incomplete_evidence(
         Settings(_env_file=None, env="test", **overrides)
 
 
-def test_v2_off_mode_keeps_audit_refs_dormant_for_fast_kill_switch() -> None:
+@pytest.mark.parametrize("mode", ["off", "shadow", "dark"])
+def test_v2_non_promoted_modes_keep_audit_refs_dormant(mode: str) -> None:
     receipt = "sha256:" + "a" * 64
     subject = "sha256:" + "b" * 64
     settings = Settings(
         _env_file=None,
         env="test",
-        v2_chain_mode="off",
+        v2_chain_mode=mode,
         v2_promotion_receipt_evaluation_id=receipt,
         v2_canary_subject_digests=subject,
     )
