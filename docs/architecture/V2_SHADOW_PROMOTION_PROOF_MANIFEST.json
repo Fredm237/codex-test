@@ -1,76 +1,76 @@
 {
   "schema_version": "filon-v2-shadow-promotion-proof-manifest/v1",
-  "scope_ref": "sha256:1f96acc4650db96c92d1878c084ff91e8eb14b00b18de541fe98913fba46088d",
-  "verified_at": "2026-09-05T22:15:46Z",
-  "verifier_version": "phase19.5-ops-v2",
+  "scope_ref": "sha256:d4160cb9a4e0aa08a9b7e3e61385fc7c31ada5f6f650a5d14b8d6fabc7109b8a",
+  "verified_at": "2026-09-08T19:54:54Z",
+  "verifier_version": "phase19.5-ops-v3",
   "verification_status": "VERIFIED",
   "raw_payload_retained": false,
   "proofs": [
     {
       "proof_kind": "single_alembic_head_ref",
       "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#migration.single_head",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:5357a002a8d5c0be7aa5125360744eeb2715fbb355fd3ce22018806b525829df"
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:f1b3d97340f67f116a6fa2d2ee0d8b4131f60220212d689ae0562a2b76e1d653"
     },
     {
       "proof_kind": "postgresql_migration_ref",
       "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#migration.postgresql_runtime_ready",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:e0ae6709db24af03aaf73feeba643a8521ab3a7fb8adb5de3ba389f03b563d67"
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:77fbfd6f603bc2171df48e989397cafb6057a50a9f4ce7319e320191e5e18612"
     },
     {
       "proof_kind": "expand_only_rollback_ref",
       "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#migration.additive_and_reversible_contract_ci_run_id",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:6e1daeb1b5adc1a6fab9f2daf48e2a15de499d9b889a6c2146d3bc7120130298"
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:1c574ece02e31389eb1f9cb818023549bfb61bee738ffa18312b815186e7e57f"
     },
     {
       "proof_kind": "replay_idempotence_ref",
-      "artifact_ref": "doc:docs/architecture/V2_30_WINDOW_QUALIFICATION.md#replay",
-      "artifact_digest": "sha256:c21f76652de595b3eef2ca9c26946aed1c393b605e9c3729eac7ee4171b9f48a",
-      "proof_ref": "sha256:9990ff0d091298d319091890ef19f464b43e4dc1518bb8e4d62404d7f15dd082"
+      "artifact_ref": "doc:docs/architecture/V2_30_WINDOW_QUALIFICATION.md#replay-exact",
+      "artifact_digest": "sha256:19d2f65401cbc7acba9abe22af9f32b663a586dd2753d4e1f4974e0c45a45992",
+      "proof_ref": "sha256:bdafddfdea018fda9aa85044f7de2429418ea2c423a7b5b30d1246df90a9e785"
     },
     {
       "proof_kind": "inherited_benchmarks_ref",
       "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#ci",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:242227bf3868f3fa396aaf015dcc0206fc0da6b26c4f85e6a01162d7ef5d0dc7"
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:780486bb1b238fcd9a1250a581ccbd844449e752f33ed9104e163b27c1f3b5a6"
     },
     {
       "proof_kind": "safety_invariants_ref",
       "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#safety",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:1956f4a1b5c2afe75f81fe51cc8647ec397007736f9604cca74d300193b584c1"
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:3dcd85f1075c054099fb97c2735a0ec5fa6a39a4dcb241b41039b5f9bb492e9b"
     },
     {
       "proof_kind": "collision_exercise_ref",
       "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#recovery.covered_test_contracts",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:e884224acef8f36356b0b27ae9890d483030388fe575df13b0e9becf2d93b769"
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:53a078aa480dac1342b3ebd0d75b9ebec077501326552aa5b45d9ad3eed7a198"
     },
     {
       "proof_kind": "stale_interruption_ref",
-      "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#recovery.catalogue_run_25_terminal_status",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:19f24b6b33956820bfac8bc82c023a0e51248a64591faabf1a1357613ef32952"
+      "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#recovery.covered_test_contracts",
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:9be70f8a22c9c7340d90439a5c48a8648f918123a19dc02866f0f4ae7998375e"
     },
     {
       "proof_kind": "recovery_replay_ref",
       "artifact_ref": "doc:docs/architecture/V2_DARK_QUALIFICATION_EVIDENCE.json#recovery.covered_test_contracts",
-      "artifact_digest": "sha256:37a3c693c5531702fc324192608ca7afe94a4bbcd1e4828fc8f5ef351ce2755e",
-      "proof_ref": "sha256:8df8dfea04908dc27a9327c3a94e083f2c0448dee827c779f4fb3fc947965299"
+      "artifact_digest": "sha256:d097cfb326b0070f9d3255e8017e082d2b52cb7029791cf018f4ed1635be1561",
+      "proof_ref": "sha256:a500d42e5582a44ce3103b671a0cec48a1ba02e2d838a26e7d3ca4a14c8628bf"
     },
     {
       "proof_kind": "dark_reader_rollback_ref",
       "artifact_ref": "doc:docs/architecture/V2_ROLLBACK_RECEIPT.md#exercice-reel",
-      "artifact_digest": "sha256:c5ce43a0cacd3807abdf7479be152c13772441411d79fa60f8fac526c8232fce",
-      "proof_ref": "sha256:7d4d0bf097823dfe850637bd90d331ff4a9d1f6f82865719c9c3dbf5b343eb24"
+      "artifact_digest": "sha256:178c774fcf505948342f60813b088d20b04b29753267dea02c49ea495c8d1629",
+      "proof_ref": "sha256:c954bccd70e963d203946aa02aa7c294a5ec0e3c94f5467fe67f3967a596da93"
     },
     {
       "proof_kind": "performance_policy_ref",
       "artifact_ref": "doc:docs/architecture/V2_COVERAGE_FUNNEL.md#conclusion-objective",
-      "artifact_digest": "sha256:7c404feda5c368fae81b70d65a476d07637277360d92fe00b4b58fc96d50f072",
-      "proof_ref": "sha256:54406b2586e67624fcc88925ec834fe28455f80db0b57f7c946111e957fd4635"
+      "artifact_digest": "sha256:e961648550499fcfef37c33429d8d642788451aa8c195dc436b6b43c8da33f8e",
+      "proof_ref": "sha256:b7492589d29ffe39e8002d4608040f2ac30c2238ee19418d2465f75bfabc00e5"
     }
   ]
 }
