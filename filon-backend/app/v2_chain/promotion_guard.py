@@ -127,6 +127,30 @@ def _validate_receipt(
     return _validate_partition(receipt)
 
 
+def _configured_scope(settings: Settings) -> dict[str, object]:
+    return {
+        "verticals": sorted(settings.v2_supported_verticals_list),
+        "locales": sorted(settings.v2_supported_locales_list),
+        "countries": sorted(settings.v2_supported_countries_list),
+        "decision_types": sorted(settings.v2_supported_decision_types_list),
+        "maximum_data_age_seconds": settings.v2_max_data_age_seconds,
+    }
+
+
+def _validate_runtime_scope(
+    receipt: V2PromotionReceipt,
+    *,
+    settings: Settings,
+) -> None:
+    configured = _configured_scope(settings)
+    policy = receipt.policy_json if isinstance(receipt.policy_json, dict) else {}
+    authorized = policy.get("runtime_scope")
+    if authorized is None:
+        raise V2PromotionGuardError("promotion receipt has no bound runtime scope")
+    if not isinstance(authorized, dict) or authorized != configured:
+        raise V2PromotionGuardError("promotion runtime scope drifted")
+
+
 async def _require_registered_proofs(
     session,
     *,
@@ -183,6 +207,7 @@ async def authorize_v2_runtime(
         )
         if receipt.policy_json.get("campaign_id") != settings.v2_chain_campaign_id:
             raise V2PromotionGuardError("canary receipt campaign drifted")
+        _validate_runtime_scope(receipt, settings=settings)
         await _require_registered_proofs(
             session,
             receipt=receipt,
@@ -228,6 +253,7 @@ async def authorize_v2_runtime(
         )
         if source.policy_json.get("campaign_id") != settings.v2_chain_campaign_id:
             raise V2PromotionGuardError("public canary lineage campaign drifted")
+        _validate_runtime_scope(source, settings=settings)
         await _require_registered_proofs(
             session,
             receipt=receipt,

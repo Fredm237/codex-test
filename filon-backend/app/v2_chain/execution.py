@@ -14,6 +14,7 @@ from sqlalchemy.exc import IntegrityError
 
 from app.db import models as core_models
 from app.db.writer_lease import serialize_pipeline_writer_start
+from app.observations.models import RawSourceRecord
 from app.v2_chain.models import V2ChainExecution
 from app.v2_chain.orchestrator import (
     V2ChainCheckpoints,
@@ -88,6 +89,8 @@ def window_metrics(report: V2ChainReport) -> dict[str, object]:
         "after_raw_id": report.after_raw_id,
         "last_raw_source_id": identity.get("last_raw_source_id"),
         "checkpoints": asdict(report.checkpoints),
+        "country_code": report.country_code,
+        "raw_id_upper_bound": report.raw_id_upper_bound,
     }
     snapshot = "sha256:" + hashlib.sha256(
         json.dumps(snapshot_payload, sort_keys=True, separators=(",", ":")).encode()
@@ -138,7 +141,87 @@ def window_metrics(report: V2ChainReport) -> dict[str, object]:
         "coverage_funnel": coverage_funnel,
         "errors": 0,
         "evaluation_identity": report.evaluation_id,
+        "country_code": report.country_code,
+        "raw_id_upper_bound": report.raw_id_upper_bound,
     }
+
+
+def _effective_limit(
+    *,
+    after_raw_id: int,
+    limit: int,
+    country_code: str | None = None,
+    raw_id_upper_bound: int | None = None,
+) -> int:
+    if (country_code is None) != (raw_id_upper_bound is None):
+        raise ValueError("country scope requires both country and raw upper bound")
+    if country_code is None:
+        return limit
+    if (
+        len(country_code) != 2
+        or country_code.upper() != country_code
+        or not country_code.isalpha()
+    ):
+        raise ValueError("country code must be an uppercase ISO alpha-2 code")
+    if raw_id_upper_bound <= after_raw_id:
+        raise ValueError("raw upper bound must be greater than after_raw_id")
+    return min(limit, raw_id_upper_bound - after_raw_id)
+
+
+async def _assert_country_window(
+    session,
+    *,
+    after_raw_id: int,
+    limit: int,
+    country_code: str | None,
+    raw_id_upper_bound: int | None,
+) -> int:
+    """Valide le pays et retourne la taille exacte avant la borne immuable."""
+
+    if country_code is None or raw_id_upper_bound is None:
+        return limit
+    raw_rows = list(
+        (
+            await session.execute(
+                select(RawSourceRecord.id, RawSourceRecord.context_json)
+                .where(
+                    RawSourceRecord.source_type == "awin_feed",
+                    RawSourceRecord.id > after_raw_id,
+                    RawSourceRecord.id <= raw_id_upper_bound,
+                )
+                .order_by(RawSourceRecord.id)
+                .limit(limit)
+            )
+        ).all()
+    )
+    if not raw_rows:
+        raise ValueError("country-scoped V2 window is empty")
+    merchant_ids: set[int] = set()
+    for _raw_id, context in raw_rows:
+        merchant_id = (context or {}).get("merchant_id")
+        if (
+            isinstance(merchant_id, bool)
+            or not isinstance(merchant_id, int)
+            or merchant_id < 1
+        ):
+            raise ValueError("country-scoped raw source has no merchant")
+        merchant_ids.add(merchant_id)
+    regions = dict(
+        (
+            await session.execute(
+                select(core_models.Merchant.id, core_models.Merchant.region).where(
+                    core_models.Merchant.id.in_(merchant_ids)
+                )
+            )
+        ).all()
+    )
+    if len(regions) != len(merchant_ids) or any(
+        not isinstance(regions.get(merchant_id), str)
+        or regions[merchant_id].strip().upper() != country_code
+        for merchant_id in merchant_ids
+    ):
+        raise ValueError("country-scoped V2 window contains another region")
+    return len(raw_rows)
 
 
 async def _start_execution(
@@ -153,6 +236,8 @@ async def _start_execution(
     campaign_id: str | None,
     execution_kind: str | None,
     source_execution_id: int | None,
+    country_code: str | None = None,
+    raw_id_upper_bound: int | None = None,
 ) -> int:
     campaign_id, execution_kind, source_execution_id = _campaign_fields(
         campaign_id=campaign_id,
@@ -184,6 +269,8 @@ async def _start_execution(
         campaign_id=campaign_id,
         execution_kind=execution_kind,
         source_execution_id=source_execution_id,
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
         heartbeat_at=now,
     )
     session.add(execution)
@@ -320,28 +407,47 @@ async def run_journaled_v2_shadow_chain(
     campaign_id: str | None = None,
     execution_kind: str | None = None,
     source_execution_id: int | None = None,
+    country_code: str | None = None,
+    raw_id_upper_bound: int | None = None,
 ) -> V2ChainReport:
     """Exécute la chaîne sous lease unique et consigne chaque étape."""
 
     captured = checkpoints or await capture_checkpoints(session)
+    execution_limit = _effective_limit(
+        after_raw_id=after_raw_id,
+        limit=limit,
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
+    )
     validate_v2_chain_request(
         evaluated_at=evaluated_at,
         vertical=vertical,
         after_raw_id=after_raw_id,
-        limit=limit,
+        limit=execution_limit,
         checkpoints=captured,
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
+    )
+    execution_limit = await _assert_country_window(
+        session,
+        after_raw_id=after_raw_id,
+        limit=execution_limit,
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
     execution_id = await _start_execution(
         session,
         evaluated_at=evaluated_at,
         vertical=vertical,
         after_raw_id=after_raw_id,
-        limit=limit,
+        limit=execution_limit,
         apply=apply,
         checkpoints=captured,
         campaign_id=campaign_id,
         execution_kind=execution_kind,
         source_execution_id=source_execution_id,
+        country_code=country_code,
+        raw_id_upper_bound=raw_id_upper_bound,
     )
 
     async def on_stage_complete(stage_name: str) -> None:
@@ -353,10 +459,12 @@ async def run_journaled_v2_shadow_chain(
             evaluated_at=evaluated_at,
             vertical=vertical,
             after_raw_id=after_raw_id,
-            limit=limit,
+            limit=execution_limit,
             apply=apply,
             checkpoints=captured,
             on_stage_complete=on_stage_complete,
+            country_code=country_code,
+            raw_id_upper_bound=raw_id_upper_bound,
         )
     except BaseException as exc:
         await session.rollback()

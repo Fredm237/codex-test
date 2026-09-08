@@ -79,6 +79,7 @@ def _shadow_values(report: V2ShadowQualificationReport) -> dict[str, object]:
     identity = {
         "evaluated_at": report.evaluated_at,
         "campaign_id": report.campaign_id,
+        "runtime_scope": asdict(report.runtime_scope),
         "metrics": asdict(report.metrics),
         "gate": report.gate.to_dict(),
         "proof_refs": report.proof_refs,
@@ -107,6 +108,7 @@ def _shadow_values(report: V2ShadowQualificationReport) -> dict[str, object]:
         "policy_json": {
             "campaign_id": report.campaign_id,
             "maximum_p95_window_ms": report.maximum_p95_window_ms,
+            "runtime_scope": _json_value(asdict(report.runtime_scope)),
         },
         "raw_payload_retained": False,
         "evaluated_at": _evaluated_at(report.evaluated_at),

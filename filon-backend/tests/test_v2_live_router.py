@@ -36,7 +36,8 @@ def _settings(mode: str):
         v2_chain_campaign_id=CAMPAIGN,
         v2_canary_subject_digests_list=[SUBJECT] if mode == "canary" else [],
         v2_supported_verticals_list=["smartphones"],
-        v2_supported_locales_list=["fr"],
+        v2_supported_locales_list=["fr", "fr-BE"],
+        v2_supported_countries_list=["BE"],
         v2_supported_decision_types_list=["purchase_advice"],
         v2_max_data_age_seconds=300,
     )
@@ -158,6 +159,41 @@ async def test_non_promoted_modes_preserve_the_exact_core_block(
     assert result.response is core
     assert result.source == "core_v1"
     assert result.reason_code == "reader_off"
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("country", "locale"),
+    (("fr", "fr"), (None, "fr"), ("FR", "fr-FR")),
+)
+async def test_promoted_reader_fails_closed_outside_the_country_allowlist(
+    monkeypatch,
+    country: str | None,
+    locale: str,
+) -> None:
+    _session, reader, recorder, inspector = _install_promoted_runtime(
+        monkeypatch,
+        mode="public",
+    )
+    core = {"real": True, "offers": 1, "cards": [{"offer_id": 7}]}
+
+    result = await live_router.route_promoted_response(
+        core_response=core,
+        core_latency_us=1_000,
+        query="un smartphone",
+        budget=500,
+        country=country,
+        locale=locale,
+        surface="advise_stream",
+        subject_digest=None,
+    )
+
+    assert result.response is core
+    assert result.source == "core_v1"
+    assert result.reason_code == "country_unsupported"
+    inspector.assert_not_awaited()
+    reader.assert_not_awaited()
+    recorder.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -414,8 +450,8 @@ async def test_public_mode_uses_exact_authorization_without_canary_identity(
         core_latency_us=12_000,
         query="un smartphone",
         budget=None,
-        country=None,
-        locale="fr",
+        country="be",
+        locale="fr-BE",
         surface="advise",
         subject_digest=None,
     )
@@ -452,8 +488,8 @@ async def test_public_abstention_never_erases_a_core_recommendation(monkeypatch)
         core_latency_us=5_000,
         query="un smartphone",
         budget=None,
-        country=None,
-        locale="fr",
+        country="be",
+        locale="fr-BE",
         surface="advise",
         subject_digest=None,
     )
@@ -489,8 +525,8 @@ async def test_public_telemetry_failure_returns_the_whole_core_block(monkeypatch
         core_latency_us=5_000,
         query="un smartphone",
         budget=None,
-        country=None,
-        locale="fr",
+        country="be",
+        locale="fr-BE",
         surface="advise",
         subject_digest=None,
     )

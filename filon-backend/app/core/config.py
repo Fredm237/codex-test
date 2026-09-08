@@ -221,6 +221,8 @@ class Settings(BaseSettings):
                 errors.append("V2_CHAIN_MODE=canary requires supported verticals")
             if not self.v2_supported_locales_list:
                 errors.append("V2_CHAIN_MODE=canary requires supported locales")
+            if not self.v2_supported_countries_list:
+                errors.append("V2_CHAIN_MODE=canary requires supported countries")
             if not self.v2_supported_decision_types_list:
                 errors.append("V2_CHAIN_MODE=canary requires supported decision types")
             if self.v2_max_data_age_seconds is None:
@@ -248,6 +250,8 @@ class Settings(BaseSettings):
                 errors.append("V2_CHAIN_MODE=public requires supported verticals")
             if not self.v2_supported_locales_list:
                 errors.append("V2_CHAIN_MODE=public requires supported locales")
+            if not self.v2_supported_countries_list:
+                errors.append("V2_CHAIN_MODE=public requires supported countries")
             if not self.v2_supported_decision_types_list:
                 errors.append("V2_CHAIN_MODE=public requires supported decision types")
             if self.v2_max_data_age_seconds is None:
@@ -601,9 +605,9 @@ class Settings(BaseSettings):
     # CANARY/PUBLIC exigent une verticale, une locale, un type et une fraîcheur.
     v2_supported_verticals: str = Field(default="")
     v2_supported_locales: str = Field(default="")
+    v2_supported_countries: str = Field(default="")
     v2_supported_decision_types: str = Field(default="")
     v2_max_data_age_seconds: int | None = Field(default=None, ge=1, le=30 * 24 * 60 * 60)
-
     @field_validator(
         "v2_promotion_receipt_evaluation_id",
         "v2_chain_campaign_id",
@@ -647,6 +651,22 @@ class Settings(BaseSettings):
             name="V2_SUPPORTED_LOCALES",
             maximum=8,
         )
+
+    @property
+    def v2_supported_countries_list(self) -> list[str]:
+        values = _v2_scope_tokens(
+            self.v2_supported_countries,
+            name="V2_SUPPORTED_COUNTRIES",
+            maximum=2,
+        )
+        if any(
+            len(value) != 2 or value.upper() != value or not value.isalpha()
+            for value in values
+        ):
+            raise ValueError(
+                "V2_SUPPORTED_COUNTRIES must contain uppercase ISO-3166 alpha-2 codes"
+            )
+        return values
 
     @property
     def v2_supported_decision_types_list(self) -> list[str]:

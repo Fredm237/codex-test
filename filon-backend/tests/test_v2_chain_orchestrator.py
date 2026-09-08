@@ -131,6 +131,65 @@ async def _seed(session) -> None:
 
 
 @pytest.mark.asyncio
+async def test_country_scoped_window_rejects_a_mixed_region() -> None:
+    engine = create_async_engine("sqlite+aiosqlite:///:memory:")
+    async with engine.begin() as connection:
+        await connection.run_sync(Base.metadata.create_all)
+    sessions = async_sessionmaker(engine, expire_on_commit=False)
+    try:
+        async with sessions() as session:
+            belgian = core_models.Merchant(
+                awin_mid=1201,
+                name="Belgian Merchant",
+                slug="belgian-merchant",
+                joined=True,
+                region="BE",
+            )
+            french = core_models.Merchant(
+                awin_mid=1202,
+                name="French Merchant",
+                slug="french-merchant",
+                joined=True,
+                region="FR",
+            )
+            session.add_all((belgian, french))
+            await session.flush()
+            for index, merchant in enumerate((belgian, french), start=1):
+                session.add(
+                    RawSourceRecord(
+                        source_type="awin_feed",
+                        source_ref=f"awin-feed:{merchant.awin_mid}",
+                        source_record_key=f"{merchant.awin_mid}:scope-{index}",
+                        schema_version="awin-create-a-feed-v1",
+                        context_json={"merchant_id": merchant.id},
+                        payload_json={"name": f"Scoped {index}"},
+                        payload_checksum=f"{index:064x}",
+                        replay_key=f"{index + 10:064x}",
+                        observed_at=EVALUATED_AT.replace(tzinfo=None),
+                    )
+                )
+            await session.commit()
+
+            assert await v2_execution._assert_country_window(
+                session,
+                after_raw_id=0,
+                limit=2,
+                country_code="BE",
+                raw_id_upper_bound=1,
+            ) == 1
+            with pytest.raises(ValueError, match="another region"):
+                await v2_execution._assert_country_window(
+                    session,
+                    after_raw_id=0,
+                    limit=2,
+                    country_code="BE",
+                    raw_id_upper_bound=2,
+                )
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
 async def test_atomic_chain_apply_and_identical_replay_are_idempotent() -> None:
     engine = create_async_engine("sqlite+aiosqlite:///:memory:")
     async with engine.begin() as connection:

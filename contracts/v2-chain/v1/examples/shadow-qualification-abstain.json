@@ -2,6 +2,13 @@
   "schema_version": "v2-shadow-qualification/v1",
   "evaluated_at": "2026-09-04T09:00:00Z",
   "campaign_id": "sha256:eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+  "runtime_scope": {
+    "verticals": ["smartphones"],
+    "locales": ["fr-BE"],
+    "countries": ["BE"],
+    "decision_types": ["purchase_advice"],
+    "maximum_data_age_seconds": 300
+  },
   "metrics": {
     "execution_rows": 30,
     "valid_terminal_windows": 30,

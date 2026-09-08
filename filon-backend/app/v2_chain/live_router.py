@@ -299,6 +299,14 @@ async def route_promoted_response(
         return V2LiveRouteResult(
             core_response, "core_v1", mode, "vertical_unsupported"
         )
+    request_country = _country(country, locale)
+    if (
+        request_country is None
+        or request_country not in settings.v2_supported_countries_list
+    ):
+        return V2LiveRouteResult(
+            core_response, "core_v1", mode, "country_unsupported"
+        )
 
     assignment = (
         assign_closed_cohort(
@@ -334,7 +342,7 @@ async def route_promoted_response(
                 query=query,
                 vertical=vertical,
                 locale=_language(locale),
-                country_code=_country(country, locale),
+                country_code=request_country,
                 budget_amount_decimal=(
                     f"{budget:.2f}" if budget is not None else None
                 ),

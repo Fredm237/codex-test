@@ -103,5 +103,11 @@ obtenues :
 9. nouveau reçu public autorisant explicitement le scope Belgique ;
 10. vérification publique réelle suivie d'un test du kill switch.
 
+Le routeur promu exige en plus `V2_SUPPORTED_COUNTRIES`. Une requête sans pays
+ISO explicite, ou dont le pays ne figure pas dans cette liste fermée, retourne
+Core V1 avant tout accès au lecteur V2. Pour la portée historique France, la
+valeur doit rester `FR` ; `BE` ne peut être ajouté qu'après le nouveau reçu
+Belgique.
+
 Une absence de produit admissible reste une abstention ou un fallback Core V1.
 `BUY_NOW` et `WAIT` ne sont pas ouverts par ce lot.

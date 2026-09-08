@@ -57,6 +57,13 @@ def _shadow_receipt(**overrides) -> V2PromotionReceipt:
         "policy_json": {
             "campaign_id": _digest("f"),
             "maximum_p95_window_ms": 500,
+            "runtime_scope": {
+                "verticals": ["smartphones"],
+                "locales": ["fr-BE"],
+                "countries": ["BE"],
+                "decision_types": ["purchase_advice"],
+                "maximum_data_age_seconds": 300,
+            },
         },
         "raw_payload_retained": False,
         "evaluated_at": datetime(2026, 9, 4, 12, 0, 0),
@@ -100,6 +107,7 @@ def _settings(mode: str) -> Settings:
         ),
         "v2_supported_verticals": "smartphones",
         "v2_supported_locales": "fr-BE",
+        "v2_supported_countries": "BE",
         "v2_supported_decision_types": "purchase_advice",
         "v2_max_data_age_seconds": 300,
     }

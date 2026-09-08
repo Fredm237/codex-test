@@ -22,6 +22,7 @@ from app.v2_chain.promotion_receipt import (
 from app.v2_chain.qualification import (
     V2PublicQualificationMetrics,
     V2PublicQualificationReport,
+    V2PromotionScope,
     V2QualificationMetrics,
     V2ShadowQualificationReport,
 )
@@ -105,6 +106,13 @@ def _shadow_report() -> V2ShadowQualificationReport:
     identity = {
         "evaluated_at": EVALUATED_AT,
         "campaign_id": "sha256:" + "c" * 64,
+        "runtime_scope": {
+            "verticals": ["smartphones"],
+            "locales": ["fr-BE"],
+            "countries": ["BE"],
+            "decision_types": ["purchase_advice"],
+            "maximum_data_age_seconds": 300,
+        },
         "metrics": asdict(metrics),
         "gate": gate.to_dict(),
         "proof_refs": refs,
@@ -114,6 +122,13 @@ def _shadow_report() -> V2ShadowQualificationReport:
         schema_version="v2-shadow-qualification/v1",
         evaluated_at=EVALUATED_AT,
         campaign_id="sha256:" + "c" * 64,
+        runtime_scope=V2PromotionScope(
+            verticals=("smartphones",),
+            locales=("fr-BE",),
+            countries=("BE",),
+            decision_types=("purchase_advice",),
+            maximum_data_age_seconds=300,
+        ),
         metrics=metrics,
         gate=gate,
         proof_refs=refs,
