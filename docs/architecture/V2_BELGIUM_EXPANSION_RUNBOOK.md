@@ -3,10 +3,12 @@
 ## État
 
 - Date de préparation : **8 septembre 2026**
-- Production actuelle : **V2 `FACTUAL_OPTIONS` France**, Belgique servie par
-  **Core V1 fail-closed**
+- Date de fermeture : **9 septembre 2026**
+- Production actuelle : **V2 `FACTUAL_OPTIONS` France** et **V2 `ABSTAIN`
+  Belgique**, avec Core V1 calculé en premier et conservé comme fallback
 - Lot présent : amorçage régional explicite, borné et journalisé
-- Activation Belgique : **NON EFFECTUÉE**
+- Activation Belgique : **EFFECTUÉE ET PROUVÉE**, voir
+  `V2_BE_PUBLIC_ACTIVATION_RECEIPT.md`
 
 Ce runbook ne transforme pas la preuve France en preuve Belgique. La Belgique
 doit accumuler ses propres données de provenance, exécutions V2, observations
@@ -88,8 +90,9 @@ identifiant du run catalogue. Aucun payload brut n'y est retenu.
 
 ## Gates après amorçage
 
-L'extension Belgique reste fermée tant que ces preuves ne sont pas toutes
-obtenues :
+L'extension Belgique devait rester fermée tant que ces preuves n'étaient pas
+toutes obtenues. Elles sont désormais fermées dans
+`V2_BE_PUBLIC_ACTIVATION_RECEIPT.md` :
 
 1. run catalogue terminal `succeeded`, un seul feed, au plus 500 lignes ;
 2. absence de writer catalogue ou V2 concurrent ;
@@ -110,4 +113,5 @@ valeur doit rester `FR` ; `BE` ne peut être ajouté qu'après le nouveau reçu
 Belgique.
 
 Une absence de produit admissible reste une abstention ou un fallback Core V1.
-`BUY_NOW` et `WAIT` ne sont pas ouverts par ce lot.
+`BUY_NOW`, `FACTUAL_OPTIONS` et `WAIT` ne sont pas ouverts par ce lot. La
+promotion belge est strictement limitée à `ABSTAIN`.
