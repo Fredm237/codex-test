@@ -424,10 +424,61 @@ async def test_unadapted_actionable_response_can_never_cross_the_public_contract
 
     assert result.response is core
     assert result.source == "core_v1"
-    assert result.reason_code == "v2_reader_error"
+    assert result.reason_code == "response_type_not_qualified"
     receipt = recorder.await_args.kwargs["receipt"]
     assert receipt.response_type == "CORE"
-    assert receipt.fallback_reason == "v2_reader_error"
+    assert receipt.fallback_reason == "response_type_not_qualified"
+    assert receipt.chain_complete is True
+    assert receipt.safety_state == "SAFE"
+    assert receipt.provenance_complete is True
+
+
+@pytest.mark.asyncio
+async def test_public_factual_receipt_keeps_core_when_v2_abstains(
+    monkeypatch,
+) -> None:
+    session, reader, recorder, _inspector = _install_promoted_runtime(
+        monkeypatch,
+        mode="public",
+    )
+    monkeypatch.setattr(
+        live_router,
+        "authorize_v2_runtime",
+        AsyncMock(
+            return_value=V2RuntimeAuthorization(
+                schema_version="v2-runtime-authorization/v1",
+                mode="public",
+                promotion_stage="canary_to_public",
+                receipt_evaluation_id=RECEIPT,
+                gate_evaluation_id=GATE_ID,
+                authorized_response_types=("FACTUAL_OPTIONS",),
+                canary_subjects=0,
+            )
+        ),
+    )
+    core = {"real": True, "offers": 1, "cards": [{"offer_id": 7}]}
+
+    result = await live_router.route_promoted_response(
+        core_response=core,
+        core_latency_us=4_000,
+        query="un smartphone",
+        budget=None,
+        country="be",
+        locale="fr",
+        surface="advise_stream",
+        subject_digest=None,
+    )
+
+    assert result.response is core
+    assert result.source == "core_v1"
+    assert result.reason_code == "response_type_not_qualified"
+    receipt = recorder.await_args.kwargs["receipt"]
+    assert receipt.response_type == "CORE"
+    assert receipt.fallback_reason == "response_type_not_qualified"
+    assert receipt.chain_complete is True
+    assert receipt.safety_state == "ABSTAIN"
+    assert receipt.provenance_complete is True
+    session.commit.assert_awaited_once()
 
 
 @pytest.mark.asyncio
