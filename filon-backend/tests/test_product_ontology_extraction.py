@@ -69,7 +69,7 @@ def test_ambiguous_compatibility_never_defaults_to_primary_or_canonical():
     assert payload["relationships"][0]["target_variant_id"] is None
 
 
-def test_synthetic_family_name_without_product_noun_never_becomes_primary():
+def test_resolved_identity_and_observed_category_can_prove_primary_role():
     payload = _extract(
         {
             "name": "Example Climate 9000 BTU",
@@ -78,11 +78,75 @@ def test_synthetic_family_name_without_product_noun_never_becomes_primary():
         }
     )
     _assert_valid(payload)
-    assert payload["product_role"] == {
-        "state": "unknown",
-        "value": "UNKNOWN",
-        "evidence": [],
-    }
+    assert payload["ontology_status"] == "VERIFIED"
+    assert payload["product_role"]["value"] == "PRIMARY_PRODUCT"
+    assert (
+        payload["product_role"]["evidence"][0]["evidence_strength"]
+        == "observed_structured"
+    )
+
+
+def test_resolved_perfume_uses_observed_category_without_product_noun():
+    payload = _extract(
+        {
+            "product_name": "Example No. 5",
+            "merchant_category": "Eau de parfum",
+            "brand_name": "Example",
+        }
+    )
+    _assert_valid(payload)
+    assert payload["ontology_status"] == "VERIFIED"
+    assert payload["classification"]["category"]["state"] == "known"
+    assert payload["classification"]["product_type"]["state"] == "known"
+    assert payload["product_role"]["value"] == "PRIMARY_PRODUCT"
+
+
+def test_structured_accessory_category_never_defaults_to_primary():
+    payload = _extract(
+        {
+            "product_name": "Example Model X",
+            "merchant_category": "Hoesjes, screenprotector & houders",
+        }
+    )
+    _assert_valid(payload)
+    assert payload["ontology_status"] == "VERIFIED"
+    assert payload["product_role"]["value"] == "ACCESSORY"
+
+
+def test_unresolved_identity_stays_quarantined_with_structured_category():
+    payload = _extract(
+        {
+            "product_name": "Example No. 5",
+            "merchant_category": "Eau de parfum",
+        },
+        variant_id=None,
+    )
+    _assert_valid(payload)
+    assert payload["ontology_status"] == "QUARANTINED"
+    assert payload["reason_codes"][0] == "identity_unresolved"
+
+
+@pytest.mark.parametrize(
+    "name, expected",
+    [
+        ("Example Studio laptop", "PRIMARY_PRODUCT"),
+        ("Bundle Example Studio laptop with 2 controllers", "BUNDLE"),
+    ],
+)
+def test_explicit_sold_object_survives_a_noisy_merchant_category(
+    name: str,
+    expected: str,
+):
+    payload = _extract(
+        {
+            "name": name,
+            "merchant_category": "software title",
+            "offer_kind": "physical_product",
+        }
+    )
+    _assert_valid(payload)
+    assert payload["ontology_status"] == "VERIFIED"
+    assert payload["product_role"]["value"] == expected
 
 
 @pytest.mark.parametrize(
