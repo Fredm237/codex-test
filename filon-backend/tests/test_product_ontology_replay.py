@@ -209,6 +209,58 @@ async def test_new_evaluation_is_append_only():
 
 
 @pytest.mark.asyncio
+async def test_v2_projection_coexists_with_historical_v1_snapshot():
+    engine, maker = await _database()
+    try:
+        async with maker() as session:
+            raws = await _seed(session)
+            session.add(
+                models.ProductOntologySnapshot(
+                    snapshot_key="f" * 64,
+                    raw_source_record_id=raws[0].id,
+                    offer_id=1,
+                    variant_id=1,
+                    ontology_status="PARTIAL",
+                    classification_json={},
+                    product_role_json={},
+                    attributes_json=[],
+                    relationships_json=[],
+                    facets_json={},
+                    legacy_taxonomy_json={},
+                    reason_codes_json=["product_type_unknown"],
+                    projection_version="product-ontology-extractor/v1",
+                    policy_version="product-ontology-policy/v1",
+                    observed_at=OBSERVED_AT,
+                    evaluated_at=EVALUATED_AT.replace(tzinfo=None),
+                )
+            )
+            await session.commit()
+
+            report = await replay_product_ontology_batch(
+                session, evaluated_at=EVALUATED_AT, limit=1, apply=True
+            )
+            assert report.snapshots_created == 1
+            rows = (
+                (
+                    await session.execute(
+                        select(models.ProductOntologySnapshot).where(
+                            models.ProductOntologySnapshot.raw_source_record_id
+                            == raws[0].id
+                        )
+                    )
+                )
+                .scalars()
+                .all()
+            )
+            assert {row.projection_version for row in rows} == {
+                "product-ontology-extractor/v1",
+                "product-ontology-extractor/v2",
+            }
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
 async def test_same_evaluation_refuses_changed_source():
     engine, maker = await _database()
     try:

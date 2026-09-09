@@ -1,4 +1,4 @@
-"""Extracteur Product Ontology v1, déterministe et fail-closed.
+"""Extracteur Product Ontology déterministe et fail-closed.
 
 La taxonomie et le moteur de rôle historiques restent des signaux de migration.
 Ils ne peuvent pas, seuls, transformer un objet ambigu en produit principal ni
@@ -8,6 +8,7 @@ une cible textuelle en Variant canonique.
 from __future__ import annotations
 
 import re
+import unicodedata
 from datetime import datetime, timezone
 from typing import Any, Mapping
 
@@ -15,8 +16,8 @@ from app.services import product_role as legacy_roles
 from app.services import taxonomy
 
 
-EXTRACTOR_VERSION = "product-ontology-extractor/v1"
-POLICY_VERSION = "product-ontology-policy/v1"
+EXTRACTOR_VERSION = "product-ontology-extractor/v2"
+POLICY_VERSION = "product-ontology-policy/v2"
 
 
 class ProductOntologyExtractionError(ValueError):
@@ -44,6 +45,12 @@ _PRIMARY_OBJECT = re.compile(
     r"notebooks?|ordinateurs?\s+portables?|tyres?|tires?|pneus?|air\s+conditioners?|"
     r"climatiseurs?|jackets?|vestes?|manteaux?|travel\s+guides?|"
     r"guides?\s+de\s+voyage)\b",
+    re.IGNORECASE,
+)
+
+_STRUCTURED_ACCESSORY = re.compile(
+    r"\b(?:accessories?|accessoires?|hoesjes?|screenprotector|"
+    r"houders?|kabels?|cables?)\b",
     re.IGNORECASE,
 )
 
@@ -141,6 +148,83 @@ def _known_concept(key: str, label: str, evidence: dict[str, Any]) -> dict[str, 
     return {"state": "known", "value": {"concept_key": key, "label": label}, "evidence": [evidence]}
 
 
+def _concept_segment(value: str) -> str:
+    normalized = unicodedata.normalize("NFKD", value.casefold())
+    ascii_value = "".join(
+        character
+        for character in normalized
+        if not unicodedata.combining(character)
+    )
+    segment = re.sub(r"[^a-z0-9]+", "_", ascii_value).strip("_")
+    return segment[:80] or "unknown"
+
+
+def _structured_classification(
+    *,
+    merchant_category: str | None,
+    title: str,
+    brand: str | None,
+    merchant_name: str | None,
+    evidence_factory,
+) -> tuple[dict[str, Any] | None, str | None, str | None]:
+    """Projette la taxonomie catalogue seulement depuis une catégorie observée.
+
+    La taxonomie historique reste une aide de migration quand le flux n'expose
+    aucune catégorie. En revanche, une catégorie marchande explicite, liée à
+    une Variant déjà résolue par le replay appelant, constitue un signal
+    structuré observable. Les catégories promotionnelles ou inconnues restent
+    fermées car ``taxonomy.classify`` retourne alors ``None``.
+    """
+
+    if merchant_category is None:
+        return None, None, None
+    category = taxonomy.classify(
+        merchant_category,
+        title or None,
+        brand,
+        merchant_name,
+    )
+    if category is None:
+        return None, None, None
+    subcategory = taxonomy.classify_subcategory(
+        category,
+        title or None,
+        merchant_category,
+        merchant_name,
+    )
+    category_key = f"catalog.{_concept_segment(category)}"
+    category_evidence = evidence_factory(
+        "category",
+        "observed_merchant_category_taxonomy",
+        "observed_structured",
+    )
+    product_label = subcategory or merchant_category
+    product_key = f"catalog_type.{_concept_segment(product_label)}"
+    product_evidence = evidence_factory(
+        "product_type",
+        "observed_merchant_category_taxonomy",
+        "observed_structured",
+    )
+    classification = {
+        "category": _known_concept(category_key, category, category_evidence),
+        "subcategory": (
+            _known_concept(
+                f"{category_key}.{_concept_segment(subcategory)}",
+                subcategory,
+                evidence_factory(
+                    "subcategory",
+                    "observed_merchant_category_taxonomy",
+                    "observed_structured",
+                ),
+            )
+            if subcategory
+            else _unknown_concept()
+        ),
+        "product_type": _known_concept(product_key, product_label, product_evidence),
+    }
+    return classification, category, subcategory
+
+
 def _product_type(text: str) -> tuple[str, str, str, str, str, str, str | None] | None:
     for pattern, category_key, category_label, subcategory_key, subcategory_label, type_key, type_label, legacy_category in _PRODUCT_TYPES:
         if re.search(pattern, text, re.IGNORECASE):
@@ -151,9 +235,11 @@ def _product_type(text: str) -> tuple[str, str, str, str, str, str, str | None] 
 def _role(
     *,
     title: str,
-    source_text: str,
     offer_kind: str | None,
-    legacy: Mapping[str, Any],
+    title_legacy: Mapping[str, Any],
+    structured_product_type_known: bool,
+    identity_resolved: bool,
+    merchant_category: str | None,
     evidence_factory,
 ) -> dict[str, Any]:
     if offer_kind == taxonomy.ACCOMMODATION:
@@ -162,17 +248,35 @@ def _role(
         value, strength, transformation = "DIGITAL_CONTENT", "observed_structured", "explicit_offer_kind"
     elif offer_kind == taxonomy.SERVICE:
         value, strength, transformation = "SERVICE", "observed_structured", "explicit_offer_kind"
+    elif merchant_category and _STRUCTURED_ACCESSORY.search(merchant_category):
+        value, strength, transformation = "ACCESSORY", "observed_structured", "observed_accessory_category"
     else:
-        legacy_value = legacy["product_role"]
-        mapped = _LEGACY_ROLE_MAP.get(legacy_value)
+        # Le libellé de l'objet vendu prime sur une catégorie marchande
+        # bruyante. Par exemple, un « Bundle ... laptop » classé sous
+        # « software title » reste un bundle physique ; la catégorie ne
+        # doit pas effacer ce signal explicite. Les relations restent toutefois
+        # calculées depuis le titre et continuent de bloquer PRIMARY_PRODUCT.
+        title_legacy_value = title_legacy["product_role"]
+        mapped = _LEGACY_ROLE_MAP.get(title_legacy_value)
         if mapped is not None:
             value, strength, transformation = mapped, "weak_text", "explicit_role_lexeme"
         elif (
-            legacy_value == legacy_roles.MAIN_PRODUCT
-            and not legacy["relationships"]
+            title_legacy_value == legacy_roles.MAIN_PRODUCT
+            and not title_legacy["relationships"]
             and _PRIMARY_OBJECT.search(title)
         ):
             value, strength, transformation = "PRIMARY_PRODUCT", "weak_text", "explicit_primary_object_lexeme"
+        elif (
+            identity_resolved
+            and structured_product_type_known
+            and title_legacy_value == legacy_roles.MAIN_PRODUCT
+            and not title_legacy["relationships"]
+        ):
+            value, strength, transformation = (
+                "PRIMARY_PRODUCT",
+                "observed_structured",
+                "resolved_identity_and_observed_category",
+            )
         else:
             return {"state": "unknown", "value": "UNKNOWN", "evidence": []}
     return {
@@ -283,11 +387,17 @@ def extract_product_ontology(
     brand = _text(row, "brand_name", "brand")
     offer_kind = _text(row, "offer_kind")
     source_text = " ".join(value for value in (title, merchant_category or "") if value).strip()
-    # La catégorie marchande alimente uniquement le mapping legacy ci-dessous.
-    # Elle ne peut pas décider du rôle de l'objet vendu : un flux « Software »
-    # peut contenir un laptop, comme un flux « Smartphones » peut contenir une
-    # coque. Le rôle et les relations exigent donc un signal dans le titre.
+    # La catégorie marchande observée peut préciser une famille et distinguer
+    # un accessoire. Le rôle PRIMARY_PRODUCT exige en plus une identité résolue
+    # et l'absence de relation contradictoire ; une catégorie seule ne suffit
+    # donc jamais à rendre canonique un objet ambigu.
     legacy = legacy_roles.understand_offer(
+        name=title or None,
+        merchant_category=merchant_category,
+        brand=brand,
+        offer_kind=offer_kind,
+    )
+    title_legacy = legacy_roles.understand_offer(
         name=title or None,
         merchant_category=None,
         brand=brand,
@@ -307,12 +417,20 @@ def extract_product_ontology(
 
     product_type = _product_type(source_text)
     if product_type is None:
-        classification = {
+        structured, expected_legacy, _structured_subcategory = (
+            _structured_classification(
+                merchant_category=merchant_category,
+                title=title,
+                brand=brand,
+                merchant_name=_text(row, "merchant_name"),
+                evidence_factory=evidence_factory,
+            )
+        )
+        classification = structured or {
             "category": _unknown_concept(),
             "subcategory": _unknown_concept(),
             "product_type": _unknown_concept(),
         }
-        expected_legacy = None
     else:
         category_key, category_label, subcategory_key, subcategory_label, type_key, type_label, expected_legacy = product_type
         classification = {
@@ -323,9 +441,13 @@ def extract_product_ontology(
 
     role = _role(
         title=title,
-        source_text=source_text,
         offer_kind=offer_kind,
-        legacy=legacy,
+        title_legacy=title_legacy,
+        structured_product_type_known=(
+            classification["product_type"]["state"] == "known"
+        ),
+        identity_resolved=variant_id is not None,
+        merchant_category=merchant_category,
         evidence_factory=evidence_factory,
     )
     relationships, relationship_dropped = _relationships(legacy, evidence_factory)
