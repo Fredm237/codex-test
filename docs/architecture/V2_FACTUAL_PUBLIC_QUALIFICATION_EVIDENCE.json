@@ -1,0 +1,141 @@
+{
+  "schema_version": "filon-v2-factual-public-qualification-evidence/v1",
+  "evaluated_at": "2026-09-09T18:24:23Z",
+  "candidate_status": "CANARY_PROVEN_PUBLIC_NOT_YET_AUTHORIZED",
+  "scope": {
+    "countries": ["BE"],
+    "locales": ["fr", "fr-BE"],
+    "verticals": ["audio", "smartphones"],
+    "decision_types": ["purchase_advice"],
+    "maximum_data_age_seconds": 259200,
+    "requested_public_response_types": ["FACTUAL_OPTIONS"],
+    "blocked_response_types": ["ABSTAIN", "BUY_NOW", "WAIT"]
+  },
+  "lineage": {
+    "campaign_id": "sha256:f74167696ec2db95509be9fa1a5f8187a51c2bad95981e001d228fd2c91aa9f9",
+    "shadow_receipt_evaluation_id": "sha256:5f3aeff6eb4ce8b12c8d4661b4e5d499fd888d181102f41320c54d0ac0b4743f",
+    "shadow_gate_evaluation_id": "sha256:d70ea921fb41e7f45dd53a29215bbbe08b53e86ee61334dc5f7a3a6c2dfd4905",
+    "candidate_main_commit": "80b0261a63650ccad319f919fe71a8ee50a2c058"
+  },
+  "canary": {
+    "initial_deployment_id": "1f8dc31e-c017-4995-90d0-703289942352",
+    "restored_deployment_id": "e7ef37df-7896-4fe5-ab9b-4b7ce87dc640",
+    "observations": 30,
+    "observation_id_first": 144,
+    "observation_id_last": 173,
+    "observed_at_first": "2026-09-09T17:13:20.034113Z",
+    "observed_at_last": "2026-09-09T17:16:51.489394Z",
+    "paired_observations": 30,
+    "v2_served": 30,
+    "served_response_type_counts": {
+      "FACTUAL_OPTIONS": 30
+    },
+    "eligible_fallbacks": 0,
+    "reader_errors": 0,
+    "invalid_or_incomplete": 0,
+    "provenance_complete": 30,
+    "raw_query_retained": 0,
+    "p95_latency_delta_us": -3966291
+  },
+  "readiness_and_5xx": {
+    "status": "VERIFIED",
+    "health_live_http": 200,
+    "health_ready_http": 200,
+    "health_http": 200,
+    "database": "ok",
+    "redis": "ok",
+    "schema_revision": "2d0f4a6c8e1b",
+    "canary_reader_errors": 0,
+    "v2_attributed_5xx": 0
+  },
+  "failure_injection": {
+    "status": "VERIFIED",
+    "contract": "A promoted-reader exception returns the complete Core V1 response and persists only a neutral failure reason.",
+    "test_file": "filon-backend/tests/test_v2_live_router.py",
+    "candidate_ci_run_id": 34372065705,
+    "candidate_ci_job": "Backend, contrats et Quality Lab",
+    "production_candidate_error_injected": false,
+    "reason": "The destructive fault path is covered on the exact deployed router revision; production qualification instead exercised the reversible runtime kill switch without corrupting the append-only canary lineage."
+  },
+  "rollback_to_shadow": {
+    "status": "VERIFIED",
+    "dark_deployment_id": "da51ae4e-0f71-4e95-9265-39e736ce1826",
+    "mode": "dark",
+    "canary_reader_enabled": false,
+    "public_reader_enabled": false,
+    "core_v1_probe_http": 200,
+    "core_v1_probe_result": "Core V1 trace returned; no V2 factual trace or alternatives were served.",
+    "canary_observations_before": 30,
+    "canary_observations_after": 30,
+    "journal_preserved": true,
+    "restored_canary_deployment_id": "e7ef37df-7896-4fe5-ab9b-4b7ce87dc640",
+    "restored_mode": "canary",
+    "restored_canary_reader_enabled": true,
+    "restored_public_reader_enabled": false
+  },
+  "backup_restore": {
+    "status": "VERIFIED",
+    "latest_volume_backup_policy": "daily",
+    "daily_backups_present": true,
+    "weekly_backups_present": true,
+    "monthly_backups_present": true,
+    "restore_action_available": true,
+    "phase_0_restore_drill": "docs/architecture/PHASE_0_RAILWAY_DEPLOYMENT_RECEIPT.md#sauvegarde-et-restauration-prouvee",
+    "pitr_enabled": false,
+    "pitr_classification": "KNOWN_LIMITATION_NON_BLOCKING_WITH_SCHEDULED_BACKUPS_AND_PROVEN_RESTORE_DRILL"
+  },
+  "capacity_and_alerting": {
+    "status": "VERIFIED",
+    "paired_observations": 30,
+    "p95_latency_delta_us": -3966291,
+    "v2_fallbacks": 0,
+    "v2_reader_errors": 0,
+    "database_health": "ok",
+    "redis_health": "ok",
+    "operations_receipt": "docs/architecture/PHASE_06_PRODUCTION_OBSERVABILITY_RECEIPT.md"
+  },
+  "inherited_regressions": {
+    "status": "VERIFIED",
+    "github_actions_run_id": 34372065705,
+    "conclusion": "success",
+    "jobs": {
+      "Backend, contrats et Quality Lab": "success",
+      "Web — contrats, tests et build": "success",
+      "Mobile — types, lint et tests hermétiques": "success",
+      "Extension — contrat, manifeste et syntaxe": "success"
+    }
+  },
+  "open_blockers_audit": {
+    "status": "CANDIDATE_AUDIT_COMPLETE",
+    "integrity_blocker_for_factual_options": false,
+    "recovery_blocker_for_factual_options": false,
+    "security_blocker_for_factual_options": false,
+    "scope_expansion_blocked": true,
+    "notes": [
+      "Public authorization is requested only for FACTUAL_OPTIONS observed 30 times in the exact canary lineage.",
+      "ABSTAIN is already publicly authorized under its prior Belgian receipt and is intentionally outside this new factual receipt.",
+      "BUY_NOW and WAIT remain blocked because the persisted funnel has no rankable, optimizable, calibrated or actionable rows.",
+      "Unsupported scope, stale evidence, incomplete provenance and every V2 reader error keep the complete Core V1 response."
+    ]
+  },
+  "public_policy": {
+    "status": "CANDIDATE_NOT_ACTIVATED",
+    "current_mode": "canary",
+    "current_public_reader": false,
+    "current_canary_reader": true,
+    "requested_mode_after_terminal_gate": "public",
+    "requested_response_types": ["FACTUAL_OPTIONS"],
+    "requested_public_reader_after_terminal_gate": true,
+    "requested_canary_reader_after_terminal_gate": false,
+    "closed_canary_cohort_required_after_terminal_gate": false,
+    "core_v1_computed_first": true,
+    "core_v1_fallback": true,
+    "kill_switch": "V2_CHAIN_MODE=dark with both promoted readers disabled",
+    "no_partial_v2_response": true,
+    "no_implicit_verdict": true,
+    "factual_options_are_not_a_recommendation": true
+  },
+  "raw_payload_retained": false,
+  "user_data_retained": false,
+  "secrets_retained": false
+}
