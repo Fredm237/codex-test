@@ -232,6 +232,42 @@ async def test_online_reader_empty_index_is_an_honest_abstention() -> None:
 
 
 @pytest.mark.asyncio
+async def test_online_reader_keeps_proven_noncanonical_offer_available() -> None:
+    """A deduplicated offer remains usable when it carries the fresh proof."""
+
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            await _seed(session)
+            await run_journaled_v2_shadow_chain(
+                session,
+                evaluated_at=EVALUATED_AT,
+                vertical="smartphones",
+                limit=1,
+                apply=True,
+            )
+            offer = await session.scalar(select(core_models.Offer))
+            assert offer is not None
+            offer.is_canonical = False
+            await session.commit()
+
+            result = await read_v2_online(
+                session,
+                V2OnlineReadRequest(
+                    query="Acme Smartphone Prime",
+                    vertical="smartphones",
+                    locale="fr",
+                ),
+                evaluated_at=EVALUATED_AT,
+            )
+
+            assert result.response_type == "FACTUAL_OPTIONS"
+            assert result.response["items"][0]["offer_ref"] == f"offer:{offer.id}"
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
 async def test_online_reader_uses_feed_market_not_merchant_headquarters() -> None:
     engine, sessions = await _database()
     try:
