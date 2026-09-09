@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://filon.local/contracts/v2-chain/v1/regional-feed-audit.schema.json",
+  "title": "FILON V2 regional feed audit receipt v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema_version", "status", "region", "sample_rows_per_feed",
+    "eligible_feed_count", "sampled_feed_count", "qualified_feed_ids",
+    "recommended_feed_id", "feeds", "raw_payload_retained",
+    "product_names_retained", "prices_retained", "urls_retained"
+  ],
+  "properties": {
+    "schema_version": {"const": "v2-regional-feed-audit/v1"},
+    "status": {"enum": ["metadata_only", "qualified", "no_qualified_feed", "partial", "scope_unavailable"]},
+    "region": {"type": "string", "pattern": "^[A-Z]{2}$"},
+    "sample_rows_per_feed": {"type": "integer", "minimum": 0, "maximum": 2000},
+    "eligible_feed_count": {"type": "integer", "minimum": 0, "maximum": 10000},
+    "sampled_feed_count": {"type": "integer", "minimum": 0, "maximum": 64},
+    "qualified_feed_ids": {
+      "type": "array", "maxItems": 64, "uniqueItems": true,
+      "items": {"type": "string", "pattern": "^[0-9]+$"}
+    },
+    "recommended_feed_id": {"type": ["string", "null"], "pattern": "^[0-9]+$"},
+    "feeds": {
+      "type": "array", "maxItems": 64,
+      "items": {"$ref": "#/$defs/feed"}
+    },
+    "raw_payload_retained": {"const": false},
+    "product_names_retained": {"const": false},
+    "prices_retained": {"const": false},
+    "urls_retained": {"const": false}
+  },
+  "$defs": {
+    "feed": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "feed_id", "declared_products", "mapped_identifier_fields",
+        "sample_status", "sampled_rows", "identifier_supplied_rows",
+        "valid_gtin_rows", "smartphone_rows", "smartphone_valid_gtin_rows"
+      ],
+      "properties": {
+        "feed_id": {"type": "string", "pattern": "^[0-9]+$"},
+        "declared_products": {"type": "integer", "minimum": 0},
+        "mapped_identifier_fields": {
+          "type": "array", "uniqueItems": true,
+          "items": {"enum": ["ean", "product_GTIN", "product_gtin", "upc"]}
+        },
+        "sample_status": {"enum": ["metadata_only", "sampled", "download_failed"]},
+        "sampled_rows": {"type": "integer", "minimum": 0, "maximum": 2000},
+        "identifier_supplied_rows": {"type": "integer", "minimum": 0, "maximum": 2000},
+        "valid_gtin_rows": {"type": "integer", "minimum": 0, "maximum": 2000},
+        "smartphone_rows": {"type": "integer", "minimum": 0, "maximum": 2000},
+        "smartphone_valid_gtin_rows": {"type": "integer", "minimum": 0, "maximum": 2000}
+      }
+    }
+  }
+}

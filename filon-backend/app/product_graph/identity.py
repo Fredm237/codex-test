@@ -14,8 +14,7 @@ from sqlalchemy import select
 
 from app.product_graph import models
 from app.product_graph.resolution import ProductGraphResolutionError
-from app.services.catalog_grouping import normalize_ean
-
+from app.services.catalog_grouping import extract_awin_gtin
 
 CONTRACT_VERSION = "1.0.0"
 TRANSFORMATION = "awin_product_identity"
@@ -92,18 +91,20 @@ def project_awin_identity_assertions(
             )
         )
 
-    raw_ean = _text(row.get("ean"), "ean")
+    normalized_gtin, _, raw_gtin = extract_awin_gtin(row)
+    raw_ean = _text(raw_gtin, "gtin")
     if raw_ean is not None:
-        gtin = normalize_ean(raw_ean)
         projections.append(
             IdentityAssertionProjection(
                 subject_type="variant",
                 field="identifier",
                 value=raw_ean,
-                normalized_value=gtin,
+                normalized_value=normalized_gtin,
                 identifier_namespace="gtin",
                 identifier_scope="global",
-                status="validated" if gtin is not None else "quarantine",
+                status=(
+                    "validated" if normalized_gtin is not None else "quarantine"
+                ),
             )
         )
 

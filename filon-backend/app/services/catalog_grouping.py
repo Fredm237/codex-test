@@ -15,7 +15,7 @@ from __future__ import annotations
 import asyncio
 import re
 from collections import Counter, defaultdict
-from collections.abc import Awaitable, Callable
+from collections.abc import Awaitable, Callable, Mapping
 
 from sqlalchemy import bindparam, func, select, update
 
@@ -92,6 +92,42 @@ def normalize_ean(raw: str | None) -> str | None:
     elif len(digits) == 12:
         digits = "0" + digits
     return digits
+
+
+# Les feeds Awin historiques n'utilisent pas tous la même colonne. ``ean`` est
+# la plus courante, mais les schémas Retail récents peuvent publier le même
+# identifiant fort sous ``product_GTIN`` ou ``upc``. L'ordre est stable et une
+# valeur invalide ne masque jamais une valeur valide disponible plus loin.
+AWIN_GTIN_FIELDS = ("ean", "product_GTIN", "product_gtin", "upc")
+
+
+def extract_awin_gtin(
+    row: Mapping[str, object],
+) -> tuple[str | None, str | None, str | None]:
+    """Retourne ``(gtin normalisé, champ source, valeur source)``.
+
+    La fonction ne rapproche aucun produit : elle sélectionne seulement un
+    identifiant global dont le checksum GS1 est valide. Si des valeurs sont
+    présentes mais toutes invalides, le premier champ renseigné est retourné
+    avec un GTIN ``None`` afin que la quarantaine conserve la provenance.
+    """
+
+    first_supplied: tuple[str, str] | None = None
+    for field in AWIN_GTIN_FIELDS:
+        value = row.get(field)
+        if value is None or isinstance(value, bool):
+            continue
+        text = str(value).strip()
+        if not text:
+            continue
+        if first_supplied is None:
+            first_supplied = (field, text)
+        normalized = normalize_ean(text)
+        if normalized is not None:
+            return normalized, field, text
+    if first_supplied is not None:
+        return None, first_supplied[0], first_supplied[1]
+    return None, None, None
 
 
 def _consensus(counts: Counter) -> str | None:
