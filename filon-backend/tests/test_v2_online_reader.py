@@ -116,6 +116,35 @@ async def _seed(session) -> None:
     await session.commit()
 
 
+async def _add_listing_market(
+    session,
+    *,
+    country_code: str,
+    age: timedelta = timedelta(hours=1),
+) -> None:
+    raw = await session.scalar(select(RawSourceRecord))
+    offer = await session.scalar(select(core_models.Offer))
+    assert raw is not None and offer is not None
+    session.add(
+        Observation(
+            raw_source_record_id=raw.id,
+            subject_type="merchant_offer",
+            subject_ref=f"offer:{offer.id}",
+            offer_id=offer.id,
+            field="listing_market",
+            value_json=country_code,
+            status="verified",
+            source_type="awin_feed",
+            source_ref=raw.source_ref,
+            observed_at=(EVALUATED_AT - age).replace(tzinfo=None),
+            transformation="awin_offer_observation",
+            transformation_version="market-test-v1",
+            confidence=1.0,
+        )
+    )
+    await session.commit()
+
+
 @pytest.mark.asyncio
 async def test_online_reader_executes_real_chain_without_writing_or_exposing_query() -> None:
     engine, sessions = await _database()
@@ -198,6 +227,88 @@ async def test_online_reader_empty_index_is_an_honest_abstention() -> None:
             assert result.response_type == "ABSTAIN"
             assert result.response["items"] == []
             assert "retrieval_no_match" in result.response["reason_codes"]
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_online_reader_uses_feed_market_not_merchant_headquarters() -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            await _seed(session)
+            merchant = await session.scalar(select(core_models.Merchant))
+            assert merchant is not None
+            merchant.region = "FR"
+            await _add_listing_market(session, country_code="BE")
+            await run_journaled_v2_shadow_chain(
+                session,
+                evaluated_at=EVALUATED_AT,
+                vertical="smartphones",
+                limit=1,
+                apply=True,
+            )
+
+            result = await read_v2_online(
+                session,
+                V2OnlineReadRequest(
+                    query="Acme Smartphone Prime",
+                    vertical="smartphones",
+                    country_code="BE",
+                ),
+                evaluated_at=EVALUATED_AT,
+            )
+
+            assert result.response_type == "FACTUAL_OPTIONS"
+            assert result.response["items"][0]["listing_market"] == "BE"
+            assert any(
+                ref.endswith(":listing_market")
+                for ref in result.response["items"][0]["evidence_refs"]
+            )
+            VALIDATOR.validate(dict(result.response))
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("market", "age"),
+    ((None, timedelta(hours=1)), ("FR", timedelta(hours=1)), ("BE", timedelta(days=4))),
+)
+async def test_online_reader_fails_closed_without_fresh_matching_feed_market(
+    market,
+    age,
+) -> None:
+    engine, sessions = await _database()
+    try:
+        async with sessions() as session:
+            await _seed(session)
+            merchant = await session.scalar(select(core_models.Merchant))
+            assert merchant is not None
+            merchant.region = "BE"
+            await session.commit()
+            if market is not None:
+                await _add_listing_market(session, country_code=market, age=age)
+            await run_journaled_v2_shadow_chain(
+                session,
+                evaluated_at=EVALUATED_AT,
+                vertical="smartphones",
+                limit=1,
+                apply=True,
+            )
+
+            result = await read_v2_online(
+                session,
+                V2OnlineReadRequest(
+                    query="Acme Smartphone Prime",
+                    vertical="smartphones",
+                    country_code="BE",
+                ),
+                evaluated_at=EVALUATED_AT,
+            )
+
+            assert result.response_type == "ABSTAIN"
+            assert result.response["items"] == []
     finally:
         await engine.dispose()
 

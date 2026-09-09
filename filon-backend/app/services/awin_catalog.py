@@ -852,6 +852,7 @@ async def ingest_feeds(
                                 feed_id=f.feed_id,
                                 merchant_id=merchant_id,
                                 merchant_name=merchant_name,
+                                listing_market_country=f.region,
                                 offer_id=offer_id,
                                 sync_run_id=sync_run_id,
                                 resume_from_run_id=resume_from_run_id,

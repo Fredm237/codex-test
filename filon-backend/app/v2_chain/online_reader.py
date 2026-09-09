@@ -72,6 +72,10 @@ from app.product_ranking.engine import (
 from app.services.currency import normalize_currency_code
 from app.services.freshness import format_utc_timestamp, offer_observation_is_fresh
 from app.services.offer_evidence import OfferEvidence, load_offer_evidence
+from app.services.offer_market_evidence import (
+    OfferMarketEvidence,
+    load_offer_listing_markets,
+)
 from app.v2_chain.canary import V2CanaryPayload
 
 
@@ -384,7 +388,7 @@ def _candidate_facts(
     entity_ref: str,
     offers: list[core_models.Offer],
     evidence_by_offer: Mapping[int, OfferEvidence],
-    merchant_by_id: Mapping[int, core_models.Merchant],
+    market_evidence_by_offer: Mapping[int, tuple[OfferMarketEvidence, ...]],
     *,
     evaluated_at: datetime,
 ) -> CandidateFacts:
@@ -417,28 +421,18 @@ def _candidate_facts(
     else:
         availability = Fact("unknown")
 
-    country_values = sorted(
-        {
-            merchant.region.strip().upper()
-            for offer in current
-            if (
-                (merchant := merchant_by_id.get(offer.merchant_id)) is not None
-                and isinstance(merchant.region, str)
-                and len(merchant.region.strip()) == 2
-            )
-        }
+    fresh_market_evidence = tuple(
+        evidence
+        for offer in current
+        for evidence in market_evidence_by_offer.get(offer.id, ())
+        if offer_observation_is_fresh(evidence.observed_at, now=evaluated_at)
     )
+    country_values = sorted({item.country_code for item in fresh_market_evidence})
     countries = (
         Fact(
             "known",
             country_values,
-            tuple(sorted({
-                f"merchant:{offer.merchant_id}:region"
-                for offer in current
-                if offer.merchant_id in merchant_by_id
-                and isinstance(merchant_by_id[offer.merchant_id].region, str)
-                and len(merchant_by_id[offer.merchant_id].region.strip()) == 2
-            })),
+            tuple(sorted({item.evidence_ref for item in fresh_market_evidence})),
         )
         if country_values
         else Fact("unknown")
@@ -470,6 +464,7 @@ def _option_items(
     by_id: Mapping[int, core_models.Offer],
     merchant_by_id: Mapping[int, core_models.Merchant],
     evidence_by_offer: Mapping[int, OfferEvidence],
+    market_evidence_by_offer: Mapping[int, tuple[OfferMarketEvidence, ...]],
     evaluated_at: datetime,
 ) -> tuple[dict[str, object], ...]:
     """Matérialise au plus cinq options prouvées, dans l'ordre P5.
@@ -492,6 +487,19 @@ def _option_items(
             evidence_by_offer,
             evaluated_at=evaluated_at,
         )
+        if request.country_code is not None:
+            candidate_offers = [
+                offer
+                for offer in candidate_offers
+                if any(
+                    evidence.country_code == request.country_code
+                    and offer_observation_is_fresh(
+                        evidence.observed_at,
+                        now=evaluated_at,
+                    )
+                    for evidence in market_evidence_by_offer.get(offer.id, ())
+                )
+            ]
         if request.budget_currency is not None:
             candidate_offers = [
                 offer
@@ -524,6 +532,7 @@ def _option_items(
                 "merchant_ref": f"merchant:{merchant.id}",
                 "price": {"amount": f"{float(offer.price):.2f}", "currency": currency},
                 "availability": "in_stock",
+                "listing_market": request.country_code,
                 "observed_at": observed_at,
                 "destination_url": offer.deep_link or offer.product_url,
                 "ranking_basis": "retrieval_and_hard_constraints_only",
@@ -538,6 +547,16 @@ def _option_items(
                 "evidence_refs": [
                     f"offer:{offer.id}:price",
                     f"offer:{offer.id}:stock",
+                    *[
+                        evidence.evidence_ref
+                        for evidence in market_evidence_by_offer.get(offer.id, ())
+                        if request.country_code is not None
+                        and evidence.country_code == request.country_code
+                        and offer_observation_is_fresh(
+                            evidence.observed_at,
+                            now=evaluated_at,
+                        )
+                    ],
                     *[
                         source.evidence_ref
                         for source in candidate.source_evidence
@@ -696,12 +715,13 @@ async def read_v2_online(
         offers,
         current_only=True,
     )
+    market_evidence_by_offer = await load_offer_listing_markets(session, offer_ids)
     candidate_facts = [
         _candidate_facts(
             candidate.entity_ref,
             [by_id[value] for value in candidate.offer_ids if value in by_id],
             evidence_by_offer,
-            merchant_by_id,
+            market_evidence_by_offer,
             evaluated_at=evaluated,
         )
         for candidate in retrieval.candidates
@@ -789,6 +809,7 @@ async def read_v2_online(
         by_id=by_id,
         merchant_by_id=merchant_by_id,
         evidence_by_offer=evidence_by_offer,
+        market_evidence_by_offer=market_evidence_by_offer,
         evaluated_at=evaluated,
     )
     outcome = "FACTUAL_OPTIONS" if items else "ABSTAIN"

@@ -697,7 +697,15 @@ async def test_feed_ingestion_writes_shadow_only_when_enabled(monkeypatch, enabl
             assert heartbeats == 4
             assert result["shadow"]["enabled"] is enabled
             assert counts["raw_sources"] == (1 if enabled else 0)
-            assert counts["observations"] == (10 if enabled else 0)
+            assert counts["observations"] == (11 if enabled else 0)
+            if enabled:
+                listing_market = await session.scalar(
+                    select(models.Observation).where(
+                        models.Observation.field == "listing_market"
+                    )
+                )
+                assert listing_market is not None
+                assert listing_market.value_json == "BE"
             assert result["shadow"]["failures"] == 0
     finally:
         await engine.dispose()

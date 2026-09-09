@@ -340,7 +340,7 @@ async def test_awin_writer_projects_graph_only_under_both_shadow_flags(monkeypat
             assert result["shadow"] == {
                 "enabled": True,
                 "raw_sources": 1,
-                "observations": 10,
+                "observations": 11,
                 "quarantine": 0,
                 "failures": 0,
             }
