@@ -1,0 +1,76 @@
+{
+  "schema_version": "filon-v2-shadow-promotion-proof-manifest/v1",
+  "scope_ref": "sha256:f74167696ec2db95509be9fa1a5f8187a51c2bad95981e001d228fd2c91aa9f9",
+  "verified_at": "2026-09-09T14:10:46Z",
+  "verifier_version": "phase19.5-factual-v1",
+  "verification_status": "VERIFIED",
+  "raw_payload_retained": false,
+  "proofs": [
+    {
+      "proof_kind": "collision_exercise_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#collision_exercise",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:ee0c4e5655af76770084c94c1444c6188ea06b868aeb2832a0ac7334fd37335e"
+    },
+    {
+      "proof_kind": "dark_reader_rollback_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#dark_reader_rollback",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:7172cc48b7f2468e8bb6e41f9d66253986cddd11db3dfa23ca98369d30a3d548"
+    },
+    {
+      "proof_kind": "expand_only_rollback_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#expand_only_rollback",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:edba4652e8dbbfc73b64e2ea1747bfcac0e0cf55b4c5a7863bdbf99bf07cb29a"
+    },
+    {
+      "proof_kind": "inherited_benchmarks_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#inherited_benchmarks",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:8604bd8e0da3728692ded3289c8d7e150cde3c220fc7d033bb6856f574040240"
+    },
+    {
+      "proof_kind": "performance_policy_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#performance_policy",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:ea8f0f27b77dec59d92a63d1c9d26386ce149e8a2779d59fd4ba5fbea78d681f"
+    },
+    {
+      "proof_kind": "postgresql_migration_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#postgresql_migration",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:476f48cf66238d14b8058ae23fd00fa8052748675f8c4f73153969ac68692c5b"
+    },
+    {
+      "proof_kind": "recovery_replay_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#recovery_replay",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:5ed1ae3a85753d9fec1303bb5e299ceb1d40e289cf5686d9c4ee2a566c600d6e"
+    },
+    {
+      "proof_kind": "replay_idempotence_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#replay_idempotence",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:09a48ad9bf84342d8a7a85a5243151496b861933f8295f39d0495333a42f1e56"
+    },
+    {
+      "proof_kind": "safety_invariants_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#safety_invariants",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:e7c58dd4b3aae88db3d1fb7975dc69594ef6522c0da3bd7be952a0ff3fed4b9f"
+    },
+    {
+      "proof_kind": "single_alembic_head_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#single_alembic_head",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:4c7902ee503718116133b3fadaabf0f5ef362655c7c479563d55984fe5c4bdb8"
+    },
+    {
+      "proof_kind": "stale_interruption_ref",
+      "artifact_ref": "doc:docs/architecture/V2_FACTUAL_CANARY_QUALIFICATION_EVIDENCE.json#stale_interruption",
+      "artifact_digest": "sha256:013a6f5d57793466e2cb52f65efd5d5cdcc481958a787c4067c9fc52c2bcbd84",
+      "proof_ref": "sha256:acd5152671658a39967718d2605be86ddc6e2ec465d2a15a7586a798c75306d3"
+    }
+  ]
+}
