@@ -17,6 +17,10 @@ from app.v2_chain.models import V2LiveDarkReadObservation
 def test_vertical_inference_is_explicit_and_ambiguous_queries_are_unsupported() -> None:
     assert live_dark_reader.infer_supported_vertical("Un laptop étudiant") == "laptops"
     assert live_dark_reader.infer_supported_vertical("Des pneus hiver") == "tyres"
+    assert (
+        live_dark_reader.infer_supported_vertical("Bluetooth koptelefoon")
+        == "audio"
+    )
     assert live_dark_reader.infer_supported_vertical("Un laptop et un casque") is None
     assert live_dark_reader.infer_supported_vertical("Un cadeau utile") is None
 
