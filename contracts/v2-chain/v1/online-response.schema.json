@@ -86,6 +86,10 @@
         "merchant_ref": {"type": "string", "pattern": "^merchant:[1-9][0-9]*$"},
         "price": {"$ref": "#/$defs/money"},
         "availability": {"const": "in_stock"},
+        "listing_market": {
+          "type": ["string", "null"],
+          "pattern": "^[A-Z]{2}$"
+        },
         "observed_at": {"type": "string", "format": "date-time"},
         "destination_url": {"type": ["string", "null"]},
         "ranking_basis": {"const": "retrieval_and_hard_constraints_only"},

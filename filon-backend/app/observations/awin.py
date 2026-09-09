@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Mapping
@@ -147,6 +148,7 @@ def project_awin_row(
     feed_id: str,
     merchant_id: int,
     merchant_name: str | None = None,
+    listing_market_country: str | None = None,
     observed_at: datetime | None = None,
     transformation_version: str = TRANSFORMATION_VERSION,
 ) -> AwinProjection:
@@ -158,11 +160,16 @@ def project_awin_row(
     external_id = _text(payload, "aw_product_id")
     source_record_key = f"{merchant_id}:{external_id or 'unknown-' + payload_checksum[:16]}"
     subject_ref = f"awin-offer:{source_record_key}"
+    normalized_market = (listing_market_country or "").strip().upper()
+    if not re.fullmatch(r"[A-Z]{2}", normalized_market):
+        normalized_market = ""
     context = {
         "feed_id": str(feed_id),
         "merchant_id": merchant_id,
         "merchant_name": merchant_name,
     }
+    if normalized_market:
+        context["listing_market_country"] = normalized_market
     replay_material = {
         "source_type": SOURCE_TYPE,
         "source_ref": source_ref,
@@ -180,6 +187,18 @@ def project_awin_row(
         _observed_text(payload, "merchant_image_url", "image_url"),
         _observed_text(payload, "aw_deep_link", "deep_link"),
     ]
+    if normalized_market:
+        # Le marché du feed prouve où l'offre est publiée. Il ne doit jamais
+        # être remplacé par Merchant.region (siège du marchand), ni présenté
+        # comme une garantie de livraison à l'adresse de l'utilisateur.
+        observations.append(
+            ProjectedObservation(
+                field="listing_market",
+                value=normalized_market,
+                status="verified",
+                confidence=1.0,
+            )
+        )
     issues: list[ProjectedIssue] = []
 
     if external_id is None:
@@ -483,6 +502,7 @@ async def capture_awin_row(
     feed_id: str,
     merchant_id: int,
     merchant_name: str | None,
+    listing_market_country: str | None = None,
     offer_id: int | None,
     sync_run_id: int | None,
     resume_from_run_id: int | None = None,
@@ -493,6 +513,7 @@ async def capture_awin_row(
         feed_id=feed_id,
         merchant_id=merchant_id,
         merchant_name=merchant_name,
+        listing_market_country=listing_market_country,
         observed_at=observed_at,
     )
     return await persist_projection(
@@ -521,6 +542,7 @@ async def replay_raw_source(
         feed_id=str(raw.context_json["feed_id"]),
         merchant_id=merchant_id,
         merchant_name=raw.context_json.get("merchant_name"),
+        listing_market_country=raw.context_json.get("listing_market_country"),
         observed_at=raw.observed_at,
         transformation_version=transformation_version,
     )
