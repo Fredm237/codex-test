@@ -19,9 +19,7 @@ def test_factual_public_evidence_is_bounded_and_fail_closed() -> None:
     assert evidence["schema_version"] == (
         "filon-v2-factual-public-qualification-evidence/v1"
     )
-    assert evidence["candidate_status"] == (
-        "CANARY_PROVEN_PUBLIC_NOT_YET_AUTHORIZED"
-    )
+    assert evidence["candidate_status"] == "PUBLIC_ACTIVE_PROVEN"
     assert evidence["scope"]["requested_public_response_types"] == [
         "FACTUAL_OPTIONS"
     ]
@@ -59,15 +57,34 @@ def test_factual_public_evidence_is_bounded_and_fail_closed() -> None:
     assert rollback["restored_public_reader_enabled"] is False
 
     policy = evidence["public_policy"]
-    assert policy["status"] == "CANDIDATE_NOT_ACTIVATED"
-    assert policy["current_mode"] == "canary"
-    assert policy["current_public_reader"] is False
+    assert policy["status"] == "ACTIVE_PROVEN"
+    assert policy["current_mode"] == "public"
+    assert policy["current_public_reader"] is True
+    assert policy["current_canary_reader"] is False
     assert policy["requested_response_types"] == ["FACTUAL_OPTIONS"]
     assert policy["core_v1_computed_first"] is True
     assert policy["core_v1_fallback"] is True
     assert policy["no_partial_v2_response"] is True
     assert policy["no_implicit_verdict"] is True
     assert policy["factual_options_are_not_a_recommendation"] is True
+
+    activation = evidence["public_activation"]
+    assert activation["qualification_status"] == "PUBLIC_AUTHORIZED"
+    assert activation["dry_run_apply_replay"] == "VERIFIED"
+    assert activation["runtime_mode"] == "public"
+    assert activation["public_reader_enabled"] is True
+    assert activation["canary_reader_enabled"] is False
+    assert activation["health_http"] == {
+        "live": 200,
+        "ready": 200,
+        "dependencies": 200,
+        "catalog_pulse": 200,
+    }
+    assert activation["public_observations"] >= 2
+    assert activation["public_v2_factual_options"] >= 1
+    assert activation["public_core_v1_fallbacks"] >= 1
+    assert activation["fallback_reason"] == "response_type_not_qualified"
+    assert activation["safety_violations"] == 0
 
     assert evidence["raw_payload_retained"] is False
     assert evidence["user_data_retained"] is False

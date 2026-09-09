@@ -1,7 +1,7 @@
 {
   "schema_version": "filon-v2-factual-public-qualification-evidence/v1",
-  "evaluated_at": "2026-09-09T18:24:23Z",
-  "candidate_status": "CANARY_PROVEN_PUBLIC_NOT_YET_AUTHORIZED",
+  "evaluated_at": "2026-09-09T21:20:00Z",
+  "candidate_status": "PUBLIC_ACTIVE_PROVEN",
   "scope": {
     "countries": ["BE"],
     "locales": ["fr", "fr-BE"],
@@ -15,7 +15,9 @@
     "campaign_id": "sha256:f74167696ec2db95509be9fa1a5f8187a51c2bad95981e001d228fd2c91aa9f9",
     "shadow_receipt_evaluation_id": "sha256:5f3aeff6eb4ce8b12c8d4661b4e5d499fd888d181102f41320c54d0ac0b4743f",
     "shadow_gate_evaluation_id": "sha256:d70ea921fb41e7f45dd53a29215bbbe08b53e86ee61334dc5f7a3a6c2dfd4905",
-    "candidate_main_commit": "80b0261a63650ccad319f919fe71a8ee50a2c058"
+    "candidate_main_commit": "f5f30d99961617d1ca36d213de12c5ca9fe900af",
+    "public_receipt_evaluation_id": "sha256:b280e4f43efc9c92eb9967b6a947728add5b0ca5073958f7dd25e5aa048fac13",
+    "public_gate_evaluation_id": "sha256:2a07332e34fd46396c0680d15b336e7da973c22ed7403151025d3a9fdc2791e5"
   },
   "canary": {
     "initial_deployment_id": "1f8dc31e-c017-4995-90d0-703289942352",
@@ -96,7 +98,7 @@
   },
   "inherited_regressions": {
     "status": "VERIFIED",
-    "github_actions_run_id": 34372065705,
+    "github_actions_run_id": 34402385399,
     "conclusion": "success",
     "jobs": {
       "Backend, contrats et Quality Lab": "success",
@@ -106,7 +108,7 @@
     }
   },
   "open_blockers_audit": {
-    "status": "CANDIDATE_AUDIT_COMPLETE",
+    "status": "PUBLIC_SCOPE_AUDIT_COMPLETE",
     "integrity_blocker_for_factual_options": false,
     "recovery_blocker_for_factual_options": false,
     "security_blocker_for_factual_options": false,
@@ -119,10 +121,10 @@
     ]
   },
   "public_policy": {
-    "status": "CANDIDATE_NOT_ACTIVATED",
-    "current_mode": "canary",
-    "current_public_reader": false,
-    "current_canary_reader": true,
+    "status": "ACTIVE_PROVEN",
+    "current_mode": "public",
+    "current_public_reader": true,
+    "current_canary_reader": false,
     "requested_mode_after_terminal_gate": "public",
     "requested_response_types": ["FACTUAL_OPTIONS"],
     "requested_public_reader_after_terminal_gate": true,
@@ -134,6 +136,32 @@
     "no_partial_v2_response": true,
     "no_implicit_verdict": true,
     "factual_options_are_not_a_recommendation": true
+  },
+  "public_activation": {
+    "qualification_status": "PUBLIC_AUTHORIZED",
+    "receipt_id": 10,
+    "receipt_evaluation_id": "sha256:b280e4f43efc9c92eb9967b6a947728add5b0ca5073958f7dd25e5aa048fac13",
+    "gate_evaluation_id": "sha256:2a07332e34fd46396c0680d15b336e7da973c22ed7403151025d3a9fdc2791e5",
+    "dry_run_apply_replay": "VERIFIED",
+    "railway_deployment_id": "c371a3be-981b-424b-a2b8-a11dbaf3618a",
+    "railway_instance_id": "7869b81d-f832-4a9e-b25f-15354d61bdf6",
+    "runtime_mode": "public",
+    "public_reader_enabled": true,
+    "canary_reader_enabled": false,
+    "schema_revision": "2d0f4a6c8e1b",
+    "health_http": {
+      "live": 200,
+      "ready": 200,
+      "dependencies": 200,
+      "catalog_pulse": 200
+    },
+    "public_observations": 2,
+    "public_v2_factual_options": 1,
+    "public_core_v1_fallbacks": 1,
+    "fallback_reason": "response_type_not_qualified",
+    "safety_violations": 0,
+    "observation_ids": [182, 183],
+    "control_evaluation_id": "sha256:b71c275640a6366c777da4304614c115753d26556964dc0134fe72ce5079cd06"
   },
   "raw_payload_retained": false,
   "user_data_retained": false,
