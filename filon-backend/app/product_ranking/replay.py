@@ -39,6 +39,7 @@ class ProductRankingReplayReport:
     limit: int
     scanned_runs: int
     scanned_candidates: int
+    rankable_runs: int
     ranked_candidates: int
     unrankable_candidates: int
     ineligible_candidates: int
@@ -85,7 +86,7 @@ async def replay_product_ranking_batch(
         .scalars()
         .all()
     )
-    counters = {key: 0 for key in ("candidates", "RANKED", "UNRANKABLE", "INELIGIBLE", "runs_created", "runs_existing", "candidates_created", "candidates_existing")}
+    counters = {key: 0 for key in ("candidates", "rankable_runs", "RANKED", "UNRANKABLE", "INELIGIBLE", "runs_created", "runs_existing", "candidates_created", "candidates_existing")}
     identities: list[dict[str, object]] = []
     for run in runs:
         rows = (
@@ -125,6 +126,7 @@ async def replay_product_ranking_batch(
             apply=apply,
         )
         counters["candidates"] += len(ranking.candidates)
+        counters["rankable_runs"] += bool(ranking.ranked_entity_refs)
         for candidate in ranking.candidates:
             counters[candidate.status] += 1
         for key in ("runs_created", "runs_existing", "candidates_created", "candidates_existing"):
@@ -141,6 +143,7 @@ async def replay_product_ranking_batch(
         limit,
         len(runs),
         counters["candidates"],
+        counters["rankable_runs"],
         counters["RANKED"],
         counters["UNRANKABLE"],
         counters["INELIGIBLE"],

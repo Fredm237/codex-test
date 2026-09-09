@@ -105,8 +105,11 @@ def window_metrics(report: V2ChainReport) -> dict[str, object]:
         "verified_offer": _integer(offer_truth, "verified"),
         "ontology_verified": _integer(ontology, "verified"),
         "retrieved": _integer(retrieval, "candidate_runs"),
-        "eligible": _integer(constraints, "eligible_candidates"),
-        "rankable": _integer(ranking, "ranked_candidates"),
+        # From retrieval onward the funnel unit is one query/run. Candidate
+        # counts are fan-out diagnostics and cannot be compared monotonically
+        # with the number of input products.
+        "eligible": _integer(constraints, "eligible_runs"),
+        "rankable": _integer(ranking, "rankable_runs"),
         "optimizable": _integer(optimization, "eligible_offers"),
         "calibrated": _integer(confidence, "calibrated_runs"),
         "actionable": (
