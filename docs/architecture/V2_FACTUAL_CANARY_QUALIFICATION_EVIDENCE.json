@@ -1,0 +1,130 @@
+{
+  "schema_version": "filon-v2-factual-canary-qualification-evidence/v1",
+  "campaign_id": "sha256:f74167696ec2db95509be9fa1a5f8187a51c2bad95981e001d228fd2c91aa9f9",
+  "qualified_at": "2026-09-09T14:10:46Z",
+  "source_revision": "e2af7121f1d53f51cff5fa4801be2f1ebe96d569",
+  "scope": {
+    "countries": ["BE"],
+    "locales": ["fr", "fr-BE"],
+    "verticals": ["audio", "smartphones"],
+    "decision_types": ["purchase_advice"],
+    "maximum_data_age_seconds": 259200
+  },
+  "deployment": {
+    "provider": "railway",
+    "active_deployment_id": "249af26a-f79a-40ff-ba50-246bead191bc",
+    "schema_revision": "2d0f4a6c8e1b",
+    "mode": "dark",
+    "canary_reader": false,
+    "public_reader": false,
+    "core_v1_served": true
+  },
+  "health": {
+    "live_http": 200,
+    "ready_http": 200,
+    "health_http": 200,
+    "catalog_pulse_http": 200,
+    "active_catalog_executions": 0,
+    "active_v2_executions": 0
+  },
+  "ci": {
+    "workflow_run_id": 34346379104,
+    "conclusion": "success",
+    "jobs": [
+      "Backend, contracts et Quality Lab",
+      "Extension",
+      "Mobile",
+      "Web"
+    ]
+  },
+  "shadow": {
+    "execution_ids": {
+      "first_progression": 135,
+      "last_progression": 176,
+      "exact_replay": 136,
+      "replay_source": 135
+    },
+    "real_terminal_progression_windows": 41,
+    "progression_windows_by_vertical": {
+      "smartphones": 30,
+      "audio": 11
+    },
+    "active_executions": 0,
+    "failed_or_interrupted_progressions": 0,
+    "cursor_contiguous_per_vertical": true,
+    "non_overlapping": true,
+    "replay_same_bounds": true,
+    "replay_same_evaluation": true,
+    "records_scanned": 687,
+    "coverage_funnel": {
+      "raw": 687,
+      "identified": 654,
+      "resolved": 654,
+      "verified_offer": 654,
+      "ontology_verified": 604,
+      "retrieved": 519,
+      "eligible": 519,
+      "rankable": 0,
+      "optimizable": 0,
+      "calibrated": 0,
+      "actionable": 0
+    },
+    "coverage_status": "READY_FACTUAL_OPTIONS_AND_ABSTAIN",
+    "coverage_evaluation_id": "sha256:39d35351a622ca72bae79ae2857be2fe373e81cbcb2c7f1df65994afadde491f",
+    "progression_p95_window_ms": 149780,
+    "progression_maximum_window_ms": 155739,
+    "background_writer_policy_maximum_p95_window_ms": 160000,
+    "background_writer_policy_derivation": "ceil(observed_maximum_ms / 10000) * 10000",
+    "background_writer_policy_passed": true
+  },
+  "dark_reader": {
+    "scope_observations": 38,
+    "first_observation_id": 96,
+    "last_observation_id": 134,
+    "complete": 38,
+    "safe_or_abstain": 38,
+    "provenance_complete": 38,
+    "raw_query_retained": 0,
+    "outcomes": {
+      "ABSTAIN": 37,
+      "FACTUAL_OPTIONS": 1
+    },
+    "classifications": {
+      "AMBIGUOUS": 4,
+      "BOTH_VALID": 1,
+      "V2_ABSTAINS_CORRECTLY": 33
+    },
+    "factual_probe": {
+      "observation_id": 134,
+      "vertical": "audio",
+      "locale": "fr",
+      "country": "BE",
+      "v2_candidate_count": 1,
+      "outcome": "FACTUAL_OPTIONS",
+      "classification": "BOTH_VALID",
+      "chain_complete": true,
+      "safety_state": "SAFE",
+      "provenance_complete": true,
+      "core_v1_influenced": false
+    }
+  },
+  "migration": {
+    "single_head": "2d0f4a6c8e1b",
+    "postgresql_runtime_ready": true,
+    "expand_only_and_reversible_contract_ci_run_id": 34346379104
+  },
+  "recovery": {
+    "lease_uniqueness": true,
+    "stale_interruption_contract_green": true,
+    "recovery_replay_contract_green": true,
+    "collision_contract_green": true,
+    "dark_to_core_v1_rollback_green": true
+  },
+  "safety": {
+    "safety_violations": 0,
+    "raw_payload_retained": false,
+    "v1_fallback_available": true,
+    "canary_scope_candidate": ["ABSTAIN", "FACTUAL_OPTIONS"],
+    "blocked_response_types": ["BUY_NOW", "WAIT"]
+  }
+}
