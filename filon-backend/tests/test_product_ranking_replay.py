@@ -37,6 +37,7 @@ async def test_real_shape_replay_abstains_then_is_idempotent() -> None:
         )
         assert dry.scanned_runs == first.scanned_runs == replay.scanned_runs == 1
         assert dry.scanned_candidates == 1
+        assert dry.rankable_runs == 0
         assert dry.ranked_candidates == 0
         assert dry.unrankable_candidates == 1
         assert dry.runs_created == 0
