@@ -96,6 +96,7 @@ async def test_real_shape_replay_is_dry_then_created_then_idempotent():
         replay = await replay_constraint_batch(session, evaluated_at=evaluated, limit=1, apply=True)
         assert dry.scanned_runs == first.scanned_runs == replay.scanned_runs == 1
         assert dry.scanned_candidates == 1
+        assert dry.eligible_runs == 1
         assert dry.eligible_candidates == 1
         assert dry.runs_created == 0
         assert first.runs_created == first.candidates_created == 1
