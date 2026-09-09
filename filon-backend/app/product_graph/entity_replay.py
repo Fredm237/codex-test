@@ -39,12 +39,13 @@ from app.product_graph.models import (
     GraphEntitySignalProjection,
     GraphOfferVariantLink,
 )
+from app.services.catalog_grouping import extract_awin_gtin
 
 
 log = get_logger("product_graph.entity_replay")
 MAX_REPLAY_ROWS = 10_000
 REPLAY_REPORT_SCHEMA_VERSION = "entity-resolution-replay-report/v1"
-IDENTIFIER_FIELDS = ("gtin", "ean", "ean13", "upc")
+PROFILE_VERSION = "awin-entity-profile/v2"
 CANDIDATE_WEAK_SIGNALS = {"title", "image"}
 
 
@@ -107,11 +108,17 @@ def _profile(raw: RawSourceRecord) -> dict[str, Any]:
         source_ref=raw.source_ref,
         observed_at=observed_at,
     )
-    identifiers = {
-        field: raw.payload_json[field]
-        for field in IDENTIFIER_FIELDS
-        if field in raw.payload_json and raw.payload_json[field] not in (None, "")
-    }
+    normalized_gtin, _, raw_gtin = extract_awin_gtin(raw.payload_json)
+    # Les feeds Awin belges publient fréquemment l'identifiant global dans
+    # ``product_GTIN`` plutôt que ``ean``. Le profil Entity Resolution doit
+    # suivre exactement la projection Product Graph déjà validée : une valeur
+    # GS1 valide est normalisée, tandis qu'une valeur fournie mais invalide est
+    # conservée pour provoquer une quarantaine explicite.
+    identifiers = (
+        {"gtin": normalized_gtin or raw_gtin}
+        if normalized_gtin is not None or raw_gtin is not None
+        else {}
+    )
     return {
         "raw_source_record_id": raw.id,
         "source_type": raw.source_type,
@@ -251,7 +258,7 @@ async def _stored_profiles(session) -> dict[int, dict[str, Any]]:
     rows = (
         await session.execute(
             select(GraphEntitySignalProjection).where(
-                GraphEntitySignalProjection.extractor_version == EXTRACTOR_VERSION
+                GraphEntitySignalProjection.extractor_version == PROFILE_VERSION
             )
         )
     ).scalars().all()
@@ -283,14 +290,14 @@ async def _persist_profile(
     projection_key = _digest(
         {
             "raw_source_record_id": raw_id,
-            "extractor_version": EXTRACTOR_VERSION,
+            "extractor_version": PROFILE_VERSION,
             "profile": profile,
         }
     )
     existing = await session.scalar(
         select(GraphEntitySignalProjection).where(
             GraphEntitySignalProjection.raw_source_record_id == raw_id,
-            GraphEntitySignalProjection.extractor_version == EXTRACTOR_VERSION,
+            GraphEntitySignalProjection.extractor_version == PROFILE_VERSION,
         )
     )
     if existing is not None:
@@ -305,7 +312,7 @@ async def _persist_profile(
             source_type=str(profile["source_type"]),
             source_ref=str(profile["source_ref"]),
             observed_at=observed_at.replace(tzinfo=None),
-            extractor_version=EXTRACTOR_VERSION,
+            extractor_version=PROFILE_VERSION,
             profile_json=profile,
         )
     )
@@ -326,7 +333,7 @@ async def _persist_decision(
         {
             "raw_source_record_id": raw_id,
             "offer_id": offer_id,
-            "extractor_version": EXTRACTOR_VERSION,
+            "extractor_version": PROFILE_VERSION,
             "decision": contract,
         }
     )
@@ -354,7 +361,7 @@ async def _persist_decision(
             reason_codes_json=list(decision.reason_codes),
             evidence_json=[item.as_contract() for item in decision.evidence],
             conflicts_json=[item.as_contract() for item in decision.conflicts],
-            extractor_version=EXTRACTOR_VERSION,
+            extractor_version=PROFILE_VERSION,
             resolver_version=RESOLVER_VERSION,
             policy_version=POLICY_VERSION,
             observed_at=_aware(observed_at).replace(tzinfo=None),
@@ -447,7 +454,7 @@ async def replay_entity_resolution_batch(
     )
     return EntityReplayReport(
         schema_version=REPLAY_REPORT_SCHEMA_VERSION,
-        extractor_version=EXTRACTOR_VERSION,
+        extractor_version=PROFILE_VERSION,
         resolver_version=RESOLVER_VERSION,
         policy_version=POLICY_VERSION,
         mode="apply" if apply else "dry_run",

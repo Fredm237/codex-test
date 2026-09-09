@@ -139,6 +139,80 @@ async def _seed(session):
     return raws, variant
 
 
+async def _seed_product_gtin(session):
+    merchant = core_models.Merchant(
+        awin_mid=903,
+        name="Belgian replay",
+        slug="belgian-replay",
+        region="BE",
+    )
+    session.add(merchant)
+    await session.flush()
+    offer = core_models.Offer(
+        merchant_id=merchant.id,
+        awin_product_id="be-sku-1",
+        name="Belgian product",
+    )
+    session.add(offer)
+    await session.flush()
+    raw = observation_models.RawSourceRecord(
+        source_type="awin_feed",
+        source_ref="awin-feed:903",
+        source_record_key="903:be-sku-1",
+        schema_version="awin-create-a-feed-v1",
+        context_json={"merchant_id": merchant.id},
+        payload_json={
+            "product_GTIN": "4006381333931",
+            "product_name": "Belgian product",
+        },
+        payload_checksum="d" * 64,
+        replay_key="e" * 64,
+        sync_run_id=None,
+        observed_at=OBSERVED_AT,
+    )
+    session.add(raw)
+    await session.flush()
+    session.add(
+        observation_models.Observation(
+            raw_source_record_id=raw.id,
+            subject_type="offer",
+            subject_ref=f"offer:{offer.id}",
+            offer_id=offer.id,
+            field="name",
+            value_json=offer.name,
+            status="verified",
+            source_type="awin_feed",
+            source_ref=raw.source_ref,
+            observed_at=OBSERVED_AT,
+            transformation="test",
+            transformation_version="v1",
+            confidence=1.0,
+        )
+    )
+    variant = models.GraphVariant(
+        variant_key="gtin:4006381333931",
+        model_id=None,
+        attributes_json={},
+        status="shadow",
+        resolver_version=GRAPH_RESOLVER_VERSION,
+    )
+    session.add(variant)
+    await session.flush()
+    session.add(
+        models.GraphOfferVariantLink(
+            raw_source_record_id=raw.id,
+            offer_id=offer.id,
+            variant_id=variant.id,
+            resolution="resolved",
+            reason_code="exact_gtin",
+            resolver_version=GRAPH_RESOLVER_VERSION,
+            observed_at=OBSERVED_AT,
+        )
+    )
+    await session.commit()
+    return raw, variant
+
+
 @pytest.mark.asyncio
 async def test_realistic_replay_is_idempotent_and_keeps_five_state_truth():
     engine, maker = await _database()
@@ -181,6 +255,106 @@ async def test_realistic_replay_is_idempotent_and_keeps_five_state_truth():
             assert decisions[0].canonical_variant_id == variant.id
             assert decisions[1].canonical_variant_id == variant.id
             assert decisions[2].canonical_variant_id is None
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_replay_resolves_alternate_awin_product_gtin_exactly():
+    engine, maker = await _database()
+    try:
+        async with maker() as session:
+            raw, variant = await _seed_product_gtin(session)
+
+            first = await replay_entity_resolution_batch(session, limit=1, apply=True)
+            replay = await replay_entity_resolution_batch(session, limit=1, apply=True)
+
+            assert first.exact_verified == 1
+            assert first.probable == 0
+            assert first.ambiguous == 0
+            assert first.unresolved == 0
+            assert replay.evaluation_id == first.evaluation_id
+            decision = await session.scalar(
+                select(models.GraphEntityResolutionDecision).where(
+                    models.GraphEntityResolutionDecision.raw_source_record_id
+                    == raw.id
+                )
+            )
+            assert decision is not None
+            assert decision.canonical_variant_id == variant.id
+            assert decision.reason_codes_json == ["exact_global_identifier"]
+    finally:
+        await engine.dispose()
+
+
+@pytest.mark.asyncio
+async def test_v2_replay_appends_beside_legacy_v1_without_rewriting_history():
+    engine, maker = await _database()
+    try:
+        async with maker() as session:
+            raw, variant = await _seed_product_gtin(session)
+            offer_id = await session.scalar(
+                select(observation_models.Observation.offer_id).where(
+                    observation_models.Observation.raw_source_record_id == raw.id
+                )
+            )
+            assert offer_id is not None
+            session.add(
+                models.GraphEntitySignalProjection(
+                    projection_key="1" * 64,
+                    raw_source_record_id=raw.id,
+                    source_type=raw.source_type,
+                    source_ref=raw.source_ref,
+                    observed_at=raw.observed_at,
+                    extractor_version="awin-entity-signals/v1",
+                    profile_json={"legacy": True},
+                )
+            )
+            session.add(
+                models.GraphEntityResolutionDecision(
+                    decision_key="2" * 64,
+                    raw_source_record_id=raw.id,
+                    offer_id=offer_id,
+                    subject_type="variant",
+                    resolution="PROBABLE",
+                    canonical_variant_id=None,
+                    candidate_ids_json=[variant.id],
+                    confidence_score=0.2,
+                    reason_codes_json=["candidate_generation_only"],
+                    evidence_json=[],
+                    conflicts_json=[],
+                    extractor_version="awin-entity-signals/v1",
+                    resolver_version="entity-resolution-shadow-v1",
+                    policy_version="entity-resolution-policy-v1",
+                    observed_at=raw.observed_at,
+                )
+            )
+            await session.commit()
+
+            report = await replay_entity_resolution_batch(session, limit=1, apply=True)
+
+            assert report.exact_verified == 1
+            assert await session.scalar(
+                select(func.count()).select_from(models.GraphEntitySignalProjection)
+            ) == 2
+            assert await session.scalar(
+                select(func.count()).select_from(models.GraphEntityResolutionDecision)
+            ) == 2
+            legacy = await session.scalar(
+                select(models.GraphEntityResolutionDecision).where(
+                    models.GraphEntityResolutionDecision.resolver_version
+                    == "entity-resolution-shadow-v1"
+                )
+            )
+            current = await session.scalar(
+                select(models.GraphEntityResolutionDecision).where(
+                    models.GraphEntityResolutionDecision.resolver_version
+                    == "entity-resolution-shadow-v2"
+                )
+            )
+            assert legacy is not None and legacy.resolution == "PROBABLE"
+            assert current is not None and current.resolution == "EXACT_VERIFIED"
+            assert current.canonical_variant_id == variant.id
     finally:
         await engine.dispose()
 

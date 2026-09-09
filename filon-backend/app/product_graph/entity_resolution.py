@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any
 
 
-RESOLVER_VERSION = "entity-resolution-shadow-v1"
+RESOLVER_VERSION = "entity-resolution-shadow-v2"
 POLICY_VERSION = "entity-resolution-policy-v1"
 MAX_CANDIDATES = 100
 STRONG_SIGNALS = {
