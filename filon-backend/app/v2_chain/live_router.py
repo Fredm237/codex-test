@@ -398,6 +398,16 @@ async def route_promoted_response(
                     evaluated_at=evaluated_at,
                     inspection=inspection,
                 )
+                # Un type que le reçu n'autorise pas doit parvenir intact au
+                # gate afin d'être classé ``response_type_not_qualified``.
+                # Le transformer (ou lever ici) ferait passer un repli de
+                # politique attendu pour une panne lecteur et produirait une
+                # fausse violation de sûreté dans le journal PUBLIC.
+                if (
+                    payload.response_type
+                    not in authorization.authorized_response_types
+                ):
+                    return payload
                 if payload.response_type == "FACTUAL_OPTIONS":
                     return replace(
                         payload,
