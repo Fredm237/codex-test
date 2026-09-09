@@ -25,6 +25,7 @@ import tempfile
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from urllib.parse import unquote
 
 import httpx
 from sqlalchemy import func, select
@@ -38,8 +39,8 @@ from app.core.observability import (
     traced_pipeline_stage,
 )
 from app.db import models
-from app.services import taxonomy
-from app.services import safety
+from app.services import safety, taxonomy
+from app.services.catalog_grouping import extract_awin_gtin
 from app.services.currency import normalize_currency_code
 from app.services.dedup import dedup_key
 from app.services.source_normalization import parse_price, parse_tristate_bool
@@ -57,6 +58,8 @@ _FEED_COLUMNS = [
     "merchant_category",
     "brand_name",
     "ean",
+    "product_GTIN",
+    "upc",
     "in_stock",
 ]
 _HARD_MAX_ROWS_PER_FEED = 250_000
@@ -218,6 +221,20 @@ class FeedInfo:
     advertiser_name: str
     region: str
     products: int
+    mapped_columns: tuple[str, ...] = ()
+
+
+def _columns_from_feed_url(value: str | None) -> tuple[str, ...]:
+    """Extrait les colonnes réellement mappées depuis l'URL du feed Awin."""
+
+    match = re.search(r"/columns/([^/]+)/?", value or "", re.IGNORECASE)
+    if match is None:
+        return ()
+    return tuple(
+        column.strip()
+        for column in unquote(match.group(1)).split(",")
+        if column.strip()
+    )
 
 
 async def list_feeds() -> list[FeedInfo]:
@@ -256,6 +273,7 @@ async def list_feeds() -> list[FeedInfo]:
                 advertiser_name=low.get("advertiser name", ""),
                 region=(low.get("primary region") or low.get("region") or "").upper(),
                 products=products,
+                mapped_columns=_columns_from_feed_url(low.get("url")),
             )
         )
     log.info("Feeds Awin listés : %d", len(feeds))
@@ -373,10 +391,11 @@ async def _upsert_offer(
     offer_kind = taxonomy.classify_offer_kind(
         row.get("merchant_category"), name, row.get("brand_name"), merchant_name
     )
+    normalized_gtin, _, _ = extract_awin_gtin(row)
     values = {
         "merchant_id": merchant_id,
         "awin_product_id": pid[:191],
-        "ean": (row.get("ean") or "").strip()[:64] or None,
+        "ean": normalized_gtin,
         "name": name[:512],
         "brand": (row.get("brand_name") or "").strip()[:191] or None,
         "category": (row.get("merchant_category") or "").strip()[:255] or None,
@@ -853,13 +872,13 @@ async def ingest_feeds(
                             # projection v2 invalide conserve RawSource et les
                             # observations déjà qualifiées.
                             try:
-                                from app.product_graph.resolution import (
-                                    persist_awin_graph_projection,
-                                    project_awin_variant,
-                                )
                                 from app.product_graph.identity import (
                                     persist_awin_identity_assertions,
                                     project_awin_identity_assertions,
+                                )
+                                from app.product_graph.resolution import (
+                                    persist_awin_graph_projection,
+                                    project_awin_variant,
                                 )
 
                                 async with session.begin_nested():

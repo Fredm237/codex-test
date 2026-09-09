@@ -13,9 +13,8 @@ from sqlalchemy import func, select
 from app.core.error_taxonomy import ProductErrorCode
 from app.core.observability import traced_pipeline_stage
 from app.observations import models
-from app.services.catalog_grouping import normalize_ean
+from app.services.catalog_grouping import extract_awin_gtin
 from app.services.source_normalization import parse_price, parse_tristate_bool
-
 
 SOURCE_TYPE = "awin_feed"
 SCHEMA_VERSION = "awin-create-a-feed-v1"
@@ -204,8 +203,7 @@ def project_awin_row(
             )
         )
 
-    raw_ean = _text(payload, "ean")
-    normalized_ean = normalize_ean(raw_ean)
+    normalized_ean, gtin_source_field, raw_ean = extract_awin_gtin(payload)
     observations.append(
         ProjectedObservation(
             field="gtin",
@@ -219,7 +217,7 @@ def project_awin_row(
             ProjectedIssue(
                 error_code=ProductErrorCode.INVALID_IDENTIFIER,
                 stage="identifier_validation",
-                field="ean",
+                field=gtin_source_field,
                 rejected_value=raw_ean,
                 reason="GTIN/EAN absent du jeu de longueurs valides ou checksum invalide.",
             )

@@ -17,8 +17,7 @@ from typing import Any
 from sqlalchemy import select
 
 from app.product_graph import models
-from app.services.catalog_grouping import normalize_ean
-
+from app.services.catalog_grouping import extract_awin_gtin, normalize_ean
 
 RESOLVER_VERSION = "exact-gtin-shadow-v1"
 _GLOBAL_IDENTIFIER_KEYS = ("gtin", "ean", "ean13", "upc")
@@ -281,9 +280,13 @@ def project_awin_variant(row: Mapping[str, Any]) -> VariantResolution:
     """Projette uniquement le GTIN fort d'une ligne Awin vers le Graph."""
 
     checked = _mapping(row, "awin row")
+    normalized_gtin, _, raw_gtin = extract_awin_gtin(checked)
     return resolve_variant_observation(
         {
-            "identifiers": {"ean": checked.get("ean")},
+            # La validation est répétée par le resolver ; ``raw_gtin`` garde
+            # l'état supplied/invalid, tandis que la valeur normalisée évite
+            # qu'une colonne Awin alternative soit ignorée.
+            "identifiers": {"ean": normalized_gtin or raw_gtin},
             "attributes": {},
         }
     )

@@ -1,0 +1,38 @@
+{
+  "schema_version": "v2-regional-feed-audit/v1",
+  "status": "qualified",
+  "region": "BE",
+  "sample_rows_per_feed": 500,
+  "eligible_feed_count": 41,
+  "sampled_feed_count": 2,
+  "qualified_feed_ids": ["42"],
+  "recommended_feed_id": "42",
+  "feeds": [
+    {
+      "feed_id": "41",
+      "declared_products": 2324,
+      "mapped_identifier_fields": ["ean"],
+      "sample_status": "sampled",
+      "sampled_rows": 500,
+      "identifier_supplied_rows": 0,
+      "valid_gtin_rows": 0,
+      "smartphone_rows": 6,
+      "smartphone_valid_gtin_rows": 0
+    },
+    {
+      "feed_id": "42",
+      "declared_products": 8000,
+      "mapped_identifier_fields": ["product_GTIN"],
+      "sample_status": "sampled",
+      "sampled_rows": 500,
+      "identifier_supplied_rows": 420,
+      "valid_gtin_rows": 418,
+      "smartphone_rows": 35,
+      "smartphone_valid_gtin_rows": 31
+    }
+  ],
+  "raw_payload_retained": false,
+  "product_names_retained": false,
+  "prices_retained": false,
+  "urls_retained": false
+}

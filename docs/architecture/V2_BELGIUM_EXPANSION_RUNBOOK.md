@@ -24,10 +24,52 @@ L'audit en lecture seule a mesuré :
 - aucun snapshot Offer Truth ou Product Ontology belge au moment de l'audit ;
 - le feed belge `111943` déclare **2 324** produits ;
 - sur une lecture de préqualification limitée aux 500 premières lignes, **6**
-  produits ont été classés dans le sous-rayon `Smartphones`.
+  produits ont été classés dans le sous-rayon `Smartphones` ;
+- l'audit V2 ultérieur a prouvé que ces **500 lignes ne contiennent aucun EAN
+  dans la colonne historique demandée** : ces lignes stockées ne pouvaient donc
+  produire que `ABSTAIN` avec le resolver exact actuel ;
+- le **9 septembre 2026**, une nouvelle lecture Awin strictement agrégée et sans
+  écriture, incluant la colonne mappée `product_GTIN`, a mesuré sur les 500
+  premières lignes du même feed : **490 identifiants renseignés**, **481 GTIN
+  valides**, **8 smartphones**, et **8 smartphones avec GTIN valide** ; aucun
+  catalogue ou writer V2 n'était actif pendant cette lecture.
 
 Aucun nom, prix, URL ou payload produit issu de cette lecture n'est conservé
 dans ce document.
+
+## Préqualification factuelle du prochain feed
+
+La liste Awin indique les colonnes réellement mappées par feed. FILON sait
+désormais lire les identifiants globaux publiés sous `ean`, `product_GTIN` ou
+`upc`, puis les valide avec le même checksum GS1. Une valeur invalide ne peut
+jamais masquer une autre valeur valide et aucun SKU marchand n'est promu en
+identifiant global.
+
+Le diagnostic du feed `111943` prouve que le corpus belge nécessaire existe
+déjà chez le fournisseur. La correction porte sur la projection des colonnes,
+pas sur un assouplissement du resolver ni sur une donnée inventée.
+
+Inventaire métadonnées, sans téléchargement de produit ni écriture :
+
+```bash
+python -m app.ingest.regional_feed_audit --region BE
+```
+
+Audit d'un petit groupe explicite, borné à 500 lignes par feed :
+
+```bash
+python -m app.ingest.regional_feed_audit \
+  --region BE \
+  --feed-id <feed-id> \
+  --sample-rows 500
+```
+
+Le reçu ne conserve que les identifiants de feeds et cinq compteurs : lignes
+échantillonnées, présence d'un identifiant, GTIN valides, smartphones et
+intersection smartphone/GTIN valide. Les noms, prix, URLs et payloads restent
+absents. Seul un feed dont `smartphone_valid_gtin_rows > 0` peut être proposé à
+`regional_seed`; `no_qualified_feed`, `partial` et `scope_unavailable` ferment
+le chemin sans writer.
 
 ## Pourquoi une commande dédiée
 

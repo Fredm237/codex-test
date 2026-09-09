@@ -127,7 +127,20 @@ def test_download_url_has_columns_and_key():
     url = a._download_url(["111", "222"])
     assert "/fid/111,222/" in url
     assert "aw_deep_link" in url and "search_price" in url
+    assert "product_GTIN" in url and "upc" in url
     assert "compression/gzip" in url
+
+
+def test_feed_url_exposes_only_mapped_columns_as_metadata():
+    url = (
+        "https://feeds.example/datafeed/download/apikey/key/fid/42/"
+        "columns/product_name%2Cproduct_GTIN%2Cupc/format/csv/"
+    )
+    assert a._columns_from_feed_url(url) == (
+        "product_name",
+        "product_GTIN",
+        "upc",
+    )
 
 
 @pytest.mark.asyncio

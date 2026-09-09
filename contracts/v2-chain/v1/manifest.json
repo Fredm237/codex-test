@@ -31,6 +31,10 @@
     "examples/scheduler-interrupted.json",
     "examples/scheduler-resume-due.json"
   ],
+  "regional_feed_audit_schema": "regional-feed-audit.schema.json",
+  "regional_feed_audit_examples": [
+    "examples/regional-feed-audit-qualified.json"
+  ],
   "servable_response_types": ["ABSTAIN", "FACTUAL_OPTIONS"],
   "raw_query_retained": false,
   "atomic_core_fallback_required": true
