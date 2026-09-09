@@ -39,6 +39,7 @@ class ConstraintReplayReport:
     limit: int
     scanned_runs: int
     scanned_candidates: int
+    eligible_runs: int
     eligible_candidates: int
     excluded_candidates: int
     unknown_candidates: int
@@ -122,7 +123,7 @@ async def replay_constraint_batch(
         .scalars()
         .all()
     )
-    counters = {key: 0 for key in ("candidates", "ELIGIBLE", "EXCLUDED", "UNKNOWN", "runs_created", "runs_existing", "candidates_created", "candidates_existing")}
+    counters = {key: 0 for key in ("candidates", "eligible_runs", "ELIGIBLE", "EXCLUDED", "UNKNOWN", "runs_created", "runs_existing", "candidates_created", "candidates_existing")}
     identities: list[dict[str, object]] = []
     for run in runs:
         candidates = (
@@ -168,6 +169,9 @@ async def replay_constraint_batch(
             apply=apply,
         )
         counters["candidates"] += len(evaluation.candidates)
+        counters["eligible_runs"] += any(
+            item.status == "ELIGIBLE" for item in evaluation.candidates
+        )
         for item in evaluation.candidates:
             counters[item.status] += 1
         for key in ("runs_created", "runs_existing", "candidates_created", "candidates_existing"):
@@ -183,6 +187,7 @@ async def replay_constraint_batch(
         limit=limit,
         scanned_runs=len(runs),
         scanned_candidates=counters["candidates"],
+        eligible_runs=counters["eligible_runs"],
         eligible_candidates=counters["ELIGIBLE"],
         excluded_candidates=counters["EXCLUDED"],
         unknown_candidates=counters["UNKNOWN"],
