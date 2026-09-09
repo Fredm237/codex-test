@@ -183,7 +183,6 @@ def _latest_snapshot_statement():
         .where(
             ProductOntologySnapshot.variant_id.is_not(None),
             ProductOntologySnapshot.ontology_status.in_(("VERIFIED", "PARTIAL")),
-            core_models.Offer.is_canonical.is_(True),
             core_models.Offer.is_adult.is_(False),
         )
         .order_by(ProductOntologySnapshot.id.desc())
