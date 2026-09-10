@@ -1,0 +1,56 @@
+{
+  "schema_version": "product-ranking-benchmark-manifest/v2",
+  "policy": "eligible_product_evidence_scoped_vertical_aware_no_commission",
+  "generator": {
+    "version": "filon-product-ranking-holdout/v2",
+    "seeds": [8101, 8111, 8117, 8123, 8147, 8161, 8167, 8171],
+    "samples_per_vertical_locale_seed": 36,
+    "development_engine_input": false
+  },
+  "verticals": ["general", "smartphones", "laptops", "audio", "fashion", "appliances_hvac", "tyres"],
+  "locales": ["fr", "nl", "en"],
+  "scenarios": [
+    "full_known",
+    "optional_unknown",
+    "need_fit_unknown",
+    "evidence_unknown",
+    "known_unsourced_required",
+    "invalid_optional",
+    "ineligible",
+    "commission_mutation",
+    "tie_stability"
+  ],
+  "minimum_statistical_support": {
+    "total_cases": 5000,
+    "optional_unknown_cases": 500,
+    "required_unknown_cases": 1000,
+    "known_unsourced_required_cases": 500,
+    "invalid_optional_cases": 500,
+    "ineligible_cases": 500,
+    "commission_mutation_cases": 500
+  },
+  "engineering_gates": {
+    "order_accuracy_ci95_lower_min": 0.995,
+    "top1_accuracy_min": 1.0,
+    "required_unknown_ranked_max": 0,
+    "known_unsourced_required_ranked_max": 0,
+    "invalid_optional_ranked_max": 0,
+    "ineligible_ranked_max": 0,
+    "optional_unknown_disclosure_min": 1.0,
+    "provenance_completeness_min": 1.0,
+    "determinism_failures_max": 0,
+    "commission_invariance_failures_max": 0
+  },
+  "claim_boundary": {
+    "ranking_is_product_quality_claim": false,
+    "ranking_is_offer_selection": false,
+    "ranking_is_buy_wait_verdict": false,
+    "unknown_dimension_receives_score": false
+  },
+  "evaluation_governance": {
+    "mode": "AUTONOMOUS_QUALITY_LAB",
+    "external_human_ground_truth": "NO_EXTERNAL_HUMAN_GROUND_TRUTH",
+    "subjective_quality_status": "NOT_INDEPENDENTLY_VALIDATED",
+    "human_validation_required": false
+  }
+}

@@ -220,7 +220,8 @@ async def test_atomic_chain_apply_and_identical_replay_are_idempotent() -> None:
             assert first.stages["hybrid_retrieval"]["runs_created"] == 1
             assert replay.stages["hybrid_retrieval"]["runs_existing"] == 1
             assert first.stages["constraint_engine"]["eligible_runs"] == 1
-            assert first.stages["product_ranking"]["rankable_runs"] == 0
+            assert first.stages["product_ranking"]["rankable_runs"] == 1
+            assert first.stages["offer_optimization"]["unoptimizable_offers"] == 1
             assert first.stages["buy_wait"]["runs_created"] == 1
             assert replay.stages["buy_wait"]["runs_existing"] == 1
             assert first.stages["buy_wait"]["abstained_runs"] == 1

@@ -244,6 +244,8 @@ class Settings(BaseSettings):
                 errors.append("V2_CHAIN_MODE=public requires supported decision types")
             if self.v2_max_data_age_seconds is None:
                 errors.append("V2_CHAIN_MODE=public requires an explicit freshness bound")
+        if self.v2_only_public_enabled and self.v2_chain_mode != "public":
+            errors.append("V2_ONLY_PUBLIC_ENABLED requires V2_CHAIN_MODE=public")
         if self.product_graph_shadow_enabled and not self.observation_shadow_enabled:
             errors.append(
                 "PRODUCT_GRAPH_SHADOW_ENABLED requires OBSERVATION_SHADOW_ENABLED"
@@ -585,6 +587,9 @@ class Settings(BaseSettings):
     v2_chain_campaign_id: str | None = Field(default=None)
     v2_canary_reader_enabled: bool = Field(default=False)
     v2_public_reader_enabled: bool = Field(default=False)
+    # Coupe le calcul et le fallback Core V1 sur les routes d'achat. V1 reste
+    # disponible uniquement comme rollback opérateur en remettant ce flag OFF.
+    v2_only_public_enabled: bool = Field(default=False)
     v2_promotion_receipt_evaluation_id: str | None = Field(default=None)
     # Liste CSV de digests HMAC/SHA-256 pseudonymisés. Les valeurs ne sont ni
     # des identités ni des secrets et ne doivent jamais être journalisées.

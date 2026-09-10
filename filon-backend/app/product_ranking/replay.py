@@ -1,7 +1,8 @@
-"""Replay borné Product Ranking Phase 7.
+"""Replay borné Product Ranking v2 fondé sur les preuves Hybrid Retrieval.
 
-Le replay production s'abstient tant que les quatre dimensions ne disposent
-pas de preuves réelles. Il qualifie le câblage sans inventer un score.
+Le replay classe uniquement lorsque le rang de récupération et sa provenance
+sont persistés. La qualité produit et la valeur restent inconnues et ne
+reçoivent jamais de valeur de remplacement.
 """
 
 from __future__ import annotations
@@ -12,6 +13,7 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
+from decimal import Decimal, ROUND_HALF_UP
 
 from sqlalchemy import select
 
@@ -19,12 +21,13 @@ from app.constraint_engine.models import ConstraintCandidateEvaluation, Constrai
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.db import session as db
+from app.hybrid_retrieval.models import HybridRetrievalCandidate
 
 from .engine import RankingCandidateFacts, RankingRequest, ScoreFact, VERTICAL_WEIGHTS, rank_products
 from .persistence import persist_product_ranking
 
 
-REPLAY_VERSION = "product-ranking-production-replay/v1"
+REPLAY_VERSION = "product-ranking-production-replay/v2"
 MAX_REPLAY_RUNS = 100
 
 
@@ -57,6 +60,66 @@ def _validate_window(after_constraint_run_id: int, limit: int) -> tuple[int, int
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= MAX_REPLAY_RUNS:
         raise ValueError(f"limit must be between 1 and {MAX_REPLAY_RUNS}")
     return after_constraint_run_id, limit
+
+
+def _bounded_score(value: Decimal) -> str:
+    return format(
+        min(Decimal("1"), max(Decimal("0"), value)).quantize(
+            Decimal("0.000001"), rounding=ROUND_HALF_UP
+        ),
+        "f",
+    )
+
+
+def _factual_dimensions(
+    candidate: HybridRetrievalCandidate | None,
+) -> dict[str, ScoreFact]:
+    """Construit uniquement les dimensions prouvables depuis P5.
+
+    Le rang et la couverture des sources sont des faits persistés. La qualité
+    produit et la valeur marchande restent explicitement inconnues : elles ne
+    reçoivent ni valeur neutre, ni moyenne inventée.
+    """
+
+    if candidate is None or candidate.candidate_rank < 1:
+        return {name: ScoreFact("unknown") for name in (
+            "need_fit", "product_quality", "value", "evidence"
+        )}
+    raw_source_rows = (
+        candidate.source_evidence_json
+        if isinstance(candidate.source_evidence_json, list)
+        else []
+    )
+    source_rows = [
+        item
+        for item in raw_source_rows
+        if isinstance(item, dict)
+        and item.get("source_type") in {"LEXICAL", "STRUCTURED", "SEMANTIC"}
+        and isinstance(item.get("evidence_ref"), str)
+        and item["evidence_ref"]
+    ]
+    source_types = {str(item["source_type"]) for item in source_rows}
+    source_refs = tuple(
+        sorted({str(item["evidence_ref"]) for item in source_rows})
+    )
+    if not source_refs:
+        evidence = ScoreFact("unknown")
+    else:
+        evidence = ScoreFact(
+            "known",
+            _bounded_score(Decimal(len(source_types)) / Decimal("3")),
+            source_refs,
+        )
+    return {
+        "need_fit": ScoreFact(
+            "known",
+            _bounded_score(Decimal("1") / Decimal(candidate.candidate_rank)),
+            (f"hybrid-retrieval-candidate:{candidate.id}:rank",),
+        ),
+        "product_quality": ScoreFact("unknown"),
+        "value": ScoreFact("unknown"),
+        "evidence": evidence,
+    }
 
 
 async def replay_product_ranking_batch(
@@ -100,19 +163,26 @@ async def replay_product_ranking_batch(
             .scalars()
             .all()
         )
-        # Aucune dimension n'est inférée d'un prix, d'un statut ou d'une
-        # commission. Tant que les preuves Phase 7 manquent, le résultat est une
-        # abstention honnête.
+        retrieval_ids = [row.retrieval_candidate_id for row in rows]
+        retrieval_rows = (
+            (
+                await session.execute(
+                    select(HybridRetrievalCandidate).where(
+                        HybridRetrievalCandidate.id.in_(retrieval_ids)
+                    )
+                )
+            )
+            .scalars()
+            .all()
+            if retrieval_ids
+            else []
+        )
+        retrieval_by_id = {item.id: item for item in retrieval_rows}
         candidates = [
             RankingCandidateFacts(
                 row.entity_ref,
                 row.status,
-                {
-                    "need_fit": ScoreFact("unknown"),
-                    "product_quality": ScoreFact("unknown"),
-                    "value": ScoreFact("unknown"),
-                    "evidence": ScoreFact("unknown"),
-                },
+                _factual_dimensions(retrieval_by_id.get(row.retrieval_candidate_id)),
             )
             for row in rows
         ]

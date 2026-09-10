@@ -136,6 +136,14 @@ jobs:
           --strict-engineering
           --output ../quality-product-ranking-report.json
 
+      - name: Qualifier Product Ranking v2 avec preuves partielles explicites
+        if: ${{ !cancelled() }}
+        run: >-
+          python -m quality_lab.product_ranking_v2
+          --manifest ../quality/product-ranking-v2-manifest.json
+          --strict
+          --output ../quality-product-ranking-v2-report.json
+
       - name: Exécuter les garde-fous Offer Optimization sans signal commercial
         if: ${{ !cancelled() }}
         run: >-
@@ -186,6 +194,7 @@ jobs:
             ${{ github.workspace }}/quality-solution-composer-report.json
             ${{ github.workspace }}/quality-personal-commerce-report.json
             ${{ github.workspace }}/quality-product-ranking-report.json
+            ${{ github.workspace }}/quality-product-ranking-v2-report.json
             ${{ github.workspace }}/quality-offer-optimization-report.json
             ${{ github.workspace }}/quality-confidence-report.json
             ${{ github.workspace }}/quality-buy-wait-report.json

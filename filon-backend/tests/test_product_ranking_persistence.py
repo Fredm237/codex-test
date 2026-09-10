@@ -47,7 +47,13 @@ async def _constraint_chain(session):
         group_key="variant:101",
         rrf_score="0.01",
         offer_ids_json=[],
-        source_evidence_json=[],
+        source_evidence_json=[
+            {
+                "source_type": "LEXICAL",
+                "source_rank": 1,
+                "evidence_ref": "product-ontology:1:lexical",
+            }
+        ],
     )
     constraint = ConstraintEvaluationRun(
         id=1,

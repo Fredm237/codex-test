@@ -1,0 +1,26 @@
+{
+  "schema_version": "product-ranking-run/v2",
+  "run_ref": "synthetic:ranking:evidence-scoped",
+  "constraint_run_ref": "synthetic:constraint:2",
+  "vertical": "smartphones",
+  "context_digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "raw_context_retained": false,
+  "policy_version": "product-ranking-policy/v2",
+  "evaluated_at": "2026-09-10T08:00:00Z",
+  "outcome": "RANKED_PRODUCTS",
+  "candidates": [{
+    "entity_ref": "variant:202",
+    "status": "RANKED",
+    "rank": 1,
+    "utility": "0.851852",
+    "dimensions": [
+      {"name": "need_fit", "status": "KNOWN", "value": "1.000000", "weight": "0.35", "evidence_refs": ["hybrid-retrieval-candidate:2:rank"]},
+      {"name": "product_quality", "status": "UNKNOWN", "value": null, "weight": "0.30", "evidence_refs": []},
+      {"name": "value", "status": "UNKNOWN", "value": null, "weight": "0.25", "evidence_refs": []},
+      {"name": "evidence", "status": "KNOWN", "value": "0.333333", "weight": "0.10", "evidence_refs": ["product-ontology:2:lexical"]}
+    ],
+    "reason_codes": ["evidence_scoped_partial_ranking", "dimension_unknown:product_quality", "dimension_unknown:value"]
+  }],
+  "ranked_entity_refs": ["variant:202"],
+  "result_digest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+}

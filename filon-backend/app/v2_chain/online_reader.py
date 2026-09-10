@@ -460,17 +460,14 @@ def _option_items(
     request: V2OnlineReadRequest,
     retrieval: FusionResult,
     constraints,
+    ranking,
     by_id: Mapping[int, core_models.Offer],
     merchant_by_id: Mapping[int, core_models.Merchant],
     evidence_by_offer: Mapping[int, OfferEvidence],
     market_evidence_by_offer: Mapping[int, tuple[OfferMarketEvidence, ...]],
     evaluated_at: datetime,
 ) -> tuple[dict[str, object], ...]:
-    """Matérialise au plus cinq options prouvées, dans l'ordre P5.
-
-    L'ordre est celui de la fusion retrieval. Il ne devient jamais une note de
-    qualité et le prix n'est utilisé qu'entre offres de même entité.
-    """
+    """Matérialise au plus cinq options prouvées, dans l'ordre P7."""
 
     eligible = {
         candidate.entity_ref
@@ -478,7 +475,13 @@ def _option_items(
         if candidate.status == "ELIGIBLE"
     }
     items: list[dict[str, object]] = []
-    for candidate in retrieval.candidates:
+    candidate_by_ref = {
+        candidate.entity_ref: candidate for candidate in retrieval.candidates
+    }
+    for entity_ref in ranking.ranked_entity_refs:
+        candidate = candidate_by_ref.get(entity_ref)
+        if candidate is None:
+            continue
         if candidate.entity_ref not in eligible:
             continue
         candidate_offers = _proven_current_offers(
@@ -566,6 +569,63 @@ def _option_items(
         if len(items) == 5:
             break
     return tuple(items)
+
+
+def _ranking_candidate_facts(retrieval: FusionResult, constraints):
+    """Dérive P7 uniquement de l'ordre P5 et de sa provenance persistée."""
+
+    retrieved_by_ref = {
+        candidate.entity_ref: candidate for candidate in retrieval.candidates
+    }
+    values: list[RankingCandidateFacts] = []
+    for constrained in constraints.candidates:
+        candidate = retrieved_by_ref.get(constrained.entity_ref)
+        evidence_refs = (
+            tuple(sorted({item.evidence_ref for item in candidate.source_evidence}))
+            if candidate is not None
+            else ()
+        )
+        source_types = (
+            {item.source_type for item in candidate.source_evidence}
+            if candidate is not None
+            else set()
+        )
+        dimensions = {
+            "need_fit": (
+                ScoreFact(
+                    "known",
+                    format(
+                        Decimal("1") / Decimal(candidate.candidate_rank),
+                        ".6f",
+                    ),
+                    evidence_refs,
+                )
+                if candidate is not None and evidence_refs
+                else ScoreFact("unknown")
+            ),
+            "product_quality": ScoreFact("unknown"),
+            "value": ScoreFact("unknown"),
+            "evidence": (
+                ScoreFact(
+                    "known",
+                    format(
+                        Decimal(len(source_types)) / Decimal("3"),
+                        ".6f",
+                    ),
+                    evidence_refs,
+                )
+                if source_types and evidence_refs
+                else ScoreFact("unknown")
+            ),
+        }
+        values.append(
+            RankingCandidateFacts(
+                constrained.entity_ref,
+                constrained.status,
+                dimensions,
+            )
+        )
+    return tuple(values)
 
 
 def _constraints(request: V2OnlineReadRequest) -> tuple[HardConstraint, ...]:
@@ -734,26 +794,19 @@ async def read_v2_online(
     )
     ranking = rank_products(
         RankingRequest(f"v2-online:{query_digest}", request.vertical),
-        tuple(
-            RankingCandidateFacts(
-                candidate.entity_ref,
-                candidate.status,
-                {
-                    "need_fit": ScoreFact("unknown"),
-                    "product_quality": ScoreFact("unknown"),
-                    "value": ScoreFact("unknown"),
-                    "evidence": ScoreFact("unknown"),
-                },
-            )
-            for candidate in constraints.candidates
-        ),
+        _ranking_candidate_facts(retrieval, constraints),
+    )
+    top_product_ref = (
+        ranking.ranked_entity_refs[0]
+        if ranking.outcome == "RANKED_PRODUCTS" and ranking.ranked_entity_refs
+        else None
     )
     optimization = optimize_offers(
         OptimizationRequest(
             context_ref=f"v2-online:{query_digest}",
             ranking_outcome=ranking.outcome,
-            selected_product_ref=None,
-            selected_product_rank=None,
+            selected_product_ref=top_product_ref,
+            selected_product_rank=1 if top_product_ref is not None else None,
         ),
         (),
     )
@@ -784,8 +837,8 @@ async def read_v2_online(
         )
     )
     if (
-        ranking.outcome not in {"ABSTAINED", "NO_ELIGIBLE_PRODUCT"}
-        or optimization.outcome != "ABSTAINED"
+        ranking.outcome not in {"RANKED_PRODUCTS", "ABSTAINED", "NO_ELIGIBLE_PRODUCT"}
+        or optimization.outcome not in {"ABSTAINED", "NO_ELIGIBLE_OFFER"}
         or confidence.outcome != "ABSTAINED"
         or decision.outcome != "ABSTAIN"
     ):
@@ -805,6 +858,7 @@ async def read_v2_online(
         request=request,
         retrieval=retrieval,
         constraints=constraints,
+        ranking=ranking,
         by_id=by_id,
         merchant_by_id=merchant_by_id,
         evidence_by_offer=evidence_by_offer,

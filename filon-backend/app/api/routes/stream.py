@@ -16,10 +16,11 @@ from typing import AsyncGenerator
 from fastapi import APIRouter, BackgroundTasks, Header, HTTPException, Query
 from fastapi.responses import StreamingResponse
 
+from app.core.config import get_settings
 from app.core.logging import get_logger
 from app.services.recommend import stream_events
 from app.v2_chain.live_dark_reader import observe_live_dark_read
-from app.v2_chain.live_router import route_promoted_response
+from app.v2_chain.live_router import route_promoted_response, route_v2_only_response
 
 log = get_logger("stream")
 
@@ -39,6 +40,17 @@ async def _sse(
 ) -> AsyncGenerator[str, None]:
     started_ns = time.perf_counter_ns()
     try:
+        if get_settings().v2_only_public_enabled:
+            routed = await route_v2_only_response(
+                query=query,
+                budget=budget,
+                country=country,
+                locale=locale,
+                surface="advise_stream",
+            )
+            event = {"type": "results", "data": routed.response}
+            yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+            return
         async for event in stream_events(query, budget, country, locale):
             if event.get("type") == "results" and isinstance(event.get("data"), dict):
                 core_latency_us = max(
@@ -107,5 +119,10 @@ async def advise_stream(
             "X-Accel-Buffering": "no",
             "Connection": "keep-alive",
             "X-Content-Type-Options": "nosniff",
+            "X-Filon-Engine": (
+                "v2-only"
+                if get_settings().v2_only_public_enabled
+                else "v1-with-promoted-v2"
+            ),
         },
     )

@@ -473,3 +473,98 @@ async def route_promoted_response(
         # Ni contenu de requête, ni détail fournisseur dans le journal.
         log.warning("V2 live routing held (error_type=%s)", type(exc).__name__)
         return V2LiveRouteResult(core_response, "core_v1", mode, "runtime_hold")
+
+
+async def route_v2_only_response(
+    *,
+    query: str,
+    budget: float | None,
+    country: str | None,
+    locale: str | None,
+    surface: Surface,
+) -> V2LiveRouteResult:
+    """Sert exclusivement V2, avec abstention explicite et sans fallback V1."""
+
+    if surface not in {"advise", "advise_stream"}:
+        raise ValueError("V2 live surface is unsupported")
+    vertical = infer_supported_vertical(query) or "general"
+    request_country = _country(country, locale)
+    abstention = _public_abstention(
+        surface=surface,
+        query=query,
+        vertical=vertical,
+        country=request_country,
+    )
+    if request_country is None:
+        return V2LiveRouteResult(
+            abstention, "v2", "public_v2_only", "country_required"
+        )
+
+    evaluated_at = datetime.now(timezone.utc)
+    try:
+        settings = get_settings()
+        if not settings.v2_only_public_enabled:
+            raise RuntimeError("V2-only public switch is disabled")
+        maximum_age = settings.v2_max_data_age_seconds
+        if maximum_age is None:
+            return V2LiveRouteResult(
+                abstention, "v2", "public_v2_only", "freshness_policy_missing"
+            )
+        async with db.session_scope() as session:
+            if session is None:
+                return V2LiveRouteResult(
+                    abstention, "v2", "public_v2_only", "database_unavailable"
+                )
+            online_request = V2OnlineReadRequest(
+                query=query,
+                vertical=vertical,
+                locale=_language(locale),
+                country_code=request_country,
+                budget_amount_decimal=(
+                    f"{budget:.2f}" if budget is not None else None
+                ),
+                budget_currency="EUR" if budget is not None else None,
+            )
+            inspection = await inspect_v2_online(
+                session, online_request, evaluated_at=evaluated_at
+            )
+            if (
+                not inspection.dependencies_admissible
+                or inspection.data_age_seconds is None
+                or inspection.data_age_seconds > maximum_age
+            ):
+                return V2LiveRouteResult(
+                    abstention,
+                    "v2",
+                    "public_v2_only",
+                    "evidence_stale_or_missing",
+                )
+            payload = await read_v2_online(
+                session,
+                online_request,
+                evaluated_at=evaluated_at,
+                inspection=inspection,
+            )
+            if payload.response_type == "FACTUAL_OPTIONS":
+                return V2LiveRouteResult(
+                    _public_factual_options(
+                        surface=surface,
+                        query=query,
+                        vertical=vertical,
+                        country=request_country,
+                        payload=payload,
+                    ),
+                    "v2",
+                    "public_v2_only",
+                    "v2_factual_options",
+                )
+            if payload.response_type != "ABSTAIN":
+                raise RuntimeError("unqualified V2 response type")
+            return V2LiveRouteResult(
+                abstention, "v2", "public_v2_only", "v2_abstained"
+            )
+    except Exception as exc:
+        log.warning("V2-only routing abstained (error_type=%s)", type(exc).__name__)
+        return V2LiveRouteResult(
+            abstention, "v2", "public_v2_only", "runtime_unavailable"
+        )

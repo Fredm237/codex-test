@@ -14,13 +14,20 @@ from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from typing import Any, Mapping, Sequence
 
 
-RANKING_POLICY_VERSION = "product-ranking-policy/v1"
+RANKING_POLICY_VERSION = "product-ranking-policy/v2"
 DIMENSIONS = ("need_fit", "product_quality", "value", "evidence")
+REQUIRED_DIMENSIONS = frozenset({"need_fit", "evidence"})
 FACT_STATES = {"known", "unknown", "invalid", "conflict"}
 ELIGIBILITY_STATES = {"ELIGIBLE", "EXCLUDED", "UNKNOWN"}
 
 # Les poids sont un contrat par verticale, jamais une formule universelle.
 VERTICAL_WEIGHTS: dict[str, dict[str, Decimal]] = {
+    "general": {
+        "need_fit": Decimal("0.70"),
+        "product_quality": Decimal("0.10"),
+        "value": Decimal("0.10"),
+        "evidence": Decimal("0.10"),
+    },
     "smartphones": {
         "need_fit": Decimal("0.35"),
         "product_quality": Decimal("0.30"),
@@ -203,7 +210,9 @@ def rank_products(
         raise ProductRankingError("vertical weights are invalid")
 
     provisional: list[CandidateRanking] = []
-    scored: list[tuple[Decimal, str, tuple[DimensionEvaluation, ...]]] = []
+    scored: list[
+        tuple[Decimal, str, tuple[DimensionEvaluation, ...], tuple[str, ...]]
+    ] = []
     for candidate in candidates:
         dimensions, values = _dimension_evaluations(candidate, weights)
         if candidate.eligibility_status != "ELIGIBLE":
@@ -218,13 +227,25 @@ def rank_products(
                 )
             )
             continue
-        if set(values) != set(DIMENSIONS):
+        invalid_dimensions = tuple(
+            name
+            for name in DIMENSIONS
+            if candidate.dimensions[name].state in {"invalid", "conflict"}
+            or (
+                candidate.dimensions[name].state == "known"
+                and name not in values
+            )
+        )
+        missing_required = tuple(
+            name for name in REQUIRED_DIMENSIONS if name not in values
+        )
+        if invalid_dimensions or missing_required:
             missing = tuple(
                 f"dimension_{candidate.dimensions[name].state}:{name}"
                 if candidate.dimensions[name].state != "known"
                 else f"dimension_invalid:{name}"
                 for name in DIMENSIONS
-                if name not in values
+                if name in invalid_dimensions or name in missing_required
             )
             provisional.append(
                 CandidateRanking(
@@ -237,15 +258,30 @@ def rank_products(
                 )
             )
             continue
-        utility = sum(values[name] * weights[name] for name in DIMENSIONS).quantize(
+        known_weight = sum(weights[name] for name in values)
+        utility = (
+            sum(values[name] * weights[name] for name in values) / known_weight
+        ).quantize(
             Decimal("0.000001"), rounding=ROUND_HALF_UP
         )
-        scored.append((utility, candidate.entity_ref, dimensions))
+        scored.append((utility, candidate.entity_ref, dimensions, tuple(values)))
 
     ranked: list[CandidateRanking] = []
-    for rank, (utility, entity_ref, dimensions) in enumerate(
+    for rank, (utility, entity_ref, dimensions, known_dimensions) in enumerate(
         sorted(scored, key=lambda item: (-item[0], item[1])), start=1
     ):
+        reason_codes = (
+            ("all_dimensions_known_and_sourced",)
+            if set(known_dimensions) == set(DIMENSIONS)
+            else (
+                "evidence_scoped_partial_ranking",
+                *tuple(
+                    f"dimension_unknown:{name}"
+                    for name in DIMENSIONS
+                    if name not in known_dimensions
+                ),
+            )
+        )
         ranked.append(
             CandidateRanking(
                 entity_ref,
@@ -253,7 +289,7 @@ def rank_products(
                 rank,
                 format(utility, "f"),
                 dimensions,
-                ("all_dimensions_known_and_sourced",),
+                reason_codes,
             )
         )
     combined = tuple(ranked + sorted(provisional, key=lambda item: item.entity_ref))
@@ -279,7 +315,7 @@ def rank_products(
         "candidates": [asdict(item) for item in combined],
     }
     return ProductRanking(
-        schema_version="product-ranking/v1",
+        schema_version="product-ranking/v2",
         policy_version=RANKING_POLICY_VERSION,
         vertical=request.vertical,
         context_digest=context_digest,

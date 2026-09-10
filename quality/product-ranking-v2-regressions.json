@@ -1,0 +1,14 @@
+{
+  "schema_version": "product-ranking-v2-regressions/v1",
+  "cases": [
+    {"case_id": "required:need-fit", "truth_basis": "NEED_FIT_MUST_BE_KNOWN_AND_SOURCED"},
+    {"case_id": "required:evidence", "truth_basis": "EVIDENCE_MUST_BE_KNOWN_AND_SOURCED"},
+    {"case_id": "optional:no-default", "truth_basis": "UNKNOWN_OPTIONAL_DIMENSION_RECEIVES_NO_SCORE"},
+    {"case_id": "optional:disclosure", "truth_basis": "PARTIAL_RANKING_NAMES_EVERY_UNKNOWN_DIMENSION"},
+    {"case_id": "invalid:fail-closed", "truth_basis": "INVALID_OR_CONFLICTING_FACT_BLOCKS_RANKING"},
+    {"case_id": "eligibility:no-reentry", "truth_basis": "CONSTRAINT_STATUS_PRECEDES_RANKING"},
+    {"case_id": "affiliate:invariance", "truth_basis": "COMMISSION_IS_NOT_A_PRODUCT_SIGNAL"},
+    {"case_id": "claim:boundary", "truth_basis": "RANKING_IS_NOT_QUALITY_OFFER_OR_BUY_WAIT"},
+    {"case_id": "tie:stable", "truth_basis": "DETERMINISTIC_ENTITY_TIE_BREAK"}
+  ]
+}
