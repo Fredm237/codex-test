@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
@@ -42,7 +43,7 @@ function CguFR() {
           <h2>3. Accès et offre actuelle</h2>
           <p>
             L&apos;offre publique actuelle de FILON est affichée à <b>0 €</b>, sans abonnement ni carte bancaire&nbsp;:
-            voir la page <a href="/tarifs">Tarifs</a>. Cette offre peut évoluer ; les conditions publiées sur cette page
+            voir la page <Link href="/tarifs">Tarifs</Link>. Cette offre peut évoluer ; les conditions publiées sur cette page
             s&apos;appliquent. L&apos;éditeur s&apos;efforce
             d&apos;assurer la disponibilité du service sans pouvoir la garantir de manière ininterrompue.
           </p>
@@ -79,8 +80,8 @@ function CguFR() {
           <h2>8. Données personnelles</h2>
           <p>
             Le traitement des données personnelles est décrit dans notre{" "}
-            <a href="/confidentialite">politique de confidentialité</a> et notre{" "}
-            <a href="/cookies">politique cookies</a>, conformes au RGPD.
+            <Link href="/confidentialite">politique de confidentialité</Link> et notre{" "}
+            <Link href="/cookies">politique cookies</Link>, conformes au RGPD.
           </p>
 
           <h2>9. Responsabilité</h2>
@@ -140,7 +141,7 @@ function CguNL() {
           <h2>3. Toegang en huidig aanbod</h2>
           <p>
             Het huidige publieke aanbod van FILON staat op <b>0 €</b>, zonder abonnement of bankkaart&nbsp;: zie de
-            pagina <a href="/tarifs">Tarieven</a>. Dit aanbod kan veranderen; de op die pagina gepubliceerde voorwaarden
+            pagina <Link href="/tarifs">Tarieven</Link>. Dit aanbod kan veranderen; de op die pagina gepubliceerde voorwaarden
             zijn van toepassing. De uitgever streeft ernaar
             de beschikbaarheid van de dienst te verzekeren zonder ze ononderbroken te kunnen garanderen.
           </p>
@@ -176,8 +177,8 @@ function CguNL() {
           <h2>8. Persoonsgegevens</h2>
           <p>
             De verwerking van persoonsgegevens wordt beschreven in ons{" "}
-            <a href="/confidentialite">privacybeleid</a> en ons{" "}
-            <a href="/cookies">cookiebeleid</a>, GDPR-conform.
+            <Link href="/confidentialite">privacybeleid</Link> en ons{" "}
+            <Link href="/cookies">cookiebeleid</Link>, GDPR-conform.
           </p>
 
           <h2>9. Aansprakelijkheid</h2>
@@ -236,7 +237,7 @@ function CguEN() {
           <h2>3. Access and current offering</h2>
           <p>
             FILON&apos;s current public offering is listed at <b>€0</b>, with no subscription or payment card&nbsp;: see
-            the <a href="/tarifs">Pricing</a> page. This offering may change; the terms published on that page apply.
+            the <Link href="/tarifs">Pricing</Link> page. This offering may change; the terms published on that page apply.
             The publisher strives to ensure the
             availability of the service without being able to guarantee it uninterrupted.
           </p>
@@ -272,8 +273,8 @@ function CguEN() {
           <h2>8. Personal data</h2>
           <p>
             The processing of personal data is described in our{" "}
-            <a href="/confidentialite">privacy policy</a> and our{" "}
-            <a href="/cookies">cookie policy</a>, GDPR-compliant.
+            <Link href="/confidentialite">privacy policy</Link> and our{" "}
+            <Link href="/cookies">cookie policy</Link>, GDPR-compliant.
           </p>
 
           <h2>9. Liability</h2>
