@@ -41,8 +41,16 @@ export type SequenceDefinition = {
   frameBase: string;
   frames: number;
   poster: string;
+  finalPoster?: string;
   scrollHeightVh: number;
   frameStride: number;
+  sprite?: {
+    framesPerSheet: number;
+    columns: number;
+    rows: number;
+    tileWidth: number;
+    tileHeight: number;
+  };
 };
 
 export type CinematicScene = {
