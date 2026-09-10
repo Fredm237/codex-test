@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
+import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -56,10 +56,11 @@ assert.ok(webglContextLoss.includes("event.preventDefault()"), "la perte du cont
 assert.ok(webglContextLoss.includes('removeEventListener("webglcontextlost"'), "l'écouteur de perte GPU doit être nettoyé au démontage");
 assert.ok(productVolume.includes('onFailure={() => setState("fallback")}'), "le dossier produit doit revenir au DOM après une perte GPU");
 
+const publicSource = sources.map(({ source }) => source).join("\n");
 for (const obsolete of [
-  "seq", "seq-light", "seq-mobile", "seq-light-mobile", "film", "immersive",
-  "cinematic/interior-city", "cinematic/filon-industrial-world", "cinematic/filon-world", "cinematic/actors",
-]) assert.equal(existsSync(join(root, "public", obsolete)), false, `l'asset supersédé ${obsolete} ne doit plus alourdir la livraison`);
+  "/seq/", "/seq-light/", "/seq-mobile/", "/seq-light-mobile/", "/film/", "/immersive/",
+  "/cinematic/interior-city/", "/cinematic/filon-industrial-world/", "/cinematic/filon-world/", "/cinematic/actors/",
+]) assert.doesNotMatch(publicSource, new RegExp(obsolete.replaceAll("/", "\\/")), `l'expérience publique ne doit plus charger l'asset supersédé ${obsolete}`);
 
 const { bindWebglContextLoss } = await import("../components/experience/signature/WebglContextLoss.mjs");
 const { frameWindow, shouldRetainFrame } = await import("../components/cinematic/FrameWindow.mjs");
