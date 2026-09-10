@@ -1,0 +1,65 @@
+/* Les fiches d'offre héritaient encore de la palette nocturne de la première
+   exploration P19. La surface produit finale est claire : toutes les couches
+   de preuve restent lisibles dans la même matière éditoriale. */
+.p19-offer-surface {
+  --accent: #a94128;
+  --ink: #2a211c;
+  --ink-2: rgba(42, 33, 28, .74);
+  --ink-3: rgba(42, 33, 28, .58);
+  --card: rgba(255, 250, 242, .62);
+  --line-2: rgba(42, 33, 28, .18);
+}
+.p19-offer-dossier::before { color: #a94128; }
+.p19-offer-brand,
+.p19-offer-status,
+.p19-offer-history-title,
+.p19-price-landscape-head p,
+.p19-price-landscape-head > span,
+.p19-price-landscape-intro,
+.p19-offer-history > p,
+.p19-offer-note { color: rgba(42, 33, 28, .58) !important; }
+.p19-offer-title,
+.p19-offer-price,
+.p19-offer-merchant b,
+.p19-offer-surface .pd-compare b,
+.p19-offer-history b,
+.p19-price-landscape,
+.p19-price-landscape-head h2,
+.p19-price-landscape-control output strong { color: #2a211c !important; }
+.p19-offer-headline {
+  border-top-color: rgba(42, 33, 28, .2);
+  border-bottom-color: rgba(42, 33, 28, .2);
+}
+.p19-offer-headline > span:first-child:not(.p19-offer-status),
+.p19-offer-merchant,
+.p19-offer-surface .pd-compare span,
+.p19-price-landscape-control output span,
+.p19-price-landscape-dates { color: rgba(42, 33, 28, .58) !important; }
+.p19-offer-status[data-purchasable="true"] { color: #43513c !important; }
+.p19-offer-surface .pd-compare:hover { border-color: #a94128; }
+.p19-price-landscape-stage {
+  border-color: rgba(42, 33, 28, .14);
+  background:
+    radial-gradient(circle at var(--p19-history-progress) 50%, rgba(169, 65, 40, .12), transparent 22%),
+    linear-gradient(90deg, rgba(42, 33, 28, .025), transparent 38% 62%, rgba(42, 33, 28, .025));
+}
+.p19-price-landscape-grid path { stroke: rgba(42, 33, 28, .1); }
+.p19-price-landscape-line { stroke: #a94128; }
+.p19-price-landscape-stage circle { fill: #fffaf2; stroke: #2a211c; }
+.p19-price-landscape-stage circle.is-active { fill: #a94128; }
+.p19-price-landscape-cursor {
+  background: linear-gradient(180deg, transparent, rgba(169, 65, 40, .64) 22% 78%, transparent);
+}
+.p19-price-landscape-control output time { color: rgba(42, 33, 28, .72); }
+.p19-price-landscape-control input[type="range"] { accent-color: #a94128; }
+.p19-price-landscape-control input[type="range"]:focus-visible { outline-color: #2a211c; }
+.p19-offer-history-summary { background: rgba(42, 33, 28, .14); }
+.p19-offer-history-summary > div { background: #fffaf2; }
+.p19-offer-history-summary dt,
+.p19-price-landscape-table th { color: rgba(42, 33, 28, .54); }
+.p19-offer-history-summary dd { color: #2a211c; }
+.p19-price-landscape-table { border-top-color: rgba(42, 33, 28, .14); }
+.p19-price-landscape-table summary,
+.p19-price-landscape-table td { color: rgba(42, 33, 28, .76); }
+.p19-price-landscape-table th,
+.p19-price-landscape-table td { border-top-color: rgba(42, 33, 28, .1); }
