@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
@@ -62,7 +63,7 @@ function CookiesFR() {
 
           <h2>En savoir plus</h2>
           <p>
-            Cette politique complète notre <a href="/confidentialite">politique de confidentialité</a>. Pour toute question
+            Cette politique complète notre <Link href="/confidentialite">politique de confidentialité</Link>. Pour toute question
             relative aux cookies, écrivez-nous à <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
           </p>
         </div>
@@ -122,7 +123,7 @@ function CookiesNL() {
 
           <h2>Meer weten</h2>
           <p>
-            Dit beleid vult ons <a href="/confidentialite">privacybeleid</a> aan. Voor elke vraag over cookies, schrijf
+            Dit beleid vult ons <Link href="/confidentialite">privacybeleid</Link> aan. Voor elke vraag over cookies, schrijf
             ons op <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
           </p>
         </div>
@@ -182,7 +183,7 @@ function CookiesEN() {
 
           <h2>Learn more</h2>
           <p>
-            This policy complements our <a href="/confidentialite">privacy policy</a>. For any question about
+            This policy complements our <Link href="/confidentialite">privacy policy</Link>. For any question about
             cookies, write to us at <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a>.
           </p>
         </div>
