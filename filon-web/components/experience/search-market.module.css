@@ -97,13 +97,16 @@
 
 .surface :global(.sa-title-light),
 .surface :global(h1) {
-  max-width: 9ch;
+  max-width: 11ch;
   margin: 16px 0 34px;
   color: #2a211c !important;
-  font-size: clamp(58px, 7.2vw, 98px);
+  font-size: clamp(56px, 6.4vw, 90px);
   font-family: var(--font-serif), Georgia, serif;
-  line-height: .9;
-  letter-spacing: -.055em;
+  line-height: .92;
+  letter-spacing: -.05em;
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: none;
   text-shadow: none;
 }
 
@@ -209,7 +212,7 @@
   }
   .surface :global(.sa-title-light),
   .surface :global(h1) {
-    max-width: 8ch;
+    max-width: 9.5ch;
     margin-bottom: 28px;
     font-size: clamp(50px, 15vw, 68px);
   }
