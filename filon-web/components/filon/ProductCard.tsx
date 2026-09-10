@@ -16,7 +16,6 @@
 // lien marchand reste distinct, au-dessus, avec sa propre cible.
 
 import { useCallback, useState } from "react";
-import { motion } from "framer-motion";
 import {
   CARD_COPY,
   currentStockState,
@@ -135,14 +134,7 @@ export function ProductCard({
   }, []);
 
   return (
-    <motion.article
-      className="fx-product"
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-40px" }}
-      whileHover={{ y: -8, scale: 1.02 }}
-      transition={{ type: "spring", stiffness: 260, damping: 18 }}
-    >
+    <article className="fx-product">
       <div className={`fx-product-media${offer.image && imageOk && !imageLoaded ? " is-loading" : ""}`}>
         {offer.image && imageOk ? (
           // eslint-disable-next-line @next/next/no-img-element
@@ -212,6 +204,6 @@ export function ProductCard({
           )}
         </div>
       </div>
-    </motion.article>
+    </article>
   );
 }
