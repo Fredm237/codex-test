@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useLocale } from "@/lib/i18n";
 import { catalogueAssistantHref } from "@/lib/catalogue-assistant-url";
+import { discoverCatalogue, type CatalogDiscoveryItem } from "@/lib/catalog-discovery";
 import { formatSupportedMoney, normalizeSupportedMoney } from "@/lib/currency";
 import { DecisionPanel, type DecisionData } from "@/components/filon/DecisionPanel";
 import { ProductJourneyLink } from "@/components/experience/ProductJourneyLink";
@@ -139,35 +140,10 @@ type Card = {
   why: string; alt: string | null;
 };
 type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; currency?: string; country?: string };
-type DiscoveryItem = {
-  id: number;
-  name: string;
-  brand?: string | null;
-  category?: string | null;
-  image?: string | null;
-  merchant: { name: string };
-};
+type DiscoveryItem = CatalogDiscoveryItem;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
-}
-
-async function discoverCatalogue(q: string, signal: AbortSignal): Promise<DiscoveryItem[]> {
-  const response = await fetch(`/api/catalog/discovery/?q=${encodeURIComponent(q)}`, {
-    cache: "no-store",
-    signal,
-  });
-  if (!response.ok) return [];
-  const body: unknown = await response.json();
-  if (!isRecord(body) || !Array.isArray(body.items)) return [];
-  return body.items.filter((item): item is DiscoveryItem => {
-    if (!isRecord(item) || !isRecord(item.merchant)) return false;
-    return Number.isInteger(item.id)
-      && (item.id as number) > 0
-      && typeof item.name === "string"
-      && item.name.trim().length > 0
-      && typeof item.merchant.name === "string";
-  }).slice(0, 8);
 }
 
 /* Il n'y a plus de catalogue de démonstration ici, et c'est délibéré.

@@ -12,6 +12,18 @@ const nextConfig = {
     unoptimized: true,
   },
   basePath: process.env.NEXT_PUBLIC_BASE_PATH || undefined,
+  async rewrites() {
+    // Le développement local a besoin du même relais que Vercel. Lors d'un
+    // export statique, vercel.json assure le relais car Next n'émet pas de
+    // serveur applicatif.
+    if (process.env.STATIC_EXPORT === "1") return [];
+    return [
+      {
+        source: "/api/catalog/offers/",
+        destination: "https://web-production-c6842.up.railway.app/api/catalog/offers",
+      },
+    ];
+  },
   async headers() {
     return [
       {
