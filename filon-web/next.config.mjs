@@ -15,14 +15,13 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Le CDN peut conserver les frames longtemps, mais le navigateur les
-        // revalide : une nouvelle séquence déployée ne reste jamais bloquée
-        // dans un cache local obsolète.
-        source: "/seq/hero/:path*",
+        // Le chemin versionné rend chaque frame immuable. Une future séquence
+        // prendra un nouveau dossier au lieu d'invalider des centaines d'images.
+        source: "/cinematic/filon-scroll-story/desktop-v6-sprites4/:path*",
         headers: [
           {
             key: "Cache-Control",
-            value: "public, max-age=0, s-maxage=31536000, stale-while-revalidate=86400",
+            value: "public, max-age=31536000, immutable",
           },
         ],
       },

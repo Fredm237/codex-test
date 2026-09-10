@@ -8,7 +8,7 @@ const repositoryRoot = join(webRoot, "..");
 const paths = [
   "filon-web/lib/site.ts",
   "filon-web/lib/i18n.tsx",
-  "filon-web/components/filon/ImmersiveExperience.tsx",
+  "filon-web/components/experience/CommerceJourney.tsx",
   "filon-web/components/filon/CategoryDetails.tsx",
   "filon-web/components/filon/Proof.tsx",
   "filon-web/components/filon/ProductDetails.tsx",
