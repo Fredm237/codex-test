@@ -277,27 +277,27 @@ export function MegaMenu({ initialDepartments = [] }: { initialDepartments?: Dep
                 const detailed = detailedCategorySlugs(d);
                 return (
                 <section className="mm-dept" key={d.slug} aria-labelledby={`${panelId}-${d.slug}`}>
-                  <a className="mm-dep" id={`${panelId}-${d.slug}`} href={`/catalogue/?dept=${d.slug}`} onClick={() => close()}>
+                  <Link className="mm-dep" id={`${panelId}-${d.slug}`} href={`/catalogue/?dept=${d.slug}`} onClick={() => close()}>
                     {d.name}
                     <em>{t.products(d.count)}</em>
-                  </a>
+                  </Link>
                   <ul>
                     {categories.map((c) => (
                       <li key={c.slug}>
-                        <a href={`/categorie/${c.slug}/`} onClick={() => close()}>
+                        <Link href={`/categorie/${c.slug}/`} onClick={() => close()}>
                           {c.name}
                           <span>{c.count.toLocaleString(locale === "nl" ? "nl-BE" : locale === "en" ? "en-GB" : "fr-FR")}</span>
-                        </a>
+                        </Link>
                         {detailed.has(c.slug) && pickSubcategories(c.subcategories).length > 0 && (
                           <ul className="mm-sub">
                             {pickSubcategories(c.subcategories).map((s) => (
                               <li key={s.name}>
-                                <a
+                                <Link
                                   href={`/categorie/${c.slug}/?sub=${encodeURIComponent(s.name)}`}
                                   onClick={() => close()}
                                 >
                                   {s.name}
-                                </a>
+                                </Link>
                               </li>
                             ))}
                           </ul>
