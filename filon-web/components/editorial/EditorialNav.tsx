@@ -1,110 +1,40 @@
 "use client";
-
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { BrandLogo } from "./Brand";
 import { LanguageSwitcher } from "./LanguageSwitcher";
-import { MegaMenu } from "./MegaMenu";
 import { ThemeToggle } from "./ThemeToggle";
-import { NAV_KEYS, useLocale } from "@/lib/i18n";
+import { MegaMenu } from "./MegaMenu";
+import { useLocale } from "@/lib/i18n";
 import type { Department } from "@/lib/catalogue";
+import { catalogueLabel } from "@/lib/catalogue-labels";
 
-const DESKTOP = NAV_KEYS.slice(0, 5);
-
-/** `departments` est lu côté serveur par le layout et traversé jusqu'ici : le
- *  méga-menu est ainsi complet dès la première image, sans dépendre du réseau
- *  du visiteur. */
 export function EditorialNav({ departments = [] }: { departments?: Department[] }) {
-  const ref = useRef<HTMLElement>(null);
-  const burgerRef = useRef<HTMLButtonElement>(null);
-  const [open, setOpen] = useState(false);
-  const { t } = useLocale();
-
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    let last = 0;
-    const onScroll = () => {
-      const y = window.scrollY;
-      el.classList.toggle("stuck", y > 8);
-      el.classList.toggle("hide", y > last && y > 420 && !open);
-      last = y;
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, [open]);
-
-  // Lock scroll while the mobile menu is open
-  useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return;
-      setOpen(false);
-      burgerRef.current?.focus();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open]);
-
-  return (
-    <>
-      <header className="ed-header" ref={ref}>
-        <nav className="ed-nav">
-          <BrandLogo onClick={() => setOpen(false)} />
-          <div className="ed-nav-mid">
-            <MegaMenu initialDepartments={departments} />
-            {DESKTOP.filter((n) => n.href !== "/catalogue").map((n) => (
-              <a key={n.href} href={n.href}>
-                {t(n.key)}
-              </a>
-            ))}
-          </div>
-          <div className="ed-nav-right">
-            <ThemeToggle />
-            <LanguageSwitcher />
-            <a className="ed-nav-cta" href="/recherche">
-              {t("cta.try")}
-            </a>
-            <button
-              ref={burgerRef}
-              type="button"
-              className="ed-burger"
-              aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
-              aria-expanded={open}
-              aria-controls="filon-mobile-navigation"
-              onClick={() => setOpen((v) => !v)}
-            >
-              <span className={open ? "open" : ""} />
-            </button>
-          </div>
-        </nav>
-      </header>
-
-      {/* Sibling of <header> so the fixed panel is relative to the viewport,
-          not trapped by the header's backdrop-filter containing block. */}
-      <div id="filon-mobile-navigation" className={`ed-mobile ${open ? "show" : ""}`} aria-hidden={!open}>
-        <nav className="ed-mobile-nav" aria-label="Navigation mobile">
-          {NAV_KEYS.map((n) => (
-            <a key={n.href} href={n.href} onClick={() => setOpen(false)}>
-              {t(n.key)}
-            </a>
-          ))}
-          <a className="ed-btn wave" href="/recherche" onClick={() => setOpen(false)} style={{ marginTop: 12 }}>
-            {t("cta.try")}
-          </a>
-          <div className="ed-mobile-preferences">
-            <ThemeToggle compact />
-            <LanguageSwitcher />
-          </div>
-        </nav>
-      </div>
-    </>
-  );
+ const { locale } = useLocale();
+ const path = usePathname();
+ const dialog = useRef<HTMLDialogElement>(null);
+ const trigger = useRef<HTMLButtonElement>(null);
+ const text = {
+  fr:{links:["Explorer","L’assistant","La méthode","Journal"], open:"Ouvrir le menu",close:"Fermer le menu",go:"Trouver mon prochain achat",menu:"Navigation",categories:"Les univers"},
+  nl:{links:["Ontdekken","De assistent","Onze methode","Journal"],open:"Menu openen",close:"Menu sluiten",go:"Vind mijn volgende aankoop",menu:"Navigatie",categories:"Categorieën"},
+  en:{links:["Explore","The assistant","Our method","Journal"],open:"Open menu",close:"Close menu",go:"Find my next purchase",menu:"Navigation",categories:"Departments"},
+ }[locale];
+ const links=["/catalogue/","/recherche/","/comment-ca-marche/","/blog/"];
+ const close=()=>{dialog.current?.close(); trigger.current?.focus();};
+ useEffect(()=>{dialog.current?.close();},[path]);
+ useEffect(()=>()=>{document.body.style.overflow="";},[]);
+ return <>
+  <header className="fn-header"><nav className="fn-nav" aria-label={text.menu}>
+   <BrandLogo />
+   <div className="fn-nav-links"><MegaMenu initialDepartments={departments} />{links.slice(1).map((href,i)=><Link href={href} key={href} aria-current={path.replace(/\/$/,"")===href.replace(/\/$/,"")?"page":undefined}>{text.links[i+1]}</Link>)}</div>
+   <div className="fn-nav-tools"><ThemeToggle /><LanguageSwitcher /><Link className="fn-nav-action" href="/recherche/" aria-label={text.go}>↗</Link><button ref={trigger} className="fn-menu-button" type="button" aria-label={text.open} aria-haspopup="dialog" aria-controls="filon-navigation" onClick={()=>{dialog.current?.showModal();document.body.style.overflow="hidden";}}><span /><span /></button></div>
+  </nav></header>
+  <dialog ref={dialog} id="filon-navigation" className="fn-menu" aria-label={text.menu} onClose={()=>{document.body.style.overflow="";}} onClick={e=>{if(e.target===e.currentTarget)close();}}>
+   <div className="fn-menu-top"><BrandLogo onClick={close}/><button autoFocus onClick={close} aria-label={text.close}>×</button></div>
+   <nav>{links.map((href,i)=><Link key={href} href={href} onClick={close}><small>0{i+1}</small>{text.links[i]}<span>↗</span></Link>)}</nav>
+   <div className="fn-menu-categories"><p className="fn-kicker">{text.categories}</p>{departments.map(d=><Link key={d.slug} href={`/catalogue/?dept=${encodeURIComponent(d.slug)}`} onClick={close}>{catalogueLabel(d.name,locale)} ↗</Link>)}</div>
+   <div className="fn-menu-preferences"><ThemeToggle compact/><LanguageSwitcher /></div>
+  </dialog>
+ </>;
 }
