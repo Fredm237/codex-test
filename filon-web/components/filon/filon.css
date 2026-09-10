@@ -5098,7 +5098,7 @@ body:has(.p11-product-surface) .ed-header .ed-nav .ed-btn.dark {
   background: linear-gradient(90deg, transparent, rgba(255, 248, 239, 0.16) 18%, rgba(255, 248, 239, 0.16) 82%, transparent);
 }
 .p19-product-surface::after {
-  content: "03";
+  content: "PRODUIT";
   position: absolute;
   z-index: -1;
   right: max(3vw, 24px);
@@ -5446,7 +5446,7 @@ body:has(.p11-product-surface) .ed-header .ed-nav .ed-btn.dark {
   --line-2: rgba(255, 248, 239, 0.15);
 }
 .p19-offer-surface::after {
-  content: "OFFER";
+  content: "OFFRE";
   right: -0.05em;
   top: 22%;
   font-size: clamp(130px, 25vw, 420px);
@@ -5494,7 +5494,7 @@ body:has(.p11-product-surface) .ed-header .ed-nav .ed-btn.dark {
   animation: p19-dossier-arrival 700ms 120ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 .p19-offer-dossier::before {
-  content: "FILON / IDENTITY · OBSERVED OFFER";
+  content: "LE PRODUIT · L’OFFRE";
   display: block;
   margin: 2px 0 clamp(34px, 5vw, 62px);
   color: #ff8b68;
@@ -5742,7 +5742,12 @@ body:has(.p11-product-surface) .ed-header .ed-nav .ed-btn.dark {
 
 @media (max-width: 560px) {
   .p19-offer-media { width: calc(100% - 28px); aspect-ratio: 1 !important; }
-  .p19-offer-title { max-width: 100%; font-size: clamp(40px, 13.4vw, 62px) !important; }
+  .p19-offer-title {
+    max-width: 100%;
+    font-size: clamp(36px, 11.5vw, 50px) !important;
+    line-height: 0.96 !important;
+    overflow-wrap: anywhere;
+  }
   .p19-offer-headline { align-items: flex-start !important; flex-direction: column; gap: 10px !important; }
   .p19-price-landscape-head { align-items: start; flex-direction: column; gap: 10px; }
   .p19-price-landscape-stage { height: 190px; }
@@ -5811,7 +5816,7 @@ body:has(.p19-decision-surface) .ed-header .ed-nav .ed-btn.dark {
   background: linear-gradient(90deg, transparent, rgba(255, 248, 239, 0.15) 16%, rgba(255, 248, 239, 0.15) 84%, transparent);
 }
 .p19-decision-hero::after {
-  content: "DECISION";
+  content: "DÉCISION";
   position: absolute;
   left: max(3vw, 22px);
   bottom: 1.5vw;
@@ -6223,7 +6228,7 @@ body:has(.fx-continuity[data-experience-chapter="proof"]) .ed-header .ed-nav .ed
     linear-gradient(126deg, #100d0b 0%, #241713 58%, #15100d 100%);
 }
 .fx-continuity[data-experience-chapter="proof"] .ed-content-hero::before {
-  content: "FILON / PROOF";
+  content: "CE QUI EST VÉRIFIÉ";
   position: absolute;
   left: max(22px, calc((100vw - 1240px) / 2));
   top: clamp(108px, 12vw, 150px);
@@ -6234,7 +6239,7 @@ body:has(.fx-continuity[data-experience-chapter="proof"]) .ed-header .ed-nav .ed
   letter-spacing: 0.18em;
 }
 .fx-continuity[data-experience-chapter="proof"] .ed-content-hero::after {
-  content: "PROOF";
+  content: "PREUVE";
   position: absolute;
   right: -0.08em;
   bottom: -0.12em;
@@ -6497,7 +6502,7 @@ body:has(.fx-continuity[data-experience-chapter="decision"] .ed-content-hero) .e
     linear-gradient(128deg, #17100d 0%, #321d16 57%, #1b120e 100%);
 }
 .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero::before {
-  content: "FILON / DECISION";
+  content: "AVANT DE CHOISIR";
   position: absolute;
   left: max(22px, calc((100vw - 1240px) / 2));
   top: clamp(110px, 12vw, 154px);
@@ -6508,7 +6513,7 @@ body:has(.fx-continuity[data-experience-chapter="decision"] .ed-content-hero) .e
   letter-spacing: 0.18em;
 }
 .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero::after {
-  content: "CHECK";
+  content: "CHOISIR";
   position: absolute;
   right: -0.08em;
   bottom: -0.12em;
@@ -6560,7 +6565,7 @@ body:has(.fx-continuity[data-experience-chapter="decision"] .ed-content-hero) .e
   transform: translateY(-44%) !important;
 }
 .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-photo::after {
-  content: "OBSERVED OBJECT";
+  content: "PRODUIT PRÉSENTÉ";
   position: absolute;
   right: 16px;
   bottom: 16px;
@@ -6794,7 +6799,7 @@ body:has(.p19-market-merchants, .p19-category-market) .ed-header .ed-nav .ed-btn
   background-size: auto, 64px 64px, 64px 64px, auto;
 }
 .p19-market-merchants .ed-content-hero::before {
-  content: "FILON / MARKET · MERCHANTS";
+  content: "LES MARCHANDS SUIVIS";
   position: absolute;
   left: max(22px, calc((100vw - 1240px) / 2));
   top: clamp(112px, 12vw, 154px);
@@ -6803,7 +6808,7 @@ body:has(.p19-market-merchants, .p19-category-market) .ed-header .ed-nav .ed-btn
   letter-spacing: 0.18em;
 }
 .p19-market-merchants .ed-content-hero::after {
-  content: "INDEX";
+  content: "OFFRES";
   position: absolute;
   right: -0.06em;
   bottom: -0.16em;
@@ -7137,7 +7142,7 @@ body:has(.fx-continuity[data-experience-chapter="signal"] .ed-article-hero) .ed-
     linear-gradient(132deg, #211511 0%, #43241b 62%, #241611 100%);
 }
 .fx-continuity[data-experience-chapter="signal"] .ed-content-hero::before {
-  content: "FILON / SIGNAL";
+  content: "CE QUI COMPTE";
   position: absolute;
   left: max(22px, calc((100vw - 1240px) / 2));
   top: clamp(112px, 12vw, 156px);
@@ -7146,7 +7151,7 @@ body:has(.fx-continuity[data-experience-chapter="signal"] .ed-article-hero) .ed-
   letter-spacing: 0.18em;
 }
 .fx-continuity[data-experience-chapter="signal"] .ed-content-hero::after {
-  content: "READ";
+  content: "COMPRENDRE";
   position: absolute;
   right: -0.06em;
   bottom: -0.15em;
@@ -7427,7 +7432,7 @@ body:has(.fx-continuity[data-experience-chapter="signal"] .ed-article-hero) .ed-
     linear-gradient(132deg, #211511 0%, #43241b 62%, #241611 100%);
 }
 .fx-continuity[data-experience-chapter="signal"] .ed-article-hero::before {
-  content: "FILON / FIELD NOTE";
+  content: "GUIDE FILON";
   position: absolute;
   left: max(22px, calc((100vw - 900px) / 2));
   top: clamp(112px, 12vw, 156px);
