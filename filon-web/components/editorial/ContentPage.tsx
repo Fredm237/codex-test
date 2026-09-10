@@ -1,10 +1,9 @@
 "use client";
+import Link from "next/link";
 
 import type { ReactNode } from "react";
 import { motion } from "framer-motion";
 import { JsonLd, breadcrumbSchema } from "@/lib/seo";
-import { Reveal } from "./Reveal";
-import { LifeVideo } from "./LifeVideo";
 import { useLocale } from "@/lib/i18n";
 
 export function ContentHero({
@@ -26,33 +25,11 @@ export function ContentHero({
     <section className="ed-content-hero">
       <JsonLd data={breadcrumbSchema([{ name: "Accueil", path: "/" }, ...breadcrumb])} />
       <div className="ed-wrap">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-        >
-          <span className="eyebrow">{eyebrow}</span>
-          <h1 style={{ marginTop: 18 }}>{title}</h1>
-          <p className="intro">{intro}</p>
-        </motion.div>
-        {video && photo ? (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <LifeVideo src={video} poster={photo} />
-          </motion.div>
-        ) : photo ? (
-          <motion.div
-            className="ed-content-photo"
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.3, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <img src={photo} alt="" loading="lazy" />
-          </motion.div>
-        ) : null}
+        <nav className="fn-content-crumb" aria-label="Fil d’Ariane"><Link href="/">FILON</Link>{breadcrumb.map((item,i)=><span key={item.path}> / {i===breadcrumb.length-1 ? <span aria-current="page">{item.name}</span> : <a href={item.path}>{item.name}</a>}</span>)}</nav>
+        <div className={`fn-content-grid${photo ? "" : " is-text"}`}>
+          <div><span className="eyebrow">{eyebrow}</span><h1>{title}</h1><p className="intro">{intro}</p></div>
+          {photo ? <figure className="fn-content-image fn-spatial-card"><img src={photo} alt="" loading="lazy" /></figure> : null}
+        </div>
       </div>
     </section>
   );
