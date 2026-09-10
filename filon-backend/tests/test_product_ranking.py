@@ -54,13 +54,29 @@ def test_constraint_status_can_never_be_reintroduced(eligibility: str) -> None:
     assert result.candidates[0].status == "INELIGIBLE"
 
 
-def test_unknown_or_unsourced_dimension_abstains() -> None:
+def test_unknown_required_or_unsourced_dimension_abstains() -> None:
     unknown = _candidate(need_fit=ScoreFact("unknown"))
     unsourced = _candidate("variant:102", quality=ScoreFact("known", "0.7"))
     result = rank_products(RankingRequest("ctx", "smartphones"), [unknown, unsourced])
     assert result.outcome == "ABSTAINED"
     assert result.ranked_entity_refs == ()
     assert {item.status for item in result.candidates} == {"UNRANKABLE"}
+
+
+def test_optional_unknowns_produce_disclosed_evidence_scoped_ranking() -> None:
+    candidate = _candidate(
+        quality=ScoreFact("unknown"),
+        value=ScoreFact("unknown"),
+    )
+    result = rank_products(RankingRequest("ctx", "smartphones"), [candidate])
+    assert result.schema_version == "product-ranking/v2"
+    assert result.outcome == "RANKED_PRODUCTS"
+    assert result.candidates[0].utility == "0.822222"
+    assert result.candidates[0].reason_codes == (
+        "evidence_scoped_partial_ranking",
+        "dimension_unknown:product_quality",
+        "dimension_unknown:value",
+    )
 
 
 def test_vertical_weights_are_not_universal() -> None:

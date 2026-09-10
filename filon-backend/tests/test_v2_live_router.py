@@ -40,7 +40,67 @@ def _settings(mode: str):
         v2_supported_countries_list=["BE"],
         v2_supported_decision_types_list=["purchase_advice"],
         v2_max_data_age_seconds=300,
+        v2_only_public_enabled=mode == "public",
     )
+
+
+@pytest.mark.asyncio
+async def test_v2_only_route_serves_factual_options_without_core_or_cohort(
+    monkeypatch,
+) -> None:
+    _session, reader, recorder, inspector = _install_promoted_runtime(
+        monkeypatch,
+        mode="public",
+    )
+    reader.return_value = _factual_payload()
+
+    result = await live_router.route_v2_only_response(
+        query="un smartphone 128 Go",
+        budget=700,
+        country="be",
+        locale="fr",
+        surface="advise_stream",
+    )
+
+    assert result.source == "v2"
+    assert result.mode == "public_v2_only"
+    assert result.reason_code == "v2_factual_options"
+    assert result.response["real"] is True
+    assert result.response["cards"][0]["offer_id"] == 77
+    inspector.assert_awaited_once()
+    reader.assert_awaited_once()
+    recorder.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_v2_only_route_abstains_instead_of_falling_back_to_core(
+    monkeypatch,
+) -> None:
+    _session, reader, recorder, _inspector = _install_promoted_runtime(
+        monkeypatch,
+        mode="public",
+    )
+    reader.side_effect = RuntimeError("reader unavailable")
+
+    result = await live_router.route_v2_only_response(
+        query="un appareil introuvable",
+        budget=None,
+        country="be",
+        locale="fr",
+        surface="advise_stream",
+    )
+
+    assert result.source == "v2"
+    assert result.reason_code == "runtime_unavailable"
+    assert result.response == {
+        "usage": "un appareil introuvable",
+        "offers": 0,
+        "cards": [],
+        "real": False,
+        "currency": None,
+        "country": "be",
+    }
+    recorder.assert_not_awaited()
 
 
 def _authorization(mode: str) -> V2RuntimeAuthorization:

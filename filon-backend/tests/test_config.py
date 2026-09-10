@@ -208,6 +208,7 @@ def test_rate_limit_remains_local_without_an_explicit_opt_in() -> None:
 def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> None:
     settings = Settings(_env_file=None, env="test")
     assert settings.v2_chain_mode == "off"
+    assert settings.v2_only_public_enabled is False
     assert settings.v2_canary_reader_enabled is False
     assert settings.v2_public_reader_enabled is False
     assert settings.v2_promotion_receipt_evaluation_id is None
@@ -592,6 +593,18 @@ def test_product_graph_shadow_is_off_and_depends_on_observation_provenance() -> 
         evidence_engine_shadow_enabled=True,
     )
     assert evidence_enabled.evidence_engine_shadow_enabled is True
+
+
+def test_v2_only_public_switch_requires_the_public_runtime() -> None:
+    with pytest.raises(
+        ValueError,
+        match="V2_ONLY_PUBLIC_ENABLED requires V2_CHAIN_MODE=public",
+    ):
+        Settings(
+            _env_file=None,
+            env="test",
+            v2_only_public_enabled=True,
+        )
 
 
 def test_atomic_v2_shadow_mode_enables_every_writer_and_no_reader() -> None:
