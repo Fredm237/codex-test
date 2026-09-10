@@ -41,7 +41,7 @@ assert.ok(homeJourney.includes('data-direction="industrial"'), "la home doit res
 assert.doesNotMatch(homeJourney, /requestedDirection|HomeSignatureVolume/, "aucune variante de laboratoire ne doit survivre dans la home finale");
 assert.doesNotMatch(productVolume, /world="grand-receipt"/, "le dossier produit doit conserver sa caméra d'identité dédiée");
 assert.ok(signatureCanvas.includes("@react-three/fiber"), "la primitive finale doit rester une vraie scène R3F");
-const spriteFrames = readdirSync(join(root, "public/cinematic/filon-scroll-story/desktop-v6-sprites4")).filter((name) => /^\d{4}\.webp$/.test(name));
+const spriteFrames = readdirSync(join(root, "public/cinematic/filon-scroll-story/desktop-v7-sprites4")).filter((name) => /^\d{4}\.webp$/.test(name));
 assert.equal(spriteFrames.length, 91, "les 363 frames du film doivent être regroupées dans 91 planches bornées");
 assert.ok(homeJourney.includes("<CinematicSequenceRenderer"), "la home doit lire le film image par image sur le canvas");
 assert.ok(homeJourney.includes("frameProgress={progress}"), "le scroll doit sélectionner directement la frame du film");

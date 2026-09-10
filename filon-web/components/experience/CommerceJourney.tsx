@@ -109,10 +109,10 @@ const INDUSTRIAL_COPY = {
 } as const;
 
 const INDUSTRIAL_SEQUENCE = {
-  frameBase: "/cinematic/filon-scroll-story/desktop-v6-sprites4",
+  frameBase: "/cinematic/filon-scroll-story/desktop-v7-sprites4",
   frames: 363,
-  poster: "/cinematic/filon-scroll-story/desktop-v6-sprites4/poster-first.webp",
-  finalPoster: "/cinematic/filon-scroll-story/desktop-v6-sprites4/poster-final.webp",
+  poster: "/cinematic/filon-scroll-story/desktop-v7-sprites4/poster-first.webp",
+  finalPoster: "/cinematic/filon-scroll-story/desktop-v7-sprites4/poster-final.webp",
   scrollHeightVh: 390,
   frameStride: 1,
   sprite: {
