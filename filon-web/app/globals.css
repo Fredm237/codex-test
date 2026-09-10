@@ -1,156 +1,26 @@
 @import "tailwindcss";
 @import "./tokens.css";
 @import "./primitives.css";
-
-/* ============================================================
-   FILON — Base
-   Les valeurs vivent dans tokens.css ; ce fichier ne contient
-   que la remise à zéro, les réglages typographiques de la page
-   et les quelques utilitaires transversaux.
-   ============================================================ */
-
-:root {
-  --sans: var(--fx-font-body);
-  --serif: var(--fx-font-display);
-  --mono: "SF Mono", ui-monospace, "Geist Mono", Menlo, monospace;
-  color-scheme: light;
-}
-:root[data-tone="dark"] { color-scheme: dark; }
-:root[data-tone="light"] { color-scheme: light; }
-
-@theme inline {
-  --color-paper: var(--fx-bg);
-  --color-card: var(--fx-surface);
-  --color-ink: var(--fx-text);
-  --color-dim: var(--fx-text-secondary);
-  --color-accent: var(--fx-brand);
-  --color-gain: var(--fx-gain);
-  --font-sans: var(--sans);
-  --font-serif: var(--serif);
-  --font-mono: var(--mono);
-}
-
-* { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
-@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-
-body {
-  margin: 0;
-  background: var(--fx-bg);
-  color: var(--fx-text);
-  font-family: var(--sans);
-  font-size: var(--fx-text-base);
-  line-height: var(--fx-leading-normal);
-  letter-spacing: var(--fx-tracking-normal);
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  /* `clip` et non `hidden` : les deux empêchent le débordement horizontal,
-     mais `hidden` fait du body un conteneur de défilement, ce qui casse
-     `position: sticky` pour TOUS les descendants. La séquence pilotée au
-     défilement en dépend — le symptôme était une image qui se décollait et
-     du texte qui sortait du cadre. */
-  overflow-x: clip;
-}
-
-/* La sélection est une flaque de spot : ambre plein, texte sombre. */
-::selection { background: var(--fx-gold-500); color: var(--fx-ink-1000); }
-a { color: inherit; text-decoration: none; }
-
-/* Les titres sont la même grotesque que le corps, en graisse légère et
-   très resserrée. Sur fond sombre une graisse lourde s'empâte : c'est
-   l'échelle qui porte, pas le gras. */
-h1, h2, h3 {
-  margin: 0;
-  font-family: var(--serif);
-  font-weight: 300;
-  line-height: var(--fx-leading-tight);
-  text-wrap: balance;
-  letter-spacing: var(--fx-tracking-display);
-  color: var(--fx-text-strong);
-}
-h4, h5, h6 { font-family: var(--serif); font-weight: 400; letter-spacing: var(--fx-tracking-tight); }
-p { text-wrap: pretty; }
-img, video { max-width: 100%; }
-
-/* L'anneau de focus est doré et jamais retiré : c'est la seule
-   façon dont une navigation au clavier reste lisible. */
-:focus-visible {
-  outline: 2px solid var(--fx-focus);
-  outline-offset: 3px;
-  border-radius: var(--fx-radius-xs);
-}
-
-/* Utilitaires typographiques.
-   `.serif` conserve son nom — 86 fichiers l'appellent — mais désigne
-   désormais la grotesque de titrage. Seul `.it` reste une vraie serif :
-   Outfit n'a pas d'italique, et l'éditorial en a besoin. */
-.serif { font-family: var(--serif); letter-spacing: var(--fx-tracking-display); }
-/* L'italique serif était la signature de l'ancienne référence. Elle est
-   retirée : la marque observée n'a ni serif ni italique. L'emphase se
-   fait par la graisse et la lumière — un cran plus léger que ce qui
-   l'entoure, posé dans l'ambre. */
-.it,
-h1 em, h2 em, .fx-display em, .fx-hero-title em {
-  font-family: var(--serif);
-  font-style: normal;
-  font-weight: 200;
-  letter-spacing: var(--fx-tracking-display);
-  color: var(--fx-brand);
-}
-.mono { font-family: var(--mono); font-feature-settings: "tnum"; }
-
-/* Le surtitre est la seule majuscule du système. Très interlettré,
-   discret : c'est une légende de plan, pas un titre. */
-.eyebrow {
-  font-size: var(--fx-text-xs);
-  font-weight: 500;
-  letter-spacing: var(--fx-tracking-wide);
-  text-transform: uppercase;
-  color: var(--fx-text-muted);
-}
-
-/* Le mot-signe. Bas de casse, point final — la forme lue chez
-   w.wearebrand, transposée à FILON. */
-.wordmark {
-  font-family: var(--serif);
-  font-weight: 400;
-  text-transform: lowercase;
-  letter-spacing: -0.03em;
-  color: var(--fx-text-strong);
-}
-.wordmark::after { content: "."; color: var(--fx-brand); }
-
-/* Flaque de lumière : le halo ambré posé DERRIÈRE un bloc, jamais
-   dessus. C'est le seul effet lumineux autorisé. */
-.pool { position: relative; isolation: isolate; }
-.pool::before {
-  content: "";
-  position: absolute;
-  inset: -20% -10% auto;
-  height: 70%;
-  z-index: -1;
-  background: radial-gradient(60% 100% at 50% 0%, rgba(200, 149, 68, 0.16), transparent 70%);
-  pointer-events: none;
-}
-/* Reliquat de l'ancienne identité : le texte en dégradé bleu→turquoise
-   devient un aplat de marque. Conservé le temps que les composants
-   migrent, pour ne pas laisser de texte transparent derrière. */
-.wave-text { color: var(--fx-brand); background: none; -webkit-background-clip: border-box; background-clip: border-box; }
-
-/* Apparition au scroll — une seule courbe, respect du réglage système */
-.rv {
-  opacity: 0;
-  transform: translateY(22px);
-  transition:
-    opacity var(--fx-duration-reveal) var(--fx-ease-out),
-    transform var(--fx-duration-reveal) var(--fx-ease-out);
-}
-.rv.in { opacity: 1; transform: none; }
-@media (prefers-reduced-motion: reduce) {
-  .rv { opacity: 1 !important; transform: none !important; }
-  *, *::before, *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
+:root { --sans:var(--fx-font-body); --serif:var(--fx-font-display); --mono:ui-monospace,SFMono-Regular,Menlo,monospace; }
+@theme inline { --color-paper:var(--fx-bg); --color-card:var(--fx-surface); --color-ink:var(--fx-text); --color-dim:var(--fx-text-secondary); --color-accent:var(--fx-brand); --color-gain:var(--fx-gain); --font-sans:var(--sans); --font-serif:var(--serif); --font-mono:var(--mono); }
+* { box-sizing:border-box; }
+html { scroll-behavior:smooth; scroll-padding-top:100px; }
+body { margin:0; background:var(--fx-bg); color:var(--fx-text); font-family:var(--sans); font-size:16px; line-height:1.6; -webkit-font-smoothing:antialiased; }
+a { color:inherit; text-decoration:none; }
+button,input,select,textarea { font:inherit; }
+button,a,input,select,textarea { -webkit-tap-highlight-color:transparent; }
+button { cursor:pointer; }
+button:disabled { cursor:wait; opacity:.55; }
+h1,h2,h3,h4 { font-family:var(--serif); font-weight:500; line-height:1.08; letter-spacing:-.045em; color:var(--fx-text-strong); margin:0; text-wrap:balance; }
+h1 em,h2 em,.it { font-style:normal; color:var(--fx-brand); }
+p { text-wrap:pretty; }
+img,video,canvas { max-width:100%; }
+img { height:auto; }
+::selection { background:#ceff80; color:#11180b; }
+:focus-visible { outline:2px solid var(--fx-focus); outline-offset:5px; }
+.serif { font-family:var(--serif); }
+.mono { font-family:var(--mono); }
+.eyebrow { font-size:12px; letter-spacing:.12em; text-transform:uppercase; color:var(--fx-text-muted); }
+.wave-text { color:var(--fx-brand); }
+.rv { opacity:1; }
+@media(prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation-duration:.01ms!important; animation-iteration-count:1!important; transition-duration:.01ms!important; } }
