@@ -6,12 +6,13 @@ Révision candidate : `b5d3f7a9c1e4`
 
 ## Décision actuelle
 
-**P18F = INTEGRATED LOCALLY, NO-GO production.**
+**P18F = GO shadow production. P18G canary/public = NO-GO.**
 
-Le journal, le writer, l'export, l'effacement et le replay sont construits et
-qualifiés localement. La nouvelle tête Alembic est raccordée au runtime et à
-la configuration, mais elle n'est ni publiée, ni fusionnée, ni appliquée en
-production. Aucun flag, writer, lecteur ou Cron n'a été activé.
+Le journal, le writer, l'export, l'effacement et le replay sont construits,
+qualifiés et déployés. La migration `b5d3f7a9c1e4` est appliquée en production
+et le triplet borné dry-run, apply unique, replay identique est terminalement
+vert. Le secret HMAC est configuré dans Railway sans être consigné. Les flags,
+writers persistants, lecteurs publics et Cron Personal Commerce restent OFF.
 
 ## Contrat de persistance
 
@@ -102,14 +103,28 @@ distante décrite ci-dessous.
 Cette preuve ferme la gate CI et la preuve PostgreSQL jetable. Elle n'autorise
 ni fusion, ni migration de production, ni activation du writer ou d'un lecteur.
 
+## Qualification production
+
+- PR `#413` fusionnée au commit
+  `e48529bfde73c958f15ae00e1eaff953d382fedc` ;
+- CI `main` `33656618219` : quatre jobs terminaux `success` ;
+- déploiements Railway `c60a2674-ff63-4832-ac68-1c9335a288c7` puis
+  `d444580f-6977-4610-83eb-4797b1ddd087` : `success` ;
+- schéma production : `b5d3f7a9c1e4` ;
+- replay d'une source BUY/WAIT : `0 -> 1 -> 1` ligne entre dry-run, apply et
+  replay, identité inchangée ;
+- ligne produite : abstention sans consentement, sans sujet, sans contexte brut
+  et sans solution synthétique ;
+- configuration persistante : writer P18 OFF, chaîne V2 OFF, lecteurs canary et
+  public OFF.
+
+Le reçu détaillé est `PHASE_18_PRODUCTION_QUALIFICATION_REPORT.md`.
+
 ## Gates encore ouverts
 
-1. fusionner et appliquer la migration additive en production ;
-2. exécuter un seul replay borné `dry-run → apply → replay` avec writer
-   temporairement ON et tous les lecteurs OFF ;
-3. produire une preuve d'export/effacement sur cohorte consentante avant tout
+1. produire une preuve d'export/effacement sur cohorte consentante avant tout
    canary ;
-4. promouvoir la chaîne nécessaire de façon atomique et réversible.
+2. promouvoir la chaîne nécessaire de façon atomique et réversible.
 
-Ce document ne ferme donc pas Phase 18 et ne déclenche pas le mandat créatif
-post-Phase 18.
+P18F est fermé. Ce document ne ferme pas P18G et n'autorise aucun lecteur
+canary ou public.
