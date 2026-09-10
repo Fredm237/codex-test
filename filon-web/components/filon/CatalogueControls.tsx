@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 // Recherche et réglages du catalogue.
 //
@@ -70,11 +71,11 @@ export function CatalogueControls({
       {active.length > 0 && (
         <div className="fx-active-filters">
           {active.map(([key, label, to]) => (
-            <a className="fx-filter-pill" key={key} href={to}>
+            <Link className="fx-filter-pill" key={key} href={to}>
               {label}
               <span aria-hidden="true">×</span>
               <span className="fx-sr">{t("cat.remove")}</span>
-            </a>
+            </Link>
           ))}
         </div>
       )}
