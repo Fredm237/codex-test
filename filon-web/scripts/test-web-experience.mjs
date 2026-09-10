@@ -51,7 +51,7 @@ assert.ok(experience.includes("prefers-reduced-motion: reduce"), "la home doit d
 assert.ok(experience.includes("connection?.saveData"), "la home doit respecter l'économie de données");
 assert.ok(experience.includes("data-immersive-journey"), "le chapitre doit exposer sa frontière aux contrôles globaux");
 assert.ok(experience.includes("<CinematicSequenceRenderer"), "la home validée doit exécuter son film piloté par le scroll");
-assert.ok(experience.includes('frameBase: "/cinematic/filon-scroll-story/desktop-v6-sprites4"'), "la home doit employer la séquence finale qualifiée");
+assert.ok(experience.includes('frameBase: "/cinematic/filon-scroll-story/desktop-v7-sprites4"'), "la home doit employer la séquence finale qualifiée");
 assert.ok(experience.includes("framesPerSheet: 4"), "les 363 images doivent rester adressables individuellement depuis les planches de livraison");
 assert.doesNotMatch(experience, /FILON \/ PLAN|LABORATOIRE|P19[A-Z]/, "la home finale ne doit pas exposer le vocabulaire du laboratoire");
 assert.doesNotMatch(experience, /shotRail|\["CHAOS", "IDENTITÉ", "MARCHÉ", "DÉCISION"\]/, "la home finale doit faire vivre la séquence sans afficher son storyboard");

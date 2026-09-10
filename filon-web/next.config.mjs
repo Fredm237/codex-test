@@ -17,7 +17,7 @@ const nextConfig = {
       {
         // Le chemin versionné rend chaque frame immuable. Une future séquence
         // prendra un nouveau dossier au lieu d'invalider des centaines d'images.
-        source: "/cinematic/filon-scroll-story/desktop-v6-sprites4/:path*",
+        source: "/cinematic/filon-scroll-story/desktop-v7-sprites4/:path*",
         headers: [
           {
             key: "Cache-Control",
