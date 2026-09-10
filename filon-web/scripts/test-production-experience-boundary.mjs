@@ -37,6 +37,9 @@ const sequenceRenderer = readFileSync(join(root, "components/cinematic/Cinematic
 const filonCss = readFileSync(join(root, "components/filon/filon.css"), "utf8");
 const productContrast = readFileSync(join(root, "components/filon/product-contrast.css"), "utf8");
 const siteLayout = readFileSync(join(root, "app/(site)/layout.tsx"), "utf8");
+const decisionPanel = readFileSync(join(root, "components/filon/DecisionPanel.tsx"), "utf8");
+const verdict = readFileSync(join(root, "components/editorial/Verdict.tsx"), "utf8");
+const outfitStudio = readFileSync(join(root, "components/intelligence/OutfitStudio.tsx"), "utf8");
 
 assert.ok(productVolume.includes("./SignatureCommerceCanvas"), "le dossier produit doit consommer la même primitive de production");
 assert.ok(homeJourney.includes('data-direction="industrial"'), "la home doit rester sur la direction cinématique qualifiée");
@@ -57,6 +60,20 @@ assert.ok(webglContextLoss.includes('addEventListener("webglcontextlost"'), "une
 assert.ok(webglContextLoss.includes("event.preventDefault()"), "la perte du contexte GPU doit rester restaurable par le navigateur");
 assert.ok(webglContextLoss.includes('removeEventListener("webglcontextlost"'), "l'écouteur de perte GPU doit être nettoyé au démontage");
 assert.ok(productVolume.includes('onFailure={() => setState("fallback")}'), "le dossier produit doit revenir au DOM après une perte GPU");
+for (const laboratoryLabel of [
+  "IDENTITY", "OBSERVED OFFER", "FILON / PROOF", "FILON / DECISION",
+  "OBSERVED OBJECT", "MARKET · MERCHANTS", "FILON / SIGNAL", "FIELD NOTE",
+]) {
+  assert.doesNotMatch(
+    filonCss,
+    new RegExp(`content:\\s*[\"'](?:[^\"']*\\s)?${laboratoryLabel.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&")}`, "i"),
+    `le CSS public expose encore le label de laboratoire ${laboratoryLabel}`,
+  );
+}
+assert.match(filonCss, /@media \(max-width:\s*560px\)[\s\S]*?\.p19-offer-title\s*\{[\s\S]*?font-size:\s*clamp\(36px,\s*11\.5vw,\s*50px\)/, "le titre d'une offre doit rester composé sur mobile");
+assert.doesNotMatch(decisionPanel, /Confiance non calibrée|Vertrouwen niet gekalibreerd|Confidence not calibrated/, "la calibration interne ne doit pas devenir du jargon public");
+assert.match(decisionPanel, /Informations incomplètes/, "l'état prudent doit être expliqué en langage courant");
+assert.doesNotMatch(`${verdict}\n${outfitStudio}`, /confiance non calibrée|vertrouwen niet gekalibreerd|confidence (?:is )?not (?:yet )?calibrated/i, "le vocabulaire de calibration ne doit pas atteindre les surfaces publiques");
 
 const publicSource = sources.map(({ source }) => source).join("\n");
 for (const obsolete of [
