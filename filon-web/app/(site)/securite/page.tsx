@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, ProseBlock, InfoGrid, ClosingCta } from "@/components/editorial/ContentPage";
@@ -41,8 +42,8 @@ function SecuriteFR() {
           le total final doivent y être confirmés. Le parcours public actuel ne collecte pas de moyen de paiement.
         </p>
         <p>
-          Le détail complet des traitements figure dans notre <a href="/confidentialite">politique de confidentialité</a> et
-          notre <a href="/cookies">politique cookies</a>.
+          Le détail complet des traitements figure dans notre <Link href="/confidentialite">politique de confidentialité</Link> et
+          notre <Link href="/cookies">politique cookies</Link>.
         </p>
       </ProseBlock>
       <ProseBlock heading={<>Signaler une <span className="it">vulnérabilité</span>.</>}>
@@ -86,8 +87,8 @@ function SecuriteNL() {
           voorraad en eindtotaal. De huidige publieke route verzamelt geen betaalmiddel.
         </p>
         <p>
-          De volledige details van de verwerkingen staan in ons <a href="/confidentialite">privacybeleid</a> en ons{" "}
-          <a href="/cookies">cookiebeleid</a>.
+          De volledige details van de verwerkingen staan in ons <Link href="/confidentialite">privacybeleid</Link> en ons{" "}
+          <Link href="/cookies">cookiebeleid</Link>.
         </p>
       </ProseBlock>
       <ProseBlock heading={<>Een <span className="it">kwetsbaarheid</span> melden.</>}>
@@ -131,8 +132,8 @@ function SecuriteEN() {
           total there. The current public journey does not collect a payment method.
         </p>
         <p>
-          The full detail of the processing is set out in our <a href="/confidentialite">privacy policy</a> and our{" "}
-          <a href="/cookies">cookie policy</a>.
+          The full detail of the processing is set out in our <Link href="/confidentialite">privacy policy</Link> and our{" "}
+          <Link href="/cookies">cookie policy</Link>.
         </p>
       </ProseBlock>
       <ProseBlock heading={<>Report a <span className="it">vulnerability</span>.</>}>
