@@ -13,7 +13,7 @@ import marketStyles from "@/components/experience/search-market.module.css";
 const SL = {
   fr: {
     eyebrow: "Assistant d'achat",
-    h1Idle: "Que cherchez-vous ?", h1Again: "Un autre achat à analyser ?",
+    h1Idle: "Que cherchez‑vous ?", h1Again: "Un autre achat à analyser ?",
     placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
     searching: "FILON vérifie les offres disponibles…",
     searchingDetail: "Un résultat apparaîtra uniquement si le produit, le prix et le stock sont encore prouvés.",
