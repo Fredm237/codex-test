@@ -35,6 +35,8 @@ const signatureCanvas = readFileSync(join(root, "components/experience/signature
 const webglContextLoss = readFileSync(join(root, "components/experience/signature/WebglContextLoss.mjs"), "utf8");
 const sequenceRenderer = readFileSync(join(root, "components/cinematic/CinematicSequenceRenderer.tsx"), "utf8");
 const filonCss = readFileSync(join(root, "components/filon/filon.css"), "utf8");
+const productContrast = readFileSync(join(root, "components/filon/product-contrast.css"), "utf8");
+const siteLayout = readFileSync(join(root, "app/(site)/layout.tsx"), "utf8");
 
 assert.ok(productVolume.includes("./SignatureCommerceCanvas"), "le dossier produit doit consommer la même primitive de production");
 assert.ok(homeJourney.includes('data-direction="industrial"'), "la home doit rester sur la direction cinématique qualifiée");
@@ -82,15 +84,10 @@ assert.equal(lostEvent.defaultPrevented, true, "la restauration native du contex
 unbindContextLoss();
 contextTarget.dispatchEvent(new Event("webglcontextlost", { cancelable: true }));
 assert.equal(failureCount, 1, "le listener GPU doit disparaître avec le canvas");
-assert.match(
-  filonCss,
-  /\.p19-product-surface \.pg-offer\s*\{[^}]*background:/s,
-  "les offres du dossier sombre doivent imposer un fond lisible, indépendant du thème éditorial",
-);
-assert.match(
-  filonCss,
-  /\.p19-product-surface \.filon-decision-evidence li,[\s\S]*?color:\s*rgba\(255, 248, 239,/,
-  "les preuves de décision doivent conserver un contraste explicite sur le dossier sombre",
-);
+assert.ok(siteLayout.includes('product-contrast.css'), "la palette finale de contraste doit être chargée après la grammaire P19");
+assert.match(productContrast, /\.p19-offer-title,[\s\S]*?color:\s*#2a211c\s*!important/, "le titre d'une offre doit rester sombre sur le dossier clair");
+assert.match(productContrast, /\[data-experience-chapter="decision"\][\s\S]*?\.ed-content-hero h1\s*\{\s*color:\s*#2a211c/, "les chapitres Décision doivent conserver un titre lisible sur l'argile claire");
+assert.match(productContrast, /\.p19-cashback-gate li\s*\{\s*color:\s*#2a211c/, "les étapes Cashback doivent conserver un contraste explicite");
+assert.match(productContrast, /@media \(max-width:\s*760px\)[\s\S]*?\.ed-content-photo\s*\{[\s\S]*?position:\s*relative/, "la photo Décision doit passer sous le texte avant de pouvoir le masquer");
 
 console.log("✓ Frontière finale : laboratoire isolé, primitives 3D réutilisables, aucun label de démonstration public");

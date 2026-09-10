@@ -63,3 +63,51 @@
 .p19-price-landscape-table td { color: rgba(42, 33, 28, .76); }
 .p19-price-landscape-table th,
 .p19-price-landscape-table td { border-top-color: rgba(42, 33, 28, .1); }
+
+/* Les chapitres Décision réutilisent un ancien hero nocturne dont la
+   spécificité dépassait la palette claire finale. */
+.fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero .eyebrow {
+  color: rgba(42, 33, 28, .58);
+}
+.fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero h1 {
+  color: #2a211c;
+}
+.fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero .intro {
+  color: rgba(42, 33, 28, .72);
+}
+
+/* Cashback emploie sa propre liste de qualification : ses enfants doivent
+   suivre le contraste du hero argile et non l'ancienne palette noire. */
+.p19-cashback-gate li { color: #2a211c; }
+.p19-cashback-gate small { color: rgba(42, 33, 28, .56); }
+.p19-cashback-gate li + li { border-top-color: rgba(42, 33, 28, .14); }
+.p19-cashback-gate::before {
+  background: linear-gradient(#a94128, rgba(42, 33, 28, .18));
+}
+
+/* Dès la tablette étroite, la photo devient un plan à part entière sous le
+   texte. La conserver en absolu jusqu'à 620 px masquait le titre et le récit. */
+@media (max-width: 760px) {
+  .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero {
+    min-height: auto;
+    padding: 122px 0 82px;
+  }
+  .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero .ed-wrap {
+    padding-right: 0;
+  }
+  .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero h1 {
+    max-width: 100%;
+    font-size: clamp(43px, 10vw, 62px);
+  }
+  .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero .intro {
+    max-width: 40ch;
+  }
+  .fx-continuity[data-experience-chapter="decision"]:has(.ed-content-hero) .ed-content-hero .ed-content-photo {
+    position: relative;
+    top: auto;
+    right: auto;
+    width: min(100%, 380px);
+    margin-top: 42px;
+    transform: none !important;
+  }
+}
