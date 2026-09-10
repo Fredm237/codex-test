@@ -4,6 +4,10 @@
     {
       "source": "/api/advise/stream/",
       "destination": "https://web-production-c6842.up.railway.app/api/advise/stream"
+    },
+    {
+      "source": "/api/catalog/offers/",
+      "destination": "https://web-production-c6842.up.railway.app/api/catalog/offers"
     }
   ]
 }

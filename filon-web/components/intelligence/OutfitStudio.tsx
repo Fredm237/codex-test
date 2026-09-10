@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { API } from "@/lib/api";
 import { normalizeSupportedCurrency } from "@/lib/currency";
+import { discoverCatalogue, type CatalogDiscoveryItem } from "@/lib/catalog-discovery";
 import { useLocale, type Locale } from "@/lib/i18n";
 import "./outfit-studio.css";
 
@@ -42,14 +43,7 @@ type OutfitResponse = {
   solution: OutfitSolution;
 };
 
-type DiscoveryItem = {
-  id: number;
-  name: string;
-  brand?: string | null;
-  category?: string | null;
-  image?: string | null;
-  merchant: { name: string };
-};
+type DiscoveryItem = CatalogDiscoveryItem;
 
 const OFFER_TTL_MS = 72 * 60 * 60 * 1000;
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -483,22 +477,8 @@ export function OutfitStudio() {
     setFeedback(null);
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), ANALYSIS_TIMEOUT_MS);
-    const discoveryPromise = fetch(
-      `/api/catalog/discovery/?surface=outfit&q=${encodeURIComponent(trimmed)}`,
-      { cache: "no-store", signal: controller.signal },
-    ).then(async (response) => {
-      if (!response.ok) return [];
-      const body: unknown = await response.json();
-      if (!isRecord(body) || !Array.isArray(body.items)) return [];
-      return body.items.filter((item): item is DiscoveryItem => {
-        if (!isRecord(item) || !isRecord(item.merchant)) return false;
-        return Number.isInteger(item.id)
-          && (item.id as number) > 0
-          && typeof item.name === "string"
-          && item.name.trim().length > 0
-          && typeof item.merchant.name === "string";
-      }).slice(0, 8);
-    }).catch(() => [] as DiscoveryItem[]);
+    const discoveryPromise = discoverCatalogue(trimmed, controller.signal, "outfit")
+      .catch(() => [] as DiscoveryItem[]);
     try {
       const res = await fetch(`${API}/api/intelligence/outfit/analyse`, {
         method: "POST",
