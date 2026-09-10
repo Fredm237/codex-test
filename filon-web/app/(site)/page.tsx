@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { CommerceJourney } from "@/components/experience/CommerceJourney";
+import { getDepartments, getOffers, resolve } from "@/lib/catalogue";
 import { getProof } from "@/lib/proof";
 
 export const revalidate = 600;
@@ -15,6 +16,7 @@ export const metadata: Metadata = buildMetadata({
 // La preuve reste rendue côté serveur. La couche spatiale Phase 19 est différée,
 // adaptative et strictement facultative : le DOM qualifié demeure le parcours.
 export default async function HomePage() {
-  const proof = await getProof();
-  return <CommerceJourney proof={proof} />;
+  const departments = await getDepartments();
+  const [proof, offers] = await Promise.all([getProof(), getOffers({ per: "24" }, resolve(departments, {}))]);
+  return <CommerceJourney proof={proof} departments={departments} offers={offers?.items.slice(0, 4) ?? []} />;
 }
