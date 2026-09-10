@@ -14,9 +14,9 @@ export type VerdictData = {
 };
 
 const COPY = {
-  fr: { label: "Verdict FILON", notCalibrated: "confiance non calibrée", reading: "relevé", readings: "relevés", since: "sur", day: "jour", days: "jours", started: "suivi démarré récemment" },
-  nl: { label: "FILON-oordeel", notCalibrated: "vertrouwen niet gekalibreerd", reading: "meting", readings: "metingen", since: "over", day: "dag", days: "dagen", started: "tracking is onlangs gestart" },
-  en: { label: "FILON verdict", notCalibrated: "confidence not calibrated", reading: "reading", readings: "readings", since: "over", day: "day", days: "days", started: "tracking started recently" },
+  fr: { label: "L’avis FILON", notCalibrated: "informations encore incomplètes", reading: "relevé", readings: "relevés", since: "sur", day: "jour", days: "jours", started: "suivi démarré récemment" },
+  nl: { label: "Het advies van FILON", notCalibrated: "informatie nog onvolledig", reading: "meting", readings: "metingen", since: "over", day: "dag", days: "dagen", started: "tracking is onlangs gestart" },
+  en: { label: "FILON’s view", notCalibrated: "some information is still missing", reading: "reading", readings: "readings", since: "over", day: "day", days: "days", started: "tracking started recently" },
 } as const;
 
 const HEADLINES: Record<string, Record<Locale, string>> = {
