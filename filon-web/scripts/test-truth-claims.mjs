@@ -144,9 +144,9 @@ assert.ok(
   "Outfit Studio doit traduire l’unknown de confiance au lieu d’afficher sa clé brute",
 );
 for (const label of [
-  "La confiance n’est pas encore mesurée sur un jeu indépendant",
-  "Het vertrouwen is nog niet gemeten op een onafhankelijke dataset",
-  "Confidence has not yet been measured on an independent dataset",
+  "FILON manque encore de recul pour confirmer cette proposition",
+  "FILON heeft nog te weinig gegevens om dit voorstel te bevestigen",
+  "FILON does not yet have enough evidence to confirm this suggestion",
 ]) {
   assert.ok(outfitStudio.includes(label), `traduction de confiance manquante : ${label}`);
 }

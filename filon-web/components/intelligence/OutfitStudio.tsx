@@ -398,7 +398,7 @@ function humanize(key: string, locale: Locale): string {
     occasion_not_specified: { fr: "L’occasion n’a pas été précisée", nl: "De gelegenheid is niet opgegeven", en: "The occasion was not specified" },
     occasion_not_verified: { fr: "La compatibilité avec l’occasion n’est pas vérifiée", nl: "De compatibiliteit met de gelegenheid is niet geverifieerd", en: "Compatibility with the occasion is not verified" },
     style_compatibility_not_verified: { fr: "La compatibilité de style et de coupe n’est pas vérifiée", nl: "De stijl- en pasvormcompatibiliteit is niet geverifieerd", en: "Style and fit compatibility are not verified" },
-    confidence_not_calibrated: { fr: "La confiance n’est pas encore mesurée sur un jeu indépendant", nl: "Het vertrouwen is nog niet gemeten op een onafhankelijke dataset", en: "Confidence has not yet been measured on an independent dataset" },
+    confidence_not_calibrated: { fr: "FILON manque encore de recul pour confirmer cette proposition", nl: "FILON heeft nog te weinig gegevens om dit voorstel te bevestigen", en: "FILON does not yet have enough evidence to confirm this suggestion" },
     budget_unreachable: { fr: "Le budget connu ne permet pas une proposition vérifiable", nl: "Het bekende budget laat geen verifieerbaar voorstel toe", en: "The known budget does not allow a verifiable proposal" },
     no_verified_base: { fr: "Aucune pièce principale vérifiable n’est disponible", nl: "Er is geen verifieerbaar hoofditem beschikbaar", en: "No verifiable main piece is available" },
     no_verified_requested_item: { fr: "Aucune offre ne prouve la pièce explicitement demandée", nl: "Geen aanbieding bewijst het expliciet gevraagde item", en: "No offer proves that the explicitly requested item is available" },
