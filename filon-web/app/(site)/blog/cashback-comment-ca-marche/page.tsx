@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata, articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo";
 import { Localized } from "@/components/editorial/Localized";
@@ -98,9 +99,9 @@ function ArticleFR() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Voir les offres disponibles
-          </a>
+          </Link>
         </p>
       </div>
     </article>
@@ -194,9 +195,9 @@ function ArticleNL() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Bekijk beschikbare aanbiedingen
-          </a>
+          </Link>
         </p>
       </div>
     </article>
@@ -290,9 +291,9 @@ function ArticleEN() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             See available offers
-          </a>
+          </Link>
         </p>
       </div>
     </article>

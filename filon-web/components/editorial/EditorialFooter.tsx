@@ -1,8 +1,8 @@
 "use client";
+import Link from "next/link";
 
 import { site } from "@/lib/site";
 import { Newsletter } from "./Forms";
-import { BrandLogo } from "./Brand";
 import { useLocale } from "@/lib/i18n";
 
 // Libellés NL par href (FR reste la valeur d'origine des tableaux LINKS/LEGAL).
@@ -124,40 +124,15 @@ export function EditorialFooter() {
   const lbl = (href: string, fr: string) =>
     locale === "nl" ? NL_LABELS[href] ?? fr : locale === "en" ? EN_LABELS[href] ?? fr : fr;
   return (
-    <footer className="ed-footer p19-global-footer" data-experience-exit="continuation" data-sticky-cta-avoid>
-      <div className="ed-wrap">
-        <span className="p19-footer-coordinate" aria-hidden="true">{x.coordinate}</span>
-        <div className="ed-newsblock">
-          <div>
-            <h3 style={{ fontFamily: "var(--serif)", fontVariationSettings: '"opsz" 40', fontSize: 24, letterSpacing: "-0.01em", color: "var(--fx-text)" }}>
-              {x.newsH}
-            </h3>
-            <p style={{ color: "var(--fx-text-secondary)", fontSize: 14.5, marginTop: 6 }}>
-              {x.newsP}
-            </p>
-          </div>
-          <Newsletter />
+    <footer className="fn-footer" data-sticky-cta-avoid>
+      <div className="fn-footer-inner">
+        <div className="fn-footer-top">
+          <div><h3>{x.newsH}</h3><p>{x.newsP}</p><Newsletter /></div>
+          <nav className="fn-footer-links" aria-label="FILON">{LINKS.map(l=><Link key={l.href} href={l.href}>{lbl(l.href,l.label)}</Link>)}</nav>
         </div>
-        <div className="ed-foot">
-          <BrandLogo as="span" markSize={26} />
-          <div className="ed-foot-links">
-            {LINKS.map((l) => (
-              <a key={l.href} href={l.href}>{lbl(l.href, l.label)}</a>
-            ))}
-          </div>
-          <span className="cr">© {new Date().getFullYear()} · {x.designed} {site.city}</span>
-        </div>
-        <div className="ed-foot-links" style={{ marginTop: 18 }}>
-          {LEGAL.map((l) => (
-            <a key={l.href} href={l.href} style={{ fontSize: 12.5, color: "var(--ink-3)" }}>
-              {lbl(l.href, l.label)}
-            </a>
-          ))}
-        </div>
-        <p className="ed-disc">
-          {x.disc1}{" "}
-          {x.disc2} (<a href="/transparence" style={{ color: "inherit", textDecoration: "underline" }}>{x.more}</a>).
-        </p>
+        <div className="fn-footer-word" aria-hidden="true">filon<span>↗</span></div>
+        <div className="fn-footer-base"><span>© {new Date().getFullYear()} FILON · {site.city}</span><nav className="fn-footer-legal">{LEGAL.map(l=><Link key={l.href} href={l.href}>{lbl(l.href,l.label)}</Link>)}</nav></div>
+        <p className="fn-footer-note">{x.disc1} {x.disc2} (<Link href="/transparence/">{x.more}</Link>).</p>
       </div>
     </footer>
   );

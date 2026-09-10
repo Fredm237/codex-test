@@ -16,7 +16,7 @@ function applyTone(tone: Tone) {
   const root = document.documentElement;
   root.dataset.tone = tone;
   root.style.colorScheme = tone;
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tone === "light" ? "#e7e2d8" : "#0e0c0b");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", tone === "light" ? "#f7f8fa" : "#090c14");
   window.localStorage.setItem("filon-tone", tone);
 }
 

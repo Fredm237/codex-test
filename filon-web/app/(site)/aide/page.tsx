@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero, InfoGrid, ProseBlock, ClosingCta } from "@/components/editorial/ContentPage";
@@ -38,12 +39,12 @@ function AideFR() {
 
       <ProseBlock heading={<>Vous ne trouvez pas ? <span className="it">Écrivez-nous</span>.</>} alt>
         <p>
-          La plupart des réponses se trouvent dans notre <a href="/faq">FAQ</a> et sur la page{" "}
-          <a href="/comment-ca-marche">Comment ça marche</a>. Pour tout le reste, notre équipe répond directement.
+          La plupart des réponses se trouvent dans notre <Link href="/faq">FAQ</Link> et sur la page{" "}
+          <Link href="/comment-ca-marche">Comment ça marche</Link>. Pour tout le reste, notre équipe répond directement.
         </p>
         <p>
           Contactez-nous à <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a> ou via le{" "}
-          <a href="/contact">formulaire de contact</a>. Nous revenons vers vous rapidement, en français ou en néerlandais.
+          <Link href="/contact">formulaire de contact</Link>. Nous revenons vers vous rapidement, en français ou en néerlandais.
         </p>
       </ProseBlock>
 
@@ -79,12 +80,12 @@ function AideNL() {
 
       <ProseBlock heading={<>Vind je het niet ? <span className="it">Schrijf ons</span>.</>} alt>
         <p>
-          De meeste antwoorden vind je in onze <a href="/faq">FAQ</a> en op de pagina{" "}
-          <a href="/comment-ca-marche">Hoe het werkt</a>. Voor al de rest antwoordt ons team rechtstreeks.
+          De meeste antwoorden vind je in onze <Link href="/faq">FAQ</Link> en op de pagina{" "}
+          <Link href="/comment-ca-marche">Hoe het werkt</Link>. Voor al de rest antwoordt ons team rechtstreeks.
         </p>
         <p>
           Contacteer ons op <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a> of via het{" "}
-          <a href="/contact">contactformulier</a>. We komen snel bij je terug, in het Frans of het Nederlands.
+          <Link href="/contact">contactformulier</Link>. We komen snel bij je terug, in het Frans of het Nederlands.
         </p>
       </ProseBlock>
 
@@ -120,12 +121,12 @@ function AideEN() {
 
       <ProseBlock heading={<>Can&apos;t find it ? <span className="it">Write to us</span>.</>} alt>
         <p>
-          Most answers are in our <a href="/faq">FAQ</a> and on the{" "}
-          <a href="/comment-ca-marche">How it works</a> page. For everything else, our team replies directly.
+          Most answers are in our <Link href="/faq">FAQ</Link> and on the{" "}
+          <Link href="/comment-ca-marche">How it works</Link> page. For everything else, our team replies directly.
         </p>
         <p>
           Contact us at <a href={`mailto:contact@${site.domain}`}>contact@{site.domain}</a> or via the{" "}
-          <a href="/contact">contact form</a>. We&apos;ll get back to you quickly, in French or Dutch.
+          <Link href="/contact">contact form</Link>. We&apos;ll get back to you quickly, in French or Dutch.
         </p>
       </ProseBlock>
 

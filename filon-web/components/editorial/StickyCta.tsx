@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
@@ -55,8 +56,8 @@ export function StickyCta() {
   }, [redundantOnSearch]);
   if (redundantOnSearch) return null;
   return (
-    <a className="ed-sticky-cta" href="/recherche" ref={ref}>
+    <Link className="ed-sticky-cta" href="/recherche" ref={ref}>
       {t("cta.try")}
-    </a>
+    </Link>
   );
 }

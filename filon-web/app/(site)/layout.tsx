@@ -1,13 +1,11 @@
 import "@/components/editorial/editorial.css";
 // Chargé après editorial.css : à spécificité égale, la refonte gagne.
 import "@/components/filon/filon.css";
-import "@/components/filon/product-contrast.css";
 import { EditorialNav } from "@/components/editorial/EditorialNav";
 import { EditorialFooter } from "@/components/editorial/EditorialFooter";
-import { StickyCta } from "@/components/editorial/StickyCta";
-import { SmoothScroll } from "@/components/editorial/SmoothScroll";
 import { SkipToContent } from "@/components/editorial/SkipToContent";
 import { MotionProvider } from "@/components/filon/MotionProvider";
+import { SpatialShell } from "@/components/next/SpatialShell";
 import { PageTransition } from "@/components/filon/PageTransition";
 import { ScrollToTop } from "@/components/filon/ScrollToTop";
 import { LocaleProvider } from "@/lib/i18n";
@@ -26,14 +24,14 @@ export default async function SiteLayout({ children }: { children: React.ReactNo
   return (
     <LocaleProvider>
       <MotionProvider>
-        <SmoothScroll />
         <SkipToContent />
         <EditorialNav departments={departments} />
+        <SpatialShell>
         <main id="main-content" tabIndex={-1}>
           <PageTransition>{children}</PageTransition>
         </main>
         <EditorialFooter />
-        <StickyCta />
+        </SpatialShell>
         <ScrollToTop />
       </MotionProvider>
     </LocaleProvider>

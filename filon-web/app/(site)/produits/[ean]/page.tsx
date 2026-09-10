@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata, JsonLd, siteUrl } from "@/lib/seo";
@@ -5,7 +6,7 @@ import { API } from "@/lib/api";
 import type { VerdictData } from "@/components/editorial/Verdict";
 import type { DecisionData } from "@/components/filon/DecisionPanel";
 import { ProductDetails } from "@/components/filon/ProductDetails";
-import { ProductIdentityVolume } from "@/components/experience/signature/ProductIdentityVolume";
+import { ProductStage } from "@/components/next/ProductStage";
 import { getImmersiveTextureDataUri } from "@/lib/immersive-proof";
 import { deriveProductComparison, money } from "@/components/filon/product-copy";
 
@@ -145,25 +146,11 @@ export default async function ProduitGroupePage({ params }: { params: Promise<{ 
       <section className="ed-band p11-product-surface p19-product-surface" data-product-evidence="exact">
         <div className="ed-wrap p19-product-wrap">
           <p className="p19-product-back">
-            <a href="/catalogue">← Retour au catalogue</a>
+            <Link href="/catalogue">← Retour au catalogue</Link>
           </p>
 
           <div className="pg-grid">
-            <div className="pg-media" data-product-transition-target>
-              {p.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.image} alt={p.name} />
-              ) : <span aria-hidden="true">—</span>}
-              {p.image && comparison ? (
-                <ProductIdentityVolume
-                  image={textureImage}
-                  name={[p.brand, p.name].filter(Boolean).join(" · ")}
-                  offerCount={comparison.offers.length}
-                />
-              ) : null}
-              <span className="p19-product-ean">EAN&nbsp;{p.ean}</span>
-              <span className="p19-product-axis" aria-hidden="true" />
-            </div>
+            <ProductStage image={p.image} texture={textureImage} name={p.name} ean={p.ean} />
 
             <ProductDetails p={p} />
           </div>

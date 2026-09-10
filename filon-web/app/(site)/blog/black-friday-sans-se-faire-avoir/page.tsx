@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata, articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo";
 import { Localized } from "@/components/editorial/Localized";
@@ -87,9 +88,9 @@ function ArticleFR() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Analyser une offre avec FILON
-          </a>
+          </Link>
         </p>
       </div>
     </article>
@@ -174,9 +175,9 @@ function ArticleNL() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Analyseer een aanbod met FILON
-          </a>
+          </Link>
         </p>
       </div>
     </article>
@@ -261,9 +262,9 @@ function ArticleEN() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Analyse an offer with FILON
-          </a>
+          </Link>
         </p>
       </div>
     </article>

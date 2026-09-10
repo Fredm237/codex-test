@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 // Navigation du catalogue : l'arborescence complète, dépliable.
 //
@@ -38,13 +39,13 @@ export function CatalogueNav({
     <nav className="fx-nav-tree" aria-label={t("cat.aisles")}>
       <p className="fx-nav-tree-title">{t("cat.aisles")}</p>
 
-      <a
+      <Link
         className="fx-nav-all"
         href="/catalogue/"
         aria-current={!activeDepartment ? "true" : undefined}
       >
         {t("cat.all")}
-      </a>
+      </Link>
 
       {departments.map((d) => {
         const openDepartment = activeDepartment?.slug === d.slug;
@@ -67,13 +68,13 @@ export function CatalogueNav({
 
             <ul className="fx-nav-cats">
               <li>
-                <a
+                <Link
                   className="fx-nav-link"
                   aria-current={openDepartment && !activeCategory ? "true" : undefined}
                   href={href({}, { dept: d.slug })}
                 >
                   {t("cat.allOf")} {catalogueLabel(d.name, locale)}
-                </a>
+                </Link>
               </li>
 
               {d.categories.map((c) => {
@@ -82,14 +83,14 @@ export function CatalogueNav({
                 if (subs.length === 0) {
                   return (
                     <li key={c.slug}>
-                      <a
+                      <Link
                         className="fx-nav-link"
                         aria-current={openCategory ? "true" : undefined}
                         href={href({}, { dept: d.slug, cat: c.slug })}
                       >
                         <span>{catalogueLabel(c.name, locale)}</span>
                         <span className="fx-nav-count">{count(c.count)}</span>
-                      </a>
+                      </Link>
                     </li>
                   );
                 }
@@ -112,17 +113,17 @@ export function CatalogueNav({
                       </summary>
                       <ul className="fx-nav-subs">
                         <li>
-                          <a
+                          <Link
                             className="fx-nav-link"
                             aria-current={openCategory && !activeSubcategory ? "true" : undefined}
                             href={href({}, { dept: d.slug, cat: c.slug })}
                           >
                             {t("cat.allOf")} {catalogueLabel(c.name, locale)}
-                          </a>
+                          </Link>
                         </li>
                         {subs.map((s) => (
                           <li key={s.name}>
-                            <a
+                            <Link
                               className="fx-nav-link"
                               aria-current={
                                 openCategory && activeSubcategory === s.name ? "true" : undefined
@@ -131,7 +132,7 @@ export function CatalogueNav({
                             >
                               <span>{catalogueLabel(s.name, locale)}</span>
                               <span className="fx-nav-count">{count(s.count)}</span>
-                            </a>
+                            </Link>
                           </li>
                         ))}
                       </ul>
@@ -147,9 +148,9 @@ export function CatalogueNav({
       {/* Les filtres en cours restent visibles dans la colonne : sur mobile
           l'arbre se referme, et il fallait pouvoir les retirer sans le rouvrir. */}
       {(query.q || query.brand || query.min || query.max) && (
-        <a className="fx-nav-reset" href={href({}, { dept: query.dept, cat: query.cat, sub: query.sub })}>
+        <Link className="fx-nav-reset" href={href({}, { dept: query.dept, cat: query.cat, sub: query.sub })}>
           {t("cat.clear")}
-        </a>
+        </Link>
       )}
     </nav>
   );

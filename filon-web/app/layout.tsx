@@ -12,7 +12,7 @@ const themeBootstrap = `(() => {
     const stored = localStorage.getItem("filon-tone");
     const tone = stored === "light" || stored === "dark"
       ? stored
-      : "light";
+      : "dark";
     const root = document.documentElement;
     root.dataset.tone = tone;
     root.style.colorScheme = tone;
@@ -29,7 +29,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#efe7da",
+  themeColor: "#090c14",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -38,7 +38,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="fr"
       className={`${fraunces.variable} ${outfit.variable} ${inter.variable}`}
       data-scroll-behavior="smooth"
-      data-tone="light"
+      data-tone="dark"
       suppressHydrationWarning
     >
       <head>

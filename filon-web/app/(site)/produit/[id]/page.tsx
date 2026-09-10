@@ -1,3 +1,4 @@
+import { ProductStage } from "@/components/next/ProductStage";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { buildMetadata } from "@/lib/seo";
@@ -88,12 +89,8 @@ export default async function ProduitPage({ params }: { params: Promise<{ id: st
         <p className="p19-product-back">
             <OfferBackLink />
         </p>
-        <div style={{ display: "grid", gap: 32, gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1.1fr)", alignItems: "start" }} className="pd-grid">
-          <div className="p19-offer-media" data-product-transition-target style={{ aspectRatio: "1 / 1", background: "#fff", borderRadius: 20, border: "1px solid var(--line-2)", display: "grid", placeItems: "center", overflow: "hidden" }}>
-            {o.image ? (
-              <img src={o.image} alt={o.name} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 22 }} />
-            ) : <span aria-hidden="true">—</span>}
-          </div>
+        <div className="pg-grid">
+          <ProductStage image={o.image} texture={null} name={o.name} ean={o.ean ?? undefined} />
           <OfferProductDetails offer={o} />
         </div>
       </div>

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata } from "@/lib/seo";
 import { ContentHero } from "@/components/editorial/ContentPage";
@@ -64,7 +65,7 @@ function MentionsFR() {
           <h2>Données personnelles</h2>
           <p>
             Le traitement des données personnelles est décrit dans notre{" "}
-            <a href="/confidentialite">politique de confidentialité</a>.
+            <Link href="/confidentialite">politique de confidentialité</Link>.
           </p>
 
           <h2>Responsabilité</h2>
@@ -134,7 +135,7 @@ function MentionsNL() {
           <h2>Persoonsgegevens</h2>
           <p>
             De verwerking van persoonsgegevens wordt beschreven in ons{" "}
-            <a href="/confidentialite">privacybeleid</a>.
+            <Link href="/confidentialite">privacybeleid</Link>.
           </p>
 
           <h2>Aansprakelijkheid</h2>
@@ -203,7 +204,7 @@ function MentionsEN() {
           <h2>Personal data</h2>
           <p>
             The processing of personal data is described in our{" "}
-            <a href="/confidentialite">privacy policy</a>.
+            <Link href="/confidentialite">privacy policy</Link>.
           </p>
 
           <h2>Liability</h2>

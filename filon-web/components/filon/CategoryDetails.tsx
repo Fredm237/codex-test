@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { ProductCard } from "@/components/filon/ProductCard";
 import { useLocale, type Locale } from "@/lib/i18n";
@@ -78,24 +79,24 @@ export function CategoryDetails({
     <div className="p19-category-market" data-market-plan="category">
       <section className="ed-band">
         <div className="ed-wrap">
-        <p style={{ marginBottom: 18 }}><a href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>{copy.back}</a></p>
+        <p style={{ marginBottom: 18 }}><Link href="/catalogue" style={{ fontSize: 13.5, color: "var(--ink-3)" }}>{copy.back}</Link></p>
         <h1 className="cat-rail-title" style={{ fontSize: "clamp(26px, 4vw, 36px)" }}>{catalogueLabel(category.name, locale)}</h1>
         <p className="cat-rail-sub" style={{ marginBottom: 24 }}>{copy.compared(formatNumber(total))}</p>
 
         {subs.length > 0 && (
           <nav className="cat-chips" aria-label={copy.subs}>
-            <a className={`cat-chip${active ? "" : " on"}`} href={`/categorie/${category.slug}/`}>{copy.all}</a>
+            <Link className={`cat-chip${active ? "" : " on"}`} href={`/categorie/${category.slug}/`}>{copy.all}</Link>
             {subs.map((sub) => (
-              <a key={sub.name} className={`cat-chip${active === sub.name ? " on" : ""}`} href={`/categorie/${category.slug}/?sub=${encodeURIComponent(sub.name)}`}>
+              <Link key={sub.name} className={`cat-chip${active === sub.name ? " on" : ""}`} href={`/categorie/${category.slug}/?sub=${encodeURIComponent(sub.name)}`}>
                 {sub.name} <span>{formatNumber(sub.count)}</span>
-              </a>
+              </Link>
             ))}
           </nav>
         )}
 
         {others.length > 0 && (
           <nav className="cat-chips" aria-label={copy.other}>
-            {others.map((other) => <a key={other.slug} className="cat-chip" href={`/categorie/${other.slug}/`}>{catalogueLabel(other.name, locale)} <span>{formatNumber(other.count)}</span></a>)}
+            {others.map((other) => <Link key={other.slug} className="cat-chip" href={`/categorie/${other.slug}/`}>{catalogueLabel(other.name, locale)} <span>{formatNumber(other.count)}</span></Link>)}
           </nav>
         )}
 
@@ -104,7 +105,7 @@ export function CategoryDetails({
         ) : (
           <>
             <div className="fx-product-grid" style={{ marginTop: 28 }}>{items.map((offer) => <ProductCard key={offer.id} offer={offer} />)}</div>
-            {total > items.length && <p style={{ marginTop: 30, textAlign: "center" }}><a className="ed-btn ghost" href="/catalogue/" style={{ textDecoration: "none" }}>{copy.browse(formatNumber(total))}</a></p>}
+            {total > items.length && <p style={{ marginTop: 30, textAlign: "center" }}><Link className="ed-btn ghost" href="/catalogue/" style={{ textDecoration: "none" }}>{copy.browse(formatNumber(total))}</Link></p>}
           </>
         )}
         </div>

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import { Reveal } from "./Reveal";
 import { useLocale } from "@/lib/i18n";
@@ -161,9 +162,9 @@ export function Closing() {
           <h2>
             {x.cH1}<span className="it">{x.cH2}</span>
           </h2>
-          <a className="ed-btn dark" href="/recherche" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
+          <Link className="ed-btn dark" href="/recherche" style={{ marginTop: "clamp(34px,5vw,50px)" }}>
             {t("cta.try")}
-          </a>
+          </Link>
         </Reveal>
       </div>
     </section>

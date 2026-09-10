@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 import dynamic from "next/dynamic";
 import { Reveal } from "./Reveal";
@@ -92,7 +93,7 @@ export function GraphScene() {
               <span className="it">{x.graphH2}</span>
             </h2>
             <p className="ed-scene-sub">{x.graphSub}</p>
-            <a className="ed-btn ghostlight" href="/intelligence">{x.graphCta}</a>
+            <Link className="ed-btn ghostlight" href="/intelligence">{x.graphCta}</Link>
           </Reveal>
         </div>
       </div>
@@ -114,7 +115,7 @@ export function ClosingScene() {
             {x.finalH1}<span className="it">{x.finalH2}</span>.
           </h2>
           <div className="ed-final-actions">
-            <a className="ed-btn wave" href="/recherche">{t("cta.try")}</a>
+            <Link className="ed-btn wave" href="/recherche">{t("cta.try")}</Link>
             <ChromeCta variant="ghostlight" label={t("cta.chrome")} />
           </div>
           <p className="ed-final-note">{x.finalNote}</p>

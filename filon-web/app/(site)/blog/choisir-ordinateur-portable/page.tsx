@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from "next";
 import { buildMetadata, articleSchema, breadcrumbSchema, JsonLd } from "@/lib/seo";
 import { Localized } from "@/components/editorial/Localized";
@@ -88,7 +89,7 @@ function ArticleFR() {
         <p>
           Une offre reconditionnée peut constituer une alternative, mais le prix, l&apos;état, la batterie, les accessoires,
           la garantie et le retour varient. Consultez notre guide{" "}
-          <a href="/blog/neuf-vs-reconditionne-economie-reelle">Neuf vs reconditionné</a> pour les vérifier par offre.
+          <Link href="/blog/neuf-vs-reconditionne-economie-reelle">Neuf vs reconditionné</Link> pour les vérifier par offre.
         </p>
 
         <div className="callout">
@@ -106,9 +107,9 @@ function ArticleFR() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Trouver mon portable avec FILON
-          </a>
+          </Link>
         </p>
       </div>
     </article>
@@ -194,7 +195,7 @@ function ArticleNL() {
         <p>
           Een refurbished aanbod kan een alternatief zijn, maar prijs, staat, batterij, accessoires, garantie en retour
           verschillen. Lees onze gids{" "}
-          <a href="/blog/neuf-vs-reconditionne-economie-reelle">Nieuw vs refurbished</a> om die per aanbod te controleren.
+          <Link href="/blog/neuf-vs-reconditionne-economie-reelle">Nieuw vs refurbished</Link> om die per aanbod te controleren.
         </p>
 
         <div className="callout">
@@ -212,9 +213,9 @@ function ArticleNL() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Mijn laptop vinden met FILON
-          </a>
+          </Link>
         </p>
       </div>
     </article>
@@ -300,7 +301,7 @@ function ArticleEN() {
         <p>
           A refurbished offer can be an alternative, but price, condition, battery, accessories, warranty and returns
           vary. Read our guide{" "}
-          <a href="/blog/neuf-vs-reconditionne-economie-reelle">New vs refurbished</a> to check them offer by offer.
+          <Link href="/blog/neuf-vs-reconditionne-economie-reelle">New vs refurbished</Link> to check them offer by offer.
         </p>
 
         <div className="callout">
@@ -318,9 +319,9 @@ function ArticleEN() {
         </ul>
 
         <p style={{ marginTop: 30 }}>
-          <a className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
+          <Link className="ed-btn wave" href="/recherche" style={{ textDecoration: "none" }}>
             Find my laptop with FILON
-          </a>
+          </Link>
         </p>
       </div>
     </article>

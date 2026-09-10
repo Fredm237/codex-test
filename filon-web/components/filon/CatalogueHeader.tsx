@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 
 // Fil d'Ariane, titre et décompte du catalogue.
 //
@@ -34,17 +35,17 @@ export function CatalogueHeader({
   return (
     <>
       <nav className="fx-crumb" aria-label={t("cat.crumb")}>
-        <a href="/catalogue/">{t("nav.catalogue")}</a>
+        <Link href="/catalogue/">{t("nav.catalogue")}</Link>
         {department && (
           <>
             <span aria-hidden="true">/</span>
-            <a href={href({}, { dept: department.slug })}>{catalogueLabel(department.name, locale)}</a>
+            <Link href={href({}, { dept: department.slug })}>{catalogueLabel(department.name, locale)}</Link>
           </>
         )}
         {category && (
           <>
             <span aria-hidden="true">/</span>
-            <a href={href({}, { dept: department?.slug, cat: category.slug })}>{catalogueLabel(category.name, locale)}</a>
+            <Link href={href({}, { dept: department?.slug, cat: category.slug })}>{catalogueLabel(category.name, locale)}</Link>
           </>
         )}
         {subcategory && (
@@ -100,14 +101,14 @@ export function CataloguePager({
     <>
       {lastPage > 1 && (
         <nav className="fx-pagination" aria-label={status}>
-          <a
+          <Link
             className="fx-page-step"
             href={href(query, { page: String(Math.max(1, page - 1)) })}
             aria-disabled={page <= 1}
             tabIndex={page <= 1 ? -1 : undefined}
           >
             {t("cat.prev")}
-          </a>
+          </Link>
           <span className="fx-page-list">
             {pages.map((p, i) =>
               p === null ? (
@@ -115,25 +116,25 @@ export function CataloguePager({
                   …
                 </span>
               ) : (
-                <a
+                <Link
                   key={p}
                   className="fx-page"
                   aria-current={p === page ? "page" : undefined}
                   href={href(query, { page: String(p) })}
                 >
                   {p}
-                </a>
+                </Link>
               )
             )}
           </span>
-          <a
+          <Link
             className="fx-page-step"
             href={href(query, { page: String(Math.min(lastPage, page + 1)) })}
             aria-disabled={page >= lastPage}
             tabIndex={page >= lastPage ? -1 : undefined}
           >
             {t("cat.next")}
-          </a>
+          </Link>
         </nav>
       )}
       <p className="fx-fine fx-page-status">{status}</p>
@@ -162,10 +163,10 @@ export function CatalogueEmpty({
     <div className="fx-body fx-catalogue-empty" role="status">
       <p>{withheldForEvidence ? evidenceMessage : t("cat.empty")}</p>
       <div className="fx-catalogue-empty-actions">
-        <a href="/catalogue/">{t("cat.reset")}</a>
-        <a className="fx-catalogue-empty-assistant" href={assistantHref}>
+        <Link href="/catalogue/">{t("cat.reset")}</Link>
+        <Link className="fx-catalogue-empty-assistant" href={assistantHref}>
           {t("cat.askAssistant")}
-        </a>
+        </Link>
       </div>
     </div>
   );
