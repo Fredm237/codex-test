@@ -18,7 +18,7 @@ const COPY = {
       "Le meilleur prix et ses preuves apparaissent ensemble.",
     ],
     searchLabel: "Que cherchez-vous aujourd’hui ?",
-    placeholder: "Un ordinateur, une montre, un canapé…",
+    placeholder: "Produit, marque ou besoin…",
     submit: "Trouver",
     catalogue: "Voir le catalogue",
     offers: "offres suivies",
@@ -35,7 +35,7 @@ const COPY = {
       "De beste prijs en het bewijs verschijnen samen.",
     ],
     searchLabel: "Wat zoekt u vandaag?",
-    placeholder: "Een laptop, horloge, bank…",
+    placeholder: "Product, merk of behoefte…",
     submit: "Zoeken",
     catalogue: "Bekijk de catalogus",
     offers: "gevolgde aanbiedingen",
@@ -52,7 +52,7 @@ const COPY = {
       "The best price and its evidence appear together.",
     ],
     searchLabel: "What are you looking for today?",
-    placeholder: "A laptop, watch, sofa…",
+    placeholder: "Product, brand or need…",
     submit: "Find it",
     catalogue: "Browse the catalogue",
     offers: "offers tracked",
@@ -181,7 +181,7 @@ export function CommerceJourney({ proof }: { proof: Proof | null }) {
           <CinematicSequenceRenderer
             sequence={INDUSTRIAL_SEQUENCE}
             frameProgress={progress}
-            cameraProgress={.5}
+            cameraProgress={progress}
             reducedMotion={reduced}
             className={styles.frameSequence}
           />
@@ -201,15 +201,6 @@ export function CommerceJourney({ proof }: { proof: Proof | null }) {
             </div>
           </form>
           {shot === 0 ? <p className={styles.scrollCue}>{scrollCopy} <span aria-hidden="true">↓</span></p> : null}
-          <div className={styles.timeline} aria-label={copy.title.join(" ")}>
-            {copy.title.map((label, index) => (
-              <span key={label} data-active={index === shot} data-past={index < shot}>
-                <i aria-hidden="true" /><b>0{index + 1}</b><em>{label}</em>
-              </span>
-            ))}
-            {!reduced && progress === 1 ? <button type="button" onClick={replay} aria-label={copy.replay}>↻</button> : null}
-          </div>
-          <a className={styles.catalogue} href="/catalogue/">{copy.catalogue} <span aria-hidden="true">→</span></a>
         </div>
         <div className={styles.stage}>
           <div className={styles.stats} aria-hidden="true">
@@ -221,6 +212,15 @@ export function CommerceJourney({ proof }: { proof: Proof | null }) {
             <strong>{industrialCopy.decisionTitle}</strong>
             <a href="/recherche/">{industrialCopy.decisionCta} →</a>
           </div>
+        </div>
+        <a className={styles.catalogue} href="/catalogue/">{copy.catalogue} <span aria-hidden="true">→</span></a>
+        <div className={styles.timeline} aria-label={copy.title.join(" ")}>
+          {copy.title.map((label, index) => (
+            <span key={label} data-active={index === shot} data-past={index < shot}>
+              <i aria-hidden="true" /><b>0{index + 1}</b><em>{label}</em>
+            </span>
+          ))}
+          {!reduced && progress === 1 ? <button type="button" onClick={replay} aria-label={copy.replay}>↻</button> : null}
         </div>
       </div>
       </div>
