@@ -42,6 +42,15 @@ type OutfitResponse = {
   solution: OutfitSolution;
 };
 
+type DiscoveryItem = {
+  id: number;
+  name: string;
+  brand?: string | null;
+  category?: string | null;
+  image?: string | null;
+  merchant: { name: string };
+};
+
 const OFFER_TTL_MS = 72 * 60 * 60 * 1000;
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -193,6 +202,10 @@ type Copy = {
   keep: string;
   reject: string;
   feedbackThanks: string;
+  discoveryTitle: string;
+  discoveryBody: string;
+  updatingPrice: string;
+  viewProduct: string;
   roles: Record<OutfitItem["role"], string>;
   modes: Record<Mode, { label: string; hint: string }>;
 };
@@ -231,6 +244,10 @@ const COPY: Record<Locale, Copy> = {
     keep: "À garder",
     reject: "Pas pour moi",
     feedbackThanks: "Merci. Ce retour sera revu comme un signal, pas comme une préférence automatique.",
+    discoveryTitle: "Des pièces réelles pour continuer",
+    discoveryBody: "FILON a trouvé ces articles dans le catalogue. Leurs prix sont en cours d’actualisation : ils ne sont donc pas encore assemblés en recommandation ni additionnés dans un total.",
+    updatingPrice: "Prix en cours d’actualisation",
+    viewProduct: "Voir le produit",
     roles: { base: "Article sélectionné", footwear: "Chaussures", accessory: "Accessoire" },
     modes: {
       create: { label: "Créer", hint: "Partir d’une intention" },
@@ -274,6 +291,10 @@ const COPY: Record<Locale, Copy> = {
     keep: "Bewaren",
     reject: "Niet voor mij",
     feedbackThanks: "Bedankt. Deze feedback wordt als signaal bekeken, niet als automatische voorkeur.",
+    discoveryTitle: "Echte items om verder te gaan",
+    discoveryBody: "FILON vond deze items in de catalogus. Hun prijzen worden bijgewerkt; daarom vormen ze nog geen aanbeveling of totaal.",
+    updatingPrice: "Prijs wordt bijgewerkt",
+    viewProduct: "Bekijk product",
     roles: { base: "Geselecteerd artikel", footwear: "Schoenen", accessory: "Accessoire" },
     modes: {
       create: { label: "Maken", hint: "Vanuit een intentie" },
@@ -317,6 +338,10 @@ const COPY: Record<Locale, Copy> = {
     keep: "Keep it",
     reject: "Not for me",
     feedbackThanks: "Thank you. This feedback is reviewed as a signal, not stored as an automatic preference.",
+    discoveryTitle: "Real items to keep exploring",
+    discoveryBody: "FILON found these items in the catalogue. Their prices are being refreshed, so they are not yet assembled into a recommendation or total.",
+    updatingPrice: "Price being refreshed",
+    viewProduct: "View product",
     roles: { base: "Selected item", footwear: "Footwear", accessory: "Accessory" },
     modes: {
       create: { label: "Create", hint: "Start from an intention" },
@@ -426,6 +451,7 @@ export function OutfitStudio() {
   const [mode, setMode] = useState<Mode>("create");
   const [request, setRequest] = useState("");
   const [result, setResult] = useState<OutfitResponse | null>(null);
+  const [discoveries, setDiscoveries] = useState<DiscoveryItem[]>([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<"keep" | "reject" | null>(null);
@@ -453,9 +479,26 @@ export function OutfitStudio() {
     setBusy(true);
     setError(null);
     setResult(null);
+    setDiscoveries([]);
     setFeedback(null);
     const controller = new AbortController();
     const timeout = window.setTimeout(() => controller.abort(), ANALYSIS_TIMEOUT_MS);
+    const discoveryPromise = fetch(
+      `/api/catalog/discovery/?surface=outfit&q=${encodeURIComponent(trimmed)}`,
+      { cache: "no-store", signal: controller.signal },
+    ).then(async (response) => {
+      if (!response.ok) return [];
+      const body: unknown = await response.json();
+      if (!isRecord(body) || !Array.isArray(body.items)) return [];
+      return body.items.filter((item): item is DiscoveryItem => {
+        if (!isRecord(item) || !isRecord(item.merchant)) return false;
+        return Number.isInteger(item.id)
+          && (item.id as number) > 0
+          && typeof item.name === "string"
+          && item.name.trim().length > 0
+          && typeof item.merchant.name === "string";
+      }).slice(0, 8);
+    }).catch(() => [] as DiscoveryItem[]);
     try {
       const res = await fetch(`${API}/api/intelligence/outfit/analyse`, {
         method: "POST",
@@ -471,6 +514,9 @@ export function OutfitStudio() {
       const response = sanitizeOutfitResponse(await res.json(), trimmed);
       if (!response) throw new Error("invalid_evidence_contract");
       setResult(response);
+      if (response.solution.decision === "abstain") {
+        setDiscoveries(await discoveryPromise);
+      }
     } catch {
       setError(copy.unavailable);
     } finally {
@@ -554,8 +600,38 @@ export function OutfitStudio() {
 
           {error && <div className="os-panel os-error" role="alert">{error}</div>}
           {result && <OutfitResult result={result} copy={copy} locale={locale} feedback={feedback} onFeedback={sendFeedback} />}
+          {result?.solution.decision === "abstain" && discoveries.length > 0 && (
+            <OutfitDiscovery items={discoveries} copy={copy} />
+          )}
         </>
       )}
+      </div>
+    </section>
+  );
+}
+
+function OutfitDiscovery({ items, copy }: { items: DiscoveryItem[]; copy: Copy }) {
+  return (
+    <section className="os-discovery" aria-labelledby="outfit-discovery-title">
+      <header>
+        <p className="os-kicker">Catalogue FILON</p>
+        <h2 id="outfit-discovery-title">{copy.discoveryTitle}</h2>
+        <p>{copy.discoveryBody}</p>
+      </header>
+      <div className="os-discovery-grid">
+        {items.map((item) => (
+          <a href={`/produit/${item.id}/`} className="os-discovery-item" key={item.id}>
+            <span className="os-discovery-image">
+              {item.image ? <img src={item.image} alt="" loading="lazy" /> : null}
+            </span>
+            <span className="os-discovery-copy">
+              <small>{item.brand || item.category || item.merchant.name}</small>
+              <strong>{item.name}</strong>
+              <em>{copy.updatingPrice}</em>
+              <b>{copy.viewProduct} →</b>
+            </span>
+          </a>
+        ))}
       </div>
     </section>
   );

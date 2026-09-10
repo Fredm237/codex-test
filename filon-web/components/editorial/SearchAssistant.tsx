@@ -14,7 +14,7 @@ const SL = {
   fr: {
     eyebrow: "Assistant d'achat",
     h1Idle: "Que cherchez‑vous ?", h1Again: "Un autre achat à analyser ?",
-    placeholder: "Décrivez un besoin, ou un produit…", ask: "Demander",
+    placeholder: "Un produit ou un besoin…", ask: "Demander",
     searching: "FILON vérifie les offres disponibles…",
     searchingDetail: "Un résultat apparaîtra uniquement si le produit, le prix et le stock sont encore prouvés.",
     priceFor: "Votre région",
@@ -27,6 +27,10 @@ const SL = {
     failedBody: "L'analyse s'appuie sur les offres de nos marchands partenaires, et ce service est momentanément injoignable. Plutôt que de vous proposer des produits inventés, je préfère ne rien vous proposer. Réessayez dans un instant.",
     sourceTitle: "Aucune offre vérifiée n’est disponible pour cette recherche.",
     sourceBody: "FILON s’appuie uniquement sur les offres de son catalogue partenaire. Cette recherche ne renvoie pas encore de prix vérifiables ; explorez le catalogue ou reformulez votre demande.",
+    discoveryTitle: "Produits trouvés dans le catalogue",
+    discoveryBody: "Les produits correspondent à votre recherche. Leurs prix sont en cours d’actualisation : FILON ne les affiche pas tant qu’ils ne sont pas vérifiés.",
+    updatingPrice: "Prix en cours d’actualisation",
+    openProduct: "Voir le produit",
     retry: "Réessayer",
     disc: "FILON est gratuit. Vous ne payez jamais, et vos données ne sont pas revendues.",
     at: "chez", cashback: "cashback", coupon: "coupon", observedRate: "Tarif observé", contextualOffer: "À confirmer pour vos dates et conditions",
@@ -35,7 +39,7 @@ const SL = {
   nl: {
     eyebrow: "Koopassistent",
     h1Idle: "Wat zoek je?", h1Again: "Nog een aankoop om te analyseren?",
-    placeholder: "Beschrijf een behoefte, of een product…", ask: "Vragen",
+    placeholder: "Een product of behoefte…", ask: "Vragen",
     searching: "FILON controleert de beschikbare aanbiedingen…",
     searchingDetail: "Een resultaat verschijnt alleen als product, prijs en voorraad nog bewezen zijn.",
     priceFor: "Jouw regio",
@@ -48,6 +52,10 @@ const SL = {
     failedBody: "De analyse steunt op de aanbiedingen van onze partnerwinkels, en die dienst is tijdelijk onbereikbaar. Liever niets voorstellen dan verzonnen producten. Probeer het zo meteen opnieuw.",
     sourceTitle: "Geen geverifieerde aanbieding voor deze zoekopdracht.",
     sourceBody: "FILON gebruikt uitsluitend aanbiedingen uit zijn partnercatalogus. Deze zoekopdracht levert nog geen verifieerbare prijzen op; verken de catalogus of verfijn je vraag.",
+    discoveryTitle: "Producten gevonden in de catalogus",
+    discoveryBody: "Deze producten passen bij je zoekopdracht. Hun prijzen worden bijgewerkt en verschijnen pas na verificatie.",
+    updatingPrice: "Prijs wordt bijgewerkt",
+    openProduct: "Bekijk product",
     retry: "Opnieuw proberen",
     disc: "FILON is gratis. Je betaalt nooit, en je gegevens worden niet doorverkocht.",
     at: "bij", cashback: "cashback", coupon: "code", observedRate: "Waargenomen tarief", contextualOffer: "Bevestig data en voorwaarden",
@@ -56,7 +64,7 @@ const SL = {
   en: {
     eyebrow: "Shopping assistant",
     h1Idle: "What are you looking for?", h1Again: "Another purchase to analyse?",
-    placeholder: "Describe a need, or a product…", ask: "Ask",
+    placeholder: "A product or a need…", ask: "Ask",
     searching: "FILON is checking available offers…",
     searchingDetail: "A result appears only when the product, price and stock are still proven.",
     priceFor: "Your region",
@@ -69,6 +77,10 @@ const SL = {
     failedBody: "The analysis draws on offers from our partner merchants, and that service is temporarily unreachable. Rather than show you invented products, I would rather show you nothing. Try again in a moment.",
     sourceTitle: "No verified offer is available for this search.",
     sourceBody: "FILON relies only on offers from its partner catalogue. This search does not yet return verifiable prices; explore the catalogue or refine your request.",
+    discoveryTitle: "Products found in the catalogue",
+    discoveryBody: "These products match your search. Their prices are being refreshed and will only appear after verification.",
+    updatingPrice: "Price being refreshed",
+    openProduct: "View product",
     retry: "Try again",
     disc: "FILON is free. You never pay, and your data is not resold.",
     at: "at", cashback: "cashback", coupon: "coupon", observedRate: "Observed rate", contextualOffer: "Confirm dates and terms",
@@ -127,6 +139,36 @@ type Card = {
   why: string; alt: string | null;
 };
 type Result = { usage: string; offers: number; cards: Card[]; real?: boolean; currency?: string; country?: string };
+type DiscoveryItem = {
+  id: number;
+  name: string;
+  brand?: string | null;
+  category?: string | null;
+  image?: string | null;
+  merchant: { name: string };
+};
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+async function discoverCatalogue(q: string, signal: AbortSignal): Promise<DiscoveryItem[]> {
+  const response = await fetch(`/api/catalog/discovery/?q=${encodeURIComponent(q)}`, {
+    cache: "no-store",
+    signal,
+  });
+  if (!response.ok) return [];
+  const body: unknown = await response.json();
+  if (!isRecord(body) || !Array.isArray(body.items)) return [];
+  return body.items.filter((item): item is DiscoveryItem => {
+    if (!isRecord(item) || !isRecord(item.merchant)) return false;
+    return Number.isInteger(item.id)
+      && (item.id as number) > 0
+      && typeof item.name === "string"
+      && item.name.trim().length > 0
+      && typeof item.merchant.name === "string";
+  }).slice(0, 8);
+}
 
 /* Il n'y a plus de catalogue de démonstration ici, et c'est délibéré.
 
@@ -286,8 +328,9 @@ function RecCard({ c, i, q }: { c: Card; i: number; q: string }) {
 
 export function SearchAssistant() {
   const [query, setQuery] = useState("");
-  const [phase, setPhase] = useState<"idle" | "thinking" | "results" | "failed">("idle");
+  const [phase, setPhase] = useState<"idle" | "thinking" | "results" | "discovery" | "failed">("idle");
   const [result, setResult] = useState<Result | null>(null);
+  const [discoveries, setDiscoveries] = useState<DiscoveryItem[]>([]);
   const [asked, setAsked] = useState("");
   const [blockedExternal, setBlockedExternal] = useState(false);
   // Pays proposé par géolocalisation plutôt que « be » en dur : le prix, la
@@ -326,8 +369,13 @@ export function SearchAssistant() {
     let receivedTerminalEvent = false;
     setPhase("thinking");
     setResult(null);
+    setDiscoveries([]);
     setBlockedExternal(false);
+    // La découverte du catalogue démarre en parallèle de V2. Elle ne s'affiche
+    // que si V2 s'abstient, mais elle ne rajoute alors pas un second délai.
+    const discoveryPromise = discoverCatalogue(q, controller.signal);
 
+    let needsDiscovery = false;
     const apply = (ev: Ev): boolean => {
       if (runId.current !== id) return false; // superseded by a newer query
       if (ev.type === "results") {
@@ -353,8 +401,7 @@ export function SearchAssistant() {
         // le catalogue FILON : ce sont des estimations et non des offres à
         // recommander. Elles restent donc hors de l’interface de décision.
         if (!ev.data.real || verifiedCards.length === 0) {
-          setBlockedExternal(true);
-          setPhase("failed");
+          needsDiscovery = true;
           return true;
         }
         setResult({ ...ev.data, cards: verifiedCards });
@@ -376,6 +423,16 @@ export function SearchAssistant() {
       // l’interface restait indéfiniment sur les étapes d’analyse.
       if (runId.current === id && !controller.signal.aborted && !receivedTerminalEvent) {
         setPhase("failed");
+      } else if (runId.current === id && needsDiscovery && !controller.signal.aborted) {
+        const items = await discoveryPromise;
+        if (runId.current !== id) return;
+        if (items.length) {
+          setDiscoveries(items);
+          setPhase("discovery");
+        } else {
+          setBlockedExternal(true);
+          setPhase("failed");
+        }
       }
     } catch (error) {
       // Une nouvelle recherche annule la précédente : elle ne doit ni afficher
@@ -505,6 +562,30 @@ export function SearchAssistant() {
                     {result.cards.map((c, i) => <RecCard key={`${c.merchant}-${c.name}-${i}`} c={c} i={i} q={asked} />)}
                   </div>
                   <p className="sa-disc">{S.disc}</p>
+                </motion.div>
+              )}
+
+              {phase === "discovery" && discoveries.length > 0 && (
+                <motion.div className="fa-discovery" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <div className="fa-discovery-head">
+                    <h2>{S.discoveryTitle}</h2>
+                    <p>{S.discoveryBody}</p>
+                  </div>
+                  <div className="fa-discovery-grid">
+                    {discoveries.map((item) => (
+                      <a className="fa-discovery-card" href={`/produit/${item.id}/`} key={item.id}>
+                        <span className="fa-discovery-image">
+                          {item.image ? <img src={item.image} alt="" loading="lazy" /> : <IcBox />}
+                        </span>
+                        <span className="fa-discovery-copy">
+                          <small>{item.brand || item.category || item.merchant.name}</small>
+                          <strong>{item.name}</strong>
+                          <span>{S.updatingPrice}</span>
+                          <b>{S.openProduct} →</b>
+                        </span>
+                      </a>
+                    ))}
+                  </div>
                 </motion.div>
               )}
             </motion.div>

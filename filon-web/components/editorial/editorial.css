@@ -596,6 +596,25 @@
 
 /* ── ranked recommendation cards — image-forward, desire-driven ── */
 .fa-cards { display: flex; flex-direction: column; gap: 18px; }
+.fa-discovery-head { display: grid; grid-template-columns: minmax(0, .8fr) minmax(280px, 1fr); gap: 28px; align-items: end; margin-bottom: 22px; }
+.fa-discovery-head h2 { margin: 0; color: var(--ink); font-family: var(--serif); font-size: clamp(30px, 5vw, 54px); font-weight: 430; line-height: .95; letter-spacing: -.045em; }
+.fa-discovery-head p { max-width: 58ch; margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.6; }
+.fa-discovery-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.fa-discovery-card { min-width: 0; display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 16px; padding: 12px; color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--card); text-decoration: none; transition: transform .2s var(--ease-out), border-color .2s; }
+.fa-discovery-card:hover, .fa-discovery-card:focus-visible { transform: translateY(-3px); border-color: var(--accent); outline: none; }
+.fa-discovery-image { min-height: 132px; display: grid; place-items: center; overflow: hidden; border-radius: var(--r-md); background: #fff; }
+.fa-discovery-image img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+.fa-discovery-copy { min-width: 0; display: flex; flex-direction: column; align-items: flex-start; padding: 7px 4px; }
+.fa-discovery-copy small { color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .07em; }
+.fa-discovery-copy strong { margin-top: 8px; display: -webkit-box; overflow: hidden; color: var(--ink); font-family: var(--serif); font-size: 18px; line-height: 1.18; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+.fa-discovery-copy span { margin-top: 10px; color: var(--ink-3); font-size: 12px; }
+.fa-discovery-copy b { margin-top: auto; padding-top: 12px; color: var(--accent); font-size: 12px; }
+@media (max-width: 720px) {
+  .fa-discovery-head { grid-template-columns: 1fr; gap: 10px; }
+  .fa-discovery-grid { grid-template-columns: 1fr; }
+  .fa-discovery-card { grid-template-columns: 104px minmax(0, 1fr); }
+  .fa-discovery-image { min-height: 112px; }
+}
 .fa-card { position: relative; background: var(--card); border: 1px solid var(--line); border-radius: var(--r-xl); overflow: hidden;
   box-shadow: 0 12px 34px -22px rgba(17,30,50,0.28);
   opacity: 0; transform: translateY(16px); animation: fa-in 0.55s var(--ease-out) forwards; animation-delay: var(--d, 0ms); }
