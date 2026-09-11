@@ -172,6 +172,7 @@ def retrieve_lexical(
     documents: Sequence[LexicalDocument],
     *,
     limit: int = 50,
+    allow_generic_options: bool = False,
 ) -> LexicalResult:
     """Retourne une fenêtre product-first sans inventer d'identité."""
 
@@ -202,7 +203,7 @@ def retrieve_lexical(
     # Une requête réduite à un type générique ne départage pas plusieurs
     # entités. Renvoyer AMBIGUOUS empêche le premier prix ou le premier marchand
     # de devenir implicitement la réponse.
-    if len(terms) == 1 and len(ranked) > 1:
+    if len(terms) == 1 and len(ranked) > 1 and not allow_generic_options:
         return LexicalResult("AMBIGUOUS", (), ("ambiguous_intent",))
     if not ranked:
         if unresolved_matches:

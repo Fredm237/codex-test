@@ -13,12 +13,13 @@ from __future__ import annotations
 
 import hashlib
 import math
+import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation
 from typing import Mapping
 
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 
 from app.buy_wait.engine import (
     BuyWaitRequest,
@@ -46,6 +47,7 @@ from app.hybrid_retrieval.fusion import (
 from app.hybrid_retrieval.lexical import (
     LEXICAL_ADAPTER_VERSION,
     LexicalDocument,
+    lexical_terms,
     retrieve_lexical,
 )
 from app.hybrid_retrieval.replay import ReplayDocument, _document
@@ -83,6 +85,15 @@ ONLINE_READER_VERSION = "v2-online-reader/v2"
 MAX_QUERY_LENGTH = 512
 MAX_DOCUMENTS = 1_000
 MAX_CANDIDATES = 50
+
+_VERTICAL_SEARCH_TERMS: dict[str, tuple[str, ...]] = {
+    "smartphones": ("smartphone", "telephone", "téléphone", "iphone", "galaxy", "mobile"),
+    "laptops": ("ordinateur portable", "laptop", "notebook", "macbook"),
+    "audio": ("casque", "headphone", "headphones", "écouteur", "ecouteur", "earbud", "speaker"),
+    "fashion": ("robe", "veste", "chemise", "pantalon", "chaussure", "sneaker", "jacket"),
+    "appliances_hvac": ("climatiseur", "air conditioner", "chauffage", "aspirateur"),
+    "tyres": ("pneu", "pneus", "tyre", "tyres", "tire", "tires"),
+}
 
 
 class V2OnlineReaderError(ValueError):
@@ -164,7 +175,25 @@ def _request_key(request: V2OnlineReadRequest) -> str:
     return "sha256:" + hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
-def _latest_snapshot_statement():
+def _retrieval_query(request: V2OnlineReadRequest) -> str:
+    """Retire le budget déjà porté par le contrat, sans toucher aux modèles."""
+
+    query = request.query.strip()
+    if request.budget_amount_decimal is None:
+        return query
+    amount = Decimal(request.budget_amount_decimal)
+    variants = {format(amount, "f"), format(amount.normalize(), "f")}
+    for value in sorted(variants, key=len, reverse=True):
+        query = re.sub(
+            rf"(?<![\w.-]){re.escape(value)}(?:[.,]0+)?\s*(?:€|eur)?(?![\w.-])",
+            " ",
+            query,
+            flags=re.IGNORECASE,
+        )
+    return " ".join(query.split()) or request.query.strip()
+
+
+def _latest_snapshot_statement(request: V2OnlineReadRequest | None = None):
     latest = (
         select(
             ProductOntologySnapshot.offer_id.label("offer_id"),
@@ -173,7 +202,7 @@ def _latest_snapshot_statement():
         .group_by(ProductOntologySnapshot.offer_id)
         .subquery()
     )
-    return (
+    statement = (
         select(ProductOntologySnapshot, core_models.Offer)
         .join(latest, ProductOntologySnapshot.id == latest.c.snapshot_id)
         .join(
@@ -185,15 +214,39 @@ def _latest_snapshot_statement():
             ProductOntologySnapshot.ontology_status.in_(("VERIFIED", "PARTIAL")),
             core_models.Offer.is_adult.is_(False),
         )
-        .order_by(ProductOntologySnapshot.id.desc())
-        .limit(MAX_DOCUMENTS)
     )
+    if request is not None:
+        # La précédente fenêtre prenait les 1 000 derniers snapshots du
+        # catalogue entier. Une arrivée massive d'un rayon sans rapport pouvait
+        # donc évincer tous les iPhone ou casques avant même la recherche V2.
+        # On borne désormais *après* une présélection liée à la requête et à sa
+        # verticale. Le classement en mémoire reste le juge final.
+        terms = set(lexical_terms(_retrieval_query(request)))
+        terms.update(_VERTICAL_SEARCH_TERMS.get(request.vertical, ()))
+        fields = (
+            core_models.Offer.name,
+            core_models.Offer.brand,
+            core_models.Offer.category,
+            core_models.Offer.filon_category,
+            core_models.Offer.filon_subcategory,
+        )
+        statement = statement.where(
+            or_(
+                *[
+                    field.ilike(f"%{term}%")
+                    for term in sorted(terms)
+                    for field in fields
+                ]
+            )
+        )
+    return statement.order_by(ProductOntologySnapshot.id.desc()).limit(MAX_DOCUMENTS)
 
 
 async def _documents(
     session,
+    request: V2OnlineReadRequest | None = None,
 ) -> tuple[tuple[ReplayDocument, ...], dict[int, datetime]]:
-    rows = (await session.execute(_latest_snapshot_statement())).all()
+    rows = (await session.execute(_latest_snapshot_statement(request))).all()
     result: list[ReplayDocument] = []
     evaluated_at_by_snapshot: dict[int, datetime] = {}
     for snapshot, offer in rows:
@@ -218,7 +271,7 @@ def _retrieval(
     request: V2OnlineReadRequest,
     documents: tuple[ReplayDocument, ...],
 ):
-    query = request.query.strip()
+    query = _retrieval_query(request)
     lexical_documents = tuple(
         LexicalDocument(
             document_ref=f"product-ontology:{item.snapshot_id}",
@@ -259,11 +312,17 @@ def _retrieval(
             evidence_by_entity.get(item.entity_ref, item.snapshot_id),
         )
 
-    lexical = retrieve_lexical(query, lexical_documents, limit=MAX_CANDIDATES)
+    lexical = retrieve_lexical(
+        query,
+        lexical_documents,
+        limit=MAX_CANDIDATES,
+        allow_generic_options=True,
+    )
     structured = retrieve_structured(
         intent_from_query(query),
         structured_documents,
         limit=MAX_CANDIDATES,
+        allow_generic_options=True,
     )
     semantic = retrieve_semantic(query, semantic_documents, limit=MAX_CANDIDATES)
     hits = [
@@ -686,7 +745,7 @@ async def inspect_v2_online(
     if evaluated_at.tzinfo is None:
         raise V2OnlineReaderError("evaluated_at must include a timezone")
     evaluated = evaluated_at.astimezone(timezone.utc)
-    documents, snapshot_times = await _documents(session)
+    documents, snapshot_times = await _documents(session, request)
     query_digest, retrieval = _retrieval(request, documents)
     candidate_entities = {
         candidate.entity_ref for candidate in retrieval.candidates

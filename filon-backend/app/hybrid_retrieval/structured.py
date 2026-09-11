@@ -75,6 +75,7 @@ def retrieve_structured(
     documents: Sequence[StructuredDocument],
     *,
     limit: int = 50,
+    allow_generic_options: bool = False,
 ) -> StructuredResult:
     if isinstance(limit, bool) or not isinstance(limit, int) or not 1 <= limit <= MAX_STRUCTURED_CANDIDATES:
         raise StructuredRetrievalError("limit must be between 1 and 500")
@@ -102,7 +103,11 @@ def retrieve_structured(
 
     # Un scope générique n'est pas un choix de produit, même si la fenêtre
     # structurée courante ne contient qu'une ligne.
-    if not intent.specificity_terms and not intent.constraints:
+    if (
+        not intent.specificity_terms
+        and not intent.constraints
+        and not allow_generic_options
+    ):
         return StructuredResult("AMBIGUOUS", (), ("ambiguous_intent",))
     if not grouped:
         if unresolved:
