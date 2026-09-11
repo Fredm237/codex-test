@@ -35,6 +35,19 @@ def test_generic_structured_scope_is_ambiguous_not_first_row():
     assert result.hits == ()
 
 
+def test_online_factual_options_can_expand_a_generic_structured_scope():
+    result = retrieve_structured(
+        intent_from_query("telefoon"),
+        (
+            StructuredDocument("a", "variant:1", "smartphone", "PRIMARY_PRODUCT", {}, (1,)),
+            StructuredDocument("b", "variant:2", "smartphone", "PRIMARY_PRODUCT", {}, (2,)),
+        ),
+        allow_generic_options=True,
+    )
+    assert result.outcome == "CANDIDATES"
+    assert [hit.entity_ref for hit in result.hits] == ["variant:1", "variant:2"]
+
+
 def test_semantic_only_candidate_stays_quarantined_and_unresolved():
     result = retrieve_semantic(
         "quiet comfortable headphones",

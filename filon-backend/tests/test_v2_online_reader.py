@@ -10,6 +10,7 @@ from unittest.mock import AsyncMock
 import pytest
 from jsonschema import Draft202012Validator
 from sqlalchemy import func, select
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db import models as core_models
@@ -24,6 +25,8 @@ from app.v2_chain.online_reader import (
     ONLINE_READER_VERSION,
     V2OnlineReadRequest,
     V2OnlineReaderError,
+    _latest_snapshot_statement,
+    _retrieval_query,
     inspect_v2_online,
     read_v2_online,
 )
@@ -34,6 +37,31 @@ ROUTES_ROOT = Path(__file__).resolve().parents[1] / "app" / "api" / "routes"
 CONTRACT_ROOT = Path(__file__).resolve().parents[2] / "contracts" / "v2-chain" / "v1"
 SCHEMA = json.loads((CONTRACT_ROOT / "online-response.schema.json").read_text())
 VALIDATOR = Draft202012Validator(SCHEMA)
+
+
+def test_online_window_is_filtered_before_its_global_bound() -> None:
+    request = V2OnlineReadRequest(
+        query="casque Sony WH-1000XM5",
+        vertical="audio",
+        country_code="BE",
+    )
+    statement = _latest_snapshot_statement(request)
+    sql = str(statement.compile(dialect=postgresql.dialect()))
+    assert "offers.name ILIKE" in sql
+    assert "product_ontology_snapshots.id DESC" in sql
+    assert statement._limit_clause.value == 1_000
+
+
+def test_online_retrieval_does_not_treat_the_explicit_budget_as_a_model() -> None:
+    request = V2OnlineReadRequest(
+        query="un bon smartphone à 500€",
+        vertical="smartphones",
+        budget_amount_decimal="500.00",
+        budget_currency="EUR",
+    )
+    query = _retrieval_query(request)
+    assert "500" not in query
+    assert "smartphone" in query
 
 
 async def _database():

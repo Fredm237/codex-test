@@ -53,6 +53,17 @@ def test_no_match_and_generic_ambiguity_fail_closed():
     assert retrieve_lexical("telefoon", documents).outcome == "AMBIGUOUS"
 
 
+def test_online_factual_options_can_return_multiple_generic_products():
+    documents = (_document("variant:1", "Phone Pro 15"), _document("variant:2", "Alternative 15"))
+    result = retrieve_lexical(
+        "telefoon",
+        documents,
+        allow_generic_options=True,
+    )
+    assert result.outcome == "CANDIDATES"
+    assert len(result.hits) == 2
+
+
 def test_explicit_attribute_conflict_is_not_returned():
     result = retrieve_lexical(
         "Phone Pro 15 storage 128GB",
