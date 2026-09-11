@@ -10,13 +10,17 @@ export type CatalogDiscoveryItem = {
 
 const SMARTPHONE_QUERY = /\b(?:iphone|galaxy|smartphone|t[ée]l[ée]phones?|gsm)\b/i;
 const SMARTPHONE_IMPOSTOR = /\b(?:cam[ée]ra|lunettes?|coque|cover|case|housse|verre|glass|chargeur|charger|c[âa]ble|adaptateur|support|bracelet|band|strap|pi[èe]ce|repair|[ée]cran|screen|batterie)\b/i;
+const LAPTOP_QUERY = /\b(?:macbook|laptop|notebook|ordinateur portable|pc portable)\b/i;
+const LAPTOP_IMPOSTOR = /\b(?:extenseur|second [ée]cran|[ée]cran (?:externe|portable)|ram|m[ée]moire|carte m[èe]re|motherboard|batterie|chargeur|adaptateur|housse|sacoche|support|clavier|pi[èe]ce|replacement|remplacement)\b/i;
+const HEADPHONE_QUERY = /\b(?:casque|headphones?|headsets?|[ée]couteurs?|earbuds?|koptelefoon)\b/i;
+const HEADPHONE_IMPOSTOR = /\b(?:casquettes?|moto|interphone|protection auditive|prot[èe]ge-oreilles|tir|t-shirt|adaptateur|impedance|helmet)\b/i;
 const FASHION_IMPOSTOR = /\b(?:patron|tissu|dentelle|ruban|yard|couture|garniture|breloque|bouton|fermeture|patch|[ée]cusson|cintre|rangement|meuble|languette|serrage|couvre-chaussure|lacets?|accessoires?|d[ée]coration|bricolage)\b/i;
 const FASHION_TERM = /^(?:robe|veste|chemise|pantalon|chaussure)$/i;
 
 const INTENTS: ReadonlyArray<[RegExp, string]> = [
   [/\b(?:iphone|galaxy|smartphone|t[ée]l[ée]phones?|gsm)\b/i, "smartphone"],
   [/\b(?:macbook|laptop|notebook|ordinateur|pc portable)\b/i, "ordinateur portable"],
-  [/\b(?:casque|headphone|koptelefoon|[ée]couteurs?|earbuds?)\b/i, "casque"],
+  [/\b(?:casque|headphone|koptelefoon|[ée]couteurs?|earbuds?)\b/i, "casque audio"],
   [/\b(?:robes?|dresses?|jurken?)\b/i, "robe"],
   [/\b(?:vestes?|jackets?|jassen?)\b/i, "veste"],
   [/\b(?:pantalons?|trousers?|broeken?)\b/i, "pantalon"],
@@ -50,6 +54,17 @@ function relevantTo(query: string, item: CatalogDiscoveryItem) {
     if (item.subcategory !== "Smartphones") return false;
     const exactModel = query.match(/\b(?:iphone|galaxy)\s+[a-z0-9-]+/i)?.[0];
     return exactModel ? item.name.toLocaleLowerCase().includes(exactModel.toLocaleLowerCase()) : true;
+  }
+  if (LAPTOP_QUERY.test(query)) {
+    if (LAPTOP_IMPOSTOR.test(item.name)) return false;
+    return item.subcategory === "Ordinateurs portables"
+      && LAPTOP_QUERY.test(item.name);
+  }
+  if (HEADPHONE_QUERY.test(query)) {
+    if (HEADPHONE_IMPOSTOR.test(item.name)) return false;
+    const section = `${item.category || ""} ${item.subcategory || ""}`;
+    return HEADPHONE_QUERY.test(item.name)
+      && /(?:Casques audio|Écouteurs|Gaming|TV & Son|Téléphonie)/i.test(section);
   }
   if (FASHION_TERM.test(query)) {
     if (FASHION_IMPOSTOR.test(item.name)) return false;
